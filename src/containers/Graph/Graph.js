@@ -100,7 +100,7 @@ const Graph = (props) => {
         props.onSwitchClearGraph(false);
     }
 
-    console.log(elements2);
+    // console.log(elements2);
 
     return (
         <div ref={outerRef} style={{ height: '100%' }}>

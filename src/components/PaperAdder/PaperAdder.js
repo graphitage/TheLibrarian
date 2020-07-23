@@ -9,7 +9,7 @@ import PaperAdderBar from './PaperAdderBar/PaperAdderBar';
 const PaperAdder = (props) => {
     const [pdfFileUrl, setPdfFileUrl] = useState(null);
     const [extractedText, setExtractedText] = useState("");
-    const [modalIsOpen, setModalIsOpen] = useState("");
+    const [modalIsOpen, setModalIsOpen] = useState(false);
 
     function sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -41,7 +41,7 @@ const PaperAdder = (props) => {
                     src={pdfFileUrl}
                 />
                 {
-                    extractedText != "" ?
+                    extractedText !== "" ?
                         <div style={{
                             height: '100%', maxHeight: '800px', width: '49%', float: 'right',
                             padding: '10px', color: 'black', backgroundColor: '#fff',
@@ -55,7 +55,6 @@ const PaperAdder = (props) => {
                         null
                 }
             </div>
-            <Modal show={modalIsOpen}></Modal>
 
             <Modal onHide={handleModalClosed} show={modalIsOpen}>
                 <Modal.Header closeButton>

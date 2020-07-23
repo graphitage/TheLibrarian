@@ -15,20 +15,20 @@ import uiReducer from './store/reducers/ui';
 import "bootstrap/dist/css/bootstrap.min.css"
 
 const rootReducer = combineReducers({
-  details: detailsReducer,
-  graph: graphReducer,
-  ui: uiReducer,
+    details: detailsReducer,
+    graph: graphReducer,
+    ui: uiReducer,
 })
 
 const logger = store => {
-  return (next) => {
-      return action =>  {
-          console.log('[Middleware] Dispatching', action);
-          const result = next(action);
-          console.log('[Middleware] next state', store.getState());
-          return result;
-      }
-  }
+    return (next) => {
+        return action => {
+            console.log('[Middleware] Dispatching', action);
+            const result = next(action);
+            console.log('[Middleware] next state', store.getState());
+            return result;
+        }
+    }
 }
 
 //for Redux DevTools
@@ -38,9 +38,7 @@ const store = createStore(rootReducer, composeEnhancers(applyMiddleware(logger, 
 
 ReactDOM.render(
     <Provider store={store}>
-        <React.StrictMode>
-            <App />
-        </React.StrictMode>
+        <App />
     </Provider>,
     document.getElementById("root")
 )
