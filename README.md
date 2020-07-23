@@ -1,68 +1,12 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# The Librarian
 
-## Available Scripts
+[Watch the demo video here.](https://www.youtube.com/watch?v=dB-KBpiRqVA&feature=youtu.be)
 
-In the project directory, you can run:
+The Librarian is meant to be used for getting a value out of big chunks of document data. It is a platform to make conceptually creating relations among documents, comparing and creating semantic groups out of them possible. Its aim is to solve the common problem of grouping document data. The users can contribute to the amount of data by adding new documents, which will then get positioned in the data space according to their similarities with the already existing ones.
 
-### `npm start`
+The Librarian uses **OCR** to extract the textual content out of document files. Supported file formats are `.pdf`, `.docx`, and common image files like `.jpg`, `.pdf`. It relies on
+* [`Apache Tika`](https://pypi.org/project/tika/) for .pdf files,
+* [`python-docx`](https://pypi.org/project/python-docx-1/) library for .docx files,
+* and [`Tesseract`](https://pypi.org/project/pytesseract/) for image files.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
-
-### Analyzing the Bundle Size
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
-
-### Making a Progressive Web App
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
-
-### Advanced Configuration
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
-
-### Deployment
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
-
-### `npm run build` fails to minify
-
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+**Topic modeling** is used to get the similarity score between multiple papers according to what topic their contents are about. For this, the [`RESTful-Top2Vec`](https://github.com/ddangelov/Top2Vec) algorithm is used.
