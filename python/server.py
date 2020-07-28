@@ -5,19 +5,16 @@ from flask_cors import CORS
 import random
 from tika import parser
 import json
+from top2vec import Top2Vec
 
 
-paper_jsons = []
-
-
-def get_paper_jsons():
-    global paper_jsons
-    papers_directory = 'papers'
-    for paper in os.listdir(papers_directory):
-        paper_path = os.path.join(papers_directory, paper)
-        with open(paper_path, "rb") as json_file:
-            data = json.load(json_file)
-            paper_jsons.append(data)
+common_words_file = open('common_words.txt', 'r')
+lines = common_words_file.read().split('\n')
+# dictionary for fast access
+common_words = {}
+for line in lines:
+    common_words[line] = line
+common_words_file.close()
 
 
 # directory structure:
@@ -49,56 +46,25 @@ app = Flask(__name__)
 CORS(app)
 
 
-def update_similarities(title):
-    # for the paper with title, adds the similarity values with the
-    # papers that are already in the papers list
-    global paper_similarity
-
-    # first create a new dictionary for the second dimension
-    paper_similarity[title] = {}
-
-    for paper in papers:
-        if paper != title:
-            # let's make it between 0.1 and 0.95
-            similarity = random.random() * 0.85 + 0.1
-
-            paper_similarity[title][paper] = similarity
-            paper_similarity[paper][title] = similarity
+model = Top2Vec.load('model.thelibrarian')
 
 
-def getPaperContents():
-    # gets the paper from the directory where the paper files reside
-    # for the newly added paper, calculates the similarity with all the
-    # previous ones
-    global papers, paper_content
-    paper_directory = 'papers'
-    paper_files = os.listdir(paper_directory)
-    for paper_file in paper_files:
-        file_path = os.path.join(paper_directory, paper_file)
-        title = '.'.join(paper_file.split('.')[:-1])
-        with open(file_path, 'rb') as paper_file:
-            paper_content[title] = paper_file.read().decode().split('\n')
-        update_similarities(title)
-        papers.append(title)
+def getPapersAndSimilarities():
+    global papers, paper_content, paper_similarity
+    papers = list(model.document_ids)
+    paper_content = list(model.documents)
 
-
-# def isSectionTitle(content, index):
-#     return (content[index][0].isnumeric() or
-#         (index < (len(content) - 1) and content[index][0].isupper() and content[index+1][0].isupper()))
-
-
-# def sanitizeContent(content):
-#     result = []
-#     for line in content:
-
-#     return []
-
-
-# def sanitizePaperContents():
-#     global paper_content
-#     for paper in paper_content:
-#         content = paper_content[paper]
-#         paper_content[paper] = sanitizeContent(content)
+    model_paper_count = len(model.documents)
+    for paper_title in papers:
+        paper_similarity[paper_title] = {}
+        doc_scores, doc_ids =\
+            model.search_documents_by_documents(
+                doc_ids=[paper_title],
+                num_docs=model_paper_count-1,
+                return_documents=False
+            )
+        for doc_score, doc_id in zip(doc_scores, doc_ids):
+            paper_similarity[paper_title][doc_id] = doc_score
 
 
 @app.route('/')
@@ -106,31 +72,35 @@ def papernodes():
     return jsonify(papers)
 
 
-@app.route('/paper_upload', methods=['POST'])
-def paper_upload():
-    buf = io.BytesIO(request.files['paper'].read())
-    buf.seek(0)
-    raw = parser.from_buffer(buf)
+def extract_text_from_buffer(buffer):
+    buffer.seek(0)
+    raw = parser.from_buffer(buffer)
     content = raw['content'].split('\n')
     content = [row for row in content if row != ""]
 
-    return jsonify(content)
-
+    result = []
+    for line in content:
+        words = line.split(' ')
+        uncommon_words = []
+        for word in words:
+            if not ((word in common_words)
+                or (word[-1:] == 's' and word[:-1] in common_words)
+                or (word[-2:] == 'es' and word[:-2] in common_words)
+                or (word[-3:] == 'ies' and word[:-3] in common_words)):
+                uncommon_words.append(word)
+        result.append(' '.join(uncommon_words))
+    
+    return result
 
 @app.route('/extract_text', methods=['POST'])
-def extract_text():
-    return jsonify(['done'])
+def send_extracted_text():
+    buf = io.BytesIO(request.files['paper'].read())
+    extracted_text = extract_text_from_buffer(buf)
 
-
-@app.route('/paper_node/<int:id>', methods=['GET', 'POST'])
-def send_paper_nodes(id):
-    for paper_json in paper_jsons:
-        if str(paper_json['Paper']['id']) == str(id):
-            return jsonify(paper_json)
-    return jsonify("empty")
+    return jsonify(extracted_text)
 
 
 if __name__ == '__main__':
-    get_paper_jsons()
-    getPaperContents()
+    # get_paper_jsons()
+    getPapersAndSimilarities()
     app.run(host='127.0.0.1', port=8000, debug=True)

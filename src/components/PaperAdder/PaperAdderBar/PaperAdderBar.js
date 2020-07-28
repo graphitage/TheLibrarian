@@ -13,7 +13,7 @@ const PaperAdderBar = (props) => {
         let formNode = formRef.current;
         const data = new FormData(formNode);
 
-        fetch(baseUrl + '/paper_upload', {
+        fetch(baseUrl + '/extract_text', {
             method: 'POST',
             body: data
         }).then(response => response.json())
