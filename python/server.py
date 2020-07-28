@@ -8,6 +8,9 @@ import json
 from top2vec import Top2Vec
 
 
+paper_directory = 'papers'
+
+
 common_words_file = open('common_words.txt', 'r')
 lines = common_words_file.read().split('\n')
 # dictionary for fast access
@@ -42,11 +45,22 @@ paper_content = {}
 # between two papers
 paper_similarity = {}
 
-app = Flask(__name__)
-CORS(app)
-
+# model.documents --> content
+# model.document_ids --> title
 
 model = Top2Vec.load('model.thelibrarian')
+
+for title in model.document_ids:
+    paper_similarity[title] = {}
+    doc_scores, doc_ids = model.search_documents_by_documents(
+        doc_ids=[title],
+        num_docs=len(model.documents)-1,
+        return_documents=False)
+    for score, doc_id in zip(doc_scores, doc_ids):
+        paper_similarity[title][doc_id] = score
+
+app = Flask(__name__)
+CORS(app)
 
 
 def getPapersAndSimilarities():
@@ -72,11 +86,14 @@ def papernodes():
     return jsonify(papers)
 
 
-def extract_text_from_buffer(buffer):
+def extract_text_from_buffer(buffer, exclude_commons=False):
     buffer.seek(0)
     raw = parser.from_buffer(buffer)
     content = raw['content'].split('\n')
     content = [row for row in content if row != ""]
+
+    if not exclude_commons:
+        return content
 
     result = []
     for line in content:
@@ -84,13 +101,14 @@ def extract_text_from_buffer(buffer):
         uncommon_words = []
         for word in words:
             if not ((word in common_words)
-                or (word[-1:] == 's' and word[:-1] in common_words)
-                or (word[-2:] == 'es' and word[:-2] in common_words)
-                or (word[-3:] == 'ies' and word[:-3] in common_words)):
+                    or (word[-1:] == 's' and word[:-1] in common_words)
+                    or (word[-2:] == 'es' and word[:-2] in common_words)
+                    or (word[-3:] == 'ies' and word[:-3] in common_words)):
                 uncommon_words.append(word)
         result.append(' '.join(uncommon_words))
-    
+
     return result
+
 
 @app.route('/extract_text', methods=['POST'])
 def send_extracted_text():
@@ -100,7 +118,31 @@ def send_extracted_text():
     return jsonify(extracted_text)
 
 
+@app.route('/submit_paper', methods=['POST'])
+def submit_paper():
+    buf = io.BytesIO(request.files['paper'].read())
+    extracted_text = '\n'.join(extract_text_from_buffer(buf))
+    extracted_text_without_common_words = '\n'.join(
+        extract_text_from_buffer(buf, exclude_commons=True))
+
+    filename = request.form['title']
+    with open(os.path.join(paper_directory, (filename + '.txt')), 'wb') as file:
+        file.write(extracted_text.encode())
+    if filename not in model.document_ids:
+        model.add_documents(
+            documents=[extracted_text_without_common_words], document_ids=[filename])
+        doc_scores, doc_ids = model.search_documents_by_documents(
+            doc_ids=[filename],
+            num_docs=len(model.documents)-1,
+            return_documents=False)
+        for score, doc_id in zip(doc_scores, doc_ids):
+            paper_similarity[filename][doc_id] = score
+            paper_similarity[doc_id][filename] = score
+
+    return jsonify(message='Your paper contribution (' + filename + ') is saved. Thanks!')
+
+
 if __name__ == '__main__':
     # get_paper_jsons()
     getPapersAndSimilarities()
-    app.run(host='127.0.0.1', port=8000, debug=True)
+    app.run(host='127.0.0.1', port=6123, debug=True)

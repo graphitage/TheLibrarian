@@ -6,18 +6,31 @@ import Button from 'react-bootstrap/Button';
 import * as actionTypes from '../../store/actions/actionTypes';
 import PaperAdderBar from './PaperAdderBar/PaperAdderBar';
 
+const baseUrl = 'http://localhost:6123';
+
 const PaperAdder = (props) => {
     const [pdfFileUrl, setPdfFileUrl] = useState(null);
     const [extractedText, setExtractedText] = useState("");
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [modalContent, setModalContent] = useState("");
 
-    function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    const handlePaperSubmitted = event => {
+        event.preventDefault();
+        
+        const data = new FormData(event.target);
 
-    const handlePaperSubmitted = async (event) => {
-        await sleep(2000);
-        setModalIsOpen(true);
+        fetch(
+            baseUrl + '/submit_paper',
+            {
+                method: 'POST',
+                body: data
+            }
+        ).then(response => response.json())
+        .then(data => {
+            console.log(data);
+            setModalContent(data.message);
+            setModalIsOpen(true);
+        });
     };
 
     const handleModalClosed = (event) => {
@@ -62,7 +75,7 @@ const PaperAdder = (props) => {
                 </Modal.Header>
 
                 <Modal.Body>
-                    Your paper contribution is saved. Thanks!
+                    {modalContent}
                 </Modal.Body>
 
                 <Modal.Footer>
