@@ -9,4 +9,4 @@ The Librarian uses **OCR** to extract the textual content out of document files.
 * [`python-docx`](https://pypi.org/project/python-docx-1/) library for .docx files,
 * and [`Tesseract`](https://pypi.org/project/pytesseract/) for image files.
 
-**Topic modeling** is used to get the similarity score between multiple papers according to what topic their contents are about. For this, the [`RESTful-Top2Vec`](https://github.com/ddangelov/Top2Vec) algorithm is used.
+**Topic modeling** is used to get the similarity score between multiple papers according to what topic their contents are about. For this, the [`Top2Vec`](https://github.com/ddangelov/Top2Vec) algorithm is used.
