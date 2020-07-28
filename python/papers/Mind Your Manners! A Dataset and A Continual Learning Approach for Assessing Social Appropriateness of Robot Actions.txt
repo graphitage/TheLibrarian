@@ -1,0 +1,583 @@
+Mind Your Manners! A Dataset and A Continual Learning Approach
+for Assessing Social Appropriateness of Robot Actions
+Jonas Tjomsland1, Sinan Kalkan2 and Hatice Gunes1
+Abstract— To date, endowing robots with an ability to assess
+social appropriateness of their actions has not been possible.
+This has been mainly due to (i) the lack of relevant and labelled
+data, and (ii) the lack of formulations of this as a lifelong
+learning problem. In this paper, we address these two issues. We
+first introduce the Socially Appropriate Domestic Robot Actions
+dataset (MANNERS-DB), which contains appropriateness la-
+bels of robot actions annotated by humans. To be able to control
+but vary the configurations of the scenes and the social settings,
+MANNERS-DB has been created utilising a simulation envi-
+ronment by uniformly sampling relevant contextual attributes.
+Secondly, we train and evaluate a baseline Bayesian Neural
+Network (BNN) that estimates social appropriateness of actions
+in the MANNERS-DB. Finally, we formulate learning social
+appropriateness of actions as a continual learning problem
+using the uncertainty of the BNN parameters. The experimental
+results show that the social appropriateness of robot actions can
+be predicted with a satisfactory level of precision. Our work
+takes robots one step closer to a human-like understanding
+of (social) appropriateness of actions, with respect to the social
+context they operate in. To facilitate reproducibility and further
+progress in this area, the MANNERS-DB, the trained models
+and the relevant code will be made publicly available.
+I. INTRODUCTION
+Similarly to humans, social robots, which are expected
+to inhabit highly challenging environments populated with
+complex objects, articulated tools, and complicated social
+settings involving humans, animals and other robots, should
+be able to assess whether an action is socially appropriate in
+a given context. The social robotics community has studied
+related problems such as socially appropriate navigation [1],
+recognition of human intent [2], engagement [3], facial ex-
+pressions and personality [4]. However, determining whether
+generic robot actions are appropriate or not in a given social
+context is a relatively less explored area of research.
+Our work takes robots one step closer to a human-like
+understanding of (social) appropriateness of actions, with
+respect to the social context they operate in. To this end,
+we first introduce a dataset called MANNERS-DB that con-
+stitutes simulated robot actions in visual domestic scenes of
+different social configurations (see an example in Fig. 1). The
+1J. Tjomsland and H. Gunes are with the Department of Computer
+Science and Technology, University of Cambridge, United Kingdom.
+{jonas.tjomsland, hatice.gunes}@cl.cam.ac.uk
+2S. Kalkan is with the Department of Computer Engineering, Middle East
+Technical University, Ankara, Turkey, and currently a visiting researcher
+at the Department of Computer Science and Technology, University of
+Cambridge, United Kingdom. skalkan@metu.edu.tr
+J. Tjomsland and H. Gunes’ work has been partially supported by the
+EPSRC under grant ref: EP/R030782/1. S. Kalkan is supported by Scientific
+and Technological Research Council of Turkey (TÜBİTAK) through BIDEB
+2219 International Postdoctoral Research Scholarship Program.
+robot actions in each scene have been annotated by humans
+with social appropriateness levels. Moreover, we train and
+evaluate a baseline Bayesian Neural Network that estimates
+social appropriateness of actions on the MANNERS-DB. Fi-
+nally, we formulate learning social appropriateness of actions
+as a continual learning problem and propose a Bayesian
+continual learning model that can incrementally learn social
+appropriateness of new actions.
+Fig. 1. An example scene of the simulated living room environment.
+II. RELATED WORK
+A. Social Appropriateness and HRI
+The well-known survey paper on social signal processing
+by Vinciarelli et al. [5] provides a compilation of the relevant
+cues associated to the most important social behaviours,
+including behavioural cues related to posture and usage
+of space. Kendon in [6] proposed the Facing-formation
+system of spatial organisation where F-formations refer
+to the spatial patterns formed when people interact face-
+to-face. According to this framework, the space that an
+individual directs their attention to is called a transactional
+segment. When two or more people’s transactional segments
+overlap during an interaction, an F-formation with different
+configurations is formed (L-arrangement, face-to-face, side-
+by-side, semicircular, and rectangular arrangements). This
+framework has been widely adopted for automatic analysis of
+free-standing group interactions. When it comes to assessing
+how we use the space and the environment around us in
+social interactions, Hall [7] identified four concentric zones
+around a person, namely the intimate, the casual-personal,
+the socio-consultive and the public zone. He argued that the
+preferred interpersonal distance between the parties interact-
+ing is determined by the social relationship between them.
+The intimate zone is reserved for our closest relations which
+ar
+X
+iv
+:2
+00
+7.
+12
+50
+6v
+1 
+ [
+cs
+.R
+O
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+we embrace and physically touch. The casual-personal zone,
+is where we interact with friends and wider family. The
+socio-consultive zone is where acquaintances and etc. are
+let in. And lastly, the public zone is where strangers and
+impersonal interactions often occur.
+In the field of human-robot interaction, studies have shown
+that robots are treated differently than humans with respect
+to appropriate interpersonal distance and invasion of personal
+space. Evidence suggests that, when introduced to a robot,
+people prefer it to be positioned in what Hall [7] defines
+as the social zone and only after first interactions they
+would feel comfortable allowing it into their personal zone
+[8], [9]. Studies also show that these preferences change as
+people get used to the robot over time [10], and that these
+preferences are also dependent on robot appearance [11]. We
+note that majority of the existing work on robot behaviour
+toward and around people have focused on socially aware
+motion planning [12] or approach [13]. Researchers have
+also examined how and when to engage humans appropri-
+ately in HRI situations, based on sensory inputs indicating
+location, pose, and movement of humans in the environment
+[14]. To the best of our knowledge, the perception and the
+machine-learning based recognition of social appropriateness
+of domestic robot actions has not been investigated.
+B. Continual Learning
+Humans excel at continuously learning new skills and new
+knowledge with new experiences. This has inspired a new
+problem in machine learning, coined as continual learning
+(CL), also as lifelong learning or incremental learning [15],
+[16], [17], [18], that studies developing methods that can
+continuously learn with each new experience or task. Unlike
+conventional machine learning models, CL models do not
+assume the data, its distribution or the tasks to be fixed.
+An important challenge in CL is to be able to retain
+the previously acquired knowledge while learning new ones.
+Called as the catastrophic forgetting problem [19], [20],
+unless measures are taken, learning from new experience
+tends to overwrite the previously learned associations.
+Over the years, many strategies have been devised against
+catastrophic forgetting (see [15], [21] for reviews). These
+include e.g. regularizing the destructive supervision signals,
+rehearsing previously obtained experiences, modifying the
+architecture by increasing new neurons or layers, or em-
+ploying neuro-inspired approaches such as using an episodic
+memory with consolidation of novel experiences to a long-
+term memory. In this paper, we use a method that regularizes
+updates to parameters by looking at their uncertainties,
+following the approach in [22].
+III. THE MANNERS DATASET AND ITS LABELS
+Since it is difficult to create a real environment with
+simultaneously controlled and varied social configurations
+and attributes, we developed a simulation environment to
+generate static scenes with various social configurations and
+attributes. The scenes were then labeled by independent
+observers via a crowdsourcing platform.
+A. Dataset Generation
+The Simulation Environment. The environment was
+developed in Unity3D simulation software [23]. With Unity,
+we could generate a living room scene with various social
+configurations and attributes, involving groups of people,
+children and animals in different orientations and positions
+in space, music playing, robot facing the people etc. See an
+example scene with these aspects illustrated in Fig. 1. The
+living room in which all the scenes are generated is part of
+a Unity Asset package from Craft Studios [24]. All avatars
+used to represent either people or animals are taken from
+Adobe’s Mixamo software [25]. Avatars are spawned into the
+living room scene as Unity Gameobjects, following a script
+written in the Unity compatible C# programming language.
+Scene Generation. 1000 scenes were generated by uni-
+formly sampling the factors listed in Table II, which in-
+clude the number of people, the number of groups with
+people, animals, their locations and orientations etc. Specific
+attention was paid to the uniform sampling of positions
+and orientations to ensure that the dataset contains a wide
+spectrum of proxemics [7], [6] configurations.
+Robot actions. We specifically consider the social appro-
+priateness of the actions listed in Table I. In total, 16 robot
+actions are investigated - all actions except Cleaning (Picking
+up stuff) and Starting a conversation are investigated in two
+sets, based on whether they are executed in a region (within
+a circle surrounding the robot) or in a direction pointed by
+an arrow.
+TABLE I
+THE ROBOT ACTIONS INVESTIGATED IN EACH SCENE
+Actions within a circle Actions along an arrow
+Vacuum cleaning Vacuum cleaning
+Mopping the floor Mopping the floor
+Carry warm food Carry warm food
+Carry cold food Carry cold food
+Carry drinks Carry drinks
+Carry small objects (plates, toys) Carry small objects (plates, toys)
+Carry big objects (tables, chairs) Carry big objects (tables, chairs)
+Cleaning (Picking up stuff) Starting conversation
+B. Annotation and Analyses
+Data Annotation. The generated scenes were labelled for
+social appropriateness of the robot actions in the depicted
+domestic setting using a crowd-sourcing platform [26]. The
+screenshot of what the annotators were presented with is
+depicted in Figure 2. Using this platform, we gathered 15
+subjective opinions per scene, on a Likert scale from 1 to
+5, where 1 represented “very inappropriate” and 5 “very
+appropriate”. The annotators constitute a varied group of
+English speakers. In order to avoid low-quality annotations,
+participants had to answer a honeypot question (similarly
+to [3]), that asked them whether there was an animal or
+child present in the scene (Figure 2). They were additionally
+requested to explain their annotation via free-form sentences
+in a text box. Once the annotations have been obtained,
+we first analyze the quality of the annotations and what
+we can infer from them about the factors affecting social
+appropriateness of robot actions.
+Fig. 2. The task as shown to the annotators on the crowd-sourcing platform.
+Reliability. We analyzed the reliability of the annotations
+using Cronbachs α [27] metric, which tests the reliability of
+our crowd-sourced data by looking at internal consistency.
+For the actions-in-circle we obtain α = 0.885 and for
+actions-along-arrow, α = 0.851. According to [28], Cron-
+bachs α values over 0.70 are deemed as a good level of
+agreement.
+Perceived Social Appropriateness of Actions. We now
+explore the relation between the various factors and the social
+appropriateness of actions. Figure 3 provides the Pearson
+correlation coefficients for group-related and distance-related
+features separately, where we observe that appropriateness
+of actions such as “Vacuum cleaning”, “mopping the floor”,
+“carry big objects” is affected by the distance to the closest
+group. Moreover, appropriateness of “starting a conversa-
+tion” is strongly affected by whether the robot is facing the
+group or not. Since distance and orientation are important
+factors in perceived appropriateness of actions, in Figure 4
+we provide an analysis of appropriateness with respect to
+the distance and the orientation of the closest human. We
+see that actions that may pose danger to or disturb humans
+(e.g. carrying big objects, vacuum cleaning) are not perceived
+as appropriate when the robot is positioned very close to the
+(a)
+(b)
+Fig. 3. The Pearson correlation [29] between social appropriateness of
+actions and (a) group related features, or (b) distance-related features. Values
+marked with * are statistically significant (p < 0.01).
+humans. Instead, for starting a conversation we see an inverse
+relation, i.e., it is more appropriate to start a conversation
+when the robot is close to the human.
+IV. CONTINUAL LEARNING
+A. Architecture and Continual Learning Models.
+We define a two-layer Bayesian Neural Network (BNN),
+as shown in Fig. 5, as the base architecture for estimating
+appropriateness ŷAi (in 1-5) as well as its uncertainty log σ̂Ai
+for each action Ai.
+Based on this architecture, we define three continual
+learning models:
+• Baseline (BNN): The model with no continual learning.
+• 2-tasks model (BNN-2CL): The model that first learns
+actions within a circle and then continues learning the
+actions along an arrow.
+• 16-tasks model (BNN-16CL): The model that learns ac-
+tions (tasks) continually in a sequential manner (inspired
+by [30]).
+The input to BNN is a 29-dimensional vector that consists
+of features detailed in Table II. These were utilised by
+the simulation environment when originally generating the
+MANNERS-DB.
+B. Training
+Unlike conventional neural networks, a BNN models a
+Normal distribution (with mean & variance) over parameters,
+i.e. ωi = (µi, σi). Training BNNs is challenging because
+p(ω|X,Y ), where X,Y are the inputs and outputs, is in-
+tractable. Therefore, we used a backpropagation-compatible
+(a)
+(b)
+Fig. 4. Average appropriateness of actions with respect to the (a) distance
+and (b) orientation of the closest person in the environment.
+approximation, called Bayes-by-backprop [31], which essen-
+tially approximates p(ω|X,Y ) with a distribution qθ(ωi)
+whose parameters can be learned.
+The loss function minimized for training the models in
+this fashion is defined (for each action) as follows:
+L(θ) =
+M∑
+i=1
+p1 log qθ(ωi)− p2 log p(ωi) (1)
++
+p3
+K
+K∑
+i=1
+1
+2
+σ̂−2i ‖yi − ŷi‖
+2 +
+1
+2
+log σ̂2i , (2)
+where the first line controls variational approximation; the
+second line enforces the correctness of the predictions and es-
+timates their uncertainty; and p1 = 0.001, p2 = 0.001, p3 =
+0.05 are empirically tuned constants.
+When undertaking continual learning, we need to deal
+with catastrophic forgetting. To prevent this, we employ the
+uncertainty-guided continual learning strategy in [22]. This
+method proposes rescaling the learning rate (η) to calculate
+a learning rate (ηµi , ησi ) for each parameter (ωi = (µi, σi))
+according to the current variance σi of that parameter: ηµi ←
+σiη. Following Ebrahimi et al. [22], we take ησi = η.
+TABLE II
+THE FACTORS FORMING THE 29-DIMENSIONAL INPUT TO THE
+LEARNING MODELS.
+Feature Variable type Range
+Operating within circle Int 0 or 1
+Radius of action circle Float 0.5 → 3
+Operating in the direction of an arrow Int 0 or 1
+Number of humans Int 0 → 9
+Number of children Int 0 → 2
+Distance to closet child Float 0.4 → 6
+Number of animals Int 0 or 1
+Distance to animal Float 0.4 → 6
+Number of people in a group Int 2 → 5
+Group radius Float 0.50 → 1
+Distance to group Float 0 → 6
+Robot within group? Int 0 or 1
+Robot facing group? Int 0 or 1
+Distance to 3 closest humans 3 x Float 0.3 → 5
+Direction robot to 3 closest humans 3 x Float 0.0 → 360.0
+Direction closest human to robot Float 0.0 → 360.0
+Robot facing 3 closest humans? 3 x Int 0 or 1
+3 closest humans facing robot? 3 x Int 0 or 1
+Number of people sofa Int 0 → 2
+Playing music? Int 0 or 1
+Total number of agents in scene Int 1 → 11
+Fig. 5. Neural network architecture for all three Bayesian models. The
+models take in the representation of the scene as a 29-dimensional vector
+(Table II) and estimate social appropriateness of each action (ŷAi ) in range
+(1-5) as well as the uncertainty of estimation (log σ̂Ai ).
+V. EXPERIMENTS AND RESULTS
+A. Experiments
+Implementation Details. We kept all hyperparameters
+the same for the three models, to allow for a reasonable
+comparison in performance. Nevertheless, an extensive hy-
+perparameter search was carried out to validate that this did
+not lead to a substantial drop in performance. For training, we
+used a batch size of 64, 200 epochs per task, an initial global
+learning rate η of 0.06. The learning rate η was decayed by a
+factor of 3 every time the validation loss stopped decreasing
+for 5 epochs in row, similar to traditional adaptive learning
+rate methods. Following [22], we used 10 Monte Carlo
+samples to approximate the variational posterior, qθ(ω),
+and the initial mean of the posterior was sampled from
+a Gaussian centered at 0 with 0.1 in standard deviation.
+The standard deviation of the weights was initialised as -
+3. Training on each task was done sequentially and the
+models’ weights were saved between tasks. This way, the
+change in performance, both the ability to predict accurate
+appropriateness and obtain sensible uncertainty measures,
+can be investigated with respect to the number of tasks the
+model has been trained on. It is important to note that the
+Continual Learning approach adopted here is fundamentally
+different than many other CL applications. In our work, there
+is no substantial difference in the input features between data
+samples of two different tasks. There is, however, difference
+in terms of labels, as for every new task the model tries to
+learn to label a new set of actions.
+Training and Test Sets. For all three models we split
+the dataset into training, validation and testing sets. The
+number of test samples, 100 scenes, are the same for all
+models, the training and validation set is, however, separated
+differently to facilitate Continual Learning. The 650 scenes
+used for training and validation contain 9584 individual
+labelled samples. The validation part consist of 1000 samples
+for the BNN model, 400 samples per task (circle and arrow)
+for the BNN-2CL model and 100 per task (each action)
+for the BNN-16CL model. This means that the size of the
+training set for each model is approximately 8500 for the
+BNN model, 4400 per task for the BNN-2CL model and 500
+per task for the BNN-16CL model. It is worth noting that
+these differences in size of training set affect the comparative
+results obtained for each model as discussed in the next
+section.
+B. Results
+The prediction results of the three models are presented in
+Table III. We see that all three models generally estimate the
+appropriateness level (1-5) with low error (on average, with
+RMSE values lower than 0.63, for all models). Therefore
+we conclude that the social appropriateness of robot actions
+can be predicted with a satisfactory level of precision on the
+MANNERS-DB.
+TABLE III
+ROOT-MEAN-SQUARED ERROR (RMSE) OF PREDICTIONS.
+Actions RMSE
+Within a circle BNN BNN-2CL BNN-16CL
+Vacuum cleaning 0.467 0.501 0.767
+Mopping the floor 0.502 0.594 0.581
+Carry warm food 0.445 0.448 0.810
+Carry cold food 0.420 0.403 0.561
+Carry drinks 0.402 0.485 0.733
+Carry small objects 0.386 0.879 0.517
+Carry big objects 0.497 0.520 0.665
+Cleaning (Picking up stuff) 0.192 0.479 0.491
+In direction of arrow BNN BNN-2CL BNN-16CL
+Vacuum cleaning 0.555 0.591 0.750
+Mopping the floor 0.542 0.602 0.664
+Carry warm food 0.468 0.489 0.678
+Carry cold food 0.477 0.495 0.526
+Carry drinks 0.451 0.465 0.586
+Carry small objects 0.431 0.464 0.548
+Carry big objects 0.498 0.535 0.594
+Starting a conversation 0.539 0.523 0.678
+Mean over all actions 0.480 0.530 0.630
+We provide an analysis of one of the continual learning
+model’s performance (BNN-16CL) in Figure 6. The figure
+shows that there is substantial difference in performance
+before and after training on a task/action. It also indicates
+clearly that before a task is trained on, its performance is
+affected by the training on other tasks. Looking at Figure
+6(a) and task 7, we observe a good example of this, where
+the loss is increasing as the model is getting trained on other
+tasks, before dropping after being trained on the specific
+task at hand. Looking at Figure 6, we confirm that the loss
+on the test data for a specific task drops as the model gets
+trained on that specific task and thereafter, stays reasonably
+low and unaffected by the follow-up training process(es).
+This suggests that the model is able to handle catastrophic
+forgetting well.
+(a) Actions 1-8 (within circle)
+(b) Actions 9-16 (along arrow)
+Fig. 6. Per action performance on test the full set at different stages of
+continual learning.
+VI. CONCLUSION
+In this work, we studied the problem of social appro-
+priateness of domestic robot actions – to the best of our
+knowledge, we are the first to do so. For this end, we first
+introduced a dataset with social appropriateness annotations
+of robot actions in static scenes generated using a simula-
+tion environment. The subjective appropriateness annotations
+were obtained using a crowd-sourcing platform.
+Our analysis of the annotations revealed that human anno-
+tators do perceive appropriateness of robot actions differently
+based on social context. We identified, for example, starting
+a conversation is perceived more appropriate if the robot is
+close to and facing the human. We then formulated learning
+of social appropriateness of actions as a lifelong learning
+problem. We implemented three Bayesian Neural Networks,
+two of which employed continual learning. Our experiments
+demonstrated that all models provided a reasonable level of
+prediction performance and the continual learning models
+were able to cope well with catastrophic forgetting.
+In Figure 7, we provide predictions of the learning mod-
+els and compare them with the annotations provided by
+annotators. We observe that the estimated appropriateness
+levels deviate at most by 1 unit and generally follow the
+appropriateness-inappropriateness trend of actions; i.e. they
+are low when the annotations are low, and vice versa.
+Therefore we conclude that, with the generation of the
+MANNERS-DB and the proposed learning models, this work
+takes robots one step closer to a human-like understanding of
+(social) appropriateness of actions, with respect to the social
+context they operate in.
+Fig. 7. Predictions for test scene with people, group and music. The robot
+is at the center of the circle.
+REFERENCES
+[1] J. V. Gómez, N. Mavridis, and S. Garrido, “Social path planning:
+Generic human-robot interaction framework for robotic navigation
+tasks,” in Workshop on cognitive robotics systems: replicating human
+actions and activities, 2013.
+[2] D. P. Losey, C. G. McDonald, E. Battaglia, and M. K. O’Malley,
+“A review of intent detection, arbitration, and communication aspects
+of shared control for physical human–robot interaction,” Applied
+Mechanics Reviews, vol. 70, no. 1, 2018.
+[3] H. Salam, O. eliktutan, I. Hupont, H. Gunes, and M. Chetouani, “Fully
+automatic analysis of engagement and its relationship to personality
+in human-robot interactions,” IEEE Access, vol. 5, 2017.
+[4] H. Gunes, O. Celiktutan, and E. Sariyanidi, “Live humanrobot inter-
+active public demonstrations with automatic emotion and personality
+prediction,” Phil. Trans. R. Soc. B, vol. 374, no. 1771, pp. 1–8, 2019.
+[5] A. Vinciarelli, M. Pantic, and H. Bourlard, “Social signal processing:
+Survey of an emerging domain,” Image and Vision Computing, vol. 27,
+no. 12, pp. 1743 – 1759, 2009.
+[6] A. Kendon, “Spacing and orientation in co-present interaction,” in
+Proceedings of the Second International Conference on Development
+of Multimodal Interfaces: Active Listening and Synchrony, 2009, p.
+115.
+[7] E. T. Hall, R. L. Birdwhistell, et al., “Proxemics [and comments and
+replies],” Current anthropology, vol. 9, no. 2/3, pp. 83–108, 1968.
+[8] H. Hüttenrauch, K. S. Eklundh, A. Green, and E. A. Topp, “Investi-
+gating spatial relationships in human-robot interaction,” in IEEE/RSJ
+International Conference on Intelligent Robots and Systems (IROS).
+IEEE, 2006, pp. 5052–5059.
+[9] M. L. Walters, K. Dautenhahn, R. Te Boekhorst, K. L. Koay, D. S.
+Syrdal, and C. L. Nehaniv, “An empirical framework for human-robot
+proxemics,” Procs of new frontiers in human-robot interaction, 2009.
+[10] K. L. Koay, D. S. Syrdal, M. L. Walters, and K. Dautenhahn,
+“Living with robots: Investigating the habituation effect in participants’
+preferences during a longitudinal human-robot interaction study,” in
+16th IEEE International Symposium on Robot and Human Interactive
+Communication (Ro-Man). IEEE, 2007, pp. 564–569.
+[11] M. L. Walters, D. S. Syrdal, K. Dautenhahn, R. Te Boekhorst,
+and K. L. Koay, “Avoiding the uncanny valley: robot appearance,
+personality and consistency of behavior in an attention-seeking home
+scenario for a robot companion,” Autonomous Robots, vol. 24, no. 2,
+pp. 159–178, 2008.
+[12] R. Triebel, K. Arras, R. Alami, L. Beyer, S. Breuers, R. Chatila,
+M. Chetouani, D. Cremers, V. Evers, M. Fiore, et al., “Spencer: A
+socially aware service robot for passenger guidance and help in busy
+airports,” in Field and service robotics. Springer, 2016, pp. 607–622.
+[13] M. L. Walters, K. Dautenhahn, S. N. Woods, and K. L. Koay, “Robotic
+etiquette: results from user studies involving a fetch and carry task,” in
+2nd ACM/IEEE International Conference on Human-Robot Interaction
+(HRI). IEEE, 2007, pp. 317–324.
+[14] M. P. Michalowski, S. Sabanovic, and R. Simmons, “A spatial model
+of engagement for a social robot,” in 9th IEEE International Workshop
+on Advanced Motion Control. IEEE, 2006, pp. 762–767.
+[15] S. Thrun and T. M. Mitchell, “Lifelong robot learning,” Robotics and
+autonomous systems, vol. 15, no. 1-2, pp. 25–46, 1995.
+[16] Z. Chen and B. Liu, “Lifelong machine learning,” Synthesis Lectures
+on Artificial Intelligence and Machine Learning, vol. 10, no. 3, pp.
+1–145, 2016.
+[17] M. B. Ring, “Continual learning in reinforcement environments,”
+Ph.D. dissertation, University of Texas at Austin Austin, Texas 78712,
+1994.
+[18] T. Lesort, V. Lomonaco, A. Stoian, D. Maltoni, D. Filliat, and N. Dı́az-
+Rodrı́guez, “Continual learning for robotics: Definition, framework,
+learning strategies, opportunities and challenges,” Information Fusion,
+vol. 58, pp. 52–68, 2020.
+[19] R. M. French, “Catastrophic forgetting in connectionist networks,”
+Trends in cognitive sciences, vol. 3, no. 4, pp. 128–135, 1999.
+[20] M. McCloskey and N. J. Cohen, “Catastrophic interference in connec-
+tionist networks: The sequential learning problem,” in Psychology of
+learning and motivation. Elsevier, 1989, vol. 24, pp. 109–165.
+[21] G. Parisi, R. Kemker, J. Part, C. Kanan, and S. Wermter, “Continual
+Lifelong Learning with Neural Networks: A review,” Neural Networks,
+vol. 113, pp. 54–71, 2019.
+[22] S. Ebrahimi, M. Elhoseiny, T. Darrell, and M. Rohrbach, “Uncertainty-
+guided continual learning with bayesian neural networks,” arXiv
+preprint:1906.02425, 2019.
+[23] U. Technologies, “Unity3D,” https://unity.com, [Accessed 25-May-
+2020].
+[24] C. Studios, “Modern apartment,” https://assetstore.unity.com/
+packages/3d/environments/modern-apartment-123668, [Accessed
+28-May-2020].
+[25] Adobe, “Mixamo,” https://www.mixamo.com/, [Accessed 20-May-
+2020].
+[26] R. Morris, D. McDuff, and R. Calvo, “Crowdsourcing techniques for
+affective computing,” in The Oxford handbook of affective computing.
+Oxford Univ. Press, 2014, pp. 384–394.
+[27] J. M. Bland and D. G. Altman, “Statistics notes: Cronbach’s alpha,”
+Bmj, vol. 314, no. 7080, p. 572, 1997.
+[28] J. C. Nunnally, “Assessment of reliability,” Psychometric Theory,
+1978.
+[29] D. Freedman, R. Pisani, and R. Purves, “Statistics (international
+student edition),” Pisani, R. Purves, 4th edn. WW Norton & Company,
+New York, 2007.
+[30] N. Churamani and H. Gunes, “Clifer: Continual learning with imagi-
+nation for facial expression recognition,” in FG, 2020.
+[31] C. Blundell, J. Cornebise, K. Kavukcuoglu, and D. Wierstra, “Weight
+uncertainty in neural networks,” arXiv preprint:1505.05424, 2015.
+https://unity.com
+https://assetstore.unity.com/packages/3d/environments/modern-apartment-123668
+https://assetstore.unity.com/packages/3d/environments/modern-apartment-123668
+https://www.mixamo.com/
+	I INTRODUCTION
+	II Related Work
+	II-A Social Appropriateness and HRI
+	II-B Continual Learning
+	III THE MANNERS DATASET and ITS LABELS
+	III-A Dataset Generation
+	III-B Annotation and Analyses
+	IV CONTINUAL LEARNING
+	IV-A Architecture and Continual Learning Models.
+	IV-B Training
+	V EXPERIMENTS AND RESULTS
+	V-A Experiments
+	V-B Results
+	VI Conclusion
+	References

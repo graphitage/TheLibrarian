@@ -1,0 +1,1467 @@
+Magnus Nernst and thermal Hall effect
+Debottam Mandal,∗ Kamal Das,† and Amit Agarwal‡
+Department of Physics, Indian Institute of Technology Kanpur, Kanpur 208016
+Motivated by the recent prediction of the Magnus Hall effect in systems with broken inversion
+symmetry, in this paper we study the Magnus Nernst effect and the Magnus thermal Hall effect.
+In presence of an in-built electric field, the self rotating wave-packets of electrons with finite Berry
+curvature generate a Magnus velocity perpendicular to both. This anomalous Magnus velocity gives
+rise to the Magnus Hall transport which manifests in all four electro-thermal transport coefficients.
+In this paper, we demonstrate the existence of the Magnus Nernst and Magnus thermal Hall effect
+in monolayer WTe2 and gapped bilayer graphene, using the semiclassical Boltzmann formalism. We
+show that the Magnus velocity can also give rise to Magnus valley Hall effect in gapped graphene.
+Magnus velocity can be useful for experimentally probing the Berry curvature and design of novel
+electrical and electro-thermal devices.
+I. INTRODUCTION
+Different kinds of Hall effects have played a funda-
+mental role in unraveling electron dynamics1,2 and novel
+electronic states3,4 in crystalline materials. The tradi-
+tional classical1 and quantum Hall effects3 arise from the
+Lorentz force which manifests only in the presence of an
+external magnetic field. More recently, there has been a
+growing interest in novel Hall effects which persist even
+in the absence of a magnetic field. Prominent examples
+are the anomalous5–7 and the quantum anomalous Hall
+effect4,8–10. These primarily arise from the anomalous ve-
+locity in which the Berry curvature (BC) plays a key role.
+More interestingly, the BC in different materials can also
+couple to the spin, valley, and orbital degrees of freedom
+giving rise to the spin11–14, valley15–18 and orbital19,20
+Hall effects, even when the total charge anomalous Hall
+effect (AHE) vanishes. Along with these, the thermal
+analogue of these Hall effects21–26 also have played a ma-
+jor role in the field of caloritronics. In this paper, we
+study a new kind of Hall effect, the Magnus Hall effect
+(MHE)27 which relies on the BC and an in-built electric
+field to generate a Magnus velocity perpendicular to both
+(see Fig. 1).
+For all physical phenomena related to the BC, sym-
+metries play an important role. For instance, in systems
+with spatial inversion symmetry (SIS) and broken time
+reversal symmetry (TRS), we have Ω(k) = Ω(−k). This
+leads to non-zero intrinsic AHE. In systems preserving
+TRS and broken SIS, the BC satisfies Ω(k) = −Ω(−k),
+leading to vanishing AHE. This vanishing AHE in sys-
+tems preserving TRS with non-zero BC has motivated
+the search for new manifestations of BC in such systems.
+Some examples include the valley Hall effect15 and the
+non-linear Hall effects28–35. Recently, there has been a
+new addition to this list in the form of the MHE which
+leads to a finite transverse charge transport27 varying lin-
+early with the applied bias field. The crucial ingredients
+needed for generating the Magnus velocity are the BC,
+and an in-built electric field induced by gate voltages (see
+Fig. 1). These combine to induce a transverse charge and
+energy current in two dimensional systems when a bias
+Magnus velocity
+UL
+UL
+UR
+UR
+S
+o
+u
+rc
+e
+D
+ra
+in
+Magnus Hall transport
+Wavefunction matters: Berry curvature 
+k
+E
+��/a �/a
+Energy bands in a crystal; depends on k
+Energy Energy bands 
+Momentum Quasi-momentum 
+Mass Effective mass
+Electron wavepacket traveling through certain special crystals
+Emergent quantum mechanical property:
+Berry curvature  
+(self-rotation of wavepackets) 
+⌦
+vmagnus = rU ⇥⌦
+Ein = rU/e
+FIG. 1. A schematic depiction of the Magnus Hall effect in-
+duced by the Magnus velocity. In presence of an in-built elec-
+tric field, eEin = ∇rU , a self-rotating electron wave-packet
+with a finite Berry curvature generates an anomalous Mag-
+nus velocity, ~vmagnus = Ein × Ω. This transverse velocity
+gives rise to the Magnus Hall transport, including the Mag-
+nus Nernst effect and the Magnus thermal Hall effect.
+voltage or temperature gradient is applied.
+Motivated by this recent discovery of MHE, in this pa-
+per we demonstrate the existence of the Magnus Nernst
+effect and Magnus thermal Hall effect. We explicitly cal-
+culate all the Magnus transport coefficients in presence
+of an in-built electric field in TRS invariant and SIS bro-
+ken systems, such as monolayer WTe2 and gapped bilayer
+graphene. We find that the Magnus velocity can also give
+rise to Magnus valley Hall effect in gapped graphene. We
+also show that the Magnus Hall transport coefficients sat-
+isfy the Mott relation and the Wiedemann-Franz law at
+low temperature. The rest of the paper is organized as
+follows. In Sec. II we use the semiclassical Boltzmann
+transport formalism to discuss the Magnus Hall conduc-
+tivities (MHCs) in the diffusive regime, followed by a
+ballistic description in Sec. III. In Sec. IV we present an-
+alytical and numerical results for three different systems:
+gapped graphene, monolayer WTe2 and bilayer graphene.
+This is followed by discussion in Sec. V and finally we
+summarize our results in Sec. VI.
+ar
+X
+iv
+:2
+00
+7.
+12
+64
+1v
+1 
+ [
+co
+nd
+-m
+at
+.m
+es
+-h
+al
+l]
+  2
+4 
+Ju
+l 
+20
+20
+2
+II. MAGNUS HALL COEFFICIENTS IN THE
+DIFFUSIVE REGIME
+We start with the description of the Magnus Hall trans-
+port in the diffusive regime. A schematic of the experi-
+mental set up is shown in Fig. 1 and it has two impor-
+tant ingredients. First, a slowly varying electric potential
+energy U(r) is introduced along the length of the sam-
+ple (x-axis). Such a potential energy can be introduced
+by means of two gate voltages, namely UL and UR with
+∆U ≡ UL − UR, as shown in Fig. 1. This creates an in-
+built electric field Ein = e
+−1∇rU in the device, where −e
+is the electronic charge. Second, we need crystalline ma-
+terials in which the self-rotation of the electronic wave-
+packets gives rise to a finite BC, Ω. Additionally, there
+is an applied electric field E, or temperature gradient
+(∇rT ) between the source and drain, which drives the
+electric or energy current.
+The equations of motion of the carriers wave-packet
+(for the coordinates of the center of mass) in such a sys-
+tem are given by36,37
+~ṙ = ∇k�k + [∇rU + eE]×Ω , (1a)
+~k̇ = −∇rU − eE . (1b)
+Here, �k is the energy dispersion. The first term in
+Eq. (1a) is the semiclassical band velocity, the second
+term is the Magnus velocity, ~vmagnus = ∇rU×Ω, which
+is the focus of this work, and the third E×Ω term is the
+anomalous velocity. For a two dimensional system in the
+x-y plane, the BC is always in the z-direction. Hence, for
+the experimental set-up shown in Fig. 1, both the Magnus
+and the anomalous velocity will be along the y-direction.
+The non-equilibrium carrier distribution function,
+f(r,k) can be obtained from the Boltzmann transport
+equation. Within the relaxation time approximation, it
+is given by38
+∂f
+∂t
++ k̇ · ∂f
+∂k
++ ṙ · ∂f
+∂r
+= −f − f0
+τ
+. (2)
+Here, f0 is the equilibrium distribution function and τ
+is the scattering time. For simplicity, we will consider τ
+to be momentum independent. In the steady state, i.e.,
+∂f/∂t = 0, without any external bias (E,∇rT = 0), the
+equilibrium distribution function is given by the Fermi
+function,
+f0(k, r) =
+1
+1 + eβ[�(k,r)−µ̄]
+. (3)
+Here, we have defined β = 1/(kBT ), �(k, r) = �k + U(r),
+and µ̄ is a fixed electro-chemical potential. It can be
+easily checked that Eq. (3) satisfies Eq. (2). The tag of
+equilibrium, even in presence of the gate voltages, is sup-
+ported by the fact that both the longitudinal and trans-
+verse charge and energy currents vanish. Now, in the
+presence of a finite bias perturbation, we can obtain the
+steady state non-equilibrium distribution function up to
+linear order in the bias fields to be
+f = f0 + vxτ
+(
+eEx + β [�(k, r)− µ̄] kB∇xT
+)
+∂�f0 . (4)
+Here, we have defined the x-component of the band ve-
+locity as ~vx ≡ ∂kx�k and ∂� ≡ ∂/∂�k.
+The charge current j and the heat current J, can be
+calculated by integrating the carrier velocity or energy
+velocity multiplied by the non-equilibrium distribution
+function over the Brillouin zone. Ignoring the orbital
+magnetization induced anomalous contributions39–41, the
+currents are given by,
+{j(x),J(x)} =
+∫
+[dk] ṙ {−e, [�(k, x)− µ̄]} f(k, x) . (5)
+Here, we have denoted [dk] ≡ dkxdky/(2π)2 for brevity.
+In systems with TRS, the anomalous Hall velocity in the
+ṙ terms cancel out, and does not yield any current. Thus,
+the currents in Eq. (5) will have two contributions, one
+from the semiclassical band velocity and the other from
+the Magnus velocity.
+We can obtain the expressions of Hall transport coef-
+ficients using jy = σyxEx − αyx∂xT and Jy = ᾱyxEx −
+κ̄yx∂xT . The conductivities are obtained from spatially
+averaged currents, as described in Appendix A. Now, it
+is straight forward to separate out the band velocity con-
+tribution and the Magnus velocity contribution in the
+transport coefficients. The band velocity contributions
+are given by
+{σ, α, κ̄}0yx = −τ
+∫
+[dk]
+{
+e2,−e�̃
+T
+,
+�̃2
+T
+}
+vyvx ∂�feq. (6)
+Here, we have defined �̃ ≡ �k − µ and feq ≡ f0(U =
+0, µ̄ = µ), where µ is the constant chemical potential.
+The superscript implies that these contributions are in-
+dependent of the in-built electric field.
+The Magnus Hall conductivities are obtained to be
+σm = −
+e2τ
+~
+∆U
+L
+∫
+[dk]Ωzvx ∂�feq, (7)
+αm =
+ekBτ
+~
+∆U
+L
+∫
+[dk] Ωzvxβ(�k − µ) ∂�feq, (8)
+κ̄m = −
+k2BTτ
+~
+∆U
+L
+∫
+[dk] Ωzvxβ
+2(�k − µ)2 ∂�feq. (9)
+Here, L is the length between the gates shown in Fig. 1.
+Equation (7) gives the MHC which was first proposed
+in Ref. [27] in the ballistic regime. Equation (8) is for
+the Magnus Nernst conductivity and Eq. (9) yields the
+Magnus thermal Hall (or Righi-Leduc) conductivity. The
+MHCs are proportional to the in-built electric field. In
+contrast to the AHE6,42, they depend on the derivative
+of Fermi function and are a Fermi surface property.
+The form of Eqs. (7)-(9) clearly shows the Magnus Hall
+transport coefficients also satisfy the Mott relation as well
+as the Wiedemann-Franz law25,38,39,43. More specifically,
+αm = −
+π2k2BT
+3e
+∂σm
+∂µ
+, and κ̄m =
+π2k2BT
+3e2
+σm . (10)
+Note that these relations are valid only when the chemical
+potential is much greater than the temperature energy
+scale38.
+3
+III. MAGNUS HALL TRANSPORT IN THE
+BALLISTIC REGIME
+In this section, we discuss the Magnus Hall trans-
+port in the ballistic regime. In the device geometry of
+Fig. 1, the external bias field creates an imbalance in the
+electro-chemical potential of the source (µ̄s = µ̄ + ∆µ)
+and the drain (µ̄d = µ̄). Similarly, the application of a
+temperature gradient results in the source temperature
+Ts = T + ∆T and the drain temperature Td = T . In the
+ballistic regime, we have τ → ∞, and consequently the
+distribution function is given by the collision-less Boltz-
+mann transport equation27,
+∂f
+∂t
++ k̇ · ∂f
+∂k
++ ṙ · ∂f
+∂r
+= 0 . (11)
+The non-equilibrium distribution function can be ex-
+pressed as f = f0 + f1, where the equilibrium part is
+given by Eq. (3) and the non-equilibrium part f1 is cal-
+culated below.
+Working in the linear response regime in terms of ∆µ,
+we rewrite Eq. (11) as
+− ∂U
+∂x
+∂f1
+∂kx
++
+∂�k
+∂kx
+∂f1
+∂x
+= 0 . (12)
+For a small spatial variation of U , the first term can be
+neglected, and we get a spatially independent f1. Fur-
+thermore, since only the carriers from the source with
+positive velocity are allowed in region 0 < x < L, the
+non-equilibrium part of the distribution function can be
+obtained as
+f1(k, r) =
+{
+−∆µ∂f0 − �(k,r)−µ̄T ∆T∂�f0 for vx > 0 ,
+0 for vx < 0 .
+(13)
+We note the resemblance of Eq. (13) with its diffusive
+counterpart, Eq. (4). These equations become identical
+if one identifies the scattering length vxτ with the device
+length L, ∆µ/L with electric force −eEx and ∆T/L with
+−∇xT , the temperature gradient.
+As discussed for the diffusive regime, the Hall transport
+coefficients will have two different contributions. The co-
+efficients originating from the band velocity can be ex-
+pressed as
+{σ, α, κ̄}0yx = −L
+∫
+vx>0
+[dk] vy
+{
+e2,−e�̃
+T
+,
+�̃2
+T
+}
+∂�feq .
+(14)
+The Magnus Hall contributions can be written as
+σm = −
+e2
+~
+∆U
+∫
+vx>0
+[dk] Ωz∂�feq , (15)
+αm =
+e
+~T
+∆U
+∫
+vx>0
+[dk]Ωz (�k − µ) ∂�feq , (16)
+κ̄m = −
+1
+~T
+∆U
+∫
+vx>0
+[dk]Ωz (�k − µ)2 ∂�feq . (17)
+Similar to the diffusive regime, the Magnus Hall trans-
+port coefficients in the ballistic regime also obey the Mott
+relation and the Wiedemann-Franz law.
+Having established the existence of the Magnus Nernst
+and Magnus thermal Hall effect, we now use Eqs. (15)-
+(17) to obtain the analytical as well as numerical results
+for the transport coefficients for three different systems.
+IV. MAGNUS HALL TRANSPORT IN MODEL
+SYSTEMS
+We now calculate the Magnus Hall coefficients for three
+different systems: gapped graphene, monolayer WTe2,
+and bilayer graphene. All the three systems are time
+reversal invariant and SIS broken and thus they host non-
+zero BC.
+A. Gapped graphene
+A simple SIS broken system in which the Magnus Hall
+transport can be demonstrated is gapped graphene, with-
+out trigonal warping44–46. It has a finite BC, and its low
+energy model is isotropic. Mostly familiar for its val-
+ley contrasting features, the low energy valley resolved
+isotropic Hamiltonian of this system is given by 15
+H(k) =
+√
+3
+2
+at(kxτzσx + kyσy) +
+∆g
+2
+σz . (18)
+Here, σi are the Pauli spin matrices denoting the pseudo-
+spin, τz = ±1 denotes the valley degree of freedom and
+∆g is the bandgap at each valley induced by the breaking
+of the sub-lattice symmetry44.
+The SIS breaking introduces finite BC in the system,
+which has opposite sign for the two valleys. The momen-
+tum space distribution of the BC in the valence band is
+given by
+Ωz(k) = τz
+3a2t2∆g
+2[∆2g + 3a
+2t2k2]3/2
+. (19)
+Using this, we calculate the Magnus Hall conductivities
+from Eqs. (15)-(17). For each valley, including the spin
+degeneracy, we obtain
+{σm, αm, κ̄m} = τz
+∆g
+8πµ2
+∆U
+{
+e2
+~
+,
+2π2kBe
+3~βµ
+,
+π2k2BT
+3~
+}
+.
+(20)
+The Magnus Hall contributions are opposite in the two
+valleys, yielding an overall zero Magnus current. How-
+ever, similar to the case of valley Hall effect15, here we
+will have a Magnus valley Hall effect with the carriers of
+opposite valley index accumulating on the different ends
+of the sample. Such an accumulation of the valley Hall
+carriers will persist over the diffusion length (typically
+∼ 1µm) from the boundaries.
+4
+1 0 1
+0.8
+0.0
+0.8
+E
+ (
+e
+V
+)
+ki
+kx
+ky
+a) b)
+FIG. 2. (a) The energy dispersion with kx/y (with ky/x =
+0) and (b) the BC of the model Hamiltonian for monolayer
+WTe2, Eq. (23). Panel (a) shows the two massive Dirac cones
+in absence of tilt (A = 0). Panel (b) shows the BC density
+and Fermi surface at µ = −0.35 eV. The green portion of the
+Fermi surface contour represents vx > 0 and the black portion
+represents vx < 0. We have chosen other parameters to be
+B = 1.0, δ = −0.25, vy = 1.0 and D = 0.1 in eV.
+Since the BC for the two valleys has opposite sign,
+we can have a finite Magnus Hall current for a valley
+polarized system with different chemical potential in the
+two valleys 47,48. More explicitly, for chemical potential
+µ+ δµ/2 of valley τz = 1 and µ− δµ/2 of valley τz = −1,
+we obtain the total conductivity to be
+{σm, αm, κ̄m} = −
+∆g δµ
+4πµ3
+{
+e2
+~
+,
+π2ek2BT
+~µ
+,
+π2k2BT
+3~
+}
+∆U.
+(21)
+This will generate a transverse charge or energy current
+for a longitudinal perturbation (bias voltage or tempera-
+ture difference), which will be observable if the width of
+the device region is smaller or comparable to the mean
+free path15. However, the different chemical potential in
+the two valleys will also give rise to a finite anomalous
+Hall response, which is given by
+{σa, αa, κ̄a} =
+∆g δµ
+2πµ2
+{
+e2
+2~
+,
+π2ek2BTe
+3~µ
+,
+π2k2BT
+6~
+}
+.
+(22)
+We find that the MHE transport coefficients differ from
+the AHE transport coefficients by a factor of ∆U/µ.
+Thus the MHE transport coefficients can be identified
+in experiments by studying their variation with ∆U .
+B. Surface states of a topological crystalline
+insulator and monolayer WTe2
+The electronic states of monolayer WTe2
+33,49,50 or the
+tilted surface states of a topological crystalline insula-
+tor51,52 are both described by a similar low energy Hamil-
+tonian. The anisotropic Hamiltonian is given by 27,30
+H(k) =
+(
+Ak2 +Bk2 + δ −ikyvy +D
+ikyvy +D Ak
+2 −Bk2 − δ
+)
+. (23)
+Equation (23) obeys TRS, i.e. T −1H(k)T = H(−k),
+where T is the time reversal operator. The corresponding
+energy dispersion is given by
+�k = Ak
+2 ±
+√
+(Bk2 + δ)2 + k2yv
+2
+y +D
+2 . (24)
+The +(−) sign denotes the conduction (valence) band.
+The bands are shown in Fig. 2(a). We use the follow-
+ing parameters: B = 1.0, vy = 1.0, D = 0.1, δ = −0.25,
+all in eV. This Hamiltonian hosts two massive Dirac
+cones of gap 2D along the kx direction at (Kx,Ky) =
+(±
+√
+−δ/B, 0). The coefficient A tilts the dispersion
+but it does not alter the band gap and the vy term
+makes the dispersion anisotropic. The gap between the
+bands at the Γ point, (kx, ky) = (0, 0), is 2µΓ, where
+µΓ ≡ (δ2 + D2)1/2. Thus, the system with no tilt has a
+single Fermi surface for |µ| > µΓ and two Fermi pockets
+for |µ| < µΓ.
+The BC of this system can be calculated analytically
+and it is given by
+Ω±z (k) = ±
+kxvyBD[
+(Bk2 + δ)2 + k2yv
+2
+y +D
+2
+]3/2 . (25)
+Here, the +(−) sign stands for the conduction (valence)
+band. The BC is independent of the tilt coefficient
+A, and has opposite signs for the two bands. As ex-
+pected from a time reversal symmetric system, it satisfies
+Ωz(−k) = −Ωz(k). Furthermore, as Ωz ∝ kx, the two
+valleys, centered around (Kx,Ky) = (±
+√
+−δ/B, 0), have
+opposite BC as shown in Fig. 2(b). The Fermi surface
+of the valence band is also shown for µ = −0.35 eV. The
+green (black) coloured portion of the contours represent
+vx > 0 (vx < 0). The BC is directly proportional to the
+bandgap, Ωz ∝ D, which is typical of two-dimensional
+gapped systems. The two gapped Dirac nodes are sepa-
+rated in the momentum space by 2
+√
+−δ/B. In this con-
+tinuum model, as B → 0, the two gapped Dirac nodes
+move to ±∞. This reflects in the vanishing of the BC
+with B → 0.
+It turns out that even though this model is anisotropic,
+it has a mirror symmetry which forces the semiclassical
+velocity contribution to the Hall coefficients to vanish27.
+Thus the Hall charge and energy current is determined
+by the MHE. We calculate the MHC numerically using
+Eq. (15), and analytically for the simpler case of A = 0,
+in the regime of single Fermi surface in the valence band
+(µ < −µΓ). Our analytical calculations yield
+σm =
+e2
+~
+D∆U
+8π2µ2
+Θ(|µ| − µΓ)
+{
+π + 2θs for |µ| < µ0 ,
+π − 2θs for |µ| > µ0 .
+(26)
+Here, Θ(x) denotes the step function and we have defined
+µ0 ≡
+(
+D2 − δv2y/B
+)1/2
+. In Eq. (26), we have also defined
+sin θs =
+√
+v4y + 4B
+2(µ2 − µ20)− v2y
+2B
+√
+µ2 −D2
+. (27)
+Clearly, as µ→ µ0, we have θs → 0 and the second term
+in Eq. (26) vanishes. The details of the calculation are
+5
+a) b) c)
+FIG. 3. The Magnus Hall responses of monolayer WTe2 model
+Hamiltonian, Eq. (23). (a) The Magnus Hall conductivity in
+units of 10−3e2/h. (b) The Magnus Nernst conductivity in
+units of 10−3kBe/h where a discontinuity is observed near
+µ0. (c) The Magnus thermal Hall conductivity in units of
+10−3k2BT/h. In all the panels, the dashed red line repre-
+sents the analytical results (for single Fermi surface regime
+of |µ| > µΓ) and the solid blue line represents the exact nu-
+merical results. Here, we have used the parameters of Fig. 2,
+in addition to ∆U = 50 meV and kBT = 10 meV.
+presented in Appendix B. In Fig. 3(a) we have shown
+the µ dependence of the conductivity. The red dashed
+line corresponds the analytical result given in Eq. (26)
+and the blue solid line represents the numerical result
+obtained from Eq. (15). The corresponding conductiivty
+curve for µ > 0 (in the conduction band) will be the
+mirror image of Fig. 3(a) owing to the particle-hole sym-
+metry present in the system.
+As the Fermi level moves below the top of the valence
+band, starting from a lower value, the conductivity in-
+creases, attains a peak and then decreases. The lower
+value of the conductivity in the region above µΓ can be at-
+tributed to the cancellation of contributions coming from
+the distinct Fermi pockets as shown in Fig. 2(b). And the
+decrease of the conductivity well inside the band can be
+attributed to the smaller value of BC at such lower ener-
+gies.
+The Magnus Nernst conductivity defined in Eq. (16)
+can now be obtained from the MHC by using the Mott
+relation. A simple calculation yields
+αm =
+kBe
+~
+D∆U
+12µ3β
+Θ(|µ| − µΓ)
+{
+π + 2θs −X(θs) |µ| < µ0 ,
+π − 2θs +X(θs) |µ| > µ0 .
+(28)
+Here, we have defined
+X(θs) =
+µ2
+µ2 −D2
+(
+sec θs
+sin θs + v2y/(2B
+√
+µ2 −D2)
+− tan θs
+)
+.
+(29)
+The chemical potential dependence of the Nernst conductiv-
+ity is shown by the red dashed line in Fig. 3(b), along with
+the numerical result by the blue solid line. We note that the
+mirror image characteristic discussed for the charge conduc-
+tivity is also applicable for the Nernst conductivity. However,
+the contribution from the conduction and the valance band
+will differ by a minus sign.
+The Magnus Righi-Leduc conductivity, or the Magnus ther-
+mal Hall effect, can be deduced using the Wiedemann-Franz
+s=-1
+a) b) 
+c) d)
+s=1
+s=-1
+s=1
+FIG. 4. (a) The energy dispersion of gapped bilayer graphene
+as a function of kx for ky = 0 and (b) the corresponding Berry
+curvature, for the s = −1 valley. (c) and (d) show the same for
+the s = 1 valley. The Berry curvature plots are supplemented
+by the Fermi surface contour at µ = −60 meV. The yellow
+portion of the Fermi surface contour represents vx > 0 and
+the black portion represents vx < 0. We have chosen the
+parameters to be ∆ = 50 meV, v = 105 m/s, λ = 1/(2m∗)
+m2/s with m∗ = 0.033me.
+law. We find
+κ̄m =
+k2BT
+~
+D∆U
+24µ2
+Θ(|µ|−µΓ)
+{
+π + 2θs for |µ| < µ0 ,
+π − 2θs for |µ| > µ0 .
+(30)
+Since κ̄m ∝ σm, it has features similar to the MHC as shown
+in Fig. 3(c) by the red dashed line. The numerically obtained
+κ̄m is also highlighted by the blue solid line.
+C. Bilayer graphene
+Another interesting system to explore the Magnus Hall
+transport is the bilayer graphene with trigonal warping53,54.
+The valley resolved Hamiltonian with a gap is given by55
+Hs(k) =
+(
+∆ svk−s − λk2s
+svks − λk2−s −∆
+)
+. (31)
+Here, k± = kx±iky with the subscript s denoting the valley
+index, s = +1 for K valley and s = −1 for the K′ valley.
+In bilayer graphene, or in Eq. (31), the gap ∆ is introduced
+by a perpendicular electric field56, which we will treat as a
+fixed parameter. Note that the K′ valley is the time reversed
+partner of the K valley, i.e., Hs(k) = Hs̄(−k). The dispersion
+of this Hamiltonian is given by
+�
+s
+k = ±
+[
+∆
+2
++ k
+2
+v
+2
++ λ
+2
+k
+4 − 2svλkx(k2x − 3k
+2
+y)
+]1/2
+. (32)
+Clearly, the parameter λ controls the trigonal wrapping and
+the anisotropy of the dispersion, as shown in Fig. 4(a) and
+(c).
+6
+a) b) c)exact
+W-F lawMott law
+exact
+FIG. 5. The chemical potential dependence of the Magnus
+Hall transport coefficients in bilayer graphene at two different
+temperatures: 150 K (orange lines) and 15 K (green lines).
+(a) The Magnus Hall conductivity in units of 102e2/h. (b)
+The Magnus Nernst conductivity in units of 102kBe/h, ob-
+tained using exact numerical analysis (solid lines) and using
+Mott relation (dashed lines). (c) The Magnus Righi-Leduc
+conductivity in units of 102k2BT/h, obtained using exact nu-
+merical analysis (solid lines) and the Wiedemann-Franz law
+(dashed lines). We have used the parameters from Fig. 4, and
+the potential energy difference is considered to be ∆U = 10
+meV.
+The BC for Hamiltonian (31) can be calculated analytically
+and is given by
+Ω
+s,±
+z (k) =
+∓s∆(v2 − 4λ2k2)
+2
+[
+∆2 + k2v2 + λ2k4 − 2svλkx(k2x − 3k2y)
+]3/2 .
+(33)
+The ± sign stands for the conduction and valence band. As
+usual for two dimension gapped systems, we find Ωz ∝ ∆,
+the gap in the band dispersion. Unlike the case of gapped
+graphene considered above, here the two valleys have different
+BC as highlighted in Fig. 4(b) and (d). However, by virtue
+of the two valleys being time reversed partners of each other,
+we have Ωsz(−k) = Ωs̄z(k).
+The Magnus Hall coefficients can now be calculated nu-
+merically with the inclusion of the spin degree of freedom and
+adding the contribution from the two valleys. Results ob-
+tained from Eqs. (15)-(17) are presented in Fig. 5. We have
+chosen the parameters of the Hamiltonian to be v = 0.66 eV
+and λ = 115.7 eV and the gate induced potential energy dif-
+ference to be ∆U = 10 meV. The MHCs are shown for two
+different temperatures: for 150 K in orange line and for 15
+K in green. Figure 5(a) shows that the MHC decreases af-
+ter a sharp rise as we move the Fermi level below the top of
+the valence band at 15 K27. However, the thermal broaden-
+ing of the Fermi function causes σm to be non-zero even for
+µ > −∆ (in the bandgap) at higher temperature. Figure 5(b)
+shows the Magnus Nernst conductivity obtained by exact nu-
+merical integration (solid lines) along with that obtained by
+using the Mott relation (dashed lines). The reults based on
+the exact and the Mott relation are in better agreement at
+lower temperature. This is expected as the Mott relation is
+valid only in the regime µ � kBT 38. In Fig. 5(c) we have
+shown the Magnus thermal Hall conductivity obtained from
+exact numerical integration (solid lines) along with the results
+using the Wiedemann-Franz law (dashed lines). Note the de-
+viation of the Wiedemann-Franz law based results from the
+exact relation for 150 K, when µ is near the top of the valence
+band.
+V. DISCUSSIONS
+The Magnus Hall responses will be dominant for systems
+with TRS but broken inversion symmetry, as the AHE in such
+systems vanishes. However, the Magnus Hall effects can also
+be present in TRS broken and SIS invariant systems, along
+with a finite anomalous Hall response. More importantly,
+the presence of a finite BC is only a necessary condition for
+generating a finite Magnus Hall response. In addition, an
+asymmetry of the Fermi surface and BC is also needed, as
+demonstrated by the examples of monolayer WTe2 and bilayer
+graphene.
+All the results in our paper are derived within some ap-
+proximations, and they are valid only up to first order in the
+variation of the in-built electric field (Ein or ∆U). For exam-
+ple, while the effect of the in-built electric field is included in
+the velocity, its effect on modification of the band-structure
+and in creating an inhomogeneous distribution function of
+carriers is not considered. Inclusion of such considerations
+will lead to MHE, which depends on higher powers of ∆U ,
+with our calculations representing the linear order response
+in ∆U .
+Strictly speaking, the Magnus Hall effects are non-linear
+effect. The non-linearity is manifested via the product of the
+in-built electric field and external bias. However, in terms of
+the external bias field, it is linear response phenomena. More
+importantly, since its origin lies in the Berry curvature, it
+can also couple to the spin, valley and orbital degrees of free-
+dom, giving rise to Magnus spin Hall, Magnus valley Hall, and
+Magnus orbital Hall effects. More interestingly, the Magnus
+velocity is unique in the sense that it need not be perpendic-
+ular to the carrier velocity as in classical Hall effect or to the
+applied bias field as in the anomalous Hall effect. This can be
+used to design new devices, which have no analogue in terms
+of the other Hall effects.
+VI. CONCLUSIONS
+In this paper, we have explored the Magnus Hall transport
+in inversion symmetry broken systems with a finite Berry cur-
+vature. Physically, the origin of the magnus Hall effects lies
+in the anomalous Magnus velocity arising in a self-rotating
+quantum electronic wave-packet moving through a potential
+energy gradient in a crystalline material.
+Motivated by the recent demonstration of Magnus Hall ef-
+fect in Ref. [27], we explicitly demonstrate the existence of a
+Magnus Nernst effect, and Magnus thermal Hall effect for dif-
+ferent systems. We calculate all the transport coefficients, and
+show that the Magnus Hall transport coefficients satisfy the
+Mott relation and Wiedemann-Franz law at low temperature.
+Using a combination of analytical and numerical techniques,
+we demonstrate the Magnus Hall effects in three concrete ex-
+ample systems: gapped graphene, monolayer WTe2 and bi-
+layer graphene. These new Hall effects will be fundamentally
+useful for experimentally probing the Berry curvature and
+can also be used for potential electrical and thermo-electric
+devices.
+7
+ACKNOWLEDGMENTS
+We acknowledge funding from Science Education and Re-
+search Board (SERB) and Department of Science and Tech-
+nology (DST), Government of India.
+Appendix A: Expressions of conductivities from
+current
+Here, we derive the expressions of transport coefficients
+from current. Usually this step is very straightforward. How-
+ever, since the Magnus Hall current is position dependent, we
+have to perform a spatial average for obtaining the transport
+coefficients.
+The Hall component of the charge current in the diffusive
+regime can be evaluated in the form jE(x) = j
+0
+E(x) + j
+1
+E(x).
+The subscript denotes the current due to an external electric
+field, while the superscript is indicative of the order of the
+internal potential energy difference ∆U . Using Eq. (5) and
+ignoring the anomalous Hall current we calculate the charge
+current to be
+j
+0
+E(x) = −e
+2
+τEx
+∫
+[dk] vyvx∂�f0 , (A1)
+j
+1
+E(x) =
+e2τ
+~
+∂U
+∂x
+Ex
+∫
+[dk] Ωzvx∂�f0 . (A2)
+The j0E(x) is the Hall current from the semiclassical velocity
+and j1E(x) is the Magnus Hall current. We can perform the
+spatial average using jE = (1/L)
+∫ L
+0
+jE(x)dx and the corre-
+sponding electrical Hall conductivities can be obtained using
+jy = σ
+0
+yxEx + σ
+1
+yxEx. These are specified in Eqs. (6)-(7) of
+the main text.
+The thermoelectric response to the charge current is given
+jT(x) = j
+0
+T(x) + j
+1
+T(x) and in terms of �̃(k, r) ≡ �(k, r) − µ̄
+these are given by
+j
+0
+T(x) = −ekBτ∂xT
+∫
+[dk] vyvxβ�̃(k, r)∂�f0 , (A3)
+j
+1
+T(x) =
+ekBτ
+~
+∂U
+∂x
+∂xT
+∫
+[dk] Ωzvxβ�̃(k, r)∂�f0 . (A4)
+The spatial average can be performed as jT =
+(1/L)
+∫ L
+0
+jT(x)dx. We calculate the thermoelectric con-
+ductivities using the relation jy = −α0yx∂xT − α1yx∂xT and
+these are expressed in Eqs. (6) and (8) of the main text.
+Similar to the charge current, the y-component of the heat
+current can also be written as Jy = J
+0
+E + J
+1
+E + J
+0
+T + J
+1
+T. The
+temperature gradient induced thermal current is given by
+J
+0
+T(x) = k
+2
+BTτ∂xT
+∫
+[dk] vyvxβ
+2
+�̃(k, r)
+2
+∂�f0 , (A5)
+J
+1
+T(x) = −
+k2BTτ
+~
+∂U
+∂x
+∂xT
+∫
+[dk] Ωzvxβ
+2
+�̃(k, r)
+2
+∂�f0 .(A6)
+The thermal Hall conductivity can be obtained from these ex-
+pressions after the spatial average as JT = 1/L
+∫ L
+0
+JT(x)dx,
+and using the relation Jy = −κ̄0yx∂xT − κ̄1yx∂xT . The calcu-
+lated thermal Hall conductivity is specified in Eq. (6) and (9).
+Similar calculations can also be done for the ballistic regime.
+TABLE I. Details of momentum space integral of monolayer
+WTe2
+Conditions |µ| > µ0 |µ| < µ0
+cos θµ < 0 k ∈ (kmin, kmax) k ∈ (
+√
+−δ/B, kmax)
+cos θµ > 0 k ∈ null k ∈ (kmin,
+√
+−δ/B)
+Appendix B: Analytical calculation for monolayer
+WTe2 model Hamiltonian
+This Appendix describes the details of the analytical cal-
+culations needed to arrive at Eq. (26). The integral to be
+evaluated is [Eq. (15)]
+I =
+∫
+vx>0
+dkxdkyΩz
+(
+−
+∂f0
+∂�k
+)
+. (B1)
+Substituting the BC from Eq. (25) in the above expression,
+and replacing the derivative of Fermi function by a Dirac delta
+function for T = 0, we obtain
+I = BDvy
+∫
+vx>0
+dkxdky
+kx
+�3k
+δ(�k − µ) . (B2)
+To evaluate this, we use the identity δ[f(x)] =
+∑
+i
+δ(x −
+xi)/|f ′(xi)| where xi’s are the zeros of f(x) and f ′(x) is the
+first derivative. This yields,
+δ(�k − µ) =
+∑
+θµ
+|µ|δ(θ − θµ)
+|k2v2y sin θµ cos θµ|
+. (B3)
+Here, we have used the polar coordinates, for convenience,
+with θ as the polar angle. The zeros are found to be
+θ
++
+µ = cos
+−1
+[ε/(kvy)] , (B4)
+θ
+−
+µ = π − cos
+−1
+[ε/(kvy)] , (B5)
+with ε =
+[
+k2v2y + (Bk
+2 + δ)2 +D2 − µ2
+]1/2
+.
+Recall that for |µ| > µΓ, we have a single Fermi surface.
+Thus, we can identify the k-states which contribute to the
+integration. For a given µ, the radial component, k, can vary
+between kmin and kmax which are given by
+k
+2
+min =
+√
+v2y(4δB + v
+2
+y) + 4B
+2(µ2 −D2)− v2y
+2B2
+−
+δ
+B
+,(B6)
+k
+2
+max =
+√
+µ2 −D2
+B
+−
+δ
+B
+. (B7)
+Note that kmax is always greater than the radial distance of
+the massive Dirac cone located at (Kx,Ky) = (±
+√
+−δ/B, 0).
+However, kmin can be greater or lesser than the same depend-
+ing on the chemical potential. Thus, it is useful to define
+µ0 =
+√
+D2 − δv2y/B for which kmin = Kx =
+√
+−δ/B. We
+have, kmin > Kx (kmin < Kx) for |µ| > µ0 (|µ| < µ0).
+The other set of conditions on the integrations are imposed
+by vx > 0. The expression of x-component of velocity is given
+by
+vx(k) =
+2Bk(Bk2 + δ) cos θ
+~�k
+. (B8)
+With B > 0, the positive velocity condition can be satisfied
+for two scenarios: i) cos θ > 0 with k2 < −δ/B and ii) cos θ <
+0 with k2 > −δ/B. In the first scenario we have to integrate
+8
+from k ∈ [kmin, k =
+√
+−δ/B] and for the second scenario, k ∈
+[
+√
+−δ/B, kmax]. For a given µ, the first scenario in satisfied
+by Eq. (B4) and the second scenario is satisfied by Eq. (B5).
+The limits of the k-integral are summarized in the tabular
+form in Table. I.
+Using these conditions in Eq. (B2) we obtain,
+I = −
+BD
+2π2vyµ2
+[∫
+cos θ>0
+dk
+| sin θ+µ |
+−
+∫
+cos θ<0
+dk
+| sin θ−µ |
+]
+. (B9)
+Now using Eq. (B4)-(B5) and k-limits specified in Table. I we
+obtain
+σm =
+D
+8π2µ2
+{
+π + 2θs for |µ| < µ0 ,
+π − 2θs for |µ| > µ0 .
+(B10)
+Here, we have defined
+sin θs ≡
+k2min −K
+2
+k2max −K2
+, (B11)
+=
+√
+v2y(4δB + v
+2
+y) + 4B
+2(µ2 −D2)− v2y
+2B
+√
+µ2 −D2
+. (B12)
+Note that sin θs is positive for |µ| > µ0 and negative for |µ| <
+µ0.
+∗ dmandal@iitk.ac.in
+† kamaldas@iitk.ac.in
+‡ amitag@iitk.ac.in
+1 E. H. Hall, “On a new action of the magnet on electric
+currents,” American Journal of Mathematics 2, 287–292
+(1879).
+2 Robert Karplus and J. M. Luttinger, “Hall effect in ferro-
+magnetics,” Phys. Rev. 95, 1154–1160 (1954).
+3 K. v. Klitzing, G. Dorda, and M. Pepper, “New method for
+high-accuracy determination of the fine-structure constant
+based on quantized hall resistance,” Phys. Rev. Lett. 45,
+494–497 (1980).
+4 F. D. M. Haldane, “Model for a quantum hall effect with-
+out landau levels: Condensed-matter realization of the
+”parity anomaly”,” Phys. Rev. Lett. 61, 2015–2018 (1988).
+5 E.H. Hall, “Xxxviii. on the new action of magnetism on a
+permanent electric current,” The London, Edinburgh, and
+Dublin Philosophical Magazine and Journal of Science 10,
+301–328 (1880).
+6 N A Sinitsyn, “Semiclassical theories of the anomalous hall
+effect,” Journal of Physics: Condensed Matter 20, 023201
+(2008).
+7 Naoto Nagaosa, Jairo Sinova, Shigeki Onoda, A. H. Mac-
+Donald, and N. P. Ong, “Anomalous hall effect,” Rev.
+Mod. Phys. 82, 1539–1592 (2010).
+8 Cui-Zu Chang, Jinsong Zhang, Xiao Feng, Jie Shen,
+Zuocheng Zhang, Minghua Guo, Kang Li, Yunbo Ou, Pang
+Wei, Li-Li Wang, Zhong-Qing Ji, Yang Feng, Shuaihua Ji,
+Xi Chen, Jinfeng Jia, Xi Dai, Zhong Fang, Shou-Cheng
+Zhang, Ke He, Yayu Wang, Li Lu, Xu-Cun Ma, and
+Qi-Kun Xue, “Experimental observation of the quantum
+anomalous hall effect in a magnetic topological insulator,”
+Science 340, 167–170 (2013).
+9 Chao-Xing Liu, Shou-Cheng Zhang, and Xiao-Liang Qi,
+“The quantum anomalous hall effect: Theory and exper-
+iment,” Annual Review of Condensed Matter Physics 7,
+301–321 (2016).
+10 Ke He, Yayu Wang, and Qi-Kun Xue, “Topological ma-
+terials: Quantum anomalous hall system,” Annual Review
+of Condensed Matter Physics 9, 329–344 (2018).
+11 Y. K. Kato, R. C. Myers, A. C. Gossard, and D. D.
+Awschalom, “Observation of the spin hall effect in semi-
+conductors,” Science 306, 1910–1913 (2004).
+12 Jairo Sinova, Dimitrie Culcer, Q. Niu, N. A. Sinitsyn,
+T. Jungwirth, and A. H. MacDonald, “Universal intrinsic
+spin hall effect,” Phys. Rev. Lett. 92, 126603 (2004).
+13 Markus König, Steffen Wiedmann, Christoph Brüne, An-
+dreas Roth, Hartmut Buhmann, Laurens W. Molenkamp,
+Xiao-Liang Qi, and Shou-Cheng Zhang, “Quantum spin
+hall insulator state in hgte quantum wells,” Science 318,
+766–770 (2007).
+14 Jairo Sinova, Sergio O. Valenzuela, J. Wunderlich, C. H.
+Back, and T. Jungwirth, “Spin hall effects,” Rev. Mod.
+Phys. 87, 1213–1260 (2015).
+15 Di Xiao, Wang Yao, and Qian Niu, “Valley-contrasting
+physics in graphene: Magnetic moment and topological
+transport,” Phys. Rev. Lett. 99, 236809 (2007).
+16 Di Xiao, Gui-Bin Liu, Wanxiang Feng, Xiaodong Xu, and
+Wang Yao, “Coupled spin and valley physics in monolayers
+of mos2 and other group-vi dichalcogenides,” Phys. Rev.
+Lett. 108, 196802 (2012).
+17 K. F. Mak, K. L. McGill, J. Park, and P. L. McEuen,
+“The valley hall effect in mos2 transistors,” Science 344,
+1489–1492 (2014).
+18 R. V. Gorbachev, J. C. W. Song, G. L. Yu, A. V. Kre-
+tinin, F. Withers, Y. Cao, A. Mishchenko, I. V. Grigorieva,
+K. S. Novoselov, L. S. Levitov, and A. K. Geim, “Detect-
+ing topological currents in graphene superlattices,” Science
+346, 448–451 (2014).
+19 Dongwook Go, Daegeun Jo, Changyoung Kim, and Hyun-
+Woo Lee, “Intrinsic spin and orbital hall effects from or-
+bital texture,” Phys. Rev. Lett. 121, 086602 (2018).
+20 Luis M. Canonico, Tarik P. Cysne, Tatiana G. Rappoport,
+and R. B. Muniz, “Two-dimensional orbital hall insula-
+tors,” Phys. Rev. B 101, 075429 (2020).
+21 Xiao-Qin Yu, Zhen-Gang Zhu, Gang Su, and A.-P. Jauho,
+“Thermally driven pure spin and valley currents via the
+anomalous nernst effect in monolayer group-vi dichalco-
+genides,” Phys. Rev. Lett. 115, 246601 (2015).
+22 Tian Liang, Jingjing Lin, Quinn Gibson, Tong Gao, Max
+Hirschberger, Minhao Liu, R. J. Cava, and N. P. Ong,
+“Anomalous nernst effect in the dirac semimetal cd3as2,”
+Phys. Rev. Lett. 118, 136601 (2017).
+23 S. Meyer, Y.-T. Chen, S. Wimmer, M. Altham-
+mer, T. Wimmer, R. Schlitz, S. Geprägs, H. Huebl,
+D. Ködderitzsch, H. Ebert, G. E. W. Bauer, R. Gross, and
+S. T. B. Goennenwein, “Observation of the spin nernst ef-
+fect,” Nature Materials 16, 977–981 (2017).
+24 Mitali Banerjee, Moty Heiblum, Vladimir Umansky,
+Dima E. Feldman, Yuval Oreg, and Ady Stern, “Obser-
+mailto:dmandal@iitk.ac.in
+mailto:kamaldas@iitk.ac.in
+mailto:amitag@iitk.ac.in
+http://www.jstor.org/stable/2369245
+http://www.jstor.org/stable/2369245
+http://dx.doi.org/10.1103/PhysRev.95.1154
+http://dx.doi.org/10.1103/PhysRevLett.45.494
+http://dx.doi.org/10.1103/PhysRevLett.45.494
+http://dx.doi.org/ 10.1103/PhysRevLett.61.2015
+http://dx.doi.org/ 10.1080/14786448008626936
+http://dx.doi.org/ 10.1080/14786448008626936
+http://dx.doi.org/ 10.1080/14786448008626936
+http://stacks.iop.org/0953-8984/20/i=2/a=023201
+http://stacks.iop.org/0953-8984/20/i=2/a=023201
+http://dx.doi.org/ 10.1103/RevModPhys.82.1539
+http://dx.doi.org/ 10.1103/RevModPhys.82.1539
+http://dx.doi.org/ 10.1126/science.1234414
+http://dx.doi.org/ 10.1146/annurev-conmatphys-031115-011417
+http://dx.doi.org/ 10.1146/annurev-conmatphys-031115-011417
+http://dx.doi.org/10.1146/annurev-conmatphys-033117-054144
+http://dx.doi.org/10.1146/annurev-conmatphys-033117-054144
+http://dx.doi.org/10.1126/science.1105514
+http://dx.doi.org/10.1103/PhysRevLett.92.126603
+http://dx.doi.org/10.1126/science.1148047
+http://dx.doi.org/10.1126/science.1148047
+http://dx.doi.org/10.1103/RevModPhys.87.1213
+http://dx.doi.org/10.1103/RevModPhys.87.1213
+http://dx.doi.org/ 10.1103/PhysRevLett.99.236809
+http://dx.doi.org/ 10.1103/PhysRevLett.108.196802
+http://dx.doi.org/ 10.1103/PhysRevLett.108.196802
+http://dx.doi.org/10.1126/science.1250140
+http://dx.doi.org/10.1126/science.1250140
+http://dx.doi.org/10.1126/science.1254966
+http://dx.doi.org/10.1126/science.1254966
+http://dx.doi.org/ 10.1103/PhysRevLett.121.086602
+http://dx.doi.org/10.1103/PhysRevB.101.075429
+http://dx.doi.org/10.1103/PhysRevLett.115.246601
+http://dx.doi.org/ 10.1103/PhysRevLett.118.136601
+http://dx.doi.org/10.1038/nmat4964
+9
+vation of half-integer thermal hall conductance,” Nature
+559, 205–210 (2018).
+25 Kamal Das and Amit Agarwal, “Thermal and gravita-
+tional chiral anomaly induced magneto-transport in weyl
+semimetals,” Phys. Rev. Research 2, 013088 (2020).
+26 Kamal Das, Sahil Kumar Singh, and Amit Agarwal,
+“Chiral anomalies induced transport in weyl semimetals
+in quantizing magnetic field,” (2020), arXiv:2003.07215
+[cond-mat.mes-hall].
+27 Micha l Papaj and Liang Fu, “Magnus hall effect,” Phys.
+Rev. Lett. 123, 216802 (2019).
+28 E. Deyo, L. E. Golub, E. L. Ivchenko, and B. Spivak,
+“Semiclassical theory of the photogalvanic effect in non-
+centrosymmetric systems,” (2009), arXiv:0904.1917 [cond-
+mat.mes-hall].
+29 J. E. Moore and J. Orenstein, “Confinement-induced berry
+phase and helicity-dependent photocurrents,” Phys. Rev.
+Lett. 105, 026805 (2010).
+30 Inti Sodemann and Liang Fu, “Quantum nonlinear hall
+effect induced by berry curvature dipole in time-reversal
+invariant materials,” Phys. Rev. Lett. 115, 216806 (2015).
+31 Takahiro Morimoto and Naoto Nagaosa, “Topological na-
+ture of nonlinear optical effects in solids,” Science Ad-
+vances 2 (2016).
+32 S. Nandy and Inti Sodemann, “Symmetry and quantum
+kinetics of the nonlinear hall effect,” Phys. Rev. B 100,
+195117 (2019).
+33 Qiong Ma, Su-Yang Xu, Huitao Shen, David MacNeill,
+Valla Fatemi, Tay-Rong Chang, Andrés M. Mier Val-
+divia, Sanfeng Wu, Zongzheng Du, Chuang-Han Hsu, Shi-
+ang Fang, Quinn D. Gibson, Kenji Watanabe, Takashi
+Taniguchi, Robert J. Cava, Efthimios Kaxiras, Hai-Zhou
+Lu, Hsin Lin, Liang Fu, Nuh Gedik, and Pablo Jarillo-
+Herrero, “Observation of the nonlinear hall effect under
+time-reversal-symmetric conditions,” Nature 565, 337–342
+(2019).
+34 Kaifei Kang, Tingxin Li, Egon Sohn, Jie Shan, and Kin Fai
+Mak, “Nonlinear anomalous hall effect in few-layer wte2,”
+Nature Materials 18, 324–328 (2019).
+35 Pan He, Steven S.-L. Zhang, Dapeng Zhu, Shuyuan Shi,
+Olle G. Heinonen, Giovanni Vignale, and Hyunsoo Yang,
+“Nonlinear Planar Hall Effect,” Physical Review Letters
+123, 016801 (2019).
+36 Ganesh Sundaram and Qian Niu, “Wave-packet dynam-
+ics in slowly perturbed crystals: Gradient corrections and
+berry-phase effects,” Phys. Rev. B 59, 14915–14925 (1999).
+37 Di Xiao, Ming-Che Chang, and Qian Niu, “Berry phase ef-
+fects on electronic properties,” Rev. Mod. Phys. 82, 1959–
+2007 (2010).
+38 N.W. Ashcroft and N.D. Mermin, Solid State Physics,
+HRW international editions (Holt, Rinehart and Winston,
+1976).
+39 Di Xiao, Yugui Yao, Zhong Fang, and Qian Niu, “Berry-
+phase effect in anomalous thermoelectric transport,” Phys.
+Rev. Lett. 97, 026603 (2006).
+40 Kamal Das and Amit Agarwal, “Berry curvature induced
+thermopower in type-i and type-ii weyl semimetals,” Phys.
+Rev. B 100, 085406 (2019).
+41 Kamal Das and Amit Agarwal, “Linear magnetochiral
+transport in tilted type-i and type-ii weyl semimetals,”
+Phys. Rev. B 99, 085405 (2019).
+42 Kabyashree Sonowal, Ashutosh Singh, and Amit Agarwal,
+“Giant optical activity and kerr effect in type-i and type-ii
+weyl semimetals,” Phys. Rev. B 100, 085436 (2019).
+43 Liang Dong, Cong Xiao, Bangguo Xiong, and Qian Niu,
+“Berry phase effects in dipole density and the mott rela-
+tion,” Phys. Rev. Lett. 124, 066601 (2020).
+44 S. Y. Zhou, G.-H. Gweon, A. V. Fedorov, P. N. First, W. A.
+de Heer, D.-H. Lee, F. Guinea, A. H. Castro Neto, and
+A. Lanzara, “Substrate-induced bandgap opening in epi-
+taxial graphene,” Nature Materials 6, 770–775 (2007).
+45 Matthew Yankowitz, Jiamin Xue, Daniel Cormode,
+Javier D. Sanchez-Yamagishi, K. Watanabe, T. Taniguchi,
+Pablo Jarillo-Herrero, Philippe Jacquod, and Brian J.
+LeRoy, “Emergence of superlattice dirac points in graphene
+on hexagonal boron nitride,” Nature Physics 8, 382–386
+(2012).
+46 Justin C. W. Song, Polnop Samutpraphoot, and Leonid S.
+Levitov, “Topological bloch bands in graphene superlat-
+tices,” Proceedings of the National Academy of Sciences
+112, 10879–10883 (2015).
+47 Hualing Zeng, Junfeng Dai, Wang Yao, Di Xiao, and
+Xiaodong Cui, “Valley polarization in mos2 monolayers
+by optical pumping,” Nature Nanotechnology 7, 490–493
+(2012).
+48 Kin Fai Mak, Keliang He, Jie Shan, and Tony F. Heinz,
+“Control of valley polarization in monolayer mos2 by op-
+tical helicity,” Nature Nanotechnology 7, 494–498 (2012).
+49 Xiaofeng Qian, Junwei Liu, Liang Fu, and Ju Li, “Quan-
+tum spin hall effect in two-dimensional transition metal
+dichalcogenides,” Science 346, 1344–1347 (2014).
+50 Zaiyao Fei, Tauno Palomaki, Sanfeng Wu, Wenjin Zhao,
+Xinghan Cai, Bosong Sun, Paul Nguyen, Joseph Finney,
+Xiaodong Xu, and David H. Cobden, “Edge conduction
+in monolayer wte2,” Nature Physics 13, 677–682 (2017).
+51 Junwei Liu, Wenhui Duan, and Liang Fu, “Two types of
+surface states in topological crystalline insulators,” Phys.
+Rev. B 88, 241303 (2013).
+52 Yoichi Ando and Liang Fu, “Topological crystalline insu-
+lators and topological superconductors: From concepts to
+materials,” Annual Review of Condensed Matter Physics
+6, 361–381 (2015).
+53 Edward McCann and Mikito Koshino, “The electronic
+properties of bilayer graphene,” Reports on Progress in
+Physics 76, 056503 (2013).
+54 A.V. Rozhkov, A.O. Sboychakov, A.L. Rakhmanov, and
+Franco Nori, “Electronic properties of graphene-based bi-
+layer systems,” Physics Reports 648, 1 – 104 (2016).
+55 Edward McCann and Vladimir I. Fal’ko, “Landau-level de-
+generacy and quantum hall effect in a graphite bilayer,”
+Phys. Rev. Lett. 96, 086805 (2006).
+56 Afsal Kareekunnan, Manoharan Muruganathan, and
+Hiroshi Mizuta, “Manipulating berry curvature in
+hbn/bilayer graphene commensurate heterostructures,”
+Phys. Rev. B 101, 195406 (2020).
+http://dx.doi.org/10.1038/s41586-018-0184-1
+http://dx.doi.org/10.1038/s41586-018-0184-1
+http://dx.doi.org/10.1103/PhysRevResearch.2.013088
+http://arxiv.org/abs/2003.07215
+http://arxiv.org/abs/2003.07215
+http://dx.doi.org/10.1103/PhysRevLett.123.216802
+http://dx.doi.org/10.1103/PhysRevLett.123.216802
+http://arxiv.org/abs/0904.1917
+http://arxiv.org/abs/0904.1917
+http://dx.doi.org/10.1103/PhysRevLett.105.026805
+http://dx.doi.org/10.1103/PhysRevLett.105.026805
+http://dx.doi.org/10.1103/PhysRevLett.115.216806
+https://advances.sciencemag.org/content/2/5/e1501524
+https://advances.sciencemag.org/content/2/5/e1501524
+http://dx.doi.org/ 10.1103/PhysRevB.100.195117
+http://dx.doi.org/ 10.1103/PhysRevB.100.195117
+http://dx.doi.org/ 10.1038/s41586-018-0807-6
+http://dx.doi.org/ 10.1038/s41586-018-0807-6
+http://dx.doi.org/10.1038/s41563-019-0294-7
+http://dx.doi.org/10.1103/PhysRevLett.123.016801
+http://dx.doi.org/10.1103/PhysRevLett.123.016801
+http://dx.doi.org/10.1103/PhysRevB.59.14915
+http://dx.doi.org/10.1103/RevModPhys.82.1959
+http://dx.doi.org/10.1103/RevModPhys.82.1959
+https://books.google.co.in/books?id=1C9HAQAAIAAJ
+http://dx.doi.org/10.1103/PhysRevLett.97.026603
+http://dx.doi.org/10.1103/PhysRevLett.97.026603
+http://dx.doi.org/10.1103/PhysRevB.100.085406
+http://dx.doi.org/10.1103/PhysRevB.100.085406
+http://dx.doi.org/10.1103/PhysRevB.99.085405
+http://dx.doi.org/10.1103/PhysRevB.100.085436
+http://dx.doi.org/10.1103/PhysRevLett.124.066601
+http://dx.doi.org/10.1038/nmat2003
+http://dx.doi.org/10.1038/nphys2272
+http://dx.doi.org/10.1038/nphys2272
+http://dx.doi.org/ 10.1073/pnas.1424760112
+http://dx.doi.org/ 10.1073/pnas.1424760112
+http://dx.doi.org/10.1038/nnano.2012.95
+http://dx.doi.org/10.1038/nnano.2012.95
+http://dx.doi.org/ 10.1038/nnano.2012.96
+http://dx.doi.org/ 10.1126/science.1256815
+http://dx.doi.org/10.1038/nphys4091
+http://dx.doi.org/ 10.1103/PhysRevB.88.241303
+http://dx.doi.org/ 10.1103/PhysRevB.88.241303
+http://dx.doi.org/10.1146/annurev-conmatphys-031214-014501
+http://dx.doi.org/10.1146/annurev-conmatphys-031214-014501
+http://dx.doi.org/ 10.1088/0034-4885/76/5/056503
+http://dx.doi.org/ 10.1088/0034-4885/76/5/056503
+http://dx.doi.org/ https://doi.org/10.1016/j.physrep.2016.07.003
+http://dx.doi.org/ 10.1103/PhysRevLett.96.086805
+http://dx.doi.org/10.1103/PhysRevB.101.195406
+	Magnus Nernst and thermal Hall effect
+	Abstract
+	I Introduction
+	II Magnus Hall coefficients in the diffusive regime
+	III Magnus Hall transport in the ballistic regime
+	IV Magnus Hall transport in Model systems
+	A Gapped graphene
+	B Surface states of a topological crystalline insulator and monolayer WTe2
+	C Bilayer graphene
+	V Discussions
+	VI Conclusions
+	 Acknowledgments
+	A Expressions of conductivities from current
+	B Analytical calculation for monolayer WTe2 model Hamiltonian
+	 References

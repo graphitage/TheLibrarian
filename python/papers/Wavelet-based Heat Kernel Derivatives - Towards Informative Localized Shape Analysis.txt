@@ -1,0 +1,1850 @@
+Wavelet-based Heat Kernel Derivatives
+Volume xx (200y), Number z, pp. 1–14
+Wavelet-based Heat Kernel Derivatives:
+Towards Informative Localized Shape Analysis
+M. Kirgo1 2, S. Melzi1, G. Patanè3, E. Rodolà4 and M. Ovsjanikov1
+1LIX - École Polytechnique, 2EDF R&D, 3CNR - IMATI, 4USI Lugano
+Abstract
+In this paper, we propose a new construction for Mexican hat wavelets on shapes with applications to partial shape matching.
+Our approach takes its main inspiration in the well-established methodology of diffusion wavelets. Our novel construction
+enables us to rapidly compute a multiscale family of Mexican hat wavelet functions, by approximating the derivative of the heat
+kernel. We demonstrate that this approach allows our functions to inherit many attractive properties of the heat kernel. Due to
+its natural ability to encode high-frequency details on a shape, our method allows us to reconstruct and transfer δ-functions
+more accurately than the Laplace-Beltrami eigenfunction basis and other related bases. Finally, we apply our approach to the
+challenging problems of partial and large-scale shape matching. An extensive comparison to state-of-the-art approaches shows
+that our method, while comparable in performance, is both simpler and much faster than competing approaches.
+CCS Concepts
+• Computing methodologies → Shape analysis; • Theory of computation → Computational geometry; • Mathematics of
+computing → Functional analysis;
+1. Introduction
+In the last decade, advances in 3D shape analysis have seen
+the emergence of a class of methods falling under the umbrella
+term of diffusion geometry. Based on the seminal work of Coif-
+man and Lafon [CL06], such approaches leverage the relation
+between the geometry of the underlying space and the diffu-
+sion process defined on it, as encoded especially by the spec-
+tral quantities such as the eigenvalues and eigenfunctions of the
+Laplace-Beltrami operator (LBO, for short). This general approach
+has been successfully exploited for instance in the construction
+of point signatures [SOG09, GBAL09] or for the estimation of
+maps between shapes [OBCS∗12]. More recently, progress in this
+field has shifted towards a more “local” notion of shape analy-
+sis [OLCO13, MRCB18], where the quantities of interest are com-
+puted only on small and well-controlled neighborhoods (Sect. 2).
+This choice is motivated by several relevant settings dealing with
+real-world 3D data, where the shapes at hand frequently have miss-
+ing geometry due to self-occlusions or a wildly different mesh con-
+nectivity (due to differences in the data source). To date, however,
+combining informative diffusion-based geometric techniques with
+robust localized shape analysis has remained an elusive goal ad-
+dressed by very few methods.
+In this paper, we propose an extension to the classical diffusion-
+based constructions by considering functions that are obtained as
+time derivatives of the heat kernel (Sect. 3). Such functions have
+local support, thus providing a natural tool for the computation of
+correspondences between partial shapes (Fig. 1). Furthermore, they
+inherit fundamental properties of the heat kernel map [OMMG10],
+such as their efficient computation together with the ability to
+recover isometries from a single point. Our construction is also
+closely related to Mexican hat wavelets, but built directly on the
+surface while avoiding spectral-based approximations.
+From a functional standpoint, such a family of functions can be
+thought of as forming an over-complete basis (a frame) that pro-
+vides a richer functional representation power, compared to e.g.
+standard Fourier or heat kernel functions. For example, delta func-
+tions supported at surface points are reconstructed more faithfully
+by using our representation under a memory budget (Sect. 5). This
+aspect has direct and important consequences in a range of applica-
+tions, including dense correspondence, function transfer across de-
+formable shapes, and shape matching (Sect. 6). Our contributions
+can be summarized (Sect. 7) as follows
+• we introduce heat kernel derivatives as a novel tool for localized
+shape analysis;
+• our proposed representation is compact and efficient to com-
+pute, while allowing an accurate representation of Mexican hat
+wavelets. Furtheremore, it is demonstrably competitive with full-
+fledged algorithmic pipelines for partial shape correspondence
+and similarity, at a fraction of the computational cost;
+• we compare our approach to other popular Mexican hat wavelet
+formulations and prove that it achieves the best trade-off between
+efficiency and accuracy.
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+2 M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives
+Figure 1: Example functions from the proposed wavelet family on a pair of shapes, respectively a full model (left) and a partial near-isometry
+(center). Each function is represented at three scales (from left to right) and localized around two different samples (1 for each row). The
+rightmost column shows the point-to-point correspondence obtained using our wavelet family (top) and the standard Laplace-Beltrami basis
+(bottom). Both maps are estimated on the same set of 13 landmarks, and visualized by color coding. Our construction is designed to be the
+preferred choice in the partial setting.
+2. Related work
+The definition of a compact and efficient representation of signals
+is a fundamental task in signal processing. By far the most common
+approach in geometry processing is to use the eigenfunctions of the
+Laplace-Beltrami operator, which can be viewed as a natural exten-
+sion of the Fourier basis to surfaces [Tau95,Lév06,VL08]. In most
+settings, a truncated version consisting of only the low frequency
+eigenfunctions is used for robustness and efficiency reasons. The
+Fourier basis lies at the core of many global and pointwise shape
+signatures, such as [Rus07, RWP06, SOG09, GBAL09, ASC11,
+MRCB16] to name a few, and has been widely used in applications
+such as shape deformation [RCG08], segmentation [RBG∗09] and
+functional transfer [NMR∗18] among many others. In [ABK15],
+Aflalo et al. showed that the LBO eigenfunctions are the optimal
+for representing continuous functions with bounded variation, pro-
+viding theoretical justification for its versatility.
+The LBO eigenfunctions is also commonly used in the functional
+map framework, [OBCS∗12], which relies on approximating and
+transferring functions in reduced bases. Despite its prevalence, the
+truncated Fourier basis suffers from three main limitations: (i) the
+support of its functions is global [MRCB18], (ii) the truncated set
+of eigenfunctions provides a low-pass filter on the signal and thus
+it is not able to approximate functions composed of high frequen-
+cies [NMR∗18], (iii) the LBO eigenfunctions are defined up to sign
+and, they suffer from switches in the sign and the order, even for
+near isometric shapes [SK14].
+To address these challenges, several alternatives to the Fourier
+basis have been proposed. In [KBB∗13], Kovnatsky et al. proposed
+to optimize for a compatible basis on shape collections by per-
+forming simultaneous diagonalization of the LBO. The compressed
+manifold modes, a set of sparse basis functions that are more local-
+ized on the surface, have been proposed in [NVT∗14] and further
+analyzed in [OLCO13, KGB16]. Modifying the LBO, Choukroun
+et al. [CSBK17] propose the definition of a Hamiltonian operator,
+whose eigenfunctions are localized in the regions that correspond
+to the modification of the LBO.The authors of [MRCB18] propose
+a similar solution where the basis generated is also orthogonal to a
+given set of functions.
+In [NMR∗18], Nogneng and coauthors show the improvement
+obtained considering polynomial combinations of the Fourier basis
+in conjunction with the standard linear combinations of its func-
+tions, allowing the representation of higher frequencies. Recently
+in [MMM∗20], a new basis has been introduced, where three ex-
+trinsic functions derived from the coordinates of the 3D embedding
+of the shape have been added to a set of Fourier basis functions.
+These new functions, namely the “Coordinates Manifold Harmon-
+ics”, add extrinsic information to the smooth intrinsic representa-
+tion of the Fourier basis. More related to our paper is the Binary
+Sparse Frame proposed in [Mel19], where the authors define a set
+of non-orthogonal indicator functions that, through the sparse cod-
+ing, improve the approximation and the transfer of step functions.
+Finally, a set of diffusion and Harmonic bases were proposed re-
+cently in [Pat18], based on properties of the heat kernel.
+Local and multi-scale processing Our work is also closely re-
+lated to previous methods for local analysis. Earliest works in this
+domain aimed at recovering local shape properties in a neighbor-
+hood of a given point, especially for constructing local descrip-
+tors [Joh99,CJ97,BMP01,HSKK01,MHYS04]. A survey on local
+shape descriptors was presented in [HPPLG11]. Most closely re-
+lated to ours in this domain are works that exploit the diffusion
+equation, and especially those based on the heat kernel, includ-
+ing [SOG09, VBCG10, BK10, Pat13, PS13, Pat16] among others.
+These methods typically exploit the multi-scale nature of the heat
+kernel that captures progressively larger neighborhoods of a given
+point while being able to characterize local geometry efficiently.
+However, it has been observed that the signatures based on heat dif-
+fusion can fail to capture important (e.g. medium frequency) shape
+details, which has led to other descriptors, such as the Wave Ker-
+nel Signature [ASC11], or the study of optimal spectral descrip-
+tors [Bro11, WVR∗14].
+Most of these approaches focuses on the discriminative power
+of the computed descriptors and can thus lose the locality property
+enjoyed by the heat kernel. Perhaps most closely related to ours
+in this domain is the Spectral Graph Wavelet Signature introduced
+in [LH13] and, similarly to ours, also inspired by wavelet functions
+and specifically by the spectral graph wavelet transform [HVG11].
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives 3
+Our approach is different first because it does not rely on an eigen-
+decomposition and can be directly computed by solving a series of
+diffusion equations, which allows us to capture very local details
+and operate on complex geometry, and second because we aim to
+construct an informative family of functions centered at fixed seed
+points rather than a canonical descriptor for each point. Neverthe-
+less, we provide a comparison with [HVG11] in Sect. 3.2 and show
+that our approach leads to a rich functional family that can be com-
+puted very efficiently, while capturing local high frequency details,
+which is crucial in applications such as partial shape matching.
+Wavelets on surfaces Finally, our work is largely inspired by con-
+structions of wavelet-based functional families on triangle meshes.
+There has been a large number of possible wavelet analogues in this
+context (see e.g., Chapter 4 in [Zho12] for an overview) including
+based on subdivision [LDW97], diffusion [CM06], and eigende-
+composition [HVG11]. While our work does not fit directly in this
+field, we base our construction on diffusion wavelets and specifi-
+cally propose to consider the negative time derivative of the heat
+kernel to construct our multiscale functional family. In the Eu-
+clidean domain this time derivative (or equivalently second deriva-
+tive in space) precisely corresponds to the Mexican hat Wavelet.
+Moreover, since it can be constricted without relying on an eigen-
+decomposition (see e.g. [HQ12]), it provides a very efficient and
+powerful tool for local analysis.
+2.1. Background & motivation
+As mentioned in the introduction, our main goal is to construct
+a family of functions that is local and provides a multi-scale de-
+scription of the shape geometry. In Euclidean domains, a stan-
+dard solution for this problem is provided by the formalism of
+wavelets and the associated wavelet transforms. The most classical
+approach for generating a family of wavelet functions is via shift-
+ing and dilation (or scaling) of a generating function, referred to
+as the mother wavelet. Extending this approach to curved surfaces
+is challenging primarily because the two fundamental operations:
+shifting and dilation are not canonically defined on non-Euclidean
+domains. As a result, a large number of approaches have been pro-
+posed [CM06,HQ12] that circumvent these challenges by replacing
+these operations with those easier to mimic on surfaces.
+Our construction is based on the notion of diffusion wavelets,
+which broadly exploit the link between diffusion and function
+dilation. Specifically, consider a zero-mean Gaussian function
+f0(x) = (σ
+√
+2π)−1 exp(−x2/(2σ2)). Now observe that if f0 is di-
+lated and re-scaled 1/s, resulting in 1s f0(x/s), we obtain another
+Gaussian, whose standard deviation is multiplied by s. On the
+other hand, if we consider a diffusion process ∂t f (x, t) = ∂2xx f (x, t),
+then its fundamental solution is given by the classical heat kernel
+f (x, t) = (4tπ)1/2 exp(−x2/(4t)). Remark that the heat kernel sat-
+isfies f (x,σ2/2) = f0, and moreover since f (x,s
+2
+σ
+2/2) is a Gaus-
+sian with standard deviation sσ, we get f (x,s2σ2/2) = 1s f0(x/s).
+Indeed, dilation and scaling can be equivalently computed by solv-
+ing the diffusion equation starting with f0. While the above com-
+putation is done with f0 being a Gaussian function, a similar re-
+sult also holds for the Mexican hat (Ricker) wavelet, which on the
+Euclidean domains is defined simply as the negative second order
+derivative of a Gaussian function.
+(a) (b)
+(c) (d)
+tmax ∈ R∗
+s ∈ S
+nscales ∈ N
+∗
+Figure 2: (a-c) Illustration of our diffusion wavelets (red) on
+a 1D manifold (in black), and corresponding “scaling func-
+tions"(orange), which approximate the heat kernel evaluated at the
+same sample. (d) Parameters of our approach: largest diffusion
+time tmax, number of scales nscales, and samples s. The end of the
+support of successive wavelets
+{
+ψ
+M
+s,n
+}
+n∈[1;nscales]
+is represented by
+blue lines and the light blue region is covered by the wavelet at tmax.
+According to these observations, the key idea of diffusion
+wavelets is to replace dilation by diffusion, which is particularly
+useful on curved surfaces. In fact, defining dilation is itself difficult,
+while diffusion is well defined by replacing the Laplacian ∂2xx f (x, t)
+with the Laplace-Beltrami operator. Following this line of work,
+our main goal is to construct a multi-scale family of functions that
+both have strong locality properties and exhibit good approxima-
+tion of other functions through linear combinations. Previous ap-
+proaches have exploited these links either by using a multi-scale
+family built directly from the heat kernel [CM06] or by operating in
+the spectral domain, through a truncated representation [HQ12]. In-
+stead, we propose to build a multi-scale functional family using the
+derivative (in time or, equivalently, in space) of the heat kernel and
+to operate purely in the spatial domain by explicitly simulating heat
+diffusion. This choice allows us to both avoid an expensive eigen-
+decomposition necessary to approximate very local functions and
+to achieve better function reconstruction accuracy, exploiting the
+multi-resolution properties of the Mexican hat wavelet. Similarly
+to diffusion-based wavelets defined on surfaces, our method relies
+on the fact that dilating the Mexican hat wavelet function in the
+Euclidean space can be achieved via the diffusion operator.
+3. Proposed approach
+We introduce the diffusion wavelets on surfaces (Sect. 3.1), their
+computation (Sect. 3.2), their conversion to a point-to-point map
+(Sect. 3.3) and main properties (Sect. 3.4). In Sect. 4, we perform
+an in-depth empirical study of these properties.
+3.1. Diffusion wavelets
+In the spirit of [HQ12], we define a wavelet-like family by means
+of a diffusion process on the manifoldM (Fig. 2(a-c), red curve).
+Such a family can also be considered as a dictionary of functions.
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+4 M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives
+Algorithm 1 Computation of a dictionary of Mexican hat-like
+functions for a set of samples S. AM is the area of M. AM
+and WM designate the normalized area and cotangent weight matri-
+ces, computed using Neumann boundary conditions and the vertex
+coordinates of M divided by
+√
+AM. ρ ∈ (0;1] is an adjustment
+ratio, and ||.||1 the L1 norm w.r.t. AM.
+Input: set of samples S, number of scales nscales, maximal diffu-
+sion time tmax, ratio ρ
+Output: ΨS (multi-scale dictionary for all s ∈ S)
+t← ρ · tmax
+nscales·
+√
+AM
+ΨS ←{}; ψMS ← A
+†
+MWMδS ; ψ
+M
+S,0 ← ψ
+M
+S
+for n← 1 to nscales do
+ψ
+M
+S,n ← (AM+ t ·WM)
+†AMψ
+M
+S,n−1
+ΨS ← {ΨS ,ψMS,n}
+end for
+Normalize each column c of Ψs with ||c||1
+Normalize each column c of Ψs by max(c)−min(c)
+The space spammed by a dictionary of this type is used for the rep-
+resentation of a function in wavelet coefficients for the considered
+family. Let u be a function defined onM that solves the heat equa-
+tion with initial condition u(x,0) = u0(x):
+∂tu(x, t) =−∆u(x, t), u(x,0) = u0(x), t ∈ R
++
+. (1)
+If the initial condition is defined at a single point (i.e. u0(x) = δy(x)
+with y ∈ M), then the solution of Eq. (1) is called the heat ker-
+nel Kt(x,y). Given the basis of eigenfunctions of the Laplace-
+Beltrami operator on M {Φk}k and their associated eigenval-
+ues {λk}k, where k = 0, . . . ,∞, the heat kernel Kt admits the fol-
+lowing spectral representation:
+Kt(x,y) =
+∞
+∑
+k=0
+exp(−tλk) ·Φk(x)Φk(y), x,y ∈M.
+In [HQ12], this property is used to define Mexican hat wavelets
+onM as
+ψt(x,y) =
+N
+∑
+k=0
+λk · exp(−tλk) ·Φk(x)Φk(y). (2)
+The intuition behind this definition is as follows: Kt provides a
+family of Gaussian analogs on the surface of M, with increasing
+standard deviation as t grows. The negative first order derivative in
+time of such a Gaussian produces Mexican hat functions. In other
+words, the complete basis is defined as
+ψt(x,y) =−∂tKt(x,y) = ∆xKt(x,y), (3)
+where ∆x denotes the Laplace-Beltrami operator with respect to
+the x variable. Since computing the exact value of Kt requires the
+computation of the complete basis of Laplacian eigenpairs, the au-
+thors of [HQ12] approximate the construction of a wavelet frame
+by truncating the spectrum of the Laplacian in Eq. (2) to N = 300.
+In this work, we construct a dictionary of localized functions,
+based on the same intuition but avoiding the eigen-decomposition,
+and instead directly solving the diffusion equation. Our dictionary
+shares the following properties (Fig. 2d) with the spectral Mexican
+hat diffusion wavelets:
+• it is based on the same defining relation (through derivatives
+in time or space) between the heat kernel and the Mexican hat
+wavelets as in the Euclidean setting;
+• our functions are located at a set of chosen sample positions S,
+and the resulting dictionary provides a multi-scale representa-
+tion via a maximum diffusion time tmax and a chosen number of
+scales nscales.
+For convenience, in the following we consider the case where one
+sample location at vertex s is considered. To build a dictionary of
+functions at various scales, we make three observations.
+1. Given the δ-function at s, denoted δs, in the discrete setting, one
+can compute a Mexican hat wavelet by applying the Laplace-
+Beltrami operator to δs.
+2. Given a function f , one can compute a scaled version of f by
+applying the diffusion operator Dt to f . Additionally, the “scal-
+ing factor” is controlled by the diffusion time t.
+3. Dt can be approximated precisely and efficiently via a
+backward-Euler scheme.
+Property 1. is a direct application of the discretized heat equation
+(1) and provides a simple way to compute a “mother wavelet” given
+by δs, ψsM . Formally, the mother wavelet is obtained by comput-
+ing the following quantity: ψsM = A
+†
+MWMδs. AM and WM des-
+ignate the normalized area and cotangent weight matrices, com-
+puted using Neumann boundary conditions and the vertex coordi-
+nates ofM divided by the area ofM. A†M designates the pseudo-
+inverse of AM. By applying Property 2, for increasing diffusion
+times t to ψMs , we obtain a set of multi-scale Mexican hat-like
+functions Ψs =
+{
+ψ
+M
+s,n
+}
+n∈[1;nscales]
+. Finally, Property 3. constitutes
+an efficient way to compute 2. In practice, we found out that 25
+Euler-steps are sufficient to approximate well the result of DtψMs at
+any t (see results in Sect. 3.2).
+Moreover, we use directly each intermediate function ψMs,n ob-
+tained at the n-th backward Euler step as a function of our dictio-
+nary. In other words, the number of scales nscales represents the
+number of backward-Euler step that we use to produce the Mexi-
+can hat wavelet associated to a diffusion time tmax. Given a func-
+tion f on M, applying one backward-Euler step to approximate
+the effect of the discretized diffusion operator Dt amounts to com-
+pute the quantity fdi f f = (AM+ t ·WM)
+†AM f . Therefore, given
+the (n− 1)-th computed wavelet at a sample s, we can compute
+the n-th wavelet as : ψMs,n = (AM+ t ·WM)†AMψMs,n−1.
+When two or more shapes are considered, the ratio parameter ρ
+introduced in the algorithm, is set to ρ =
+√
+AN√
+AM
+that allows us to
+adjust the diffusion scales on two manifoldsN andM so that they
+relate well in practice. If a single shape is involved then we can
+set ρ = 1. This ratio is especially useful in the case of partial shape
+matching, whereN is the partial shape andM the full shape.
+Storing the set of sample locations S, in the matrix δS (the kth
+column of this matrix is δS(k)) allows us to perform the compu-
+tation of the wavelets at all sample locations in parallel: Instead of
+computing a single mother wavelet ψMs , we compute a set of mother
+wavelets, stored as the columns of a matrix ψMS : ψ
+M
+s ← A
+†
+MWMδS ,
+that are propagated via backward Euler steps to tmax. This proce-
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives 5
+(a)
+20 40 60 80 100
+0
+1
+2
+3
+4
+·10−2
+# Scales
+L
+1
+E
+rr
+or
+(b)
+20 40 60 80 100
+0
+0.5
+1
+1.5
+2
+·10−3
+# Scales
+L
+2
+E
+rr
+or
+Ours
+[PS13]
+[HQ12]
+[HVG11]
+(c)
+20 40 60 80 100
+0
+10
+20
+30
+40
+# Scales
+T
+im
+e
+(s
+)
+Figure 3: (a) L1 error comparison between various Mexican hat diffusion wavelet definitions and our approach to ground truth wavelets,
+(b) L2 error and (c) Computation time. on the complete set of 100 shapes of the FAUST data set (remeshed to shapes with 5K vertices). Note
+that the error of [HVG11] does not appear in (b) because its error values lie in a higher order of magnitude than the plot scale (see averaged
+values in Table 1).
+dure, summarized in Algorithm 1, enables us to compute the full
+dictionary ΨMS = Ψs1 , . . . ,Ψs|S| efficiently.
+3.2. Comparison to other diffusion wavelets
+Our approach has two main competitors: the Mexican hat
+wavelets [HQ12] and the diffusion wavelets [HVG11]. We also
+compare our construction to an alternative approach using the
+wFEM diffusion operator [Pat13], which replaces our backward
+Euler approximation scheme in the generation of the Mexican hat
+wavelets. Note that we do not compare our method with the work
+of Coifman et al. [CM06], which defines orthogonal wavelets, but
+not Mexican hat wavelets, using a diffusion operator. Moreover,
+their construction does not allow to select a set of samples from
+which to compute the wavelet functions, whereas we rely on this
+information. Finally, their computation method is performed via a
+full bottom-up approach, starting from all vertices of the consid-
+ered shape, to large-scale orthogonal wavelet functions. This pro-
+cess uses a costly iterative procedure, that is not well suited to our
+applications involving dense meshes.
+Our evaluation on the competing definitions is based on three
+criteria: (i) L1 error to the ground truth Mexican hat wavelets
+(Fig. 3(a), Table 1), (ii) L2 error to the ground truth Mexican hat
+wavelets (Fig. 3(b), Table 1), (iii) computation time (Fig. 3(c),
+Table 1). The first and second criteria provide a way to assess
+how well the compared approaches approximate the ground truth
+Mexican hat wavelet functions, while the third criterion mea-
+sures the computational efficiency of the approaches. We com-
+pute the ground truth Mexican hat wavelet family in Eq. (2) with
+the complete Laplacian spectrum, and the intermediate diffusion
+times tGTn = n · t, where t = ρ · tmaxnscales·
+√
+AM
+is introduced in Algo-
+rithm 1.The evaluations are performed on all shapes of the FAUST
+data set (remeshed to shapes with 5K vertices), using the average
+error at 10 randomly picked sample locations.
+For our application purpose, namely partial shape matching,
+an ideal method should (i) be accurate enough to ensure that the
+created functions are consistent across shapes, and (ii) enable a
+lightweight computation scheme, so that we can compute large dic-
+tionaries of functions, instead of a reduced basis. While our approx-
+Ours [Pat13] [HQ12] [HVG11]
+Av. L1 5.0×10−3 4.8×10−3 2.5×10−4 4.0×10−2
+Av. L2 4.9×10−4 1.5×10−4 9.9×10−6 2.5×10−2
+Av. t.(s) 1.14 2.2×101 2.46 9.89
+Table 1: Comparison of four Mexican hat wavelet formulations on
+the FAUST data set (remeshed shapes with 5K vertices).
+imation of the ground truth diffusion wavelets is the second best in
+terms of L1 and L2 error, it requires a substantially smaller com-
+putation time compared to all competitors, and especially the most
+accurate methods of [Pat13] and [HQ12]. Hence, we deploy our
+Mexican hat wavelet computation strategy for our applications.
+3.3. Reconstruction and point-to-point map recovery
+We use two approaches to perform point-wise signal recovery on
+shapes N andM, equipped with their dictionaries ΨNS and Ψ
+M
+S .
+The choice of the approach is conditioned by the task we deal with.
+δ-function reconstruction on a single shape In the case of δ-
+function reconstruction on a shape M, the mapping T that asso-
+ciates to each vertex index ofM its image provided by ΨMS can be
+computed theoretically as
+T = argmax
+rows
+Ψ
+M
+S (Ψ
+M
+S )
+†︸ ︷︷ ︸
+∈RnM×nM
+. (4)
+The left pseudo-inverse of ΨMS , denoted (Ψ
+M
+S )
+†
+, is used here as
+the representation in dictionary space of all δ-functions of M:
+the k-th column of ΨMS
+†
+corresponds to the coordinates in the
+dictionary space of the δ-function located at vertex k. To con-
+vert back this dictionary representation in the basis of δ-functions
+on M, ΨMS (Ψ
+M
+S )
+†
+is computed. The k-th column of the result-
+ing nM × nM matrix is the image of the δ-function at vertex k.
+Taking the argmax over the rows of this matrix provides the loca-
+tion of the δ-function according to the dictionary ΨMS . Since Ψ
+M
+S
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+6 M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives
+is rank deficient, the computation of its pseudo-inverse via Eq.
+(4) is unstable. To remedy this aspect, we use a Tikhonov (or
+ridge) regularization-like approach, that introduces the variable α
+in T = argmax
+rows
+Ψ
+M
+S α, which is the solution to
+argmin
+α
+||ΨMS α− IM||
+2
++ ||Γα||2, (5)
+where Γ is an nM× (|S|×nscales) matrix, whose columns contain
+the values 1k2 , with k ∈ [1;nscales] repeated |S| times each, and IM is
+the identity matrix onM. Eq. (5) can be solved easily in practice,
+in the form of a linear system presented in Eq. (6)[
+Ψ
+M
+S ;Γ
+]
+α =
+[
+IM ;0nM×(|S|×nscales)
+]
+(6)
+δ-function transfer and shape matching for multiple shapes
+When considering shape matching (or δ-function transfer) from a
+source shapeM to a target shape N , we do not rely on the “spec-
+trum” of the dictionaries. Instead, we use as a representation of
+a vertex k on a shape M the set of values taken by each func-
+tion constituting ΨNS . In other words, instead of using (Ψ
+M
+S )
+†
+as
+a representation in our dictionary, we simply use (ΨMS )
+T
+. In this
+last representation, the embedding of the k-th vertex consists in the
+value taken by each wavelet of the dictionary at the k-vertex. Note
+that we do not assume the dictionary to be an orthogonal family
+(which it is not in most cases). To recover the mapping T that as-
+sociates to each vertex index ofM its image on N , we perform a
+nearest neighbor search between the representations ofM and N ,
+i.e, T = NN-search
+rows
+(
+Ψ
+N
+S ,Ψ
+M
+S
+)
+, where NN-search is the nearest
+neighbor assignment solution of each row of ΨMS among the rows
+of ΨNS .
+3.4. Theoretical guarantees
+The construction above inherits many attractive properties of the
+heat kernel including being isometry-invariant, local and multi-
+scale, and capturing information around a seed point in an informa-
+tive manner. According to [OMMG10], we call a point x generic if
+it does not lie on any isolines of the Laplace-Beltrami eigenfunc-
+tions, i.e. if φi(x) 6= 0 for all i. As shown in [OMMG10], the set
+of generic points has full measure. Moreover a surface is called
+generic if its Laplace-Beltrami eigenvalues are non-repeating. It is
+well-known [BU83] that an infinitesimal perturbation to a metric of
+any surface makes it generic. With these definitions, the following
+theorem guarantees that the uniqueness properties enjoyed by the
+heat kernel also apply to our wavelet family construction.
+Theorem 1 Let M be a generic connected compact manifold
+without boundary and p a generic point on M. For any two
+points x,y, x = y if and only if ψMt (p,x) = ψ
+M
+t (p,y) for all t.
+IfM andN are two generic connected compact manifolds and p a
+generic point on M, then a map T :M→N where T (p) is generic
+is an isometry if and only if ψMt (p,x) = ψ
+N
+t (T (p),T (x)) for all t.
+According to [OMMG10] (c.f., Lemma 3.2, Remark 3.3), given
+two strictly increasing sequences λi and µi of non-negative
+numbers that tend to infinity, if a(t) = ∑i ai exp(−tλi) and
+b(t) = ∑i bi exp(−tµi), where ai,bi 6= 0 then a(t) = b(t) for all t
+if and only if λi = µi and ai = bi for all i. Applying this result to
+the spectral expansion ψMt (p,x) = ∑i λi exp(−tλi)Φi(p)Φi(x) and
+recalling that only the first eigenvalue on a connected manifold
+is zero, we iget the first statement of Theorem 1 (using the same
+proof as of Theorem 3.1 in [OMMG10]). The second statement
+follows from the same argument as Theorem 3.5 in [OMMG10]).
+Namely, by first applying this lemma to x = p, and y = q, which
+implies preservation of eigenvalues and second to other points on
+the surface implying preservation of all but first eigenfunction. To-
+gether this implies that T preserves ψ if and only if it preserves the
+Laplace-Beltrami operator, which is equivalent to an isometry.
+Theorem 1 implies that generically every point x on a surface
+can be uniquely characterized by its relation to some fixed point p
+via ψt(p,x). Furthermore, an isometry can be recovered fully given
+a correspondence between a single pair of seed points. Note that
+the same result was derived for the heat kernel [OMMG10] and
+indeed we directly use the idea of the proof from that work. As
+shown below, our wavelet-inspired construction provides a more
+informative characterization in practice, while retaining the locality
+and multi-scale nature of the heat kernel.
+4. Experimental analysis
+We introduce the data sets (Sect. 4.1) used in our experimental anal-
+ysis (Sect. 4.2) on different aspects of the proposed approach, such
+as the sample placement, the number of scales, the computational
+robustness, and the choice of tmax.
+4.1. Data sets
+The FAUST training data set [BRLB14] consists in 100 human
+shapes, with 10 different humans in 10 different poses. All shapes
+have a consistent manifold mesh structure, composed of 6890 ver-
+tices. The TOSCA data set [BBK08] is composed of 80 shapes
+of various categories: 11 cats, 9 dogs, 3 wolves, 8 horses, 6 cen-
+taurs, 4 gorillas, 12 female figures, and 2 different male figures,
+in 7 and 20 poses. The mean vertex count is about 50K. If not ex-
+plicitly mentioned, the shapes of this data set are remeshed to count
+around 5K vertices each. In the TOSCA Isometric data set, we con-
+sider shape pairs within the same category (e.g. cats matched to
+cats), whereas in the TOSCA non-Isometric data set, we consider
+matches between the gorilla shapes and the two human categories
+(male and female). The Humerus Bones data set is composed of a
+collection of 15 humerus bone models of wild boars acquired using
+a 3D sensor. Each bone was scanned independently, with 24 con-
+sistent landmarks provided by experts in the field [GM13] on each
+shape. The original resolution of the shapes is around 25K vertices.
+The SHREC’16 partial cuts correspondence bench-
+mark [CRB∗16], is the most adopted data set for non-rigid
+shape matching. The shapes belong to 8 different classes (5
+animals and 3 humans). Each class contains pose deformations
+and partiality transformations of two kinds: regular cuts and
+irregular holes. We limit our evaluation to the cuts set (120 pairs).
+These shapes are resampled independently to ∼ 10K vertices
+and share a similar density. The SHREC’19 connectivity track
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives 7
+M
+es
+he
+s
+O
+ur
+s
+P
+F
+M
+sp
+ar
+se
+P
+F
+M
+Source (SMPL) Target from different data sets
+Figure 4: (First row) Different mesh connectivity. (Second-fourth
+rows) Qualitative comparison on the FARM partial data set be-
+tween our approach and the PFM in is original version (PFM) and
+initialized with the sparse correspondence that we adopt for the
+definition of our family of functions (PFM sparse).
+benchmark [MMR∗19] is a data set composed of 44 shapes of
+humans. The complete benchmark consists in 430 shape pairs
+composed by meshes that represent deformable human body
+shapes. Shapes belonging to these categories undergo changes in
+pose and identity. The meshes exhibit variations of two different
+types: density (from 5K to 50K vertices); distribution (uniform and
+non-uniform). For each shape, the full SMPL model [LMR∗15]
+(6890 vertices) servces as our ground-truth.
+The FARM partial data set is a collection of partial shapes that
+we extract from a subset of 5 meshes of the SHREC’19 con-
+nectivity track [MMR∗19]. These shapes belong to different data
+set: TOSCA [BBK08] (around 50K vertices), SPRING [YYZ∗14]
+(12.5K vertices) and K3DHUB [XZC18] (around 10K vertices).
+We randomly cut five patches from each of these shapes (Fig. 4) and
+each partial mesh is matched with the full SMPL model [LMR∗15]
+(6890 vertices). The ground-truth correspondence is extended to
+these partial shapes from the FARM registration [MMRC18] which
+provides a ground truth dense correspondence between SMPL and
+each of the full shapes involved.
+0 20 40 60 80 100
+0
+2
+4
+6
+8
+10
+# samples
+R
+ec
+on
+.e
+rr
+.(
+×
+10
+−
+2
+)
+SHREC’19
+0 20 40 60 80 100
+0
+2
+4
+6
+8
+10
+# samples
+G
+eo
+.e
+rr
+.(
+×
+10
+−
+2
+)
+SHREC’16 Partial Cuts
+Poisson disk
+FPS (Euclidean)
+FPS (geodesic)
+Random
+Figure 5: Mean reconstruction error (recon. err.) as a function
+of the number of samples (# samples) on all δ-functions for 26
+shapes of the SHREC’19 connectivity track data set (top) and mean
+geodesic matching error (geo. err.) on the complete set of shapes
+from the Shrec16 Partial cuts data set (bottom) using various sam-
+pling strategies. In both cases, we used 25 scales.
+4.2. Experimental results
+Sample selection First, we assess that the sampling strategy does
+not affect the outcome of our method. To this end, we compare far-
+thest point sampling (euclidean and geodesic), poisson disk sam-
+pling (computed using the gptoolbox matlab package [J∗18]) and
+random sampling on the SHREC’16 Partial cuts data set, and the
+SHREC’19 connectivity track data sets, using the δ-function re-
+construction error at all sample locations as an error metric for
+the SHREC’19 connectivity track data set and standard geodesic
+matching error for the SHREC’16 Partial cuts data set. The out-
+come of this experiment is shown in Fig. 5. It appears that all sam-
+pling strategies behave in a similar fashion in both experiments. We
+also note that adding more samples improves the reconstruction er-
+ror significantly by injecting more local information to the wavelet
+family. In all other experiments, we therefore use the euclidean far-
+thest point sampling strategy for its simplicity and even localization
+of samples compared to random sampling.
+Sample robustness Second, we verify the resilience of our ap-
+proach to noise in the sample placement. We consider a set of 10
+samples, among which we displace 1, 2, 3, 5 or all samples within
+a geodesic radius around the original sample location (noise ra-
+dius). Three different number of scales are compared: 5, 25 and 50
+with noise radii varying between 1.0×10−2 and 1.0×10−1 of the
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+8 M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives
+1/10 noisy 2/10 noisy 3/10 noisy 5/10 noisy 10/10 noisy
+2 4 6 8 100
+2
+4
+6
+8
+10
+Noise rad. (×10−2)
+G
+eo
+.e
+rr
+.(
+×
+10
+−
+2 )
+2 4 6 8 100
+2
+4
+6
+8
+10
+Noise rad. (×10−2)
+2 4 6 8 100
+2
+4
+6
+8
+10
+Noise rad. (×10−2)
+2 4 6 8 100
+2
+4
+6
+8
+10
+Noise rad. (×10−2)
+2 4 6 8 100
+2
+4
+6
+8
+10
+Noise rad. (×10−2)
+2 4 6 8 100
+2
+4
+6
+8
+10
+Noise rad. (×10−2)
+G
+eo
+.e
+rr
+.(
+×
+10
+−
+2 )
+2 4 6 8 100
+2
+4
+6
+8
+10
+Noise rad. (×10−2)
+2 4 6 8 100
+2
+4
+6
+8
+10
+Noise rad. (×10−2)
+2 4 6 8 100
+2
+4
+6
+8
+10
+Noise rad. (×10−2)
+2 4 6 8 100
+2
+4
+6
+8
+10
+Noise rad. (×10−2)
+5 scales
+25 scales
+50 scales
+0 5101520253035404550556065707580859095100105110115120125130135140145150155160165170175180185190195200205210215220225230235240245250255260265270275280285290295300305310315320325330335340345350355360365370375380385390395400405410415420425430435440445
+0 5101520253035404550556065707580859095100105110115120125130135140145150155160165170175180185190195200205210215220225230235240245250255260265270275280285290295300305310315320325330335340345350355360365370375380385390395400405410415420425430435440445
+0
+5
+10
+15
+20
+25
+30
+35
+40
+45
+50
+55
+60
+65
+70
+75
+80
+85
+90
+95
+100
+105
+110
+115
+120
+125
+130
+135
+140
+145
+150
+155
+160
+165
+170
+175
+180
+185
+190
+195
+200
+0
+5
+10
+15
+20
+25
+30
+35
+40
+45
+50
+55
+60
+65
+70
+75
+80
+85
+90
+95
+100
+105
+110
+115
+120
+125
+130
+135
+140
+145
+150
+155
+160
+165
+170
+175
+180
+185
+190
+195
+200
+SH
+R
+E
+C
+’1
+9
+SH
+R
+E
+C
+’1
+6
+Figure 6: Geodesic matching error as a function of the noise level applied to the positioning of the samples on the complete SHREC’16
+Partial cuts data set (“SHREC’16”, top row) and 55 shape pairs of the SHREC’19 connectivity track data set (“SHREC’19”, bottom row).
+The level of noise is given as a noise radius (noise rad.), that represent the geodesic disc, centered around the original sample, in which the
+noisy sample is drawn from. The geodesic radius is expressed as a fraction of the maximum geodesic distance. In each column, an increasing
+number of samples are noisy (from left to right: 1, 2, 3, 5 and 10, out of a total of 10 samples).
+greatest geodesic distance on the shape. Fig. 6 summarizes our re-
+sults collected on the complete SHREC’16 Partial cuts data set (top
+row) and 55 shape pairs of the SHREC’19 connectivity track data
+set (bottom row).
+Number of scales Fig. 6 empirically indicates that choosing 25
+scales is a good trade-off between robustness to noise and compu-
+tational efficiency, especially when the sample position is inaccu-
+rate. As another incentive for using this number of scales, we ob-
+serve that adding more scales allows to improve the quality of the
+approximation with respect to the ground truth diffusion wavelets
+(Fig. 3 (b,c)).
+Computational robustness We verify the robustness of our
+method to topological changes by comparing three versions of the
+FAUST and TOSCA Isometric data sets: (i) the original data sets,
+with shapes counting respectively around 25K and 6890 vertices,
+(ii) the data sets remeshed to shapes with close to 5K vertices and
+(iii) the original data sets with random edge flips applied to 12.5%
+of the original edges. Table 2 demonstrates that our computation is
+robust to these changes, notably on the TOSCA data set, where the
+challenging setup of matching shapes with edge flips does not sig-
+nificantly degrade the performances compared to the "remeshed"
+scenario.
+Choice of tmax The maximum diffusion time tmax remains a free
+parameter of our method. Throughout the experiments that we
+present, we choose to fix its value to 1, since it provides good
+results on the data sets that we are using. However, selecting its
+value depending on the shape at hand could allow to improve the
+quality of the matching obtained when using our method, in par-
+ticular in situations where the samples cannot be placed regularly
+0 20 40 60 80 100
+0
+2
+4
+6
+8
+10
+tmax value
+G
+eo
+.e
+rr
+.(
+×
+10
+−
+2
+)
+SourceTarget
+Figure 7: Left: mean geodesic error on 30 shape pairs of the
+humerus bones data set, remeshed to 1k shapes.The minimum
+matching error of 7.35× 10−2 is attained for tmax = 14 (red dot).
+Right: illustration of a matching estimated between two bones us-
+ing the best tmax value. Corresponding points are depicted with the
+same color. The target shape was rescaled by a factor of ×0.8 to
+match the size of the source shape.
+on the shape’s surface. To illustrate this aspect, we conducted an
+experiment on the humerus bones data set. All shapes have been
+remeshed to count 1K vertices. Fig. 7 shows that the geodesic er-
+ror varies substantially depending on tmax. Its value is the smallest
+for tmax = 14.
+5. Experimental Comparisons
+To illustrate the benefits of our method, we discuss the reconstruc-
+tion (Sect. 5.1) and transfer (Sect. 5.2) of δ-functions on shapes,
+and compare our approach to the heat kernel (Sect. 5.3).
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives 9
+2 samples 4 samples 6 samples
+0 5 ·10−2 0.1 0.15 0.2 0.25
+0
+20
+40
+60
+80
+100
+Geodesic distance
+%
+C
+or
+re
+sp
+on
+de
+nc
+es
+0 5 ·10−2 0.1 0.15 0.2 0.25
+0
+20
+40
+60
+80
+100
+Geodesic distance
+0 5 ·10−2 0.1 0.15 0.2 0.25
+0
+20
+40
+60
+80
+100
+Geodesic distance
+0 5 ·10−2 0.1 0.15 0.2 0.25
+0
+20
+40
+60
+80
+100
+Geodesic distance
+%
+C
+or
+re
+sp
+on
+de
+nc
+es
+0 5 ·10−2 0.1 0.15 0.2 0.25
+0
+20
+40
+60
+80
+100
+Geodesic distance
+0 5 ·10−2 0.1 0.15 0.2 0.25
+0
+20
+40
+60
+80
+100
+Geodesic distance
+Ours
+Fourier
+CMM
+LMHT
+O
+SC
+A
+n.
+I.
+SH
+R
+E
+C
+’1
+6
+Figure 8: Reconstruction error of all δ-functions on all shapes of the SHREC’16 Partial cuts data set (top row) and on all shapes of the
+TOSCA non-isometric data set (category 8) (bottom row). Averaged values are reported respectively in Tables 3 and 4). Each column is with
+a different number of sample points/basis functions. The x-axis represents the normalized geodesic distance to the ground truth and the y-axis
+is the fraction of correspondences in percent.
+Data set / # scales 5 25 50
+Faust (original) 1.00 9.96 9.78
+Faust (edges flipped) 9.91 9.77 9.64
+Faust (remeshed) 5.78 6.15 6.09
+TOSCA (original) 4.47 4.78 4.83
+TOSCA (remeshed) 4.97 4.99 5.00
+TOSCA (edges flipped) 5.35 6.02 6.23
+Table 2: Mean geodesic error (×10−2) on 200 shape pairs of the
+FAUST data set and 212 pairs of the TOSCA Isometric data set
+(original, with edges flipped and remeshed to 5K vertices in both
+cases). Selected scales are 5, 25, and 50.
+5.1. δ-function reconstruction
+One feature of our approach, is that it provides a better representa-
+tion for δ-functions. With only a small number of sample points, we
+provide an approximation of δ-functions that is significantly more
+accurate than traditional functional bases, such as the eigenfunc-
+tions of the Laplace-Beltrami operator. Fig. 8 presents the results
+obtained on all shapes of the SHREC’16 Partial cuts data set and
+all shapes of the TOSCA non Isometric data set (remeshed ver-
+sion). The evaluation indicates the error in terms of geodesic radius
+obtained when embedding a δ-function of the shape with a given
+basis/dictionary of functions, and projecting the embedding back
+on the shape.
+Our basis is computed using 25 scales and the δ-function re-
+construction point-to-point map recovery. We compare our perfor-
+mance to the traditional harmonic basis (Fourier), the Localized
+Manifold Harmonic basis (LMH) [MRCB18] and the Compressed
+Manifold Modes (CMM) [NVT∗14]. For each of these methods,
+the δ-function location is determined by taking the position at
+which its approximation in the basis considered is maximal. To
+# Gt Corres. 2 4 6
+Fourier 3.84×10−1 2.27×10−1 1.69×10−1
+LMH 4.09×10−1 2.32×10−1 1.80×10−1
+CMM 7.03×10−1 6.22×10−1 5.08×10−1
+Ours 2.28×10−1 1.00×10−1 3.75×10−2
+Table 3: Average reconstruction error for the SHREC’16 Partial
+cuts data set, corresponding to the top row of Fig. 8.
+# Gt Corres. 2 4 6
+Fourier 5.55×10−1 3.17×10−1 2.03×10−1
+LMH 4.73×10−1 2.98×10−1 1.81×10−1
+CMM 7.66×10−1 7.34×10−1 5.80×10−1
+Ours 3.94×10−1 6.9×10−2 3.1×10−2
+Table 4: Average reconstruction error for all 24 shapes from the
+TOSCA non isometric data set (category 8), corresponding to the
+bottom row of Fig. 8.
+build our family of functions, we use 2, 4, or 6 samples, placed
+using Euclidean farthest point sampling, 10 scales, tmax = 1 for the
+maximum diffusion scale, and the point-to-point map conversion
+for δ-function reconstruction described in Sect. 3.3. According to
+the mean geodesic error for all approaches (Tables 3, 4), our ap-
+proach outperforms significantly the other methods.
+5.2. δ-function transfer
+As a continuation of the previous experiments, and still considering
+full shapes, we study how well our family of functions allows us to
+recover the entire δ basis after being transferred from a sourceM
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+10 M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives
+3 samples 10 samples 20 samples
+0 0.2 0.4 0.6 0.8 1
+0
+20
+40
+60
+80
+100
+Geodesic distance
+%
+C
+or
+re
+sp
+on
+de
+nc
+es
+0 0.2 0.4 0.6 0.8 1
+0
+20
+40
+60
+80
+100
+Geodesic distance
+%
+C
+or
+re
+sp
+on
+de
+nc
+es
+0 0.2 0.4 0.6 0.8 1
+0
+20
+40
+60
+80
+100
+Geodesic distance
+%
+C
+or
+re
+sp
+on
+de
+nc
+es
+0 0.2 0.4 0.6 0.8 1
+0
+20
+40
+60
+80
+100
+Geodesic distance
+%
+C
+or
+re
+sp
+on
+de
+nc
+es
+0 0.2 0.4 0.6 0.8 1
+0
+20
+40
+60
+80
+100
+Geodesic distance
+0 0.2 0.4 0.6 0.8 1
+0
+20
+40
+60
+80
+100
+Geodesic distance
+Ours
+Fourier
+CMM
+LMH
+0 5101520253035404550556065707580859095100105110115120125130135140145150155160165170175180185190195200205210215220225230235240245250255260265270275280285290295300305310315320325330335340345350355360365370375380385390395400405410415420425430435440445450455460465470475480485
+0 5101520253035404550556065707580859095100105110115120125130135140145150155160165170175180185190195200205210215220225230235240245250255260265270275280285290295300305310315320325330335340345350355360365370375380385390395400405410415420425430435440445450455460465470475480485
+0
+5
+10
+15
+20
+25
+30
+35
+40
+45
+50
+55
+60
+65
+70
+75
+80
+85
+90
+95
+100
+105
+110
+115
+120
+125
+130
+135
+140
+145
+150
+155
+160
+0
+5
+10
+15
+20
+25
+30
+35
+40
+45
+50
+55
+60
+65
+70
+75
+80
+85
+90
+95
+100
+105
+110
+115
+120
+125
+130
+135
+140
+145
+150
+155
+160
+T
+O
+SC
+A
+n.
+I.
+SH
+R
+E
+C
+’1
+6
+Figure 9: Reconstruction error after transferring all δ-functions on all shapes of the SHREC’16 Partial cuts data set (“SHREC’16”, top row,
+see averaged values in Table 5) and 190 shape pairs of the TOSCA non-isometric data set (“TOSCA n.I.”, bottom row, see averaged values
+in Table 6) using an increasing number of ground truth sample points/basis functions correspondences. On all plots, the x-axis represents the
+normalized geodesic distance and the y-axis is the fraction of correspondences in percent.
+to a target shape N . We call δ-function transfer the operation that
+consists in reconstructing all δ-functions computed on the target
+shapeN after the transfer fromN .
+Since our approach relies on the location of sample points on
+both shapes considered, which are given as ground truth correspon-
+dences, we compute for the competing bases a set of ground truth
+functional correspondences equal to the number of samples that
+we use. For a basis ΦM on M and ΦN on N , such a ground
+truth functional correspondence is given by φ̃N = φM · φTM ·Π ·
+AN · φN , where Π is the matrix encoding the ground-truth point-
+to-point correspondences betweenM andN . Indeed, the mapping
+between φM and φN is given as the matrix C = (φN
+T ·AN ) ·Π ·φM
+and the image of φM onN is obtained as φM ·CT = φ̃N . Equipped
+with this ground truth correspondence, we obtain a point-to-point
+map from N to M by computing a nearest-neighbor search be-
+tween Φ̃N and ΦN . For our family of functions, we employ the
+same setup as for the δ-function reconstruction with a few adjust-
+ments: we use 3, 10 or 20 samples and the transfer point-to-point
+conversion introduced in Sect. 3.3. The remaining parameters stay
+identical (25 scales and tmax = 1).
+Fig. 9 presents the results on the same data sets as for the δ-
+function reconstruction experiment and comparing again against
+the Fourier, LMH and CMM bases. The evaluation indicates the
+error in terms of geodesic radius obtained when embedding a δ-
+function of the shape M using a given basis/dictionary of func-
+tions, and projecting the embedding back on the target shape N .
+According to the average values in Tables 5, 6, our basis outper-
+forms the other bases by a substantial margin.
+5.3. Comparison with the heat kernel
+The construction of our functions is closely related to those ones
+provided by the heat kernel. While both function types share the
+ability to characterize uniquely every point on a surface, our ap-
+proach is more informative in practice. To assess this practical
+# Gt Corres. 3 10 20
+Fourier 4.94×10−1 1.93×10−1 9.68×10−2
+LMH 5.22×10−1 2.75×10−1 1.59×10−1
+CMM 7.06×10−1 6.01×10−1 3.02×10−1
+Ours 8.88×10−2 2.82×10−2 1.94×10−2
+Table 5: Average reconstruction error after transfer for all shape
+pairs of the SHREC’16 Partial cuts data set, corresponding to the
+bottom row of Fig. 9.
+advantage, we conduct the following experiment on a set of 10
+pairs of the dog class from the TOSCA data set. Given an increas-
+ing number of samples, we compute for each pair of shape the
+AUC (Area Under the Curve: the probability that a point is within
+a radius of 0.25 in normalized geodesic distance) and the mean
+geodesic error using our wavelet-based family and the heat kernel,
+associated with the conversion of a point-to-point map.
+We setup our basis using the same parameters as for the δ-
+function transfer experiment, using ground-truth correspondences
+between the sample points on the source and target shapes. The
+quantitative and qualitative evaluation of this experiment is de-
+picted in Fig. 10. Relying on a diffusion process to define both
+the families of functions, we emphasize that this experiment can
+be seen as an additional comparison to standard diffusion wavelets.
+This result highlights that our family of functions is more informa-
+tive than the heat kernel one.
+6. Application to Partial Shape Matching
+As the main application of our method, we tackle the problem of
+partial shape matching, one of the challenging scenarios in non-
+rigid shape matching. We experiment on the SHREC’16 Partial
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives 11
+# Gt Corres. 3 10 20
+Fourier 6.70×10−1 4.04×10−1 3.44×10−1
+LMH 6.94×10−1 4.51×10−1 3.82×10−1
+CMM 7.36×10−1 6.87×10−1 5.98×10−1
+Ours 2.14×10−1 1.08×10−1 7.97×10−2
+Table 6: Average reconstruction error after transfer for 190 shape
+pairs from the TOSCA non-isometric data set, corresponding to the
+bottom row of Fig. 9.
+Correspondence benchmark [CRB∗16] (Sect. 6.1) and on a new
+set of partial shapes, namely FARM partial (Sect. 6.2). If not speci-
+fied, we adopt as sparse set of correspondences for our approach
+the fully automatic result obtained with the pipeline proposed
+in [RBA∗12], initialized with the SHOT descriptor [TSDS10]. We
+highlight that we are proposing a new approach for shape and func-
+tional space representation and not a complete pipeline to solve the
+partial matching problem. In the following experiments, we will
+compare our approach to algorithms that exploit full optimization
+and learning strategies. Some of these methods are also specifically
+designed for partial matching. In this spirit, our results are more
+impressive than how they could appear and they prove that our rep-
+resentation well suits the partial case.
+6.1. Application to the SHREC’16 Partial Cuts benchmark
+In the evaluation on the SHREC’16 Partial Cuts data set, each
+partial shape is paired with the full shape of the class to which
+it belongs. Despite the partiality, in this data set, the shape pairs
+differ for local isometries that are well described by the stan-
+dard Fourier basis. The quantitative evaluation, performed accord-
+ingly to the standard protocol proposed in [KLF11], is shown in
+Fig. 11. On the left we compare our approach on the entire cuts
+set from SHREC’16 with all the methods that were considered in
+the challenge. We refer to [CRB∗16] for a description of these
+methods. Our performance is comparable with partial functional
+maps [RCB∗17] (PFM) the state-of-the-art for partial matching.
+For a fair comparison, we additionally evaluate the performance
+of PFM when it is initialized with the same sparse correspondence
+that we exploit to generate our family of functions (PFM sparse).
+The constraints optimization performed by PFM produces more
+accurate correspondence because it is able to solve the inaccuracies
+contained in the initial sparse correspondence. Moreover, due to
+the way the data set was produced, the shape pairs of this data set
+have similar connectivity, which is a known factor of overfitting
+for shape matching techniques. Our evaluation performed on the
+FARM partial data set in Sect. 6.2 demonstrates that, contrary to
+PFM, our method stays reliable when considering shape matching
+problems where shapes have highly different connectivity.
+In the middle of Fig. 11, we compare our approach to PFM
+when both are initialized with 20 and 30 ground-truth correspon-
+dences only on the cat class. As can be seen if the sparse corre-
+spondences are correct our method is comparable to PFM and even
+better. We highlight that this is the unique evaluation in which we
+Ours basis
+Heat Kernel basis
+Source
+Ours
+Heat Kernel
+1 sample 4 samples 8 samples
+1 3 5 7 9 11 13 150.6
+0.7
+0.8
+0.9
+1
+number of samples
+A
+U
+C
+1 3 5 7 9 11 13 150
+0.025
+0.05
+0.075
+0.1
+0.125
+number of samples
+m
+ea
+n
+ge
+od
+es
+ic
+er
+ro
+r Ours
+Heat Kernel
+Figure 10: (1st, 2nd Rows) Comparison with heat kernels in point-
+to-point map conversion with the same number of scales and a
+small number of point samples. Four scales of the heat diffusion
+from a sample on a pair of shapes; the colormap ranges from blue
+(negative) to red (positive) with values close to zero in white. (3rd
+Row) Qualitative comparison of the resulting maps for 1, 4, 8 sam-
+ples (left to right), using color correspondence to show the resulting
+point-to-point map. (4th Row) Performances of our approach com-
+pared to the heat kernel in terms of Area Under the Curve (AUC)
+and mean geodesic error. Results are averaged over 10 pairs of the
+dog class from the TOSCA data set. The evaluation highlights the
+better performances of our representation over the heat kernel.
+use a ground-truth initialization. The qualitative results depicted in
+Fig. 12 confirm that our performance is comparable to PFM. When
+considering the computational efficiency however, our method out-
+performs PFM by a significant margin. On the complete SHREC16
+data set, PFM sparse takes on average 138.2s. per shape to be com-
+puted, PFM 240.9s., while our method needs 46.2s.. Moreover, the
+sparse set of samples takes on average 38.7s. per shape to be com-
+puted. Therefore, most of the computation overhead lies in this
+preprocessing step for our method. Once a set of sparse correspon-
+dences is available, we require an average computation time of 7.5s.
+per shape, which represents an improvement of more than ten times
+compared to PFM sparse (99.5s. per shape).
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+12 M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives
+Similar connectivity Similar connectivity Different connectivity
+SHREC16 cuts SHREC16 cuts cat shapes FARM partial
+0 0.05 0.1 0.15 0.2 0.25
+0
+20
+40
+60
+80
+100
+Geodesic error
+%
+C
+or
+re
+sp
+on
+de
+nc
+es
+PFM
+PFM sparse
+Ours
+RF
+IM
+EN
+GT
+0 0.05 0.1 0.15 0.2 0.25
+0
+20
+40
+60
+80
+100
+Geodesic error
+PFM 20
+PFM 30
+Ours 20
+Ours 30
+0 0.05 0.1 0.15 0.2 0.25
+0
+20
+40
+60
+80
+100
+Geodesic error
+PFM
+PFM sparse
+Ours
+Figure 11: Quantitative comparison on the SHREC’16 partial cut benchmark (composed of shapes with similar connectivity) and on the
+FARM partial data set (shapes with different connectivity). In all plots, the x-axis is the mean geodesic distance to the ground truth. Abbrevi-
+ations used: PFM (partial functional maps), PFM sparse (PFM initialized with the same sparse correspondence used to compute our frame),
+RF, IM, EN, GT. For PFM and ours applied to SHREC’16 cuts on the cat shape, an additional number specifies the number of ground-truth
+correspondences that were used for initialization (20 or 30).
+6.2. Application to the FARM partial
+The FARM partial contains non-isometric deformation and ex-
+tremely different connectivities. These deformations make the
+FARM partial more challenging than SHREC’16 which does not
+consider such variations. On the right of Fig. 11, the quantitative
+comparison on FARM partial is shown. As can be seen on these
+challenging pairs PFM does not perform very well. According to
+Fig. 4, our results are dramatically better than competitors; these
+quantitative and qualitative evaluations also demonstrate that our
+approach is competitive to state-of-the-art methods.
+7. Conclusions
+In this work, we have proposed an extension to the basic diffu-
+sion (heat kernel) construction by considering its time derivative.
+The resulting family of diffusion-based Mexican hat wavelets, is
+local and allows to find accurate point-to-point correspondences
+between shapes; this includes particularly challenging settings such
+as partial shape correspondence, and matching between shapes with
+highly different triangulations. At the same time, the efficient use
+of diffusion-based methods enables us to solve these difficult prob-
+lems at a fraction of the computational cost compared to other ap-
+proaches. We further proved that our functions inherit properties
+of the heat kernel map, such as the ability of only requiring one
+sample point to recover an isometry.
+Our experiments on δ-function reconstruction and transfer indi-
+cate that our family can be thought of as an over-complete basis
+that provides a richer functional representation power compared to
+Fourier, diffusion functions, and other bases. Moreover, the appli-
+cation of wavelet-like functions on partial and large-scale shapes
+show promising results compared to state-of-the-art methods, es-
+pecially when taking into consideration its simplicity.
+The main limitation of our approach currently lies in the depen-
+dency on an initial sparse correspondence, which is assumed to be
+roughly accurate. Although further progress in deformable sparse
+matching would have a direct and positive impact on our method,
+we believe that this problem can be solved jointly within our frame
+calculation algorithm, and leave this challenge as an exciting direc-
+tion of future research.
+References
+[ABK15] AFLALO Y., BREZIS H., KIMMEL R.: On the optimality of
+shape and data representation in the spectral domain. SIAM Journal on
+Imaging Sciences 8, 2 (2015), 1141–1160. 2
+[ASC11] AUBRY M., SCHLICKEWEI U., CREMERS D.: The wave kernel
+signature: A quantum mechanical approach to shape analysis. In Conf.
+on Computer Vision Workshops (2011), pp. 1626–1633. 2
+[BBK08] BRONSTEIN A. M., BRONSTEIN M. M., KIMMEL R.: Numer-
+ical Geometry of Non-Rigid Shapes. Springer, New York, NY, 2008. 6,
+7
+[BK10] BRONSTEIN M. M., KOKKINOS I.: Scale-invariant heat kernel
+signatures for non-rigid shape recognition. In Conf. on Computer Vision
+and Pattern Recognition (2010), pp. 1704–1711. 2
+[BMP01] BELONGIE S., MALIK J., PUZICHA J.: Shape context: a new
+descriptor for shape matching and object recognition. In Advances in
+neural information processing systems (2001), pp. 831–837. 2
+[BRLB14] BOGO F., ROMERO J., LOPER M., BLACK M. J.: FAUST:
+dataset and evaluation for 3D mesh registration. In Conf. on Computer
+Vision and Pattern Recognition (2014). 6
+[Bro11] BRONSTEIN A. M.: Spectral descriptors for deformable shapes.
+arXiv preprint arXiv:1110.5015 (2011). 2
+[BU83] BANDO S., URAKAWA H.: Generic properties of the eigenvalue
+of the laplacian for compact riemannian manifolds. Tohoku Mathemati-
+cal Journal, Second Series 35, 2 (1983), 155–172. 6
+[CJ97] CHUA C. S., JARVIS R.: Point signatures: A new representa-
+tion for 3D object recognition. Intern. Journal of Computer Vision 25, 1
+(1997), 63–85. 2
+[CL06] COIFMAN R. R., LAFON S.: Diffusion maps. Applied and Com-
+putational Harmonic Analysis 21, 1 (2006), 5–30. 1
+[CM06] COIFMAN R. R., MAGGIONI M.: Diffusion wavelets. Applied
+and Computational Harmonic Analysis 21, 1 (2006), 53–94. 3, 5
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives 13
+S
+ou
+rc
+e
+O
+ur
+s
+P
+F
+M
+sp
+ar
+se
+P
+F
+M
+Figure 12: Qualitative comparison on the SHREC’16 partial cut benchmark for 5 classes (wolf, horse, centaur, dog, cat) between our
+approach, the PFM (original version), and the PFM initialized with the sparse correspondence that we adopt for the definition of our family
+of functions (PFM sparse). The resulting point-to-point mapping is displayed through color correspondence. Our approache, despite its
+simplicity, is comparable to PFM.
+[CRB∗16] COSMO L., RODOLÀ E., BRONSTEIN M., TORSELLO A.,
+CREMERS D., SAHILLIOĞLU Y.: Partial matching of deformable
+shapes. In Proc. of the Eurographics Workshop on 3D Object Retrieval
+(2016), pp. 61–67. 6, 11
+[CSBK17] CHOUKROUN Y., SHTERN A., BRONSTEIN A., KIMMEL R.:
+Hamiltonian operator for spectral shape analysis. arXiv:1611.01990
+(2017). 2
+[GBAL09] GEBAL K., BÆRENTZEN J. A., ANÆS H., LARSEN R.:
+Shape analysis using the auto diffusion function. Computer Graphics
+Forum 28, 5 (2009), 1405–1413. 1, 2
+[GM13] GUNZ P., MITTEROECKER P.: Semilandmarks: a method for
+quantifying curves and surfaces. Hystrix, the Italian journal of mammal-
+ogy 24, 1 (2013), 103–109. 6
+[HPPLG11] HEIDER P., PIERRE-PIERRE A., LI R., GRIMM C.: Local
+shape descriptors, a survey and evaluation. In Proc. Eurographics Conf.
+on 3D Object Retrieval (2011), pp. 49–56. 2
+[HQ12] HOU T., QIN H.: Continuous and discrete mexican hat wavelet
+transforms on manifolds. Graphical Models 74, 4 (2012), 221–232. 3,
+4, 5
+[HSKK01] HILAGA M., SHINAGAWA Y., KOHMURA T., KUNII T. L.:
+Topology matching for fully automatic similarity estimation of 3D
+shapes. In Conf. on Computer Graphics and Interactive Techniques
+(2001), pp. 203–212. 2
+[HVG11] HAMMOND D. K., VANDERGHEYNST P., GRIBONVAL R.:
+Wavelets on graphs via spectral graph theory. Applied and Computa-
+tional Harmonic Analysis 30, 2 (2011), 129–150. 2, 3, 5
+[J∗18] JACOBSON A., ET AL.: gptoolbox: Geometry processing toolbox,
+2018. http://github.com/alecjacobson/gptoolbox. 7
+[Joh99] JOHNSON A. E.: Using spin images for efficient object recog-
+nition in cluttered 3D scenes. ACM Trans. on Pattern Analysis and Ma-
+chine Intelligence 21, 5 (1999), 433–449. 2
+[KBB∗13] KOVNATSKY A., BRONSTEIN M. M., BRONSTEIN A. M.,
+GLASHOFF K., KIMMEL R.: Coupled quasi-harmonic bases. Computer
+Graphics Forum 32 (2013), 439–448. 2
+[KGB16] KOVNATSKY A., GLASHOFF K., BRONSTEIN M. M.:
+MADMM: a generic algorithm for non-smooth optimization on mani-
+folds. In Proc. of the European Conference on Computer Vision (2016),
+pp. 680–696. 2
+[KLF11] KIM V. G., LIPMAN Y., FUNKHOUSER T.: Blended Intrinsic
+Maps. In ACM Trans. on Graphics (2011), vol. 30, p. 79. 11
+[LDW97] LOUNSBERY M., DEROSE T. D., WARREN J.: Multiresolu-
+tion analysis for surfaces of arbitrary topological type. ACM Trans. on
+Graphics 16, 1 (1997), 34–73. 3
+[Lév06] LÉVY B.: Laplace-Beltrami eigenfunctions towards an algo-
+rithm that understands geometry. In Proc. of Shape Modelling Inten-
+rational (2006), pp. 13–25. 2
+[LH13] LI C., HAMZA A. B.: A multiresolution descriptor for de-
+formable 3D shape retrieval. The Visual Computer 29, 6-8 (2013), 513–
+524. 2
+[LMR∗15] LOPER M., MAHMOOD N., ROMERO J., PONS-MOLL G.,
+BLACK M. J.: SMPL: A skinned multi-person linear model. ACM Trans.
+on Graphics 34, 6 (2015), 248:1–248:16. 7
+[Mel19] MELZI S.: Sparse representation of step functions on manifolds.
+Computers & Graphics 82 (2019), 117 – 128. 2
+[MHYS04] MANAY S., HONG B.-W., YEZZI A. J., SOATTO S.: Inte-
+gral invariant signatures. In European Conf. on Computer Vision (2004),
+Springer, pp. 87–99. 2
+submitted to COMPUTER GRAPHICS Forum (7/2020).
+14 M. Kirgo, S. Melzi, G. Patanè, E. Rodolà and M. Ovsjanikov / Wavelet-based Heat Kernel Derivatives
+[MMM∗20] MELZI S., MARIN R., MUSONI P., BARDON F., TARINI
+M., CASTELLANI U.: Intrinsic/extrinsic embedding for functional
+remeshing of 3D shapes. Computers & Graphics 88 (2020), 1 – 12.
+2
+[MMR∗19] MELZI S., MARIN R., RODOLÀ E., CASTELLANI U., REN
+J., POULENARD A., WONKA P., OVSJANIKOV M.: SHREC 2019:
+Matching Humans with Different Connectivity. In Eurographics Work-
+shop on 3D Object Retrieval (2019). 7
+[MMRC18] MARIN R., MELZI S., RODOLÀ E., CASTELLANI U.:
+Farm: Functional automatic registration method for 3D human bodies,
+2018. 7
+[MRCB16] MELZI S., RODOLÀ E., CASTELLANI U., BRONSTEIN M.:
+Shape analysis with anisotropic windowed fourier transform. In Conf.
+on 3D Vision (2016). 2
+[MRCB18] MELZI S., RODOLÀ E., CASTELLANI U., BRONSTEIN
+M. M.: Localized manifold harmonics for spectral shape analysis. Com-
+puter Graphics Forum 37, 6 (2018), 20–34. 1, 2, 9
+[NMR∗18] NOGNENG D., MELZI S., RODOLÀ E., CASTELLANI U.,
+BRONSTEIN M. M., OVSJANIKOV M.: Improved functional mappings
+via product preservation. Computer Graphics Forum 37, 2 (2018), 179–
+190. 2
+[NVT∗14] NEUMANN T., VARANASI K., THEOBALT C., MAGNOR M.,
+WACKER M.: Compressed manifold modes for mesh processing. Com-
+puter Graphics Forum 33, 5 (2014), 35–44. 2, 9
+[OBCS∗12] OVSJANIKOV M., BEN-CHEN M., SOLOMON J.,
+BUTSCHER A., GUIBAS L.: Functional maps: a flexible repre-
+sentation of maps between shapes. ACM Trans. on Graphics 31, 4
+(2012), 30:1–30:11. 1, 2
+[OLCO13] OZOLIN, Š V., LAI R., CAFLISCH R., OSHER S.: Compressed
+modes for variational problems in mathematics and physics. Proc. of the
+National Academy of Sciences 110, 46 (2013), 18368–18373. 1, 2
+[OMMG10] OVSJANIKOV M., MÉRIGOT Q., MÉMOLI F., GUIBAS L.:
+One point isometric matching with the heat kernel. In Computer Graph-
+ics Forum (2010), vol. 29, pp. 1555–1564. 1, 6
+[Pat13] PATANÉ G.: wFEM heat kernel: Discretization and applications
+to shape analysis and retrieval. Computer-Aided Geometric Design 30, 3
+(2013), 276–295. 2, 5
+[Pat16] PATANÈ G.: STAR - Laplacian spectral kernels and distances for
+geometry processing and shape analysis. Computer Graphics Forum 35,
+2 (2016), 599–624. 2
+[Pat18] PATANÈ G.: Laplacian spectral basis functions. Computer-Aided
+Geometric Design 65 (2018), 31 – 47. 2
+[PS13] PATANÉ G., SPAGNUOLO M.: Heat diffusion kernel and distance
+on surface meshes and point sets. Computers & Graphics 37, 6 (2013),
+676–686. 2, 5
+[RBA∗12] RODOLÀ E., BRONSTEIN A. M., ALBARELLI A., BERGA-
+MASCO F., TORSELLO A.: A game-theoretic approach to deformable
+shape matching. In Conf. on Computer Vision and Pattern Recognition
+(2012), pp. 182–189. 11
+[RBG∗09] REUTER M., BIASOTTI S., GIORGI D., PATANÈ G., SPAG-
+NUOLO M.: Discrete Laplace-Beltrami operators for shape analysis and
+segmentation. Computers and Graphics 33, 3 (2009), 381–390. 2
+[RCB∗17] RODOLÀ E., COSMO L., BRONSTEIN M., TORSELLO A.,
+CREMERS D.: Partial functional correspondence. Computer Graphics
+Forum 36, 1 (2017), 222–236. 11
+[RCG08] RONG G., CAO Y., GUO X.: Spectral mesh deformation. The
+Visual Computer 24, 7 (2008), 787–796. 2
+[Rus07] RUSTAMOV R. M.: Laplace-Beltrami eigenfunctions for defor-
+mation invariant shape representation. In Proc. of Symposium on Geom-
+etry Processing (2007), pp. 225–233. 2
+[RWP06] REUTER M., WOLTER F.-E., PEINECKE N.: Laplace–
+Beltrami spectra as ‘Shape-DNA’of surfaces and solids. Computer-
+Aided Design 38, 4 (2006), 342–366. 2
+[SK14] SHTERN A., KIMMEL R.: Matching the LBO eigenspace of non-
+rigid shapes via high order statistics. Axioms 3, 3 (2014), 300–319. 2
+[SOG09] SUN J., OVSJANIKOV M., GUIBAS L.: A concise and provably
+informative multi-scale signature based on heat diffusion. In Computer
+Graphics Forum (2009), vol. 28, pp. 1383–1392. 1, 2
+[Tau95] TAUBIN G.: A signal processing approach to fair surface design.
+In ACM SIGGRAPH (1995), pp. 351–358. 2
+[TSDS10] TOMBARI F., SALTI S., DI STEFANO L.: Unique signatures
+of histograms for local surface description. In Proc. of the European
+Conference on Computer Vision (2010), Springer, pp. 356–369. 11
+[VBCG10] VAXMAN A., BEN-CHEN M., GOTSMAN C.: A multi-
+resolution approach to heat kernels on discrete surfaces. In ACM Trans.
+on Graphics (2010), vol. 29, p. 121. 2
+[VL08] VALLET B., LÉVY B.: Spectral geometry processing with mani-
+fold harmonics. Computer Graphics Forum 27, 2 (2008), 251–260. 2
+[WVR∗14] WINDHEUSER T., VESTNER M., RODOLÀ E., TRIEBEL R.,
+CREMERS D.: Optimal intrinsic descriptors for non-rigid shape analysis.
+In Proc. of the British Machine Vision Conf. (2014). 2
+[XZC18] XU Z., ZHANG Q., CHENG S.: Multilevel active registration
+for kinect human body scans: from low quality to high quality. Multime-
+dia Systems 24, 3 (2018), 257–270. 7
+[YYZ∗14] YANG Y., YU Y., ZHOU Y., DU S., DAVIS J., YANG R.:
+Semantic parametric reshaping of human body models. In Conf. on 3D
+Vision (2014). 7
+[Zho12] ZHONG M.: Harmonic Shape Analysis: From Fourier to
+Wavelets. Master’s thesis, Stony Brook University, 2012. 3
+submitted to COMPUTER GRAPHICS Forum (7/2020).

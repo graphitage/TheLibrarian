@@ -1,0 +1,1220 @@
+DeepClone: Modeling Clones to Generate Code Predictions
+DeepClone: Modeling Clones to Generate Code Predictions
+Muhammad Hammad
+Eindhoven University of Technology, Netherlands
+Önder Babur
+Eindhoven University of Technology, Netherlands
+Hamid Abdul Basit
+Prince Sultan University, Saudi Arabia
+Mark van den Brand
+Eindhoven University of Technology, Netherlands
+ABSTRACT
+During so�ware development, programmers o�en tend to reuse
+the code for common functionalities, available in other source code
+repositories. �is activity helps them to reduce time and e�ort to
+develop code, instead of building it from scratch. Code clones are
+candidates for reuse in an exploratory or rapid development, as
+they represent o�en repeated functionality in so�ware systems.
+To facilitate code clone reuse, we propose a novel approach, Deep-
+Clone, where we utilize a deep learning algorithm for modeling
+code clones and predicting the next possible set of tokens (up to the
+cloned method body) based on the user input so far. �e generated
+predictions aim to potentially help developers to write code rapidly
+with minimum tuning of values later on. DeepClone applies natural
+language processing techniques to learn from a large code corpus
+(the BigCloneBench dataset), and generates code tokens (full clone
+methods where applicable) using the model learned. We have quan-
+titatively evaluated our solution to assess (1) our model’s quality
+and its accuracy in token prediction, and (2) its performance and
+e�ectiveness in clone method prediction. With a high quality and
+accurate model as the foundation, we further discuss scenarios for
+exploiting our approach.
+CCS CONCEPTS
+•Computing methodologies → Neural networks; •So�ware
+and its engineering → Language features; Reusability; Au-
+tomatic programming; So�ware development methods;
+KEYWORDS
+natural language modeling, deep learning, code clone, code predic-
+tion
+1 INTRODUCTION
+Many so�ware development and maintenance tasks rely on search-
+ing the source code e�ectively [69]. However, the structure of
+source code makes it di�cult to be read in a linear fashion like
+normal text and hinders an e�ective code search. It is also tedious
+and impractical to read the entire source code of large so�ware sys-
+tems. Writing new source code is an expensive activity, consuming
+considerable time and e�ort. To overcome this limitation, devel-
+opers frequently perform ad hoc code reuse [38], which requires
+selectively reading the source code to identify the relevant parts
+of the code for reuse [75]. O�en, programming of well-de�ned
+problems amounts to a simple look-up [75], �rst in one�s own, and
+then in others� code repositories, followed by judicious copying
+and pasting. �e bigger the dataset of code available, the more
+likely it is that one will �nd what one is looking for [25]. For this
+purpose, developers require features such as code snippet search,
+code predictions, code auto-completion and code generation, which
+can help them to write code quickly and easily. �ese problems
+have been usually solved by language modeling.
+Claude Shannon is considered to be a founder of language mod-
+eling [72, 73]. Shannon used this technique to predict the next
+element following some given text and bound the entropy of the
+English language. Since then, several language models have been
+developed to perform di�erence tasks. A language model (LM)
+estimates the likelihood of sequences of tokens based on a training
+dataset, by assigning probabilities to tokens (words, subwords, or
+punctuation marks) or character sequences (sentences or words oc-
+curring a�er a given sequence [39]). �ere are di�erent techniques
+such as statistical ones and deep neural networks (DNN), which
+have been applied for LMs including n-gram, graphed-based, and
+context sensitive models [6, 8, 56]. Both techniques have led to
+great results on natural language processing (NLP) tasks mainly,
+because in practice natural language is o�en repetitive and pre-
+dictable [31], thus can be modeled using both techniques. However,
+statistical modeling techniques does not perform well, when the
+size of vocabulary is very large. During the so�ware development
+life-cycle, developers declare new identi�er names at a far higher
+rate, which degrade the performance of statistical language models
+[41].
+Deep neural network (DNN) techniques, on the other hand, are
+extremely powerful machine learning models that achieve excellent
+performance on various di�cult problems such as speech recog-
+nition [21] and visual object recognition [44]. A recent study [41]
+shows that deep neural network (DNN) techniques indeed outper-
+form statistical language modeling techniques. �eir power arises
+from the fact that they can perform arbitrary parallel computation
+for a modest number of steps. A surprising example of the power
+of DNNs is their ability to sort N N-bit numbers using only 2 hid-
+den layers of quadratic size [66]. Various DNN techniques have
+been applied on source code to perform language modeling [14], by
+learning the features from a large source code dataset. DNN tech-
+niques involve an algorithm that improves automatically through
+experience based on data. It is a way to discover a new algorithm
+from the experience, and involves the study of algorithms that can
+extract information automatically. �ese LMs have been referred
+as neural language model (NLM). NLMs have been used to perform
+various tasks such as speech recognition [20], machine translation
+[36], comment generation[34], fault detection [64], code comple-
+tion [54][57], code clone detection [81, 90], code search [28] and
+code summarization [35].
+ar
+X
+iv
+:2
+00
+7.
+11
+67
+1v
+1 
+ [
+cs
+.S
+E
+] 
+ 2
+2 
+Ju
+l 
+20
+20
+One such application of a language model is code prediction,
+which has received a good deal of a�ention from the so�ware engi-
+neering researchers [15, 16, 92]. It involves automated techniques
+for aiding so�ware development and maintenance by proposing
+next likely tokens on the basis of user inputs. A prediction model is
+capable of automatically learning features for representing source
+code, and using them for next token prediction in a sequence. Neu-
+ral Language Models (NLMs) represent code tokens in a continuous
+vector space, which has a�ractive properties. Pythia [82] is an AI
+assisted code completion approach, which generates ranked lists
+of method, and API recommendations at edit time. Similarly, Deep
+TabNine [2] has been recently launched, which is an auto-complete
+tool trained on approximately two million GitHub �les that intends
+to enhance so�ware developers� work�ows.
+�ese models can be re�ned by tuning several parameters such
+as layering, epoch value, batch size and the size of token sequences.
+Hence, by keeping these bene�ts of deep learning, we have used
+them to build a prediction model. Neural language models can
+outperform carefully tuned n-gram models, when modeling natural
+language [37]. Researchers have applied various types of deep
+neural networks (DNN) for language modeling such as Recurrent
+Neural Network (RNN) [53, 94], its variants such as Long Short Term
+Memory (LSTM) [32, 42, 77], and Transformer based Generative
+Pre-Training-2 (GPT-2) [62], a successor of GPT [60], for performing
+code predictions.
+�ese code predictions are at the level of a �xed threshold token
+length. We believe that method level clones of arbitrary length,
+extracted from a large code repository, can enhance regular code
+generation and prediction applications. Code clones are repeated
+pa�erns in the code, which are usually created with the copy-
+and-paste practice mentioned above. According to Roy and Cordy
+[68], around 5 to 50% of the code in so�ware applications can
+be enclosed in clones, which can be of several granularity levels
+such as line, method, �le, and directory. Most of the time clones
+are considered to be harmful for a so�ware system, and mainly
+researchers work on techniques for avoiding and eliminating clones
+[10, 11, 88, 93]. However, Kapser and Godfrey [40] observe that
+code clones are not always bad, as they can also have positive e�ects
+on the so�ware development in certain circumstances. One of the
+positive use cases is exploratory development, where the rapid
+development of a feature is required and the remedial uni�cation
+of newly generated clone is not clearly justi�ed. Also, a piece of
+cloned code is expected to be more stable and poses less risk than
+new development. Hence, it can be argued that developers need
+to reuse code for desired so�ware features in a way that supports
+opportunistic programming for increased productivity.
+We believe that clone methods can be considered as a useful
+component for a language model, as they can be used to capture
+the common code practices of developers, which then can be used
+for code predictions and completions to the new developer. In
+this work, we exploit the re-usability aspect of code clones for
+the purpose of source code modeling in predicting code tokens by
+applying a deep learning algorithm. We believe that our approach
+can help in improving the quality of code prediction up to full clone
+method bodies with arbitrary length. In this paper, we have made
+the following contributions:
+(1) We present the �rst a�empt in literature for explicitly mod-
+eling of code clones using deep learning to be utilized for
+code/clone method prediction.
+(2) Our approach can generate predictions up to the full cloned
+method body (with arbitrary length) on the basis of user
+input.
+(3) We have quantitatively evaluated our approach using the
+BigCloneBench dataset, in terms of model quality and per-
+formance in various tasks including token prediction, and
+clone method prediction.
+2 RELATEDWORK
+In this section, we present related work covering source code lan-
+guage modeling techniques, and the role of learning based tech-
+niques in the �eld of code clones.
+2.1 Language Modeling
+To the best of our knowledge no techniques have been presented to
+model code clones for predicting clone methods. However, many
+techniques have been introduced to perform language modeling for
+various other tasks such as token prediction and completion. White
+et al. [91] apply Recurrent Neural Network (RNN) to model Java
+source code and evaluate its performance on code prediction task.
+Bold [16] speci�cally models Java language method statements and
+compare the performance with English language datasets trained
+by Long Short Term Memory (LSTM). He argues that method state-
+ments highly resemble with English language sentences and can be
+comparable with each other. He compares the performance of mod-
+els on predicting a next element and demonstrate that LSTM can
+achieve performance trained on the Java datasets higher than the
+English dataset. Hindle et al. [31] make a fair comparison between
+so�ware and natural language by discovering that so�ware is much
+more repetitive and well structured than natural language. So, it is
+much simpler to model Java code by using n-grams rather than the
+English language. �ey compare the performance of language mod-
+els on next element prediction task and demonstrate that n-gram
+models trained on Java dataset performs much be�er as compared
+to n-gram models trained on English language dataset. Hellendoorn
+and Devanbu [30] notice that source code based neural language
+models (NLMs) under-perform due to the unlimited scope of the
+vocabulary size, as in so�ware development life cycle identi�ers
+keep on coming with higher rates, and limiting vocabulary is not a
+good solution with NLMs. So, they propose a nested scope, dynam-
+ically updatable, unlimited vocabulary count-based ngram model,
+which outperforms the LSTM model on the task of token prediction.
+In contrast, Rafael et al. [41] solve the issue of unlimited scope of
+vocabulary size by applying byte-pair encoding (BPE) technique in
+modeling the code. �ey compare the performance of n-gram and
+Gated Recurrent Unit (GRU) language models trained on source
+code datasets, and demonstrate that NLM can outperforms on code
+completion and bug detection tasks if BPE technique is applied.
+2.2 Code Clones
+�e only work we have come across that uses clone methods for
+recommending code completion is by Shamsa [3]. However, the
+2
+clone methods considered in this system are based on a di�erent
+notion of similarity — similar API calls.
+Learning based approaches have been extensively used for clone
+detection. White et al. [90] use recursive neural network (RNN)
+for clone detection. Wei et. al [89] use the LSTM model for the
+functional clone detection problem by learning supervised deep
+features. CCLearner [48] extracts tokens from known method-level
+code clones and non-clones in a given codebase to train a classi�er,
+which is then used to detect clones. Tufano et al. [85] use a deep
+learning based approach to automatically learn code similarities
+from di�erent representations. Vara et al. [7] propose a method
+to increase the precision of code clone detection using machine
+learning techniques. �ey apply 19 clone class metrics to capture
+di�erent characteristics of code clones and use them to train a
+decision tree model.
+3 BIGCLONEBENCH FOR CODE CLONES
+In the literature, there exist a few code clone benchmark data sets,
+such as OCD benchmark [63], Bellon’s benchmark [13], Murakami
+et al.�s benchmark [55] and BigCloneBench[78–80]. �e largest
+one is BigCloneBench, which consists of over 8 million manually
+validated clone method pairs in IJaDataset 2.0 [1]- a large Java
+repository of 2.3 million source �les (365 MLOC) from 25,000 open-
+source projects. BigCloneBench contains clones with both syntactic
+and semantic similarities.
+BigCloneBench contains the references of starting and ending
+lines of method clones existing in the code repository. In forming
+this benchmark, methods that potentially implement a given com-
+mon functionality were identi�ed using pa�ern based heuristics.
+�ese methods were manually tagged as true or false positives of
+the target functionality by judges. All true positives of a function-
+ality were grouped as a clone class, where a clone class of size
+n contains n(n−1)2 clone pairs. �e clone types and similarity of
+these clone pairs were later identi�ed in a post-processing step.
+Currently, BigCloneBench contains clones corresponding to 43 dis-
+tinct functionalities. Further details can be found in the relevant
+publications [78–80].
+BigCloneBench has been primarily developed to measure and
+compare the recall of clone detection tools [70, 78–80]. However,
+it can also be used for other clone and so�ware studies [80]. Li et
+al. [48] have developed a DNN-based clone detector, CCLearner,
+using BigCloneBench.
+3.1 Dataset Preparation
+IJaDataset [1] is very large, and outside the scalability limits of
+most clone detection tools. However, the clone detection tools
+do not need to be executed for the entire IJaDataset, only for the
+�les containing reference clones in BigCloneBench. Svajlenko et
+al. [78–80] provide a reduced version of IJaDataset, which contains
+only the relevant source �les and is distributed into a number of
+smaller subsets for clone detection. �ere is one subset per func-
+tionality in BigCloneBench. Each functionality�s subset includes
+all the �les, which contain methods tagged as true or false positive
+of that functionality in the creation of BigCloneBench. �erefore
+each subset is a realistic subject system, containing both true and
+false positive clones. We have performed pre-processing steps
+to build our mutually exclusive training, testing, and validation
+datasets. �e training set is used to train our DeepClone language
+model. A�er each training epoch, the trained model is evaluated on
+the validation set and its performance helps in assessing the con-
+vergence against hyper-parameters (e.g. learning rate in gradient
+searches). �e validation set is not used to learn any of the model�s
+parameters. �e testing set is used for empirical evaluation of our
+DeepClone model. Table 1 demonstrates the pre-processing steps
+on an example of binary search clone method.
+3.1.1 Filtering. We have applied the following query to extract
+true positive clone methods from BigCloneBench dataset and their
+references in IJaDataset.
+select distinct a.functionality_id, b.type, b.name,
+b.startline, b.endline from clones a
+join functions b on a.function_id_one=b.id
+union
+select distinct a.functionality_id, b.type, b.name,
+b.startline, b.endline from clones a
+join functions b on a.function_id_two=b.id
+In the above query, we have applied the union operation to dis-
+card duplicated results. �e ”functions” table contains information
+about true and false positive clone method, including �lename,
+starting and ending line position of the clone method, the type
+id of the method. Whereas the ”clones” table contains the list of
+true positive clone method pair information including syntactic
+similarity and validity measures. �e result allows us to include
+all the �les, which have true positive clone methods, and discard
+those �les, which have only false positive clone methods from the
+reduced version of IJaDataset.
+3.1.2 Distribution. In this step, we need to distribute the set of
+�les into training, validation, and testing datasets. We have adopted
+a strategy of strati�ed sampling [83] in order to ensure that all
+types of clone methods appear in training, validation and testing
+datasets. We distribute the set of �les existing in each functionality
+folder, into portions such as 80% training, 10% validation, and 10%
+testing. �en, we copy those �les belonging to three separate folders
+such as training, validation, and testing. If any of the �le already
+exist in one of those folders, we discard that speci�c �le, therefore
+avoid exact duplication. �is means that the �le has already been
+moved to one of the speci�c folder type such as training, validation,
+and testing. Allamanis [5] also notices that the negative impact
+has been occurred on model performance, if same �le has been
+used for training and testing. Tables 2 and 3 depict the detailed
+statistical overview of our datasets, which we have used for training,
+validation and testing. We have only mentioned the titles of the
+functionalities in Table 2, and excluded further details. �ose are
+out of scope for this paper and can be found in the BigCloneBench
+dataset.
+3.1.3 Marking. Researchers in the past have used special meta-
+tokens to solve various problems. Picho�a and Mooney [59] place〈
+S
+〉
+and
+〈
+/S
+〉
+meta-tokens in modeling sentences for prediction.
+Chen et al. [18] insert
+〈
+START BUG
+〉
+and
+〈
+END BUG
+〉
+meta-tokens
+in the buggy lines of the source code, which helps in automatically
+3
+repairing programs. We have marked the regions of the true positive
+clone methods, by placing the meta-token
+〈
+soc
+〉
+at the start, and〈
+eoc
+〉
+at the end of a clone method in the IJaDataset �les, by tracing
+the clone method references from the BigCloneBench dataset.
+3.1.4 Normalization and Tokenization. We have adapted Javalang1
+Python library, which contains a lexer and parser for Java 8 pro-
+gramming language. �is library helps us to normalize our code by
+removing whitespaces, extra lines, comments, as well as to tokenize
+the code.
+3.1.5 Replacement. For each set of �les, we have replaced in-
+teger, �oat, binary, and hexadecimal constant values with the〈
+num val
+〉
+meta-token. Similarly, we have replaced string and char-
+acter values with
+〈
+str val
+〉
+. �is reduces our vocabulary size, which
+leads to faster training of the model. �is technique has been used
+by several researchers in the same manner for data preparation
+[22, 41, 91].
+3.1.6 Merging. We have merged all the tokenized data existing
+in the training, validation and testing folders, and placed them into
+separate text �les, i.e. train.txt, valid.txt, and test.txt. �ese tokens
+are separated by the space character. Table 3 gives a statistical
+overview of our experimental dataset.
+4 DEEPCLONE MODEL
+In this section, we discuss our approach in modeling code clones
+using GPT-2 and the experimental setup used to conduct our study.
+4.1 Generative Pretrained Transformer 2
+(GPT-2)
+OpenAI developed a large-scale unsupervised language model called
+GPT-2 (Generative Pretrained Transformer 2) [60–62] to generate
+several sound sentences of realistic text by extending any given
+seed. GPT-2 is a large transformer-based language model with 1.5
+billion parameters, trained on a dataset of 8 million web pages. GPT-
+2 is trained with a simple objective: predict the next word, given
+all of the previous words within some text. It is a direct scale-up of
+GPT, with more than 10X the parameters and trained on more than
+10X the amount of data. �is model has been trained on a large
+corpora of web pages and social media. We focus on �ne-tuning a
+GPT-2 transformer [60–62] pre-trained model for generating code
+clones, even though it has been trained on English language. But,
+we apply �ne-tunning of a pre-trained model on IJaDataset (Java
+language dataset), as it exists a large amount of overlapping vo-
+cabulary with English language. Secondly, GPT-2 is claimed to be
+so powerful that the threat of its harmful use is high. Moreover,
+GPT-2 transformer has demonstrated impressive e�ectiveness of
+pre-trained language models on various tasks, particularly sound
+text generation. �is architecture was �rst developed to solve prob-
+lems in natural language processing. GPT-2 has in built Byte Pair
+Encoding tokenizer (BPE).
+During so�ware development, the number of unique identi�ers
+increases with the size of the codebase [6]. �is problem makes
+it infeasible to train LMs on large corpora. BPE is an algorithm
+originally designed for data compression, in which bytes that are
+1h�ps://github.com/c2nes/javalang
+not used in the data replace the most frequently occurring byte
+pairs or sequences [26]. BPE provides several bene�ts [41]. First, no
+token is considered out-of-vocabulary. Unknown tokens at test time
+are represented by subsequences. Second, it dynamically adapts
+the frequency of the sequences by merging common subsequences
+and keeping less frequent tokens as is. Common tokens will be
+represented by a single token, while infrequent ones will be split
+in pre�xes, su�xes and roots. �is con�rms that each sequence is
+common enough to have valuable embeddings. Finally, it allows
+for a very precise control of the vocabulary size, by tweaking the
+number of merges performed. A larger vocabulary will contain
+more complete tokens and less sequences, whereas smaller ones
+will contain longer sequences. It has been reported in the literature
+that neural language modeling (NLM) along-with BPE outperforms
+several traditional approaches, e.g. using n-grams [30].
+GPT-2 model further simultaneously performs well on a variety
+of language tasks including question answering, reading compre-
+hension, summarization, and translation [62]. We further notice
+that in general, be�er pre-trained models lead to be�er performance
+on �ne-tuned or transfer tasks [58]. Fine-tuning is one approach to
+transfer learning, which is to adjust feature weights according to
+the new dataset on some already trained model. Previously, GPT-2
+Transformer has been successfully �ne-tuned on di�erent types of
+datasets. Kim et al. [43] have used GPT-2 transformer for code pre-
+diction by revealing the syntactic structure of code to the network.
+Ziegler et al. [95] have applied a reinforcement learning method on
+the 774M GPT-2 model to support human-preferred text more o�en.
+Lee et. al [46] �ne tune 345M, a GPT-2 based pre-trained model
+of medium version, to patent claim generation by providing vari-
+ous experiment results for qualitative analysis and future research.
+Deep TabNine [2], a so�ware programming productivity tool to
+predict the next chunk of code, has been successfully �ne-tuned
+by using GPT-2, on approximately two million GitHub �les cap-
+turing numerous programming languages. DeepClone is initially
+inspired by Deep TabNine, and we have �ne-tuned only those �les
+of IJaDataset, which contains true positive clone methods from
+BigCloneBench dataset.
+4.2 Model Con�gurations
+We selected a small version (117) of GPT-2 based pre-trained model
+as our base model, as it can not take too much time and resources to
+�ne-tune. Other versions are quite bigger in size. Similarly, a small
+version is enough to proof our approach. �e 117 pre-trained model
+contains 50257 vocabulary size, 117M parameters, 12-layers, 768-
+hidden, and 12-heads. We have �ne-tuned our DeepClone model
+on the partition of a GPU-1080Ti cluster (276 CPU cores, 329728
+CUDA cores, 5.9 TB memory) 2, for approximately 9 hours by using
+HuggingFace Transformer Library. In our experiment, we have
+performed training and evaluation with batch size per GPU of 1
+for 5 epochs. We have used a learning rate of 5e-5 and the gradient
+accumulation steps (number of update steps to accumulate before
+performing a backward/update pass) as 5. Default values have been
+used for other hyper-parameters, as mentioned in the language
+modeling code3.
+2h�ps://userinfo.surfsara.nl/
+3h�ps://github.com/huggingface/transformers/blob/master/examples/language-
+modeling
+4
+Table 1: An example of the preprocessing steps applied on a clone method body
+Original
+Marking
+Normalization and
+Tokenization
+Replacement
+(a) Perplexity over the validation dataset (b) Training average losses (c) Convergence of the learning rate
+Figure 1: Training graphs
+5 EMPIRICAL EVALUATION
+In order to determine the performance of our approach, we have
+performed both intrinsic and extrinsic evaluations.
+5.1 Intrinsic Evaluation
+Intrinsic evaluation refers to the evaluation of a model by measuring
+its quality. For this purpose we have used perplexity (as done in
+[16, 22, 91, 94]), which is an inverse of cross-entropy (as used in
+[30, 41]). Perplexity is a measurement of how well a given language
+model predicts sample data. It estimates the average number of
+code tokens to select from at each point in a sequence [6, 52]. It is
+a natural evaluation metric for language models, which represent a
+probability distribution over a subsequence or an entire dataset.
+P(L) = exp(−
+1
+M
+M∑
+i
+log P(ti |t0 : ti−1)) (1)
+�e formula for perplexity is presented in Equation 1. P(ti |t0 :
+ti−1) is the conditional probability assigned by the model to the
+token t at index i . By applying loд of conditional probability, cross-
+entropy loss is calculated. M refers to the length of tokens. Hence,
+5
+Table 2: Detailed statistics of the training, validation, and testing datasets along with experimental results
+Files Clone Methods Syntactic Similarity
+Functionality Id Name Training Validation Testing Training Validation Testing PPL µ σ 2
+2 DownloadFrom Web 655 82 82 715 97 94 2.209 0.446 0.024
+3 Secure Hash 983 123 124 1072 132 132 2.176 0.444 0.031
+4 Copy File 2088 260 261 2454 306 295 2.267 0.372 0.031
+5 Decompresszip archive. 4 1 0 8 1 0 - 0.392 0.043
+6 Connect to FTP Server 137 18 18 173 24 25 2.652 0.383 0.029
+7 Bubble SortArray 106 13 14 133 19 15 2.096 0.498 0.046
+8 Setup SGV 19 2 3 19 2 3 4.362 0.458 0.045
+9 Setup SGVEvent Handler 6 1 2 7 2 2 3.085 0.310 0.040
+10 Executeupdate and rollback. 349 44 44 567 56 71 2.278 0.415 0.030
+11 InitializeJava Eclipse Project. 16 2 3 17 2 4 2.672 0.400 0.042
+12 Get PrimeFactors 16 2 2 17 2 2 3.923 0.586 0.044
+13 Shu�e Arrayin Place 48 6 7 65 7 7 4.144 0.496 0.07
+14 Binary Search 251 31 32 315 54 34 2.814 0.537 0.017
+15 Load CustomFont 19 2 3 21 2 3 2.982 0.414 0.029
+17 CreateEncryption Key Files 14 2 2 17 2 2 2.931 0.378 0.04
+18 Play Sound 25 3 4 31 3 5 3.746 0.483 0.024
+19 TakeScreenshot to File 69 9 8 82 12 9 3.049 0.421 0.030
+20 Fibonacci 168 21 22 169 21 22 2.168 0.872 0.022
+21 XMPP SendMessage 18 2 3 20 2 3 3.147 0.484 0.024
+22 Encrypt ToFile 49 7 8 59 8 8 2.406 0.420 0.028
+23 Resize Array 224 27 29 317 44 36 2.484 0.487 0.031
+24 Open URL inSystem Browser 219 28 29 295 37 36 2.516 0.400 0.039
+25 Open File inDesktop Application 54 9 7 82 12 8 2.517 0.376 0.037
+26 GCD 16 2 3 18 2 3 6.686 0.597 0.030
+27 Call MethodUsing Re�ection 294 37 37 329 39 41 2.183 0.402 0.041
+28 Parse XML toDOM 122 15 16 157 21 19 2 0.435 0.031
+29 Convert DateString Format 35 4 5 43 10 6 3.28 0.295 0.052
+30 Zip Files 783 97 99 1119 136 135 2.272 0.411 0.027
+31 File Dialog 194 26 24 364 50 43 2.361 0.376 0.043
+32 Send E-Mail 178 23 23 190 25 25 1.781 0.450 0.036
+33 CRC32 FileChecksum 142 21 19 217 29 28 2.761 0.341 0.031
+34 ExecuteExternal Process 306 38 39 375 40 47 2.086 0.373 0.037
+35 InstantiateUsing Re�ection 582 73 73 656 83 99 3.115 0.350 0.026
+36 Connect toDatabase 126 16 17 167 20 19 2.137 0.368 0.036
+37 Load Fileinto Byte Array 104 13 14 124 14 16 2.274 0.421 0.035
+38 Get MACAddress String 15 2 3 18 2 3 2.745 0.470 0.017
+39 Delete Folderand Contents 175 23 24 218 27 30 3.022 0.497 0.032
+40 Parse CSVFile 125 14 18 161 16 25 2.004 0.433 0.038
+41 Transpose aMatrix. 333 42 41 395 45 50 2.527 0.388 0.051
+42 ExtractMatches Using Regex 337 43 44 405 47 48 2.921 0.420 0.028
+43 CopyDirectory 65 8 10 118 15 15 2.289 0.480 0.024
+44 TestPalindrome 15 1 3 133 16 19 1.668 0.903 0.04
+45 Write PDFFile 122 15 15 129 15 15 2.304 0.431 0.034
+6
+Table 3: Final Distribution of BigCloneBench Dataset
+Files Clone Methods Tokens
+Training 9,606 11,991 16,933,894
+Validation 1,208 1,499 2,130,360
+Testing 1,234 1,502 2,235,982
+Total 12,048 14,992 21,300,236
+Figure 2: DeepClone training process
+perplexity is an exponentiation of the average cross entropy loss
+from each token [0,M].
+Training Evaluation. At each checkpoint (500 logging step) of
+the training steps, we have evaluated the DeepClone model perfor-
+mance by calculating the perplexity on the validation set. Figure 1a
+describes the variations in perplexity on the validation set a�er each
+checkpoint, which takes place at each 500 log step. We observe that
+we achieve the lowest perplexity P1 (2.145) at step 24500. Figure 1c
+displays the convergence of the learning rate a�er each checkpoint.
+Learning rate helps in determining how quickly or slowly a neural
+network model learns a problem, by adjusting the weights of a
+network with respect to the value of loss function. Whereas, loss
+function is to calculate a model error, which identi�es how well
+a model predicts the expected outcome for any data point in the
+training set. GPT-2 uses cross-entropy loss function, which is to
+measure the performance of a language model, whose output is a
+probability value between 0 and 1. Figure 1b displays a convergence
+of training losses a�er each checkpoint of 500 steps, which indicates
+how well a model behaves a�er each checkpoint of optimization.
+�e loss value is �nally minimized to 0.75 at step 24500, which is a
+sign of a well optimized deep learning model. Figure 2 describes the
+training process of DeepClone Model, which mentions the steps
+described in Section 3, used to perform the �ne-tuning of our model.
+We have published our training results online4.
+4h�ps://tensorboard.dev/experiment/tk1XqDi8RMqtrMjmVyQ9Sg
+�e DeepClone model has been successfully �ne-tuned on the
+BigCloneBench dataset by using a powerful GPT-2 based
+pre-trained model.
+Model Evaluation. We computed an overall perplexity of 2.146
+on the testing dataset for our DeepClone model, as denoted by P2
+in Table 4. We have achieved a much be�er perplexity compared to
+the previous source code LMs [16, 22, 91]. �ese models, though,
+use di�erent corpora and deep learning architecture than ours and
+hence are not directly comparable. We believe our be�er perfor-
+mance can be a�ributed to the fact that we model a more repetitious
+body of code (i.e. clones) to begin with, as well as that we use a
+pre-trained model based on the powerful GPT-2 transformer.
+Besides the overall perplexity on the testing dataset as previously
+elaborated in the paper, we again calculate the perplexity using the
+testing dataset, but without the clone method markers (i.e.
+〈
+soc
+〉
+and〈
+eoc
+〉
+). Our motivation for this additional measurement is as fol-
+lows. Hindle et al. [31] observe that due to the repetitive nature of
+the code, there exist predictable statistical properties, which n-gram
+language models can capture and leverage for so�ware engineering
+tasks. �e sign of a good model is that it can capture the pa�erns
+in the dataset very well, which is particularly important for the
+task of clone method prediction. In Table 4, we can see an increase
+when comparing the original perplexity score of 2.146 (P2 and the
+perplexity on the testing dataset without clone markers of 2.182
+(P3). �is means that our DeepClone model performs be�er, when
+the code has clone methods marked with
+〈
+soc
+〉
+and
+〈
+eoc
+〉
+tokens.
+�e prediction capability of DeepClone is be�er on code which
+has marked clone methods.
+Evaluation per Clone Method. In order to determine which clone
+method snippets are more predictable compared to the others, we
+calculated an average perplexity score (PPL) for each type of clone
+method snippet (see Table 2). We �rst extracted the code snippet for
+each type of clone method for our testing dataset, and calculated
+the perplexity score. �e scores, as depicted in Table 2, indicate
+how likely these can be predicted by our DeepClone model.
+We also analyze several factors which can e�ect the perplex-
+ity of clone methods. BigCloneBench contains scores of syntactic
+similarity between each clone method pairs on the basis of tokens,
+which have been calculated by using a line-based metric a�er full
+normalization such as removing comments etc. We have calculated
+mean (µ) and variance (σ 2) to determine the overall syntactic sim-
+ilarity of all the clone methods per each type of functionality, as
+mentioned in Table 2.
+We observe that the perplexity scores vary according to the
+syntactic similarity between clone methods, as well as the number
+of clone method snippets in the training set. From the results, we
+can see that the ”Test palindrome” type of clone method (number
+44), which is used to test if a string is a palindrome, has the lowest
+perplexity score. �is represents that our DeepClone model can
+predict that clone method snippet very well. We can a�ribute
+this to the fact that those types of clone method snippets have
+quite high mean syntactic similarity (0.903), along with very low
+variance (0.040). Similarly, 133 total clone method snippets have
+been used in the training, which is not a reasonably high number.
+7
+Table 4: DeepClone evaluation results on the testing dataset
+Perplexity Accuracy
+P1 P2 P3 P4 P5 MRR Top 1 Top 3 Top 5 Top 10
+2.145 2.146 2.182 2.410 2.767 84.329% 77.808% 90.040% 92.766% 94.999%
+Similarly, we have also observed quite high perplexity scores for
+some particular clone methods such as ”GCD” (number 26), to �nd
+greatest common denominator, meaning that are not well predicted.
+�is can be due to having less clone method snippets (total 18)
+trained in the DeepClone Model. We have noted that ”Decompress
+zip archive” clone method (number 5) has not been evaluated, due
+to having too few code clone �les used in the training and validation
+dataset.
+We cannot claim that syntactical similarity and number of clone
+methods in the training set alone determine the perplexity per-
+formance. �ere are other many factors which need to observed.
+In BigCloneBench, there are many false positive clone methods,
+which may be syntactically similar to true positive clone methods.
+True positive clone methods may also have syntactically similarity
+with other parts of the code. Similarly, clone type can be another
+factor as well. �ose and other more well-known factors such as
+hyper-parameters are le� to be explored in the future.
+For the majority of the clone methods, DeepClone achieves a
+successful prediction.
+Non-Clone Method vs Clone Method. Allamanis [5] notices that a
+language model achieves low perplexity scores for code duplication,
+and high perplexity score for less duplicated code. In order to
+observe that di�erence, we calculated the perplexity scores for all
+the clone method snippets and non-clone method snippets in the
+testing dataset. We extracted clone method snippets by tracing the
+tokens, which come inclusively between
+〈
+soc
+〉
+and
+〈
+eoc
+〉
+token. All
+other snippets were considered to be a part of non-clone method
+snippets. We then calculated the perplexity for each snippet. Finally,
+we took an average of the perplexities for both type of code snippets.
+P4 represents the average perplexity score for the clone method
+snippets, and P5 represents the average perplexity of the non-
+clone method snippets. �e result (Table 4) depicts that DeepClone
+successfully predicts clone method snippets much be�er than non-
+clone method snippets in general.
+DeepClone predicts clone code method snippets more accurately
+than non-clone ones.
+5.2 Extrinsic Evaluation
+Extrinsic evaluation refers to the evaluation of a model’s perfor-
+mance on speci�c tasks. We evaluated DeepClone on the tasks of
+token prediction, and clone method prediction.
+Token Prediction. We collect the top 10 predictions from our
+DeepClone model, and compute the top-k accuracy (the fraction of
+times the correct prediction appears in the top k predictions) for k
+∈ [1, 10]. Moreover, we measure the Mean Reciprocal Rank (MRR)
+scores of our language model. A simpli�ed description of MRR is
+that it averages top-k prediction accuracy across various k. In this
+speci�c scenario k ∈ [1, 10] since the models output a list of top-10
+best tokens. �e MRR is a rank-based evaluation metric, which
+produces a value between 0-1, where the value closer to 1 indicates a
+be�er source code prediction model. MRR has previously been used
+for evaluating code prediction by many researchers [30, 41, 65, 84].
+�e reciprocal rank of a query response is the multiplicative inverse
+of the rank of the �rst correct answer, while MRR is the average of
+reciprocal ranks or results for a sample of queries C de�ned as in
+equation 2
+MRR(C) =
+1
+|C |
+|C |∑
+n=1
+1
+yn
+(2)
+where C is a code sequence and yn refers to the index of the �rst
+relevant prediction. MRR(C) is the average of all sequences C in
+the testing data set.
+Table 4 shows the top-k accuracies as well as the MRR score.
+Clearly, the results suggest that the proposed DeepClone model
+is able to more accurately model pre-processed Java source code
+containing clone methods. �e table also indicates that there is
+almost 77.808% chance to get a correct token in the �rst option, and
+94.999% chance to have a correct output in the top-10 predicted
+outcomes. To further quantify the accuracy of DeepClone Model
+for token prediction task, we report an MRR score of 83%, which
+indicates an excellent performance in evaluating a ranked list of
+predictions.
+DeepClone produces highly accurate results on the token
+prediction task.
+Clone Method Prediction. We further measure the e�ectiveness of
+our DeepClone model in predicting code tokens for clone method
+task. �is demonstrates our model’s e�ectiveness in providing ease
+to the developer’s work by generating the clone method snippet.
+In order to predict a chunk of subsequence from a clone method
+based on the user input, there exist several text generation methods
+such as beam search [86], sampling with temperature [4, 24], top-k
+sampling [23] and nucleus sampling [33]. All these methods have
+a speci�c decoding strategy to shape the probability distribution of
+language model such as assign higher probability to higher qual-
+ity text. Among these text generation methodologies, we choose
+nucleus sampling as it outperforms other methodologies [33]. Nu-
+cleus sampling is claimed to be best the strategy for generating
+large form of high quality text, comparable to human wri�en text.
+By having GPT-2 well �ne-tuned, DeepClone model, along with
+nucleus sampling, we can expect informative set of code tokens
+for clone method predictions. For this purpose, we extracted sub-
+sequences of 20 tokens from the testing dataset, and moved the
+window one step ahead to obtain further subsequences. Among
+those, we randomly selected 1,144 subsequences containing 22,880
+tokens, in which
+〈
+soc
+〉
+token is a part of each subsequence, which
+8
+indicates a start of clone method. We passed these subsequences
+one by one to our DeepClone model, and we kept on predicting
+new tokens with nucleus sampling (threshold value 0.9) until the
+meta-token
+〈
+eoc
+〉
+(i.e. end of clone) appears. With this experiment,
+we successfully generated 151,348 tokens associated with clone
+methods. Given the 1144 cases, this amounts to an average of ∼132
+tokens per case. As a comparison, related approaches traditionally
+employ a threshold-based strategy of generating a certain number
+of code tokens up to a maximum threshold value of t. Note that t is
+typically a low value, e.g. 1 for simple token prediction, and 5-20
+for the popular Deep TabNine auto-completer. Nevertheless, we
+can see that DeepClone with the clone marker strategy is able to
+beat threshold-based strategies even with an extremely generous
+con�gurations of t = 50 or even 100. Furthermore, threshold-based
+strategies cannot give a user an informative set of code tokens in
+a single pass. �ese informative code tokens can be of variable
+length, as the length of clone method tokens varies. By marking
+the clone method regions in the code dataset, it helps DeepClone
+to generate meaningful clone method snippets in a single pass. We
+conclude that our DeepClone model not only helps developers to
+code rapidly, but also provides a meaningful set of code tokens for
+a clone method.
+DeepClone provide eases to the developer by generating not
+only a larger set of tokens, but also informative ones.
+6 DISCUSSION
+�e approach we have proposed leads to promising results. �e
+metrics in the training phase (learning rate approaching 0, min-
+imized loss) and in the validation phase (perplexity of 2.145) all
+indicate a �ne-tuned model. �e series of perplexity scores, we cal-
+culated allows us to conclude that our DeepClone model can predict
+regularities successfully in terms of clone markers, including the
+code in general and the individual clone snippets in particular. �e
+extrinsic evaluation reveals that we achieve a quite high accuracy,
+notably 95% in the top 10 suggestions, as well as larger number
+of tokens than a threshold-based strategy even with a generous
+threshold of 100. With a high quality and accurate model as the
+foundation, we would like to discuss next the potential use cases to
+exploit our model, as well as limitations to our work.
+6.1 Potential Use Cases for DeepClone
+�e DeepClone model can be utilized to assist developers in vari-
+ous use cases. Some of these have already been mentioned above:
+predicting the next token (as typically done by many LMs), and
+whole clone method body. �e la�er, while seemingly straightfor-
+ward, can be enhanced with a more elaborate ranking and retrieval
+mechanism rather than simply generating the most likely sequence
+of tokens one a�er another. For that purpose, the additional infor-
+mation in the BigCloneBench dataset, including the exact clone
+method clusters (hence various methods representing the same
+functionality), clone types and so on can be exploited. Another
+use case might involve clone refactoring (and avoidance), by rec-
+ommending clone method call instead of predicting a complete
+clone method snippet. In combination with some additional ef-
+fort of transforming the clone methods into reusable assets (e.g. in
+the form of libraries), the prediction could be tweaked to avoid
+cloning in the �rst place and generate method calls instead. Finally,
+the model can be used to perform code search for the common
+functionality.
+6.2 Limitations and�reats to Validity
+Our work has certain limitations. �e proposed approach is the
+�rst step, which raises the granularity level to method for code pre-
+diction. However, we cannot expect exactly the same clone method
+predicted or completed, as trained by our DeepClone model. In
+prediction tasks, generating well-formed outputs is challenging,
+which is well known in natural language generation [47, 74]. How-
+ever, the desired output might be a variation of another, previously
+observed sample [27, 29, 45, 49, 76]. �is is because of the nature of
+language modeling. Language model is a probabilistic model, which
+can generate multiple possibilities of code snippet, based on the
+user input. �e space of possible clone methods that could be gen-
+erated grows exponentially with the length of the clone methods.
+By having V tokens in the vocabulary, there can be V N possible
+clone methods of length N that could be sampled. An extension
+would involve displaying the most similar cloned methods (as is)
+from the dataset to the user. BigCloneBench contains clone method
+references of only those snippets, which belong to the selected list
+of 43 common functionalities. It does not contain references of all
+the clones in the dataset. Although the dataset is enough to proof
+our methodology, there is a possibility to model all the clones in
+the dataset, which may result in interesting �ndings. Similarly, we
+observe that syntactic similarity on the overall clone methods and
+the number of clone methods used in training can e�ect perplexity.
+However, there can be several other factors such as clone type,
+syntactic similarity over false positive clones, and GPT-2 hyper-
+parameters. In our study, we relied on the HuggingFace transformer
+implementation of GPT-2 to train and evaluate DeepClone model.
+While GPT-2 is a reliable implementation that has been utilized
+in a number of NLP experiments [9, 67, 71], it is still an emerging
+project. However, our results and trends are aligned with those
+that have been obtained in the �eld of NLP. Hence, we are positive
+that the results are reliable.
+Allamanis [5] discusses the negative e�ects of code duplication
+in the evaluation of language models and proposes two strategies in
+order to avoid biased evaluation results. �e �rst one is to remove
+the duplicated code before actually developing a model, and the
+second one is to down-weight duplicated samples in the loss func-
+tion and performance metrics. �is might have implications for our
+study, although our motivation for this work is modeling cloned
+code in the �rst place. �erefore we claim our true data distribution
+by de�nition includes duplication. Furthermore, in his study he
+only considers exact and near-miss �le duplicates. Clones can be
+of several types and granularity levels such as simple, structural
+and method [12], which might need to be considered as well. On
+the other side, he remarks on the common cloning practice and
+potentially positive use of clones, which we agree with and have
+tried to exploit in this paper.
+As can be expected from a DNN-based study, we could not eval-
+uate all the possible combinations (hundreds) of hyper-parameter
+9
+due to the resources needed. �ere is a risk in the choice of hyper-
+parameters for deep learning methods. �e change in training,
+validation or testing set or the variation in hyper-parameters may
+impact the performance of the anticipated method. For this reason,
+we also did not evaluate other NLM architectures such as GRU [19],
+LSTMs [32], additional neural cache variants [51, 87] or QRNNs
+[17]. �e dataset used in this study is collected from BigCloneBench,
+a well-known cloned code dataset. It does not necessarily mean that
+the codebase used in this study represents Java language source
+code entirely (threat to external validity). As for the clone method
+prediction, we only use nucleus sampling [33]. �ere are various
+other text generation methods such as beam search [86], sampling
+with temperature [4, 24], and top-k sampling [23], which can be
+explored for predicting clone method snippet.
+7 CONCLUSION AND FUTUREWORK
+In this work, we proposed DeepClone, a deep learning-based cloned
+code language model. We performed intrinsic and extrinsic evalua-
+tions to determine the performance of DeepClone model in predict-
+ing clone methods. �e extensive evaluation of this work suggests
+that the proposed approach signi�cantly improves the model�s
+performance by exploiting the concept of deep learning and code
+clones. Following from this work, we would like to exploit our
+model in the potential use cases, which are discussed above (see
+Section 6.1). From a fundamental point of view, though, our ap-
+proach can be improved in several di�erent ways as future work.
+Our model can be improved by hyper-parameter optimizations
+[50], as well as be�er training (e.g. on a larger dataset or larger
+pre-trained GPT-2 models). Furthermore, we plan to investigate
+how we can tackle di�erent types and granularity levels of code
+clones such as simple clones, structural clones, and �le clones [12].
+ACKNOWLEDGMENTS
+We acknowledge Dr. Sohaib Khan (CEO at Hazen.ai) for provid-
+ing us valuable feedback on the experimentation part of neural
+networks. We acknowledge SURFsara of providing us credits to
+perform experiments.
+REFERENCES
+[1] 2020 (accessed May 8, 2020). Ambient So�ware Evoluton Group, IJaDataset 2.0.
+http://secold.org/projects/seclone.
+[2] 2020 (accessed May 8, 2020). TabNine. Autocompletion with deep learning.
+https://tabnine.com/blog/deep/.
+[3] Shamsa Abid. 2019. Recommending related functions from API usage-based
+function clone structures. In Proceedings of the 2019 27th ACM Joint Meeting on
+European So�ware Engineering Conference and Symposium on the Foundations of
+So�ware Engineering. 1193–1195.
+[4] David H Ackley, Geo�rey E Hinton, and Terrence J Sejnowski. 1985. A learning
+algorithm for Boltzmann machines. Cognitive science 9, 1 (1985), 147–169.
+[5] Miltiadis Allamanis. 2019. �e adverse e�ects of code duplication in machine
+learning models of code. In Proceedings of the 2019 ACM SIGPLAN International
+Symposium on New Ideas, New Paradigms, and Re�ections on Programming and
+So�ware. 143–153.
+[6] Miltiadis Allamanis and Charles Su�on. 2013. Mining source code repositories
+at massive scale using language modeling. In Proceedings of the 10th Working
+Conference on Mining So�ware Repositories. IEEE Press, 207–216.
+[7] Vara Arammongkolvichai, Rainer Koschke, Chaiyong Ragkhitwetsagul, Morakot
+Choetkiertikul, and �anwadee Sunetnanta. 2019. Improving Clone Detection
+Precision Using Machine Learning Techniques. In 2019 10th International Work-
+shop on Empirical So�ware Engineering in Practice (IWESEP). IEEE, 31–315.
+[8] Muhammad Asaduzzaman, Chanchal K Roy, Kevin A Schneider, and Daqing
+Hou. 2016. A Simple, E�cient, Context-sensitive Approach for Code Completion.
+Journal of So�ware: Evolution and Process 28, 7 (2016), 512–541.
+[9] He Bai, Peng Shi, Jimmy Lin, Luchen Tan, Kun Xiong, Wen Gao, Jie Liu, and Ming
+Li. 2020. Semantics of the Unwri�en. arXiv preprint arXiv:2004.02251 (2020).
+[10] Hamid Abdul Basit, Muhammad Hammad, Stan Jarzabek, and Rainer Koschke.
+2015. What do we need to know about clones? deriving information needs from
+user goals. In 2015 IEEE 9th International Workshop on So�ware Clones (IWSC).
+IEEE, 51–57.
+[11] Hamid Abdul Basit, Muhammad Hammad, and Rainer Koschke. 2015. A survey
+on goal-oriented visualization of clone data. In 2015 IEEE 3rd Working Conference
+on So�ware Visualization (VISSOFT). IEEE, 46–55.
+[12] Hamid Abdul Basit and Stan Jarzabek. 2005. Detecting higher-level similarity
+pa�erns in programs. ACM Sigso� So�ware engineering notes 30, 5 (2005), 156–
+165.
+[13] Stefan Bellon, Rainer Koschke, Giulio Antoniol, Jens Krinke, and E�ore Merlo.
+2007. Comparison and evaluation of clone detection tools. IEEE Transactions on
+so�ware engineering 33, 9 (2007), 577–591.
+[14] Yoshua Bengio, Réjean Ducharme, Pascal Vincent, and Christian Jauvin. 2003. A
+neural probabilistic language model. Journal of machine learning research 3, Feb
+(2003), 1137–1155.
+[15] Avishkar Bhoopchand, Tim Rocktäschel, Earl Barr, and Sebastian Riedel. 2016.
+Learning python code suggestion with a sparse pointer network. arXiv preprint
+arXiv:1611.08307 (2016).
+[16] Brendon Boldt. 2017. Using LSTMs to Model the Java Programming Language.
+In International Conference on Arti�cial Neural Networks. Springer, 268–275.
+[17] James Bradbury, Stephen Merity, Caiming Xiong, and Richard Socher. 2016.
+�asi-recurrent neural networks. arXiv preprint arXiv:1611.01576 (2016).
+[18] Zimin Chen, Steve James Kommrusch, Michele Tufano, Louis-Noël Pouchet,
+Denys Poshyvanyk, and Martin Monperrus. 2019. Sequencer: Sequence-to-
+sequence learning for end-to-end program repair. IEEE Transactions on So�ware
+Engineering (2019).
+[19] Kyunghyun Cho, Bart Van Merriënboer, Caglar Gulcehre, Dzmitry Bahdanau,
+Fethi Bougares, Holger Schwenk, and Yoshua Bengio. 2014. Learning phrase
+representations using RNN encoder-decoder for statistical machine translation.
+arXiv preprint arXiv:1406.1078 (2014).
+[20] Mathias Creutz, Teemu Hirsimäki, Mikko Kurimo, An�i Puurula, Janne
+Pylkkönen, Vesa Siivola, Ma�i Varjokallio, Ebru Arisoy, Murat Saraçlar, and
+Andreas Stolcke. 2007. Morph-based speech recognition and modeling of out-of-
+vocabulary words across languages. ACM Transactions on Speech and Language
+Processing (TSLP) 5, 1 (2007), 1–29.
+[21] George E Dahl, Dong Yu, Li Deng, and Alex Acero. 2011. Context-dependent
+pre-trained deep neural networks for large-vocabulary speech recognition. IEEE
+Transactions on audio, speech, and language processing 20, 1 (2011), 30–42.
+[22] Hoa Khanh Dam, Truyen Tran, and Trang Pham. 2016. A deep language model
+for so�ware code. arXiv preprint arXiv:1608.02715 (2016).
+[23] Angela Fan, Mike Lewis, and Yann Dauphin. 2018. Hierarchical neural story
+generation. arXiv preprint arXiv:1805.04833 (2018).
+[24] Jessica Ficler and Yoav Goldberg. 2017. Controlling linguistic style aspects in
+neural language generation. arXiv preprint arXiv:1707.02633 (2017).
+[25] Mark Gabel and Zhendong Su. 2010. A study of the uniqueness of source
+code. In Proceedings of the eighteenth ACM SIGSOFT international symposium on
+Foundations of so�ware engineering. 147–156.
+[26] Philip Gage. 1994. A new algorithm for data compression. C Users Journal 12, 2
+(1994), 23–38.
+[27] Jiatao Gu, Yong Wang, Kyunghyun Cho, and Victor OK Li. 2018. Search engine
+guided neural machine translation. In �irty-Second AAAI Conference on Arti�cial
+Intelligence.
+[28] Xiaodong Gu, Hongyu Zhang, and Sunghun Kim. 2018. Deep code search. In
+2018 IEEE/ACM 40th International Conference on So�ware Engineering (ICSE).
+IEEE, 933–944.
+[29] Kelvin Guu, Tatsunori B Hashimoto, Yonatan Oren, and Percy Liang. 2018. Gen-
+erating sentences by editing prototypes. Transactions of the Association for
+Computational Linguistics 6 (2018), 437–450.
+[30] Vincent J Hellendoorn and Premkumar Devanbu. 2017. Are deep neural networks
+the best choice for modeling source code?. In Proceedings of the 2017 11th Joint
+Meeting on Foundations of So�ware Engineering. ACM, 763–773.
+[31] Abram Hindle, Earl T Barr, Mark Gabel, Zhendong Su, and Premkumar Devanbu.
+2016. On the naturalness of so�ware. Commun. ACM 59, 5 (2016), 122–131.
+[32] Sepp Hochreiter and Jürgen Schmidhuber. 1997. Long short-term memory. Neural
+computation 9, 8 (1997), 1735–1780.
+[33] Ari Holtzman, Jan Buys, Maxwell Forbes, and Yejin Choi. 2019. �e curious case
+of neural text degeneration. arXiv preprint arXiv:1904.09751 (2019).
+[34] Xing Hu, Ge Li, Xin Xia, David Lo, and Zhi Jin. 2018. Deep code comment
+generation. In Proceedings of the 26th Conference on Program Comprehension.
+ACM, 200–210.
+[35] Srinivasan Iyer, Ioannis Konstas, Alvin Cheung, and Luke Ze�lemoyer. 2016.
+Summarizing source code using a neural a�ention model. In Proceedings of the
+54th Annual Meeting of the Association for Computational Linguistics (Volume 1:
+Long Papers). 2073–2083.
+10
+http://secold.org/projects/seclone
+https://tabnine.com/blog/deep/
+[36] Sébastien Jean, Kyunghyun Cho, Roland Memisevic, and Yoshua Bengio. 2014.
+On using very large target vocabulary for neural machine translation. arXiv
+preprint arXiv:1412.2007 (2014).
+[37] Rafal Jozefowicz, Oriol Vinyals, Mike Schuster, Noam Shazeer, and Yonghui Wu.
+2016. Exploring the limits of language modeling. arXiv preprint arXiv:1602.02410
+(2016).
+[38] Elmar Juergens, Florian Deissenboeck, Benjamin Hummel, and Stefan Wagner.
+2009. Do code clones ma�er?. In 2009 IEEE 31st International Conference on
+So�ware Engineering. IEEE, 485–495.
+[39] Daniel Jurafsky andJamesH. 2009. Martin. Speech and Language Processing.
+[40] Cory J Kapser and Michael W Godfrey. 2008. �Cloning considered harmful� con-
+sidered harmful: pa�erns of cloning in so�ware. Empirical So�ware Engineering
+13, 6 (2008), 645.
+[41] Rafael-Michael Karampatsis, Hlib Babii, Romain Robbes, Charles Su�on, and
+Andrea Janes. 2020. Big Code!= Big Vocabulary: Open-Vocabulary Models for
+Source Code. (2020).
+[42] Urvashi Khandelwal, He He, Peng Qi, and Dan Jurafsky. 2018. Sharp nearby,
+fuzzy far away: How neural language models use context. arXiv preprint
+arXiv:1805.04623 (2018).
+[43] Seohyun Kim, Jinman Zhao, Yuchi Tian, and Satish Chandra. 2020. Code Predic-
+tion by Feeding Trees to Transformers. arXiv preprint arXiv:2003.13848 (2020).
+[44] Alex Krizhevsky, Ilya Sutskever, and Geo�rey E Hinton. 2012. Imagenet classi�ca-
+tion with deep convolutional neural networks. In Advances in neural information
+processing systems. 1097–1105.
+[45] Polina Kuznetsova, Vicente Ordonez, Alexander Berg, Tamara Berg, and Yejin
+Choi. 2013. Generalizing image captions for image-text parallel corpus. In
+Proceedings of the 51st Annual Meeting of the Association for Computational
+Linguistics (Volume 2: Short Papers). 790–796.
+[46] Jieh-Sheng Lee and Jieh Hsiang. 2019. Patent Claim Generation by Fine-Tuning
+OpenAI GPT-2. arXiv preprint arXiv:1907.02052 (2019).
+[47] Jiwei Li, Will Monroe, Tianlin Shi, Sébastien Jean, Alan Ri�er, and Dan Juraf-
+sky. 2017. Adversarial learning for neural dialogue generation. arXiv preprint
+arXiv:1701.06547 (2017).
+[48] Liuqing Li, He Feng, Wenjie Zhuang, Na Meng, and Barbara Ryder. 2017.
+Cclearner: A deep learning-based clone detection approach. In 2017 IEEE In-
+ternational Conference on So�ware Maintenance and Evolution (ICSME). IEEE,
+249–260.
+[49] Rebecca Mason and Eugene Charniak. 2014. Domain-speci�c image captioning.
+In Proceedings of the Eighteenth Conference on Computational Natural Language
+Learning. 11–20.
+[50] Pawel Matuszyk, Renê Tatua Castillo, Daniel Ko�ke, and Myra Spiliopoulou.
+2016. A Comparative Study on Hyperparameter Optimization for Recommender
+Systems. In Workshop on Recommender Systems and Big Data Analytics (RS-
+BDA’16).�2016.�S. 13–21.
+[51] Stephen Merity, Caiming Xiong, James Bradbury, and Richard Socher. 2016.
+Pointer sentinel mixture models. arXiv preprint arXiv:1609.07843 (2016).
+[52] Tomáš Mikolov, Anoop Deoras, Stefan Kombrink, Lukáš Burget, and Jan
+Černockỳ. 2011. Empirical evaluation and combination of advanced language
+modeling techniques. In Twel�h Annual Conference of the International Speech
+Communication Association.
+[53] Tomáš Mikolov, Martin Kara�át, Lukáš Burget, Jan Černockỳ, and Sanjeev Khu-
+danpur. 2010. Recurrent neural network based language model. In Eleventh
+annual conference of the international speech communication association.
+[54] Lili Mou, Rui Men, Ge Li, Lu Zhang, and Zhi Jin. 2015. On end-to-end pro-
+gram generation from user intention by deep neural networks. arXiv preprint
+arXiv:1510.07211 (2015).
+[55] Hiroaki Murakami, Yoshiki Higo, and Shinji Kusumoto. 2014. A dataset of clone
+references with gaps. In Proceedings of the 11th Working Conference on Mining
+So�ware Repositories. ACM, 412–415.
+[56] Anh Tuan Nguyen and Tien N Nguyen. 2015. Graph-based statistical language
+model for code. In 2015 IEEE/ACM 37th IEEE International Conference on So�ware
+Engineering, Vol. 1. IEEE, 858–868.
+[57] Tung �anh Nguyen, Anh Tuan Nguyen, Hoan Anh Nguyen, and Tien N Nguyen.
+2013. A statistical semantic language model for source code. In Proceedings of the
+2013 9th Joint Meeting on Foundations of So�ware Engineering. ACM, 532–542.
+[58] Ma�hew Peters, Sebastian Ruder, and Noah A Smith. 2019. To tune or not
+to tune? adapting pretrained representations to diverse tasks. arXiv preprint
+arXiv:1903.05987 (2019).
+[59] Karl Picho�a and Raymond J Mooney. 2016. Using sentence-level LSTM language
+models for script inference. arXiv preprint arXiv:1604.02993 (2016).
+[60] Alec Radford, Karthik Narasimhan, Tim Salimans, and Ilya
+Sutskever. 2018. Improving language understanding by genera-
+tive pre-training. URL h�ps://s3-us-west-2. amazonaws. com/openai-
+assets/researchcovers/languageunsupervised/language understanding paper.
+pdf (2018).
+[61] Alec Radford, Je�rey Wu, Dario Amodei, Daniela Amodei, Jack Clark, Miles
+Brundage, and Ilya Sutskever. 2019. Be�er language models and their implica-
+tions. OpenAI Blog h�ps://openai. com/blog/be�er-language-models (2019).
+[62] Alec Radford, Je�rey Wu, Rewon Child, David Luan, Dario Amodei, and Ilya
+Sutskever. 2019. Language models are unsupervised multitask learners. OpenAI
+Blog 1, 8 (2019), 9.
+[63] Chaiyong Ragkhitwetsagul. 2018. Code similarity and clone search in large-scale
+source code data. Ph.D. Dissertation. UCL (University College London).
+[64] Baishakhi Ray, Vincent Hellendoorn, Saheel Godhane, Zhaopeng Tu, Alberto
+Bacchelli, and Premkumar Devanbu. 2016. On the” naturalness” of buggy code.
+In 2016 IEEE/ACM 38th International Conference on So�ware Engineering (ICSE).
+IEEE, 428–439.
+[65] Veselin Raychev, Martin Vechev, and Eran Yahav. 2014. Code completion with
+statistical language models. In Proceedings of the 35th ACM SIGPLAN Conference
+on Programming Language Design and Implementation. 419–428.
+[66] Alexander A Razborov. 1992. On small depth threshold circuits. In Scandinavian
+Workshop on Algorithm �eory. Springer, 42–52.
+[67] Corbin Rosset, Chenyan Xiong, Xia Song, Daniel Campos, Nick Craswell, Saurabh
+Tiwary, and Paul Benne�. 2020. Leading Conversational Search by Suggesting
+Useful �estions. In Proceedings of �e Web Conference 2020. 1160–1170.
+[68] Chanchal Kumar Roy and James R Cordy. 2007. A survey on so�ware clone
+detection research. �een�s School of Computing TR 541, 115 (2007), 64–68.
+[69] Caitlin Sadowski, Kathryn T Stolee, and Sebastian Elbaum. 2015. How developers
+search for code: a case study. In Proceedings of the 2015 10th Joint Meeting on
+Foundations of So�ware Engineering. 191–201.
+[70] Hitesh Sajnani, Vaibhav Saini, Je�rey Svajlenko, Chanchal K Roy, and Cristina V
+Lopes. 2016. Sourcerercc: Scaling code clone detection to big-code. In 2016
+IEEE/ACM 38th International Conference on So�ware Engineering (ICSE). IEEE,
+1157–1168.
+[71] Abigail See, Aneesh Pappu, Rohun Saxena, Akhila Yerukola, and Christopher D
+Manning. 2019. Do Massively Pretrained Language Models Make Be�er Story-
+tellers? arXiv preprint arXiv:1909.10705 (2019).
+[72] Claude E Shannon. 1948. A mathematical theory of communication. Bell system
+technical journal 27, 3 (1948), 379–423.
+[73] Claude E Shannon. 1951. Prediction and entropy of printed English. Bell system
+technical journal 30, 1 (1951), 50–64.
+[74] Louis Shao, Stephan Gouws, Denny Britz, Anna Goldie, Brian Strope, and Ray
+Kurzweil. 2017. Generating high-quality and informative conversation responses
+with sequence-to-sequence models. arXiv preprint arXiv:1701.03185 (2017).
+[75] Susan Ellio� Sim, Charles LA Clarke, and Richard C Holt. 1998. Archetypal
+source code searches: A survey of so�ware developers and maintainers. In
+Proceedings. 6th International Workshop on Program Comprehension. IWPC’98
+(Cat. No. 98TB100242). IEEE, 180–187.
+[76] Yiping Song, Rui Yan, Xiang Li, Dongyan Zhao, and Ming Zhang. 2016. Two are
+be�er than one: An ensemble of retrieval-and generation-based dialog systems.
+arXiv preprint arXiv:1610.07149 (2016).
+[77] Martin Sundermeyer, Ralf Schlüter, and Hermann Ney. 2012. LSTM neural net-
+works for language modeling. In �irteenth annual conference of the international
+speech communication association.
+[78] Je�rey Svajlenko, Judith F Islam, Iman Keivanloo, Chanchal K Roy, and Moham-
+mad Mamun Mia. 2014. Towards a big data curated benchmark of inter-project
+code clones. In 2014 IEEE International Conference on So�ware Maintenance and
+Evolution. IEEE, 476–480.
+[79] Je�rey Svajlenko and Chanchal K Roy. 2015. Evaluating clone detection tools with
+bigclonebench. In 2015 IEEE International Conference on So�ware Maintenance
+and Evolution (ICSME). IEEE, 131–140.
+[80] Je�rey Svajlenko and Chanchal K Roy. 2016. Bigcloneeval: A clone detection tool
+evaluation framework with bigclonebench. In 2016 IEEE International Conference
+on So�ware Maintenance and Evolution (ICSME). IEEE, 596–600.
+[81] Je�rey Svajlenko and Chanchal K Roy. 2016. A machine learning based approach
+for evaluating clone detection tools for a generalized and accurate precision.
+International Journal of So�ware Engineering and Knowledge Engineering 26,
+09n10 (2016), 1399–1429.
+[82] Alexey Svyatkovskiy, Ying Zhao, Shengyu Fu, and Neel Sundaresan. 2019. Pythia:
+AI-assisted Code Completion System. In Proceedings of the 25th ACM SIGKDD
+International Conference on Knowledge Discovery & Data Mining. 2727–2735.
+[83] Jan E Trost. 1986. Statistically nonrepresentative strati�ed sampling: A sampling
+technique for qualitative studies. �alitative sociology 9, 1 (1986), 54–57.
+[84] Zhaopeng Tu, Zhendong Su, and Premkumar Devanbu. 2014. On the localness
+of so�ware. In Proceedings of the 22nd ACM SIGSOFT International Symposium
+on Foundations of So�ware Engineering. 269–280.
+[85] Michele Tufano, Cody Watson, Gabriele Bavota, Massimiliano Di Penta, Martin
+White, and Denys Poshyvanyk. 2018. Deep learning similarities from di�erent
+representations of source code. In 2018 IEEE/ACM 15th International Conference
+on Mining So�ware Repositories (MSR). IEEE, 542–553.
+[86] Ashwin K Vijayakumar, Michael Cogswell, Ramprasaath R Selvaraju, Qing Sun,
+Stefan Lee, David Crandall, and Dhruv Batra. 2018. Diverse beam search for
+improved description of complex scenes. In �irty-Second AAAI Conference on
+Arti�cial Intelligence.
+[87] Oriol Vinyals, Meire Fortunato, and Navdeep Jaitly. 2015. Pointer networks. In
+Advances in neural information processing systems. 2692–2700.
+11
+[88] Wei Wang and Michael W Godfrey. 2014. Recommending clones for refactoring
+using design, context, and history. In 2014 IEEE International Conference on
+So�ware Maintenance and Evolution. IEEE, 331–340.
+[89] Huihui Wei and Ming Li. 2017. Supervised Deep Features for So�ware Functional
+Clone Detection by Exploiting Lexical and Syntactical Information in Source
+Code.. In IJCAI. 3034–3040.
+[90] Martin White, Michele Tufano, Christopher Vendome, and Denys Poshyvanyk.
+2016. Deep learning code fragments for code clone detection. In Proceedings of
+the 31st IEEE/ACM International Conference on Automated So�ware Engineering.
+ACM, 87–98.
+[91] Martin White, Christopher Vendome, Mario Linares-Vásquez, and Denys Poshy-
+vanyk. 2015. Toward deep learning so�ware repositories. In Proceedings of the
+12th Working Conference on Mining So�ware Repositories. IEEE Press, 334–345.
+[92] Yixiao Yang, Yu Jiang, Ming Gu, Jiaguang Sun, Jian Gao, and Han Liu. 2017.
+A language model for statements of so�ware code. In Proceedings of the 32nd
+IEEE/ACM International Conference on Automated So�ware Engineering. IEEE
+Press, 682–687.
+[93] Norihiro Yoshida, Seiya Numata, Eunjong Choiz, and Katsuro Inoue. 2019. Proac-
+tive clone recommendation system for extract method refactoring. In 2019
+IEEE/ACM 3rd International Workshop on Refactoring (IWoR). IEEE, 67–70.
+[94] Wojciech Zaremba, Ilya Sutskever, and Oriol Vinyals. 2014. Recurrent neural
+network regularization. arXiv preprint arXiv:1409.2329 (2014).
+[95] Daniel M Ziegler, Nisan Stiennon, Je�rey Wu, Tom B Brown, Alec Radford,
+Dario Amodei, Paul Christiano, and Geo�rey Irving. 2019. Fine-tuning language
+models from human preferences. arXiv preprint arXiv:1909.08593 (2019).
+12
+	Abstract
+	1 Introduction
+	2 Related Work
+	2.1 Language Modeling
+	2.2 Code Clones
+	3 BigCloneBench for Code Clones
+	3.1 Dataset Preparation
+	4 DeepClone Model
+	4.1 Generative Pretrained Transformer 2 (GPT-2)
+	4.2 Model Configurations
+	5 Empirical Evaluation
+	5.1 Intrinsic Evaluation
+	5.2 Extrinsic Evaluation
+	6 Discussion
+	6.1 Potential Use Cases for DeepClone
+	6.2 Limitations and Threats to Validity
+	7 Conclusion and Future Work
+	Acknowledgments
+	References

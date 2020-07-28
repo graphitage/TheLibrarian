@@ -1,0 +1,652 @@
+Considerations for Eye Tracking Experiments in Information Retrieval
+Considerations for Eye Tracking Experiments in Information Retrieval
+MICHAEL SEGUNDO ORTIZ, Carolina Health Informatics Program, University of North Carolina at Chapel
+Hill, USA
+In this survey I discuss ophthalmic neurophysiology and the experimental considerations that must be made to reduce possible noise
+in an eye-tracking data stream. I also review the history, experiments, technological benefits and limitations of eye-tracking within the
+information retrieval field. The concepts of aware and adaptive user interfaces are also explored that humbly make an attempt to
+synthesize work from the fields of industrial engineering and psychophysiology with information retrieval.
+1 INTRODUCTION
+On the nature of learning, I think about my son. A 1-year old at the time of this writing, he plays by waving his arms,
+looking around, yelling, and putting his mouth on every object in sight. In these moments, I observe him without explicit
+instruction unless of course danger lurks. His sensorimotor connections to the world around him provides information
+on the rewards and penalties he needs to be well-adjusted – behave optimally, safely, curiously. Learning through
+interaction is the foundation of our existence. Equally, we can take a computational approach to this information
+interaction in the context of human and machine where now the roles are reversed. The machine is the human, and the
+human, the environment.
+What would we need to understand in order to interact with an information system (machine) with our eyes or
+have the machine interact with us based on what it perceives in our eyes? Well of course, the machine would require a
+direct interface to an eye-tracking device which would provide a data stream. Consider gaze point as an example signal.
+What are the operational characteristics of this signal? Investigation of the speed and sensitivity of the signals is a
+fundamental objective for this interaction to make sense. Additionally, a human knows precisely when they wish to
+click, touch, or use their voice, to execute interactions. What can we say about the machine? How would the machine
+learn when to provide a context menu, retrieve a specific document, adjust the presentation, or filter the information?
+If such a system existed, how would we democratize it? As I will discuss later in great detail, Pupil Center Corneal
+Reflection (PCCR) eye tracking devices are extraordinarily expensive and thus research with them becomes self-limiting
+for building real-time adaptive systems as I have outlined above.
+Generally, the traditional methodology for information retrieval experiments has been to study gaze behavior and
+then report the findings in order to optimize interface layout or improve relevance feedback. If I were to ask where
+is the technology and how can I interact with it? What we would find is that they are confined to aseptic laboratories.
+Sophisticated eye trackers utilize infrared illumination and pupil center corneal reflection methods to capture raw
+gaze coordinates and classify the ocular behavior as an all-in-one package. Local cues within highly visual displays of
+information are intended to be used to assess and navigate spatial relationships [45, 46]. Having functions that enable
+rapid, incremental, and reversible actions with continuous browsing and presentation of results are pillars of visual
+information seeking design [1]. Moreover, “how does visualization amplify cognition?” By grouping information together
+and using positioning intelligently between groups, reductions in search and working memory can be achieved and is
+the essence of “using vision to think” [9, see page 15-17]. Thus, by studying ocular behavior of information retrieval
+processes, engineers can optimize their systems. This short review provides a historical background on ophthalmic
+neurophysiology, eye tracking technology, information retrieval experiments, and experimental considerations for
+those beginning work in this area.
+ar
+X
+iv
+:2
+00
+7.
+12
+66
+5v
+1 
+ [
+cs
+.H
+C
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+2 Ortiz
+2 OPHTHALMIC NEUROPHYSIOLOGY
+Millions of years of evolution through physical, chemical, genetic, molecular, biological, and environmental, pathways
+of increasing complexity naturally selected humans for something beautiful and fundamental to our senses and
+consciousness – visual perception. The knowledge gained since the first comprehensive anatomic descriptions of neural
+cell types that constitute the retina in the 19th century followed by electron microscopy, microelectrode recording
+techniques, immunostaining, and pharmacology, in the 20th century [44] are immature in comparison to the forces of
+nature.
+Now, here we are in the first-quarter of the 21st century and human-machine interaction research scientists are
+asking the question “how can I leverage an understanding of vision and visual perception in my research and development
+process?” As research scientists in the information field, we should bear this responsibility with conviction and depth to
+try and understand every possible angle of the phenomena we seek to observe and record. This section on Ophthalmic
+Neurophysiology is an elementary introduction on how vision works and should be our prism through which we plan
+and execute all eye-tracking studies.
+Figure 1 shows the basic anatomy of the eye. First, light passes through the cornea which due to its shape, can bend
+light to allow for focus. Some of this light enters through the pupil which has its diameter controlled by the iris. Bright
+light causes the iris to constrict the pupil which lets in less light. Low light causes the iris to widen the pupil diameter
+to let in more light. Then, light passes through the lens which coordinates with the cornea via muscles of the Ciliary
+body to properly focus the light on the light-sensitive layer of tissue called the retina. Photoreceptors then translate the
+light input into an electrical signal that travels via the optic nerve to the brain1.
+1https://www.nei.nih.gov/learn-about-eye-health/healthy-vision/how-eyes-work
+https://www.nei.nih.gov/learn-about-eye-health/healthy-vision/how-eyes-work
+Eye Tracking in IR 3
+Fig. 1. Basic eye anatomy. Credit: National Eye Institute.
+Figure 2 shows the slightly more complex anatomy of the eye as a cross-section. We will focus on the back of the eye
+(lower portion of the figure). The fovea is the center of the macula and provides sharp vision that is characteristic of
+attention on a particular stimulus in the world while leaving the peripheral vision somewhat blurred. You may notice
+the angle of the lens and fovea are slightly off-center. More on this later. The optic nerve is a collection of millions of
+nerve fibers that relay signals of visual messages that have been projected onto the retina from our environment to the
+brain.2
+2https://www.umkelloggeye.org/conditions-treatments/anatomy-eye
+https://www.umkelloggeye.org/conditions-treatments/anatomy-eye
+4 Ortiz
+Fig. 2. Complex eye anatomy. Credit: Kellogg Eye Center, Michigan Medicine.
+The electrical signals in transit to the brain first have to be spatially distributed across the five different neural cell
+types shown in figure 3. The photoreceptors (rods and cones) are the first order neurons in the visual pathway. These
+receptors synapse (connect and relay) with bipolar and horizontal cells which function primarily to establish brightness
+and color contrasts of the visual stimulus. The biploar cells then synapse with retinal ganglion and amacrine cells which
+intensify the contrast that supports vision for structure, shape, and is the precursor for movement detection. Finally the
+visual information that has been translated and properly organized into an electrical data structure is delivered to the
+brain via long projections of the retinal ganglion cells called axons.
+Fig. 3. Neurons of the retina.
+Eye Tracking in IR 5
+Described thus far is, broadly, the visual pathway from external stimulus to retinal processing. Sensory information
+must reach the cerebral cortex (outer layer of the brain), to be perceived. We must now consider the visual pathway from
+retina to cortex as shown in the cross-section of figure 4. The optic nerve fibers intersect contralaterally at the optic
+chiasm. The axons in this optic tract end with various nuclei (cell bodies). The thalamus is much like a hub containing
+nerve fiber projections in all directions that exchange information to the cerebral cortex (among many other regulatory
+functions).
+Fig. 4. Simplified visual pathway; from retina to cortex. Credit: University of Texas McGovern Medical School.
+Within the midbrain, involved in motor movements, there is the superior colliculus that plays an essential role in
+coordinating eye and head movements to visual stimuli (among other sensory inputs). For example, the extraocular
+muscles are shown in figure 5. Within the thalamus, the lateral geniculate nucleus coordinates visual perception3 as
+shown in figure 6. Lastly, the pretectum controls the pupilary light reflex.4
+Fig. 5. Lateral and anterior view of extraocular muscles [35]
+3http://www.mit.edu/~kardar/research/seminars/CorticalMaps/VisualSystem.html
+4https://nba.uth.tmc.edu/neuroscience/m/s3/chapter07.html
+http://www.mit.edu/~kardar/research/seminars/CorticalMaps/VisualSystem.html
+https://nba.uth.tmc.edu/neuroscience/m/s3/chapter07.html
+6 Ortiz
+Fig. 6. Lateral view of visual perception (Lateral Geniculate Nucleus). Credit: MIT Cortical Maps
+Based on the introductory ophthalmic neurophysiology reviewed in this section, human-machine interaction
+experimenters should consider (at a minimum) certain operating parameters:
+• Pupillary response to lighting conditions is sensitive. Control for this by maintaining stable lighting throughout
+an experiment, as one may not be able to defend that changes in pupil diameter are in-fact due to changes in
+focus/attention on the machine or changes in ambient lighting.
+• Screen participants for no previous history of ophthalmic disease. If the visual system is impaired at any level,
+the neurophysiological responses are no longer a reliable dependent variable as an excitatory, lack of, or delayed,
+ophthalmic response may not accurately represent a neurophysiological transition state with respect to machine
+interaction.
+• Many ophthalmic diseases are age-related. For the examination of human-machine interaction in the context of
+spatial/visual information, recruit study participants that are under the age of 40 to minimize the likelihood of
+confounding variables.5,6,7,8,9
+After reviewing the itemized list above, some may reason that this preliminary screening criteria is too narrow due
+to the fact that neuroadaptive systems will soon emerge on the technological landscape and that aging populations
+are increasingly engaging with technology, therefore their neurophysiological responses should be studied in order to
+make technology inclusive, not exclusive. I happen to agree with this logic. However, as we will review later, many
+limitations in current measuring devices exist, and some are related to ophthalmic diseases or deficiencies.
+3 EYE-TRACKING TECHNOLOGY
+In this section I will explain the history, theory, practice, and standardization of eye-tracking technology. The pioneers
+of eye-tracking date all the way back to Aristotle as can be seen in the clock-wise chronological arrangement in figure 7.
+Others contributed significantly to the knowledge of eye movement studies however portraits of them have either not
+been found or do not exist [56].
+5https://www.cdc.gov/visionhealth/basics/ced/index.html
+6https://www.nia.nih.gov/health/aging-and-your-eyes
+7https://ghr.nlm.nih.gov/condition/age-related-macular-degeneration
+8https://www.nei.nih.gov/learn-about-eye-health/resources-for-health-educators/vision-and-aging-resources
+9https://www.aoa.org/patients-and-public/good-vision-throughout-life/adult-vision-19-to-40-years-of-age/adult-vision-41-to-60-years-of-age
+https://www.cdc.gov/visionhealth/basics/ced/index.html
+https://www.nia.nih.gov/health/aging-and-your-eyes
+https://ghr.nlm.nih.gov/condition/age-related-macular-degeneration
+https://www.nei.nih.gov/learn-about-eye-health/resources-for-health-educators/vision-and-aging-resources
+https://www.aoa.org/patients-and-public/good-vision-throughout-life/adult-vision-19-to-40-years-of-age/adult-vision-41-to-60-years-of-age
+Eye Tracking in IR 7
+Fig. 7. Pioneers of eye movement research.
+In 1879, the discontinuities of eye movements were elucidated by the Swiss Ophthalmologist Edmond Landolt [32].
+Although his work did not use the terms fixations and saccades (rapid movement between fixations), it provided a
+framework for understanding the terms we use today. In the same year, the German physiologist Edwald Hering and
+French Ophthalmologist Louis Émile Javal, described the discontinuous eye movements during reading. Dr. Javal was
+an ophthalmic laboratory director at the University of Paris (Sorbonne), worked on optical devices, the neurophysiology
+of reading, and introduced the term saccades which of Old French origin (8th to 14th century) was saquer or to pull and
+in modern French translates to violent pull.
+“the eye makes several saccades during the passage over each line, about one for every 15–18 letters of text” [30]. (French
+to English translation).
+About twenty years later, the psychologist Edmund Burke Huey appeared to be the first American to cite Javal’s
+work describing that the consistent neurophysiological accommodation (referring to the lens of the eye) from having to
+read laterally across a page increases extraocular muscle fatigue and reduces reading speed [25]. Moreover, Dr. Huey
+described his motivations for building an experimental eye-tracking device:
+“the eye moved with along the line by little jerks and not with a continuous steady movement. I tried to record these
+jerks by direct observation, but finally decided that my simple reaction to sight stimuli was not quick enough to keep up...
+It seemed needful to have an accurate record of these movements; and it seemed impossible to get such record without a
+direct attachment of recording apparatus to the eye-ball. As I could find no account of this having been done, I arranged an
+apparatus for the purpose and have so far succeeded in taking 18 tracings of the eye’s movements in reading.”
+8 Ortiz
+A drawing of this apparatus is show in figure 8. Dr. Huey went on to write the famous book on Psychology and
+Pedagogy of Reading in 1908 [26].
+Fig. 8. Huey eye-tracker.
+For an excellent historical overview of eye-tracking developments in the study of fixations, saccades, and reading, in
+the 19th and 20th centuries please see sections 6 and 6.1 in [56]. Additionally, and of particular interest, is the work in
+the 1960’s of the British engineering psychologist, B. Shackel, who worked on the inter-relation of man and machine
+and the optimum design of such equipment for human use. Specifically his early work in measures and viewpoint
+recording of electro-oculography (electrical potential during eye rotation) for the British Royal Navy on human-guided
+weapon systems [51, 52] (see figs. 9 to 11).
+Eye Tracking in IR 9
+Fig. 9. Paradigm. Fig. 10. Electrodes.
+Fig. 11. Visual Field.
+10 Ortiz
+The Russian psychologist Alfred L. Yarbus studied the relation between fixations and interest during image studies
+that used a novel device developed in his laboratory (figure 12). Please see Chapter IV in [58] for a thorough review of
+his experiments.
+Fig. 12. Yarbus suction cups and recording device.
+Merchant et al. were American engineers who worked for the aerospace systems arm of Honeywell International
+Inc. in the 1970’s and developed a remote video oculometer for the United States Air Force that was prototyped to
+use eye movement as a control device for targeting software within aircraft weapon systems [37]. The fundamental
+breakthrough of their research was digital image capture, automatic image processing, gaze point detection, and control
+device mapping, as a packaged hardware/software solution all in real-time. Moreover, the basic concept of using a
+light source to illuminate the eye, create reflections, and capture an image of the eye showing such reflections in
+order to record real-time neurophysiologic phenomena, was called Pupil Center Corneal Reflection (PCCR) and is
+still the fundamental technology for state-of-the-art eye-trackers today, in the year 2020.10 Although, the design as it
+related to form factor, dark room requirements, and restriction of head movement, were sub-optimal for “use in the
+wild”. Unfortunately, as history has shown us, when mission critical United States military funded research projects
+fail on deliverables, the research community follows in its abandonment of theory and practice and thus many years
+10https://www.tobiipro.com/learn-and-support/learn/eye-tracking-essentials/how-do-tobii-eye-trackers-work/
+https://www.tobiipro.com/learn-and-support/learn/eye-tracking-essentials/how-do-tobii-eye-trackers-work/
+Eye Tracking in IR 11
+passed before innovations in eye-tracking emerged once again. However, metrics of performance was the overarching
+contribution by the early pioneers and are not limited to:
+• Pupil and iris detection.
+• Gaze prediction.
+• Freedom of head movement.
+• Adjustments for human anatomical eye variability.
+• Adjustment for uncorrected and corrected human vision.
+• Environmental lighting.
+• Ease of calibration.
+• Safety (apparatus, exposure, etc.).
+• Speed of capture, processing, prediction.
+• Form factor and cost.
+Let’s discuss the Pupil Center Corneal Reflection (PCCR) method in more detail. Near-infared illumination creates
+reflection patterns on the cornea and lens called Purkinje images [17] (see figure 13) which can be captured by image
+sensors and the resulting vectors can be calculated in real-time that describe eye-gaze and direction. This information
+can be used to analyze the behavior and consciousness of a subject [14].
+Fig. 13. Light and the Purkinje images/reflections.
+The essential architecture of an eye-tracking device is made up of illuminators, cameras, processing unit for image
+detection, and a 3D eyemodel with fixation, saccade, and pupil size variationmapping algorithms. Figure 14 demonstrates
+the paradigm for a Tobii Technology screen based eye tracker.11 Pupil response as an indicator of a neurophysiological
+state requires the establishment of a baseline pupil diameter. Additionally, pupil variations over time is the important
+marker versus pupil size, and when used in conjunction with ocular-motor changes over time (fixations and saccades),
+can provide a rich representation of human-machine interaction.12
+11https://www.tobiipro.com/learn-and-support/learn/eye-tracking-essentials/how-do-tobii-eye-trackers-work/
+12https://www.tobiipro.com/learn-and-support/learn/eye-tracking-essentials/is-pupil-size-calculations-possible-with-tobii-eye-trackers/
+https://www.tobiipro.com/learn-and-support/learn/eye-tracking-essentials/how-do-tobii-eye-trackers-work/
+https://www.tobiipro.com/learn-and-support/learn/eye-tracking-essentials/is-pupil-size-calculations-possible-with-tobii-eye-trackers/
+12 Ortiz
+Fig. 14. Tobii screen-based eye tracker architecture. Credit: Tobii Technology LLC.
+Lastly, geometric characteristics of a subject’s eyes must be estimated to reliably measure eye-gaze point calculations
+(see figure 15). Therefore, a calibration procedure involves bright/dark pupil adjustments for lighting conditions, light
+refraction/reflection properties of the cornea, lens, and fovea, and an anatomical 3D eye model to estimate foveal
+location responsible for the visual field (focus, full color).13
+Fig. 15. Geometrical variation calibration. Credit: Tobii Technology LLC.
+13https://www.tobiipro.com/learn-and-support/learn/eye-tracking-essentials/what-happens-during-the-eye-tracker-calibration/
+https://www.tobiipro.com/learn-and-support/learn/eye-tracking-essentials/what-happens-during-the-eye-tracker-calibration/
+Eye Tracking in IR 13
+4 EYE-TRACKING IN SEARCH AND RETRIEVAL
+In 2003, the first study on eye-tracking and information retrieval (IR) from search engines was conducted [49]. The
+authors of the study wanted to understand if it was possible to infer relevance from eye movement signals. In 2004,
+Granka et al. [20] investigated how users interact with search engine result pages (SERPs) in order to improve interface
+design processes and implicit feedback of the engine while Klöckner et al. [31] asked the more basic question of search
+list order and eye movement behavior to understand depth-first or breadth-first retrieval strategies. In 2005, similar
+to the previous study, Aula et al. [3] wanted to classify search result evaluation style in addition to depth-first or
+breadth-first strategies. The research revealed that users can be categorized as economic or exhaustive in that the
+eye-gaze of experienced users is fast and decisions are made with less information (economic).
+In 2007, Cutrell and Guan [10] approached eye-tracking methodology in information retrieval a bit differently. They
+argued that search engine interfaces were remarkably similar across domains and that the metadata (e.g. title, snippets,
+URL, date, author, etc.) describing each result, although very simple in design, it was not obvious how users utilized
+this descriptive data. Essentially, what were they looking at when they made their decisions about a particular result
+item and what separates an expert searcher from a novice? Later, this research was complemented by the 2009 work
+of Ishita et al. [28] where it was observed that titles of search results explained much of the eye-tracking data, while
+Capra et al. used eye-tracking to examine how exploratory search within online public access catalogs (OPAC) was
+conducted during utilization of facets for filtering and refining a non-transactional search strategy [8].
+In 2010, Balatsoukas and Ruthven [4] argued that “there are no studies exploring the relationship between relevance
+criteria use and human eye movements (e.g. number of fixations, fixation length, and scan-paths)”. I believe their was
+some truth to this statement, as the only research close to their work was that of inferring relevance, at the macro-level,
+from eye-tracking [49]. Their work uncovered that topicality explained much of the fixation data. Dinet et al. [11]
+studied visual strategies of young people from grades 5 to 11 on how they explored the search engine results page and
+how these strategies were affected by typographical cuing such as font alterations while Dumais et al. [12] examined
+individual differences in gaze behavior for all elements on the results page (e.g. results, ads, related searches).
+In 2012, Balatsoukas and Ruthven extended their previous work on the relationship between relevance criteria
+and eye-movements to include cognitive and behavioral approaches with grades of relevance (e.g. relevant, partial,
+not) and the relationship to length of eye-fixations [5] while Marcos et al. [36] studied patterns of successful vs.
+unsuccessful information seeking behaviors; specifically, how, why, and when, users behave differently with respect to
+query formulation, result page activity, and query re-formulation. In 2013, Maqbali et al. studied eye-tracking behavior
+with respect to textual and visual search interfaces as well as the issue of data quality (e.g. noise reduction, device
+calibration) at a time when the existing software14 did not support such features [2].
+In 2014, Gossen et al. studied the differences in perception of search results and interface elements between late-
+elementary school children and adults with the goal of developing methodologies to build search engines for engaging
+and educating young children based on previous evidence that search behavior varies widely between children and adults
+[19]. Gwizdka examined the relationship between the degree of relevance assigned to a retrieval result by a user, the
+cognitive effort committed to reading the documented result, and inferring the relationship with eye-movement patterns
+[21] while Hofmann et al. examined interaction and eye-movement behavior of users with query auto completion
+rankings (also referred to as query suggestions or dynamics queries) [24].
+14https://www.tobiipro.com/learn-and-support/learn/tobii-pro-studio/
+https://www.tobiipro.com/learn-and-support/learn/tobii-pro-studio/
+14 Ortiz
+In 2015, Eickhoff et al. argued that query suggestion approaches were “attention oblivious” in that without mapping
+mouse cursor movement at the term-level of search engine result pages, eye-tracking signals, and query reformulations,
+efforts of user modeling were limited in their value, based solely on previous, popular, or related searches, and not
+entirely obvious that such suggestions were relevant for users with non-transactional information needs [13]. Gwizdka
+and Zhang examined relevance from the perspective of pupillary responses (pupil dilation) of users during visits and re-
+visits of web pages and hypothesized differences in pupil dilation would reflect relevance, as such physiologic responses
+may indicate level of interest and can be used as a proxy for relevance [23] while Liu et al. studied eye-movements and
+cursor activity in the context of vertical search sessions and how vertical type and position, within the results ranking,
+affected neurophysiologic and behavioral measures [33].
+In 2016, Bilal and Gwizdka re-examined the reading behavior of children, grades 6 and 8, by asking what eye-fixation
+patterns can be observed by manipulating task type for Google SERPs with the vision of developing child-centric
+models of readability for improved access and comprehension [7] while Mostafa and Gwizdka extended the notion of
+controlled experimentation to go beyond that of implemented systems that have variations for experimentation such as
+control and experimental conditions, to that of neurophysiological baselines as an important step in the experimental
+design process and analogize the biological and clinical bio-marker to that of:
+“establish behavioral correlates or markers that indicate normal or abnormal psycho-physiological conditions”
+...in order to contextualize experimental responses [38]. Prior to their position, experimental concerns were focused
+on data quality (e.g. noise reduction) and device calibration, not human response calibration.
+In 2017, Gwizdka et al. revisited previous work on inferring relevance judgements for news stories albeit with
+a higher resolution eye-tracking device and the addition of more complex neurophysiological approaches such as
+electroencephalography (EEG) to identify relevance judgement correlates between eye-movement patterns and electrical
+activity in the brain [22] while Low et al. applied eye-tracking, pupillometry, and EEG to model user search behavior
+within a multimedia environment (e.g. an image library) in order to operationalize the development of an assistive
+technology that can guide a user throughout the search process based on their predicted attention, and latent intention
+[34].
+In 2019, the first neuroadaptive implicit relevance feedback information retrieval system was built and evaluated by
+Jacucci et al. [29]. The authors demonstrated how to model search intent with eye and brain-computer interfaces for
+improved relevance predictions while Wu et al. examined eye-gaze in combination with electrodermal activity (EDA),
+which measures neurally mediated effects on sweat gland permeability, while users examined search engine result
+pages to predict subjective search satisfaction [57]. In 2020, Bhattacharya et al. re-examined relevance prediction for
+neuroadaptive IR systems with respect to scanpath image classification and reported up to 80% accuracy in their model
+[6].
+5 EYE-TRACKING IN AWARE AND ADAPTIVE USER INTERFACES
+In this section, I will review only those works that satisfy the criteria of a system (machine) that utilizes implicit signals
+from an eye-tracker to carry out functions and interact or collaborate with a human.
+iDict was an eye-aware application that monitored gaze path (saccades) while users read text in foreign languages.
+When difficulties were observed by analyzing the discontinuous eye movements, the machine would assist with the
+Eye Tracking in IR 15
+translation [27]. Later, an affordable “Gaze Contingent Display” was developed for the first time that was operating
+system and hardware integration agnostic. Such a display was capable of rendering images via the gaze point and thus
+had applications in gaze contingent image analysis and multi-modal displays that provide “focus+context” as can be
+found with volumetric medical imaging [41].
+Children with autism spectrum disorder have difficulties with social attention. Particularly, they do not focus on the
+eyes or faces of those communicating with them. It is thought that forms of training may offer benefit. An amusement
+ride machine was engineered and outfitted with various sensors and an eye-tracker. The ride was an experiment that
+would elicit various responses from the child and require visual engagement of a screen that would then reward with
+auditory and vestibular experiences, and thus functioned as a gaze contingent environment for socially training the
+child on the issue of attention [48].
+Fluid and pleasant human communication requires visual and auditory cues that are respected by two or more people.
+For example, as I am speaking to someone and engaged in eye contact, perhaps I will look away for a moment or fade
+my tone of voice and pause. These are social cues that are then acted upon by another person where they then engage
+me with their thought. This level of appropriateness is not embedded in devices. Although the concept of “Attentive
+User Interfaces” that utilize eye-tracking to become more conscious about when to interrupt a human or group of
+humans has been studied [53].
+Utilizing our visual system as a point and selection device for machine interactions instead of a computer mouse or
+touch screen would seem like a natural progression in the evolution of interaction. There are two avenues of engineering
+along this thread. The first simply requires a machine to interact with, an accurate eye tracking device, and thresholds
+for gaze fixation in order to select items presented by the machine. The second requires that we study the behaviors of
+interaction (eye, peripheral components) and their correlates in order to build a model of what the typical human eye
+does precisely before and after selections are made.
+With this information we may then be able to have semi-conscious machines that understand when we would like to
+select something or navigate through an environment. A machine of the first kind was in-fact built and experimented on
+for image search and retrieval [42], whereby a threshold of 80 millisecond gaze fixation was used as the selection device.
+The experiment asked that users identify the target image within a library of images that were presented in groups. All
+similarity calculations were stored as metadata prior to the experiment. The user would have to iteratively gaze at related
+images for at least 80 milliseconds for the group of images to filter and narrow with a change of results. The results
+indicated that the speed of gaze contingent image search was faster than an automated random selection algorithm.
+However, the gaze contingent display was not experimented against a traditional interaction like the computer mouse.
+Later, a similar system was built and an experiment was conducted using Google image search [15]. The authors in
+[40] also presented a similar gaze threshold (100 ms) based system called GazeNoter. The gaze-adaptive note-taking
+system was built and tested for online PowerPoint slide presentations. Essentially, by analyzing a user’s gaze, video
+playblack speed would adjust and recommend notes for particular areas of interest (e.g. bullet points, images, etc.).
+The prototype was framed around the idea that video lectures require the user to obtrusively pause the video, lose
+focus, write a note, then continue. In-fact, the experiments reported show that users generated more efficient notes and
+preferred the gaze adaptive system in comparison to a baseline system that had no adaptive features.
+In [43], the authors note that implementation of eye-tracking in humanoid robots has been done before. However,
+no experiment had been conducted on the benefits for human-robot collaboration. The eye-tracker was built into
+16 Ortiz
+the humanoid robot “iCub”15 as opposed to being an externally visible interface. This engineering design enabled a
+single blind experiment where the subjects had no knowledge of any infared cameras illuminating the cornea and
+pupil or the involvement of eye-tracking in the experiment. The robot and human sat across each other at a table. The
+humans were not asked to interact with the robot in any particular way (voice, pointing, gaze, etc.) but were asked
+to communicate with the robot in order to receive a specific order of toy blocks to build a structure. The robot was
+specifically programmed in this experiment to only react to eye gaze which it did successfully in under 30 seconds
+across subjects.
+Cartographers encode geographic information on small scale maps that represent all the topological features of our
+planet. This information is decoded with legends that enable the map user to understand what and where they are
+looking at. Digital maps have become adaptive to user click behavior and therefore the legends reflect the real-time
+interaction. Google Earth16 is an excellent example of this. New evidence indicates that gaze-based adaptive legends
+are just as useful and perhaps more useful than traditional legends [18]. This experiment included two versions of a
+digital map (e.g. static legend, gaze-based adaptive legend). Although participants in the study performed similarly for
+time-on-task, they preferred the adaptive legend, indicating its perceived usefulness.
+6 ADDITIONAL EXPERIMENTAL CONSIDERATIONS
+6.1 Technology
+The standardization of eye-tracking technology is not without limitation. A number of advancements in the fundamental
+technology of PCCR based eye-trackers are still required. For example, the image processing algorithms have difficulty
+on a number of scenarios involving the pupil center corneal reflection method:
+• Reflections from eye-glasses and contact lenses worn by the subject can cause image processing artifacts.
+• Eye-lashes that occlude the perimeter of the pupil cause problems for time-series pupil diameter calculations.
+• Large pupils reflect more light than small pupils. The wide dynamic range in reflection can be an issue for image
+processors.
+• The eye blink reflex has a complex neural circuit involving the oculomotor nerve (cranial nerve III), trigeminial
+nerve (cranial nerve V), and the facial nerve (cranial nerve VII). 17,18 When a pathology in this reflex is present
+the subject does not blink during an experimental task therefore dry and congealed corneas is the result, which
+makes corneal reflection difficult for the image processor.
+• High-speed photography by the image capture modality is required as saccadic eye movements have high velocity,
+and head movements may at times be also high in velocity causing blurred images of the corneal reflection.
+• Squinting causes pupil center and corneal reflection distortion during image processing.
+• The trade-off between PCCR accuracy and freedom of head movement may be overcome by robotic cameras that
+“eye follow” although this is not available in most affordable eye-trackers.
+Additionally, sampling frequencies should be thoughtfully understood in order to design an experiment that po-
+tentially answers a question or set of questions (see figure 16). Essentially, at the highest frequency (1200 Hz), 1200
+data points for each second of eye movement are recorded and each eye movement will be recorded approximately
+every 0.83 milliseconds (sub-millisecond). While at the lowest end of the frequency spectrum (60 Hz), 60 data points
+15http://www.icub.org
+16https://www.google.com/earth/
+17https://nba.uth.tmc.edu/neuroscience/m/s3/chapter07.html
+18https://www.ncbi.nlm.nih.gov/books/NBK534247/
+http://www.icub.org
+https://www.google.com/earth/
+https://nba.uth.tmc.edu/neuroscience/m/s3/chapter07.html
+https://www.ncbi.nlm.nih.gov/books/NBK534247/
+Eye Tracking in IR 17
+for each second of eye movement are recorded and each eye movement will be recorded approximately every 16.67
+milliseconds. These sampling frequencies are important to understand because certain eye phenomena can only be
+observed at certain frequencies. For example, low-noise saccades are observed at frequencies greater than 120Hz which
+are sampled every 8.33 milliseconds while low-noise microsaccades are observed at frequencies greater than 600Hz
+which are sampled every 1.67 milliseconds.19
+Fig. 16. Sampling frequencies.
+Higher sampling frequencies will provide higher sample sizes and levels of certainty over the same unit of time. In
+terms of stratifying a data stream accurately and building user models for adaptive feedback within a system, high
+sampling frequency is a pre-requisite and provides more granularity for fixations, fixation duration, pupil dilation,
+saccades, saccade velocity, microsaccades, and spontaneous blink rate.
+6.2 Psychophysiology
+With this data, we can begin to ask questions related to moment-by-moment actions and their relationship to neurophys-
+iology. For example, it is not possible to move your eyes (voluntarily or involuntarily) without making a corresponding
+shift in focus/attention and disruption to working memory. This is especially true in spatial environments [54, 55].
+Perhaps, by modeling a user’s typical pattern of eye movement over time, a system can adapt and learn when to politely
+re-focus the user and/or more accurately model the eye-as-an-input.
+Moreover, the eyes generally fixate on objects of thought. Although this may not always be the case in scenarios
+where we are looking at nothing but retrieving representations in the background [16]. Think of a moment where you
+gestured with your hand at a particular area of a room or place that someone you spoke to earlier was in. Therefore, in
+the context of a human-machine interaction, how would the machine learn to understand the difference in order to
+execute system commands, navigate menus, or remain observant for the next cue? For information systems, at least,
+this is the argument for supplementary data collection from peripheral components which allow for investigation and
+19https://www.tobiipro.com/learn-and-support/learn/eye-tracking-essentials/eye-tracker-sampling-frequency/
+https://www.tobiipro.com/learn-and-support/learn/eye-tracking-essentials/eye-tracker-sampling-frequency/
+18 Ortiz
+potential discovery of correlates that the machine can be trained on to understand the difference. However, an accepted
+theory of visual perception is that it is the result of both feedforward and feedback connections, where the initial
+feedforward stimulation generates interpretation(s) that are fed-backward for further processing and confirmation
+known as a reentrant loop. Experiments have demonstrated varying cycle times for reentrant loops when subjects
+are presented with information in advance (a specific task) for sequential image processing and detecting a target.
+Detection performance increased as the duration of an image being presented increased from 13-80 milliseconds [47].
+Another limitation with this interaction is the manipulation device (computer mouse) as the literature has suggested
+that average mouse pointing time for web search appears to range from 600-1000 milliseconds [39] while pupil dilation
+can have latencies of only 200 milliseconds. This suggests that visual perception during information seeking tasks is
+significantly faster than the ability to act on it with our motor movements and thus it is likely that the eye-as-an-input
+device is more efficient and therefore a significant delay between the moment a user decides upon a selection item and
+when the selection item is actuated, appears to exist. On this particular issue, experimental protocols should outlines a
+specific manner in which to understand or operationalize this gap.
+Even when a user is focused and attentive, their comprehension may still lack that of an expert. How would an
+adaptive system learn about a user to the extent that although attentive, their comprehension is not optimal and perhaps
+recommend material to build a foundation then return later? Most scientists in the field would likely argue that this
+is the purpose for objective questioning as an assessment. However, these assessments cannot distinguish correctly
+guessed answers, or misunderstanding in the wording of a question leading to an incorrect answer. Additionally, less
+fixations and longer saccades may be indicative of proficient comprehension and has been shown to be predictive of
+higher percentage scores on objective assessments [50].
+7 CONCLUSION
+In this short review I have discussed ophthalmic neurophysiology and the experimental considerations that must be
+made to reduce possible noise in an eye-tracking data stream. I have also reviewed the history, experiments, technological
+benefits, and limitations of eye-tracking studies within the information retrieval field. The concepts of aware and
+adaptive user interfaces were also explored that humbly motivated my investigations and synthesis of previous work
+from the fields of industrial engineering, psychophysiology, and information retrieval.
+As I stated at the beginning of this review, on the nature of learning I consistently think about my son. Learning from
+his environment is the foundation of his existence. His interaction with ambient information reinforces or discourages
+certain behaviors. Throughout this writing I attempted to express these ideas within the context of human-information-
+machine interaction. More precisely, I attempted to express the need for establishing a foundation that measures the
+decision making process with lower latency but also with the ability to be operationalized non-intrusively and as an
+input device, which in order to achieve such a goal, requires a window to the mammalian brain that is achievable only
+with eye-tracking as I firmly believe this to be the future of ocular navigation for information retrieval.
+REFERENCES
+[1] Christopher Ahlberg and Ben Shneiderman. 2003. Visual information seeking: Tight coupling of dynamic query filters with starfield displays. In
+The craft of information visualization. Elsevier, 7–13.
+[2] Hilal Al Maqbali, Falk Scholer, James A. Thom, and Mingfang Wu. 2013. Using Eye Tracking for Evaluating Web Search Interfaces. In Proceedings
+of the 18th Australasian Document Computing Symposium (ADCS ’13). Association for Computing Machinery, New York, NY, USA, 2–9. https:
+//doi.org/10.1145/2537734.2537747
+https://doi.org/10.1145/2537734.2537747
+https://doi.org/10.1145/2537734.2537747
+Eye Tracking in IR 19
+[3] Anne Aula, Päivi Majaranta, and Kari-Jouko Räihä. 2005. Eye-Tracking Reveals the Personal Styles for Search Result Evaluation. In Proceedings
+of the 2005 IFIP TC13 International Conference on Human-Computer Interaction (INTERACT’05). Springer-Verlag, Berlin, Heidelberg, 1058–1061.
+https://doi.org/10.1007/11555261104
+[4] Panos Balatsoukas and Ian Ruthven. 2010. The use of relevance criteria during predictive judgment: An eye tracking approach. Pro-
+ceedings of the American Society for Information Science and Technology 47, 1 (2010), 1–10. https://doi.org/10.1002/meet.14504701145
+arXiv:https://asistdl.onlinelibrary.wiley.com/doi/pdf/10.1002/meet.14504701145
+[5] Panos Balatsoukas and Ian Ruthven. 2012. An Eye-Tracking Approach to the Analysis of Relevance Judgments on the Web: The Case of Google
+Search Engine. J. Am. Soc. Inf. Sci. Technol. 63, 9 (Sept. 2012), 1728–1746. https://doi.org/10.1002/asi.22707
+[6] Nilavra Bhattacharya, Somnath Rakshit, Jacek Gwizdka, and Paul Kogut. 2020. Relevance Prediction from Eye-movements Using Semi-interpretable
+Convolutional Neural Networks. arXiv preprint arXiv:2001.05152 (2020).
+[7] Dania Bilal and Jacek Gwizdka. 2016. Children’s Eye-Fixations on Google Search Results. In Proceedings of the 79th ASIS&T Annual Meeting: Creating
+Knowledge, Enhancing Lives through Information & Technology (ASIST ’16). American Society for Information Science, USA, Article Article 89,
+6 pages.
+[8] Robert Capra, Bill Kules, Matthew Banta, and Tito Sierra. 2009. Faceted Search for Library Catalogs: Developing Grounded Tasks and Analyzing
+Eye-Tracking Data.
+[9] Mackinlay Card. 1999. Readings in information visualization: using vision to think. Morgan Kaufmann.
+[10] Edward Cutrell and Zhiwei Guan. 2007. What Are You Looking for? An Eye-Tracking Study of Information Usage in Web Search. In Proceedings of
+the SIGCHI Conference on Human Factors in Computing Systems (CHI ’07). Association for Computing Machinery, New York, NY, USA, 407–416.
+https://doi.org/10.1145/1240624.1240690
+[11] Jérôme Dinet, J. M. Christian Bastien, and Muneo Kitajima. 2010. What, Where and How Are Young People Looking for in a Search Engine Results
+Page? Impact of Typographical Cues and Prior Domain Knowledge. In Proceedings of the 22nd Conference on l’Interaction Homme-Machine (IHM ’10).
+Association for Computing Machinery, New York, NY, USA, 105–112. https://doi.org/10.1145/1941007.1941022
+[12] Susan T. Dumais, Georg Buscher, and Edward Cutrell. 2010. Individual Differences in Gaze Patterns for Web Search. In Proceedings of the
+Third Symposium on Information Interaction in Context (IIiX ’10). Association for Computing Machinery, New York, NY, USA, 185–194. https:
+//doi.org/10.1145/1840784.1840812
+[13] Carsten Eickhoff, Sebastian Dungs, and Vu Tran. 2015. An Eye-Tracking Study of Query Reformulation. In Proceedings of the 38th International ACM
+SIGIR Conference on Research and Development in Information Retrieval (SIGIR ’15). Association for Computing Machinery, New York, NY, USA,
+13–22. https://doi.org/10.1145/2766462.2767703
+[14] John Elvesjo, Marten Skogo, and Gunnar Elvers. 2009. Method and installation for detecting and following an eye and the gaze direction thereof.
+US Patent 7,572,008.
+[15] A. Faro, D. Giordano, C. Pino, and C. Spampinato. 2010. Visual Attention for Implicit Relevance Feedback in a Content Based Image Retrieval. In
+Proceedings of the 2010 Symposium on Eye-Tracking Research & Applications (ETRA ’10). Association for Computing Machinery, New York, NY, USA,
+73–76. https://doi.org/10.1145/1743666.1743684
+[16] Fernanda Ferreira, Jens Apel, and John M Henderson. 2008. Taking a new look at looking at nothing. Trends in cognitive sciences 12, 11 (2008),
+405–410.
+[17] MM Gellrich and C Kandzia. 2016. Purkinje images in slit lamp videography: Video article. Der Ophthalmologe: Zeitschrift der Deutschen
+Ophthalmologischen Gesellschaft 113, 9 (2016), 789–793.
+[18] Fabian Göbel, Peter Kiefer, Ioannis Giannopoulos, Andrew T. Duchowski, and Martin Raubal. 2018. Improving Map Reading with Gaze-Adaptive
+Legends. In Proceedings of the 2018 ACM Symposium on Eye Tracking Research & Applications (ETRA ’18). Association for Computing Machinery,
+New York, NY, USA, Article Article 29, 9 pages. https://doi.org/10.1145/3204493.3204544
+[19] Tatiana Gossen, Juliane Höbel, and Andreas Nürnberger. 2014. A Comparative Study about Children’s and Adults’ Perception of Targeted Web
+Search Engines. In Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI ’14). Association for Computing Machinery,
+New York, NY, USA, 1821–1824. https://doi.org/10.1145/2556288.2557031
+[20] Laura A. Granka, Thorsten Joachims, and Geri Gay. 2004. Eye-Tracking Analysis of User Behavior in WWW Search. In Proceedings of the 27th
+Annual International ACM SIGIR Conference on Research and Development in Information Retrieval (SIGIR ’04). Association for Computing Machinery,
+New York, NY, USA, 478–479. https://doi.org/10.1145/1008992.1009079
+[21] Jacek Gwizdka. 2014. News Stories Relevance Effects on Eye-Movements. In Proceedings of the Symposium on Eye Tracking Research and Applications
+(ETRA ’14). Association for Computing Machinery, New York, NY, USA, 283–286. https://doi.org/10.1145/2578153.2578198
+[22] Jacek Gwizdka, Rahilsadat Hosseini, Michael Cole, and Shouyi Wang. 2017. Temporal Dynamics of Eye-Tracking and EEG during Reading and
+Relevance Decisions. J. Assoc. Inf. Sci. Technol. 68, 10 (Oct. 2017), 2299–2312.
+[23] Jacek Gwizdka and Yinglong Zhang. 2015. Differences in Eye-Tracking Measures Between Visits and Revisits to Relevant and Irrelevant Web Pages.
+In Proceedings of the 38th International ACM SIGIR Conference on Research and Development in Information Retrieval (SIGIR ’15). Association for
+Computing Machinery, New York, NY, USA, 811–814. https://doi.org/10.1145/2766462.2767795
+[24] Kajta Hofmann, Bhaskar Mitra, Filip Radlinski, and Milad Shokouhi. 2014. An Eye-Tracking Study of User Interactions with Query Auto Completion.
+In Proceedings of the 23rd ACM International Conference on Conference on Information and Knowledge Management (CIKM ’14). Association for
+Computing Machinery, New York, NY, USA, 549–558. https://doi.org/10.1145/2661829.2661922
+https://doi.org/10.1007/11555261_104
+https://doi.org/10.1002/meet.14504701145
+http://arxiv.org/abs/https://asistdl.onlinelibrary.wiley.com/doi/pdf/10.1002/meet.14504701145
+https://doi.org/10.1002/asi.22707
+https://doi.org/10.1145/1240624.1240690
+https://doi.org/10.1145/1941007.1941022
+https://doi.org/10.1145/1840784.1840812
+https://doi.org/10.1145/1840784.1840812
+https://doi.org/10.1145/2766462.2767703
+https://doi.org/10.1145/1743666.1743684
+https://doi.org/10.1145/3204493.3204544
+https://doi.org/10.1145/2556288.2557031
+https://doi.org/10.1145/1008992.1009079
+https://doi.org/10.1145/2578153.2578198
+https://doi.org/10.1145/2766462.2767795
+https://doi.org/10.1145/2661829.2661922
+20 Ortiz
+[25] Edmund B Huey. 1898. Preliminary experiments in the physiology and psychology of reading. The American Journal of Psychology 9, 4 (1898),
+575–586.
+[26] Edmund Burke Huey. 1908. The psychology and pedagogy of reading. The Macmillan Company.
+[27] Aulikki Hyrskykari, Päivi Majaranta, Antti Aaltonen, and Kari-Jouko Räihä. 2000. Design Issues of IDICT: A Gaze-Assisted Translation Aid. In
+Proceedings of the 2000 Symposium on Eye Tracking Research & Applications (ETRA ’00). Association for Computing Machinery, New York, NY, USA,
+9–14. https://doi.org/10.1145/355017.355019
+[28] Emi Ishita, Shinji Mine, Masanori Koizumi, Yosuke Miyata, Chihiro Kunimoto, Junko Shiozaki, Keiko Kurata, and Shuichi Ueda. 2009. Analyzing
+OPAC Use with Screen Views and Eye Tracking. In Proceedings of the 9th ACM/IEEE-CS Joint Conference on Digital Libraries (JCDL ’09). Association
+for Computing Machinery, New York, NY, USA, 405–406. https://doi.org/10.1145/1555400.1555485
+[29] Giulio Jacucci, Oswald Barral, Pedram Daee, Markus Wenzel, Baris Serim, Tuukka Ruotsalo, Patrik Pluchino, Jonathan Freeman, Luciano
+Gamberini, Samuel Kaski, and Benjamin Blankertz. 2019. Integrating neurophysiologic relevance feedback in intent modeling for informa-
+tion retrieval. Journal of the Association for Information Science and Technology 70, 9 (2019), 917–930. https://doi.org/10.1002/asi.24161
+arXiv:https://asistdl.onlinelibrary.wiley.com/doi/pdf/10.1002/asi.24161
+[30] Emile Javal. 1878. Essai sur la physiologie de la lecture. Annales d’Ocilistique 80 (1878), 97–117.
+[31] Kerstin Klöckner, Nadine Wirschum, and Anthony Jameson. 2004. Depth- and Breadth-First Processing of Search Result Lists. In CHI ’04
+Extended Abstracts on Human Factors in Computing Systems (CHI EA ’04). Association for Computing Machinery, New York, NY, USA, 1539.
+https://doi.org/10.1145/985921.986115
+[32] Edmond Landolt. 1879. A Manual of Examination of the Eyes... Baillière, Tindall & Cox.
+[33] Zeyang Liu, Yiqun Liu, Ke Zhou, Min Zhang, and Shaoping Ma. 2015. Influence of Vertical Result in Web Search Examination. In Proceedings of the
+38th International ACM SIGIR Conference on Research and Development in Information Retrieval (SIGIR ’15). Association for Computing Machinery,
+New York, NY, USA, 193–202. https://doi.org/10.1145/2766462.2767714
+[34] Thomas Low, Nikola Bubalo, Tatiana Gossen, Michael Kotzyba, André Brechmann, AnkeHuckauf, and Andreas Nürnberger. 2017. Towards Identifying
+User Intentions in Exploratory Search Using Gaze and Pupil Tracking. In Proceedings of the 2017 Conference on Conference Human Information
+Interaction and Retrieval (CHIIR ’17). Association for Computing Machinery, New York, NY, USA, 273–276. https://doi.org/10.1145/3020165.3022131
+[35] Parker E Ludwig and Craig N Czyz. 2019. Anatomy, Head and Neck, Eye Muscles. In StatPearls [Internet]. StatPearls Publishing.
+[36] Mari-Carmen Marcos, David F. Nettleton, and Diego Sáez-Trumper. 2012. A User Study of Web Search Session Behaviour Using Eye Tracking Data.
+In Proceedings of the 26th Annual BCS Interaction Specialist Group Conference on People and Computers (BCS-HCI ’12). BCS Learning & Development
+Ltd., Swindon, GBR, 262–267.
+[37] John Merchant, Richard Morrissette, and James L Porterfield. 1974. Remote measurement of eye direction allowing subject motion over one cubic
+foot of space. IEEE transactions on biomedical engineering 4 (1974), 309–317.
+[38] Javed Mostafa and Jacek Gwizdka. 2016. Deepening the Role of the User: Neuro-Physiological Evidence as a Basis for Studying and Improving
+Search. In CHIIR ’16.
+[39] Atsuo Murata and Makoto Moriwaka. 2009. Basic study for development of web browser suitable for eye-gaze input system-identification of optimal
+click method. In Proceedings: Fifth International Workshop on Computational Intelligence & Applications, Vol. 2009. IEEE SMC Hiroshima Chapter,
+302–305.
+[40] Cuong Nguyen and Feng Liu. 2016. Gaze-Based Notetaking for Learning from Lecture Videos. In Proceedings of the 2016 CHI Conference on
+Human Factors in Computing Systems (CHI ’16). Association for Computing Machinery, New York, NY, USA, 2093–2097. https://doi.org/10.1145/
+2858036.2858137
+[41] Stavri G. Nikolov, Timothy D. Newman, Dave R. Bull, Nishan C. Canagarajah, Michael G. Jones, and Iain D. Gilchrist. 2004. Gaze-Contingent Display
+Using Texture Mapping and OpenGL: System and Applications. In Proceedings of the 2004 Symposium on Eye Tracking Research & Applications (ETRA
+’04). Association for Computing Machinery, New York, NY, USA, 11–18. https://doi.org/10.1145/968363.968366
+[42] Oyewole Oyekoya and Fred Stentiford. 2006. An Eye Tracking Interface for Image Search. In Proceedings of the 2006 Symposium on Eye Tracking
+Research & Applications (ETRA ’06). Association for Computing Machinery, New York, NY, USA, 40. https://doi.org/10.1145/1117309.1117324
+[43] Oskar Palinko, Francesco Rea, Giulio Sandini, and Alessandra Sciutti. 2016. Eye Tracking for Human Robot Interaction. In Proceedings of the Ninth
+Biennial ACM Symposium on Eye Tracking Research & Applications (ETRA ’16). Association for Computing Machinery, New York, NY, USA, 327–328.
+https://doi.org/10.1145/2857491.2888590
+[44] Ido Perlman, Helga Kolb, and Ralph Nelson. 2015. The Organization of the Retina and Visual System.
+[45] Peter Pirolli, Stuart K Card, and Mija M Van Der Wege. 2001. Visual information foraging in a focus+ context visualization. In Proceedings of the
+SIGCHI conference on Human factors in computing systems. 506–513.
+[46] Peter Pirolli, Stuart K Card, and Mija M Van Der Wege. 2003. The effects of information scent on visual search in the hyperbolic tree browser. ACM
+Transactions on Computer-Human Interaction (TOCHI) 10, 1 (2003), 20–53.
+[47] Mary C Potter, Brad Wyble, Carl Erick Hagmann, and Emily S McCourt. 2014. Detecting meaning in RSVP at 13 ms per picture. Attention, Perception,
+& Psychophysics 76, 2 (2014), 270–279.
+[48] Rameshsharma Ramloll, Cheryl Trepagnier, Marc Sebrechts, and Andreas Finkelmeyer. 2004. A Gaze Contingent Environment for Fostering Social
+Attention in Autistic Children. In Proceedings of the 2004 Symposium on Eye Tracking Research & Applications (ETRA ’04). Association for Computing
+Machinery, New York, NY, USA, 19–26. https://doi.org/10.1145/968363.968367
+https://doi.org/10.1145/355017.355019
+https://doi.org/10.1145/1555400.1555485
+https://doi.org/10.1002/asi.24161
+http://arxiv.org/abs/https://asistdl.onlinelibrary.wiley.com/doi/pdf/10.1002/asi.24161
+https://doi.org/10.1145/985921.986115
+https://doi.org/10.1145/2766462.2767714
+https://doi.org/10.1145/3020165.3022131
+https://doi.org/10.1145/2858036.2858137
+https://doi.org/10.1145/2858036.2858137
+https://doi.org/10.1145/968363.968366
+https://doi.org/10.1145/1117309.1117324
+https://doi.org/10.1145/2857491.2888590
+https://doi.org/10.1145/968363.968367
+Eye Tracking in IR 21
+[49] Jarkko Salojarvi, Ilpo Kojo, Jaana Simola, and Samuel Kaski. 2003. Can relevance be inferred from eye movements in information retrieval. Proceedings
+of WSOM 3 (01 2003).
+[50] Charles Lima Sanches, Koichi Kise, and Olivier Augereau. 2017. Japanese Reading Objective Understanding Estimation by Eye Gaze Analysis. In
+Proceedings of the 2017 ACM International Joint Conference on Pervasive and Ubiquitous Computing and Proceedings of the 2017 ACM International
+Symposium on Wearable Computers (UbiComp ’17). Association for Computing Machinery, New York, NY, USA, 121–124. https://doi.org/10.1145/
+3123024.3123092
+[51] B Shackel. 1960. Note on mobile eye viewpoint recording. JOSA 50, 8 (1960), 763–768.
+[52] B Shackel. 1960. Pilot study in electro-oculography. The British journal of ophthalmology 44, 2 (1960), 89.
+[53] Jeffrey S. Shell, Roel Vertegaal, Daniel Cheng, Alexander W. Skaburskis, Changuk Sohn, A. James Stewart, Omar Aoudeh, and Connor Dickie. 2004.
+ECSGlasses and EyePliances: Using Attention to Open Sociable Windows of Interaction. In Proceedings of the 2004 Symposium on Eye Tracking
+Research & Applications (ETRA ’04). Association for Computing Machinery, New York, NY, USA, 93–100. https://doi.org/10.1145/968363.968384
+[54] Martin Shepherd, John M Findlay, and Robert J Hockey. 1986. The relationship between eye movements and spatial attention. The Quarterly Journal
+of Experimental Psychology 38, 3 (1986), 475–491.
+[55] Jan Theeuwes, Artem Belopolsky, and Christian NL Olivers. 2009. Interactions between working memory, attention and eye movements. Acta
+psychologica 132, 2 (2009), 106–114.
+[56] Nicholas J Wade. 2010. Pioneers of eye movement research. i-Perception 1, 2 (2010), 33–68.
+[57] Yingying Wu, Yiqun Liu, Yen-Hsi Richard Tsai, and Shing-Tung Yau. 2019. Investigating the role of eye movements and physiological signals in
+search satisfaction prediction using geometric analysis. Journal of the Association for Information Science and Technology 70, 9 (2019), 981–999.
+https://doi.org/10.1002/asi.24240 arXiv:https://asistdl.onlinelibrary.wiley.com/doi/pdf/10.1002/asi.24240
+[58] Alfred L Yarbus. [n.d.]. Eye Movements and Vision. Springer.
+https://doi.org/10.1145/3123024.3123092
+https://doi.org/10.1145/3123024.3123092
+https://doi.org/10.1145/968363.968384
+https://doi.org/10.1002/asi.24240
+http://arxiv.org/abs/https://asistdl.onlinelibrary.wiley.com/doi/pdf/10.1002/asi.24240
+	Abstract
+	1 Introduction
+	2 Ophthalmic Neurophysiology
+	3 Eye-tracking Technology
+	4 Eye-tracking in Search and Retrieval
+	5 Eye-tracking in Aware and Adaptive User Interfaces
+	6 Additional Experimental Considerations
+	6.1 Technology
+	6.2 Psychophysiology
+	7 Conclusion
+	References

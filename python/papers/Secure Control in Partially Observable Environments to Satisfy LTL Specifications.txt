@@ -1,0 +1,1698 @@
+1
+Secure Control in Partially Observable
+Environments to Satisfy LTL Specifications∗,+
+Bhaskar Ramasubramanian1, Luyao Niu2, Andrew Clark2,
+Linda Bushnell1, Fellow, IEEE, and Radha Poovendran1, Fellow, IEEE
+Abstract—This paper studies the synthesis of control
+policies for an agent that has to satisfy a temporal logic
+specification in a partially observable environment, in
+the presence of an adversary. The interaction of the
+agent (defender) with the adversary is modeled as a par-
+tially observable stochastic game. The goal is to generate
+a defender policy to maximize satisfaction of a given
+temporal logic specification under any adversary policy.
+The search for policies is limited to the space of finite
+state controllers, which leads to a tractable approach
+to determine policies. We relate the satisfaction of the
+specification to reaching (a subset of) recurrent states of a
+Markov chain. We present an algorithm to determine a set
+of defender and adversary finite state controllers of fixed
+sizes that will satisfy the temporal logic specification, and
+prove that it is sound. We then propose a value-iteration
+algorithm to maximize the probability of satisfying the
+temporal logic specification under finite state controllers
+of fixed sizes. Lastly, we extend this setting to the scenario
+where the size of the finite state controller of the defender
+can be increased to improve the satisfaction probability.
+We illustrate our approach with an example.
+Index Terms—linear temporal logic (LTL), partially ob-
+servable stochastic games (POSGs), finite state controllers
+(FSCs), Stackelberg equilibrium, value iteration, policy
+iteration, global Markov chain (GMC)
+I. INTRODUCTION
+Cyber-physical systems (CPSs) are entities in which
+the working of a physical system is governed by its
+interactions with computing devices and algorithms. These
+systems are ubiquitous [2], and vary in scale from energy
+systems to medical devices and robots. In applications like
+autonomous cars and robotics, CPSs are expected to oper-
+ate in dynamic and potentially dangerous environments
+with a large degree of autonomy. In such a setting, the
+system might be the target of malicious attacks that aim
+to prevent it from accomplishing a goal. An attack can be
+carried out on the physical system, on the computers that
+control the physical system, or on communication channels
+between components of the system. Such attacks by an
+∗This work was supported by the U.S. Army Research Office, the Na-
+tional Science Foundation, and the Office of Naval Research via Grants
+W911NF-16-1-0485, CNS-1656981, and N00014-17-S-B001 respectively.
++A preliminary version of this work appears in [1].
+1Network Security Lab, Department of Electrical and Computer En-
+gineering, University of Washington, Seattle, WA 98195, USA.
+{bhaskarr, lb2, rp3}@uw.edu
+2Department of Electrical and Computer Engineering, Worcester Poly-
+technic Institute, Worcester, MA 01609, USA.
+{lniu, aclark}@wpi.edu
+intelligent attacker have been reported across multiple
+domains, including power systems [3], automobiles [4], wa-
+ter networks [5], and nuclear reactors [6]. Adversaries are
+often stealthy, and tailor their attacks to cause maximum
+damage. Therefore, strategies designed to only address
+modeling and sensing errors may not satisfy performance
+requirements in the presence of an intelligent adversary
+who can manipulate system operation.
+The preceding discussion makes it imperative to develop
+methods to specify and verify CPSs and the environments
+they operate in. Formal methods [7] enable the verification
+of the behavior of CPS models against a rich set of speci-
+fications [8]. Properties like safety, liveness, stability, and
+priority can be expressed as formulas in linear temporal
+logic (LTL) [9], [10], and can be verified using off-the-
+shelf model solvers [11], [12] that take these formulas
+as inputs. Markov decision processes (MDPs) [13], [14]
+have been used to model environments where outcomes
+depend on both, an inherent randomness in the model
+(transition probabilities) and an action taken by an agent.
+These models have been extensively used in applications
+like robotics [15] and unmanned aircrafts [16].
+Current literature on the satisfaction of an LTL formula
+over an MDP assumes that states are fully observable
+[10], [15], [17]. In many practical scenarios, states may
+not be observable. For example, as seen in [18], a robot
+might only have an estimate of its location based on the
+output of a vision sensor. The inability to observe all states
+necessitates the use of a framework that accounts for par-
+tial observability. For LTL formula satisfaction in partially
+observable environments with a single agent, partially-
+observable Markov decision processes (POMDPs) can be
+used to model and solve the problem [19], [20]. However,
+determining an ‘optimal policy’ for an agent in a partially
+observable environment is NP-hard for the infinite horizon
+case, which was shown in [21]. This demonstrates the need
+for techniques to determine approximate solutions.
+Heuristics to approximately solve POMDPs include be-
+lief replanning [22], most likely belief state policy and en-
+tropy weighting [23], grid-based methods [24], and point-
+based methods [25]. The difficulty in computing exactly
+optimal policies and the lack of complete observability may
+be exploited by an adversary to launch new attacks on
+the system. The synthesis of parameterized finite state
+controllers (FSCs) for a POMDP to maximize the prob-
+ability of satisfying of an LTL formula (in the absence
+of an adversary) was proposed in [19] and [20]. This
+ar
+X
+iv
+:2
+00
+7.
+12
+50
+1v
+1 
+ [
+ee
+ss
+.S
+Y
+] 
+ 2
+2 
+Ju
+l 
+20
+20
+2
+is an approximate strategy since it does not use the
+observation and action histories; it uses only the most
+recent observation in order to determine an action. This
+restricts the class of policies that are searched over, but the
+finite cardinality of states in an FSC makes the problem
+computationally tractable. The authors of [26] showed the
+existence of ²−optimal FSCs for the average cost POMDP.
+In comparison, for the setting in this paper where we
+have two competing agents, we present guarantees on the
+convergence of a value-iteration based procedure in terms
+of the number of states in the environment and the FSCs.
+In this paper, we study the problem of determining
+strategies for an agent that has to satisfy an LTL formula
+in the presence of an adversary in a partially observable
+environment. The agent and the adversary take actions
+simultaneously, and these jointly influence transitions
+between states.
+A. Contributions
+The setting that we consider in this paper assumes two
+players or agents– a defender and an adversary– who are
+each limited in that they do not exactly observe the state.
+The policies of the agents are represented as FSCs. The
+goal for the defender will be to synthesize a policy that will
+maximize the probability of satisfying an LTL formula for
+any adversary policy. We make the following contributions.
+• We show that maximizing the satisfaction probability
+of the LTL formula under any adversary policy is
+equivalent to maximizing the probability of reaching
+a recurrent set of a Markov chain constructed by
+composing representations of the environment, the
+LTL objective, and the respective agents’ controllers.
+• We develop a heuristic algorithm to determine de-
+fender and adversary FSCs of fixed sizes that will
+satisfy the LTL formula with nonzero probability, and
+show that it is sound. The search for a defender policy
+that will maximize the probability of satisfaction of
+the LTL formula for any adversary policy can then be
+reduced to a search among these FSCs.
+• We propose a procedure based on value-iteration that
+maximizes the probability of satisfying the LTL for-
+mula under fixed defender and adversary FSCs. This
+satisfaction probability is related to a Stackelberg
+equilibrium of a partially observable stochastic game
+involving the defender and adversary. We also give
+guarantees on the convergence of this procedure.
+• We study the case when the size of the defender FSC
+can be changed to improve the satisfaction probability.
+• We present an example to illustrate our approach.
+The value-iteration procedure and the varying defender
+FSC size described above is new to this work, along with
+more detailed examples. This differentiates the present
+paper from a preliminary version that appears in [1].
+B. Outline
+An overview of LTL and partially observable stochastic
+games (POSGs) is given in Section II. We define FSCs for
+the two agents, and show how they can be composed with
+a POSG to yield a Markov chain in Section III. Section IV
+relates LTL satisfaction on a POSG to reaching specific
+subsets of recurrent sets of an associated Markov chain.
+Section V gives a procedure to determine defender and
+adversary FSCs of fixed sizes that will ensure that the
+LTL formula will be satisfied with non-zero probability.
+A value-iteration procedure to maximize the probability
+of satisfying the LTL formula under fixed defender and
+adversary FSCs is detailed in Section VI. Section VII
+addresses the scenario when states may be added to
+the defender FSC in order to improve the probability of
+satisfying the LTL formula under an adversary FSC of
+fixed size. Illustrative examples are presented in Section
+VIII. Section IX summarizes related work in POMDPs and
+TL satisfaction on MDPs. Section X concludes the paper.
+II. PRELIMINARIES
+In this section, we give a concise introduction to linear
+temporal logic and partially observable stochastic games.
+We then detail the construction of an entity which will
+ensure that runs on a POSG will satisfy an LTL formula.
+A. Linear Temporal Logic
+Temporal logic frameworks enable the representation
+and reasoning about temporal information on proposi-
+tional statements. Linear temporal logic (LTL) is one such
+framework, where the progress of time is ‘linear’. An LTL
+formula [7] is defined over a set of atomic propositions
+A P , and can be written as: φ := T|σ|¬φ|φ∧φ|Xφ|φUφ,
+where σ ∈ A P , and X and U are temporal operators
+denoting the next and until operations respectively.
+The semantics of LTL are defined over (infinite) words
+in 2A P . We write η0η1 · · · := η |=φ when a trace η ∈ (2A P )ω
+satisfies an LTL formula φ. Here, the superscript ω serves
+to indicate the potential infinite length of the word1
+Definition 2.1 (LTL Semantics): Let ηi = ηiηi+1 . . . . Then,
+the semantics of LTL can be recursively defined as:
+1) η |= T if and only if (iff) η0 is true;
+2) η |=σ iff σ ∈ η0;
+3) η |= ¬φ iff η 6|=φ;
+4) η |=φ1 ∧φ2 iff η |=φ1 and η |=φ2;
+5) η |=Xφ iff η1 |=φ;
+6) η |= φ1Uφ2 iff ∃ j ≥ 0 such that η j |= φ2 and for all
+k < j,ηk |=φ1.
+Moreover, the logic admits derived formulas of the form:
+i) φ1∨φ2 :=¬(¬φ1∧¬φ2); ii) φ1 ⇒φ2 :=¬φ1∨φ2; iii) Fφ :=
+TUφ (eventually); iv) Gφ :=¬F¬φ (always).
+Definition 2.2 (Deterministic Rabin Automaton): A de-
+terministic Rabin automaton (DRA) is a quintuple RA =
+(Q,Σ,δ, q0,F) where Q is a nonempty finite set of states, Σ
+is a finite alphabet, δ : Q×Σ→Q is a transition function,
+q0 ∈ Q is the initial state, and F := {(L(i),K(i)}Mi=1 is such
+that L(i),K(i)⊆Q for all i, and M is a positive integer.
+1To be more precise, η is a word in an ω−regular language, which is
+a generalization of regular languages to words of infinite length [7].
+3
+A run of RA is an infinite sequence of states q0q1 . . .
+such that qi ∈ δ(qi−1,α) for all i and for some α ∈ Σ.
+The run is accepting if there exists (L,K) ∈ F such that
+the run intersects with L finitely many times, and with
+K infinitely often. An LTL formula φ over A P can be
+represented by a DRA with alphabet 2A P that accepts all
+and only those runs that satisfy φ.
+B. Stochastic Games and Markov Chains
+A stochastic game involves one or more players, and
+starts with the system in a particular state. Transitions
+to a subsequent state are probabilistically determined by
+the current state and the actions chosen by each player,
+and this process is repeated. Our focus will be on two-
+player stochastic games, and we omit the quantification
+on the number of players for the remainder of this paper.
+Definition 2.3 (Stochastic Game): A stochastic game [17]
+is a tuple G := (S, s0,Ud ,Ua,T,A P ,L ). S is a finite set
+of states, s0 is the initial state, Ud and Ua are finite
+sets of actions of the defender and adversary, respectively.
+T : S×Ud×Ua×S → [0,1] encodes T(s′|s,ud ,ua), the transi-
+tion probability from state s to state s′ when defender and
+adversary actions are ud and ua respectively. A P is a set
+of atomic propositions. L : S → 2A P is a labeling function
+that maps a state to a subset of atomic propositions that
+are satisfied in that state.
+Stochastic games can be viewed as an extension of
+Markov Decision Processes when there is more than one
+player taking an action. For a player, a policy is a mapping
+from sequences of states to actions, if it is deterministic,
+or from sequences of states to a probability distribution
+over actions, if it is randomized. A policy is Markov if it
+is dependent only on the most recent state.
+In this paper, we focus our attention on the Stackelberg
+setting [27]. In this framework, the first player (leader)
+commits to a policy. The second player (follower) observes
+the leader’s policy and chooses its policy as the best
+response to the leader’s policy, defined as the policy that
+maximizes the follower’s utility. We also assume that the
+players take their actions concurrently at each time step.
+We now define the notion of a Stackelberg equilibrium,
+which indicates that a solution to a Stackelberg game has
+been found. Let QL(l, f ) (QF (l, f )) be the utility gained by
+the leader (follower) by adopting a policy l (f ).
+Definition 2.4 (Stackelberg Equilibrium): A pair (l, f )
+is a Stackelberg equilibrium if l = argmaxl′ QL(l′,BR(l′)),
+where BR(l′) = {f : f = argmaxQF (l′, f )}. That is, the
+leader’s policy is optimal given that the follower observes
+the leader’s policy and plays its best response.
+When Ua = ; and |Ud | = 1, G is a Markov chain [28].
+For s, s′ ∈ S, s′ is accessible from s, written s → s′, if
+P(sa|s)P(sb|sa) . . .P(si|s j)P(s′|si)> 0 for some (finite subset
+of) states sa, sb, . . . , si, s j. Two states communicate if s → s′
+and s′ → s. Communicating classes of states cover the state
+space of the Markov chain. A state is transient if there is
+a nonzero probability of not returning to it when we start
+from that state, and is positive recurrent otherwise. In a
+finite state Markov chain, every state is either transient
+or positive recurrent.
+C. Partially Observable Stochastic Games
+Partially observable stochastic games (POSGs) extend
+Definition 2.3 to the case when instead of observing a state
+directly, each player receives an observation that is derived
+from the state. This can be viewed as an extension of
+POMDPs to the case when there is more than one player.
+Definition 2.5 (Partially Observable Stochastic Game): A
+partially observable stochastic game is defined by the tu-
+ple S G := (S, s0,Ud ,Ua,T,Od ,Oa,Od ,Oa,A P ,L ), where
+S, s0,Ud ,Ua,T,A P ,L are as in Definition 2.3. Od and
+Oa denote the (finite) sets of observations available to the
+defender and adversary. O∗ : S×O∗ → [0,1] encodes P(o∗|s),
+where ∗ ∈ {d,a}.
+The functions O∗ model imperfect sensing. In order for
+O∗ to satisfy the conditions of a probability distribution,
+we need O∗(o|s)≥ 0∀o ∈O∗ and
+∑
+o∈O∗ O∗(o|s)= 1.
+D. Adversary and Defender Models
+The initial state of the system is s0. A transition from
+a state st to the next state st+1 is determined jointly by
+the actions of the defender and adversary according to the
+transition probability function T.
+At a state st, the adversary makes an observation, Ota of
+the state according to Oa. The adversary is also assumed
+to be aware of the policy (sequence of actions), µd , commit-
+ted to by the defender. Therefore, the overall information
+available to the adversary is Ita :=
+⋃
+i=0:t
+Oia ∪ {µd}.
+Different from the information available to the ad-
+versary, at state st, the defender makes an observation
+Otd of the state according to Od . Therefore, the overall
+information for the defender is Itd :=
+⋃
+i=0:t
+Oid .
+Definition 2.6 (POSG Policy): A (defender or adversary)
+policy for the POSG is a map from the respective overall
+information to a probability distribution over the corre-
+sponding action space, i.e. µt∗ : I
+t
+∗×U∗ → [0,1], ∗ ∈ {d,a}.
+Policies of the form above are called randomized policies.
+If µt∗ : I
+t
+∗ →U∗, it is called a deterministic policy. In the se-
+quel, we will use finite state controllers as a representation
+of policies that consider only the most recent observation.
+E. The Product-POSG
+In order to find runs on S G that would be accepted
+by a DRA RA built from an LTL formula φ, we con-
+struct a product-POSG. This construction is motivated by
+the product-stochastic game construction in [17] and the
+product-POMDP construction in [19].
+Definition 2.7 (Product-POSG): Given S G and
+RA (built from LTL formula φ), a product-POSG is
+S Gφ = (Sφ, sφ0 ,Ud ,Ua,Tφ,Od ,Oa,O
+φ
+d ,O
+φ
+a ,F
+φ,A P ,L φ),
+where Sφ = S × Q, sφ0 = (s0, q0), O
+φ
+∗(o|(s, q)) = O∗(o|s),
+Tφ((s′, q′)|(s, q),ud ,ua) = T(s′|s,ud ,ua) iff δ(q,L (s′)) = q′,
+and 0 otherwise, Fφ = {(Lφ(i),Kφ(i))}Mi=1, Lφ(i),Kφ(i)⊂ Sφ,
+4
+T̄ :=Tφ,Cd ,Ca ((s′, q′), g′d , g′a|(s, q), gd , ga) (1)
+=
+∑
+o∈Od
+∑
+o′∈Oa
+∑
+ud
+∑
+ua
+Od(o|s)Oa(o′|s)µd(g′d ,ud |gd , o)µa(g′a,ua|ga, o′)Tφ((s′, q′)|(s, q),ud ,ua)
+and (s, q) ∈ Lφ(i) iff q ∈ L(i), (s, q) ∈ Kφ(i) iff q ∈ K(i),
+L φ((s, q))=L (s).
+From the above definition, it is clear that acceptance
+conditions in the product-POSG depend on the DRA while
+the transition probabilities of the product-POSG are de-
+termined by transition probabilities of the original POSG.
+Therefore, a run on the product-POSG can be used to
+generate a path on the POSG and a run on the DRA.
+Then, if the run on the DRA is accepting, we say that the
+product-POSG satisfies the LTL specification φ.
+III. PROBLEM SETUP
+This section details the construction of FSCs for the two
+agents. An FSC for an agent can be interpreted as a policy
+for that agent. The defender and adversary policies will be
+determined by probability distributions over transitions in
+finite state controllers that are composed with the POSG.
+When the FSCs are composed with the product-POSG, the
+resulting entity is a Markov chain. We then establish a
+way to determine satisfaction of an LTL specification on
+the product-POSG in terms of runs on the composed MC.
+A. Finite State Controllers
+Finite state controllers consist of a finite number of
+internal states. Transitions between states is governed by
+the current observation of the agent. In our setting, we will
+have two FSCs, one for the defender and another for the
+adversary. We will then limit the search for defender and
+adversary policies to one over FSCs of fixed cardinality.
+Definition 3.1 (Finite State Controller): A finite state
+controller for the defender (adversary), denoted Cd (Ca),
+is a tuple C∗ = (G∗, g0∗ ,µ∗), where G∗ is a finite set of
+(internal) states of the controller, g0∗ is the initial state
+of the FSC, and µ∗ : G∗ ×O∗ ×G∗ ×U∗ → [0,1], written
+µ∗(g′∗,u∗|g∗, o∗), is a probability distribution of the next
+internal state and action, given a current internal state
+and observation. Here, ∗ ∈ {d,a}.
+An FSC is a finite-state probabilistic automaton that
+takes the current observation of the agent as its input, and
+produces a distribution over the actions as its output. The
+FSC-based control policy is defined as follows: initial states
+of the FSCs are determined by the initial state of the
+POSG. The defender commits to a policy at the start. At
+each time step, the policy returns a distribution over the
+actions and the next state of Cd , given the current state of
+the FSC Cd and the state of S G
+φ observed according to
+Od . The adversary observes this and the state according
+to Oa and responds with µa(·) generated by Ca. Actions at
+each step are taken concurrently.
+Definition 3.2 (Proper FSCs): An FSC is proper with
+respect to an LTL formula φ if there is a positive prob-
+ability of satisfying φ under this policy in an environment
+represented as a partially observable stochastic game.
+This is similar to the definition in [29], with the distinc-
+tion that the terminal state of an FSC in that context will
+be related to Rabin acceptance pairs of an MC formed by
+composing Cd and Ca with S G
+φ (Sec III-B).
+B. The Global Markov Chain
+The FSCs Cd and Ca, when composed with S G
+φ, will
+result in a finite-state, (fully observable) Markov chain. To
+maintain consistency with the literature, we will refer to
+this as the global Markov chain (GMC) [19].
+Definition 3.3 (Global Markov Chain (GMC)): The GMC
+resulting from a product-POSG S Gφ controlled by FSCs
+Cd and Ca is M := Mφ,Cd ,Ca = (S̄, s̄0,T̄,A P ,L̄ ), where
+S̄ = Sφ × Gd × Ga, s̄0 = (s0, q0, g0d , g0a ), T̄ is given by
+Equation (1), and L̄ =L φ((s, q)).
+Similar to S Gφ, the Rabin acceptance condition for M̄
+is: F̄ = {(L̄(i), K̄(i))}Mi=1, with (s, q, gd , ga) ∈ L̄(i) iff (s, q) ∈
+Lφ(i) and (s, q, gd , ga) ∈ K̄(i) iff (s, q) ∈ Kφ(i).
+A state of M is s := (s, q, gd , ga). A path on M is a
+sequence π := s0s1 . . . such that T(sk+1|sk)> 0, where T(·) is
+the transition probability in M . The path is accepting if it
+satisfies the Rabin acceptance condition. This corresponds
+to an execution in S Gφ controlled by Cd and Ca.
+C. Problem Statement
+The goal is to synthesize a defender policy that maxi-
+mizes the probability of satisfaction of an LTL specification
+under any adversary policy. Clearly, this will depend on
+the FSCs, Cd and Ca. In this paper, we will assume
+that the size of the adversary FSC is fixed, and known
+to the defender. This can be interpreted as one way for
+the defender to have knowledge of the capabilities of an
+adversary. Future work will consider the problem for FSCs
+of arbitrary sizes. The problem is formally defined below.
+Problem 3.4: Given a partially observable environment
+and an LTL formula, determine a defender policy specified
+by an FSC that maximizes the probability of satisfying
+the LTL formula under any adversary policy that is rep-
+resented as an FSC of fixed size |Ga| =GA . That is,
+max
+Cd
+min
+Ca
+P(S Gφ |=φ|Cd ,Ca, |Ga| =GA) (2)
+Optimizing over Cd and Ca indicates that the solution
+will depend on |Gd |, µd(·), and µa(·).
+5
+IV. LTL SATISFACTION AND RECURRENT SETS
+The first result in this section relates the probability of
+the LTL specification being satisfied by the product-POSG,
+denoted S Gφ |=φ, in terms of recurrent sets of the GMC.
+We then present a procedure to generate recurrent sets of
+the GMC that additionally satisfy the LTL formula. The
+main result of this section relates Problem 3.4 to deter-
+mining FSCs that maximize the probability of reaching
+certain types of recurrent sets of the GMC.
+Let R = Rφ,Cd ,Ca denote the recurrent states of M
+under FSCs Cd and Ca. Let RS := (s, q) be the restriction
+of a recurrent state to a state of S Gφ.
+Proposition 4.1: P(S Gφ |= φ|Cd ,Ca) > 0 if and only if
+there exists Cd such that for any Ca, there exists a Rabin
+acceptance pair (Lφ(i),Kφ(i)) and an initial state of M , s̄0,
+where the following conditions hold:
+Kφ(i)∩RS 6= ;
+s̄0 → (Kφ(i)×Gd ×Ga)∩R (3)
+s̄0 6→ (Lφ(i)×Gd ×Ga)∩R
+Proof: If for every (Lφ(i),Kφ(i)), at least one of the
+conditions in Equation (3) does not hold, then at least one
+of the following statements is true: i): no state that has to
+be visited infinitely often is recurrent; ii): there is no initial
+state from which a recurrent state that has to be visited
+infinitely often is accessible; iii): some state that has to
+be visited only finitely often in steady state is recurrent.
+This means S Gφ 6|=φ for all Cd .
+Conversely, if all the conditions in Equation (3) hold for
+some (Lφ(i),Kφ(i)), then S Gφ |=φ by construction.
+To quantify the satisfaction probability for a defender
+policy under any adversary policy, assume that the recur-
+rent states of M are partitioned into recurrence classes
+{R1, . . . ,Rp}. This partition is maximal, in the sense that
+two recurrent classes cannot be combined to form a larger
+recurrent class, and all states within a given recurrent
+class communicate with each other [20].
+Definition 4.2 (φ−feasible Recurrent Set): A recurrent set
+Rk is φ−feasible under FSCs Cd and Ca if there exists
+(Lφ(i),Kφ(i)) such that Kφ(i)∩RSk 6= ; and Lφ(i)∩RSk =;.
+Let φ−RecSetsCd ,Ca denote the set of φ−feasible recurrent
+sets under the respective FSCs.
+Let π→ R be the event that a path of M will reach
+a recurrent set. Algorithm 1 returns φ−feasible recurrent
+sets of S Gφ under fixed FSCs Cd ,Ca.
+We have the following result:
+Theorem 4.3: The probability of satisfying an LTL for-
+mula φ in a POSG with policies Cd and Ca is equal to the
+probability of paths in the GMC (under the same FSCs)
+reaching φ−feasible recurrent sets. That is,
+P(S Gφ |=φ|Cd ,Ca)=
+∑
+R∈φ−RecSetsCd ,Ca
+P(π→ R) (4)
+Proof: Since the recurrence classes are maximal,
+P(π → (R1 ∪ ·· · ∪ Rp)) =
+∑p
+k=1P(π → Rk). From Definition
+4.2, a φ−feasible recurrent set will necessarily contain a
+Rabin acceptance pair. Therefore, the probability of S Gφ
+Algorithm 1 Generate φ−feasible Recurrent Sets for
+S Gφ under FSCs Cd ,Ca
+Input: M :=Mφ,Cd ,Ca , {Lφ(i),Kφ(i)}Mi=1
+Output: {Rk}, that is recurrent and φ−feasible
+1: Induce digraph G of M of S Gφ under Cd ,Ca as (S,E ),
+s.t. ∀s1,s2 ∈S : s1 → s2 ∈ E ⇔T(s2|s1)> 0.
+2: C = SCCs(G ) = {C1, . . . ,CN } // strongly connected com-
+ponents of digraph
+3: RecSets := {R1, . . . ,Rp} such that Ri ∈ C and Ri is a
+sink SCC
+4: φ−RecSetsCd ,Ca =;
+5: for j = 1 to p do
+6: for i = 1 to M do
+7: if (Lφ(i)∩RSj =;)∧ (Kφ(i)∩RSj 6= ;) then
+8: φ−RecSetsCd ,Ca =φ−RecSetsCd ,Ca ∪R j
+9: end if
+10: end for
+11: end for
+satisfying the LTL formula under Cd and Ca is equivalent
+to the probability of paths on M leading to φ−feasible
+recurrent sets, which is given by Equation (4).
+Corollary 4.4: From Theorem 4.3, it follows that:
+max
+Cd
+min
+Ca
+P(S Gφ |=φ|Cd ,Ca)
+=max
+Cd
+min
+Ca
+∑
+R∈φ−RecSetsCd ,Ca
+P(π→ R) (5)
+We note that Proposition 4.1, Theorem 4.3, and Corol-
+lary 4.4 address a broader class of problems than in
+Problem 3.4 since they do not assume that the size of the
+adversary FSC is fixed.
+V. DETERMINING CANDIDATE FSCS OF FIXED SIZES
+If the sizes of Cd and Ca are fixed, then their design
+is equivalent to determining the transition probabilities
+between their internal states. In this section, we present
+a heuristic procedure that uses only the most recent
+observations of the defender and adversary to generate
+a set of admissible FSC structures such that the resulting
+GMC will have a φ−feasible recurrent set. We show that
+the procedure has a computational complexity that is
+polynomial in the number of states of the GMC and
+additionally establish that this algorithm is sound.
+Definition 5.1: An algorithm is sound if any solution
+returned by it is the Boolean constant true when evaluated
+on the output of the algorithm (i.e., every output is a
+correct output). It is complete if it returns a result for
+any input, and reports ‘failure’ if no solution exists.
+Let I∗ : G∗ ×O∗ ×G∗ ×U∗ → {0,1}, where I∗(g′,u|g, o)
+= 1 ⇔ µ∗(g′,u|g, o) > 0. I∗(·) shows if an observation o
+can enable the transition from an FSC state g to g′
+while issuing action u. We also assume that ∀(g, o) ∈
+G∗×O∗,∃(g′,u) ∈G∗×U∗ such that I∗(g′,u|g, o)= 1 [20].
+In Algorithm 2, for defender and adversary FSCs with
+fixed number of states, we determine candidate Cd and
+Ca such that the resulting M will have a φ−feasible
+6
+Od(od |s)Oa(oa|s)µd(g′d ,ud |gd , od)µa(g′a,ua|ga, oa)Tφ((s′, q′)|(s, q),ud ,ua)> 0 (6)
+Od(od |s)Oa(oa|s)µd(g′′d ,ud |gd , od)µa(g′′a,ua|ga, oa)Tφ((s′′, q′′)|(s, q),ud ,ua)> 0 (7)
+Algorithm 2 Generate candidate FSCs Cd ,Ca
+Input: Gd , Ga, S Gφ, I od , I
+o
+a
+Output: Set of admissible FSC structures I := (Id , Ia), such
+that GMC has a φ−feasible recurrent set
+1: Induce digraph G of M of SGφ under I od and I
+o
+a as
+(S,E ), s.t. ∀s1,s2 ∈S : s1 → s2 ∈ E ⇔T(s2|s1)> 0.
+2: Id = Ia =;
+3: C = SCCs(G )= {C1, . . . ,CN }
+4: for C ∈C and (Lφ(i),Kφ(i)) ∈ Fφ do
+5: Badi = {s′ ∉ C : ∃s ∈ C s.t. s→ s′}
+6: Badi = Badi ∪ (C∩ (Lφ(i)×Gd ×Ga))
+7: Goodi = C∩ (Kφ(i)×Gd ×Ga)
+8: Set I∗(g′∗,u∗|g∗, o∗)= 1 for all g′∗, g∗,u∗, o∗
+9: while
+∑
+g′∗,u∗ I∗(g
+′
+∗,u∗|g∗, o∗) > 0∀o∗, g∗ and
+Badi 6= ; do
+10: Choose s′ = (s′, q′, g′d , g′a) ∈ Badi,
+s′′ = (s′′, q′′, g′′d , g′′a) ∈Goodi
+11: for s= (s, q, gd , ga) ∈ C \ Badi do
+12: for ud ∈Ud do
+13: µ∗(g′∗,u∗|g∗, o∗)=
+I∗(g′∗,u∗|g∗,o∗)∑
+g′∗ ,u∗ I∗(g
+′∗,u∗|g∗,o∗)
+14: if ∃ua ∈Ua Eqn (6) holds then
+15: Id(g′d ,ud |gd , od)← 0
+∀g′d , gd ∈Gd
+16: end if
+17: end for
+18: for ua ∈Ua do
+19: µ∗(g′′∗,u∗|g∗, o∗)=
+I∗(g′′∗,u∗|g∗,o∗)∑
+g′′∗ ,u∗ I∗(g
+′′∗,u∗|g∗,o∗)
+20: if ∀ud ∈Ud , Eqn (7) holds then
+21: Ia(g′′a,ua|ga, oa)← 0
+22: end if
+23: end for
+24: end for
+25: Badi = Badi \{s′}
+26: end while
+27: Construct digraph Gnew of GMC of S Gφ under
+modified Id and Ia
+28: Cnew = SCCs(Gnew)
+29: if ∃s ∈Goodi s.t. s is recurrent in Gnew then
+30: I= (Id ∪Id , Ia ∪Ia)
+31: end if
+32: end for
+recurrent set. We start with initial candidate structures
+I o∗ and induce the digraph of the resulting GMC (Line 1).
+In our case, I o∗ is such that I
+o
+∗ (g
+′
+∗,u∗|g∗, o∗) = 1 for all
+g′∗, g∗,u∗, o∗. We first determine the set of communicating
+classes of the GMC, which is equivalent to determining
+the strongly connected components (SCCs) of the induced
+digraph (Line 3). A communicating class will be recurrent
+if it is a sink SCC of the corresponding digraph. The states
+in Badi are those in C that are part of the Rabin accepting
+pair that has to be visited only finitely many times (and
+therefore, to be visited with very low probability in steady
+state) (Line 6). Badi further contains states that can be
+transitioned to from some state in C. This is because once
+the system transitions out of C, it will not be able to return
+to it in order to satisfy the Rabin acceptance condition
+(Line 5) (and hence, C will not be recurrent). Goodi
+contains those states in C that need to be visited infinitely
+often according to the Rabin acceptance condition (Line 7).
+The agents have access to a state only via their obser-
+vations. A defender action is forbidden if there exists an
+adversary action that will allow a transition to a state in
+Badi under observations od and oa. This is achieved by
+setting corresponding entries in Id to zero (Lines 12-17).
+An adversary action is not useful if for every defender
+action, the probability of transitioning to a state in Goodi
+is nonzero under od and oa. This is achieved by setting
+the corresponding entry in Ia to zero (Lines 18-23).
+Proposition 5.2: Define |O | = |Od |+ |Oa| and |U | = |Ud |+
+|Ua|. Then, Algorithm 2 has an overall computational
+complexity of O(|S|2|Gd |2|Ga|2|O ||U |).
+Proof: The overall complexity depends on: (i) Deter-
+mining strongly connected components (Line 3): This can
+be done in O(|S| + |E |) [30]. Since |S| = |S||Gd ||Ga| and
+|E | ≤ |S|2, this is O(|S|2|Gd |2|Ga|2) in the worst case,
+and (ii) Determining the structures in Lines 9-26: This
+is O(|S|(|Od |+ |Oa|)(|S|(|Ud |+ |Ua|)). The result follows by
+combining the two terms.
+Proposition 5.3: Algorithm 2 is sound.
+Proof: This is by construction. The output of the
+algorithm is a set {I id ,I
+i
+a}
+W
+i=1 such that the resulting GMC
+for each case has a state that is recurrent and has to
+be visited infinitely often. This state, by Definition 4.2,
+belongs to φ− RecSetC id ,C ia . Moreover, if the algorithm
+returns a nonempty solution, a solution to Problem 3.4
+will exist since the FSCs are proper.
+Algorithm 2 is suboptimal since we only consider the
+most recent observations of the defender and adversary.
+It is also not complete, since there might be a feasible
+solution that cannot be determined by the algorithm. If
+no FSC structures of a particular size is returned by
+Algorithm 2, a heuristic is to increase the number of states
+in the defender FSC by one, and run the Algorithm again.
+Once we obtain proper FSC structures of fixed sizes, we
+will show in Section VII that the satisfaction probability
+can be improved by adding states to the defender FSC
+in a principled manner (for adversary FSCs of fixed size).
+Algorithm 2 and Proposition 5.3 will allow us to restrict
+our treatment to proper FSCs for the rest of the paper.
+7
+VI. VALUE ITERATION FOR POSGS
+In this section, we present a value-iteration based pro-
+cedure to maximize the probability of satisfying the LTL
+formula φ for FSCs Cd and Ca of fixed sizes. We prove
+that the procedure converges to a unique optimal value,
+corresponding to the Stackelberg equilibrium.
+Notice that in Equation (1), the defender and adversary
+policies are specified as probability distributions over the
+next FSC internal state and the respective agent action,
+and conditioned on the current FSC internal state and
+the agent observation. With ∗ ∈ {d,a}, we rewrite these in
+terms of a mapping µ̂∗ : G∗×S×G∗×U∗ → [0,1]:
+µ̂∗(g′∗,u∗|g∗, s) :=
+∑
+o∗∈O∗
+O∗(o∗|s)µ∗(g′∗,u∗|g∗, o∗) (8)
+This will allow us to express Equation (1) as:
+Prφ((s′, q′), g′d , g
+′
+a|(s, q), gd , ga)
+=
+∑
+ud
+∑
+ua
+µ̂d(g
+′
+d ,ud |gd , s)µ̂a(g′a,ua|ga, s)
+T
+φ((s′, q′), g′d , g
+′
+a|(s, q), gd , ga) (9)
+Define a value V over the state space of the GMC
+representing the probability of satisfying the LTL formula
+φ when starting from a state of the GMC. Additionally,
+define and characterize the following operators:
+(Tµ̂d µ̂a V )(s)=
+∑
+s′
+Pr(s′|s)V (s′);
+(Tµ̂d V )(s)=min
+µ̂a
+∑
+s′
+Pr(s′|s)V (s′);
+(TV )(s)=max
+µ̂d
+min
+µ̂a
+∑
+s′
+Pr(s′|s)V (s′)
+where Pr(s′|s) is the transition probability in the GMC
+induced by policies µ̂d and µ̂a (Equation (9)).
+Proposition 6.1: Let
+V ((s, q),gd , ga)
+=max
+µ̂d
+min
+µ̂a
+Pr(φ|((s, q), gd , ga)). (10)
+Then
+V ((s, q), gd , ga)=
+max
+µ̂d
+min
+µ̂a
+∑
+((s′,q′),g′d ,g
+′
+a)
+∑
+ud
+∑
+ua
+(
+µ̂d(g
+′
+d ,ud |gd , s)
+× µ̂a(g′a,ua|ga, s)
+×Tφ((s′, q′)|(s, q),ud ,ua)V ((s′, q′), g′d , g′a))
+)
+(11)
+Conversely, if the value vector V satisfies Equation (11),
+then Equation (10) holds true. Moreover, V is unique.
+Before proving Proposition 6.1, we will need some in-
+termediate results. Inequalities in the proofs of these
+statements are true element-wise.
+Theorem 6.2: [Monotone Convergence Theorem][31] If a
+sequence is monotone increasing and bounded from above,
+then it is a convergent sequence.
+Lemma 6.3: Let V be the satisfaction probability ob-
+tained under any pair of policies µ̂d and µ̂a, where µ̂a
+is the best response to µ̂d . Let Tk be the operation
+that composes the T operator k times, and V k be the
+corresponding value obtained (i.e., TkV :=V k). Then, there
+exists a value V∗ such that limk→∞ TkV =V∗.
+Proof: We show Lemma 6.3 by showing that the
+sequence V k = TkV is bounded and monotone.
+We first show boundedness. By definition of the operator
+T, V k+1 is obtained as a convex combination of V k. Since
+V is the satisfaction probability, it is in [0,1]. Thus, V 0 is
+bounded, and consequently, TkV is bounded for all k.
+We next show monotonicity by induction. We have that
+V 0 is the value function associated with a control policy
+µ̂d . Denote the best response of the adversary to µ̂d as
+µ̂a. Let V 1 := TV 0. From the definitions of T and Tµ̂d , we
+have TV 0 ≥ Tµ̂d V 0. Furthermore, V 0 = Tµ̂d V 0 since
+Tµ̂d V
+0(s)=min
+µ̂′a
+∑
+s′
+∑
+ud
+∑
+ua
+(
+V k(s′)µ̂d(g
+′
+d ,ud |gd , s)
+× µ̂a(g′a,ua|ga, s)Tφ((s′, q′)|(s, q),ud ,ua)
+)
+=V 0
+by the definition that µ̂′a is the best response of µ̂d .
+Therefore, we have that V 1 = TV 0 ≥ Tµ̂d V 0 = V 0. This
+gives us V 1 ≥ V 0, which serves as the base case for the
+induction. Consider iteration k. Suppose Tk−1V ≤ TkV . We
+then show TkV ≤ Tk+1V . We have:
+Tk+1V ≥min
+µ̂a
+∑
+s′
+Pr(s′|s)V k(s′)≥min
+µ̂a
+∑
+s′
+Pr(s′|s)V k−1(s′)=V k.
+The first inequality holds by the definition of T, the
+second inequality holds by the induction hypothesis that
+V k ≥V k−1, and the last equality holds by construction of a
+control policy. The existence of V∗ such that limk→∞ TkV =
+V∗ follows from Theorem 6.2.
+We now prove Proposition 6.1.
+Proof: We first prove the forward direction by con-
+tradiction, i.e., if Equation (10) holds then Equation (11)
+holds. Suppose µ̂d is a Stackelberg equilibrium policy with
+satisfaction probability being V , while Equation (11) does
+not hold. Since µ̂d is the Stackelberg equilibrium policy,
+V = Tµ̂d V . This is because, given µ̂d , the stochastic game
+is an MDP, for which V is the optimal value [13]. From
+the definitions of T and Tµ̂d , we must have Tµ̂d V ≤ TV .
+Composing the operators k times and letting k →∞,
+V = lim
+k→∞
+Tkµ̂d V ≤ limk→∞T
+kV =V∗,
+where the first equality holds by the assumption that V
+is the satisfaction probability and µ̂d is the Stackelberg
+equilibrium policy, the last equality holds by Lemma 6.3.
+If V = V∗, Eqn. (11) is satisfied, which contradicts our
+assumption that Eqn. (10) holds while (11) does not hold.
+If V 6=V∗, then there must exist a state s such that V (s)<
+V∗(s). This means that there is a policy (different from
+µ̂d) corresponding to V∗ for which we achieve a higher
+satisfaction probability starting at state s. This violates
+our assumption that µ̂d is the equilibrium policy. We must
+then have that Eqn. (11) holds given that Eqn. (10) holds.
+8
+We next prove uniqueness of the V . Let V̂ and V be
+two solutions to Eqn. (11), and let µ̂d and µd denote the
+corresponding control policies. From the definitions of T
+and Tµ̂d , we have that V = TV ≥ Tµ̂d V . Composing the
+operators on both sides k times and letting k →∞,
+V = lim
+k→∞
+TkV ≥ lim
+k→∞
+Tkµ̂d V = V̂ ,
+where the first equality holds by the assumption that µ̂d
+is the equilribrium policy, and the second equality holds
+by the fact that V̂ is the unique fixed point of operator Tµ̂d
+(Proposition 2.2.1 in Volume 2 of [13]). Following a similar
+argument as before, we have the following inequality:
+V̂ = lim
+k→∞
+TkV̂ ≥ lim
+k→∞
+Tkµ̂d V̂ =V .
+We have that both V ≥ V̂ and V̂ ≥V are true, which gives
+us V = V̂ . This implies that the value V is unique.
+We finally show that if Eqn. (11) holds then Eqn. (10)
+holds. We observe that the value function at equilibrium
+satisfies (11), and the solution is unique. Therefore, any
+solution to (11) must be a Stackelberg equilibrium [32].
+Proposition 6.1 indicates that value-iteration algorithms
+can be used to determine optimal policies µ̂d and µ̂a. Given
+a policy µ̂d and observation function Od , we will be able
+to compute µd by solving a system of linear equations.
+A value-iteration based procedure to solve the POSG
+under an LTL specification is proposed in Algorithm 3.
+The value V (s) is greedily updated at every iteration
+by computing the policy according to Proposition 6.1.
+The algorithm terminates when the difference in V (·) in
+consecutive iterations is below a pre-specified threshold.
+Algorithm 3 Maximizing probability of satisfying LTL
+formula φ under fixed FSCs Cd ,Ca
+Input: M :=Mφ,Cd ,Ca , {Lφ(i),Kφ(i)}Mi=1,² (threshold)
+Output: V ∈R|S|×|Q|×|Gd |×|Ga|
+1: Determine φ−RecSetsCd ,Ca using Algorithm 1
+2: µ̂∗(g′∗,u∗|g∗, s) :=
+∑
+o∗
+O∗(o∗|s)µ(g′∗,u∗|g∗, o∗), ∗ ∈ {d,a}
+3: V 0(s)← 0
+4: V 1(s)← 1 if s ∈φ−RecSetsCd ,Ca , and V 1(s)← 0, else
+5: k ← 0
+6: while max
+s
+{V k+1(s)−V k(s)}> ² do
+7: k ← k+1
+8: for s ∉φ−RecSetsCd ,Ca do
+9: V k+1(s)←max
+µ̂d
+min
+µ̂a
+∑
+s′
+∑
+ud
+∑
+ua
+(
+V k(s′)µ̂d(g′d ,ud |gd , s)
+×µ̂a(g′a,ua|ga, s)Tφ((s′, q′)|(s, q),ud ,ua)
+)
+10: end for
+11: end while
+12: return V (=V k(s))
+Proposition 6.4: For any ²> 0, there exist K ,V such that
+||V k(s)−V ||∞ < ² for all k > K . Further, V satisfies the
+value in Proposition 6.1 and is within the ²-neighborhood
+of the value function at Stackelberg equilibrium.
+Proof: Notice that V 1(s) ≥ V 0(s). Since V 1(s) = 0 for
+(s, q) ∉φ−RecSetsCd ,Ca , V 2(s)≥V 1(s). We induct on k.Let
+µ̂kd be the optimal defender policy at step k. Then,
+V k+1(s)≥min
+µ̂a
+∑
+s′
+∑
+ud
+∑
+ua
+(
+V k(s′)µ̂d(g
+′
+d ,ud |gd , s)
+× µ̂a(g′a,ua|ga, s)Tφ((s′, q′)|(s, q),ud ,ua)
+)
+≥min
+µ̂a
+∑
+s′
+∑
+ud
+∑
+ua
+(
+V k−1(s′)µ̂d(g
+′
+d ,ud |gd , s)
+× µ̂a(g′a,ua|ga, s)Tφ((s′, q′)|(s, q),ud ,ua)
+)
+=V k(s)
+The first inequality holds because V k+1(s) is the value
+obtained by the maximizing policy, and dominates the
+value achieved by any other policy. The second and last
+inequalities follow from the induction hypothesis and def-
+inition of V k(s) respectively. Further, for each state, V k(s)
+is bounded since it is a convex combination of terms that
+are ≤ 1. Let V be the set of limit points so that K can be
+chosen such that ||V k(s)−V ||∞ < ² for k > K .
+Since V k(s) converges, it is a Cauchy sequence. There-
+fore, for every ²> 0, there exists K sufficiently large, such
+that for all k > K , |V k(s)−V k+1(s)| < ². From Line 8 of Al-
+gorithm 3, this shows that V is within an ²−neighborhood
+of a Stackelberg equilibrium for every ²> 0.
+A minor modification of the value update procedure
+gives the following proposition on the termination time
+of Algorithm 3 [33] .
+Proposition 6.5 ([33], Proposition 4): Suppose that at
+time k, the value update in Line 8 of Algorithm 3 is
+performed as shown if the right hand side term is greater
+than (1+²)V k(s), and V k+1(s)=V k(s) otherwise. Then, Al-
+gorithm 3 converges to a value V that satisfies ||V k+1(s)−
+V k(s)||∞ < ² in at most N∗ iterations, where N∗ =
+|S||Q||Gd ||Ga|max
+s
+{
+log( 1Vmin(s) )/ log(1+ ²)
+}
+. Here Vmin(s) is
+the smallest non-zero value of V k(s).
+VII. ADDING STATES TO Cd
+Whenever Algorithm 2 returns a non-empty solution,
+the FSCs are proper (Definition 3.2). In this case, there
+is a nonzero probability of visiting a state in a φ−feasible
+recurrent set of S Gφ under FSCs Cd ,Ca.
+It might be the case that the probability of satisfying
+the LTL formula can be increased by adding states to Cd .
+In doing so, it is important to ensure that adding states
+to Cd does not decrease this satisfaction probability when
+compared to the satisfaction probability for Cd with fewer
+states. This lends itself to a policy iteration like approach.
+Policy iteration [13] is a procedure that alternates between
+policy evaluation and policy improvement until conver-
+gence to a Stackelberg equilibrium. The policy evaluation
+step involves solving a Bellman equation, while the policy
+improvement step then ‘greedily’ chooses a policy that
+maximizes the satisfaction probability.
+9
+In this section, we will assume that the size of Ca is
+fixed. Intuititively, this means that the defender is aware
+of the capabilities of the adversary. However, the defender
+does not know the transition probabilities in Ca, which
+means it needs to determine the transition probabilities
+of its own FSC in order to be robust against the worst-
+case transition probabilities between states in Ca. Future
+work will seek to address the situations when the defender
+knows the nature of the strongest possible adversary (this
+will correspond to |Ga| ≤GA), and when the defender does
+not know anything about the abilities of an adversary.
+We will work with the ‘value’ of a state gd ∈Gd in Cd .
+Denote this by Vgd (s). From the defender’s perspective, the
+transition probabilities in Cd are influenced by its belief of
+the state of S Gφ under Cd and Ca. The belief is a (prior)
+probability distribution over the states of the POSG. Then,
+the value of gd ∈ Gd under belief b = {b1, . . . ,b|S|} can be
+written as Vgd (b) =
+∑
+i biVgd (si). The value function for a
+belief b is then given by
+V (b) :=max
+gd
+Vgd (b) (12)
+Figure 1 shows V (b) for a two-state POSG with |Gd | = 3.
+Figure 1: Value function of a two-state POSG with three
+states in Cd . The value of each FSC state is linear in the
+belief (black lines). The value function is the point-wise
+maximum of the values of the FSC states (red curve).
+When working with defender and adversary FSCs of
+fixed sizes, the value iteration in Algorithm 3 terminates
+when a (local) equilibrium is reached. This means there is
+no choice of transition probabilities in Cd that will improve
+the satisfaction probability for some belief state(s). This
+probability can be improved by adding states to Cd (since
+|Ga| is fixed). The value of a belief b (Equation (12)) is
+the point-wise maximum of the value at each state of Cd ,
+which themselves are linear functions of the belief state.
+Therefore, at equilibrium, V (b) will satisfy:
+V (b)=max
+ud
+min
+ua
+∑
+o∈Od
+P(o|b)V (bud uao ) (13)
+where P(o|b) :=
+∑
+s
+Od(o|s)b(s), (14)
+bud uao (s
+′) :=
+∑
+s
+T(s′|s,ud ,ua)
+Od(o|s)b(s)∑
+o∈OdOd (o|s)b(s)
+(15)
+Figure 2: Robust linear program for state 2 of Cd . Im-
+proved vector V ′2gd +² is tangent to the one-step look-ahead
+value function.
+This set of equations is not easy to solve since the belief
+takes values in [0,1]. However, Equation (13) results in
+a point-wise improvement of the value function, until an
+optimum is reached. We will need the following definitions.
+Definition 7.1 (Tangent FSC State): An FSC state gd is
+tangent to the one-step look-ahead value function V (b) in
+Equation (13) if V (b)=Vgd (b) at state b.
+Definition 7.2 (Improved FSC State): A state gd ∈Gd is
+improved if transition probabilities associated with that
+state are changed in a way that increases Vgd .
+For the setting where there are two agents with com-
+peting objectives, the problem of determining a policy µd
+that achieves an improvement in Vgd under any adversary
+policy µa can be posed as a robust linear program [34],
+presented in Equations (16)-(19).
+When ² > 0, an improvement in the value of the FSC
+state (by ²) can be achieved. This is because there exists
+a convex combination of value vectors of the one-step
+look-ahead value function that dominates the present
+value of the FSC state [35]. The procedure is carried
+out for each gd ∈ Gd , until no further improvement in
+the transition probabilities in Cd is possible. At this
+stage, the robust linear program yields ² = 0 for every
+gd ∈ Gd . The following result generalizes Theorem 2 in
+[35] to a partially observable environment that includes
+an adversarial agent.
+Proposition 7.3: The policy iteration procedure has
+reached a local equilibrium if and only if all the states
+gd ∈Gd are tangent to V (b).
+Proof: The robust linear program aims to maximize
+the improvement that can be achieved in the value of
+each state in Cd . From the preceding discussion, and from
+Definition 7.1, a translation of the value vector of a state
+gd by ² > 0 will make it tangent to the one-step look-
+ahead value function. By a similar argument, ² = 0 for
+each gd ∈ Gd indicates that improvement in the value of
+an FSC state will not be possible if it is already tangent
+to the one-step look-ahead value function. This is shown
+in Figures 2 and 3.
+10
+max
+²,µd
+² (16)
+subject to: Vgd (s)+²≤
+∑
+s′,o,o′,g′d ,g
+′
+a,ud ,ua
+(
+Vg′d (s
+′)Od(o|s)µd(g′d ,ud |gd , o)Oa(o′|s)
+×µa(g′a,ua|ga, o′)×Tφ((s′, q′)|(s, q),ud ,ua)
+)
+∀s,∀µa(g′a,ua|ga, o′) (17)∑
+g′,u∗
+µ∗(g′∗,u∗|g∗, o∗)= 1 ∀o∗;∗ ∈ {d,a} (18)
+µ∗(g′∗,u∗|g∗, o∗)≥ 0 ∀o∗, g′∗,u∗;∗ ∈ {d,a} (19)
+Figure 3: At a local equilibrium, all states are tangent to
+the one-step look-ahead value function.
+When ² = 0 for each gd , the satisfaction probability
+can be improved by adding states to Cd in a ‘principled
+way’. Let MaxNewStates denote the maximum number
+of states that can be added to Cd , and let {bk} := B denote
+the set of belief states satisfying V (bk) = Vgd (b) for each
+gd from Equation (16).
+Algorithm 4 presents a procedure to add states to the
+defender FSC to improve the satisfaction probability. Lines
+6− 11 determine the one-step look-ahead beliefs. A new
+state is added to Cd if the defender ‘believes’ that the
+probability of satisfying the LTL formula from these states
+is higher than that from the current belief state (Lines
+13 − 18). Lines 13 and 14 respectively form the policy
+evaluation and policy improvement steps of the policy
+iteration. Edges from new states in the FSC are directed
+towards the action and FSC state that maximize the value
+function V (b) in a deterministic manner (Line 16). Values
+of probabilities and transitions to and from the added state
+will be adjusted as other FSC states are improved.
+Proposition 7.4: Algorithm 4 terminates in finite time.
+Proof: This follows from the facts the sets B, Od , Ud ,
+and Ua have finite cardinality, and the one-step look-ahead
+values in Equation (13) are upper bounded.
+The procedure yields a new Cd , from which candidate
+FSC structures can be found using Algorithm 2. The de-
+Algorithm 4 Adding states to FSC Cd
+Input: Set of belief states {bk} := B ; MaxNewStates
+Output: Set of improved states in FSC Cd
+1: NewStateNumber ← 0
+2: while B 6= ; do
+3: Choose b ∈ B
+4: B := B \ b
+5: Ahead :=;
+6: for (ud ,ua, od) ∈Ud ×Ua ×Od do
+7: if P(o|b)> 0 in Equation (14) then
+8: Determine bud uao (s
+′) from Equation (15)
+9: Ahead = Ahead∪ {bud uao }
+10: end if
+11: end for
+12: for ba ∈ Ahead do
+13: Determine V (ba) from Equations (13, 14, 15)
+14: Note maximizers u∗d , g
+∗
+d (Eqns. (13), (12))
+15: if V (ba) > V (b) AND NewStateNumber <
+MaxNewStates then
+16: Add state, gnew to Cd with µd(g∗d ,u
+∗
+d |gnew, o)=
+1 ∀o ∈Od
+17: NewStateNumber ← NewStateNumber+1
+18: end if
+19: end for
+20: end while
+fender policy to maximize the probability of satisfying the
+LTL formula under any Ca of fixed size can be determined
+by Algorithm 3 or the robust linear program in Eqn. (16).
+VIII. EXAMPLES
+This section presents an example and experiments that
+illustrate our approach.
+Example 8.1:
+For this example, the state space is an M × N grid,
+S := {si : i = x+M y, x ∈ {0, . . . , M −1}, y ∈ {0, . . . , N −1}}. The
+defender’s actions are Ud = {R,L,U ,D} denoting right,
+left, up, and down, and the actions of the adversary are
+Ua = {A, N A}, denoting attack, and not attack respec-
+tively. The observations of both agents are Od = Oa =
+{correct,wrong}, such that: Od(correct|si) = 0.8 = 1 −
+Od(wrong|si), and Oa(correct|si)= 0.6= 1−Oa(wrong|si).
+11
+Figure 4: Clockwise, from top-left: Global Markov chain
+(GMC) for initial defender and adversary FSC structures-
+green states (m1&m2) must be visited infinitely often, and
+state in red (m3) must be visited finitely often in steady-
+state; GMC state mi ∈ S×Q×Gd×Ga; State-space for M =
+3, N = 2 showing unsafe (s4) and target (s5) states.
+Od and Oa are probabilities that the agents sense that
+their observation of the state is indeed the correct state
+or not. That is, P(oi = si) or P(oi 6= si).
+Let A P = {obs,tar}, denoting obstacle and target re-
+spectively. Then, if φ=GFtar∧G¬obs, the corresponding
+DRA will have two states q0, q1, with F = ({;}, {q1}).
+Transition probabilities for (ud ,ua) = (R, N A) and (R, A)
+are defined below. Let Nsi denote the neighbors of si.
+T(s j|si,R, N A)=
+
+
+0.8 j = i+1, (i+1) 6≡ 0 mod M
+0.2
+|Nsi |
+(s j ∈ {si} ∪ Nsi \ {si+1}),
+(i+1) 6≡ 0 mod M
+1 j = i and (i+1)≡ 0 mod M
+T(s j|si,R, A)=
+
+
+0.6 j = i+1, (i+1) 6≡ 0 mod M
+0.4
+|Nsi |
+(s j ∈ {si} ∪ Nsi \ {si+1}),
+(i+1) 6≡ 0 mod M
+1 j = i and i+1≡ 0 mod M
+Notice that in the above equations, the probability of
+the agent moving to the ‘correct’ next state for a particular
+defender action is larger for the adversary action N A than
+for the adversary action A. Further, in this case, if the
+defender is in a square along the right edge of the grid,
+then the action R does not result in a change of state. The
+probabilities for other action pairs can be defined similarly.
+For this example, let M = 3 and N = 2. Then, |S| = 6.
+Let s4 be an unsafe state, and s5 be the goal state. This
+is indicated in Figure 4. Let |Gd | = 2, |Ga| = 1 for the
+FSCs. Assume that for some initial structures I 0d ,I
+0
+a
+the GMC is given by Figure 4. The figure also indicates
+the states in terms of its individual components. Assume
+that the LTL formula φ is such that the states in green
+denote those that have to be visited infinitely often in
+steady state, while those in red must be avoided. Therefore
+(Lφ,Kφ) = {({;}, {m1}), ({m3}, {m2})}. The boxes C1,C2,C3
+indicate the communicating classes of the graph.
+From Algorithm 2, for C1, Bad = {m8},Good = {m1}. For
+m1 → m8, Eqn. (6) is true for all ua and ud = {D,L}.
+Thus, Id(g′,ud |g, o) ← 0 for o = {correct,wrong}. For
+m9 → m1, since Eqn. (7) does not hold for R,D ∈Ud , Ia(·)
+is unchanged. Then, m1 is recurrent in Gnew. For C2,
+Bad = {m3,m7},Good = {m2}. Like for C1, Ia(·) remains
+unchanged, since (7) does not hold for D ∈Ud . For m5 →
+m7, Id(g′,ud |g, o) ← 0∀ud ∈ Ud \ D. A similar conclusion
+is drawn for m4 → m3. Then, m2 will be recurrent in Gnew.
+For C3, since Bad =Good =;, no structure is added to I .
+Notice that these FSCs satisfy Proposition 4.1.
+This example also shows the limitations of Algorithm
+2. From the M ×N grid, there is a policy that takes the
+defender from any s ∈ S \ {s4} to s5 with probability 1.
+However, for FSCs of small size, the initial state of the
+defender might result in the Algorithm reporting that no
+solution was found, even if there exists a feasible solution.
+Example 8.2: Consider the model of Example 8.1, with
+M = 5, N = 4. A representation of the environment is
+shown in Figure 5a. Like in Example 8.1, the LTL formula
+to be satisfied is φ=GFtar∧G¬obs. The observation func-
+tion of the defender is modified so that for a state s where
+L (s) = obs or L (s) = tar, Od(correct|s) = 1. That is, the
+defender recognizes an obstacle or the target correctly with
+probability one. Our experiments compute the probability
+of reaching the target under limited sensing capabilities of
+the agents with FSCs having different number of states.
+In each case, we assume that |Gd | ≥ |Ga|. The number of
+states in the GMC varies from 60 to 480.
+Table I shows the average satisfaction probability and
+standard deviation of reaching the target state s19 starting
+from s0 (expressed in terms of the value of the state
+from Equation (10)) when the adversary FSC has one and
+two states. Higher values of the standard deviation could
+be due to the fact that in some cases, Algorithm 3 may
+terminate before V (s0) is updated enough number of times.
+|Gd| |Ga| = 1: V(s0) [Std. Dev.] |Ga| = 2: V(s0) [Std. Dev.]
+1 0.53 [0.04] 0.45 [0.05]
+2 0.55 [0.05] 0.45 [0.06]
+3 0.56 [0.09] 0.47 [0.08]
+4 0.57 [0.10] 0.48 [0.12]
+Table I: Satisfaction probability and standard deviation
+(over 100 trials) of reaching the target state s19 from
+s0 for LTL formula φ = GFtar∧G¬obs starting from s0
+for varying number of defender FSC states |Gd |, when
+number of states in adversary FSC, |Ga| = 1 and |Ga| = 2.
+Table II compares the probabilities of satisfying the
+LTL objective φ = GFtar∧ G¬obs starting from s0 in
+the presence and absence of an adversary. We compare
+our approach with a baseline, which is a defender policy
+synthesized in the absence of an adversary. The GMC
+for the case without an adversary is constructed using
+the approach of [20]. This baseline defender policy in
+then realized in the presence of an adversary, and we
+compare it with our method of synthesizing a defender
+policy assuming the presence of an adversary. Although
+12
+(a) (b)
+Figure 5: The agent aims to satisfy the LTL formula φ=GFtar∧G¬obs in the presence of an adversary, in a partially
+observable environment. The environment is the grid-world in Figure 5a. The states in red indicate the presence of
+an obstacle, the state in green is the target state, and the agent starts in state s0. The agents’ actions are determined
+by their observations of the state. Assume that the defender FSC has at least as many states as the adversary FSC,
+i.e. |Gd | ≥ |Ga|. Figure 5b shows the fraction of runs (out of 100) when the agent reaches the target within 80 steps
+and 40 steps. This number is higher when |Gd | is larger, for a fixed value of |Ga| (−o−,−∗−, and −♦− curves). For
+the same |Gd |, the fraction of successful runs is higher when |Ga| is lower (−o− and −∗− curves). The fraction of
+successful runs is also higher when the agent is allowed more steps to reach the target (−o− and −♦− curves).
+|Gd| Benign Baseline Adv. Baseline Adv.-Aware (ours)
+1 0.69 0.35 0.53
+2 0.70 0.35 0.55
+3 0.73 0.38 0.56
+4 0.75 0.39 0.57
+Table II: Comparison of probabilities of satisfying LTL
+formula φ=GFtar∧G¬obs starting from s0 in the pres-
+ence and absence of an adversary. The first column lists
+the number of defender FSC states. Subsequent columns
+enumerate satisfaction probabilities in the following sce-
+narios: i) absence of adversary (Benign Baseline [20]); ii)
+using a defender policy that was synthesized without an
+adversary, but realized in the presence of an adversary
+(Adversarial Baseline); iii) using a defender policy de-
+signed assuming the presence of an adversary (Adversary-
+Aware Design- our approach). Although the benign base-
+line gives the highest satisfaction probability, the same
+baseline when used in the presence of an adversary results
+in a much lower satisfaction probability. In comparison,
+our Adversary-Aware Design approach results in a higher
+satisfaction probability than the ‘Adversarial Baseline’
+where we use a defender policy designed to account for
+adversarial behavior. We assume that the adversary FSC
+has one state, so that the GMC with and without the
+adversary FSC will have the same number of states.
+the highest satisfaction probability is got while using the
+baseline policy, when this baseline is used in the presence
+of an adversary, we obtain a much lower satisfaction
+probability. In comparison, our adversary-aware defender
+policy results in a higher satisfaction probability than
+when using the baseline in the presence of the adversary.
+We note that for this comparison, the adversary FSC has
+one state, i.e., |Ga| = 1, so that the GMCs with and without
+the adversary FSC have the same number of states.
+Figure 5b shows the fraction of sample paths when the
+agent reaches the target for the first time. After this,
+since the agent is in a recurrent set, it will continue to
+visit states in this set with probability one. The following
+observations can be drawn from Figure 5b. First, for a
+fixed |Ga|, the fraction of runs when the agent successfully
+reaches the target increases as |Gd | increases. Second,
+for a fixed |Gd |, the probability of satisfying φ is higher
+for a smaller |Ga|. Third, the fraction of successful runs
+improves with allowing the agent more steps to reach the
+target. One reason for the first two observations is that the
+number of states in an FSC models the ‘memory’ available
+to the agent. The defender can play better when it has
+more FSC states, or when the adversary has fewer FSC
+states. While our results agree with intuition, a caveat is
+that these numbers depend on the agents’ observations,
+Od and Oa. Here, the observations of the agents is an
+indication of whether the state is the actual state the
+defender is in. This could be a reason for fewer successful
+runs when the agent is allowed a maximum of 40 steps
+versus the case when it is allowed 80 steps.
+IX. RELATED WORK
+A large body of work studies classes of problems that
+are relevant to this paper. These can be divided into three
+broad categories: i) synthesis of strategies for systems
+13
+represented as an MDP that has to additionally satisfy
+a TL formula; ii) synthesis of strategies for POMDPs;
+iii) synthesis of defender and adversary strategies for an
+MDP under a TL constraint. While there has been recent
+work on the synthesis of controllers for POMDPs under
+TL specifications, these have largely been restricted to the
+single-agent case, and do not address the case when there
+might be an adversary with a competing objective.
+Approaches that address the satisfaction of TL con-
+straints for problems in motion-planning include hier-
+archical control [36], ensuring probabilistic satisfaction
+guarantees [15], and sensing-based strategies [9]. Con-
+troller synthesis for deterministic linear systems to ensure
+that the closed-loop system will satisfy an LTL formula
+is studied in [37]. The authors of [38] propose methods
+to synthesize a robust control policy that satisfies an
+LTL formula for a system represented as an MDP whose
+transitions are not exactly known, but are assumed to lie
+in a set. For MDPs under an LTL specification, a partial
+ordering on the states is leveraged to solve controller syn-
+thesis as a receding horizon problem in [39]. The synthesis
+of an optimal control policy that maximizes the probability
+of an MDP satisfying an LTL formula that additionally
+minimizes the cost between satisfying instances is studied
+in [10]. This is computed by determining maximal end
+components in an MDP. However, this approach will not
+work in the partially observable setting, where policies will
+depend on an observation of the state [40]. The synthesis
+of joint control and sensing strategies for discrete systems
+with incomplete information and sensing is presented in
+[41]. The setting of [10] in the presence of an adversary
+with competing objectives was presented in [33].
+A policy in a POSG (or POMDP) at time t depends
+on actions and observations at all previous times. A
+memoryless policy, on the other hand, only depends on
+the current state. For fully observable stochastic games,
+it is possible to always find memoryless policies that are
+optimal. However, a policy with memory could perform
+much better than a memoryless policy for POSGs. One
+way of determining policies for a POSG is to keep track
+of the entire execution, observation, and action histories,
+which can be abstracted into determining a sufficient
+statistic for the POSG execution. One example is the
+belief state, which reflects the probability that the agent
+is in some state, based on receiving observations from the
+environment. Updating the belief state at every time step
+only requires knowledge of the previous belief state and
+the most recent action and observation. Thus, the belief
+states form the states of an MDP [42], which is more
+amenable to analysis [13] than a POMDP. However, the
+belief state is uncountable, and will hinder development
+of exact algorithms to determine optimal strategies.
+Synthesis of memoryless strategies for POMDPs in
+order to satisfy a specification was shown to be NP-hard
+and in PSPACE in [21]. In [43], a discretization of the
+belief space was carried out apriori, resulting in a fully
+observable MDP. However, this approach is not practical if
+the state space is large [26]. The complexity of determining
+a strategy for maximizing the probability of satisfaction
+of parity objectives was shown to be undecidable in [44].
+However, determining finite-memory strategies for the
+qualitative problem of parity objective satisfaction was
+shown to be EXPTIME-complete in [45].
+Dynamic programming for POSGs for the finite horizon
+setting was studied in [46]. When agents cooperate to earn
+rewards, the framework is called a decentralized-POMDP
+(Dec-POMDP). The infinite horizon case for Dec-POMDPs
+was presented in [47], where the authors proposed a
+bounded policy iteration algorithm for policies represented
+as joint FSCs. A complete and optimal algorithm for
+deterministic FSC policies for DecPOMDPs was presented
+in [48]. Optimization techniques for ‘fixed-size controllers’
+to solve Dec-POMDPs were investigated in [49]. A survey
+of recent research in Dec- POMDPs is presented in [50].
+The satisfaction of an LTL formula in partially observ-
+able adversarial environments was presented for the first
+time in [1]. The authors used FSCs to represent the poli-
+cies of the agents, and proposed an algorithm that yielded
+defender FSCs of fixed size satisfying the LTL formula
+under any adversary FSC of fixed size. The authors also
+broadened the scope of this problem to continuous state
+environments and to settings when the adversary could
+potentially tamper with clocks that keep track of time in
+the environment in [51], [52].
+X. CONCLUSION
+This paper demonstrated the use of FSCs in order to sat-
+isfy an LTL formula in a partially observable environment,
+in the presence of an adversary. The FSCs represented
+agent policies, and these were composed with a POSG
+representing the environment to yield a fully observable
+MC. We showed that the probability of satisfaction of
+the LTL formula was equal to the probability of reaching
+recurrent classes of this MC. We subsequently presented a
+procedure to determine defender and adversary controllers
+of fixed sizes that result in nonzero satisfaction probability
+of the LTL formula, and proved its soundness. Maximizing
+the satisfaction probability was related to reaching a
+Stackelberg equilibrium of a stochastic game involving the
+agents through a value-iteration based procedure. Finally,
+we showed a means to add states to the defender FSC
+in a principled way in order to improve the satisfaction
+probability for adversary FSCs of fixed sizes.
+In Section VII, when adding states to Cd , we assumed
+that the size of Ca was fixed. Future work will seek to
+relax this assumption, and study cases when the defender
+has limited knowledge of the abilities of an adversary.
+We will also study methods to quantitatively compare the
+optimality of FSC-based policies with policies determined
+using other heuristics to approximately solve partially
+observable environments. To address the challenge of state
+explosion, we will investigate state aggregation techniques
+[53], [54], [55] for the product-POSG and the GMC. This
+will enable solutions of more complex problems.
+14
+REFERENCES
+[1] B. Ramasubramanian, A. Clark, L. Bushnell, and R. Poovendran,
+“Secure control under partial observability with temporal logic
+constraints,” in Proc. American Control Conf., 2019, pp. 1181–1188.
+[2] R. Baheti and H. Gill, “Cyber-physical systems,” The Impact of
+Control Technology, vol. 12, no. 1, pp. 161–166, 2011.
+[3] J. E. Sullivan and D. Kamensky, “How cyber-attacks in Ukraine
+show the vulnerability of the US power grid,” The Electricity
+Journal, vol. 30, no. 3, pp. 30–35, 2017.
+[4] Y. Shoukry, P. Martin, P. Tabuada, and M. Srivastava, “Non-invasive
+spoofing attacks for anti-lock braking systems,” in International
+Workshop on Cryptographic Hardware and Embedded Systems.
+Springer, 2013, pp. 55–72.
+[5] J. Slay and M. Miller, “Lessons learned from the Maroochy water
+breach,” in International Conference on Critical Infrastructure Pro-
+tection. Springer, 2007, pp. 73–82.
+[6] J. P. Farwell and R. Rohozinski, “Stuxnet and the future of cyber
+war,” Survival, vol. 53, no. 1, pp. 23–40, 2011.
+[7] C. Baier and J.-P. Katoen, Principles of Model Checking. MIT Press,
+2008.
+[8] M. Lahijanian, S. B. Andersson, and C. Belta, “Formal verification
+and synthesis for discrete-time stochastic systems,” IEEE Transac-
+tions on Automatic Control, vol. 60, no. 8, pp. 2031–2045, 2015.
+[9] H. Kress-Gazit, G. E. Fainekos, and G. J. Pappas, “Where’s Waldo?:
+Sensor-based temporal logic motion planning,” in International
+Conference on Robotics and Automation, 2007, pp. 3116–3121.
+[10] X. Ding, S. L. Smith, C. Belta, and D. Rus, “Optimal control of
+MDPs with linear temporal logic constraints,” IEEE Transactions
+on Automatic Control, vol. 59, no. 5, pp. 1244–1257, 2014.
+[11] A. Cimatti, E. Clarke, F. Giunchiglia, and M. Roveri, “Nusmv: A new
+symbolic model verifier,” in International Conference on Computer
+Aided Verification. Springer, 1999, pp. 495–499.
+[12] M. Kwiatkowska, G. Norman, and D. Parker, “Prism 4.0: Verification
+of probabilistic real-time systems,” in International Conference on
+Computer Aided Verification. Springer, 2011, pp. 585–591.
+[13] D. P. Bertsekas, Dynamic Programming and Optimal Control 4th
+Edition, Volumes I and II. Athena Scientific, 2015.
+[14] M. L. Puterman, Markov decision processes: Discrete stochastic
+dynamic programming. John Wiley & Sons, 2014.
+[15] M. Lahijanian, S. B. Andersson, and C. Belta, “Temporal logic
+motion planning and control with probabilistic satisfaction guar-
+antees,” IEEE Transactions on Robotics, vol. 28, pp. 396–409, 2012.
+[16] S. Temizer, M. Kochenderfer, L. Kaelbling, T. Lozano-Pérez, and
+J. Kuchar, “Collision avoidance for unmanned aircraft using MDPs,”
+in AIAA Guidance, Navigation, and Control Conference, 2010.
+[17] L. Niu and A. Clark, “Secure control under LTL constraints,” in
+Proc. of the American Control Conference, 2018, pp. 3544–3551.
+[18] S. Thrun, W. Burgard, and D. Fox, Probabilistic robotics. MIT
+Press, 2005.
+[19] R. Sharan and J. Burdick, “Finite state control of POMDPs with
+LTL specifications,” in Proceedings of the American Control Confer-
+ence, 2014, pp. 501–508.
+[20] R. Sharan, “Formal methods for control synthesis in partially
+observed environments: Application to autonomous robotic manipu-
+lation,” Ph.D. dissertation, California Institute of Technology, 2014.
+[21] N. Vlassis, M. L. Littman, and D. Barber, “On the computational
+complexity of stochastic controller optimization in POMDPs,” ACM
+Transactions on Computation Theory, vol. 4, no. 4, p. 12, 2012.
+[22] A. R. Cassandra, L. P. Kaelbling, and J. A. Kurien, “Acting under
+uncertainty: Discrete bayesian models for mobile-robot navigation,”
+in International Conference on Intelligent Robots and Systems,
+vol. 2, 1996, pp. 963–972.
+[23] L. P. Kaelbling, M. L. Littman, and A. R. Cassandra, “Planning
+and acting in partially observable stochastic domains,” Artificial
+Intelligence, vol. 101, no. 1-2, pp. 99–134, 1998.
+[24] R. I. Brafman, “A heuristic variable grid solution method for
+POMDPs,” in AAAI/IAAI, 1997, pp. 727–733.
+[25] H. Kurniawati, D. Hsu, and W. S. Lee, “SARSOP: Efficient point-
+based POMDP planning by approximating optimally reachable
+belief spaces.” in Robotics: Science and Systems, 2008.
+[26] H. Yu and D. P. Bertsekas, “On near optimality of the set of
+finite-state controllers for average cost POMDP,” Mathematics of
+Operations Research, vol. 33, no. 1, pp. 1–11, 2008.
+[27] D. Fudenberg and J. Tirole, Game Theory. MIT Press, 1991.
+[28] S. P. Meyn and R. L. Tweedie, Markov chains and stochastic
+stability. Springer Science & Business Media, 2012.
+[29] E. A. Hansen and R. Zhou, “Synthesis of hierarchical finite-state
+controllers for POMDPs.” in ICAPS, 2003, pp. 113–122.
+[30] R. Tarjan, “Depth-first search and linear graph algorithms,” SIAM
+Journal on Computing, vol. 1, no. 2, pp. 146–160, 1972.
+[31] H. Royden and P. Fitzpatrick, Real Analysis. Prentice Hall, 2010.
+[32] V. Conitzer, “On Stackelberg mixed strategies,” Synthese, vol. 193,
+pp. 689–703, 2016.
+[33] L. Niu and A. Clark, “Optimal secure control with LTL constraints,”
+IEEE Transactions on Automatic Control, 2019.
+[34] A. Ben-Tal, L. El Ghaoui, and A. Nemirovski, Robust optimization.
+Princeton University Press, 2009.
+[35] P. Poupart and C. Boutilier, “Bounded finite state controllers,” in
+Neural Information Processing Systems, 2004, pp. 823–830.
+[36] G. E. Fainekos, A. Girard, H. Kress-Gazit, and G. J. Pappas,
+“Temporal logic motion planning for dynamic robots,” Automatica,
+vol. 45, no. 2, pp. 343–352, 2009.
+[37] M. Kloetzer and C. Belta, “A fully automated framework for control
+of linear systems from temporal logic specifications,” IEEE Trans-
+actions on Automatic Control, vol. 53, no. 1, pp. 287–297, 2008.
+[38] E. M. Wolff, U. Topcu, and R. M. Murray, “Robust control of
+uncertain MDPs with LTL specifications,” in Proceedings of the
+IEEE Conference on Decision and Control, 2012, pp. 3372–3379.
+[39] T. Wongpiromsarn, U. Topcu, and R. M. Murray, “Receding horizon
+temporal logic planning,” IEEE Transactions on Automatic Control,
+vol. 57, no. 11, pp. 2817–2830, 2012.
+[40] D. Sadigh, E. S. Kim, S. Coogan, S. S. Sastry, and S. A. Seshia,
+“A learning based approach to control synthesis of MDPs for LTL
+specifications,” in Proceedings of the IEEE Conference on Decision
+and Control, 2014, pp. 1091–1096.
+[41] J. Fu and U. Topcu, “Synthesis of joint control and active sensing
+strategies under temporal logic constraints,” IEEE Transactions on
+Automatic Control, vol. 61, no. 11, pp. 3464–3476, 2016.
+[42] R. D. Smallwood and E. J. Sondik, “The optimal control of POMDPs
+over a finite horizon,” Operations Research, vol. 21, no. 5, pp. 1071–
+1088, 1973.
+[43] T. Wongpiromsarn and E. Frazzoli, “Control of probabilistic systems
+under dynamic, partially known environments with temporal logic
+specifications,” in Proceedings of the IEEE Conference on Decision
+and Control, 2012, pp. 7644–7651.
+[44] K. Chatterjee, L. Doyen, and T. A. Henzinger, “A survey of partial-
+observation stochastic parity games,” Formal Methods in System
+Design, vol. 43, no. 2, pp. 268–284, 2013.
+[45] K. Chatterjee, L. Doyen, S. Nain, and M. Y. Vardi, “The complexity
+of partial-observation stochastic parity games with finite-memory
+strategies,” in International Conference on Foundations of Software
+Science and Computation Structures. Springer, 2014, pp. 242–257.
+[46] E. A. Hansen, D. S. Bernstein, and S. Zilberstein, “Dynamic
+programming for partially observable stochastic games,” in AAAI,
+vol. 4, 2004, pp. 709–715.
+[47] D. S. Bernstein, E. A. Hansen, and S. Zilberstein, “Bounded policy
+iteration for decentralized POMDPs,” in International Joint Confer-
+ence on Artificial Intelligence, 2005, pp. 52–57.
+[48] D. Szer and F. Charpillet, “An optimal best-first search algorithm
+for solving infinite horizon DEC-POMDPs,” in European Conference
+on Machine Learning. Springer, 2005, pp. 389–399.
+[49] C. Amato, D. S. Bernstein, and S. Zilberstein, “Optimizing fixed-
+size stochastic controllers for POMDPs and decentralized POMDPs,”
+Autonomous Agents and Multi-Agent Systems, pp. 293–320, 2010.
+[50] F. A. Oliehoek and C. Amato, A Concise Introduction to Decentral-
+ized POMDPs. Springer, 2016.
+[51] B. Ramasubramanian, L. Niu, A. Clark, L. Bushnell, and R. Pooven-
+dran, “Linear temporal logic satisfaction in adversarial environ-
+ments using secure control barrier certificates,” in Proc. Conf. on
+Decision and Game Theory for Security, 2019, pp. 385–403.
+[52] L. Niu, B. Ramasubramanian, A. Clark, L. Bushnell, and R. Pooven-
+dran, “Control synthesis for cyber-physical systems to satisfy met-
+ric interval temporal logic objectives under timing and actuator
+attacks,” in Proc. of the ACM/ IEEE International Conference on
+Cyber-Physical Systems (ICCPS), 2020, pp. 162–173.
+[53] Z. Ren and B. H. Krogh, “State aggregation in MDPs,” in Proc. IEEE
+Conference on Decision and Control, 2002, pp. 3819–3824.
+[54] L. Li, T. J. Walsh, and M. L. Littman, “Towards a unified theory
+of state abstraction for MDPs.” in International Symposium on
+Artificial Intelligence and Mathematics, 2006.
+[55] E. M. Clarke, W. Klieber, M. Nováček, and P. Zuliani, “Model
+checking and the state explosion problem,” in LASER Summer
+School on Software Engineering. Springer, 2011, pp. 1–30.
+	I Introduction
+	I-A Contributions
+	I-B Outline
+	II Preliminaries
+	II-A Linear Temporal Logic
+	II-B Stochastic Games and Markov Chains
+	II-C Partially Observable Stochastic Games
+	II-D Adversary and Defender Models
+	II-E The Product-POSG
+	III Problem Setup
+	III-A Finite State Controllers
+	III-B The Global Markov Chain
+	III-C Problem Statement
+	IV LTL Satisfaction and Recurrent Sets
+	V Determining Candidate FSCs of Fixed Sizes
+	VI Value Iteration for POSGs
+	VII Adding States to Cd
+	VIII Examples
+	IX Related Work
+	X Conclusion
+	References

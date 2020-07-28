@@ -1,0 +1,4292 @@
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Feihu Huang 1 2 3 Lue Tao 1 2 Songcan Chen 1 2
+Abstract
+In the paper, we propose a class of accelerated
+stochastic gradient-free and projection-free (a.k.a.,
+zeroth-order Frank-Wolfe) methods to solve the
+constrained stochastic and finite-sum nonconvex
+optimization. Specifically, we propose an accel-
+erated stochastic zeroth-order Frank-Wolfe (Acc-
+SZOFW) method based on the variance reduced
+technique of SPIDER/SpiderBoost and a novel
+momentum accelerated technique. Moreover, un-
+der some mild conditions, we prove that the Acc-
+SZOFW has the function query complexity of
+O(d
+√
+n�−2) for finding an �-stationary point in
+the finite-sum problem, which improves the ex-
+iting best result by a factor of O(
+√
+n�−2), and
+has the function query complexity of O(d�−3) in
+the stochastic problem, which improves the ex-
+iting best result by a factor of O(�−1). To relax
+the large batches required in the Acc-SZOFW,
+we further propose a novel accelerated stochastic
+zeroth-order Frank-Wolfe (Acc-SZOFW*) based
+on a new variance reduced technique of STORM,
+which still reaches the function query complex-
+ity of O(d�−3) in the stochastic problem without
+relying on any large batches. In particular, we
+present an accelerated framework of the Frank-
+Wolfe methods based on the proposed momentum
+accelerated technique. The extensive experimen-
+tal results on black-box adversarial attack and
+robust black-box classification demonstrate the
+efficiency of our algorithms.
+1College of Computer Science & Technology, Nanjing Uni-
+versity of Aeronautics and Astronautics, Nanjing 211106, China
+2MIIT Key Laboratory of Pattern Analysis & Machine Intelligence
+3Department of Electrical & Computer Engineering, University
+of Pittsburgh, Pittsburgh, USA. Correspondence to: Feihu Huang
+<huangfeihu@nuaa.edu.cn>.
+Proceedings of the 37 th International Conference on Machine
+Learning, Vienna, Austria, PMLR 119, 2020. Copyright 2020 by
+the author(s).
+1. Introduction
+In the paper, we focus on solving the following constrained
+stochastic and finite-sum optimization problems
+min
+x∈X
+f(x) =
+
+
+Eξ[f(x, ξ)] (stochastic)
+1
+n
+n∑
+i=1
+fi(x) (finite-sum)
+(1)
+where f(x) : Rd → R is a nonconvex and smooth loss
+function, and the restricted domain X ⊆ Rd is supposed to
+be convex and compact. When f(x) denotes the expected
+risk function, the problem (1) will be seen as a stochastic
+problem. While f(x) denotes the empirical risk function,
+it will be seen as a finite-sum problem. In fact, the prob-
+lem (1) appears in many machine learning models such as
+multitask learning, recommendation systems and, structured
+prediction (Jaggi, 2013; Lacoste-Julien et al., 2013; Hazan
+& Luo, 2016). For solving the constrained problem (1),
+one common approach is the projected gradient method
+(Iusem, 2003) that alternates between optimizing in the un-
+constrained space and projecting onto the constrained set
+X . However, the projection is quite expensive to compute
+in many constrained sets such as the set of all bounded
+nuclear norm matrices. The Frank-Wolfe algorithm (i.e.,
+conditional gradient)(Frank & Wolfe, 1956; Jaggi, 2013) is
+a good candidate for solving the problem (1), which only
+needs to compute a linear operator instead of projection op-
+erator at each iteration. Following (Jaggi, 2013), the linear
+optimization on X is much faster than the projection onto
+X in many problems such as the set of all bounded nuclear
+norm matrices.
+Due to its projection-free property and ability to handle
+structured constraints, the Frank-Wolfe algorithm has re-
+cently regained popularity in many machine learning ap-
+plications, and its variants have been widely studied. For
+example, several convex variants of Frank-Wolfe algorithm
+(Jaggi, 2013; Lacoste-Julien & Jaggi, 2015; Lan & Zhou,
+2016; Xu & Yang, 2018) have been studied. In the big
+data setting, the corresponding online and stochastic Frank-
+Wolfe algorithms (Hazan & Kale, 2012; Hazan & Luo, 2016;
+Hassani et al., 2019; Xie et al., 2019) have been developed,
+and their convergence rates were studied. The above Frank-
+Wolfe algorithms were mainly studied in the convex setting.
+In fact, the Frank-Wolfe algorithm and its variants are also
+ar
+X
+iv
+:2
+00
+7.
+12
+62
+5v
+1 
+ [
+m
+at
+h.
+O
+C
+] 
+ 1
+6 
+Ju
+l 
+20
+20
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Table 1. Function query complexity comparison of the representative non-convex zeroth-order Frank-Wolfe methods for finding an
+�-stationary point of the problem (1), i.e., E‖∇G(x)‖ ≤ �. T denotes the total iterations. GauGE, UniGE and CooGE are abbreviations
+of Gaussian distribution, Uniform distribution and Coordinate-wise smoothing gradient estimators, respectively. Note that FW-Black and
+Acc-ZO-FW are deterministic algorithms, the other are stochastic algorithms. Here query-size denotes the function query size required in
+estimating one zeroth-order gradient in these algorithms. Note that these query-sizes are only used in the theoretical analysis.
+Problem Algorithm Reference Gradient Estimator Query Complexity Query-Size
+Finite-Sum
+FW-Black Chen et al. (2018) GauGE or UniGE O(dn�−4) O(ndT )
+Acc-ZO-FW Ours CooGE O(dn�−2) O(nd)
+Acc-SZOFW Ours CooGE O(dn
+1
+2 �−2) O(n
+1
+2 d)
+Stochastic
+ZO-SFW Sahu et al. (2019) GauGE O(d
+4
+3 �−4) O(1)
+ZSCG Balasubramanian & Ghadimi (2018) GauGE O(d�−4) O(dT )
+Acc-SZOFW Ours CooGE O(d�−3) O(dT 1/2)
+Acc-SZOFW Ours UniGE O(d�−3) O(d−1/2T 1/2)
+Acc-SZOFW* Ours CooGE O(d�−3) O(d)
+Acc-SZOFW* Ours UniGE O(d
+3
+2 �−3) O(1)
+successful in solving nonconvex problems such as adversar-
+ial attacks (Chen et al., 2018). Recently, some nonconvex
+variants of Frank-Wolfe algorithm (Lacoste-Julien, 2016;
+Reddi et al., 2016; Qu et al., 2018; Shen et al., 2019; Yurt-
+sever et al., 2019; Hassani et al., 2019; Zhang et al., 2019)
+have been developed.
+Until now, the above Frank-Wolfe algorithm and its vari-
+ants need to compute the gradients of objective functions at
+each iteration. However, in many complex machine learning
+problems, the explicit gradients of the objective functions
+are difficult or infeasible to obtain. For example, in the rein-
+forcement learning (Malik et al., 2019; Huang et al., 2020),
+some complex graphical model inference (Wainwright et al.,
+2008) and metric learning (Chen et al., 2019a) problems,
+it is difficult to compute the explicit gradients of objective
+functions. Even worse, in the black-box adversarial attack
+problems (Liu et al., 2018b; Chen et al., 2018), only func-
+tion values (i.e., prediction labels) are accessible. Clearly,
+the above Frank-Wolfe methods will fail in dealing with
+these problems. Since it only uses the function values in
+optimization, the gradient-free (zeroth-order) optimization
+method (Duchi et al., 2015; Nesterov & Spokoiny, 2017) is a
+promising choice to address these problems. More recently,
+some zeroth-order Frank-Wolfe methods (Balasubramanian
+& Ghadimi, 2018; Chen et al., 2018; Sahu et al., 2019) have
+been proposed and studied. However, these zeroth-order
+Frank-Wolfe methods suffer from high function query com-
+plexity in solving the problem (1) (please see Table 1).
+In the paper, thus, we propose a class of accelerated
+zeroth-order Frank-Wolfe methods to solve the problem (1),
+where f(x) is possibly black-box. Specifically, we propose
+an accelerated stochastic zeroth-order Frank-Wolfe (Acc-
+SZOFW) method based on the variance reduced technique
+of SPIDER/SpiderBoost (Fang et al., 2018; Wang et al.,
+2018) and a novel momentum accelerated technique. Fur-
+ther, we propose a novel accelerated stochastic zeroth-order
+Frank-Wolfe (Acc-SZOFW*) to relax the large mini-batch
+size required in the Acc-SZOFW.
+Contributions
+In summary, our main contributions are given as follows:
+1) We propose an accelerated stochastic zeroth-order
+Frank-Wolfe (Acc-SZOFW) method based on the vari-
+ance reduced technique of SPIDER/SpiderBoost and a
+novel momentum accelerated technique.
+2) Moreover, under some mild conditions, we prove that
+the Acc-SZOFW has the function query complexity
+of O(d
+√
+n�−2) for finding an �-stationary point in the
+finite-sum problem (1), which improves the exiting
+best result by a factor of O(
+√
+n�−2), and has the func-
+tion query complexity of O(d�−3) in the stochastic
+problem (1), which improves the exiting best result by
+a factor of O(�−1).
+3) We further propose a novel accelerated stochastic
+zeroth-order Frank-Wolfe (Acc-SZOFW*) to relax the
+large mini-batch size required in the Acc-SZOFW. We
+prove that the Acc-SZOFW* still has the function
+query complexity of O(d�−3) without relying on the
+large batches.
+4) In particular, we propose an accelerated framework
+of the Frank-Wolfe methods based on the proposed
+momentum accelerated technique.
+2. Related Works
+2.1. Zeroth-Order Methods
+Zeroth-order (gradient-free) methods can be effectively used
+to solve many machine learning problems, where the ex-
+plicit gradient is difficult or infeasible to obtain. Recently,
+the zeroth-order methods have been widely studied in ma-
+chine learning community. For example, several zeroth-
+order methods (Ghadimi & Lan, 2013; Duchi et al., 2015;
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Nesterov & Spokoiny, 2017) have been proposed by us-
+ing the Gaussian smoothing technique. Subsequently, (Liu
+et al., 2018b; Ji et al., 2019) recently proposed acceler-
+ated zeroth-order stochastic gradient methods based on the
+variance reduced techniques. To deal with nonsmooth op-
+timization, some zeroth-order proximal gradient methods
+(Ghadimi et al., 2016; Huang et al., 2019c; Ji et al., 2019)
+and zeroth-order ADMM-based methods (Gao et al., 2018;
+Liu et al., 2018a; Huang et al., 2019a;b) have been proposed.
+In addition, more recently, (Chen et al., 2019b) has pro-
+posed a zeroth-order adaptive momentum method. To solve
+the constrained optimization, the zeroth-order Frank-Wolfe
+methods (Balasubramanian & Ghadimi, 2018; Chen et al.,
+2018; Sahu et al., 2019) and the zeroth-order projected gradi-
+ent methods (Liu et al., 2018c) have been recently proposed
+and studied.
+2.2. Variance-Reduced and Momentum Methods
+To accelerate stochastic gradient descent (SGD) algorithm,
+various variance-reduced algorithms such as SAG (Roux
+et al., 2012), SAGA (Defazio et al., 2014), SVRG (Johnson
+& Zhang, 2013) and SARAH (Nguyen et al., 2017a) have
+been presented and studied. Due to the popularity of deep
+learning, recently the large-scale nonconvex learning prob-
+lems received wide interest in machine learning community.
+Thus, recently many corresponding variance-reduced algo-
+rithms to nonconvex SGD have also been proposed and stud-
+ied, e.g., SVRG (Allen-Zhu & Hazan, 2016; Reddi et al.,
+2016), SCSG (Lei et al., 2017), SARAH (Nguyen et al.,
+2017b), SPIDER (Fang et al., 2018), SpiderBoost (Wang
+et al., 2018; 2019), SNVRG (Zhou et al., 2018).
+Another effective alternative is to use momentum-based
+method to accelerate SGD. Recently, various momentum-
+based stochastic algorithms for the convex optimization
+have been proposed and studied, e.g., APCG (Lin et al.,
+2014), AccProxSVRG (Nitanda, 2014) and Katyusha (Allen-
+Zhu, 2017). At the same time, for the nonconvex optimiza-
+tion, some momentum-based stochastic algorithms have
+been also studied, e.g., RSAG (Ghadimi & Lan, 2016), Prox-
+SpiderBoost-M (Wang et al., 2019), STORM (Cutkosky &
+Orabona, 2019) and Hybrid-SGD (Tran-Dinh et al., 2019).
+3. Preliminaries
+3.1. Zeroth-Order Gradient Estimators
+In this subsection, we introduce two useful zeroth-order
+gradient estimators, i.e., uniform smoothing gradient estima-
+tor (UniGE) and coordinate smoothing gradient estimator
+(CooGE) (Liu et al., 2018b; Ji et al., 2019). Given any
+function fi(x) : Rd → R, the UniGE can generate an ap-
+proximated gradient as follows:
+∇̂unifi(x) =
+d(fi(x+ βu)− fi(x))
+β
+u, (2)
+where u ∈ Rd is a vector generated from the uniform distri-
+bution over the unit sphere, and β is a smoothing parameter.
+While the CooGE can generate an approximated gradient:
+∇̂coofi(x) =
+d∑
+j=1
+fi(x+ µjej)− fi(x− µjej)
+2µj
+ej , (3)
+where µj is a coordinate-wise smoothing parameter, and ej
+is a basis vector with 1 at its j-th coordinate, and 0 otherwise.
+Without loss of generality, let µ = µ1 = · · · = µd.
+3.2. Standard Frank-Wolfe Algorithm and
+Assumptions
+The standard Frank-Wolfe (i.e., conditional gradient) algo-
+rithm solves the above problem (1) by the following itera-
+tion: at t+ 1-th iteration,{
+wt+1 = argmax
+w∈X
+〈w,−∇f(xt)〉,
+xt+1 = (1− γt+1)xt + γt+1wt+1,
+(4)
+where γt+1 ∈ (0, 1) is a step size. For the nonconvex
+optimization, we apply the following duality gap (i.e., Frank-
+Wolfe gap (Jaggi, 2013))
+G(x) = max
+w∈X
+〈w − x,−∇f(x)〉, (5)
+to give the standard criteria of convergence ‖G(x)‖ ≤ � (or
+E‖G(x)‖ ≤ �) for finding an �-stationary point, as in (Reddi
+et al., 2016).
+Next, we give some standard assumptions regarding prob-
+lem (1) as follows:
+Assumption 1. Let fi(x) = f(x, ξi), where ξi samples
+from the distribution of random variable ξ. Each loss func-
+tion fi(x) is L-smooth such that
+‖∇fi(x)−∇fi(y)‖ ≤ L‖x− y‖, ∀x, y ∈ X ,
+fi(x) ≤ fi(y) +∇fi(y)T (x− y) +
+L
+2
+‖x− y‖2.
+Let fβ(x) = Eu∼UB [f(x+βu)] be a smooth approximation
+of f(x), where UB is the uniform distribution over the d-
+dimensional unit Euclidean ball B. Following (Ji et al.,
+2019), we have E(u,ξ)[∇̂unifξ(x)] = ∇fβ(x).
+Assumption 2. The variance of stochastic (zeroth-order)
+gradient is bounded, i.e., there exists a constant σ1 > 0
+such that for all x, it follows E‖∇fξ(x)−∇f(x)‖2 ≤ σ21;
+There exists a constant σ2 > 0 such that for all x, it follows
+E‖∇̂unifξ(x)−∇fβ(x)‖2 ≤ σ22 .
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Assumption 3. The constraint set X ⊆ Rd is compact with
+the diameter: maxx,y∈X ‖x− y‖ ≤ D.
+Assumption 4. The objective function f(x) is bounded
+from below in X , i.e., there exists a non-negative constant
+4, for all x ∈ X such as f(x)− infy∈X f(y) ≤ 4.
+Assumption 1 imposes the smoothness on each loss function
+fi(x) or f(x, ξi) , which is commonly used in the conver-
+gence analysis of nonconvex algorithms (Ghadimi et al.,
+2016). Assumption 2 shows that the variance of stochastic
+or zeroth-order gradient is bounded in norm, which have
+been commonly used in the convergence analysis of stochas-
+tic zeroth-order algorithms (Gao et al., 2018; Ji et al., 2019).
+Assumptions 3 and 4 are standard for the convergence anal-
+ysis of Frank-Wolfe algorithms (Jaggi, 2013; Shen et al.,
+2019; Yurtsever et al., 2019).
+4. Accelerated Stochastic Zeroth-Order
+Frank-Wolfe Algorithms
+In the section, we first propose an accelerated stochastic
+zeroth-order Frank-Wolfe (Acc-SZOFW) algorithm based
+on the variance reduced technique of SPIDER/SpiderBoost
+and a novel momentum accelerated technique. We then
+further propose a novel accelerated stochastic zeroth-order
+Frank-Wolfe (Acc-SZOFW*) algorithm to relax the large
+mini-batch size required in the Acc-SZOFW.
+4.1. Acc-SZOFW Algorithm
+In the subsection, we propose an Acc-SZOFW algorithm
+to solve the problem (1), where the loss function is pos-
+sibly black-box. The Acc-SZOFW algorithm is given in
+Algorithm 1.
+We first propose an accelerated deterministic zeroth-order
+Frank-Wolfe (Acc-ZO-FW) algorithm to solve the finite-
+sum problem (1) as a baseline by using the zeroth-order
+gradient vt =
+1
+n
+∑n
+i=1 ∇̂coofi(zt) in Algorithm 1. Al-
+though Chen et al. (2018) has proposed a deterministic
+zeroth-order Frank-Wolfe (FW-Black) algorithm by using
+the momentum-based accelerated zeroth-order gradients,
+our Acc-ZO-FW algorithm still has lower query complexity
+than the FW-Black algorithm (see Table 1).
+When the sample size n is very large in the finite-sum opti-
+mization problem (1), we will need to waste lots of time to
+obtain the estimated full gradient of f(x), and in turn make
+the whole algorithm became very slow. Even worse, for the
+stochastic optimization problem (1), we can never obtain
+the estimated full gradient of f(x). As a result, the stochas-
+tic optimization method is a good choice. Specifically, we
+can draw a mini-batch B ⊆ {1, 2, · · · , n} (b = |B|) or
+B = {ξ1, · · · , ξb} from the distribution of random variable
+ξ, and can obtain the following stochastic zeroth-order gra-
+Algorithm 1 Acc-SZOFW Algorithm
+1: Input: Total iteration T , step-sizes {ηt, γt ∈
+(0, 1)}T−1t=0 , weighted parameters {αt ∈ [0, 1]}
+T−1
+t=0 ,
+epoch-size q, mini-batch size b or b1, b2;
+2: Initialize: x0 = y0 = z0 ∈ X ;
+3: for t = 0, 1, . . . , T − 1 do
+4: if mod (t, q) = 0 then
+5: For the finite-sum setting, compute vt =
+∇̂coof(zt) = 1n
+∑n
+i=1 ∇̂coofi(zt);
+6: For the stochastic setting, randomly select b1 sam-
+ples B1 = {ξ1, · · · , ξb1}, and compute vt =
+∇̂coofB1(zt), or draw i.i.d. {u1, · · · , ub1} from
+uniform distribution over unit sphere, then com-
+pute vt = ∇̂unifB1(zt);
+7: else
+8: For the finite-sum setting, randomly select b =
+|B| samples B ⊆ {1, · · · , n}, and compute vt =
+1
+b
+∑
+j∈B[∇̂coofj(zt)− ∇̂coofj(zt−1)] + vt−1;
+9: For the stochastic setting, randomly select b2 sam-
+ples B2 = {ξ1, · · · , ξb2}, and compute vt =
+1
+b2
+∑
+j∈B2 [∇̂coofj(zt)−∇̂coofj(zt−1)]+vt−1, or
+draw i.i.d. {u1, · · · , ub2} from uniform
+distribution over unit sphere, then vt =
+1
+b2
+∑
+j∈B2 [∇̂unifj(zt)− ∇̂unifj(zt−1)] + vt−1;
+10: end if
+11: Optimize wt = argmaxw∈X 〈w,−vt〉;
+12: Update xt+1 = xt + γt(wt − xt);
+13: Update yt+1 = zt + ηt(wt − zt);
+14: Update zt+1 = (1− αt+1)yt+1 + αt+1xt+1;
+15: end for
+16: Output: zζ chosen uniformly random from {zt}Tt=1.
+dient:
+∇̂coofB(x) =
+1
+b
+∑
+j∈B
+∇̂coofj(x).
+Then we can use the standard Frank-Wolfe algorithm to
+update parameters based on these zeroth-order stochastic
+gradients.
+However, this standard zeroth-order stochastic Frank-
+Wolfe algorithm suffers from large variance in the zeroth-
+order stochastic gradient. Following (Balasubramanian &
+Ghadimi, 2018; Sahu et al., 2019), this variance will re-
+sult in high function query complexity. Thus, we use the
+variance reduced technique of SPIDER/SpiderBoost as in
+(Ji et al., 2019) to reduce the variance in the zeroth-order
+stochastic gradients. In Algorithm 1, we use the zeroth-order
+semi-stochastic gradients as follows:
+vt =
+1
+b
+∑
+j∈B
+[∇̂fj(zt)− ∇̂fj(zt−1)] + vt−1,
+where zeroth-order gradient ∇̂fj(·) includes ∇̂coofj(·) and
+∇̂unifj(·).
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Algorithm 2 Acc-SZOFW* Algorithm
+1: Input: Total iteration T , step-sizes {ηt, γt ∈
+(0, 1)}T−1t=0 , weighted parameters {αt ∈ [0, 1]}
+T−1
+t=1 and
+the parameter {ρt}T−1t=1 ;
+2: Initialize: x0 = y0 = z0 ∈ X ;
+3: for t = 0, 1, . . . , T − 1 do
+4: if t = 0 then
+5: Sample a point ξ0, and compute v0 =
+∇̂coofξ0(z0), or draw a vector u ∈ Rd from uni-
+form distribution over unit sphere, then compute
+v0 = ∇̂unifξ0(z0);
+6: else
+7: Sample a point ξt, and compute vt =
+∇̂coofξt(zt) + (1 − ρt)
+(
+vt−1 − ∇̂coofξt(zt−1)
+)
+,
+or draw a vector u ∈ Rd from uniform dis-
+tribution over unit sphere, then compute vt =
+∇̂unifξt(zt) + (1− ρt)
+(
+vt−1 − ∇̂unifξt(zt−1)
+)
+;
+8: end if
+9: Optimize wt = argmaxw∈X 〈w,−vt〉;
+10: Update xt+1 = xt + γt(wt − xt);
+11: Update yt+1 = zt + ηt(wt − zt);
+12: Update zt+1 = (1− αt+1)yt+1 + αt+1xt+1;
+13: end for
+14: Output: zζ chosen uniformly random from {zt}Tt=1.
+Moreover, we propose a novel momentum accelerated
+framework for the Frank-Wolfe algorithm. Specifically, we
+introduce two intermediate variables x and y, as in (Wang
+et al., 2019), and our algorithm keeps all variables {x, y, z}
+in the constraint set X . In Algorithm 1, when set αt+1 = 0
+or αt+1 = 1, our algorithm will reduce to the zeroth-order
+Frank-Wolfe algorithm with the variance reduced technique
+of SPIDER/SpiderBoost. When αt+1 ∈ (0, 1), our algo-
+rithm will generate the following iterations:
+z1 = z0 + ((1− α1)η0 + α1γ0)(w0 − z0),
+z2 = z1 + ((1− α2)η1 + α2γ1)(w1 − z1)
++ α2(1− γ1)(1− α1)(γ0 − η0)(w0 − z0),
+z3 = z2 + ((1− α3)η2 + α3γ2)(w2 − z2)
++ α3(1− γ2)(1− α2)(γ1 − η1)(w1 − z1)
++ α3(1−γ2)(1−α2)(1−γ1)(1−α1)(γ0−η0)(w0−z0),
+· · ·
+From the above iterations, the updating parameter zt is a lin-
+ear combination of the previous termswi−zi (i ≤ t), which
+coincides the aim of momentum accelerated technique (Nes-
+terov, 2004; Allen-Zhu, 2017). In fact, our momentum
+accelerated technique does not rely on the version of gradi-
+ent vt. In other words, our momentum accelerated technique
+can be applied in the zeroth-order, first-order, determinate
+or stochastic Frank-Wolfe algorithms.
+4.2. Acc-SZOFW* Algorithm
+In this subsection, we propose a novel Acc-SZOFW* algo-
+rithm based on a new momentum-based variance reduced
+technique of STORM/Hybrid-SGD (Cutkosky & Orabona,
+2019; Tran-Dinh et al., 2019). Although the above Acc-
+SZOFW algorithm reaches a lower function query complex-
+ity, it requires large batches (Please see Table 1). Clearly,
+the Acc-SZOFW algorithm can not be well competent to the
+very large-scale problems and the data flow problems. Thus,
+we further propose a novel Acc-SZOFW* algorithm to relax
+the large batches required in the Acc-SZOFW. Algorithm 2
+details the Acc-SZOFW* algorithm.
+In Algorithm 2, we apply the variance-reduced technique
+of STORM to estimate the zeroth-order stochastic gradi-
+ents, and update the parameters {x, y, z} as in Algorithm 1.
+Specifically, we use the zeroth-order stochastic gradients as
+follows:
+vt=ρt ∇̂fξt(zt)︸ ︷︷ ︸
+SGD
++(1− ρt)
+(
+∇̂fξt(zt)−∇̂fξt(zt−1)+vt−1︸ ︷︷ ︸
+SPIDER
+)
+= ∇̂fξt(zt) + (1− ρt)
+(
+vt−1 − ∇̂fξt(zt−1)
+)
+, (6)
+where ρt ∈ (0, 1]. Recently, (Zhang et al., 2019; Xie et al.,
+2019) have been applied this variance-reduced technique
+of STORM to the Frank-Wolfe algorithms. However, these
+algorithms strictly rely on the unbiased stochastic gradient.
+To the best of our knowledge, we are the first to apply the
+STORM to the zeroth-order algorithm, which does not rely
+on the unbiased stochastic gradient.
+5. Convergence Analysis
+In the section, we study the convergence properties of both
+the Acc-SZOFW and Acc-SZOFW* algorithms. All re-
+lated proofs are provided in the supplementary document.
+Throughout the paper, ‖ · ‖ denotes the vector `2 norm and
+the matrix spectral norm, respectively. Without loss of gen-
+erality, let αt =
+1
+t+1
+, γt = (1 + θt)ηt with θt =
+1
+(t+1)(t+2)
+in our algorithms.
+5.1. Convergence Properties of Acc-SZOFW Algorithm
+In this subsection, we study the convergence properties
+of the Acc-SZOFW Algorithm based on the CooGE and
+UniGE zeroth-order gradients, respectively. The detailed
+proofs are provided in the Appendix A.1.
+We first study the convergence properties of the determin-
+istic Acc-ZO-FW algorithm as a baseline, which is Al-
+gorithm 1 using the deterministic zeroth-order gradient
+vt =
+1
+n
+∑n
+i=1 ∇̂coofi(zt) for solving the finite-sum prob-
+lem (1).
+Accelerated Stochastic Gradient-free and Projection-free Methods
+5.1.1. DETERMINISTIC ACC-ZO-FW ALGORITHM
+Theorem 1. Suppose {xt, yt, zt}T−1t=0 be generated from
+Algorithm 1 by using the deterministic zeroth-order gra-
+dient vt =
+1
+n
+∑n
+i=1 ∇̂coofi(zt), and let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1+θt)ηt, η = ηt = T−
+1
+2 , µ = d−
+1
+2T−
+1
+2 ,
+then we have
+E[G(zζ)] =
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+1
+T
+1
+2
+) +O(
+ln(T )
+T
+3
+2
+),
+where zζ is chosen uniformly randomly from {zt}T−1t=0 .
+Remark 1. Theorem 1 shows that the deterministic Acc-ZO-
+FW algorithm under the CooGE has O(T−
+1
+2 ) convergence
+rate. The Acc-ZO-FW algorithm needs nd samples to esti-
+mate the zeroth-order gradient vt at each iteration. For find-
+ing an �-stationary point, i.e., E[G(zζ)] ≤ �, by T−
+1
+2 ≤ �,
+we choose T = �−2. Thus the deterministic Acc-ZO-FW
+has the function query complexity of ndT = O(dn�−2).
+Comparing with the existing deterministic zeroth-order
+Frank-Wolfe algorithm, i.e., FW-Black (Chen et al., 2018),
+our Acc-ZO-FW algorithm has a lower query complexity of
+ndT = O(dn�−2), which improves the existing result by a
+factor of O(�−2) (please see Table 1).
+5.1.2. ACC-SZOFW (COOGE) ALGORITHM
+Lemma 1. Suppose the zeroth-order stochastic gradient vt
+be generated from Algorithm 1 by using the CooGE zeroth-
+order gradient estimator. Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+and γt = (1 + θt)ηt in Algorithm 1. For the finite-sum
+setting, we have
+E‖∇f(zt)− vt‖ ≤ L
+√
+dµ+
+L(
+√
+6dµ+ 2
+√
+3Dη)√
+b/q
+.
+For the stochastic setting, we have
+E‖∇f(zt)− vt‖ ≤ L
+√
+dµ+
+L(
+√
+6dµ+ 2
+√
+3Dη)√
+b2/q
++
+√
+3σ1√
+b1
++
+√
+6dLµ.
+Theorem 2. Suppose {xt, yt, zt}T−1t=0 be generated from
+Algorithm 1 by using the CooGE zeroth-order gradient esti-
+mator, and let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1 + θt)ηt,
+η = ηt = T
+− 1
+2 , µ = d−
+1
+2T−
+1
+2 , b = q, or b2 = q and
+b1 = T , then we have
+E[G(zζ)] =
+1
+T
+T−1∑
+t=1
+E[G(zt)] ≤ O(
+1
+T
+1
+2
+) +O(
+ln(T )
+T
+3
+2
+),
+where zζ is chosen uniformly randomly from {zt}T−1t=0 .
+Remark 2. Theorem 2 shows that the Acc-SZOFW
+(CooGE) algorithm has convergence rate of O(T−
+1
+2 ) .
+When mod (t, q) = 0, the Acc-SZOFW algorithm needs
+nd or b1d samples to estimate the zeroth-order gradient
+vt at each iteration and needs T/q iterations, otherwise
+it needs 2bd or 2b2d samples to estimate vt at each itera-
+tion and needs T iterations. In the finite-sum setting, by
+T−
+1
+2 ≤ �, we choose T = �−2, and let b = q =
+√
+n,
+the Acc-SZOFW has the function query complexity of
+dnT/q + 2dbT = O(d
+√
+n�−2) for finding an �-stationary
+point. In the stochastic setting, let b2 = q = �−1 and
+b1 = T = �
+−2, the Acc-SZOFW has the function query
+complexity of db1T/q + 2db2T = O(d�−3) for finding an
+�-stationary point.
+5.1.3. ACC-SZOFW (UNIGE) ALGORITHM
+Lemma 2. Suppose the zeroth-order stochastic gradient vt
+be generated from Algorithm 1 by using the UniGE zeroth-
+order gradient estimator. Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+and γt = (1 + θt)ηt in Algorithm 1. For the stochastic
+setting, we have
+E‖∇f(zt)− vt‖ ≤
+βLd
+2
++
+L(
+√
+3dβ + 2
+√
+6Ddη)√
+2b2/q
++
+σ2√
+b1
+.
+Theorem 3. Suppose {xt, yt, zt}T−1t=0 be generated from
+Algorithm 1 by using the UniGE zeroth-order gradient esti-
+mator, and let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1 + θt)ηt,
+η = ηt = T
+− 1
+2 , β = d−1T−
+1
+2 , b2 = q, and b1 = T/d, then
+we have
+E[G(zζ)] =
+1
+T
+T−1∑
+t=1
+E[G(zt)] ≤ O(
+√
+d
+T
+1
+2
+) +O(
+√
+d ln(T )
+T
+3
+2
+),
+where zζ is chosen uniformly randomly from {zt}T−1t=0 .
+Remark 3. Theorem 3 shows that the Acc-SZOFW (UniGE)
+algorithm has O(
+√
+dT−
+1
+2 ) convergence rate. When
+mod (t, q) = 0, the Acc-SZOFW (UniGE) algorithm needs
+b1 samples to estimate the zeroth-order gradient vt at each
+iteration and needs T/q iterations, otherwise it needs 2b2
+samples to estimate vt at each iteration and needs T iter-
+ations. By
+√
+dT−
+1
+2 ≤ �, we choose T = d�−2, and let
+b2 = q = �
+−1 and b1 = �−2, the Acc-SZOFW has the
+function query complexity of b1T/q+2b2T = O(d�−3) for
+finding an �-stationary point.
+5.2. Convergence Properties of Acc-SZOFW*
+Algorithm
+In this subsection, we study the convergence properties
+of the Acc-SZOFW* Algorithm based on the CooGE and
+UniGE, respectively. The detailed proofs are provided in
+the Appendix A.2.
+Accelerated Stochastic Gradient-free and Projection-free Methods
+5.2.1. ACC-SZOFW* (COOGE) ALGORITHM
+Lemma 3. Suppose the zeroth-order gradient vt =
+∇̂coofξt(zt) + (1 − ρt)
+(
+vt−1 − ∇̂coofξt(zt−1)
+)
+be gener-
+ated from Algorithm 2. Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+,
+γt = (1 + θt)ηt, η = ηt ≤ (t + 1)−a and ρt = t−a for
+some a ∈ (0, 1] and the smoothing parameter µ = µt ≤
+d−
+1
+2 (t+ 1)−a, then we have
+E‖vt −∇f(zt)‖ ≤ L
+√
+dµ+
+√
+C(t+ 1)−
+a
+2 , (7)
+where C = 2(12L
+2D2+12L2+3σ21)
+2−2−a−a for some a ∈ (0, 1].
+Theorem 4. Suppose {xt, yt, zt}T−1t=0 be generated from
+Algorithm 2 by using the CooGE zeroth-order gradient es-
+timator. Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, η = ηt = T−
+2
+3 ,
+γt = (1 + θt)ηt, ρt = t−
+2
+3 for t ≥ 1 and µ = d−
+1
+2T−
+2
+3 ,
+then we have
+E[G(zζ)] =
+1
+T
+T−1∑
+t=1
+E[G(zt)] ≤ O(
+1
+T
+1
+3
+) +O(
+ln(T )
+T
+4
+3
+),
+where zζ is chosen uniformly randomly from {zt}T−1t=0 .
+Remark 4. Theorem 4 shows that the Acc-
+SZOFW*(CooGE) algorithm has O(T−
+1
+3 ) convergence
+rate. It needs 2d samples to estimate the zeroth-order
+gradient vt at each iteration, and needs T iterations. For
+finding an �-stationary point, i.e., ensuring E[G(zζ)] ≤ �,
+by T−
+1
+3 ≤ �, we choose T = �−3. Thus the Acc-SZOFW*
+has the function query complexity of 2dT = O(d�−3).
+Note that the Acc-SZOFW* algorithm only requires a
+small mini-batch size such as 2 and reaches the same
+function query complexity as the Acc-SZOFW algorithm
+that requires large batch sizes b2 = �−1 and b1 = �−2.
+For clarity, we need to emphasize that the mini-batch size
+denotes the sample size required at each iteration, while
+the query-size (in Table 1) denotes the function query size
+required in estimating one zeroth-order gradient in these
+algorithms. In fact, there exists a positive correlation
+between them. For example, in the Acc-SZOFW* algorithm,
+the mini-batch size is 2, and the corresponding query-size is
+2d.
+5.2.2. ACC-SZOFW* (UNIGE) ALGORITHM
+Lemma 4. Suppose the zeroth-order gradient vt =
+∇̂unifξt(zt) + (1 − ρt)
+(
+vt−1 − ∇̂unifξt(zt−1)
+)
+be gen-
+erated from Algorithm 2. Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+,
+γt = (1 + θt)ηt, η = ηt ≤ (t + 1)−a and ρt = t−a for
+some a ∈ (0, 1] and the smoothing parameter β = βt ≤
+d−1(t+ 1)−a, then we have
+E‖vt −∇f(zt)‖ ≤
+βLd
+2
++
+√
+C(t+ 1)−
+a
+2 , (8)
+where C = 24dL
+2D2+3L2+2σ22
+2−2−a−a for some a ∈ (0, 1].
+Theorem 5. Suppose {xt, yt, zt}T−1t=0 be generated from
+Algorithm 2 by using the UniGE zeroth-order gradient es-
+timator. Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, η = ηt = T−
+2
+3 ,
+γt = (1 + θt)ηt, ρt = t−
+2
+3 for t ≥ 1 and β = d−1T−
+2
+3 ,
+then we have
+E[G(zζ)] =
+1
+T
+T−1∑
+t=1
+E[G(zt)] ≤ O(
+√
+d
+T
+1
+3
+) +O(
+√
+d ln(T )
+T
+4
+3
+),
+where zζ is chosen uniformly randomly from {zt}T−1t=0 .
+Remark 5. Theorem 5 states that the Acc-SZOFW*(UniGE)
+algorithm has O(
+√
+dT−
+1
+3 ) convergence rate. It needs 2
+samples to estimate the zeroth-order gradient vt at each it-
+eration, and needs T iterations. By
+√
+dT−
+1
+3 ≤ �, we choose
+T = d
+3
+2 �−3. Thus, the Acc-SZOFW* has the function query
+complexity of 2T = O(d
+3
+2 �−3) for finding an �-stationary
+point.
+0 5 10 15 20 25
+Iterations
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Lo
+ss
+FW-Black (GauGE)
+FW-Black (UniGE)
+Acc-ZO-FW
+(a) MNIST
+0 5 10
+Iterations
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Lo
+ss
+FW-Black (GauGE)
+FW-Black (UniGE)
+Acc-ZO-FW
+(b) CIFAR10
+Figure 1. The convergence of attack loss against iterations of three
+algorithms on the SAP problem.
+6. Experiments
+In this section, we evaluate the performance of our proposed
+algorithms on two applications: 1) generating adversarial ex-
+amples from black-box deep neural networks (DNNs) and 2)
+robust black-box binary classification with `1 norm bound
+constraint. In the first application, we focus on two types
+of black-box adversarial attacks: single adversarial pertur-
+bation (SAP) against an image and universal adversarial
+perturbation (UAP) against multiple images. Specifically,
+we apply the SAP to demonstrate the efficiency of our de-
+terministic Acc-ZO-FW algorithm and compare with the
+FW-Black (Chen et al., 2018) algorithm. While we apply the
+UAP and robust black-box binary classification to verify the
+efficiency of our stochastic algorithms (i.e., Acc-SZOFW
+and Acc-SZOFW*) and compare with the ZO-SFW (Sahu
+et al., 2019) algorithm and the ZSCG (Balasubramanian
+& Ghadimi, 2018) algorithm. All of our experiments are
+conducted on a server with an Intel Xeon 2.60GHz CPU and
+an NVIDIA Titan Xp GPU. Our implementation is based
+on PyTorch and the code to reproduce our results is publicly
+available at https://github.com/TLMichael/Acc-SZOFW.
+Accelerated Stochastic Gradient-free and Projection-free Methods
+0 50 100 150 200 250 300
+Iterations
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Lo
+ss
+ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(a) MNIST
+0 25 50 75 100 125 150 175 200
+Iterations
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Lo
+ss
+ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(b) CIFAR10
+0 2000 4000 6000 8000 10000
+Queries
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Lo
+ss
+ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(c) MNIST
+0 2000 4000 6000 8000 10000
+Queries
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Lo
+ss
+ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(d) CIFAR10
+Figure 2. Comparison of six algorithms for the UAP problem.
+Above: the convergence of attack loss against iterations. Below:
+the convergence of attack loss against queries.
+6.1. Black-box Adversarial Attack
+In this subsection, we apply the zeroth-order algorithms to
+generate adversarial perturbations to attack the pre-trained
+black-box DNNs, whose parameters are hidden and only its
+outputs are accessible. Let (a, b) denote an image a with its
+true label b ∈ {1, 2, · · · ,K}, where K is the total number
+of image classes. For the SAP, we will design a perturbation
+x for a single image (a, b); For the UAP, we will design
+a universal perturbation x for multiple images {ai, bi}ni=1.
+Following (Guo et al., 2019), we solve the untargeted attack
+problem as follows:
+min
+x∈Rd
+1
+n
+n∑
+i=1
+p(bi | ai + x), s.t. ‖x‖∞ ≤ ε (9)
+where p(· | a) represents probability associated with each
+class, that is, the final output after softmax of neural network.
+In the problem (9), we normalize the pixel values to [0, 1]d.
+In the experiment, we use the pre-trained DNN models on
+MNIST (LeCun et al., 2010) and CIFAR10 (Krizhevsky
+et al., 2009) datasets as the target black-box models, which
+can attain 99.16% and 93.07% test accuracy, respectively.
+In the SAP experiment, we choose ε = 0.3 for MNIST and
+ε = 0.1 for CIFAR10. In the UAP experiment, we choose
+ε = 0.3 for both MNIST dataset and CIFAR10 dataset. For
+fair comparison, we choose the mini-batch size b = 20 for
+all stochastic zeroth-order methods. We refer readers to
+Appendix A.3 for more details of the experimental setups
+and the generated adversarial examples by our proposed
+algorithms.
+Figure 1 shows that the convergence behaviors of three algo-
+rithms on SAP problem, where for each curve, we generate
+1000 adversarial perturbations on MNIST and 100 adver-
+sarial perturbations on CIFAR10, the mean value of loss
+are plotted and the range of standard deviation is shown
+as a shadow overlay. For both datasets, the results show
+that the attack loss values of our Acc-ZO-FW algorithm
+faster decrease than those of the FW-Black algorithms, as
+the iteration increases, which demonstrates the superiority
+of our novel momentum technique and CooGE used in the
+Acc-ZO-FW algorithm.
+Figure 2 shows that the convergence of six algorithms on
+UAP problem. For both datesets, the results show that all of
+our accelerated zeroth-order algorithms have faster conver-
+gence speeds (i.e. less iteration complexity) than the existing
+algorithms, while the Acc-SZOFW (UniGE) algorithm and
+the Acc-SZOFW* (UniGE) have faster convergence speeds
+(i.e. less function query complexity) than other algorithms
+(especially ZSCG and ZO-SFW), which verifies that the ef-
+fectiveness of the variance reduced technique and the novel
+momentum technique in our accelerated algorithms. We
+notice that the periodic jitter of the curve of Acc-SZOFW
+(UniGE), which is due to the gradient variance reduction
+period of the variance reduced technique and the impre-
+cise estimation of the uniform smoothing gradient estimator
+makes the jitter more significant. The jitter is less obvious
+in Acc-SZOFW (CooGE). Figure 2(c) and Figure 2(d) rep-
+resent the attack loss against the number of function queries.
+We observe that the performance of our CooGE-based algo-
+rithms degrade since the need of large number of queries to
+construct coordinate-wise gradient estimates. From these
+results, we also find that the CooGE-based methods can not
+be competent to high-dimensional datasets due to estimating
+each coordinate-wise gradient required at least d queries. In
+addition, the performance of the Acc-SZOFW algorithms
+is better than the Acc-SZOFW* algorithms in most cases,
+which is due to the considerable mini-batch size used in the
+Acc-SZOFW algorithms.
+6.2. Robust Black-box Binary Classification
+In this subsection, we apply the proposed algorithms to
+solve the robust black-box binary classification task. Given
+a set of training samples (ai, li)ni=1, where ai ∈ R
+d and
+li ∈ {−1,+1}, we find optimal parameter x ∈ Rd by
+solving the problem:
+min
+x∈Rd
+1
+n
+n∑
+i=1
+fi(x), s.t. ‖x‖1 ≤ θ, (10)
+where fi(x) is the black-box loss function, that only returns
+the function value given an input. Here, we specify the
+loss function fi(x) =
+σ2
+2
+(1 − exp(− (li−a
+T
+i x)
+2
+σ2
+)), which
+is the nonconvex robust correntropy induced loss. In the
+Accelerated Stochastic Gradient-free and Projection-free Methods
+0 500 1000 1500 2000 2500 3000
+Iterations
+0.15
+0.20
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Tr
+ai
+n 
+Lo
+ss ZSCGZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(a) phishing
+0 100 200 300 400 500 600
+Iterations
+0.20
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Tr
+ai
+n 
+Lo
+ss ZSCGZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(b) a9a
+0 100 200 300 400 500 600
+Iterations
+0.20
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Tr
+ai
+n 
+Lo
+ss ZSCGZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(c) w8a
+0 1000 2000 3000 4000 5000
+Iterations
+0.36
+0.38
+0.40
+0.42
+0.44
+0.46
+0.48
+0.50
+Tr
+ai
+n 
+Lo
+ss ZSCGZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(d) covtype.binary
+0 100000 200000 300000 400000 500000 600000 700000
+Queries
+0.20
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Tr
+ai
+n 
+Lo
+ss ZSCGZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(e) phishing
+0 50000 100000 150000 200000 250000 300000 350000
+Queries
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Tr
+ai
+n 
+Lo
+ss ZSCGZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(f) a9a
+0 50000 100000 150000 200000 250000 300000 350000
+Queries
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Tr
+ai
+n 
+Lo
+ss ZSCGZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(g) w8a
+0 200000 400000 600000 800000 1000000 1200000
+Queries
+0.40
+0.42
+0.44
+0.46
+0.48
+0.50
+Tr
+ai
+n 
+Lo
+ss ZSCGZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(h) covtype.binary
+Figure 3. Comparison of six algorithms for robust black-box binary classification. Above: the convergence of train loss against iterations.
+Below: the convergence of train loss against queries.
+experiment, we use four public real datasets1. We set σ =
+10 and θ = 10. For fair comparison, we choose the mini-
+batch size b = 100 for all stochastic zeroth-order methods.
+In the experiment, we use four public real datasets, which
+are summarized in Table 2. For each dataset, we use half of
+the samples as training data and the rest as testing data. We
+elaborate the details of the parameter setting in Appendix
+A.4.
+Table 2. Real datasets for black-box binary classification.
+DATA SET #SAMPLES #FEATURES #CLASSES
+phishing 11,055 68 2
+a9a 32,561 123 2
+w8a 49,749 300 2
+covtype.binary 581,012 54 2
+Figure 3 shows that the convergence of six algorithms on
+the black-box binary classification problem. We see that
+the results are similar as in the case of the UAP problem.
+For all datasets, the results show that all of our acceler-
+ated algorithms have faster convergence speeds (i.e. less
+iteration complexity) than the existing algorithms, while
+the Acc-SZOFW (UniGE) algorithm and the Acc-SZOFW*
+(UniGE) have faster convergence speeds (i.e. less function
+query complexity) than other algorithms (especially ZSCG
+and ZO-SFW), which further demonstrates the efficiency of
+our accelerated algorithms. Similar to Figure 2, the periodic
+jitter of the curve of Acc-SZOFW (UniGE) also appears
+1These data are from the website https://www.csie.
+ntu.edu.tw/˜cjlin/libsvmtools/datasets/
+and seems to be more intense in the covtype.binary dataset.
+We speculate that this is because the variance of the random
+gradient estimator is too high in this situation. We also pro-
+vides the convergence of test loss in Appendix A.4, which
+is analogous to those of train loss.
+7. Conclusions
+In the paper, we proposed a class of accelerated stochastic
+gradient-free and projection-free (zeroth-order Frank-Wolfe)
+methods. In particular, we also proposed a momentum ac-
+celerated framework for the Frank-Wolfe methods. Specifi-
+cally, we presented an accelerated stochastic zeroth-order
+Frank-Wolfe (Acc-SZOFW) method based on the variance
+reduced technique of SPIDER and the proposed momentum
+accelerated technique. Further, we proposed a novel acceler-
+ated stochastic zeroth-order Frank-Wolfe (Acc-SZOFW*) to
+relax the large mini-batch size required in the Acc-SZOFW.
+Moreover, both the Acc-SZOFW and Acc-SZOFW* meth-
+ods obtain a lower query complexity, which improves the
+state-of-the-art query complexity in both finite-sum and
+stochastic settings.
+Acknowledgements
+We thank the anonymous reviewers for their valuable com-
+ments. This paper was partially supported by the Natu-
+ral Science Foundation of China (NSFC) under Grant No.
+61806093 and No. 61682281, and the Key Program of
+NSFC under Grant No. 61732006, and Jiangsu Postdoctoral
+Research Grant Program No. 2018K004A.
+https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/
+https://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/
+Accelerated Stochastic Gradient-free and Projection-free Methods
+References
+Allen-Zhu, Z. Katyusha: The first direct acceleration of
+stochastic gradient methods. The Journal of Machine
+Learning Research, 18(1):8194–8244, 2017.
+Allen-Zhu, Z. and Hazan, E. Variance reduction for faster
+non-convex optimization. In International Conference on
+Machine Learning, pp. 699–707, 2016.
+Balasubramanian, K. and Ghadimi, S. Zeroth-order (non)-
+convex stochastic optimization via conditional gradient
+and gradient updates. In Advances in Neural Information
+Processing Systems, pp. 3455–3464, 2018.
+Chen, J., Zhou, D., Yi, J., and Gu, Q. A frank-wolfe frame-
+work for efficient and effective adversarial attacks. arXiv
+preprint arXiv:1811.10828, 2018.
+Chen, S., Luo, L., Yang, J., Gong, C., Li, J., and Huang,
+H. Curvilinear distance metric learning. In Advances in
+Neural Information Processing Systems, pp. 4223–4232,
+2019a.
+Chen, X., Liu, S., Xu, K., Li, X., Lin, X., Hong, M., and Cox,
+D. Zo-adamm: Zeroth-order adaptive momentum method
+for black-box optimization. In Advances in Neural Infor-
+mation Processing Systems, pp. 7202–7213, 2019b.
+Cutkosky, A. and Orabona, F. Momentum-based variance
+reduction in non-convex sgd. In Advances in Neural
+Information Processing Systems, pp. 15210–15219, 2019.
+Defazio, A., Bach, F., and Lacoste-Julien, S. Saga: A
+fast incremental gradient method with support for non-
+strongly convex composite objectives. In Advances in
+neural information processing systems, pp. 1646–1654,
+2014.
+Duchi, J. C., Jordan, M. I., Wainwright, M. J., and Wibisono,
+A. Optimal rates for zero-order convex optimization: The
+power of two function evaluations. IEEE Transactions
+on Information Theory, 61(5):2788–2806, 2015.
+Fang, C., Li, C. J., Lin, Z., and Zhang, T. Spider: Near-
+optimal non-convex optimization via stochastic path-
+integrated differential estimator. In Advances in Neural
+Information Processing Systems, pp. 689–699, 2018.
+Frank, M. and Wolfe, P. An algorithm for quadratic pro-
+gramming. Naval research logistics quarterly, 3(1-2):
+95–110, 1956.
+Gao, X., Jiang, B., and Zhang, S. On the information-
+adaptive variants of the admm: an iteration complexity
+perspective. Journal of Scientific Computing, 76(1):327–
+363, 2018.
+Ghadimi, S. and Lan, G. Stochastic first-and zeroth-order
+methods for nonconvex stochastic programming. SIAM
+Journal on Optimization, 23(4):2341–2368, 2013.
+Ghadimi, S. and Lan, G. Accelerated gradient methods
+for nonconvex nonlinear and stochastic programming.
+Mathematical Programming, 156(1-2):59–99, 2016.
+Ghadimi, S., Lan, G., and Zhang, H. Mini-batch stochastic
+approximation methods for nonconvex stochastic com-
+posite optimization. Mathematical Programming, 155
+(1-2):267–305, 2016.
+Guo, C., Gardner, J., You, Y., Wilson, A. G., and Weinberger,
+K. Simple black-box adversarial attacks. In International
+Conference on Machine Learning, pp. 2484–2493, 2019.
+Hassani, H., Karbasi, A., Mokhtari, A., and Shen, Z.
+Stochastic conditional gradient++. arXiv preprint
+arXiv:1902.06992, 2019.
+Hazan, E. and Kale, S. Projection-free online learning.
+arXiv preprint arXiv:1206.4657, 2012.
+Hazan, E. and Luo, H. Variance-reduced and projection-free
+stochastic optimization. In ICML, pp. 1263–1271, 2016.
+He, K., Zhang, X., Ren, S., and Sun, J. Deep residual learn-
+ing for image recognition. In Proceedings of the IEEE
+conference on computer vision and pattern recognition,
+pp. 770–778, 2016.
+Huang, F., Gao, S., Chen, S., and Huang, H. Zeroth-order
+stochastic alternating direction method of multipliers for
+nonconvex nonsmooth optimization. In Proceedings of
+the 28th International Joint Conference on Artificial In-
+telligence, pp. 2549–2555. AAAI Press, 2019a.
+Huang, F., Gao, S., Pei, J., and Huang, H. Nonconvex zeroth-
+order stochastic admm methods with lower function query
+complexity. arXiv preprint arXiv:1907.13463, 2019b.
+Huang, F., Gu, B., Huo, Z., Chen, S., and Huang, H. Faster
+gradient-free proximal stochastic methods for nonconvex
+nonsmooth optimization. In AAAI, pp. 1503–1510, 2019c.
+Huang, F., Gao, S., Pei, J., and Huang, H. Momentum-
+based policy gradient methods. In Proceedings of the
+37th International Conference on Machine Learning, pp.
+3996–4007, 2020.
+Iusem, A. On the convergence properties of the projected
+gradient method for convex optimization. Computational
+& Applied Mathematics, 22(1):37–52, 2003.
+Jaggi, M. Revisiting frank-wolfe: Projection-free sparse
+convex optimization. In ICML, pp. 427–435, 2013.
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Ji, K., Wang, Z., Zhou, Y., and Liang, Y. Improved zeroth-
+order variance reduced algorithms and analysis for non-
+convex optimization. In International Conference on
+Machine Learning, pp. 3100–3109, 2019.
+Johnson, R. and Zhang, T. Accelerating stochastic gradient
+descent using predictive variance reduction. In NIPS, pp.
+315–323, 2013.
+Krizhevsky, A., Hinton, G., et al. Learning multiple layers
+of features from tiny images. 2009.
+Lacoste-Julien, S. Convergence rate of frank-wolfe for
+non-convex objectives. arXiv preprint arXiv:1607.00345,
+2016.
+Lacoste-Julien, S. and Jaggi, M. On the global linear conver-
+gence of frank-wolfe optimization variants. In NeurIPS,
+pp. 496–504, 2015.
+Lacoste-Julien, S., Jaggi, M., Schmidt, M., and Pletscher, P.
+Block-coordinate frank-wolfe optimization for structural
+svms. In ICML, pp. 53–61, 2013.
+Lan, G. and Zhou, Y. Conditional gradient sliding for convex
+optimization. SIAM Journal on Optimization, 26(2):1379–
+1409, 2016.
+LeCun, Y., Cortes, C., and Burges, C. Mnist handwritten
+digit database. ATT Labs [Online]. Available: http://yann.
+lecun. com/exdb/mnist, 2, 2010.
+Lei, L., Ju, C., Chen, J., and Jordan, M. I. Non-convex
+finite-sum optimization via scsg methods. In Advances in
+Neural Information Processing Systems, pp. 2348–2358,
+2017.
+Lin, Q., Lu, Z., and Xiao, L. An accelerated proximal coordi-
+nate gradient method. In Advances in Neural Information
+Processing Systems, pp. 3059–3067, 2014.
+Liu, S., Chen, J., Chen, P.-Y., and Hero, A. Zeroth-order
+online alternating direction method of multipliers: Con-
+vergence analysis and applications. In The Twenty-First
+International Conference on Artificial Intelligence and
+Statistics, volume 84, pp. 288–297, 2018a.
+Liu, S., Kailkhura, B., Chen, P.-Y., Ting, P., Chang, S.,
+and Amini, L. Zeroth-order stochastic variance reduc-
+tion for nonconvex optimization. In Advances in Neural
+Information Processing Systems, pp. 3727–3737, 2018b.
+Liu, S., Li, X., Chen, P.-Y., Haupt, J., and Amini, L. Zeroth-
+order stochastic projected gradient descent for nonconvex
+optimization. In 2018 IEEE Global Conference on Signal
+and Information Processing (GlobalSIP), pp. 1179–1183.
+IEEE, 2018c.
+Malik, D., Pananjady, A., Bhatia, K., Khamaru, K., Bartlett,
+P., and Wainwright, M. Derivative-free methods for pol-
+icy optimization: Guarantees for linear quadratic systems.
+In The 22nd International Conference on Artificial Intel-
+ligence and Statistics, pp. 2916–2925, 2019.
+Nesterov, Y. Introductory Lectures on Convex Programming
+Volume I: Basic course. Kluwer, Boston, 2004.
+Nesterov, Y. and Spokoiny, V. G. Random gradient-free
+minimization of convex functions. Foundations of Com-
+putational Mathematics, 17:527–566, 2017.
+Nguyen, L. M., Liu, J., Scheinberg, K., and Takáč, M. Sarah:
+A novel method for machine learning problems using
+stochastic recursive gradient. In Proceedings of the 34th
+International Conference on Machine Learning-Volume
+70, pp. 2613–2621. JMLR. org, 2017a.
+Nguyen, L. M., Liu, J., Scheinberg, K., and Takáč, M.
+Stochastic recursive gradient algorithm for nonconvex
+optimization. arXiv preprint arXiv:1705.07261, 2017b.
+Nitanda, A. Stochastic proximal gradient descent with ac-
+celeration techniques. In Advances in Neural Information
+Processing Systems, pp. 1574–1582, 2014.
+Qu, C., Li, Y., and Xu, H. Non-convex conditional gradient
+sliding. In ICML, pp. 4205–4214, 2018.
+Reddi, S. J., Hefny, A., Sra, S., Poczos, B., and Smola, A.
+Stochastic variance reduction for nonconvex optimization.
+In International conference on machine learning, pp. 314–
+323, 2016.
+Roux, N. L., Schmidt, M., and Bach, F. R. A stochastic
+gradient method with an exponential convergence rate
+for finite training sets. In Advances in neural information
+processing systems, pp. 2663–2671, 2012.
+Sahu, A. K., Zaheer, M., and Kar, S. Towards gradient free
+and projection free stochastic optimization. In The 22nd
+International Conference on Artificial Intelligence and
+Statistics, pp. 3468–3477, 2019.
+Shen, Z., Fang, C., Zhao, P., Huang, J., and Qian, H. Com-
+plexities in projection-free stochastic non-convex mini-
+mization. In AISTATS, pp. 2868–2876, 2019.
+Tran-Dinh, Q., Pham, N. H., Phan, D. T., and Nguyen, L. M.
+A hybrid stochastic optimization framework for stochas-
+tic composite nonconvex optimization. arXiv preprint
+arXiv:1907.03793, 2019.
+Wainwright, M. J., Jordan, M. I., et al. Graphical models,
+exponential families, and variational inference. Founda-
+tions and Trends R© in Machine Learning, 1(1–2):1–305,
+2008.
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Wang, Z., Ji, K., Zhou, Y., Liang, Y., and Tarokh, V.
+Spiderboost: A class of faster variance-reduced algo-
+rithms for nonconvex optimization. arXiv preprint
+arXiv:1810.10690, 2018.
+Wang, Z., Ji, K., Zhou, Y., Liang, Y., and Tarokh, V. Spi-
+derboost and momentum: Faster variance reduction algo-
+rithms. In Advances in Neural Information Processing
+Systems, pp. 2403–2413, 2019.
+Xie, J., Shen, Z., Zhang, C., Qian, H., and Wang, B. Stochas-
+tic recursive gradient-based methods for projection-free
+online learning. arXiv preprint arXiv:1910.09396, 2019.
+Xu, Y. and Yang, T. Frank-wolfe method is automati-
+cally adaptive to error bound condition. arXiv preprint
+arXiv:1810.04765, 2018.
+Yurtsever, A., Sra, S., and Cevher, V. Conditional gradi-
+ent methods via stochastic path-integrated differential
+estimator. In ICML, pp. 7282–7291, 2019.
+Zhang, M., Shen, Z., Mokhtari, A., Hassani, H., and Karbasi,
+A. One sample stochastic frank-wolfe. arXiv preprint
+arXiv:1910.04322, 2019.
+Zhou, D., Xu, P., and Gu, Q. Stochastic nested variance
+reduction for nonconvex optimization. In Proceedings of
+the 32nd International Conference on Neural Information
+Processing Systems, pp. 3925–3936. Curran Associates
+Inc., 2018.
+Accelerated Stochastic Gradient-free and Projection-free Methods
+A. Supplementary materials
+In this section, we first give the convergence analysis of our algorithms. Next, we further provide detailed experimental
+setup and additional experimental results.
+We first give some useful lemmas for both Acc-SZOFW and Acc-SZOFW* algorithms.
+Lemma 5. The sequence {xt, yt, zt}T−1t=0 is generated from the Acc-SZOFW or Acc-SZOFW* algorithm. Let αt =
+1
+t+1
+,
+η = ηt and γt = (1 + θt)ηt with θt =
+1
+(t+1)(t+2)
+, we have
+E[‖zt+1 − zt‖] ≤ 2ηD, E[‖xt+1 − zt+1‖] ≤ ηD. (11)
+Proof. By using the steps 12 to 14 in Algorithm 1 or the steps 10 to 12 in Algorithm 2, we have
+zt+1 − xt+1 = (1− αt+1)(yt+1 − xt+1)
+= (1− αt+1)(zt + ηt(wt − xt)− xt − γt(wt − xt))
+= (1− αt+1)(1− γt)(zt − xt) + (1− αt+1)(ηt − γt)(wt − zt). (12)
+By recursion to the above equality (12), we have
+xt+1 − zt+1 = (1− αt+1)
+t∑
+i=0
+( t∏
+j=i+1
+(1− αj)(1− γj)
+)
+(γi − ηi)(wi − zi). (13)
+According to (13), we can obtain
+zt+1 − zt = ηt(wt − zt)− αt+1(yt+1 − xt+1)
+= ηt(wt − zt) +
+αt+1
+1− αt+1
+(xt+1 − zt+1)
+= ηt(wt − zt) + αt+1
+t∑
+i=0
+( t∏
+j=i+1
+(1− αj)(1− γj)
+)
+(γi − ηi)(wi − zi). (14)
+By (14), we have
+‖zt+1 − zt‖ ≤ ηt‖wt − zt‖+ αt+1‖
+t∑
+i=0
+( t∏
+j=i+1
+(1− αj)(1− γj)
+)
+(γi − ηi)(wi − zi)‖
+≤ ηt‖wt − zt‖+ αt+1
+t∑
+i=0
+‖
+( t∏
+j=i+1
+(1− αj)(1− γj)
+)
+(γi − ηi)(wi − zi)‖
+≤ ηt‖wt − zt‖+ αt+1
+t∑
+i=0
+‖(γi − ηi)(wi − zi)‖
+= ηt‖wt − zt‖+ αt+1η
+t∑
+i=0
+θi‖wi − zi‖
+≤ 2ηD, (15)
+where the third inequality follows by
+∏t
+j=i+1(1−αj)(1−γj) ∈ [0, 1] due to that 0 ≤ αj ≤ 1 and 0 < γj < 1, and the above
+equality follows by γi = (1+θi)ηi, and the last inequality holds by Assumption 3 and αt+1 =
+1
+t+2
+, θi =
+1
+(i+1)(i+2)
+∈ (0, 1).
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Meanwhile, by (13), we have
+‖xt+1 − zt+1‖ = ‖(1− αt+1)
+t∑
+i=0
+( t∏
+j=i+1
+(1− αj)(1− γj)
+)
+(γi − ηi)(wi − zi)‖
+≤
+t∑
+i=0
+‖
+( t∏
+j=i+1
+(1− αj)(1− γj)
+)
+(γi − ηi)(wi − zi)‖
+≤
+t∑
+i=0
+‖(γi − ηi)(wi − zi)‖ ≤ η
+t∑
+i=0
+θi‖wi − zi‖
+≤ η
+t∑
+i=0
+θiD ≤ ηD, (16)
+where the first inequality holds by Triangle inequality and αt+1 ∈ [0, 1], and the second inequality follows by∏t
+j=i+1(1 − αj)(1 − γj) ∈ [0, 1] due to that 0 ≤ αj ≤ 1 and 0 < γj < 1, and the last inequality follows by∑t
+i=0 θi =
+∑t
+i=0
+1
+(i+1)(i+2)
+= 1− 1
+t+2
+≤ 1.
+Lemma 6. Suppose that random variables ζ1, · · · , ζm are independent and its individual mean is 0, i.e., E[ζi] = 0 for
+i = 1, · · · ,m, we have
+E[‖ζ1 + · · ·+ ζm‖2] = E[‖ζ1‖2 + · · ·+ ‖ζm‖2]. (17)
+Proof. It is easy verified that
+E[‖ζ1 + · · ·+ ζm‖2] =
+m∑
+i,j=1
+E[ζiζj ] = E[‖ζ1‖2 + · · ·+ ‖ζm‖2] +
+∑
+i6=j
+E[ζiζj ]
+= E[‖ζ1‖2 + · · ·+ ‖ζm‖2], (18)
+where the last inequality holds by the fact that random variables ζ1, · · · , ζm are independent and its individual mean is
+0.
+Next, we review some useful lemmas.
+Lemma 7. (Lemma 3 in (Ji et al., 2019)) For any L-smooth function f(x), given the zeroth-order gradient ∇̂coof(x) =∑d
+j=1
+f(x+µej)−f(x−µej)
+2µ
+ej , for any parameter µ > 0 and any x ∈ Rd, we have
+‖∇̂coof(x)−∇f(x)‖2 ≤ L2dµ2. (19)
+Lemma 8. (Lemma 5 in (Ji et al., 2019)) Let fβ(x) = Eu∼UB [f(x+ βu)] be a smooth approximation of f(x), where UB
+is the uniform distribution over the d-dimensional unit Euclidean ball B. Then we have
+(1) |fβ(x)− f(x)| ≤ β
+2L
+2
+and ‖∇fβ(x)−∇f(x)‖ ≤ βLd2 for any x ∈ R
+d;
+(2) E[ 1|S|
+∑
+j∈S ∇̂unifj(x)] = ∇fβ(x) for any x ∈ R
+d;
+(3) E‖∇̂unifj(x)− ∇̂unifj(y)‖2 ≤ 3dL2‖x− y‖2 + 3L
+2d2β
+2
+for any x, y ∈ Rd and any j draw from certain distribution.
+Note that the result (3) of Lemma 8 is an extended result from Lemma 5 in (Ji et al., 2019).
+A.1. Convergence Analysis of the Acc-SZOFW Algorithm
+In this subsection, we study the convergence properties of the Acc-SZOFW Algorithm based on the CooGE and UniGE,
+respectively. We first study the convergence properties of the deterministic Acc-ZO-FW Algorithm as a baseline, which is
+Algorithm 1 using the deterministic zeroth-order gradient vt = 1n
+∑n
+i=1 ∇̂coofi(zt) for solving the finite-sum problem (1).
+Accelerated Stochastic Gradient-free and Projection-free Methods
+A.1.1. CONVERGENCE ANALYSIS OF THE ACC-ZO-FW ALGORITHM
+Theorem 6. Suppose {xt, yt, zt}T−1t=0 be generated from Algorithm 1 by using the deterministic zeroth-order gradient
+vt =
+1
+n
+∑n
+i=1 ∇̂coofi(zt), and let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1 + θt)ηt, η = ηt = T−
+1
+2 , µ = d−
+1
+2T−
+1
+2 , then we
+have
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+1
+T
+1
+2
+) +O(
+ln(T )
+T
+3
+2
+). (20)
+Proof. By using the Assumption 1, i.e., f(x) is L-smooth, we have
+f(zt+1) ≤ f(zt) + 〈∇f(zt), zt+1 − zk〉+
+L
+2
+‖zt+1 − zt‖2
+= f(zt) + (1− αt+1)〈∇f(zt), yt+1 − zt〉+ αt+1〈∇f(zt), xt+1 − zt〉+
+L
+2
+‖zt+1 − zt‖2
+= f(zt) + ((1− αt+1)ηt + αt+1γt)〈∇f(zt), wt − zt〉+ αt+1(1− γt)〈∇f(zt), xt − zt〉
++
+L
+2
+‖zt+1 − zt‖2, (21)
+where the first equality holds by zt+1 = (1−αt+1)yt+1+αt+1xt+1, and the last equality holds by xt+1 = xt+γt(wt−xt)
+and yt+1 = zt + ηt(wt − zt).
+Let ŵt = argmaxw∈X 〈w,−∇f(zt)〉 = argminw∈X 〈w,∇f(zt)〉, we have
+〈∇f(zt), wt − zt〉 = 〈∇f(zt)− vt, wt − zt〉+ 〈vt, wt − zt〉
+≤ 〈∇f(zt)− vt, wt − zt〉+ 〈vt, ŵt − zt〉
+= 〈∇f(zt)− vt, wt − ŵt〉+ 〈∇f(zt), ŵt − zt〉
+= 〈∇f(zt)− vt, wt − ŵt〉 − G(zt)
+≤ D‖∇f(zt)− vt‖ − G(zt), (22)
+where the first inequality holds by the step 11 of Algorithm 1, and the third equality holds by the definition of Frank-Wolfe
+gap G(zt) = maxw∈X 〈w − zt,−∇f(zt)〉 = 〈ŵt − zt,−∇f(zt)〉, and the last inequality follows by Cauchy-Schwarz
+inequality and Assumption 3.
+Next, we consider the upper bound of 〈∇f(zt), xt − zt〉. We have
+〈∇f(zt), xt − zt〉 = 〈∇f(zt)−∇f(zt−1), xt − zt〉+ 〈∇f(zt−1), xt − zt〉
+≤ ‖∇f(zt)−∇f(zt−1)‖‖xt − zt‖+ 〈∇f(zt−1), xt − zt〉
+≤ L‖zt − zt−1‖‖xt − zt‖+ 〈∇f(zt−1), xt − zt〉
+≤ 2Lη2D2 + 〈∇f(zt−1), xt − zt〉
+= 2Lη2D2 + (1− αt)(1− γt−1)〈∇f(zt−1), zt−1 − xt−1〉+ (1− αt)(ηt−1 − γt−1)〈∇f(zt−1), wt−1 − zt−1〉
+≤ 2Lη2D2 + (1− αt)(1− γt−1)〈∇f(zt−1), zt−1 − xt−1〉+ (1− αt)θt−1ηt−1
+(
+D‖∇f(zt−1)− vt−1‖ − G(zt−1)
+)
+≤ 2Lη2D2 + 〈∇f(zt−1), zt−1 − xt−1〉+ θt−1ηt−1D‖∇f(zt−1)− vt−1‖ (23)
+where the first inequality holds by Cauchy-Schwarz inequality, and the third inequality holds by Lemma 5, and the second
+equality follows by the above equality (12), and the forth inequality holds by the inequality (22), and the last inequality
+follows by G(zt−1) ≥ 0 and 0 ≤ 1− αt ≤ 1. By recursion to (23), we can obtain
+〈∇f(zt), xt − zt〉 ≤ 2tLη2D2 + ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖ (24)
+Accelerated Stochastic Gradient-free and Projection-free Methods
+By using the above inequalities (21), (22) and (24), we have
+f(zt+1) ≤ f(zt) + ((1− αt+1)ηt + αt+1γt)〈∇f(zt), wt − zt〉+ αt+1(1− γt)〈∇f(zt), xt − zt〉
++
+L
+2
+‖zt+1 − zt‖2
+≤ f(zt) +
+L
+2
+‖zt+1 − zt‖2 − ((1− αt+1)ηt + αt+1γt)G(zt) + ((1− αt+1)ηt + αt+1γt)D‖∇f(zt)− vt‖
++ 2tαt+1(1− γt)Lη2D2 + αt+1(1− γt)ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖
+≤ f(zt) + 2Lη2D2 − ηG(zt) + 2ηD‖∇f(zt)− vt‖+ 2Lη2D2 + αt+1ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖
+= f(zt) + 4Lη
+2D2 − ηG(zt) + 2ηD‖∇f(zt)− vt‖+ αt+1ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖, (25)
+where the third inequality holds by the results in Lemma 5, and γt ∈ (0, 1), αt+1 = 1t+2 and αt+1(γt−ηt) =
+1
+(t+2)2(t+1)
+η ≤
+η. Summing the inequality (25) from t = 0 to T − 1, we can obtain
+η
+T−1∑
+t=1
+G(zt) ≤ f(z0)− f(zT−1) + 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−1∑
+t=0
+αt+1
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖
+= f(z0)− f(zT−1) + 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤ f(z0)− inf
+z∈X
+f(z) + 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤ 4+ 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖, (26)
+where the last inequality holds by the Assumption 4. Since vt =
+1
+n
+∑n
+i=1 ∇̂coofi(zt) = ∇̂coof(zt), we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤
+4
+ηT
++ 4LηD2 +
+2D
+T
+T−1∑
+t=0
+‖∇f(zt)− vt‖+
+D
+T
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤
+4
+ηT
++ 4LηD2 + 2DL
+√
+dµ+
+D
+T
+T−2∑
+t=0
+1
+(t+ 1)(t+ 2)
+( T−1∑
+i=t+1
+1
+i+ 1
+)
+L
+√
+dµ
+≤
+4
+ηT
++ 4LηD2 + 2DL
+√
+dµ+
+D
+T
+T−1∑
+t=0
+1
+(t+ 1)(t+ 2)
+ln(
+T
+t+ 1
+)L
+√
+dµ
+≤
+4
+ηT
++ 4LηD2 + 2DL
+√
+dµ+
+D ln(T )
+T
+L
+√
+dµ, (27)
+where the second inequality holds by Lemma 7, and the third inequality follows by the inequality
+∑T−1
+i=t+1
+1
+i+1
+≤
+∫ T
+t+1
+1
+x
+dx ≤
+ln( T
+t+1
+), and the last inequality holds by
+∑T−1
+t=0
+1
+(t+1)(t+2)
+ln( T
+t+1
+) ≤ ln(T )
+∑T−1
+t=0
+1
+(t+1)(t+2)
+= ln(T )(1− 1
+T+1
+) ≤ ln(T ).
+Let η = T−
+1
+2 , µ = d−
+1
+2T−
+1
+2 , then we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+1
+T
+1
+2
+) +O(
+ln(T )
+T
+3
+2
+). (28)
+Accelerated Stochastic Gradient-free and Projection-free Methods
+A.1.2. CONVERGENCE ANALYSIS OF THE ACC-SZOFW (COOGE) ALGORITHM
+In this subsection, we study the convergence properties of the Acc-SZOFW (CooGE) Algorithm, which uses the CooGE to
+estimate gradients. We begin with giving an upper bound of variance of stochastic zeroth-order gradient vt.
+Lemma 9. Suppose the zeroth-order gradient vt be generated from Algorithm 1 by using the CooGE zeroth-order gradient.
+Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, η = ηt and γt = (1 + θt)ηt in Algorithm 1. For the finite-sum setting, we have
+E‖∇f(zt)− vt‖ ≤ L
+√
+dµ+
+L(
+√
+6dµ+ 2
+√
+3Dη)√
+b/q
+. (29)
+For the stochastic setting, we have
+E‖∇f(zt)− vt‖ ≤ L
+√
+dµ+
+L(
+√
+6dµ+ 2
+√
+3Dη)√
+b2/q
++
+√
+3σ1√
+b1
++
+√
+6dLµ. (30)
+Proof. Without loss of generality, we first give an upper bound of E‖vt − ∇̂fcoo(zt)‖2 in the stochastic setting. By the
+definition of vt, we have
+E‖∇̂fcoo(zt)− vt‖2 = E‖ ∇̂fcoo(zt)− ∇̂fcoo(zt−1)−
+1
+b2
+∑
+j∈B2
+[∇̂coofj(zt)− ∇̂coofj(zt−1)]
+︸ ︷︷ ︸
+=T1
++ ∇̂fcoo(zt−1)− vt−1︸ ︷︷ ︸
+=T2
+‖2
+= E‖∇̂fcoo(zt)− ∇̂fcoo(zt−1)−
+1
+b2
+∑
+j∈B2
+[∇̂coofj(zt)− ∇̂coofj(zt−1)]‖2 + E‖∇̂fcoo(zt−1)− vt−1‖2
+=
+1
+b22
+∑
+j∈B2
+E‖∇̂fcoo(zt)− ∇̂fcoo(zt−1)− ∇̂coofj(zt) + ∇̂coofj(zt−1)‖2 + E‖∇̂fcoo(zt−1)− vt−1‖2
+≤
+1
+b22
+∑
+j∈B2
+E‖∇̂coofj(zt)− ∇̂coofj(zt−1)‖2 + E‖∇̂fcoo(zt−1)− vt−1‖2
+≤
+1
+b22
+∑
+j∈B2
+E‖∇̂coofj(zt)−∇fj(zt)+∇fj(zt)−∇fj(zt−1)+∇fj(zt−1)−∇̂coofj(zt−1)‖2+E‖∇̂fcoo(zt−1)− vt−1‖2
+≤
+1
+b2
+(
+3L2‖zt − zt−1‖2 + 6L2dµ2
+)
++ E‖∇̂fcoo(zt−1)− vt−1‖2
+≤
+6L2dµ2
+b2
++
+12L2η2D
+b2
++ E‖∇̂fcoo(zt−1)− vt−1‖2, (31)
+where the second equality holds by E[T1] = 0 and T2 is independent to B2, and the third equality holds by Lemma 6, and
+the third inequality holds by Cauchy-Schwarz inequality and Lemma 7, and the last inequality follows by Lemma 5.
+Let nt = bt/qc such that ntq ≤ t ≤ (nt + 1)q − 1. When t = ntq, vt = 1b1
+∑
+j∈B1 ∇̂coofj(zt), so we have
+E‖∇̂fcoo(zntq)−
+1
+b1
+∑
+j∈B1
+∇̂coofj(zntq)‖
+2
+= E‖∇̂fcoo(zntq)−∇f(zntq) +∇f(zntq)−
+1
+b1
+∑
+j∈B1
+∇fj(zntq) +
+1
+b1
+∑
+j∈B1
+∇fj(zntq)−
+1
+b1
+∑
+j∈B1
+∇̂coofj(zntq)‖
+2
+≤ 3E‖∇f(zntq)−
+1
+b1
+∑
+j∈B1
+∇fj(zntq)‖
+2 + 3E‖∇̂fcoo(zntq)−∇f(zntq)‖
+2 + 3E‖
+1
+b1
+∑
+j∈B1
+∇fj(zntq)−
+1
+b1
+∑
+j∈B1
+∇̂coofj(zntq)‖
+2
+≤
+3σ21
+b1
++ 3E‖∇̂fcoo(zntq)−∇f(zntq)‖
+2 + 3E‖
+1
+b1
+∑
+j∈B1
+∇fj(zntq)−
+1
+b1
+∑
+j∈B1
+∇̂coofj(zntq)‖
+2
+≤
+3σ21
+b1
++ 3L2dµ2 + 3L2dµ2 =
+3σ21
+b1
++ 6L2dµ2, (32)
+Accelerated Stochastic Gradient-free and Projection-free Methods
+where the first inequality holds by the Young’s inequality; the second inequality holds by Lemma 6; the third inequality
+follows by Lemma 7. By recursion to (31), we have
+E‖∇̂fcoo(zt)− vt‖2 ≤ (t− ntq)
+6L2(dµ2 + 2η2D)
+b2
++ E‖∇̂fcoo(zntq)− vntq‖
+2
+≤
+6qL2(dµ2 + 2η2D)
+b2
++
+3σ21
+b1
++ 6L2dµ2. (33)
+By Jensen’s inequality and the inequality (a+ b+ c+ d)1/2 ≤ a1/2 + b1/2 + c1/2 + d1/2 with a, b, c, d ≥ 0, we have
+E‖∇̂fcoo(zt)− vt‖ ≤
+√
+E‖∇̂fcoo(zt)− vt‖2 ≤
+L(
+√
+6dµ+ 2
+√
+3Dη)√
+b2/q
++
+√
+3σ1√
+b1
++
+√
+6dLµ. (34)
+Thus we have
+E‖∇f(zt)− vt‖ = E‖∇f(zt)− ∇̂coof(zt) + ∇̂coof(zt)− vt‖
+≤ E‖∇f(zt)− ∇̂coof(zt)‖+ E‖∇̂coof(zt)− vt‖
+≤ L
+√
+dµ+
+L(
+√
+6dµ+ 2
+√
+3Dη)√
+b2/q
++
+√
+3σ1√
+b1
++
+√
+6dLµ, (35)
+where the last inequality holds by the above Lemma 7.
+For the finite-sum setting, when t = ntq, vt = ∇̂fcoo(zt), so we have E‖∇̂fcoo(zntq)− vntq‖2 = 0. Following the above
+result, we have
+E‖∇f(zt)− vt‖ ≤ L
+√
+dµ+
+L(
+√
+6dµ+ 2
+√
+3Dη)√
+b/q
+. (36)
+Next, based on the above lemma, we will give the convergence properties of the Acc-SZOFW (CooGE) algorithm.
+Theorem 7. Suppose {xt, yt, zt}T−1t=0 be generated from Algorithm 1 by using the CooGE zeroth-order gradient, and let
+αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1 + θt)ηt, η = ηt = T−
+1
+2 , µ = d−
+1
+2T−
+1
+2 , b2 = q or b = q, and b1 = T , then we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+1
+T
+1
+2
+) +O(
+ln(T )
+T
+3
+2
+). (37)
+Proof. By using the Assumption 1, i.e., f(x) is L-smooth, we have
+f(zt+1) ≤ f(zt) + 〈∇f(zt), zt+1 − zk〉+
+L
+2
+‖zt+1 − zt‖2
+= f(zt) + (1− αt+1)〈∇f(zt), yt+1 − zt〉+ αt+1〈∇f(zt), xt+1 − zt〉+
+L
+2
+‖zt+1 − zt‖2
+= f(zt) + ((1− αt+1)ηt + αt+1γt)〈∇f(zt), wt − zt〉+ αt+1(1− γt)〈∇f(zt), xt − zt〉
++
+L
+2
+‖zt+1 − zt‖2, (38)
+where the first equality holds by zt+1 = (1−αt+1)yt+1+αt+1xt+1, and the last equality holds by xt+1 = xt+γt(wt−xt)
+and yt+1 = zt + ηt(wt − zt).
+Let ŵt = argmaxw∈X 〈w,−∇f(zt)〉 = argminw∈X 〈w,∇f(zt)〉, we have
+〈∇f(zt), wt − zt〉 = 〈∇f(zt)− vt, wt − zt〉+ 〈vt, wt − zt〉
+≤ 〈∇f(zt)− vt, wt − zt〉+ 〈vt, ŵt − zt〉
+= 〈∇f(zt)− vt, wt − ŵt〉+ 〈∇f(zt), ŵt − zt〉
+= 〈∇f(zt)− vt, wt − ŵt〉 − G(zt)
+≤ D‖∇f(zt)− vt‖ − G(zt), (39)
+Accelerated Stochastic Gradient-free and Projection-free Methods
+where the first inequality holds by the step 11 of Algorithm 1, and the third equality holds by the definition of Frank-Wolfe
+gap G(zt), and the second inequality follows by Cauchy-Schwarz inequality and Assumption 3.
+Next, we consider the upper bound of 〈∇f(zt), xt − zt〉. We have
+〈∇f(zt), xt − zt〉 = 〈∇f(zt)−∇f(zt−1), xt − zt〉+ 〈∇f(zt−1), xt − zt〉
+≤ ‖∇f(zt)−∇f(zt−1)‖‖xt − zt‖+ 〈∇f(zt−1), xt − zt〉
+≤ L‖zt − zt−1‖‖xt − zt‖+ 〈∇f(zt−1), xt − zt〉
+≤ 2Lη2D2 + 〈∇f(zt−1), xt − zt〉
+= 2Lη2D2 + (1− αt)(1− γt−1)〈∇f(zt−1), zt−1 − xt−1〉+ (1− αt)(ηt−1 − γt−1)〈∇f(zt−1), wt−1 − zt−1〉
+≤ 2Lη2D2 + (1− αt)(1− γt−1)〈∇f(zt−1), zt−1 − xt−1〉+ (1− αt)θt−1ηt−1
+(
+D‖∇f(zt−1)− vt−1‖ − G(zt−1)
+)
+≤ 2Lη2D2 + 〈∇f(zt−1), zt−1 − xt−1〉+ θt−1ηt−1D‖∇f(zt−1)− vt−1‖, (40)
+where the first inequality holds by Cauchy-Schwarz inequality, and the third inequality holds by Lemma 5, and the forth
+inequality holds by the inequality (39), and the last inequality follows by αt ∈ [0, 1], γt ∈ (0, 1) and G(zt−1) ≥ 0. By
+recursion to (40), we can obtain
+〈∇f(zt), xt − zt〉 ≤ 2tLη2D2 + ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖ (41)
+By using the above inequalities (38), (39) and (41) and the results in Lemma 5, we have
+f(zt+1) ≤ f(zt) + ((1− αt+1)ηt + αt+1γt)〈∇f(zt), wt − zt〉+ αt+1(1− γt)〈∇f(zt), xt − zt〉
++
+L
+2
+‖zt+1 − zt‖2
+≤ f(zt) + 2Lη2D2 − ((1− αt+1)ηt + αt+1γt)G(zt) + ((1− αt+1)ηt + αt+1γt)D‖∇f(zt)− vt‖
++ 2tαt+1(1− γt)Lη2D2 + αt+1(1− γt)ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖
+≤ f(zt) + 2Lη2D2 − ηG(zt) + 2ηD‖∇f(zt)− vt‖+ 2Lη2D2 + αt+1ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖
+= f(zt) + 4Lη
+2D2 − ηG(zt) + 2ηD‖∇f(zt)− vt‖+ αt+1ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖. (42)
+Summing the inequality (42) from t = 0 to T − 1, we can obtain
+η
+T−1∑
+t=1
+G(zt) ≤ f(z0)− f(zT−1) + 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−1∑
+t=0
+αt+1
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖
+= f(z0)− f(zT−1) + 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤ f(z0)− inf
+z∈X
+f(z) + 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤ 4+ 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖, (43)
+where the last inequality holds by the Assumption 4. Without loss of generality, we first consider the stochastic setting. Then
+Accelerated Stochastic Gradient-free and Projection-free Methods
+we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤
+4
+ηT
++ 4LηD2 +
+2D
+T
+T−1∑
+t=0
+‖∇f(zt)− vt‖+
+D
+T
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤
+4
+ηT
++ 4LηD2 + 2DL
+√
+dµ+
+2DL(
+√
+6dµ+ 2
+√
+3Dη)√
+b2/q
++
+2
+√
+3Dσ1√
+b1
++ 2
+√
+6dDLµ
++
+D
+T
+T−2∑
+t=0
+1
+(t+ 1)(t+ 2)
+( T−1∑
+i=t+1
+1
+i+ 1
+)(
+L
+√
+dµ+
+L(
+√
+6dµ+ 2
+√
+3Dη)√
+b2/q
++
+√
+3σ1√
+b1
++
+√
+6dLµ
+)
+≤
+4
+ηT
++ 4LηD2 + 2DL
+√
+dµ+
+2DL(
+√
+6dµ+ 2
+√
+3Dη)√
+b2/q
++
+2
+√
+3Dσ1√
+b1
++ 2
+√
+6dDLµ
++
+D
+T
+T−1∑
+t=0
+1
+(t+ 1)(t+ 2)
+ln(
+T
+t+ 1
+)
+(
+L
+√
+dµ+
+L(
+√
+6dµ+ 2
+√
+3Dη)√
+b2/q
++
+√
+3σ1√
+b1
++
+√
+6dLµ
+)
+≤
+4
+ηT
++ 4LηD2 + 2DL
+√
+dµ+
+2DL(
+√
+6dµ+ 2
+√
+3Dη)√
+b2/q
++
+2
+√
+3Dσ1√
+b1
++ 2
+√
+6dDLµ
++
+D ln(T )
+T
+(
+L
+√
+dµ+
+L(
+√
+6dµ+ 2
+√
+3Dη)√
+b2/q
++
+√
+3σ1√
+b1
++
+√
+6dLµ
+)
+, (44)
+where the second inequality holds by Lemma 9, and the third inequality follows by the inequality
+∑T−1
+i=t+1
+1
+i+1
+≤
+∫ T
+t+1
+1
+x
+dx ≤
+ln( T
+t+1
+), and the last inequality holds by
+∑T−1
+t=0
+1
+(t+1)(t+2)
+ln( T
+t+1
+) ≤ ln(T )
+∑T−1
+t=0
+1
+(t+1)(t+2)
+= ln(T )(1− 1
+T+1
+) ≤ ln(T ).
+Let η = T−
+1
+2 , µ = d−
+1
+2T−
+1
+2 , b2 = q and b1 = T−1, then we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+1
+T
+1
+2
+) +O(
+ln(T )
+T
+3
+2
+). (45)
+In the finite-sum setting, let η = T−
+1
+2 , µ = d−
+1
+2T−
+1
+2 and b2 = q. Following the above the above result, we also have
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+1
+T
+1
+2
+) +O(
+ln(T )
+T
+3
+2
+). (46)
+A.1.3. CONVERGENCE ANALYSIS OF THE ACC-SZOFW (UNIGE) ALGORITHM
+In this subsection, we study the convergence properties of the Acc-SZOFW (UniGE) Algorithm. We begin with giving an
+upper bound of variance of stochastic zeroth-order gradient vt.
+Lemma 10. Suppose the zeroth-order stochastic gradient vt be generated from Algorithm 1 by using the UniGE zeroth-order
+gradient. Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1 + θt)ηt in Algorithm 1. For the stochastic setting, we have
+E‖∇f(zt)− vt‖ ≤
+βLd
+2
++
+L(
+√
+3dβ + 2
+√
+6Ddη)√
+2b2/q
++
+σ2√
+b1
+. (47)
+Proof. First, we define fβ(x) = Eu∼UB [f(x + βu)] be a smooth approximation of f(x), where UB is the uniform
+distribution over the d-dimensional unit Euclidean ball B. By Lemma 5 in (Ji et al., 2019), we have E(u,ξ)[∇̂unifξ(x)] =
+Accelerated Stochastic Gradient-free and Projection-free Methods
+fβ(x). We give an upper bound of E‖vt −∇fβ(zt)‖2 in the stochastic setting. By the definition of vt, we have
+E‖∇fβ(zt)− vt‖2 = E‖∇fβ(zt)−∇fβ(zt−1)−
+1
+b2
+∑
+j∈B2
+[∇̂unifj(zt)− ∇̂unifj(zt−1)]
+︸ ︷︷ ︸
+=T1
++∇fβ(zt−1)− vt−1︸ ︷︷ ︸
+=T2
+‖2
+= E‖∇fβ(zt)−∇fβ(zt−1)−
+1
+b2
+∑
+j∈B2
+[∇̂unifj(zt)− ∇̂unifj(zt−1)]‖2 + E‖∇fβ(zt−1)− vt−1‖2
+=
+1
+b22
+∑
+j∈B2
+E‖∇fβ(zt)−∇fβ(zt−1)− ∇̂unifj(zt) + ∇̂unifj(zt−1)‖2 + E‖∇fβ(zt−1)− vt−1‖2
+≤
+1
+b22
+∑
+j∈B2
+E‖∇̂unifj(zt)− ∇̂unifj(zt−1)‖2 + E‖∇fβ(zt−1)− vt−1‖2
+≤
+1
+b2
+(
+3dL2‖zt − zt−1‖2 +
+3L2d2β2
+2
+)
++ E‖∇fβ(zt−1)− vt−1‖2
+≤
+3L2d2β2
+2b2
++
+12dL2η2D
+b2
++ E‖∇fβ(zt−1)− vt−1‖2, (48)
+where the second equality holds by E[T1] = 0 and T2 is independent to B2, and the second inequality holds by Lemma 8.
+Let nt = bt/qc such that ntq ≤ t ≤ (nt+1)q−1. When t = ntq, vt = 1b1
+∑
+j∈B1 ∇̂unifj(zt), so we have E‖∇fβ(zntq)−
+vntq‖2 ≤
+σ22
+b1
+. By recursion to (48), we have
+E‖∇fβ(zt)− vt‖2 ≤ (t− ntq)
+3L2(d2β2 + 8dη2D)
+2b2
++ E‖∇fβ(zntq)− vntq‖
+2
+≤
+3qL2(d2β2 + 8dη2D)
+2b2
++
+σ22
+b1
+. (49)
+By Jensen’s inequality and the inequality (a+ b+ c)1/2 ≤ a1/2 + b1/2 + c1/2 with a, b, c ≥ 0, we have
+E‖∇fβ(zt)− vt‖ ≤
+√
+E‖∇fβ(zt)− vt‖2 ≤
+L(
+√
+3dβ + 2
+√
+6Ddη)√
+2b2/q
++
+σ2√
+b1
+. (50)
+Thus we have
+E‖∇f(zt)− vt‖ = E‖∇f(zt)−∇fβ(zt) +∇fβ(zt)− vt‖
+≤ E‖∇f(zt)−∇fβ(zt)‖+ E‖∇fβ(zt)− vt‖
+≤
+βLd
+2
++
+L(
+√
+3dβ + 2
+√
+6Ddη)√
+2b2/q
++
+σ2√
+b1
+, (51)
+where the last inequality holds by the above Lemma 8.
+Next, based on the above lemma, we will give the convergence properties of the Acc-SZOFW (UniGE) algorithm.
+Theorem 8. Suppose {xt, yt, zt}T−1t=0 be generated from Algorithm 1, and let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1 + θt)ηt,
+η = ηt = T
+− 1
+2 , β = d−1T−
+1
+2 , b2 = q, and b1 = T , then we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+√
+d
+T
+1
+2
+) +O(
+√
+d ln(T )
+T
+3
+2
+). (52)
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Proof. This proof can follow the proof of Theorem 7. Here we show some different results. We have
+1
+T
+T−1∑
+t=1
+G(zt) ≤
+4
+ηT
++ 4LηD2 +
+2D
+T
+T−1∑
+t=0
+‖∇f(zt)− vt‖+
+D
+T
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤
+4
+ηT
++ 4LηD2 +DLdβ +
+2DL(
+√
+3dβ + 2
+√
+6Ddη)√
+2b2/q
++
+2Dσ2√
+b1
++
+D
+T
+T−2∑
+t=0
+1
+(t+ 1)(t+ 2)
+( T−1∑
+i=t+1
+1
+i+ 1
+)(βLd
+2
++
+L(
+√
+3dβ + 2
+√
+6Ddη)√
+2b2/q
++
+σ2√
+b1
+)
+≤
+4
+ηT
++ 4LηD2 +DLdβ +
+2DL(
+√
+3dβ + 2
+√
+6Ddη)√
+2b2/q
++
+2Dσ2√
+b1
++
+D
+T
+T−1∑
+t=0
+1
+(t+ 1)(t+ 2)
+ln(
+T
+t+ 1
+)
+(βLd
+2
++
+L(
+√
+3dβ + 2
+√
+6Ddη)√
+2b2/q
++
+σ2√
+b1
+)
+≤
+4
+ηT
++ 4LηD2 +DLdβ +
+2DL(
+√
+3dβ + 2
+√
+6Ddη)√
+2b2/q
++
+2Dσ2√
+b1
++
+D ln(T )
+T
+(βLd
+2
++
+L(
+√
+3dβ + 2
+√
+6Ddη)√
+2b2/q
++
+σ2√
+b1
+)
+, (53)
+where the second inequality holds by Lemma 10, and the third inequality follows by the inequality
+∑T−1
+i=t+1
+1
+i+1
+≤∫ T
+t+1
+1
+x
+dx ≤ ln( T
+t+1
+), and the fourth inequality holds by
+∑T−1
+t=0
+1
+(t+1)(t+2)
+ln( T
+t+1
+) ≤ ln(T )
+∑T−1
+t=0
+1
+(t+1)(t+2)
+= ln(T )(1−
+1
+T+1
+) ≤ ln(T ). Let η = T−
+1
+2 , β = d−1T−
+1
+2 , b2 = q and b1 = T−1, then we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+√
+d
+T
+1
+2
+) +O(
+√
+d ln(T )
+T
+3
+2
+). (54)
+A.2. Convergence Analysis of the Acc-SZOFW* Algorithm
+In this subsection, we study the convergence properties of the Acc-SZOFW* Algorithm based on the CooGE and UniGE,
+respectively.
+A.2.1. CONVERGENCE ANALYSIS OF THE ACC-SZOFW* (COOGE) ALGORITHM
+Lemma 11. Suppose the zeroth-order stochastic gradient vt = ∇̂coofξt(zt)+(1−ρt)
+(
+vt−1−∇̂coofξt(zt−1)
+)
+be generated
+from Algorithm 2. Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1 + θt)ηt, η = ηt ≤ (t+ 1)−a and ρt = t−a for some a ∈ (0, 1]
+and the smoothing parameter µ = µt ≤ d−
+1
+2 (t+ 1)−a, then we have
+E‖vt −∇f(zt)‖ ≤ L
+√
+dµ+
+√
+C(t+ 1)−
+a
+2 , (55)
+where C = 2(12L
+2D2+12L2+3σ21)
+2−2−a−a .
+Proof. We begin with giving an upper bound of E‖vt − ∇̂coof(zt)‖ with ∇̂coof(zt) = Eξt [∇̂coofξt(zt)]. It is easy verified
+that
+vt − vt−1 = −ρtvt−1 + (1− ρt)(∇̂coofξt(zt)− ∇̂coofξt(zt−1)) + ρt∇̂coofξt(zt), (56)
+Accelerated Stochastic Gradient-free and Projection-free Methods
+and ∇̂coof(zt) = Eξt [∇̂coofξt(zt)], and Eξt [∇̂coofξt(zt)− ∇̂coofξt(zt−1)] = ∇̂coof(zt)− ∇̂coof(zt−1). Then we have
+At = E‖∇̂coof(zt)− vt‖2 = E‖∇̂coof(zt)− ∇̂coof(zt−1) + ∇̂coof(zt−1)− vt−1 − (vt − vt−1)‖2
+= E‖∇̂coof(zt)−∇̂coof(zt−1)+∇̂coof(zt−1)−vt−1+ρtvt−1−(1−ρt)(∇̂coofξt(zt)−∇̂coofξt(zt−1))−ρt∇̂coofξt(zt)‖
+2
+= E‖(1− ρt)(∇̂coof(zt−1)− vt−1) + (1− ρt)
+(
+∇̂coof(zt)− ∇̂coof(zt−1)− ∇̂coofξt(zt) + ∇̂coofξt(zt−1)
+)
++ ρt(∇̂coof(zt)− ∇̂coofξt(zt))‖
+2
+= (1− ρt)2E‖∇̂coof(zt−1)− vt−1‖2 + (1− ρt)2E‖∇̂coof(zt)− ∇̂coof(zt−1)− ∇̂coofξt(zt) + ∇̂coofξt(zt−1)‖
+2
++ 2ρt(1− ρt)〈∇̂coof(zt)− ∇̂coof(zt−1)− ∇̂coofξt(zt) + ∇̂coofξt(zt−1), ∇̂coof(zt)− ∇̂coofξt(zt)〉
++ ρ2tE‖∇̂coof(zt)− ∇̂coofξt(zt)‖
+2
+≤ (1− ρt)2E‖∇̂coof(zt−1)− vt−1‖2 + 2(1− ρt)2E‖∇̂coof(zt)− ∇̂coof(zt−1)− ∇̂coofξt(zt) + ∇̂coofξt(zt−1)‖
+2
++ 2ρ2tE‖∇̂coof(zt)− ∇̂coofξt(zt)‖
+2
+≤ (1− ρt)2At−1 + 2(1− ρt)2E‖∇̂coofξt(zt)− ∇̂coofξt(zt−1)‖
+2 + 2ρ2tE‖∇̂coof(zt)− ∇̂coofξt(zt)‖
+2
+= (1− ρt)2At−1 + 2(1− ρt)2E‖∇̂coofξt(zt)−∇fξt(zt)+∇fξt(zt)−∇fξt(zt−1)+∇fξt(zt−1)−∇̂coofξt(zt−1)‖
+2
++ 2ρ2tE‖∇̂coof(zt)− ∇̂coofξt(zt)‖
+2
+≤ (1− ρt)2At−1 + 6(1− ρt)2L2E‖zt − zt−1‖2 + 12(1− ρt)2L2dµ2 + 2ρ2tE‖∇̂coof(zt)− ∇̂coofξt(zt)‖
+2
+≤ (1− ρt)2At−1 + 24(1− ρt)2η2L2D2 + 12(1− ρt)2L2dµ2 + 2ρ2tE‖∇̂coof(zt)− ∇̂coofξt(zt)‖
+2, (57)
+where the first inequality holds by Cauchy-Schwarz inequality, and the second inequality follows by the equality E‖ζ −
+E[ζ]‖2 = E‖ζ‖2 − ‖E[ζ]‖2, and the third inequality holds by Cauchy-Schwarz inequality and the Lemma 7, and the last
+inequality holds by the above Lemma 5. Next, we consider the upper bound of the term E‖∇̂coof(zt)− ∇̂coofξt(zt)‖2. We
+have
+E‖∇̂coof(zt)− ∇̂coofξt(zt)‖
+2
+= E‖∇̂coof(zt)−∇f(zt) +∇f(zt)−∇fξt(zt) +∇fξt(zt)− ∇̂coofξt(zt)‖
+2
+≤ 3E‖∇̂coof(zt)−∇f(zt)‖2‖2 + 3E‖∇f(zt)−∇fξt(zt)‖
+2 + 3E‖∇fξt(zt)− ∇̂coofξt(zt)‖
+2
+≤ 3σ21 + 3L
+2dµ2 + 3L2dµ2 = 3σ21 + 6L
+2dµ2, (58)
+where the first inequality holds by the Young’s inequality, and the second inequality holds by Lemma 7 and Assumption 2.
+Thus, we have
+At ≤ (1− ρt)2At−1 + 24(1− ρt)2η2L2D2 + 12(1− ρt)2L2dµ2 + 6σ21ρ
+2
+t + 12L
+2dµ2ρ2t . (59)
+Let ρt = t−a, η = ηt ≤ (t+ 1)−a for some a ∈ (0, 1] and µ = µt ≤ d−
+1
+2 (t+ 1)−a, by (59), we have
+At+1 ≤ (1−
+1
+(t+ 1)a
+)2At + (1−
+1
+(t+ 1)a
+)2
+24L2D2 + 12L2
+(t+ 1)2a
++
+6σ21 + 12L
+2dµ2
+(t+ 1)2a
+≤ (1−
+1
+(t+ 1)a
+)2At +
+2(12L2D2 + 12L2 + 3σ21)
+(t+ 1)2a
+. (60)
+Here we claim that At ≤ C(t+ 1)−a, where C =
+2(12L2D2+12L2+3σ21)
+2−2−a−a , and prove it. Define h(a) = 2− 2
+−a − a, since
+h′(a) = 2−a ln(2)− 1 ≥ 0, it is easy verified that 2 ≤ 4
+2−2−a−a ≤ 4. When t = 0, we have
+A0 = E[‖∇̂coof(z0)− ∇̂coofξ0(z0)‖
+2] ≤ 3σ21 + 6L
+2 ≤
+2(12L2D2 + 12L2 + 3σ21)
+2− 2−a − a
+≤ C · 1−a. (61)
+When t = 1, we have
+A1 = E[‖∇̂coof(z1)− ∇̂coofξ1(z1)‖
+2] ≤ 3σ21 + 6L
+2 ≤
+2(12L2D2 + 12L2 + 3σ21)
+2− 2−a − a
+/2 ≤ C · 2−a. (62)
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Assume that At ≤ C(t+ 1)−a for t ≥ 1, we have
+At+1 ≤ (1−
+1
+(t+ 1)a
+)2At +
+2(12L2D2 + 12L2 + 3σ21)
+(t+ 1)2a
+≤ (1−
+1
+(t+ 1)a
+)2 · C(t+ 1)−a +
+2(12L2D2 + 12L2 + 3σ21)
+(t+ 1)2a
+≤ C(t+ 1)−a − 2C(t+ 1)−2a + C(t+ 1)−3a +
+(2− 2−a − a)C
+(t+ 1)2a
+≤ C(t+ 1)−a +
+−2C + C(t+ 1)−a + (2− 2−a − a)C
+(t+ 1)2a
+≤ C(t+ 1)−a +
+−2C + C2−a + (2− 2−a − a)C
+(t+ 1)2a
+= C(t+ 1)−a −
+aC
+(t+ 1)2a
+. (63)
+Define g(t) = (t+ 1)−a for a ∈ (0, 1]. Since g(t) is a convex function, we have g(t+ 1) ≥ g(t) + g′(t), i.e., (t+ 2)−a −
+(t+ 1)−a ≥ −ata+1. Then we have
+At+1 ≤ C(t+ 1)−a −
+aC
+(t+ 1)2a
+≤ C(t+ 1)−a −
+aC
+(t+ 1)a+1
+≤ C(t+ 2)−a. (64)
+Thus we have At = E‖∇̂coof(zt)− vt‖2 ≤ C(t+ 1)−a, a ∈ (0, 1] for all t ≥ 0.
+By Jensen’s inequality, we have
+E‖∇̂coof(zt)− vt‖ ≤
+√
+E‖∇̂coof(zt)− vt‖2 ≤
+√
+C(t+ 1)−
+a
+2 . (65)
+Thus we have
+E‖∇f(zt)− vt‖ = E‖∇f(zt)− ∇̂coof(zt) + ∇̂coof(zt)− vt‖
+≤ E‖∇f(zt)− ∇̂coof(zt)‖+ E‖∇̂coof(zt)− vt‖
+≤ L
+√
+dµ+
+√
+C(t+ 1)−
+a
+2 , (66)
+where the last inequality holds by the above Lemma 7.
+Theorem 9. Suppose {xt, yt, zt}T−1t=0 be generated from Algorithm 2 by using the CooGE zeroth-order gradient estimator.
+Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, η = ηt = T−
+2
+3 , γt = (1 + θt)ηt, ρt = t−
+2
+3 for t ≥ 1 and µ = d−
+1
+2T−
+2
+3 , then we have
+E[G(zζ)] =
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+1
+T
+1
+3
+) +O(
+ln(T )
+T
+4
+3
+), (67)
+where zζ is chosen uniformly randomly from {zt}T−1t=0 .
+Proof. Using the Assumption 1, i.e., f(x) is L-smooth, we have
+f(zt+1) ≤ f(zt) + 〈∇f(zt), zt+1 − zk〉+
+L
+2
+‖zt+1 − zt‖2
+= f(zt) + (1− αt+1)〈∇f(zt), yt+1 − zt〉+ αt+1〈∇f(zt), xt+1 − zt〉+
+L
+2
+‖zt+1 − zt‖2
+= f(zt) + ((1− αt+1)ηt + αt+1γt)〈∇f(zt), wt − zt〉+ αt+1(1− γt)〈∇f(zt), xt − zt〉
++
+L
+2
+‖zt+1 − zt‖2, (68)
+Accelerated Stochastic Gradient-free and Projection-free Methods
+where the first equality holds by zt+1 = (1−αt+1)yt+1+αt+1xt+1, and the last equality holds by xt+1 = xt+γt(wt−xt)
+and yt+1 = zt + ηt(wt − zt).
+Let ŵt = argmaxw∈X 〈w,−∇f(zt)〉 = argminw∈X 〈w,∇f(zt)〉, we have
+〈∇f(zt), wt − zt〉 = 〈∇f(zt)− vt, wt − zt〉+ 〈vt, wt − zt〉
+≤ 〈∇f(zt)− vt, wt − zt〉+ 〈vt, ŵt − zt〉
+= 〈∇f(zt)− vt, wt − ŵt〉+ 〈∇f(zt), ŵt − zt〉
+= 〈∇f(zt)− vt, wt − ŵt〉 − G(zt)
+≤ D‖∇f(zt)− vt‖ − G(zt), (69)
+where the first inequality holds by the step 9 of Algorithm 2, and the third equality holds by the definition of Frank-Wolfe
+gap G(zt), and the second inequality follows by Cauchy-Schwarz inequality and Assumption 3.
+Next, we consider the upper bound of 〈∇f(zt), xt − zt〉, and we have
+〈∇f(zt), xt − zt〉 = 〈∇f(zt)−∇f(zt−1), xt − zt〉+ 〈∇f(zt−1), xt − zt〉
+≤ ‖∇f(zt)−∇f(zt−1)‖‖xt − zt‖+ 〈∇f(zt−1), xt − zt〉
+≤ L‖zt − zt−1‖‖xt − zt‖+ 〈∇f(zt−1), xt − zt〉
+≤ 2Lη2D2 + 〈∇f(zt−1), xt − zt〉
+= 2Lη2D2 + (1− αt)(1− γt−1)〈∇f(zt−1), zt−1 − xt−1〉+ (1− αt)(ηt−1 − γt−1)〈∇f(zt−1), wt−1 − zt−1〉
+≤ 2Lη2D2 + (1− αt)(1− γt−1)〈∇f(zt−1), zt−1 − xt−1〉+ (1− αt)θt−1ηt−1
+(
+D‖∇f(zt−1)− vt−1‖ − G(zt−1)
+)
+≤ 2Lη2D2 + 〈∇f(zt−1), zt−1 − xt−1〉+ θt−1ηt−1D‖∇f(zt−1)− vt−1‖ (70)
+where the first inequality holds by Cauchy-Schwarz inequality, and the third inequality holds by the above Lemma 5, and the
+forth inequality holds by the inequality (69), and the last inequality follows by αt ∈ [0, 1], γt ∈ (0, 1) and G(zt−1) ≥ 0. By
+recursion to (70), we have
+〈∇f(zt), xt − zt〉 ≤ 2tLη2D2 + ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖ (71)
+Based on the above inequalities (68), (69), (71) and the above Lemma 5, we have
+f(zt+1) ≤ f(zt) + ((1− αt+1)ηt + αt+1γt)〈∇f(zt), wt − zt〉+ αt+1(1− γt)〈∇f(zt), xt − zt〉
++
+L
+2
+‖zt+1 − zt‖2
+≤ f(zt) + 2Lη2D2 − ((1− αt+1)ηt + αt+1γt)G(zt) + ((1− αt+1)ηt + αt+1γt)D‖∇f(zt)− vt‖
++ 2tαt+1(1− γt)Lη2D2 + αt+1(1− γt)ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖
+≤ f(zt) + 2Lη2D2 − ηG(zt) + 2ηD‖∇f(zt)− vt‖+ 2Lη2D2 + αt+1ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖
+= f(zt) + 4Lη
+2D2 − ηG(zt) + 2ηD‖∇f(zt)− vt‖+ αt+1ηD
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖. (72)
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Summing the inequality (72) from t = 0 to T − 1, we can obtain
+η
+T−1∑
+t=1
+G(zt) ≤ f(z0)− f(zT−1) + 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−1∑
+t=0
+αt+1
+t−1∑
+i=0
+θi‖∇f(zi)− vi‖
+= f(z0)− f(zT−1) + 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤ f(z0)− inf
+z∈X
+f(z) + 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤ 4+ 4TLη2D2 + 2ηD
+T−1∑
+t=0
+‖∇f(zt)− vt‖+ ηD
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖, (73)
+where the last inequality holds by the Assumption 4. Then we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤
+4
+ηT
++ 4LηD2 +
+2D
+T
+T−1∑
+t=0
+‖∇f(zt)− vt‖+
+D
+T
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤
+4
+ηT
++ 4LηD2 + 2DL
+√
+dµ+
+2D
+√
+C
+T
+T−1∑
+t=0
+(t+ 1)−
+1
+3
++
+D
+T
+T−2∑
+t=0
+1
+(t+ 1)(t+ 2)
+( T−1∑
+i=t+1
+1
+i+ 1
+)
+(L
+√
+dµ+
+√
+C(t+ 1)−
+1
+3 )
+≤
+4
+ηT
++ 4LηD2 + 2DL
+√
+dµ+
+2D
+√
+C
+T
+T−1∑
+t=0
+(t+ 1)−
+1
+3
++
+D
+T
+T−1∑
+t=0
+1
+(t+ 1)(t+ 2)
+ln(
+T
+t+ 1
+)(L
+√
+dµ+
+√
+C(t+ 1)−
+1
+3 )
+≤
+4
+ηT
++ 4LηD2 + 2DL
+√
+dµ+
+2D
+√
+C
+T
+T−1∑
+t=0
+(t+ 1)−
+1
+3
++
+ln(T )DL
+√
+dµ
+T
++
+√
+CD ln(T )
+T
+≤
+4
+ηT
++ 4LηD2 + 2DL
+√
+dµ+
+3D
+√
+C
+T
+1
+3
++
+ln(T )DL
+√
+dµ
+T
++
+√
+CD ln(T )
+T
+, (74)
+where the second inequality holds by Lemma 11 with a = 2
+3
+, and the third inequality follows by the inequality
+∑T−1
+i=t+1
+1
+i+1
+≤∫ T
+t+1
+1
+x
+dx ≤ ln( T
+t+1
+), and the fourth inequality holds by
+∑T−1
+t=0
+1
+(t+1)(t+2)
+ln( T
+t+1
+) ≤ ln(T )
+∑T−1
+t=0
+1
+(t+1)(t+2)
+= ln(T )(1−
+1
+T+1
+) ≤ ln(T ) and (t + 1)−
+1
+3 ≤ 1, and the the fifth inequality holds by the inequality
+∑T
+t=1 t
+− 1
+3 ≤
+∫ T
+0
+x−
+1
+3 dx = 3
+2
+T
+2
+3 .
+Let η = T−
+2
+3 and µ = d−
+1
+2T−
+2
+3 , then we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤
+4+ 3D
+√
+C
+T
+1
+3
++
+4LD2 + 2DL
+T
+2
+3
++
+ln(T )DL
+T
+5
+3
++
+ln(T )
+√
+CD
+T
+4
+3
+. (75)
+Thus, we have
+E[G(zζ)] =
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+1
+T
+1
+3
+) +O(
+ln(T )
+T
+4
+3
+), (76)
+where zζ is chosen uniformly randomly from {zt}T−1t=0 .
+Accelerated Stochastic Gradient-free and Projection-free Methods
+A.2.2. CONVERGENCE ANALYSIS OF THE ACC-SZOFW* (UNIGE) ALGORITHM
+Lemma 12. Suppose the zeroth-order gradient vt = ∇̂unifξt(zt) + (1− ρt)
+(
+vt−1 − ∇̂unifξt(zt−1)
+)
+be generated from
+Algorithm 2. Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1 + θt)ηt, η = ηt ≤ (t+ 1)−a and ρt = t−a for some a ∈ (0, 1] and
+the smoothing parameter β = βt ≤ d−1(t+ 1)−a, then we have
+E‖vt −∇f(zt)‖ ≤
+βLd
+2
++
+√
+C(t+ 1)−
+a
+2 , (77)
+where C = 24L
+2dD2+3L2+2σ22
+2−2−a−a .
+Proof. First, we define fβ(x) = Eu∼UB [f(x + βu)] be a smooth approximation of f(x), where UB is the uniform
+distribution over the d-dimensional unit Euclidean ball B. By Lemma 5 in (Ji et al., 2019), we have E(u,ξ)[∇̂unifξ(x)] =
+fβ(x). Next, we will give an upper bound of E‖vt −∇fβ(zt)‖. It is easy verified that
+vt − vt−1 = −ρtvt−1 + (1− ρt)(∇̂unifξt(zt)− ∇̂unifξt(zt−1)) + ρt∇̂unifξt(zt), (78)
+and ∇fβ(zt) = Eξt [∇̂unifξt(zt)] and Eξt [∇̂unifξt(zt)− ∇̂unifξt(zt−1)] = ∇fβ(zt)−∇fβ(zt−1). Then we have
+At = E‖∇fβ(zt)− vt‖2 = E‖∇fβ(zt)−∇fβ(zt−1) +∇fβ(zt−1)− vt−1 − (vt − vt−1)‖2
+= E‖∇fβ(zt)−∇fβ(zt−1) +∇fβ(zt−1)−vt−1+ρtvt−1−(1−ρt)(∇̂unifξt(zt)−∇̂unifξt(zt−1))−ρt∇̂unifξt(zt)‖
+2
+= E‖(1− ρt)(∇fβ(zt−1)− vt−1) + (1− ρt)
+(
+∇fβ(zt)−∇fβ(zt−1)− ∇̂unifξt(zt) + ∇̂unifξt(zt−1)
+)
++ ρt(∇fβ(zt)− ∇̂unifξt(zt))‖
+2
+= (1− ρt)2E‖∇fβ(zt−1)− vt−1‖2 + (1− ρt)2E‖∇fβ(zt)−∇fβ(zt−1)− ∇̂unifξt(zt) + ∇̂unifξt(zt−1)‖
+2
++ 2ρt(1− ρt)〈∇fβ(zt)−∇fβ(zt−1)− ∇̂unifξt(zt) + ∇̂unifξt(zt−1),∇fβ(zt)− ∇̂unifξt(zt)〉
++ ρ2tE‖∇fβ(zt)− ∇̂unifξt(zt)‖
+2
+≤ (1− ρt)2E‖∇fβ(zt−1)− vt−1‖2 + 2(1− ρt)2E‖∇fβ(zt)−∇fβ(zt−1)− ∇̂unifξt(zt) + ∇̂unifξt(zt−1)‖
+2
++ 2ρ2tE‖∇fβ(zt)− ∇̂unifξt(zt)‖
+2
+≤ (1− ρt)2At−1 + 2(1− ρt)2E‖∇̂unifξt(zt)− ∇̂unifξt(zt−1)‖
+2 + 2ρ2tσ
+2
+2
+≤ (1− ρt)2At−1 + 2(1− ρt)2
+(
+3dL2E‖zt − zt−1‖2 +
+3L2d2β2
+2
+)
++ 2ρ2tσ
+2
+2
+≤ (1− ρt)2At−1 + 24(1− ρt)2η2dL2D2 + 3(1− ρt)2L2d2β2 + 2ρ2tσ
+2
+2 , (79)
+where the first inequality holds by Cauchy-Schwarz inequality, and the second inequality follows by the equality E‖ζ −
+E[ζ]‖2 = E‖ζ‖2 − ‖E[ζ]‖2, and the Lemma 8, and the last inequality holds by the above Lemma 5.
+Let ρt = t−a, η = ηt ≤ (t+ 1)−a for some a ∈ (0, 1] and β ≤ d−1(t+ 1)−a, by (79), we have
+At+1 ≤ (1−
+1
+(t+ 1)a
+)2At + (1−
+1
+(t+ 1)a
+)2
+24L2dD2 + 3L2
+(t+ 1)2a
++
+2σ22
+(t+ 1)2a
+≤ (1−
+1
+(t+ 1)a
+)2At +
+24L2dD2 + 3L2 + 2σ22
+(t+ 1)2a
+. (80)
+Here we claim that At ≤ C(t + 1)−a, where C =
+24L2dD2+3L2+2σ22
+2−2−a−a , and prove it. Define h(a) = 2 − 2
+−a − a, since
+h′(a) = 2−a ln(2)− 1 ≥ 0, it is easy verified that 2 ≤ 4
+2−2−a−a ≤ 4. When t = 0, we have
+A0 = E[‖∇fβ(z0)− ∇̂unifξ0(z0)‖
+2] ≤ σ22 ≤
+24L2dD2 + 3L2 + 2σ22
+2− 2−a − a
+≤ C · 1−a. (81)
+When t = 1, we have
+A1 = E[‖∇fβ(z1)− ∇̂unifξ1(z1)‖
+2] ≤ σ22 ≤
+24L2dD2 + 3L2 + 2σ22
+2− 2−a − a
+/2 ≤ C · 2−a. (82)
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Assume that At ≤ C(t+ 1)−a for t ≥ 1, we have
+At+1 ≤ (1−
+1
+(t+ 1)a
+)2At +
+24L2dD2 + 3L2 + 2σ22
+(t+ 1)2a
+≤ (1−
+1
+(t+ 1)a
+)2 · C(t+ 1)−a +
+24L2dD2 + 3L2 + 2σ22
+(t+ 1)2a
+≤ C(t+ 1)−a − 2C(t+ 1)−2a + C(t+ 1)−3a +
+(2− 2−a − a)C
+(t+ 1)2a
+≤ C(t+ 1)−a +
+−2C + C(t+ 1)−a + (2− 2−a − a)C
+(t+ 1)2a
+≤ C(t+ 1)−a +
+−2C + C2−a + (2− 2−a − a)C
+(t+ 1)2a
+= C(t+ 1)−a −
+aC
+(t+ 1)2a
+. (83)
+Define g(t) = (t+ 1)−a for a ∈ (0, 1]. Since g(t) is a convex function, we have g(t+ 1) ≥ g(t) + g′(t), i.e., (t+ 2)−a −
+(t+ 1)−a ≥ −ata+1. Then we have
+At+1 ≤ C(t+ 1)−a −
+aC
+(t+ 1)2a
+≤ C(t+ 1)−a −
+aC
+(t+ 1)a+1
+≤ C(t+ 2)−a. (84)
+Thus we have At = E‖∇fβ(zt)− vt‖2 ≤ C(t+ 1)−a, a ∈ (0, 1] for all t ≥ 0.
+By Jensen’s inequality, we have
+E‖∇fβ(zt)− vt‖ ≤
+√
+E‖∇fβ(zt)− vt‖2 ≤
+√
+C(t+ 1)−
+a
+2 . (85)
+Thus we have
+E‖∇f(zt)− vt‖ = E‖∇f(zt)−∇fβ(zt) +∇fβ(zt)− vt‖
+≤ E‖∇f(zt)−∇fβ(zt)‖+ E‖∇fβ(zt)− vt‖
+≤
+βLd
+2
++
+√
+C(t+ 1)−
+a
+2 , (86)
+where the last inequality holds by the Lemma 8.
+Theorem 10. Suppose {xt, yt, zt}T−1t=0 be generated from Algorithm 2 by using the UniGE zeroth-order gradient estimator.
+Let αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, η = ηt = T−
+2
+3 , γt = (1 + θt)ηt, ρt = t−
+2
+3 for t ≥ 1 and β = d−1T−
+2
+3 , then we have
+E[G(zζ)] ≤
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+√
+d
+T
+1
+3
+) +O(
+√
+d ln(T )
+T
+4
+3
+), (87)
+where zζ is chosen uniformly randomly from {zt}T−1t=0 .
+Accelerated Stochastic Gradient-free and Projection-free Methods
+Proof. This proof can follow the proof of Theorem 9. Here we show some different results. Similarly, we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤
+4
+ηT
++ 4LηD2 +
+2D
+T
+T−1∑
+t=0
+‖∇f(zt)− vt‖+
+D
+T
+T−2∑
+t=0
+θt
+( T−1∑
+i=t+1
+αi+1
+)
+‖∇f(zt)− vt‖
+≤
+4
+ηT
++ 4LηD2 +DLdβ +
+2D
+√
+C
+T
+T−1∑
+t=0
+(t+ 1)−
+1
+3
++
+D
+T
+T−2∑
+t=0
+1
+(t+ 1)(t+ 2)
+( T−1∑
+i=t+1
+1
+i+ 1
+)
+(
+βLd
+2
++
+√
+C(t+ 1)−
+1
+3 )
+≤
+4
+ηT
++ 4LηD2 +DLdβ +
+2D
+√
+C
+T
+T−1∑
+t=0
+(t+ 1)−
+1
+3
++
+D
+T
+T−1∑
+t=0
+1
+(t+ 1)(t+ 2)
+ln(
+T
+t+ 1
+)(
+βLd
+2
++
+√
+C(t+ 1)−
+1
+3 )
+≤
+4
+ηT
++ 4LηD2 +DLdβ +
+2D
+√
+C
+T
+T−1∑
+t=0
+(t+ 1)−
+1
+3
++
+ln(T )DLdβ
+2T
++
+√
+CD
+T 2
+( T−1∑
+t=0
+1
+(t+ 1)(t+ 2)
+ln(
+T
+t+ 1
+)
+)( T−1∑
+t=0
+(t+ 1)−
+1
+3
+)
+≤
+4
+ηT
++ 4LηD2 +DLdβ +
+3D
+√
+C
+T
+1
+3
++
+ln(T )DLdβ
+2T
++
+√
+CD ln(T )
+T
+4
+3
+, (88)
+where the second inequality holds by Lemma 12 with a = 2
+3
+, and the third inequality follows by the inequality
+∑T−1
+i=t+1
+1
+i+1
+≤∫ T
+t+1
+1
+x
+dx ≤ ln( T
+t+1
+), and the fourth inequality holds by
+∑T−1
+t=0
+1
+(t+1)(t+2)
+ln( T
+t+1
+) ≤ ln(T )
+∑T−1
+t=0
+1
+(t+1)(t+2)
+= ln(T )(1−
+1
+T+1
+) ≤ ln(T ), and the the fifth inequality holds by the inequality
+∑T
+t=1 t
+− 1
+3 ≤
+∫ T
+0
+x−
+1
+3 dx = 3
+2
+T
+2
+3 . Let η = T−
+2
+3 and
+µ = d−1T−
+2
+3 , then we have
+1
+T
+T−1∑
+t=1
+G(zt) ≤
+4+ 3D
+√
+C
+T
+1
+3
++
+4LD2 +DL
+T
+2
+3
++
+ln(T )DL
+2T
+5
+3
++
+ln(T )
+√
+CD
+T
+4
+3
+. (89)
+Since a = 2
+3
+and C = 24L
+2dD2+3L2+2σ22
+2−2−a−a = O(d), we have
+E[G(zζ)] =
+1
+T
+T−1∑
+t=1
+G(zt) ≤ O(
+√
+d
+T
+1
+3
+) +O(
+√
+d ln(T )
+T
+4
+3
+), (90)
+where zζ is chosen uniformly randomly from {zt}T−1t=0 .
+A.3. Application: black-box adversarial attack
+Details of pre-trained models. In the experiment, we use the pre-trained DNN models on MNIST and CIFAR10 datasets
+as the target black-box models. For MNIST dataset, we attack a pre-trained 4-layer CNN: 2 convolutional layers followed by
+2 fully-connected layers with ReLU activation and max-pooling applied after the convolutional layers, which can achieves
+99.16% test accuracy on natural examples. For CIFAR10 dataset, we attack a pre-trained ResNet18 model (He et al., 2016),
+which can achieves 93.07% test accuracy on natural examples.
+Parameter setting of the SAP problem. In the SAP experiment, we choose ε = 0.3 for MNIST dataset and ε = 0.1 for
+CIFAR10 dataset. For fair comparison, we choose step size η = 1/
+√
+T and the smoothing parameter δ = µ = 0.01 for
+both FW-Black algorithm and Acc-ZO-FW algorithm. We set the number of samples of random gradient estimators to be
+d in FW-Black, where d = 28 × 28 and d = 3 × 32 × 32 for MNIST and CIFAR10. We set αt = 1t+1 , θt =
+1
+(t+1)(t+2)
+and γt = 2(1 + θt)ηt in Acc-ZO-FW as our theory suggested. The total iteration T is set to be 1000 for both datasets. For
+Accelerated Stochastic Gradient-free and Projection-free Methods
+MNIST dataset, we randomly choose 1000 images correctly classified by the pre-trained model from the same class, so
+n = 1 in the problem (9) and we run the experiment 1000 times. For CIFAR10 dataset, we randomly choose 100 images
+correctly classified from the same class, so n = 1 in the problem (9) and we run the experiment 100 times with different
+images.
+Parameter setting of the UAP problem. In the UAP experiment, we choose ε = 0.3 for both MNIST dataset and CIFAR10
+dataset. For fair comparison, we choose the mini-batch size b = 20 for all stochastic zeroth-order methods, the number
+of samples of random gradient estimators is 1 in both our accelerated algorithms and the existing algorithms. We choose
+step size η = 1/
+√
+T in ZSCG and Acc-SZOFW, η = T−
+3
+4 in ZO-SFW and η = T−
+2
+3 in Acc-SZOFW* as their theories
+suggested, respectively. We set b2 = q = 20, b1 = 300, αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1 + θt)ηt, µ = d−
+1
+2T−
+1
+2 and
+β = d−1T−
+1
+2 in Acc-SZOFW as our theory suggested. We set αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = 6(1+ θt)ηt, µ = d−
+1
+2T−
+2
+3
+and β = d−1T−
+2
+3 in Acc-SZOFW* as our theory suggested. The total iteration T is set to be 1000 for MNIST and 5000 for
+CIFAR10. For both datasets, we randomly choose 300 images correctly classified by their corresponding pre-trained models
+from the same class, so n = 300 in the problem 9 and we run all the stochastic zeroth-order algorithms once.
+Generated adversarial examples of the SAP problem. Figure 4 displays the original images, single adversarial per-
+turbations and adversarial images generated by the Acc-ZO-FW algorithm. The pixel values of the showed adversarial
+perturbations are normalized to [0, 1]d by min-max normalization, respectively.
+Generated adversarial examples of the UAP problem. Figure 5 and Figure 6 displays the original images, universal
+adversarial perturbations and adversarial images generated by our proposed accelerated zeroth-order algorithms. The pixel
+values of the showed adversarial perturbations are normalized to [0, 1]d by min-max normalization, respectively.
+A.4. Application: robust black-box binary classification
+Parameter setting of the robust black-box classification problem. For all datasets, we set σ = 10 and θ = 10. For
+fair comparison, we choose the mini-batch size b = 100 for all stochastic zeroth-order methods, the number of samples
+of random gradient estimators is 1 in both our accelerated algorithms and the existing algorithms. We choose step size
+η = 1/
+√
+T in ZSCG and Acc-SZOFW, η = T−
+3
+4 in ZO-SFW and η = T−
+2
+3 in Acc-SZOFW* as their theories suggested,
+respectively. We set b2 = q = 100, b1 = 10000, αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = (1 + θt)ηt, µ = d−
+1
+2T−
+1
+2 and
+β = d−1T−
+1
+2 in Acc-SZOFW as our theory suggested. We set αt =
+1
+t+1
+, θt =
+1
+(t+1)(t+2)
+, γt = 6(1+ θt)ηt, µ = d−
+1
+2T−
+2
+3
+and β = d−1T−
+2
+3 in Acc-SZOFW* as our theory suggested. The total iteration T is set to be 1000000 and we run all the
+stochastic zeroth-order algorithms once.
+The convergence of test loss. Figure 7 shows that the convergence of test loss against iterations and queries, which is
+analogous to those of train loss.
+Accelerated Stochastic Gradient-free and Projection-free Methods
+(a) MNIST (b) CIFAR10
+Figure 4. Generated adversarial examples on MNIST (class ’1’) and CIFAR10 (class ’dog’) for the SAP problem. In each dataset, the first
+column represents the original images, the second column represents the single adversarial perturbations, the third column represents the
+adversarial images. The model predictions of these images are showed above each image.
+Accelerated Stochastic Gradient-free and Projection-free Methods
+(a) Acc-SZOFW (UniGE)
+(b) Acc-SZOFW (CooGE)
+(c) Acc-SZOFW* (UniGE)
+(d) Acc-SZOFW* (CooGE)
+Figure 5. Generated adversarial examples on MNIST (class ’1’) for the UAP problem. In each sub-figure, the first row represents the
+original images, the second row represents the universal adversarial perturbations, the third row represents the adversarial images. The
+model predictions of these images are showed above each image.
+Accelerated Stochastic Gradient-free and Projection-free Methods
+(a) Acc-SZOFW (UniGE)
+(b) Acc-SZOFW (CooGE)
+(c) Acc-SZOFW* (UniGE)
+(d) Acc-SZOFW* (CooGE)
+Figure 6. Generated adversarial examples on CIFAR10 (class ’dog’) for the UAP problem. In each sub-figure, the first row represents the
+original images, the second row represents the universal adversarial perturbations, the third row represents the adversarial images. The
+model predictions of these images are showed above each image.
+Accelerated Stochastic Gradient-free and Projection-free Methods
+0 500 1000 1500 2000 2500 3000
+Iterations
+0.15
+0.20
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Te
+st
+ L
+os
+s ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(a) phishing
+0 100 200 300 400 500 600
+Iterations
+0.20
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Te
+st
+ L
+os
+s ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(b) a9a
+0 100 200 300 400 500 600
+Iterations
+0.20
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Te
+st
+ L
+os
+s ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(c) w8a
+0 1000 2000 3000 4000 5000
+Iterations
+0.36
+0.38
+0.40
+0.42
+0.44
+0.46
+0.48
+0.50
+Te
+st
+ L
+os
+s ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(d) covtype.binary
+0 100000 200000 300000 400000 500000 600000 700000
+Queries
+0.20
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Te
+st
+ L
+os
+s ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(e) phishing
+0 50000 100000 150000 200000 250000 300000 350000
+Queries
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Te
+st
+ L
+os
+s ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(f) a9a
+0 50000 100000 150000 200000 250000 300000 350000
+Queries
+0.25
+0.30
+0.35
+0.40
+0.45
+0.50
+Te
+st
+ L
+os
+s ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(g) w8a
+0 200000 400000 600000 800000 1000000 1200000
+Queries
+0.40
+0.42
+0.44
+0.46
+0.48
+0.50
+Te
+st
+ L
+os
+s ZSCG
+ZO-SFW
+Acc-SZOFW (UniGE)
+Acc-SZOFW (CooGE)
+Acc-SZOFW* (UniGE)
+Acc-SZOFW* (CooGE)
+(h) covtype.binary
+Figure 7. Comparison of six algorithms for robust black-box binary classification. Above: the convergence of test loss against iterations.
+Below: the convergence of test loss against queries.

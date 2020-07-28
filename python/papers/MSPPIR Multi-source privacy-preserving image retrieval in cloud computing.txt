@@ -1,0 +1,1856 @@
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 1
+MSPPIR: Multi-source privacy-preserving image
+retrieval in cloud computing
+Qi Gu, Zhihua Xia, Member,IEEE , Xingming Sun, Senior Member,IEEE , Jian Weng, Member,IEEE
+Abstract—Content-Based Image Retrieval (CBIR) techniques have been widely researched and in service with the help of cloud
+computing like Google Images. However, the images always contain rich sensitive information. In this case, the privacy protection
+become a big problem as the cloud always can’t be fully trusted. Many privacy-preserving image retrieval schemes have been
+proposed, in which the image owner can upload the encrypted images to the cloud, and the owner himself or the authorized user can
+execute the secure retrieval with the help of cloud. Nevertheless, few existing researches notice the multi-source scene which is more
+practical. In this paper, we analyze the difficulties in Multi-Source Privacy-Preserving Image Retrieval (MSPPIR). Then we use the
+image in JPEG-format as the example, to propose a scheme called JES-MSIR, namely a novel JPEG image Encryption Scheme which
+is made for Multi-Source content-based Image Retrieval. JES-MSIR can support the requirements of MSPPIR, including the one-round
+secure retrieval from multiple sources and the union of multiple sources for better retrieval services. Experiment results and security
+analysis on the proposed scheme show its efficiency, security and accuracy.
+Index Terms—Searchable encryption, Privacy-preserving retrieval, Content-based image retrieval.
+F
+1 INTRODUCTION
+IMAGING device has rapidly become stronger and cheaperwith the development of semiconductor technology. In
+this case, more and more high-resolution images are gener-
+ated by people from all walks of life every day. The need
+for efficient storage and retrieval of images is more urgent
+by the increment of large-scale image databases among all
+kind of areas. The development of cloud computing brings
+suitable solution to the computation-intensive and storage-
+intensive image retrieval task, and many excellent image
+retrieval schemes [1] have been proposed to put the CBIR
+into practical applications like Google Search By Image [2].
+However, the images always contain rich sensitive infor-
+mation. What’s more, in many cases, images are copyright
+restricted and the owners hope to profit from them by
+providing CBIR service. Therefore, it is unsafe to directly
+upload the unencrypted images to the cloud, which makes
+us drop into the dilemma between the image retrieval and
+image security. Many prior works in the field of privacy-
+preserving CBIR (PPCBIR) have paid their attention to this
+problem. Briefly speaking, the image owner can upload
+the encrypted image features or the encrypted images to
+the Cloud Server (CS), and the CS can execute similarity
+computation between the encrypted data. A typical system
+model is shown as Fig. 1.
+It should be noticed that most of existing schemes have
+a common limitation that they only consider the single-
+source (i.e., single image owner) case [3], where the image
+owner executes the authorizing and the authorized user
+retrieve the encrypted images of this owner with the help
+of CS. However, in real-world applications, image retrieval
+Qi Gu (email: guqi634337549@163.com), Zhihua Xia (corresponding author,
+email: xia zhihua@163.com) and Xingming Sun are with the College of
+Computer and Software, Nanjing University of Information science and
+Technology, Nanjing, China
+Jian Weng is with Jinan University, Guangzhou 510632, China
+Fig. 1: The system model with a single image owner.
+task is more likely to get multiple image sources involved.
+Firstly, the users of PPCBIR always hope that they can
+get more comprehensive search results. It is obviously that
+multi-source can cope with this problem better. Secondly,
+the image owners can enhance their competitiveness by
+uniting and providing their services to the authorized users
+together. Last but not least, the CS is more willing to server
+for multi-source to enhance the stability and profitability as
+they can provide more computation and storage services.
+The joint demand of all entities makes multi-source an in-
+dispensable choice. Some recent works [3]–[5] have noticed
+the significant meaning of these scenes, however, to the
+best of our knowledge, no existing paper comprehensively
+considers MSPPIR and gives the scheme in a safe and
+efficient way.
+It is clear that CBIR is a real-time task. However, to
+ensure the image security, especially in the multi-source
+scene, is quite a challenge to the efficiency. In addition, as the
+image encrypted in spatial domain cannot be compressed
+a lot, two PPCBIR works [6], [7] try to encrypt images in
+JPEG-domain. However, these schemes still suffer from the
+problems like feature leakage, index lacking, etc.
+To address these challenges, we propose a new secure
+scheme JES-MSIR for MSPPIR, in which we consider two
+ar
+X
+iv
+:2
+00
+7.
+12
+41
+6v
+1 
+ [
+cs
+.C
+R
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 2
+basic requirements that are different from the scenario with
+a single image owner. In total, the contributions of this paper
+can be summarized as follows:
+1) We formally defined the MSPPIR problem in terms
+of functionality and security. Firstly, the authorized
+user should be able to execute the retrieval from
+all the owners, who authorize to him, with constant
+(i.e. irrelevant to the number of owners) rounds of
+communication to the CS. Secondly, a part of owners
+should be able to unite as a group to provide the
+retrieval service together. Finally, the security should
+be considered under the reasonable treat model.
+2) We propose a novel scheme which can support MSP-
+PIR efficiently. The permutations are used to ensure
+the security and accuracy. The property of permu-
+tation is further exploited to deal with the collusion
+problem and support the union of sources. The im-
+age encrypted is conducted with the quantized DCT
+coefficients in JPEG-format images to avoid the file
+expansion. The bag-of-words (BOW) and multiple
+permutations are utilized to cope with the prob-
+lems like low retrieval efficiency and feature leakage
+in the existing JPEG-domain single-source PPCBIR
+schemes.
+3) We make detailed experiments on two real-world
+image databases. It is shown that the efficiency and
+retrieval accuracy of our scheme is better than the
+existing schemes which just partly support multi-
+source, and the security is on par with the existing
+PPCBIR schemes.
+The rest of our paper is organized as follows. Section 2
+summaries the related works, specially, we give the explana-
+tions about why most of the single-source schemes are not
+suitable for the multi-source scene. Section 3 introduce the
+system architecture and preliminaries. The detailed scheme
+design is presented in Section 4 and Section 5. The Section
+6 gives the security analysis. Experiments and results are
+presented in Section 7. Finally, conclusions are made in
+Section 8.
+2 RELATED WORK
+Existing schemes on PPCBIR can be briefly classified into
+two categories. In the first category, the image owner firstly
+extracts the aggregated feature from plaintext image, then
+use specific encryption methods to encrypt the feature or
+index. The image owner uploads the encrypted features and
+encrypted images to CS at last. CS can execute the retrieval
+in encrypted domain with specific similarity measurement
+methods. In the second category, the owner just needs
+to encrypt the image, the tasks of feature extraction and
+index building are all undertaken by CS, which makes an
+ideal environment for MSPPIR. The kernel difference is that
+feature extracted before or after the encrypted image upload
+and we detailedly discuss these schemes in the follow.
+2.1 Feature-encryption based schemes
+Due to the feature extraction task undertaken by the owner,
+the kernel task of schemes in first category is constructing a
+function encryption on the feature to make the distance be-
+tween encrypted features valid. The methods can be broadly
+divided into two classes [8]: those based on randomization
+symmetric encryption techniques and those based on homo-
+morphic encryption. To the best of our knowledge, Lu et al.
+[9] proposed the first PPCBIR scheme over the encrypted
+image database. The scheme uses min-hash algorithm and
+order-preserving encryption to protect the visual words
+which are utilized to represent the images. In the another
+work, Lu et al. [10] investigates three image feature protec-
+tion techniques including bit-plane randomization, random
+projection and randomized unary encoding. Based on the
+property of bit computation, the encrypted feature is still
+valid for retrieval. Xia et al. [11] proposed a PPCBIR scheme
+based on Scale-Invariant Feature Transformation (SIFT) [12]
+features and Earth Mover’s Distance (EMD) [13]. The cal-
+culation of EMD is in fact a linear program problem, and
+a linear transformation was utilized to protect the privacy
+information during the solution process of EMD problem.
+Yuan et al. [14] designed an encrypted image search scheme
+based on the secure KNN (k-nearest neighbors) [15] algo-
+rithm and outsourced most of index building task to CS.
+The above methods are all belong to the randomization
+symmetric encryption techniques.
+Homomorphic encryption (HE) technology is a cryp-
+tography technology based on computational complexity
+theory of mathematical problems. Some early works [16],
+[17] considered the secure distance computation of feature
+vector based on the Somewhat Homomorphic Encryption
+(SHE) [18] which can support addition or multiplication
+on ciphertext, however, they are not a practical scheme in
+the PPCBIR as they expose part of plaintext feature. To
+the best of our knowledge, Lu et al. [8] firstly pointed out
+that the SHE methods can’t complete the secure retrieval
+without the interactions with the authorized user. They
+further prove that although CS can execute the retrieval
+based on Fully Homomorphic Encryption (FHE) [19] tech-
+nology which can support the addition and multiplication
+on ciphertext, the time and storage consumption are far
+more than the methods based on randomization distance-
+preserving encryption. The other schemes [3], [4] in this type
+will be detailed described later.
+2.2 Image-encryption based schemes
+The strategies in the first category suffer from a common
+disadvantage. As the big volume of storage and large com-
+putation complexity, both the image feature extraction and
+index construction are resource-consuming operations. In
+this case, the researchers try to outsource the feature extrac-
+tion task to the cloud, which brings up the methods in the
+second category. Similar to the first category, the methods
+in second category can be briefly classified into two classes.
+The first one tries to extract the encrypted classic feature
+(e.g., SIFT) from the encrypted images through SHE technol-
+ogy, and the second uses invariant statistics as the feature
+based on random encryption. To our knowledge, Hsu et
+al. [20] was the first to investigate privacy-preserving SIFT
+in the encrypted domain by utilizing Paillier cryptosystem.
+However, their scheme is computationally intractable and
+insecure [21]. The following schemes [22], [23] in this class
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 3
+try to improve their practicability by using two CS work col-
+laboratively. In recent years, more researchers [24] try to use
+pre-trained VGG16 as feature extractor to extract encrypted
+feature. However, the time and storage consumption taken
+by HE on image and plenty of interactions between servers
+is still hard to accept. The kernel reason for high complexity
+is large number of nonlinear feature extraction operations
+on encrypted image.
+The methods based on invariant statistics is the scheme
+which users and CS are both low computational cost, and
+it makes the scheme the most practical one. Ferreira et al.
+[5] proposed a tailor-made Image Encryption Scheme called
+IES-CBIR. In this scheme, random permutation is employed
+to protect the value (i.e., color) information and the position
+(i.e., texture) of image pixels is shuffled randomly. After en-
+cryption, owner sends the encrypted images to CS. The HSV
+(Hue-Saturation-Value) color histograms are extracted from
+the encrypted images at the cloud server side. The similari-
+ties between images can be directly measured by Hamming
+distances between the corresponding histograms. However,
+the global histogram is too rigid for image retrieval prob-
+lems. Xia et al. [25] further extracted local histogram as the
+local feature, and get better aggregating feature with the
+help of BOW. However, the schemes in spatial domain will
+destroy the image compression, and the encrypted images
+have to be stored in lossless-compression format (PNG, zip),
+thus it will bring the extra storage and time consumption.
+A valid solution of this problem is to encrypt the image
+in JPEG-domain, and keep the JPEG-format be hold after
+the encryption. Zhang et al. [7] encrypts the JPEG image
+by permuting the DCT coefficients of different blocks at the
+same frequency position, and Cheng et al. [6] permutes the
+entropy-coded segments in the JPEG bitstream. However,
+these schemes exposed the feature of plaintext. To avoid
+this problem, Liang et al. [26] encrypted the Huffman-code
+histograms. However, their schemes are still fragile in the
+Known-Background-Attack (KBA) model. What’s more, the
+previous works in JPEG-domain did not give the feature
+aggregation scheme, which will make the retrieval time
+unacceptable.
+2.3 Partly supported MSPPIR
+Although most of the mainstream schemes in the PPCBIR
+are mentioned above, few papers above considered the
+scene of multi-source. A straightforward idea is extend-
+ing existing schemes to multi-source scenario by executing
+searching over encrypted images belong to different owners
+one by one. However, it will introduce plenty of rounds
+of communications between authorized users and CS. A
+necessary improvement is performing multiple retrieval at
+constant rounds (e.g., one interaction). However, in this case,
+the randomization based scheme in the first category is vul-
+nerable to malicious image owner. For example, the stream
+cipher key is exposed when the attacker get the ciphertext
+and its plaintext, which make the collusion between the
+image owner and CS become threaten. Besides, the union
+expansion of schemes in the first category is still an open
+problem. The scheme based on classic feature extraction in
+the second category is also unsuitable for the multi-source
+expansion as the time-consumption will be more unaccept-
+able. Some other methods unmentioned above like partial
+encryption [27], [28] is also unsuitable for the scalability
+in that the security risk in the single-source will be more
+magnified.
+To our knowledge, there are three existing schemes
+which partly support the multi-source scene. Shen et al. [3]
+firstly point out the significant meaning of retrieval multi-
+source in one interaction, they propose a scheme called
+MIPP based on the methods in secure multi-party compu-
+tation (SMC) [29], which supports the sum of ciphertext is
+same as the sum of plaintext. The scheme let each image
+owner encrypt their feature vector by their own key and
+use their sum as an evaluation of distance. To avoid the
+interaction between the image owner and authorized user
+during the retrieval, key management center (KMC) is in-
+troduced to decrypt the image belong to image owner, then
+encrypt it with the key from the authorized user. However,
+on the one hand, this evaluation is not suitable for the image,
+which make their retrieval accuracy not good. On the other
+hand, the scheme exposes the sum of plaintext features to
+the CS and expose the plaintext image to the KMC, which
+make their scheme insecure. Zhang et al. [4] proposed a
+feasible scheme called PIC based on multi-level FHE which
+support the key conversion in the encrypted domain [30].
+The CS and KMC both possess partial secret key. When an
+user add into the system, the trusted party (TP) distribute
+the secret key to the user, CS and KMC, which make the
+ciphertext can be transformed to the same key by the collab-
+orative computing. Although their scheme can get similar
+accuracy with the plaintext, the time consumption caused
+by multi-level FHE is unacceptable. Besides, the security of
+this scheme is based on a global secret key, which make it
+vulnerable to collusion attack (i.e., the collusion between the
+CS and KMC). The above two schemes can be regarded as
+the scheme in the first category and they only consider about
+the scene about single user authorized by multi-source. In
+[5], a brief discussion about the union between the owners
+are given. In their scheme, an owner creates the repository,
+when the other users join in, they need to use the repository
+key to encrypt the pixel color features, and the users can
+encrypt their pixel positions by their own. However, it will
+make the image owner execute extra consumption when
+they join in a repository. What’s more, the following paper
+in the second category are all paying little attention to the
+scene that users authorized by multi-source.
+As the description above, existing schemes on MSPPIR
+are suffering from the shortage on the accuracy, security,
+efficiency and scalability. Inspired by existing schemes based
+on invariant statistics in the second category, we propose a
+novel system model in Section 3, and show the complete
+scheme in Section 4 and Section 5 to cope with challenges
+on multi-source PPCBIR scene.
+3 SYSTEM MODEL AND PRELIMINARIES
+3.1 System model
+Similar to [4] and [5], the proposed system involves five
+types of entities, i.e., the image owner, the group, Cloud
+Server (CS), Key Management Center (KMC) and the Au-
+thorized User (AU), as shown in Fig. 2.
+Image owner has a corresponding identity which can be
+called as OID. Each image owner has a large-scale image
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 4
+Fig. 2: System model. In the figure, the process of
+outsourcing images, authorizing users and user executes
+query are shown.
+database IOID = {Ii}
+nOID
+i=1 . Each image belong to an owner
+has a corresponding identity set IIDOID = {IIDi}
+nOID
+i=1 ,
+where the nOID means the number of the images the
+owner has. To preserve the security of images, before
+uploading, each owner generates an encrypted image set
+C = {Ci}
+nOID
+i=1 from IOID by image encryption.
+Group with a group identity GID is an union of several
+image owners. The goal of Group is to give better service for
+the authorized users, which means after the user authorized
+by the group, he can search all the images belong to the
+image owners in the group without interaction with them.
+The group organizer take the responsibility to authorize the
+users and update the members. The group organizer should
+be trusty to all the members in group. The group organizer
+could be undertaken by a trusty member or trusty third
+party.
+Cloud Server stores the encrypted images from the
+image owners and provides CBIR service for users.
+What’more, the cloud server will further extract aggregate
+feature from the encrypted images for the owner and group
+to get better retrieval time.
+Key Management Center takes the responsibility for
+storing the key for each image and the authorized infor-
+mation. When a owner adds a new encrypted image to the
+CS or authorize a user, he will send a corresponding key
+to key management center. Two keys will be got when the
+group organizer authorize a new user. During the retrieval,
+CS needs one interaction with KMC.
+Authorized User with a corresponding identity called
+as UID can be authorized by multiple owners/groups, and
+they can get the retrieval results from all the authoring
+sources with a single interaction. Authorized users need no
+interactions with KMC.
+As authentication information, CS and KMC have the
+knowledge of OID (i.e., set of OID), GID (i.e., set of
+GID) and UID (i.e., set of UID) and the authorization re-
+lationship between them. In the rest of paper, for simplicity,
+source is used to represent the image owner and the group.
+3.2 Security model
+Similar to previous schemes [4], [5], the honest-but-curious
+CS and KMC are considered in our scheme, i.e., they will
+follow the protocol specification, but may try their best to
+harvest the content of the encrypted images. In general,
+CS and KMC are well protected, so we don’t consider
+compromise attack in this paper.
+As we could set the CS and KMC in different service
+providers (i.e., Google and Amazon) and the authorized
+user will not interact with the KMC, we assume that it is
+not possible to have an authorized user who collude with
+both CS and KMC. Similar, as the union of group implies
+the assumption owner in group is highly believable, we
+assume both CS and KMC collude with an image owner in
+one group is impossible. As the group organizer need not do
+more thing besides key generation and distribution, we as-
+sume the group organizer is trusty to all the members in the
+group. Same as previous schemes [4], the collusion between
+entities only include the existing information exchange, the
+further defraud collaboratively is beyond consideration as it
+is easy to be detected by other non-collusion server.
+3.3 Preliminaries
+3.3.1 Overview of JPEG encoding
+JPEG is the most commonly used image format and account-
+ing for up to 95% of the images in the web [31]. Generally
+speaking, it will be faster to operate the JPEG image without
+decoding. To better explain the image encryption and fea-
+ture extraction operations, we here briefly introduce color
+JPEG encoding.
+As we all know, the color image is composed by a num-
+ber of pixels which are represented by RGB values. Based
+on the characteristics that human eyes are insensitive to
+chrominance information and high frequency information,
+the JPEG encoding firstly transforms the RGB information to
+YUV pattern, then down-sampling the UV information (i.e.,
+Y:U:V=4:1:1). Then the image is split to a series of 8×8 non-
+overlapped blocks, and DCT transformation are executed
+on each block. As a result, the RGB values in a block are
+transformed as one DC value and 63 AC values. At last,
+the quantization table are used to compress these values,
+the higher frequency information which means the relativly
+later part of AC values will be strongly squeezed, and most
+of AC values will be squeezed to zero.
+Due to the dependency of the adjacent image blocks,
+the difference value between two sequential DCT blocks
+is calculated to represent the DC value. Due to most of
+the AC values is zero, the zig-zag scan and run-length
+encoding are used to encode 63 AC values in each block.
+For example, suppose the zig-zag sequence of a block is {3,-
+8,0,-1,0,0,0,3,0,0,-4,EOB} that can be converted into serveral
+(r, v) pairs: {(0,3), (0,-8), (1,-1), (3,3), (2,-4), (0,0)}, where r
+denotes the number of zeros before a non-zero AC coef-
+ficient whose value equals to v. The symbol EOB (End-Of-
+Block) implies that all remaining AC coefficients in the block
+are zero, and denotes as one specific pair (0,0). The huffman
+code and VLI code table is finally used to encode the DC
+difference value and (r, v) pairs with VLI code table shown
+in Table 1, one VLI code is composed by the bit-stream and
+the group it belong to. For simplicity, in the rest of paper,
+the bit-stream of DC difference value will be called as DC,
+and the group index of DC will be denoted as gDC . It is
+easy to find that the DC and (r, v) pairs contains nearly all
+the information of image.
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 5
+TABLE 1: Variable-Length Integer (VLI) coding table
+Value v Group Index (Number of Bits) Binary Code
+0 0 -
+-1, 1 1 0,1
+-3, -2, 2, 3 2 00, 01, 10, 11
+-7, -6, -5, -4, 4, 5, 6, 7 3 000,001,010,011,100,101,110,111
+-15, . . . ,-8, 8, . . . ,15 4 0000, 0001, . . . ,1110,1111
+-31, . . . ,-16, 16, 31 5 000000, . . . ,111111
+-63, . . . ,-32, 32, . . . ,63 6 0000000, . . . ,1111111
+-127, . . . , -64, 64, . . . , 127 7 00000000, . . . ,11111111
+-255, . . . , -128, 128, . . . ,255 8 00000000, . . . ,111111111
+-511, . . . ,-129,129, . . . ,511 9 000000000, . . . ,1111111111
+-1023, . . . ,-512,512, . . . ,1023 10 0000000000, . . . ,11111111111
+. . . . . . . . .
+3.3.2 Bag-of-word model
+The CBIR technologies extract visual features to represent
+the images. During the early stages of its development,
+global features [32] are extracted from the image to perform
+the retrieval. However, the global feature is always easy to
+be affected by the illumination and rotation etc. The local
+features (e.g., SIFT) are used to solve this problem. However,
+the local features are always too large and instable, in
+this case, the feature aggregation methods are gradually
+developed. The BOW (Bag-Of-Word) [33] is one of the most
+popular models. There are three steps in the BOW model:
+(i) Local histogram extraction. The first step is to extract
+local features from the images in database. The local fea-
+ture(e.g. SIFT) is commonly used in the CBIR. However,
+to encrypted images, on the one hand, the local feature is
+not outstanding in low-resolution image without suitable
+aggregation methods; on the other hand, non-linear dection
+schemes local feature uses make the feature extraction from
+encrypted image difficult [20], [22].
+(ii) Vocabulary generation. The second step is to construct
+the visual vocabulary. Typically, k-means method can be
+employed to cluster the local features into k classes. The
+cluster centers are defined as visual words. The full set of
+the visual words constitute the vocabulary.
+(iii) Histogram calculation. The last step is to calculate
+the histogram of visual words. All the local features are
+represented by their nearest visual words. Finally, each
+image is represented by a k-bins histogram of visual words.
+It should be noticed the position of the visual words have
+been ignored in this way, and it give the space for the
+encryption.
+3.3.3 Permutation and Bitxor
+The permutation encryption and bitxor encryption is widely
+used in the encryption on features [9] and images [5], [6],
+[25]. In these schemes, symmetric secret keys are used
+during the encryption and decryption. The permutation-
+based encryption and decryption is presented in algorithm
+1 and algorithm 2.
+For simplicity, the orderly sequence of positive integers
+from 1 to N is denoted as EN . For example, E3 denotes the
+sequence (1, 2, 3). In the existing schemes [5], [6], [10], [25],
+the permutation key is used to encrypt the plaintext features
+or images, which means input data of EncPerm can be seen
+Algorithm 1 EncPerm
+Input: Plaintext Data D = (d1, d2, . . . , dn), Permutation
+key K = (k1, k2, . . . , kn)
+Output: Encrypted Sequence C = (c1, c2, . . . , cn)
+// di, ki, ci ∈ {1, 2, . . . , n}
+1: for each i ∈ E do
+2: ci = dki
+3: end for
+Algorithm 2 DecPerm
+Input: Encrypted Data C = (c1, c2, . . . , cn), Decryption key
+K = (k1, k2, . . . , kn)
+Output: Plaintext Data D = (d1, d2, . . . , dn)
+// di, ki, ci ∈ {1, 2, . . . , n}
+1: for each i ∈ E do
+2: dki = ci
+3: end for
+as E. To meet the needs of MSPPIR, the transformation
+between secret keys are further considered. From the basic
+properties of permutation group, it is easy to get formula 1.
+EncPerm(DecPerm(K2,K1),EncPerm(K1,K))
+= EncPerm(K2,K)
+(1)
+Specially, we can get formula 2 when we set K = E.
+EncPerm(DecPerm(K2,K1),EncPerm(K1, E))
+= EncPerm(K2, E)
+(2)
+It should be noticed that for each D, there is a corre-
+sponding K can get the same DecPerm(D,K). The primary
+fact means that it will be difficult to infer D or K from the
+DecPerm(D,K) only. Based on same reason, it further im-
+plies that exposed DecPerm(K2,K1) and EncPerm(K1,K)
+will not leak the K , K1 and K2. It is easy to notice that the
+BitXor (Bit-wise XOR) computation has the same property.
+4 BASIC SCHEME
+In this section, we only consider the scene the authorized
+user search from multi-owners, the enhancement on security
+and the scheme of group union will be given in the next
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 6
+section. The proposed scheme is given from the perspective
+of different entities.
+4.1 Owner Side
+4.1.1 Image Key Generation
+As mentioned in subsection 3.3.1, the JPEG-format image is
+mainly made up of DC values and (r, v) pairs. Similar with
+the image in spatial-domain, the image can be separated
+into two kinds of information, i.e., value information and
+position information. To protect the image content, we firstly
+shuffled the non-overlapping blocks. Next the (r, v) pairs
+in each block are shuffled to further protect the position
+information. Finally, the v and DC values are substituted to
+protect the value information.
+The Kp is used to encrypt the position informa-
+tion of image. In JPEG-domain, it contains the block
+permutation, intra-block permutation and the bitstream
+in one fix length. Accordingly, a pseudo-random per-
+mutation generator, a stream-cipher generator and sev-
+eral keys are used to protect the position informa-
+tion, i.e., Kp = {RandPerm, StmCiph, {keyblo∗}∗∈{Y,U,V },
+{keyinblo∗}∗∈{Y,U,V }, {keydc∗}∗∈{Y,U,V }}. For simplicity, all
+the following ∗ represent an element in {Y, U, V }
+The secret key {keyblo∗} is used to permute the blocks
+in image from the range [1, . . . , blknum∗], the blknum∗ is
+the number of non-overlapping blocks in the corresponding
+color component. The random permutation is generated as
+follow:
+pmtb∗ ← RandPerm(keyblo∗, [1, . . . , blknum∗], IID). (3)
+The secret keys {keyinblo∗} are used to generate random
+permutations to shuffle (r, v) pairs in blocks. The random
+permutations of three components are generated as follows:
+{pmtp∗j} ← RandPerm(keyinblo∗,
+[1, . . . , blksizej∗ ], IID, j∗),
+(4)
+where {blksizej∗} means the number of (r, v) pairs in j∗-th
+block, j∗ ∈ [1, . . . , blknum∗]. Similarly, secret keys {keydc∗}
+are used to generate the random bitstream to encrypt DC in
+each block.
+{bitdc∗j} ← StmCiph(keydc∗,
+[1, . . . , blksizej∗ ], IID, j∗).
+(5)
+Accordingly, a pseudo-random permutation generator
+and several secret keys are used to protect the value infor-
+mation, i.e., Kv = {RandPerm, {keyv∗}, {keyl∗}}.
+The secret keys {keyv∗} are utilized to generate random
+permutations to substitute the value of v in all the blocks.
+As most absolute value of v is less than 10, the random
+permutations are generated as follows:
+{pmtv∗,#} ← RandPerm(keyv∗, [−10,−1] ∪ [1, 10]), (6)
+here # ∈ {1, . . . , Npmt1}, Npmt1 is amount of the random
+permutations for each color component. The permutations
+ignore 0 due to the limitation of JPEG-decoding.
+The secret keys {keyl∗} are used to generate the random
+permutations to substitute the gDC . As most gDC is less than
+Algorithm 3 BlockPermut
+Input: Image I , the corresponding IID and secret keys
+{keyblo∗}
+Output: Encrypted image I ′, {pmtb∗}
+1: Parse the image, and denote the total number of blocks
+in image I as blknum∗
+2: Generate the secret permutation pmtb∗ whose size is
+blknum∗
+3: Denote the blocks in I as blk, denote the blocks in I ′ as
+blk′
+4: for ∀∗ ∈ Y,U, V do
+5: for i = 1 : blknum∗ do
+6: blk′∗ ← blk∗[pmtb∗[i]]
+7: end for
+8: end for
+Algorithm 4 IntraBlockPermut
+Input: Image I , the corresponding IID and secret keys
+{keyblo∗}
+Output: Encrypted image I ′,{pmtp∗}
+1: Parse the image, and get the blocks denoted by blk∗
+2: for ∗ ∈ {Y, U, V } do
+3: for blk∗j ∈ blk∗ do
+4: Generate the secret permutation for j-th block blk∗j
+size of blksizej∗ as pmtp∗j
+5: for blk∗j [i] ∈ blk∗j do
+6: blk′∗j [i]← blk∗j [pmtp∗j [i]]
+7: end for
+8: end for
+9: Denote all the pmtp∗j as {pmtp∗}
+10: end for
+10, the random permutations are generated from the range
+[0,9] as follows:
+{pmtDCL∗,#} ← RandPerm(keyl∗, [0, 9]), (7)
+here # ∈ {1, . . . , Npmt2}, Npmt2 is amount of the random
+permutations for each color component. The encryption on
+DC is determined by both {bitdc∗j} and {pmtDCL∗,#}
+It should be noticed the Kv is unique for each owner, but
+the Kp is one-time pad for each image.
+4.1.2 Image Outsourcing
+(C , ImgPosKey, ImgV alKey) ← ImgEnc(I , IID, Kv).
+As presented above, three steps are contained in the image
+encryption including block permutation, and intra-block
+permutation, value substitution. For each step, we present a
+sub-algorithm to specify its process(see Algorithm 3, 4 and
+5).
+As presented by Algorithm 3 and 4, we generate ran-
+dom permutations to shuffle the block position and intra-
+block (r, v) pairs. It should be noticed the permutations on
+plaintext image is actually equal to execute the EncPerm
+algorithm where one of the input can be seem as E. The
+Algorithm 5 encrypts the v and DC by substituting values
+with multiple tables. In this way, the same value at different
+positions can be substituted with different values, which
+helps to resist the statistic attacked [34], [35]. What’s more,
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 7
+Algorithm 5 ValueSubstitution
+Input: Image I and secret keys {keyv∗}, {keyl∗} and keydc∗
+Output: Encrypted image I ′, {pmtv∗,#} and
+{pmtDCL∗,#}, {bitkey∗}
+1: Generate the secret permutations pmtvY,#, pmtvU,#,
+pmtvV,#, where # ∈ {1, . . . , Npmt1}; Each permutation
+table are 20-dim, which is a random permutation of
+[−10,−1] ∪ [1, 10].
+2: Generate the secret permutations pmtDCLY,#,
+pmtDCLU,#, pmtDCLV,#, where # ∈ {1, . . . , Npmt2}.
+3: Generate three sequences sqntY , sqntU , sqntV . The
+length of sequences are equal to the block amount of
+the image I and the element of these sequences are
+the repeat of ENpmt1 . For instance, if the Npmt1 =
+5, and the image have 12 blocks, the sqnt1∗ =
+{1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2}. Similarly, sqnt2∗ are gen-
+erated by Npmt2.
+4: Parse the image and get the
+{{(r∗ij , v
+∗
+ij)
+{∗blksizei∗}
+blknum∗
+i=1
+j=1 }, {DC
+∗
+i }
+blknum∗
+i=1 .
+5: for ∀∗ ∈ Y,U, V do
+6: for i = 1 : blknum∗ do
+7: for j = 1 : blksizei∗ do
+8: v∗ij = pmtv∗,sqnt1∗[i][v
+∗
+ij ]
+9: end for
+10: Generate a random bitstream bitkey∗i
+11: Compute DC∗i ⊕ bitkey
+∗
+i , then reserve the last
+sqnt2∗[gDC∗i ] bit as new DC
+∗
+i
+12: end for
+13: Denote all the bitkey∗i as {bitkey∗}
+14: end for
+Algorithm 6 ImgEnc
+Input: Image I , the corresponding IID and Kv
+Output: Encrypted image C , ImgPosKey(OID,IID) and
+ImgV alKeyOID
+1: Randomly generate Kp
+2: (I ′i, pmtb∗) = BlockPermut(Ii, {keyblo∗})
+3: (I ′′i , {pmtp∗}) = IntraBlockPermut(I
+′
+i, keyinblo∗,#)
+4: (C, {bitkey∗}, {pmtDCL∗,#}, {pmtv∗,#}) =
+ValueSubstitution(I ′′i , keyv∗, keyl∗, keydc∗)
+5: Denote the (pmtb∗, {pmtp∗}, {bitkey∗}) as the
+ImgPosKey(OID,IID), denote the ({pmtDCL∗,#},
+{pmtv∗,#}) as the ImgV alKeyOID
+it helps to resist the collusion between image owner and CS
+as shown in section 6.
+As shown in Algorithm 6, we denote the (pmtb∗,
+{pmtp∗}, {bitkey∗}) as the ImgPosKey(OID,IID). For sim-
+plicity, the OID and IID will be omitted when there is
+no ambiguity or in general reference in the rest of paper.
+It should be noticed that all the encryption methods are
+high-efficiency bit computation or vector operation. After
+encryption, the owner should send the encrypted image
+C to the CS, and send the corresponding encryption key
+ImgPosKey(OID,IID) to the KMC.
+4.1.3 User authorization
+When one image owner with identity OID wants to au-
+thorize the user, he will give the user ImgV alKeyOID for
+Algorithm 7 TrapGen
+Input: Image I , Kv ,
+Output: Encrypted query images {COID}
+1: for each OID who authoring do
+2: Randomly generate a Kp and a {key′blo∗}
+3: (I ′i,∼) = BlockPermut(Ii, {keyblo∗})
+4: (I ′′i ,∼) = IntraBlockPermut(I
+′
+i, keyinblo∗)
+5: (I ′′′i ,∼) = ValueSubstitution(I
+′′
+i , keyv∗, keyl∗, keydc∗)
+6: (COID,∼,∼,∼) = BlockPermut(I ′′′i , {key
+′
+blo∗})
+7: end for
+the retrieval and decryption. The authorization information
+will also be known by CS and KMC. The further operations
+during authorization will be introduced in subsection 5.1.2.
+4.2 Authorized user Side
+The authorized user wants to search the similar images from
+the owners who authorize him. As shown in algorithm
+7, the user just needs to encrypt the query image with
+ImgV alKey he gets from the owners. It is noteworthy that
+encrypted query is at last protected by the BlockPermut,
+which means the relationship of block is destroyed. After
+encryption, authorized user only need to send all the en-
+crypted query with corresponding OID as the trapdoor to
+CS.
+4.3 Cloud Side
+After the owners upload the encrypted images, for the
+efficiency of retrieval, the CS will extract high-quality en-
+crypted feature and further build the index for images in
+the database. As the process of index building is similar to
+the plaintext situation, we here focus on encrypted feature
+extraction and aggregation process.
+4.3.1 Global feature extraction from encrypted DC
+The gDC is extracted to represent DC information of en-
+crypted image [36]. As most values of gDC are concentrated
+in [0,9], the CS can extract a 10-dim feature, in which the
+jth-dim represents the number of gDC whose value equals
+to j. The Y,U,V further form a 30-dim feature vector fDC .
+4.3.2 Aggregation feature extraction from the encrypted AC
+Different from DC, it is difficult to represent the AC values
+in a block effectively by a single number and it makes the
+feature aggregation an indispensable step. Inspired by [25],
+we use the typical BOW model to aggregate the features.
+The kernel observation here is that the encrypted histogram
+can still be used to compute the distance and k-means
+method BOW [33] uses is robust to the element permuta-
+tion. Accordingly, the aggregation for encrypted AC values
+consists the following three steps:
+(i) Local histogram extraction. A 40-dim vector is extracted
+to represent the feature of encrypted AC in each block,
+which is composed by three parts as follow.
+fACLocal = Hists ‖ Histv ‖ Histr. (8)
+The Hists contains the static information of (r, v) pairs,
+including the number of (r, v) pairs, the mean and standard
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 8
+deviation of r. The Histv is the distribution information
+of v. Detailedly, the value of 21-dim is the number of
+occurrences of v values in the block range from [-10,10],
+and the other 2-dim represents the v values more than 10 or
+less than -10. The Histr is the value information of r. The 14
+biggest value of r form the vector in descending order. If the
+number of (r, v) pairs is less than 14, the unfilled elements
+of Histr will be filled by -1.
+(ii) Vocabulary generation. Cluster all the local features
+into k classes with the k-means clustering algorithm. The k
+cluster centers are defined to be the encrypted visual words
+which make up the vocabulary. It should be noticed the
+Y,U,V are clustered independently as they have different
+properties naturally. The selection of k is always a difficult
+problem, however, the methods like x-means [37] or gap
+statics [38] can effectively cope with the problem. What’s
+more, we will show the retrieval accuracy of our scheme is
+quite robust to k in Fig. 9.
+(iii) Histogram calculation. After generating the vocabu-
+lary, all the local histograms in an image are represented
+by their nearest visual words. As a result, each image is
+represented by a feature vector f = (fi)ki=1. A ”scaled tf-
+idf” [39] trick is further implemented to optimize the feature
+fY , fU and fV , which means the finally extracted feature
+vectors from the (r, v) pairs.
+Finally, the image identities and the feature vector make
+up a linear index. It is easy to see that the feature vector are
+encrypted but the common index building schemes (e.g.,
+tree indexing [40]) can be further used.
+4.3.3 Search operation
+When the CS get the trapdoor generated by the authorized
+user, it will extract the same format feature as that from
+images in the dataset. If the query is limited in a single
+owner, the CS will calculate the feature with the correspond-
+ing visual words. Detailedly, the distance are calculated as
+formula 9, where D(·, ·) means manhattan distance.
+Dis(I1, I2) = α1D(f
+DC
+I1
+, fDCI2 ) + α2D(f
+Y
+I1
+, fYI2)
++α3D(f
+U
+I1
+, fUI2) + α4D(f
+V
+I1
+, fVI2)
+(9)
+Follow the experience and experiment, we set α1 = 0.1,
+α2 = 0.5, α3 = α4 = 0.2.
+4.3.4 Search operation from multiple image owners
+The above encrypted feature extraction are still valid during
+the retrieval as the manhattan distance won’t change if we
+execute the same permutation on the elements of feature
+vectors. When the multiple permutation tables are used,
+the high-frequency values will be randomly substituted
+to Npmt different value, where Npmt is the number of
+tables. It means if the value frequency distribution of two
+images is similar, the frequency of encrypted images will
+still have an extent of similarity, although the frequency
+become smoother with the increment of Npmt. The distance
+becomes weak, however, the magnitude relationship is still
+basically kept which is demonstrated experimentally.
+It further implies if the images are encrypted by the
+permutation tables in same Npmt, the distance after encryp-
+tion are still at the same level even though different per-
+mutations are utilized for encryption. It means the formula
+10 set on if we use the above encryption methods, where
+Ienc1 and Ienc2 means the image encrypted with different
+ImgV alKey and ImgPosKey.
+Dis(Ienc11 , I
+enc1
+2 ) ≈ Dis(Ienc21 , Ienc22 ) (10)
+It should be noticed the indispensable aggregation
+schemes will also infect the distance relationship. To keep
+the distance can be directly compared, the same cluster
+number kg are used to cluster the images from each image
+owner. The choice of kg will be discussed in subsection 7.2.2.
+When the query contains multi-sources, the CS will
+calculate the feature based on each global visual words,
+the distance got from different sources will be directly
+compared together and images with smaller distance will
+be returned.
+4.4 KMC side
+After CS gets the similar images, it sends the (IID, UID,
+OID) to KMC. Here, we follow the operation in [5], the CS
+sends encrypted images {C} to the querier and KMC sends
+the corresponding {ImgPosKey}. The user will decrypt the
+retrieval results according the key he has got. Notably, it
+makes users have to interact with the KMC, and actually
+leads to two rounds of interaction. We will make up the
+drawback in next section.
+5 ADVANCED SCHEME
+In the previous section, we give the scheme that can sup-
+port secure retrieval from multi-source. However, as the
+ImgPosKey is directly sent to KMC, it will be fragile to
+face the collusion between CS and KMC. Based on the
+same reason, the CS and KMC have to interact with user
+respectively, which leads to extra interaction for user. In
+this section, we firstly propose the scheme for protecting
+ImgPosKey to enhance the security and reduce interaction
+rounds, then the strategy for group union scene is further
+given.
+5.1 key protection
+Inspired by formula 1, we design a safer scheme with
+little computation increment during authorization. Briefly
+speaking, to hidden ImgPosKey, each owner with identity
+OID constructs a series of key called as UserKeyOID . Like
+formula 1, ImgPosKey plays the role of K2, UserKeyOID
+plays the role of K1. During authorization, the owner
+will generate and send a random UserKeyUIDOID which
+is same format with UserKeyOID to the user. For sim-
+plicity, the OID will be omitted in UserKeyUIDOID . The
+UserKeyUID plays the role of K in formula 1. The work of
+computing EncPerm(K1,K) will be undertaken by owner
+during authorization, and the result will be stored by KMC.
+KMC undertakes the computation of DecPerm(K2,K1)
+during the query. Here we give the construction method
+of UserKeyOID.
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 9
+5.1.1 UserKey generation
+To encrypt the ImgPosKey, owner has to consider all the
+situation. Detailedly, the owner needs to generate the key
+for encrypting the block-permutation key, intra-block per-
+mutation key and the stream cipher. Accordingly, a pseudo-
+random permutation generator, a stream-cipher generator
+and several secret keys are included in the UserKey, i.e.,
+Ku = { RandPerm, StmCiph, {keyUblo∗ }, {keyUinblo∗ },
+{keyUdc∗} }
+Here, the secret keys {keyUblo∗} are utilized to generate
+random permutations which are used to encrypt the inter-
+block permutation keys. As the length of inter-block permu-
+tation is determined by the size of images, it is difficult to
+consider all the situation. However, it can be remedied with
+a series of permutations whose length are the exponential
+of two. For simplicity, we here assume the length of images
+denoted as {CommSize} are all under consideration, and
+the random permutations are generated as follows:
+{Upmtb∗#} ← RandPerm(keyUblo∗, {CommSize}), (11)
+where # ∈ {1, . . . , |{CommSize}|}, here |{CommSize}|
+is the cardinality of set {CommSize}. Similarity, the secret
+keys {keyUinblo∗} are used to protect the intra-block permu-
+tations. As the amount of (r, v) pairs is in [1, 63], it can be
+generated as follows:
+{Upmtp∗#} ← RandPerm(keyUinblo∗, [1, . . . , 63]), (12)
+where # ∈ {1, . . . , 63}. At last, the keyUdc∗ is used to
+encrypt the bitstream which is generated to encrypt the DC.
+The permutations are generated as follows:
+{UbitKey∗#} ← StmCiph(keyUdc∗, [1, . . . , 10]), (13)
+where # ∈ {1, . . . , 10}. The whole ({Upmtb∗#},
+{Upmtp∗#} and {UbitKey∗#}) is finally denoted as the
+UserKey.
+5.1.2 Image position Key encryption
+Different from subsection 4.1.2, after the encryption of an
+image, the image owner won’t directly send ImgPosKey
+to KMC. As the Algorithm 8, the image owner will use the
+UserKeyOID to encrypt the ImgPosKey, and then send
+ImgPosKey′ = ImgKeyEnc(ImgPosKey, UserKeyOID to
+KMC. It should be noticed UserKey is unique to each
+image owner, and it will not be exposed to anyone else.
+The encrypted key ImgPosKey′ are the same format with
+ImgPosKey.
+When the owner authorizes an user, he randomly gener-
+ates a UserKeyUID and send to the authorized user. Then
+owner will use UserKeyUID to encrypt the UserKeyOID
+for following retrieval. As Algorithm 9 shows, the
+owner executes UserKeyEnc(UserKeyOID, UserKeyUID),
+and sends the result UserKey(OID,UID) to KMC.
+When CS asks the secret key from KMC, KMC will com-
+pute EncImgPosKey′IID = ImgKeyEnc(ImgPosKey
+′
+IID,
+UserKey(OID,UID)), and send back to CS. CS will fi-
+nally send back encrypted images {C} and correspond-
+ing EncImgPosKey′IID to the authorized user. From for-
+mula 1, it is easy to notice that the authorized user can
+Algorithm 8 ImgKeyEnc
+Input: ImgPosKeyIID, UserKeyOID
+Output: ImgPosKey′IID
+1: for ∀ pmtp∗j ∈ pmtp∗ do
+2: seek same length permutation Upmtp∗j in Upmtp∗#
+3: pmtp′∗j = DecPerm(pmtp∗j , Upmtp∗j)
+4: end for
+5: for ∀ ∗ ∈ {H,S, V } do
+6: seek same length permutation Upmtb∗j in Upmtb∗#
+7: pmtb′∗ = DecPerm(pmtb∗, Upmtb∗j)
+8: end for
+9: for ∀ bitkeyi∗ ∈ {bitkey∗} do
+10: seek same length bit-stream Ubitkey in Ubitkey′∗#
+11: bitkey′i∗ = bitkeyi∗ ⊕ Ubitkey
+12: end for
+13: denote the (pmtb′∗, {pmtp′∗}, {bitkey′i}) as the
+ImgPosKey′.
+Algorithm 9 UserKeyEnc/UserKeyDec
+Input: UserKeyOID, UserKeyUID
+Output: UserKey(OID,UID)
+1: for ∀ UpmtbOID∗j ∈ Upmtb
+OID
+∗# do
+2: seek same length permutation UpmtbUID∗j in
+UpmtbUID∗#
+3: Upmtb∗j=EncPerm/DecPerm(UpmtbOID∗j , Upmtb
+UID
+∗j )
+4: end for
+5: for ∀ UpmtpOID∗j ∈ Upmtp
+OID
+∗# do
+6: seek same length permutation UpmtpUID∗j in
+UpmtpUID∗#
+7: Upmtp∗j=EncPerm/DecPerm(UpmtpOID∗j , Upmtp
+UID
+∗j )
+8: end for
+9: for ∀ UbitkeyOID∗j ∈ Ubitkey
+OID
+∗# do
+10: seek same length bitstream UbitkeyUID∗j in
+UbitkeyUID∗#
+11: Ubitkeyi=UbitkeyOIDi ⊕ Ubitkey
+UID
+i
+12: end for
+denote ({Upmtb∗#}, {Upmtp∗#}, {UbitKey∗#}) as
+UserKey(OID,UID)
+get the encryption key with the help of ImgV alKey,
+EncImgPosKey′ and UserKeyUIDOID .
+5.2 Group Union
+Inspired by [5], the situation that owners unite as a group is
+further considered. In [5], the creator creates a repository in
+the CS, and the member join in should use the ImgV alKey
+creator set to encrypt their images, and further upload
+them into the repository. It will lead to plenty of extra
+consumption when owner wants to join different groups.
+Inspired by formula 2, we accomplish the union by some
+increment keys. The process of union is shown like figure 3.
+When the owners unite as the group, they should
+firstly choose a trusty member or third party as
+the group organizer. Similar to the image owner, the
+group organizer will randomly generate UserKeyGID
+and ImgV alKeyGID, then send them to all the mem-
+bers in group. After getting these information, to
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 10
+Fig. 3: The process of group union
+meet the demand of decryption for users who autho-
+rized by the group organizer, the members will com-
+pute IncUsrKey(OID,GID) = UserKeyDec(UserKeyOID,
+UserKeyGID), and send the result to KMC. Similarly, in or-
+der to meet the demand of retrieval, the members will com-
+pute all the DecPerm(pmtvOID∗,# , pmtv
+GID
+∗,# ) and DecPerm(
+pmtDCLOID∗,# , pmtDCL
+GID
+∗,# ), the results can be denoted as
+IncV alKey(OID,GID) then send it to CS. Based on formula
+2, the CS could further execute the encryption on encrypted
+images, then the CS further executes the same operation in
+subsection 4.3. The (r, v) part linear index of images for one
+image owner in CS will be finally built like Table 2.
+The group organizer undertakes the task of authoriza-
+tion. Besides the UserKeyUIDGID , the group organizer
+should use the symmetric encryption to avoid the potential
+collusion risk (shown in subsection 6.2.4). Here we briefly
+use the AES (Advanced Encryption Standard) [41]. In this
+case, after the authorization, the group organizer will send
+UserKey(UIDGID,GID) and K
+(GID,UID)
+k to KMC.
+During the retrieval from group, CS will com-
+pute the similarity with the feature belong to the
+group, and then send (GID, UID, {OID}, {IID})
+to KMC. Based on GID and OID, KMC can seek
+the corresponding IncUsrKey. Then KMC will firstly
+compute ImgKeyEnc(ImgPosKey, IncUsrKey) based on
+IID. Then, same to single owner, KMC computes
+EncImgPosKey′ based on the UserKey(GID,UID). At last,
+AES encryption based on corresponding K(GID,UID)k will
+be executed on EncImgPosKey′, and the result will be
+sent back to CS. It is easy to notice the user can finish the
+decryption based on these information.
+5.3 Update operation
+After introducing all the entites, the update operations in
+JES-MSIR are given here. Detailly, We will show the update
+on images and owners.
+Image addition: As the section 3, based on his
+ImgV alKey and random ImgPosKey, the owner can
+get the encrypted image and sends it to CS. Simi-
+larly, based on the UserKey, the owner will compute
+ImgKeyEnc(ImgPosKey, UserKey) and send it to KMC.
+The CS will execute the feature extraction by existing visual
+words, and add this image into the index. The KMC will
+store the key for following retrieval.
+Image deletion: The owner with identity GID sends
+IID to CS and KMC. Then CS should delete the correspond-
+ing encrypted image and all the feature in the index, KMC
+should delete the corresponding ImgPosKey′(OID,IID)
+Join group: The group organizer in the group with
+identity GID sends its UserKeyGID and ImgV alKeyGID
+to the new member, then the member, CS and KMC will
+execute same operation in subsection 5.2.
+Leave group: The group organizer in the group with
+identity GID sends the OID to CS and KMC. Then CS
+should delete the corresponding image features which are
+extracted for the owner and group, KMC should delete the
+IncUsrKey(OID,GID)
+6 SECURITY ANALYSIS
+Besides the security problems in PPCBIR [5], [25], MSPPIR
+[4] also faces the risk from the collusion from different
+untities. The security analysis in the non-collusion assump-
+tion, including Ciphertext-Only Attack (COA) and Known-
+Background Attack (KBA), will be firstly given in subsection
+6.1, then we analysis the potential collusion problems in
+subsection 6.2, finally the security comparison with previous
+schemes in MSPPIR are given in subsection 6.3.
+6.1 Security with no Collusion
+6.1.1 Security under COA model
+In the COA model, the adversary is only able to get the
+ciphertext. As the images are all stored in the CS, we
+here mainly consider the potential leakage in the CS. For
+formal statement, the functionality F and the correspond-
+ing information leakages of our scheme under the COA
+model are summarized in Fig. 4. Our security proofs follow
+the paradigm in secure multi-party computations [42]. The
+execution of our scheme involves the interaction between
+CS and other entities, which is defined as real experiment.
+In the proposed scheme, the honest-but-curious CS is the
+potential adversaryA. In an ideal experiment, a simulator S
+is defined as the one that can simulate the view of adversary
+A by using functionality F only, constructing the ideal
+experiment. The proposed scheme is proved secure once the
+two experiments are indistinguishable.
+Theorem 1. Our scheme is secure against an honest-but-
+curious probabilistic polynomial time (PPT) adversary under the
+COA model. The security strength depends on the image size, and
+the number of permutations in ImgValKey.
+Proof.
+• Security of image content. As the Fig. 4, the simulator S
+simulates a set of images IS , and the corresponding
+identity set IIDS according to the storage leakage
+as shown in Fig. . The simulator S knows the total
+number of images and the size of each image. How-
+ever, S can only fill the images with the randomly
+generated pixels. As stated above, JPEG-format im-
+ages are mainly consisted by the DC values and
+(r, v) pairs, both of which are contained in all Y,U, V
+components. In our scheme, the above information
+is protected respectively by the substitutions and
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 11
+TABLE 2: Partial linear index built for one image owner
+Image
+Identity
+Feature vector aggregated from (r, v) pairs for different authorized users
+OwnerOID GlobalOID GroupGID1 GlobalGID1 . . .
+IID(C1) f
+OID
+1 = {f
+OID
+1j }
+kOID
+j=1 f
+OID
+1G
+= {fOID1jg }
+kg
+j=1 f
+GID1
+1 = {f
+GID1
+1j }
+kGID1
+j=1 f
+GID1
+1G
+= {fGID11jg }
+kg
+j=1 . . .
+. . . ... . . . . . . . . . . . .
+IID(Ci) f
+OID
+i = {f
+OID
+ij }
+kOID
+j=1 f
+OID
+iG
+= {fOIDijg }
+kg
+j=1 f
+GID1
+i = {f
+GID1
+ij }
+kGID1
+j=1 f
+GID1
+iG
+= {fGID1ijg }
+kg
+j=1 . . .
+. . . . . . . . . . . . . . . . . .
+IID(Cn) f
+OID
+n = {fOIDnj }
+kOID
+j=1 f
+OID
+nG
+= {fOIDnjg }
+kg
+j=1 f
+GID1
+n = {f
+GID1
+nj }
+kGID1
+j=1 f
+GID1
+nG
+= {fGID1njg }
+kg
+j=1 . . .
+The mainly ideal functionality F of our scheme as well as the corresponding information leakages.
+(i) F .StoreImage(I, UID, IID,Kp,Kv):
+• Functionality. Each image owner encrypts all his images in I, and generates a set of encrypted images C. Next,
+each image owner uploads C, UID, IID to the CS.
+• Storage leakage. The information leaked here includes C, IID, UID and the size of each images, and the
+total number of images. What’s more, the CS know the corresponding blocks are encrypted by the same
+valuesubstitution table.
+(ii) F .Union(OID, GID, {IncV alKey}):
+• Functionality. Image owners union as a group, and sends the IncV alKey to the CS.
+• Relation leakage. The information leaked here includes the OID in the same group, and the increment key
+itself. What’s more, the CS can compute the difference of ImgV alKey belong to the owner in the same group.
+(iii) F .IndexGen(C,UID,GID):
+• Functionality. CS extracts local histograms from images blocks belong to each image owner, and constructs
+the vocabulary by cluster algorithm, and calculates the feature vectors for each image in C based on the
+corresponding UID and GID like Table 2.
+• Feature leakage. The information leaked here includes the encrypted local histograms, the similarities and
+distributions of local histograms belong to the same source.
+(iv) F .Query({Iq,UID,GID}):
+• Functionality. Authorized user encrypts the query image, and submits the encrypted images to cloud server
+as trapdoor. The CS execute the similarity calculation, and get the {IID} of similar image, and ask KMC the
+corresponding decryption key. The CS finally return all the {UID/GID, C, EncImgPosKey′} to querier.
+• Query leakage. The information leaked here includes the encrypted query images and the similarity between
+the images in the database. The information that encrypted images are encrypted from the same image is also
+leaked.
+Fig. 4: The functionality F and the information leakage in our framework
+random permutations with different keys. The v
+information between the real images and simulated
+ones are indistinguishable according to the property
+of random permutation. For a random permutation
+with length of 20, the computational complexity of
+a distinguisher D, executed by S , in distinguishing
+the color values is 20! because D needs to figure
+out the correct one from 20! permutations, which
+means a log2(20!) ≈ 61 bits security strength. The
+information of r is protected by block permutation
+and intra-block permutation. The security strengths
+of block permutation and intra-block permutation
+are equal to log2(blknum!) and log2(blksize!) bits,
+respectively. The DC values is protected by the sub-
+stitutions and bitxor by a random bit-stream. The
+security strengths of bitxor are equal to n, where
+n means the length of random bit-stream. The im-
+age content is made up of all of these information
+and hence the security strength of image encryption
+SecImg in our scheme can be calculated as:
+SecImg =3×Npmt1 × log2(20!)
++
+∑
+log2(blknum∗!)
++3×
+∑ blknum∗∑
+i=1
+log2(blksizei!)
++3×Npmt2 × log2(10!)
++
+∑ blknum∗∑
+i=1
+ni(bits)
+(14)
+• Security of features. In our scheme, image features
+are mainly calculated from the local histograms of
+encrypted DC and (r, v) pairs. With a simulated
+image IS , S can calculate the local histograms of
+the simulated image. The computational complexity
+of a distinguisher D in distinguishing the histogram
+is 3 × Npmt1 × log2(20!) + 3 × Npmt2 × log2(10!)
+which means about 642 bits security strength if we
+set Npmt1 = Npmt2 = 5
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 12
+• Security of query image and feature. As algorithm
+7 shows, all queries are encrypted by different
+ImgPosKey and ImgV alKey. The one-time pad
+encryption makes the multiple C the same security
+level with single one. As the query is firstly en-
+crypted like algorithm 6, which makes the security
+of query not less than images in CS. What’s more,
+the extra BlockPerm avoids the leakage of relation
+between the encrypted blocks.
+The images are encrypted by the combination of block
+permutation, intra-block permutation, value substitution
+and bitxor in JES-MSIR. Although the security is partly de-
+pending on the image size, the efficiency advantage makes
+this kind of encryption more suitable for images compare to
+the methods based on HE [22].
+6.1.2 Security under KBA model
+In the KBA model, besides the information leakage defined
+in Fig. 4, the adversary also knows certain statistical proper-
+ties of natural images, which degrades the security strength
+of the proposed scheme. For example, as illustrated in the
+first subfigure of Fig. 5, v values do not occur uniformly, and
+the small v value generally has much higher frequency. Af-
+ter substitution with a single table, the histogram bins have
+been shuffled, which protects the image statistical features
+to some extent. However, the distribution statistics are still
+reserved as shown in the second subfigure of Fig. 5, which
+decreases the computational complexity to figure out the
+secret permutation. In our scheme, the polyalphabetic cipher
+is utilized to encrypt the pixel values, which will flatten the
+v value histogram of the encrypted image and thus offering
+stronger security. Although the histogram become flatten,
+the size relation of retrieval distance are approximate kept.
+It is clearly a trade-off between the security and retrieval
+accuracy. In this paper, we set Npmt1 = Npmt2 = 5.
+6.2 Security under Collusion
+In the above analysis, we prove our scheme is safe if each
+participant in the system is reliable. However, a reasonable
+system should be robust to the collusion between users. As
+the image sotred in CS, we skip the analysis of collusion
+between KMC and member in group or user.
+6.2.1 The collusion between CS and KMC
+Colluding CS and KMC own the knowledge of the en-
+crypted images and encrypted key. The security of en-
+crypted images has been shown in COA model, here we
+further prove KMC can not infer the ImgPosKey from
+encrypted keys.
+As formula 1 shows, to the EncPerm and DecPerm, there
+are n! possible permutations for n elements. It means if
+all K , K1, K2 are unknown, it is indistinguishable to in-
+fer them from the DecPerm(K2,K1) and EncPerm(K1,K)
+only. Here the ImgPosKey is unknown as subsection 6.1,
+UserKeyOID are kept in the owner side, and UserKeyUID
+are stored in the authorized user side. As both CS and KMC
+is unfamiliar to the above information, it is difficult for them
+to infer ImgPosKey(OID,IID) from UserKey(OID,UID)
+and ImgPosKey
+′
+(OID,IID). In an ideal environment (i.e.
+non-collusion), the CS and KMC can be undertaken by one
+server.
+Fig. 5: Occurrence ratios of v values of original image and
+its encrypted versions with different Npmt1. [25]
+6.2.2 The collusion between CS and authorized users
+Colluding CS and AU have the knowledge of known de-
+crypted images and ImgV alKeyOID , which means the
+features are exposed. However, the images stored in CS
+are encrypted one-time pad ImgPosKey, in this case, the
+colluder can’t obtain the unknown images. As the features
+of owner is meaningless to authorized users, it will further
+decrease the possibility of collusion.
+6.2.3 The collusion between CS, KMC and a separate im-
+age owner
+The image owner may try to know more images from other
+image owners through colluding with the CS. As different
+owner use different ImgV alKey, we here mainly consider
+the potential colluding risk on the AU who authorized by
+conspirator and other image owners.
+As Algorithm 7 shows, each encrypted query is finally
+protected by BlockPerm, which means the conspirator can
+not get the block relation between the queries. Take v for
+instance, as we use multi-table in the ValueSubstitution,
+which means each block may be encrypted by Npmt2 possi-
+bilities. The owner can not infer the plaintext query feature
+in that there are (Npmt2)blknum possibilities for a image
+which has blknum blocks. It further means the collusion
+with one image owner will not expose ImgV alKey of the
+image owners authorized to the same user. As KMC has no
+information related to ImgV alKey, this kind of collusion
+will not leak the plaintext image.
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 13
+6.2.4 The collusion between CS and member in the group
+After collusion, CS has the knowledge of ImgV alKeyGID
+and UserKeyGID, which makes the image feature belong
+to the group exposed. However, as the ImgPosKey is one-
+time-pad, it can not be directly exposed. Further, the key
+KMC sends to CS is encrypted by AES if it corresponding
+to a group, which means CS actually has no information
+related to UserKeyGID. So the position information of
+image is still secure in this situation.
+6.3 The security comparison
+Here we compare the security with the former paper from
+the respective of image content and image feature, and the
+conclusion can be seen in table 3. In [3], to avoid the key
+conversion during image decryption, the KMC decrypts
+and gets the plaintext image, which makes their scheme
+insecure. In [4], the feature security depends on a global
+key, which can be got by colluding CS and KMC.
+7 EXPERIMENT RESULTS
+The section evaluates the performance of the proposed
+scheme in terms of encryption effectiveness, retrieval ac-
+curacy and efficiency. We implement the proposed scheme
+with Matlab 2018a on a Windows 10 operation system. All
+the experiment in the user side (i.e. source and authorized
+user) are executed in an machine with Intel Core i5-8250u
+CPU @ 1.6GHZ and 16GB memory. The experiment in the
+Cloud side (i.e. CS or KMC) are executed on a machine with
+Intel Core i7-6900K CPU @ 3.20GHz and 64 GB memory.
+We firstly use the common used Corel-1k image dataset [43]
+as the experiment dataset. The images in this dataset size
+either 384×256 or 256×384. The image dataset includes 10
+categories of images and each category contains 100 similar
+images.
+7.1 Upload/Update consumption
+In this section, we focus on the time consumption in
+the image owner side. Generally speaking, in the existing
+schemes, the image owner needs to execute the following
+sub-operation: Image encryption, Feature extraction, Feature
+aggregation, Feature encryption. The time consumption com-
+parison on uploading Corel-1k dataset is shown in Table 4.
+Benefiting from the simple encryption scheme, the [5] and
+[6] is in high efficiency. Suffering from the high computation
+complexity of FHE, the encryption on feature is also an
+expensive operation in [4].
+Further, the image owner have the need for updating
+their image. The existing schemes execute the following sub-
+operation during update: Image update, Feature update. The
+time consumption in update is shown as Table 5. The update
+operation in [3], [5], [6], and JES-MSIR is similar with the
+uploading. In [4], the image owner only needs to generate
+the feature based on existing visual words. However, it still
+leads to a costly update.
+The time consumption of transferring the image to the
+CS and the following operation on the encrypted images is
+almost linear to the size of encrypted image, we further give
+the size of encrypted image information in Table 6. The size
+of encrypted image in [3], [4] are equal to plaintext. Fig. 6
+illustrates the separate and joint effect of the three protecting
+steps. It should be noticed that the multiple permutations
+lead to more uniform encrypted pixels.
+Fig. 6: The visual effect of encryption, (a) the original image
+(133.jpg in Corel-1k database), the size of which is 384×256,
+(b) with block permutation only, (c) with intra-block
+permutation only, (d) with value substitution only, (e) with
+value substitution under Npmt1,pmt2 = 1, (f) with value
+substitution under Npmt1,pmt2 = 5.
+7.2 Retrieval Consumption and Precision
+In our experiments, the ”precision” for a query is defined
+as that in [44]: Pm = m′/m, where m′ is the number of
+real similar images in the m retrieved images. We choose
+all 10 categories to test the retrieval precision and time
+consumption.
+7.2.1 single-source
+During the retrieval, the time consumption are composed
+by three part: Trapdoor generation, similarity consumption in
+cloud side, decryption. The time consumption comparison on
+retrieval(return Top-50 similar images) is shown as 7. Due
+to the leakage of index, the similarity computation in [6] is
+unacceptable. The retrieval consumption in [4] depends on
+the codebook utilized as their scheme only compare with
+images in the same index each time.
+The retrieval accuracy comparison is shown as Fig. 7.
+Due to the fully utilization of DC and (r, v) pairs and
+aggregation on local (r, v) pairs, the accuracy of JES-MSIR is
+better than [5], [6]. As the typical feature (e.g. SIFT) relies on
+effective aggregation schemes [45], the accuracy in [4] is not
+outstanding. However, more effective aggregation methods
+always lead to heavier computation consumption which
+will be undertaken by the owner himself in the schemes
+belong to first category.
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 14
+TABLE 3: Security comparison
+JES-MSIR MIPP [3] PIC [4]
+content feature content feature content feature
+No Collusion yes yes no no yes yes
+Colluding CS and KMC yes yes no no yes no
+Colluding CS and User yes no no no yes yes
+Colluding CS, KMC and seperate Owner yes yes no no yes no
+Colluding CS and member yes no - - - -
+TABLE 4: Time consumption of image dataset upload
+JES-MSIR Cheng [6] IES-CBIR [5] MIPP [3] PIC [4]
+Image encryption 90.1s 79.07s 47.66s 2.51s 2.7s
+Feature extraction - - - 13s 77.43s
+Feature aggregation - - - - 200.3s
+Feature encryption - - - 6.7s 1228.8s
+Total time consumption 90.1s 79.07s 47.66s 22.21s 1509.23s
+TABLE 5: Time consumption of image update
+JES-MSIR Cheng [6] IES-CBIR [5] MIPP [3] PIC [4]
+Image update 0.09s 0.08s 0.05s 0.03s 0.04s
+Feature update - - - 0.02s 7.35s
+Total time consumption 0.09s 0.08s 0.05s 0.05s 7.39s
+TABLE 6: The size increment of the encrypted image dataset
+Plaintext JES-MSIR Cheng [6] IES-CBIR [5]
+Corel-1k dataset 32.3MB 57.1MB 40.5MB 268MB
+Fig. 7: Retrieval accuracy comparison in Corel-1k dataset
+7.2.2 multi-source
+To better show the result in multi-source scene, Corel-10k
+image dataset [46] are utilized in multi-source scene. This
+image database includes 100 categories of images and each
+category contains 100 similar images. The size of image is
+either 187×126 or 126×187. We choose all 100 categories to
+test the retrieval precision and time consumption. In our
+experiment, the images in Corel-10k dataset are randomly
+distributed to each image owner, and all the image owners
+possess the whole 10,000 images.
+The retrieval time consumption are similar to the situa-
+tion in single-source. Although our scheme needs to encrypt
+multiple queries, however, the time of trapdoor generation
+is far less than the other steps. Specially, the interaction
+rounds during the retrieval are shown in TABLE 8. The
+interaction between CS and KMC in [4] is unsure in that
+they can not ensure two rounds of interaction can search
+enough similar images.
+Figure. 8 uses the Corel-10k database shows the retrieval
+accuracy comparison in the single-source scene. When
+Nsource (i.e. the number of source) increases, the accuracy
+of [3] will kept same as the feature they use kept same;
+the accuracy of [4] will have an extent of change as the
+image owners jointly maintain the same codebook. When
+the images significantly increase, the quality of codebook
+will infect the accuracy, the influence is basically same as
+the plaintext image retrieval [47]. It should be noticed it is
+unrobust as the alternation of codebook needs the participa-
+tion of image owners.
+In JES-MSIR, as mentioned in subsection 4.3.4, the dis-
+tance are still in the same level if the same number of cluster
+centers are chosen. To choose reasonable kg for the system,
+we firstly use grid search to choose the approximately
+optimal kgrid for the 1-source (kY = 200, kU = 50, kV = 50.
+Then we use the kgird as the kg to test the situation on
+different Nsource. Further, the two, ten, half, tenth times of
+kgrid are utilized as kg to test the robustness.
+As shown in Fig. 9, three conclusions can be seen. Firstly,
+the retrieval accuracy decrease in a slow speed in the same
+choice of cluster number. For instance, the retrieval accuracy
+(Top-50) only decrease 7.3% whenNsource increase from 1 to
+1,000. It means even in a extreme situation (i.e. each image
+owner has average 10 images), the retrieval accuracy still
+stable. And the decrease ratio is decline with the increment
+of returned images as shown in Fig. 10. Secondly, small
+increment of k is beneficial to accuracy. For instance, two
+times kgrid get better accuracy when Nsource over 500. Last
+but not least, the change on kg show little influence on the
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 15
+TABLE 7: Time consumption of retrieval(Top-50)
+JES-MSIR Cheng [6] IES-CBIR [5] MIPP [3] PIC [4]
+Trapdoor generation 0.09s 0.08s 0.05s 0.03s 15.36s
+similarity computation in cloud 0.11s 75.63s 0.15s 2.63s >600s
+Decryption 4.43s 3.92s 2.44s 1.28s 1.31s
+Total time consumption 4.63s 79.63s 2.64s 3.94s >616.67s
+TABLE 8: Interaction rounds during the retrieval
+JES-MSIR MIPP [3] PIC [4]
+CS and KMC 1 1 ≥2
+CS and User 1 1 1
+KMC and User 0 1 0
+Fig. 8: Retrieval accuracy comparison in Corel-10k dataset
+results. It should be noticed that only 10% accuracy loss
+when the 10 times kgrid in utilization. And the accuracy is
+still better than [4] even in extreme situation (i.e. kY =20,
+kU=5, kV =5).
+As most of methods which can infer the ksug need
+consume plenty of resources when the feature is huge. In
+this case, only part of feature are randomly chosen from the
+original feature as an optimization in our experiment, and
+the proportion of chosen feature can be briefly called ratio,
+where ratio ∈ (0, 1]. Gap statics [38] method is employed in
+the experiment to get the ksug . A sublinear speed is gotten
+when the number of image decline. Consider all the above
+factors comprehensively, we here suggest the kg chosen as
+ksuggest =
+1
+Nsource
+(
+∑Nsource
+i=1 k
+i
+sug) · log2(1 +
+1
+ratio
+) · log2(1 +
+Nsource). The result is shown in Fig. 9 and Fig. 10, it could be
+noticed appropriate accuracy and slower decline can be got
+in different Nsource. What’s more, as all the index building
+is undertaken by CS, it is easy for CS to update the kg at
+regular intervals.
+8 CONCLUSION
+In this paper, we introduce the multi-source privacy-
+preserving CBIR problem and propose a novel scheme
+which can effectively and securely cope with this prob-
+lem. Different from the previous schemes which use the
+homomorphic encryption, we propose our scheme based on
+Fig. 9: Top-50 accuracy comparison in different choice of k
+Fig. 10: Retrieval accuracy decrease ratio in different Top-m
+the randomization encryption, which leads to a higher effi-
+ciency and acceptable accuracy and security. The bitxor and
+permutation are used to ensure the security of the image,
+and the BOW model is used to aggregte the encrypted (r, v)
+pairs in multi-source scene. As the retrieval accuracy is still
+insufficient when compared with that in plaintext domain,
+in the future, we consider to execute the state-of-art CBIR
+scheme in safety based on two non-collusion CS.
+ACKNOWLEDGEMENTS
+This work is supported in part by the National Nat-
+ural Science Foundation of China under grant num-
+bers 61672294, 61502242, 61702276, U1536206, U1405254,
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 16
+61772283, 61602253, 61601236, and 61572258, in part by
+Six peak talent project of Jiangsu Province (R2016L13), in
+part by the Priority Academic Program Development of
+Jiangsu Higher Education Institutions (PAPD) fund, in part
+by NRF-2016R1D1A1B03933294, in part by the Jiangsu Basic
+Research Programs-Natural Science Foundation under grant
+numbers BK20150925 and BK20151530, in part by the Col-
+laborative Innovation Center of Atmospheric Environment
+and Equipment Technology (CICAEET) fund, China. Zhi-
+hua Xia is supported by BK21+ program from the Ministry
+of Education of Korea.
+REFERENCES
+[1] L. Zheng, Y. Yang, and Q. Tian, “Sift meets cnn: A decade survey of
+instance retrieval,” IEEE transactions on pattern analysis and machine
+intelligence, vol. 40, no. 5, pp. 1224–1244, 2017.
+[2] C. D. Manning, P. Raghavan, and H. Schütze, Introduction to
+information retrieval. Cambridge university press, 2008.
+[3] M. Shen, G. Cheng, L. Zhu, X. Du, and J. Hu, “Content-based
+multi-source encrypted image retrieval in clouds with privacy
+preservation,” Future Generation Computer Systems, 2018.
+[4] L. Zhang, T. Jung, K. Liu, X.-Y. Li, X. Ding, J. Gu, and Y. Liu, “Pic:
+Enable large-scale privacy preserving content-based image search
+on cloud,” IEEE Transactions on Parallel and Distributed Systems,
+vol. 28, no. 11, pp. 3258–3271, 2017.
+[5] B. Ferreira, J. Rodrigues, J. Leitao, and H. Domingos, “Practical
+privacy-preserving content-based retrieval in cloud image reposi-
+tories,” IEEE Transactions on Cloud Computing, 2017.
+[6] H. Cheng, X. Zhang, J. Yu, and Y. Zhang, “Encrypted jpeg image
+retrieval using block-wise feature comparison,” Journal of Visual
+Communication and Image Representation, vol. 40, pp. 111–117, 2016.
+[7] X. Zhang and H. Cheng, “Histogram-based retrieval for encrypted
+jpeg images,” in 2014 IEEE China Summit & International Conference
+on Signal and Information Processing (ChinaSIP). IEEE, 2014, pp.
+446–449.
+[8] W. Lu, A. L. Varna, and M. Wu, “Confidentiality-preserving image
+search: a comparative study between homomorphic encryption
+and distance-preserving randomization,” IEEE Access, vol. 2, pp.
+125–141, 2014.
+[9] W. Lu, A. Swaminathan, A. L. Varna, and M. Wu, “Enabling search
+over encrypted multimedia databases,” in Media Forensics and
+Security, vol. 7254. International Society for Optics and Photonics,
+2009, p. 725418.
+[10] W. Lu, A. L. Varna, A. Swaminathan, and M. Wu, “Secure image
+retrieval through feature protection,” in 2009 IEEE International
+Conference on Acoustics, Speech and Signal Processing. IEEE, 2009,
+pp. 1533–1536.
+[11] Z. Xia, Y. Zhu, X. Sun, Z. Qin, and K. Ren, “Towards privacy-
+preserving content-based image retrieval in cloud computing,”
+IEEE Transactions on Cloud Computing, vol. 6, no. 1, pp. 276–286,
+2015.
+[12] D. G. Lowe, “Object recognition from local scale-invariant fea-
+tures,” in Proceedings of the seventh IEEE international conference on
+computer vision, vol. 2. Ieee, 1999, pp. 1150–1157.
+[13] Y. Rubner, C. Tomasi, and L. J. Guibas, “The earth mover’s distance
+as a metric for image retrieval,” International journal of computer
+vision, vol. 40, no. 2, pp. 99–121, 2000.
+[14] J. Yuan, S. Yu, and L. Guo, “Seisa: Secure and efficient encrypted
+image search with access control,” in 2015 IEEE conference on
+computer communications (INFOCOM). IEEE, 2015, pp. 2083–2091.
+[15] W. K. Wong, D. W.-l. Cheung, B. Kao, and N. Mamoulis, “Secure
+knn computation on encrypted databases,” in Proceedings of the
+2009 ACM SIGMOD International Conference on Management of data,
+2009, pp. 139–152.
+[16] J. Shashank, P. Kowshik, K. Srinathan, and C. Jawahar, “Private
+content based image retrieval,” in 2008 IEEE Conference on Com-
+puter Vision and Pattern Recognition. IEEE, 2008, pp. 1–8.
+[17] P. Zheng and J. Huang, “An efficient image homomorphic encryp-
+tion scheme with small ciphertext expansion,” in Proceedings of the
+21st ACM international conference on Multimedia, 2013, pp. 803–812.
+[18] P. Paillier, “Public-key cryptosystems based on composite degree
+residuosity classes,” in International conference on the theory and
+applications of cryptographic techniques. Springer, 1999, pp. 223–
+238.
+[19] C. Gentry, “Fully homomorphic encryption using ideal lattices,”
+in Proceedings of the forty-first annual ACM symposium on Theory of
+computing, 2009, pp. 169–178.
+[20] C.-Y. Hsu, C.-S. Lu, and S.-C. Pei, “Image feature extraction in
+encrypted domain with privacy-preserving sift,” IEEE transactions
+on image processing, vol. 21, no. 11, pp. 4593–4607, 2012.
+[21] M. Schneider and T. Schneider, “Notes on non-interactive secure
+comparison in” image feature extraction in the encrypted domain
+with privacy-preserving sift”,” in Proceedings of the 2nd ACM
+workshop on Information hiding and multimedia security, 2014, pp.
+135–140.
+[22] S. Hu, Q. Wang, J. Wang, Z. Qin, and K. Ren, “Securing sift:
+Privacy-preserving outsourcing computation of feature extractions
+over encrypted image data,” IEEE Transactions on Image Processing,
+vol. 25, no. 7, pp. 3411–3425, 2016.
+[23] Q. Wang, S. Hu, K. Ren, J. Wang, Z. Wang, and M. Du, “Catch me
+in the dark: Effective privacy-preserving outsourcing of feature
+extractions over image data,” in IEEE INFOCOM 2016-The 35th
+Annual IEEE International Conference on Computer Communications.
+IEEE, 2016, pp. 1–9.
+[24] F. Liu, Y. Wang, F.-C. Wang, Y.-Z. Zhang, and J. Lin, “Intelligent
+and secure content-based image retrieval for mobile users,” IEEE
+Access, vol. 7, pp. 119 209–119 222, 2019.
+[25] Z. Xia, L. Jiang, D. Liu, L. Lu, and B. Jeon, “Boew: a content-
+based image retrieval scheme using bag-of-encrypted-words in
+cloud computing,” IEEE Transactions on Services Computing, 2019.
+[26] H. Liang, X. Zhang, and H. Cheng, “Huffman-code based retrieval
+for encrypted jpeg images,” Journal of Visual Communication and
+Image Representation, vol. 61, pp. 149–156, 2019.
+[27] J. Gong, Y. Xu, and X. Zhao, “A privacy-preserving image retrieval
+method based on improved bovw model in cloud environment,”
+IETE Technical Review, vol. 35, no. sup1, pp. 76–84, 2018.
+[28] Y. Xu, J. Gong, L. Xiong, Z. Xu, J. Wang, and Y.-q. Shi, “A privacy-
+preserving content-based image retrieval method in cloud envi-
+ronment,” Journal of Visual Communication and Image Representation,
+vol. 43, pp. 164–172, 2017.
+[29] T. Jung, X.-Y. Li, and M. Wan, “Collusion-tolerable privacy-
+preserving sum and product calculation without secure channel,”
+IEEE Transactions on Dependable and secure computing, vol. 12, no. 1,
+pp. 45–57, 2014.
+[30] L. Xiao, O. Bastani, and I.-L. Yen, “An efficient homomorphic en-
+cryption protocol for multi-user systems.” IACR Cryptology ePrint
+Archive, vol. 2012, p. 193, 2012.
+[31] G. Schaefer, “Fast compressed domain jpeg image retrieval,” in
+2017 International Conference on Vision, Image and Signal Processing
+(ICVISP). IEEE, 2017, pp. 22–26.
+[32] A. K. Jain and A. Vailaya, “Image retrieval using color and shape,”
+Pattern recognition, vol. 29, no. 8, pp. 1233–1244, 1996.
+[33] J. Sivic and A. Zisserman, “Video google: A text retrieval approach
+to object matching in videos,” in null. IEEE, 2003, p. 1470.
+[34] G. Chen, Y. Mao, and C. K. Chui, “A symmetric image encryption
+scheme based on 3d chaotic cat maps,” Chaos, Solitons & Fractals,
+vol. 21, no. 3, pp. 749–761, 2004.
+[35] X. Chai, Y. Chen, and L. Broyde, “A novel chaos-based image
+encryption algorithm using dna sequence operations,” Optics and
+Lasers in engineering, vol. 88, pp. 197–213, 2017.
+[36] G. Schaefer, “Jpeg image retrieval by simple operators,” 2001.
+[37] D. Pelleg, A. W. Moore et al., “X-means: Extending k-means with
+efficient estimation of the number of clusters.” in Icml, vol. 1, 2000,
+pp. 727–734.
+[38] R. Tibshirani, G. Walther, and T. Hastie, “Estimating the number
+of clusters in a data set via the gap statistic,” Journal of the Royal
+Statistical Society: Series B (Statistical Methodology), vol. 63, no. 2,
+pp. 411–423, 2001.
+[39] O. Chum, J. Philbin, A. Zisserman et al., “Near duplicate image
+detection: min-hash and tf-idf weighting.” in BMVC, vol. 810,
+2008, pp. 812–815.
+[40] M. Muja and D. G. Lowe, “Scalable nearest neighbor algorithms
+for high dimensional data,” IEEE transactions on pattern analysis
+and machine intelligence, vol. 36, no. 11, pp. 2227–2240, 2014.
+[41] J. Daemen and V. Rijmen, “Reijndael: The advanced encryption
+standard.” Dr. Dobb’s Journal: Software Tools for the Professional
+Programmer, vol. 26, no. 3, pp. 137–139, 2001.
+[42] R. Canetti, “Universally composable security: A new paradigm for
+cryptographic protocols,” in Proceedings 42nd IEEE Symposium on
+Foundations of Computer Science. IEEE, 2001, pp. 136–145.
+MSPPIR: MULTI-SOURCE PRIVACY-PRESERVING IMAGE RETRIEVAL IN CLOUD COMPUTING 17
+[43] J. Li and J. Z. Wang, “Automatic linguistic indexing of pictures
+by a statistical modeling approach,” IEEE Transactions on pattern
+analysis and machine intelligence, vol. 25, no. 9, pp. 1075–1088, 2003.
+[44] H. Müller, W. Müller, D. M. Squire, S. Marchand-Maillet, and
+T. Pun, “Performance evaluation in content-based image retrieval:
+overview and proposals,” Pattern recognition letters, vol. 22, no. 5,
+pp. 593–601, 2001.
+[45] “http://lear.inrialpes.fr/ jegou/holidays state of art.html.”
+[46] J. Z. Wang, J. Li, and G. Wiederhold, “Simplicity: Semantics-
+sensitive integrated matching for picture libraries,” IEEE Trans-
+actions on pattern analysis and machine intelligence, vol. 23, no. 9, pp.
+947–963, 2001.
+[47] F. Chierichetti, A. Panconesi, P. Raghavan, M. Sozio, A. Tiberi,
+and E. Upfal, “Finding near neighbors through cluster pruning,”
+in Proceedings of the twenty-sixth ACM SIGMOD-SIGACT-SIGART
+symposium on Principles of database systems, 2007, pp. 103–112.
+Qi Gu is currently pursing his master degree in
+the School of Computer and Software, Nanjing
+University of Information Science and Technol-
+ogy, China. His research interests include func-
+tional encryption, image retrieval and nearest
+neighbor search.
+Zhihua Xia received his B.S. degree in Hunan
+City University, China, in 2006, and the Ph.D.
+degree in computer science and technology from
+Hunan University, China, in 2011.He is currently
+an associate professor with the School of Com-
+puter and Software, Nanjing University of Infor-
+mation Science and Technology, China. He was
+a visiting professor with the Sungkyunkwan Uni-
+versity, Korea, 2016. His research interests in-
+clude cloud computing security and digital foren-
+sic. He is a member of the IEEE.
+Xingming Sun received his BS in mathematics
+from Hunan Normal University, China, in 1984,
+MS in computing science from Dalian University
+of Science and Technology, China, in 1988, and
+PhD in computing science from Fudan Univer-
+sity, China, in 2001. He is currently a professor in
+China-USA Computer Research Center, China.
+His research interests include network and infor-
+mation security, digital watermarking, and data
+security in cloud.
+Jian Weng received the B.S. and M.S. degrees
+in computer science and engineering from South
+China University of Technology, Guangzhou,
+China, in 2000 and 2004, respectively, and the
+Ph.D. degree in computer science and engineer-
+ing from Shanghai Jiao Tong University, Shang-
+hai, China, in 2008. From 2008 to 2010, he
+held a Postdoctoral position with the School of
+Information Systems, Singapore Management
+University. He is currently a Professor and the
+Dean with the College of Information Science
+and Technology, Jinan University,Guangzhou,China.He has authored or
+coauthored more than 100 papers in cryptography and security con-
+ferences and journals, such as CRYPTO, EUROCRYPT, ASIACRYPT,
+TCC, PKC, TPAMI, TIFS, and TDSC. His research interests include
+public key cryptography, cloud security, and blockchain. He was the PC
+Co-Chairs or PC Member for more than 30 international conferences.
+He also serves as an Associate Editor for the IEEE T RANSACTIONS
+ON V EHICULART ECHNOLOGY.
+	1 Introduction
+	2 Related work
+	2.1 Feature-encryption based schemes
+	2.2 Image-encryption based schemes
+	2.3 Partly supported MSPPIR
+	3 System model and preliminaries
+	3.1 System model
+	3.2 Security model
+	3.3 Preliminaries
+	3.3.1 Overview of JPEG encoding
+	3.3.2 Bag-of-word model
+	3.3.3 Permutation and Bitxor
+	4 Basic scheme
+	4.1 Owner Side
+	4.1.1 Image Key Generation
+	4.1.2 Image Outsourcing
+	4.1.3 User authorization
+	4.2 Authorized user Side
+	4.3 Cloud Side
+	4.3.1 Global feature extraction from encrypted DC
+	4.3.2 Aggregation feature extraction from the encrypted AC
+	4.3.3 Search operation
+	4.3.4 Search operation from multiple image owners
+	4.4 KMC side
+	5 Advanced Scheme
+	5.1 key protection
+	5.1.1 UserKey generation
+	5.1.2 Image position Key encryption
+	5.2 Group Union
+	5.3 Update operation
+	6 Security Analysis
+	6.1 Security with no Collusion
+	6.1.1 Security under COA model
+	6.1.2 Security under KBA model
+	6.2 Security under Collusion
+	6.2.1 The collusion between CS and KMC
+	6.2.2 The collusion between CS and authorized users
+	6.2.3 The collusion between CS, KMC and a separate image owner
+	6.2.4 The collusion between CS and member in the group
+	6.3 The security comparison
+	7 Experiment results
+	7.1 Upload/Update consumption
+	7.2 Retrieval Consumption and Precision
+	7.2.1 single-source
+	7.2.2 multi-source
+	8 Conclusion
+	References
+	Biographies
+	Qi Gu
+	Zhihua Xia 
+	Xingming Sun
+	Jian Weng

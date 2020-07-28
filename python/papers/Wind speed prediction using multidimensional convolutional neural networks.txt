@@ -1,0 +1,846 @@
+Wind speed prediction using multidimensional
+convolutional neural networks
+Kevin Trebing
+Department of Knowledge Engineering
+Maastricht University
+Maastricht, The Netherlands
+k.trebing@student.maastrichtuniversity.nl
+Siamak Mehrkanoon*
+Department of Knowledge Engineering
+Maastricht University
+Maastricht, The Netherlands
+siamak.mehrkanoon@maastrichtuniversity.nl
+Abstract—Accurate wind speed forecasting is of great impor-
+tance for many economic, business and management sectors. This
+paper introduces a new model based on convolutional neural
+networks (CNNs) for wind speed prediction tasks. In partic-
+ular, we show that compared to classical CNN-based models,
+the proposed model is able to better characterise the spatio-
+temporal evolution of the wind data by learning the underlying
+complex input-output relationships from multiple dimensions
+(views) of the input data. The proposed model exploits the
+spatio-temporal multivariate multidimensional historical weather
+data for learning new representations used for wind forecasting.
+We conduct experiments on two real-life weather datasets. The
+datasets are measurements from cities in Denmark and in the
+Netherlands. The proposed model is compared with traditional
+2- and 3-dimensional CNN models, a 2D-CNN model with an
+attention layer and a 2D-CNN model equipped with upscaling
+and depthwise separable convolutions.
+Index Terms—Deep learning, Wind speed prediction, Convolu-
+tional neural networks, Feature learning, Short-term forecasting
+I. INTRODUCTION
+Weather conditions undeniably affect many aspects of life
+in modern societies. Adverse weather conditions and events
+can have both direct and indirect effects on a large number
+of economic and business sectors, such as transport, logistics
+and agriculture. Accurate and timely weather forecasts are
+therefore important for a variety of applications by facilitating
+planning and management in response to weather conditions.
+Weather forecasts are crucial to predict natural disasters such
+as extreme rainfalls, floods, hurricanes and heat waves. With
+wind power gaining importance as a source of renewable
+energy in recent years, wind speed forecasting has become
+an important tool for efficient and adaptive management of
+wind parks [1].
+To date, weather forecasting typically relies on numerical
+weather prediction (NWP) models to solve complex mathe-
+matical equations that simulate the real world’s atmosphere,
+fluid- and thermodynamics as closely as possible [2]. This
+approach requires immense computing power and, even with
+current technological equipment and tools, can take several
+hours to process [3]. Due to their extensive computational
+requirements, the applicability of NWP models is, in practice,
+*corresponding author.
+restricted to more long-term predictions. That is, NWP models
+can be used to predict for instance three hours ahead, however,
+as the time to process this prediction takes longer than three
+hours, the practical utility of this approach becomes limited
+[3]. This results in an important gap for short-term weather
+predictions that could enable short-term planning.
+One way this gap has been addressed so far is through
+data-driven machine learning models that have been able to
+significantly reduce the processing time compared to NWP
+models (e.g. [3], [4]). Machine learning-based models have
+been successfully applied in various application domains [5]–
+[8]. In particular, the literature has witnessed the use of
+different classes of machine learning models for time-series
+prediction tasks. They range from kernel-based models such
+as support vector machines [9], Least squares support vector
+machines [10] as well as deep artificial neural networks-
+based models among others [11]–[13]. Machine learning-based
+models for weather forecasting can potentially reduce the need
+for large computing power relative to the requirements of
+current NWP models. A crucial difference between the two
+approaches to weather forecasting lies in what they base their
+predictions on. Unlike conventional NWP models, data-driven
+approaches often do not make any assumptions about the
+underlying physical factors influencing weather. Instead, they
+use historical weather observations to train a machine learning
+model to map the exogenous input to a target output [14].
+In recent years, convolutional neural networks (CNNs) and
+their variants have emerged as a powerful computational
+architecture for addressing a range of challenging tasks [15],
+[16]. Convolutions are kernel-based operations that employ a
+sliding window approach over a matrix or tensor. The use of
+kernels allows to capture local invariant features and utilising
+weight sharing decreases the number of trainable parameters
+of the network significantly [15].
+The advancement of modern deep learning techniques has
+inspired many researchers to explore the available massive
+amount of weather data. The prediction performance of deep
+learning architectures for the purpose of weather forecasting
+have been studied in [17]. The authors in [18] combined pre-
+dictive models with a deep neural network to model the joint
+statistics of a set of weather-related variables. In this work,
+we propose a novel convolutional neural network architecture
+ar
+X
+iv
+:2
+00
+7.
+12
+56
+7v
+1 
+ [
+cs
+.L
+G
+] 
+ 4
+ J
+ul
+ 2
+02
+0
+to model the underlying complex nonlinear dynamics of wind
+speed in multiple Danish and Dutch cities over the course
+of up to 24 hours. This is achieved by reshaping the data
+in a way that allows the use of convolutions over multiple
+input dimensions and fusing the obtained feature maps per
+dimension. We show that our model is able to predict multiple
+steps ahead with smaller error in comparison to the other
+examined models.
+This paper is organised as follows. A brief overview of
+related research works for weather forecasting is given in
+section II. The proposed deep CNN-based architecture for
+wind speed forecasting together with the models that we
+used for comparison are presented in section III. Section IV
+describes the conducted experiments and the obtained results.
+A discussion on models performance is given in section V.
+We end with some conclusive remarks in section VI.
+II. RELATED WORK
+A number of different machine learning models have been
+proposed for weather forecasting. One of the most widely
+adopted approaches has seen Multilayer Perceptron (MLP) as
+main model for this purpose [1], [19]–[21]. An MLP is a
+rather simple neural network that consists of at least three
+layers: an input layer, a hidden layer and an output layer.
+Although MLPs were shown to be useful for a large range
+of applications, recently more sophisticated models such as
+convolutional neural networks have been applied to more
+challenging and complex tasks. Initially, CNNs have been
+used for image applications due to their aptness at capturing
+spatial relations [15]. However, since then, CNNs have also
+been successfully applied to time-series tasks. For instance, the
+authors in [22] utilised a CNN-based model to achieve high
+classification accuracy for a time-series task for detecting hu-
+man transportation mode. The input to their model consists of
+1-D data because they only have access to one sensor reading.
+Weather data, in contrast, often has multiple sensor readings
+resulting in multi-dimensional data, thus presenting a more
+complex time-series task that requires a more sophisticated
+model.
+For weather prediction tasks, convolutions are often used in
+conjunction with long short-term memory (LSTM). An LSTM
+is a particular type of recurrent neural network which, un-
+like standard feedforward neural networks, includes feedback
+connections which provide the network with some kind of
+memory of previous signals, making it adept at learning from
+experience and well-suited for predictions using time series
+data [23]. Taking advantage of this, the authors in their seminal
+work in [24] were the first to combine convolutions with
+an LSTM to create the ConvLSTM model for precipitation
+forecasting. An important challenge in machine learning-based
+precipitation forecasting is that the rain maps that are typically
+used as input are high-dimensional data which requires the
+model to make efficient use of the available information.
+Extending on the idea of [24], the authors in [25] therefore
+stacked multiple convolutional LSTMs while also adding extra
+memory connections in order to enable efficient flow of spatial
+information, resulting in their PredRNN model.
+In the field of precipitation forecasting, the authors in [3]
+employed a U-net architecture [26] to predict rainfall one hour
+ahead using the last hour of rain maps. A U-net is a type
+of CNN that employs an encoder-decoder structure which at
+first applies several iterations of downsampling followed by
+several iterations of upsampling. In addition, the upsampling
+integrates the output from previous layers through so-called
+skip-connections. This particular architecture combining up-
+and downsampling enables a synergistic learning of both low-
+and high-level features. An interesting aspect of [3] is that they
+predict four discrete classes of rainfall based on millimetres
+of rain per hour, rather than predicting exact values of rainfall
+as has predominantly been done in previous models. This
+classification approach has recently been extended by [4] who
+map their output onto 512 bins, thereby resulting in a much
+finer resolution.
+A frequently used baseline in data-driven weather forecast-
+ing is the ‘Naı̈ve Predictor’ which predicts for time t + ∆t
+the same value as at time t [2]. This method is also called
+‘Persistence’ because it is based on the assumption that the
+weather persists from one time window to the next. Although
+this prediction method is rather simple, it proved to be very
+accurate for very-short and short forecasts as described by [2].
+In the next section we describe the models that we use and
+explain our proposed model architecture that was applied to
+real-life data for the wind speed prediction task.
+III. METHODS
+A. Proposed multidimensional model
+The present study builds upon and extends the work of [14]
+who introduced different CNN architectures, including 1-D,
+2-D and 3-D convolutions, to accurately predict wind speed
+in the next 6 to 12 hours. In particular, for our new model,
+we apply depthwise-separable convolutions (DSCs) [27] to
+all three input tensor dimensions (channel, width, height).
+In this way, the kernels of the three convolutions go over
+the height-and-width, channel-and-height and channel-and-
+width dimensions, respectively. For the studied wind speed
+prediction task, this corresponds to time steps-features, cities-
+features, cities-time steps. The output of the three DSCs are
+then concatenated and fed into a fully connected layer. Thanks
+to the proposed architecture, the underlying information within
+each view of the input are learnt jointly in an end-to-end
+fashion.
+Depthwise-separable convolutions have their convolution
+operation split up into two convolutions: a depthwise and a
+pointwise convolution. The advantage of using DSCs over nor-
+mal convolutions is that they require a significant amount less
+parameters while keeping a similar accuracy [28]. Here, we
+train our model to predict the wind speed multiple steps ahead.
+As the prediction time ahead increases, the prediction task
+becomes increasingly complex for the model. After applying
+DSCs to all three dimensions we flatten the resulting feature
+maps to feed it into a fully connected layer followed by the
+output layer. In order to be able to apply a convolution to other
+dimensions, the input tensor needs to be permuted. A visual
+interpretation of this approach can be found in Fig. 1. In our
+approach we set the number of feature maps per channel to
+16 and the number of hidden neurons of the fully connected
+layer to 128. Following every pointwise convolution we apply
+a batch normalisation. A rectified linear (ReLu) activation
+function [29] is used after batch normalisation as well as after
+the dense layer.
+B. Alternative convolutional models
+We have compared the performance of our proposed model
+with four alternative CNN-based models. This includes the 2D
+and 3D convolutional models from [14]. A 2D convolutional
+approach using attention [30] and a 2D convolution with a
+transposed convolution of the original input followed by a
+double convolution as it is used in a U-net structure [26], but
+instead of normal convolutions we used depthwise-separable
+convolutions. A transposed convolution is used for upscaling
+the input dimensions. It has a similar effect than upsampling,
+but with a transposed convolution the network can adjust
+the kernels for the upsampling as well, allowing it to better
+adapt to the underlying data. The models with their respective
+trainable parameters can be found in Table I. The amount of
+parameters differed for the two datasets, because their input
+dimensions were of different size.
+TABLE I: The number of parameters of the five models that
+were compared in the experiments.
+Model # Feature maps Parameters
+Denmark Netherlands
+2D 32 46,115 112,167
+2D + Attention 32 47,059 113,367
+2D + Upscaling 32 27,974 77,568
+3D 10 54,749 200,929
+Multidimensional 16 37,258 102,832
+It can be seen from Table I that there is a large difference
+between the number of parameters in the models of the Dutch
+and Danish dataset. This difference arises from different input
+sizes of the dataset. The Danish dataset has an input shape of
+5×4×4 and the Dutch dataset has an input shape of 7×6×6
+(see section IV for a more detailed description of the datasets).
+Since we are flattening the output of the convolutional layers
+and feed it to a dense layer, the number of parameters increase
+dramatically. The architectures of the alternative models used
+for comparison are shown in Fig. 2.
+The number of feature maps for the 2D and 3D CNN-based
+models are set to 32 and 10, respectively. For our proposed
+model the number of feature maps is set to 16 for every
+dimension. We train the models for a maximum of 150 epochs
+with a batch size of 64. An early stopping is used to track the
+validation error and if it does not decrease after 20 epochs
+the training will stop. We use the Adam optimiser [31] with
+default values and a learning rate of 0.001 for updating the
+model parameters. The code of our proposed model and the
+other trained models along with the datasets can be found on
+Github1.
+IV. EXPERIMENTS
+We evaluate our model together with the other discussed
+four models on two different real-life datasets from Denmark
+and the Netherlands. The cities from which the weather mea-
+surements have been recorded and used in our experiments are
+shown in Fig. 3. The performance of the models is measured
+by their mean absolute error (MAE) and mean squared error
+(MSE) on the test set. MAE calculates the mean of the
+difference between the predicted values and true values and is
+calculated as follows:
+MAE =
+∑n
+i=1 |yi − ŷi|
+n
+, (1)
+where n is the number of samples and yi and ŷi is the true
+and predicted value, respectively. MSE calculates the mean
+of the squared difference between the predicted values and
+the true values. As a result, larger differences between y and
+ŷ contribute more to the error term than smaller differences.
+MSE is calculated as follows:
+MSE =
+∑n
+i=1(yi − ŷi)
+2
+n
+. (2)
+MAE was chosen to be able to quantitatively compare the
+results with those in [14] and MSE was chosen to have an
+indicator how reasonable the predictions of the models are.
+In what follows, the two used datasets are described in more
+detail.
+A. Dataset Denmark
+This is the same dataset as used in [14] and available
+online2. It contains hourly measurements of temperature, pres-
+sure, wind speed and wind direction of five cities in Denmark
+(see Fig. 3a) from 2000-2010. The dataset is split into training
+and validation (years 2000-2009) and test set (year 2010). The
+dataset is normalised using a min-max scaler that was trained
+on the training set. Furthermore, the dataset is arranged in
+a way that a sample contains the last four measurements in
+all the five cities and the target is the wind speed in three of
+the cities (Esbjerg, Odense and Roskilde). Therefore, the input
+dimensions have the shape C × T × F where C = #cities,
+T = #timesteps and F = #features (resulting in a shape
+of size 5 × 4 × 4). Those are the three input dimensions
+of the left-most cube in Fig. 1. We trained all five models
+multiple times to predict the wind speed multiple steps ahead
+which corresponds to 6, 12, 18 and 24 hours ahead in the
+Danish dataset. Additionally, we created a persistence model
+as baseline that uses the last wind speed measurement of each
+city as the prediction.
+The average of the obtained MAEs and MSEs, correspond-
+ing to different models, over three target cities in Denmark are
+tabulated in Table II. The best MAE and MSE are underlined
+for each tested prediction time in Table II. Our model performs
+1https://github.com/HansBambel/multidim conv
+2https://sites.google.com/view/siamak-mehrkanoon/code-data
+https://github.com/HansBambel/multidim_conv
+https://sites.google.com/view/siamak-mehrkanoon/code-data
+Fig. 1: Using depthwise-separable convolutions to go over different dimensions of the input tensor. The resulting three tensors
+are concatenated along the city-dimension and then flattened and fed into a dense layer with 128 hidden neurons. Lastly, a
+dense layer with three neurons calculates the final output.
+best or second best for all of the tested prediction time. In
+particular, one can observe that our proposed multidimensional
+architecture has the smallest overall MAE in the 6h and 24h
+prediction and the smallest MSE in the 6h and 24h prediction.
+The error increases in all models the further ahead into the
+future the model needs to predict. This makes sense because
+values in the near future are less likely to change than those
+further away, therefore they are easier to predict. Furthermore,
+one can note that the error increases less in the proposed
+multidimensional model than in the other models. This is an
+indicator that our model has better generalisation capabilities
+and can adapt better to different kinds of data. The baseline
+model is outperformed by a large margin in all step ahead
+predictions.
+In Fig. 4 the MAE of the models for each of the three
+target cities in all four prediction times are shown. The plots
+show that our model has, for almost all time steps, the lowest
+or second lowest error in each city. The differences in the
+performance of the models get larger the further they have
+to predict into the future. To illustrate further how well the
+models are performing across all time steps we calculated the
+mean of the MAEs for each city across the time steps (see
+Fig. 5). We can observe that our model is performing best for
+each of the three cities.
+B. Dataset Netherlands
+The second dataset for this study was acquired from
+the Royal Netherlands Meteorological Institute. It contains
+hourly weather measurements from 7 cities in the Netherlands
+(Fig. 3b) from January 1, 2011 until March 29, 2020 resulting
+in 81.000 data points. The measured weather features are wind
+speed, wind direction, temperature, dew point, air pressure and
+rain amount. We split the dataset into training (January 2011
+- December 2018) and testing (January 2019 - March 2020).
+The arrangement of the dataset is the same as the Denmark
+dataset: C×T ×F . We choose to use the last 6 measurements
+as input and predict the wind speed 1-, 2-, 3- and 4-steps
+ahead (corresponding to 1h, 2h, 3h and 4h ahead, respectively),
+which results in an input tensor of shape 7×6×6. Additionally,
+we create a persistence baseline by predicting the last given
+input values.
+The performance of the models trained on this dataset can
+be found in Table III. From Table III, one can observe that our
+model has the best performance in the 2h and 3h prediction
+when looking at the MAE and outperforms the other models
+in the 2h, 3h and 4h ahead predictions when using MSE. The
+baseline is outperformed by every model by a big margin.
+For this dataset we also calculated the mean of the MAEs
+for each individual city across the four different time steps.
+The results are shown in Fig. 6. It can be seen that our
+multidimensional model performs best or second best in five
+out of the seven cities. An example of a 1 hour and 4 hour
+prediction from our model is shown in Fig. 7. For this, we used
+a subset of the data and plotted the wind speed prediction for
+the cities of Eindhoven and Maastricht at each time step. Note
+that the MAE reported is for the whole test set. The Fig. 7
+shows that 1-hour ahead prediction of our model more closely
+follows the real measurements compared to that of the 4-hours
+ahead predictions.
+V. DISCUSSION
+In this study, we propose a new convolution neural network
+for short-term wind speed predictions using weather datasets
+from Denmark and the Netherlands. Specifically, our new
+model applies depthwise-separable convolutions to three di-
+mensions of the input tensor. To assess the model performance,
+we compare it to four previously described CNNs, including
+a 2D model, a 3D model, a 2D model with attention and a 2D
+model with transposed convolution.
+Using MAE and MSE as performance indicators, the anal-
+ysis of our experiments shows that our model outperforms
+previous prediction approaches for most time steps on both of
+the tested datasets. We hypothesise that these performance im-
+provements can be attributed to our novel approach of applying
+convolutions separately over different input dimensions, rather
+than applying them to only the height and width dimensions
+as done by standard convolutional approaches. The proposed
+architecture enables the network to more efficiently exploit
+information from all dimensions.
+(a)
+(b)
+(c)
+(d)
+Fig. 2: The model architecture of the models that were tested. (a) 2D convolutional neural network. (b) 2D convolutional neural
+network with attention. (c) 2D convolutional neural network with transposed convolution (upscaling). (d) 3D convolutional
+neural network. The input dimensions and number of output neurons are adjusted to the dataset. Here, the models for the DK
+dataset are shown.
+(a) Danish weather stations (b) Dutch weather stations
+Fig. 3: The cities where the wind data was taken: (a) Aalborg, Aarhus, Esbjerg, Odense and Roskilde. (b) Schiphol, De Bilt,
+Leeuwarden, Eelde, Rotterdam, Eindhoven, Maastricht.
+TABLE II: The average MAEs and MSEs of different models over target cities in Denmark dataset.
+Model MAE MSE
+6h 12h 18h 24h 6h 12h 18h 24h
+Persistence 1.649 2.210 2.309 2.313 4.608 7.929 8.702 8.812
+2D 1.304 1.746 1.930 2.004 2.824 5.088 6.120 6.610
+2D+Attention 1.313 1.715 1.905 1.950 2.885 4.896 5.933 6.201
+2D+Upscaling 1.307 1.723 1.858 1.985 2.826 4.931 5.639 6.474
+3D 1.311 1.677 1.908 1.957 2.855 4.595 5.958 6.238
+Multidimensional 1.302 1.706 1.873 1.925 2.804 4.779 5.773 6.066
+TABLE III: The average MAEs and MSEs of different models over target cities in the Netherlands dataset.
+Model MAE MSE
+1h 2h 3h 4h 1h 2h 3h 4h
+Persistence 9.55 11.34 12.90 14.37 183.61 246.95 310.38 375.36
+2D 8.11 9.17 10.15 11.12 116.89 149.01 181.78 218.49
+2D+Attention 8.08 9.10 10.11 11.00 115.96 147.75 180.66 213.23
+2D+Upscaling 8.16 9.07 10.14 10.85 117.80 147.21 182.44 208.96
+3D 8.17 9.26 10.15 10.93 118.35 151.51 181.35 211.19
+Multidimensional 8.12 9.05 9.95 10.94 116.78 144.51 174.07 208.73
+Our findings of the 2D and 3D models are consistent with
+the results of [14]. They showed that a 3D-convolutional
+approach outperforms a 2D-convolutional approach on the
+Danish dataset. Likewise, in our study, the 3D-convolution
+model performed better than the regular 2D-convolution model
+for all time steps on the Danish dataset except for the 6-
+hour prediction and thus, overall, performed better than the
+2D-convolution model (see Table II). Interestingly, the 2D-
+convolutional models with attention and upscaling are able to
+achieve better results than the regular 2D- and 3D-models.
+We did not find the same high performance of the 3D-
+convolutional model for the Dutch dataset when looking at
+different time steps. Indeed, when disregarding the baseline
+model, the 3D model showed the worst or second worst MAE
+and MSE for most time steps as can be seen in Table III.
+Interestingly, the 3D model performs well when comparing
+the mean of the time steps for each individual city (see
+Fig. 5 and 6). Our multidimensional model performed better
+than the other models in the later time step prediction when
+considering MSE as performance indicator. As previously
+mentioned, a smaller MSE is an indicator of how reasonable
+the model predicts. Overall, the high performance of our model
+generalises better across time steps and the two used datasets
+(see Fig. 5 and 6), largely providing better predictions than
+previously described standard based convolutional approaches.
+An important limitation of our study concerns the compa-
+rability of the five models. We used number of parameters as
+main indicator for model comparability, rather than optimising
+every model individually which was beyond the scope of the
+present study. Thus, we sought to keep the number of param-
+eters approximately similar in all models without modifying
+too many other configurations. To this end, we set the number
+of feature maps for the three 2D models to 32, for the 3D
+model to 10, and to 16 per dimension in our model (see Table
+I). The number of feature maps for the different models was
+based on the input dimensions of the Danish dataset and were
+subsequently also applied to the Dutch dataset that has larger
+input dimensions than the Danish dataset. This explains the
+greater range in number of parameters of the models when
+applied to the Dutch dataset (77,568 - 200,929 parameters)
+Esbjerg Odense Roskilde
+1.24
+1.26
+1.28
+1.30
+1.32
+1.34
+1.36
+M
+AE
+2D + Att
+2D
+3D
+2D + Upscaling
+Multidimensional
+(a) 6 hours ahead
+Esbjerg Odense Roskilde
+1.625
+1.650
+1.675
+1.700
+1.725
+1.750
+1.775
+M
+AE
+2D + Att
+2D
+3D
+2D + Upscaling
+Multidimensional
+(b) 12 hours ahead
+Esbjerg Odense Roskilde
+1.84
+1.86
+1.88
+1.90
+1.92
+1.94
+1.96
+M
+AE
+2D + Att
+2D
+3D
+2D + Upscaling
+Multidimensional
+(c) 18 hours ahead
+Esbjerg Odense Roskilde
+1.900
+1.925
+1.950
+1.975
+2.000
+2.025
+2.050
+M
+AE
+2D + Att
+2D
+3D
+2D + Upscaling
+Multidimensional
+(d) 24 hours ahead
+Fig. 4: The models performance for different time steps ahead for each cities forecast of the Denmark dataset.
+Esbjerg Odense Roskilde
+1.66
+1.68
+1.70
+1.72
+1.74
+1.76
+1.78
+Av
+er
+ag
+e 
+M
+AE
+ o
+ve
+r m
+ul
+tip
+le
+ s
+te
+ps
+Denmark
+2D + Att
+2D
+3D
+2D + Upscaling
+Multidimensional
+Fig. 5: Mean of the models performance across different time
+steps for each city in the Danish dataset.
+compared to the Danish dataset (27,974 - 54,749 parameters),
+as shown in Table I. We also trained the 2D models with less
+feature maps (10 feature maps, as in [14]), but observed no
+performance increase.
+VI. CONCLUSION AND FUTURE WORK
+In this paper a new multidimensional CNN based model
+is introduced for wind speed prediction. We showed that
+applying convolutions to multiple dimensions helps to capture
+more modalities of the data. Using real weather datasets we
+tested our approach against conventional 2D- and 3D-CNNs
+and showed that our proposed model is able to more accu-
+Schip
+hol De B
+ilt
+Leeu
+ward
+en Eelde
+Rotte
+rdam
+Eindh
+oven
+Maas
+trich
+t
+8.0
+8.5
+9.0
+9.5
+10.0
+10.5
+11.0
+Av
+er
+ag
+e 
+M
+AE
+ o
+ve
+r m
+ul
+tip
+le
+ s
+te
+ps
+Netherlands
+2D + Att
+2D
+3D
+2D + Transposed Conv
+Multidimensional
+Fig. 6: Mean of the models performance across different time
+steps for each city in the Dutch dataset.
+rately predict wind speeds multiple steps ahead. Furthermore,
+our proposed multidimensional model performed best across
+different time steps compared to the other tested models.
+REFERENCES
+[1] G. Li and J. Shi, “On comparing three artificial neural networks for wind
+speed forecasting,” Applied Energy, vol. 87, no. 7, pp. 2313–2320, 2010.
+[2] S. S. Soman, H. Zareipour, O. Malik, and P. Mandal, “A review of wind
+power and wind speed forecasting methods with different time horizons,”
+in North American Power Symposium 2010. IEEE, 2010, pp. 1–8.
+[3] S. Agrawal, L. Barrington, C. Bromberg, J. Burge, C. Gazen, and
+J. Hickey, “Machine learning for precipitation nowcasting from radar
+images,” arXiv preprint arXiv:1912.12132, 2019.
+0 50 100 150 200 250
+Time index
+0
+20
+40
+60
+80
+100
+120
+W
+in
+d 
+sp
+ee
+d 
+in
+ 0
+.1
+m
+/s 1h prediction: Eindhoven, MAE: 7.94
+Real
+Multidimensional
+(a)
+0 50 100 150 200 250
+Time index
+20
+40
+60
+80
+100
+120
+W
+in
+d 
+sp
+ee
+d 
+in
+ 0
+.1
+m
+/s 1h prediction: Maastricht, MAE: 8.21
+Real
+Multidimensional
+(b)
+0 50 100 150 200 250
+Time index
+0
+20
+40
+60
+80
+100
+120
+W
+in
+d 
+sp
+ee
+d 
+in
+ 0
+.1
+m
+/s 4h prediction: Eindhoven, MAE: 10.25
+Real
+Multidimensional
+(c)
+0 50 100 150 200 250
+Time index
+20
+40
+60
+80
+100
+120
+W
+in
+d 
+sp
+ee
+d 
+in
+ 0
+.1
+m
+/s 4h prediction: Maastricht, MAE: 10.39
+Real
+Multidimensional
+(d)
+Fig. 7: Comparison of predictions using our model and the real value. It is visible that the 1 hour predictions (a) and (b) follow
+the trend more closely than the 4 hour predictions (c) and (d).
+[4] C. K. Sønderby, L. Espeholt, J. Heek, M. Dehghani, A. Oliver,
+T. Salimans, S. Agrawal, J. Hickey, and N. Kalchbrenner, “Metnet:
+A neural weather model for precipitation forecasting,” arXiv preprint
+arXiv:2003.12140, 2020.
+[5] S. Mehrkanoon, S. Mehrkanoon, and J. A. Suykens, “Parameter esti-
+mation of delay differential equations: an integration-free ls-svm ap-
+proach,” Communications in Nonlinear Science and Numerical Simula-
+tion, vol. 19, no. 4, pp. 830–841, 2014.
+[6] S. Mehrkanoon, “Cross-domain neural-kernel networks,” Pattern Recog-
+nition Letters, vol. 125, pp. 474–480, 2019.
+[7] S. Mehrkanoon and J. A. Suykens, “Deep hybrid neural-kernel networks
+using random fourier features,” Neurocomputing, vol. 298, pp. 46–54,
+2018.
+[8] ——, “Regularized semipaired kernel CCA for domain adaptation,”
+IEEE Transactions on Neural Networks and Learning Systems, vol. 29,
+no. 7, pp. 3199–3213, 2017.
+[9] N. I. Sapankevych and R. Sankar, “Time series prediction using support
+vector machines: a survey,” IEEE Computational Intelligence Magazine,
+vol. 4, no. 2, pp. 24–38, 2009.
+[10] T. Van Gestel, J. A. Suykens, D.-E. Baestaens, A. Lambrechts, G. Lanck-
+riet, B. Vandaele, B. De Moor, and J. Vandewalle, “Financial time
+series prediction using least squares support vector machines within the
+evidence framework,” IEEE Transactions on neural networks, vol. 12,
+no. 4, pp. 809–821, 2001.
+[11] S. Scher, “Toward data-driven weather and climate forecasting: Ap-
+proximating a simple general circulation model with deep learning,”
+Geophysical Research Letters, vol. 45, no. 22, pp. 12–616, 2018.
+[12] M. Hossain, B. Rekabdar, S. J. Louis, and S. Dascalu, “Forecasting the
+weather of nevada: A deep learning approach,” in 2015 international
+joint conference on neural networks (IJCNN). IEEE, 2015, pp. 1–6.
+[13] E. R. Rodrigues, I. Oliveira, R. Cunha, and M. Netto, “Deepdownscale:
+a deep learning strategy for high-resolution weather forecast,” in 2018
+IEEE 14th International Conference on e-Science (e-Science). IEEE,
+2018, pp. 415–422.
+[14] S. Mehrkanoon, “Deep shared representation learning for weather ele-
+ments forecasting,” Knowledge-Based Systems, vol. 179, pp. 120–128,
+2019.
+[15] A. Krizhevsky, I. Sutskever, and G. E. Hinton, “Imagenet classification
+with deep convolutional neural networks,” in Advances in neural infor-
+mation processing systems, 2012, pp. 1097–1105.
+[16] S. Mehrkanoon, “Deep neural-kernel blocks,” Neural Networks, vol. 116,
+pp. 46–55, 2019.
+[17] A. G. Salman, B. Kanigoro, and Y. Heryadi, “Weather forecasting using
+deep learning techniques,” in 2015 international conference on advanced
+computer science and information systems (ICACSIS). IEEE, 2015, pp.
+281–285.
+[18] A. Grover, A. Kapoor, and E. Horvitz, “A deep hybrid model for weather
+forecasting,” in Proceedings of the 21th ACM SIGKDD International
+Conference on Knowledge Discovery and Data Mining, 2015, pp. 379–
+386.
+[19] E. Cadenas and W. Rivera, “Short term wind speed forecasting in la
+venta, oaxaca, méxico, using artificial neural networks,” Renewable
+Energy, vol. 34, no. 1, pp. 274–278, 2009.
+[20] M. Monfared, H. Rastegar, and H. M. Kojabadi, “A new strategy for
+wind speed forecasting using artificial intelligent methods,” Renewable
+energy, vol. 34, no. 3, pp. 845–848, 2009.
+[21] K. Rohrig and B. Lange, “Application of wind power prediction tools
+for power system operations,” in 2006 IEEE Power Engineering Society
+General Meeting. IEEE, 2006, pp. 5–pp.
+[22] X. Liang, Y. Zhang, G. Wang, and S. Xu, “A deep learning model for
+transportation mode detection based on smartphone sensing data,” IEEE
+Transactions on Intelligent Transportation Systems, 2019.
+[23] S. Hochreiter and J. Schmidhuber, “Long short-term memory,” Neural
+computation, vol. 9, no. 8, pp. 1735–1780, 1997.
+[24] S. Xingjian, Z. Chen, H. Wang, D.-Y. Yeung, W.-K. Wong, and W.-
+c. Woo, “Convolutional lstm network: A machine learning approach for
+precipitation nowcasting,” in Advances in neural information processing
+systems, 2015, pp. 802–810.
+[25] Y. Wang, M. Long, J. Wang, Z. Gao, and S. Y. Philip, “Predrnn:
+Recurrent neural networks for predictive learning using spatiotemporal
+lstms,” in Advances in Neural Information Processing Systems, 2017,
+pp. 879–888.
+[26] O. Ronneberger, P. Fischer, and T. Brox, “U-net: Convolutional networks
+for biomedical image segmentation,” in International Conference on
+Medical image computing and computer-assisted intervention. Springer,
+2015, pp. 234–241.
+[27] F. Chollet, “Xception: Deep learning with depthwise separable convolu-
+tions,” in Proceedings of the IEEE conference on computer vision and
+pattern recognition, 2017, pp. 1251–1258.
+[28] V. J. Lawhern, A. J. Solon, N. R. Waytowich, S. M. Gordon, C. P. Hung,
+and B. J. Lance, “Eegnet: a compact convolutional neural network for
+eeg-based brain–computer interfaces,” Journal of neural engineering,
+vol. 15, no. 5, p. 056013, 2018.
+[29] V. Nair and G. E. Hinton, “Rectified linear units improve restricted boltz-
+mann machines,” in Proceedings of the 27th international conference on
+machine learning (ICML-10), 2010, pp. 807–814.
+[30] I. Bello, B. Zoph, A. Vaswani, J. Shlens, and Q. V. Le, “Attention
+augmented convolutional networks,” in Proceedings of the IEEE Inter-
+national Conference on Computer Vision, 2019, pp. 3286–3295.
+[31] D. P. Kingma and J. Ba, “Adam: A method for stochastic optimization,”
+arXiv preprint arXiv:1412.6980, 2014.
+	I Introduction
+	II Related Work
+	III Methods
+	III-A Proposed multidimensional model
+	III-B Alternative convolutional models
+	IV Experiments
+	IV-A Dataset Denmark
+	IV-B Dataset Netherlands
+	V Discussion
+	VI Conclusion and Future Work
+	References

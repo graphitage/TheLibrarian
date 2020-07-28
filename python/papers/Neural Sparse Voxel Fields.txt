@@ -1,0 +1,965 @@
+Neural Sparse Voxel Fields
+Lingjie Liu†∗, Jiatao Gu‡∗, Kyaw Zaw Lin�, Tat-Seng Chua�, Christian Theobalt†
+†Max Planck Institute for Informatics
+‡Facebook AI Research �National University of Singapore
+†{lliu,theobalt}@mpi-inf.mpg.de
+‡jgu@fb.com �kyawzl@comp.nus.edu.sg
+�dcscts@nus.edu.sg
+Abstract
+Photo-realistic free-viewpoint rendering of real-world scenes using classical com-
+puter graphics techniques is challenging, because it requires the difficult step of
+capturing detailed appearance and geometry models. Recent studies have demon-
+strated promising results by learning scene representations that implicitly encode
+both geometry and appearance without 3D supervision. However, existing ap-
+proaches in practice often show blurry renderings caused by the limited network
+capacity or the difficulty in finding accurate intersections of camera rays with the
+scene geometry. Synthesizing high-resolution imagery from these representations
+often requires time-consuming optical ray marching. In this work, we introduce
+Neural Sparse Voxel Fields (NSVF), a new neural scene representation for fast
+and high-quality free-viewpoint rendering. NSVF defines a set of voxel-bounded
+implicit fields organized in a sparse voxel octree to model local properties in each
+cell. We progressively learn the underlying voxel structures with a diffentiable
+ray-marching operation from only a set of posed RGB images. With the sparse
+voxel octree structure, rendering novel views can be accelerated by skipping the
+voxels containing no relevant scene content. Our method is over 10 times faster
+than the state-of-the-art (namely, NeRF (Mildenhall et al., 2020)) at inference
+time while achieving higher quality results. Furthermore, by utilizing an explicit
+sparse voxel representation, our method can easily be applied to scene editing
+and scene composition. We also demonstrate several challenging tasks, including
+multi-scene learning, free-viewpoint rendering of a moving human, and large-scale
+scene rendering.
+1 Introduction
+Realistic rendering in computer graphics has a wide range of applications including mixed reality,
+visual effects, visualization, and even training data generation in computer vision and robot navigation.
+Photo-realistically rendering a real world scene from a free viewpoint is a tremendous challenge,
+because it is often infeasible to acquire high-quality scene geometry and material models, as done in
+high-budget visual effects productions. Researchers therefore have developed image-based rendering
+(IBR) approaches that combine vision-based scene geometry modeling with image-based view
+interpolation (Shum and Kang, 2000; Zhang and Chen, 2004; Szeliski, 2010). Despite their significant
+progress, IBR approaches still have sub-optimal rendering quality and limited control over the results,
+and are often scene-type specific. To overcome these limitations, recent works have employed deep
+neural networks to implicitly learn scene representations encapsulating both geometry and appearance
+from 2D observations with or without a coarse geometry. Such neural representations are commonly
+combined with 3D geometric models, such as voxel grids (Yan et al., 2016; Sitzmann et al., 2019a;
+∗Equal contribution.
+Preprint. Under review.
+ar
+X
+iv
+:2
+00
+7.
+11
+57
+1v
+1 
+ [
+cs
+.C
+V
+] 
+ 2
+2 
+Ju
+l 
+20
+20
+Lombardi et al., 2019), textured meshes (Thies et al., 2019; Kim et al., 2018; Liu et al., 2019a,
+2020), multi-plane images (Zhou et al., 2018; Flynn et al., 2019; Mildenhall et al., 2019), point
+clouds (Meshry et al., 2019; Aliev et al., 2019), and implicit functions (Sitzmann et al., 2019b;
+Mildenhall et al., 2020).
+Unlike most explicit geometric representations, neural implicit functions are smooth, continuous,
+and can - in theory - achieve high spatial resolution. However, existing approaches in practice often
+show blurry renderings caused by the limited network capacity or the difficulty in finding accurate
+intersections of camera rays with the scene geometry. Synthesizing high-resolution imagery from
+these representations often requires time-consuming optical ray marching. Furthermore, editing or
+re-compositing 3D scene models with these neural representations is not straightforward.
+In this paper, we propose Neural Sparse Voxel Fields (NSVF), a new implicit representation for
+fast and high-quality free-viewpoint rendering. Instead of modeling the entire space with a single
+implicit function, NSVF consists of a set of voxel-bounded implicit fields organized in a sparse
+voxel octree. Specifically, we assign a voxel embedding at each vertex of the voxel, and obtain the
+representation of a query point inside the voxel by aggregration the voxel embeddings at the eight
+vertices of the corresponding voxel. This is further passed through a multilayer perceptron network
+(MLP) to predict geometry and appearance of that query point. Our method can progressively learn
+NSVF from coarse to fine with a differentiable ray-marching operation from only a set of posed
+2D images of a scene. During training, the sparse voxels containing no scene information will be
+pruned to allow the network to focus on the implicit functions learning for volume regions with scene
+contents. With the sparse voxels, rendering at inference time can be greatly accelerated by skipping
+empty voxels without scene content.
+Our method is over 10 times faster than the state-of-the-art (namely, NeRF (Mildenhall et al., 2020))
+at inference time while achieving higher quality results. We extensively evaluate our method on a
+variety of challenging tasks including multi-object learning, free-viewpoint rendering of dynamic and
+indoor scenes. Our method can be used to edit and composite scenes. To summarize, our technical
+contributions are:
+• We present NSVF that consists of a set of voxel-bounded implicit fields, where for each voxel,
+voxel embeddings are learned to encode local properties for high-quality rendering;
+• NSVF utilizes the sparse voxel structure to achieve efficient rendering;
+• We introduce a progressive training strategy that efficiently learns the underlying sparse voxel
+structure with a differentiable ray-marching operation from a set of posed 2D images in an
+end-to-end manner.
+2 Background
+Existing neural scene representations and neural rendering methods commonly aim to learn a function
+that maps a spatial location to a feature representation that implicitly describes the local geometry
+and appearance of the scene, where novel views of that scene can be synthesized using rendering
+techniques in computer graphics. To this end, the rendering process is formulated in a differentiable
+way so that the neural network encoding the scene representation can be trained by minimizing the
+difference between the renderings and 2D images of the scene. In this section, we describe existing
+approaches to representation and rendering using implicit fields and their limitations.
+2.1 Neural Rendering with Implicit Fields
+Let us represent a scene as an implicit function Fθ: (p,v)→ (c, ω), where θ are parameters of an
+underlying neural network. This funciton describes the scene color c and its probability density ω at
+spatial location p and ray direction v. Given a pin-hole camera at position p0 ∈ R3, we render a 2D
+image of size H ×W by shooting rays from the camera to the 3D scene. We thus evaluate a volume
+rendering integral to compute the color of camera ray p(z) = p0 + z · v as:
+C(p0,v) =
+∫ +∞
+0
+ω(p(z)) · c(p(z),v)dz, where
+∫ +∞
+0
+ω(p(z))dz = 1 (1)
+2
+Note that, to encourage the scene representation to be multiview consistent, ω is restricted as a
+function of only p(z) while c takes both p(z) and v as inputs to model view-dependent color.
+Different rendering strategies to evaluate this integral are feasible.
+Surface Rendering. Surface-based methods (Sitzmann et al., 2019b; Liu et al., 2019b; Niemeyer
+et al., 2019) assume ω(p(z)) to be the Dirac function δ(p(z)−p(z∗)) where p(z∗) is the intersection
+of the camera ray with the scene geometry.
+Volume Rendering. Volume-based methods (Lombardi et al., 2019; Mildenhall et al., 2020) esti-
+mate the integral C(p0,v) in Eq. 1 by densely sampling points on each camera ray and accumulating
+the colors and densities of the sampled points into a 2D image. For example, the state-of-the-art
+method NeRF (Mildenhall et al., 2020) estimates C(p0,v) as:
+C(p0,v) ≈
+N∑
+i=1
+
+i−1∏
+j=1
+α(zj ,∆j)
+
+ · (1− α(zi,∆i)) · c(p(zi),v) (2)
+where α(zi,∆i) = exp(−σ(p(zi) ·∆i), and ∆i = zi+1 − zi. {c(p(zi),v)}Ni=1 and {σ(p(zi))}
+N
+i=1
+are the colors and the volume densities of the sampled points.
+2.2 Limitations of Existing Methods
+For surface rendering, it is critically important that an accurate surface is found for learnt color
+to be multi-view consistent, which is hard and detrimental to training convergence so that induces
+blur in the renderings. Volume rendering methods need to sample a high number of points along
+the rays for color accumulation to achieve high quality rendering. However, evaluation of each
+sample points along the ray as NeRF does is inefficient. For instance, it takes around 30 seconds for
+NeRF to render an 800× 800 image. Our main insight is that it is important to prevent sampling of
+points in empty space without relevant scene content as much as possible. Although NeRF performs
+importance sampling along the ray, due to allocating fixed computational budget for every ray, it
+cannot exploit this opportunity to improve rendering speed. We are inspired by classical computer
+graphics techniques such as the bounding volume hierarchy (BVH, Rubin and Whitted, 1980) and
+the sparse voxel octree (SVO, Laine and Karras, 2010) which are designed to model the scene in
+a sparse hierarchical structure for ray tracing acceleration. In this encoding, local properties of a
+spatial location only depend on a local neighborhood of the leaf node that the spatial location belongs
+to. In this paper we show how hierarchical sparse volume representations can be used in a neural
+network-encoded implicit field of a 3D scene to enable detailed encoding, and efficient, high quality
+differentiable volumetric rendering, even of large scale scenes.
+3 Neural Sparse Voxel Fields
+In this section, we introduce Neural Sparse-Voxel Fields (NSVF), a hybrid scene representation
+that combines neural implicit fields with an explicit sparse voxel structure. Instead of representing
+the entire scene as a single implicit field, NSVF consists of a set of voxel-bounded implicit fields
+organized in a sparse voxel octree. In the following, we describe the building block of NSVF - a
+voxel-bounded implicit field (§ 3.1) - followed by a rendering algorithm for NSVF (§ 3.2), and a
+progressive learning strategy (§ 3.3).
+3.1 Voxel-bounded Implicit Fields
+We assume that the relevant non-empty parts of a scene are contained within a set of sparse (bounding)
+voxels V = {V1 . . . VK}, and the scene is modeled as a set of voxel-bounded implicit functions:
+Fθ(p,v) = F
+i
+θ(gi(p),v) if p ∈ Vi. Each F
+i
+θ is modeled as a multi-layer perceptron (MLP) with
+shared parameters θ:
+F iθ : (gi(p),v)→ (c, σ),∀p ∈ Vi, (3)
+Here c and σ are the color and density of the 3D point p, v is ray direction, gi(p) is the representation
+at p which is defined as:
+gi(p) = ζ (χ (g̃i(p
+∗
+1), . . . , g̃i(p
+∗
+8))) (4)
+3
+Figure 1: Illustration of the differenitable volume rendering procedure with NSVF. For any given
+camera position p0 and the ray direction v, we first intersect the ray with a set of sparse voxels, then
+predict the colors and densities with neural networks for points sampled along the ray inside voxels,
+and accumulate the colors and densities of the sampled points to get the rendered color C(p0,v).
+where p∗1, . . . ,p
+∗
+8 ∈ R3 are the eight vertices of Vi, and g̃i(p∗1), . . . , g̃i(p∗8) ∈ Rd are feature
+vectors stored at each vertex. In addition, χ(.) refers to trilinear interpolation, and ζ(.) is a post-
+processing function. In our experiments, ζ(.) is positional encoding proposed by (Vaswani et al.,
+2017; Mildenhall et al., 2020).
+Compared to using the 3D coordinate of point p as input to F iθ as most of previous works do, in NSVF,
+the feature representation gi(p) is aggregated by the eight voxel embeddings of the corresponding
+voxel where region-specific information (e.g. geometry, materials, colors) can be embeded. It
+significantly eases the learning of subsequent F iθ as well as facilitates high-quality rendering.
+Special Cases. NSVF subsumes two classes of earlier works as special cases. (1) When g̃i(p∗k) =
+p∗k and ζ(.) is the positional encoding, gi(p) = ζ (χ (p
+∗
+1, . . . ,p
+∗
+8)) = ζ (p), which means that
+NeRF (Mildenhall et al., 2020) is a special case of NSVF. (2) When g̃i(p) : p→ (c, σ), ζ(.) and F iθ
+are identity functions, our model is equivalent to the models which use explicit voxels to store colors
+and densities, e.g., Neural Volumes (Lombardi et al., 2019).
+3.2 Volume Rendering
+NSVF encodes the color and density of a scene at any point p ∈ V . Compared to rendering a neural
+implicit representation that models the entire space, rendering NSVF is much more efficient as it
+obviates sampling points in the empty space. As illustrated in Figure 1, rendering is performed in two
+steps: (1) ray-voxel intersection; and (2) ray-marching inside voxels, which we explain now for a ray.
+Ray-voxel Intersection. We first apply Axis Aligned Bounding Box intersection test (AABB-
+test) (Haines, 1989) for each ray. It checks whether a ray intersects with a voxel by comparing the
+distances from the ray origin to each of the six bounding planes of the voxel. The AABB test is
+very efficient especially for a hierarchical octree structure (e.g. NSVF), as it can readily process
+millions of voxels in real time. Our experiments show that 10k ∼ 100k sparse voxels in the NSVF
+representation are enough for photo-realistic rendering of complex scenes.
+Ray Marching inside Voxels. We return the color C(p0,v) by sampling points along a ray using
+Eq. (2). To handle the case where a ray misses all the objects, we additionally add a background term
+A(p0,v) ·cbg on the right side of Eq. (2), where we define transparency A(p0,v) =
+∏N
+i=1 α(zi,∆i),
+and cbg is learnable RGB values for background. As discussed in § 2, volume rendering requires
+dense samples along the ray in non-empty space to achieve high quality rendering. Densely evaluating
+at uniformly sampled points in the whole space (Figure 2 (a)) is inefficient because empty regions are
+frequently and unnecessarily tested. To focus on sampling in more important regions, Mildenhall et al.
+(2020) learned two networks where the second network is trained with samples from the distribution
+estimated by the first one (Figure 2 (b)). However, this further increases the training and inference
+complexity. In contrast, NSVF does not employ a secondary sampling stage while achieving better
+visual quality. As shown in Figure 2 (c), we create a set of query points using rejection sampling
+based on sparse voxels. Compared to the aforementioned approaches, we are able to sample more
+densely at the same evaluation cost. We include all voxel intersection points as additional samples
+and perform color accumulation with the midpoint rule. Our approach is summarized in Algorithm 1
+4
+Figure 2: Illustrations of (a) uniform sampling; (b) importance sampling based on the results in (a);
+(c) the proposed sampling approach based on sparse voxels.
+Algorithm 1: Neural Rendering with NSVF
+Input: camera p0, ray direction v, step size τ , threshold �, voxels V = {V1, . . . , VK}, background cbg,
+background maximum depth zmax, parameters of the MLPs θ
+Initialize: transparency A = 1, color C = 0, expected depth Z = 0
+Ray-voxel Intersection: Return all the intersections of the ray with k intersected voxels, sorted from near to
+far: zint1 , z
+out
+t1
+, . . . , zintk , z
+out
+tk
+, where {t1, . . . , tk} ⊂ {1 . . .K}, k < K;
+if k > 0 then
+Stratified sampling: z1, . . . , zm with step size τ , where z1 ≥ zint1 and zm ≤ z
+out
+tk
+;
+Include voxel boundaries: z̃1, . . . z̃2k+m ← sort
+(
+z1, . . . , zm; z
+in
+t1
+, zoutt1 , . . . , z
+in
+tk
+, zouttk
+)
+;
+for j ← 1 to 2k +m− 1 do
+Obtain midpoints and intervals: ẑj ←
+z̃j+z̃j+1
+2
+,∆j ← z̃j+1 − z̃j ;
+if A > � and ∆j > 0 and p(ẑj) ∈ Vi(∃i ∈ {t1, . . . , tk}) then
+α← exp (−σθ (gi(p(ẑj))) ·∆j) , c← cθ (gi(p(ẑj)),v);
+C ← C +A · (1− α) · c, Z ← Z +A · (1− α) · ẑj , A← A · α;
+C ← C +A · cbg, Z ← Z +A · zmax;
+Return: C, Z,A
+where we additionally return the transparency A, and the expected depth Z which can be further used
+for visualizing the normal with finite difference.
+Early Termination. NSVF can represent transparent and solid objects equally well. However,
+for solid surfaces, the proposed volume rendering disperses the surface color along the ray, which
+means that it takes many unnecessary accumulation steps behind the surface to make the accumulated
+transparency A(p0,v) reach 0. We therefore use a heuristic and stop evaluating points earlier when
+the accumulated transparency A(p0,v) drops below a certain threshold �. In our experiments, we
+find that the setting � = 0.01 significantly accelerates the rendering process without causing any
+noticeable quality degradation.
+3.3 Learning
+Since our rendering process is fully differentiable, NSVF can be optimized end-to-end through
+back-propagation by comparing the rendered outputs with a set of target images, without any 3D
+supervision. To this end, the following loss is minimized:
+L =
+∑
+(p0,v)∈R
+‖C(p0,v)−C∗(p0,v)‖22 + λ · Ω (A(p0,v)) , (5)
+where R is a batch of sampled rays, C∗ is the ground-truth color of the camera ray, and Ω(.) is a
+beta-distribution regularizer proposed in Lombardi et al. (2019). Next, we propose a progressive
+training strategy to better facilitate learning and inference:
+Voxel Initialization We start by learning implicit functions for an initial set of voxels subdividing
+an initial bounding box (with volume V ) that roughly encloses the scene with sufficient margin. The
+initial voxel size is set to l ≈ 3
+√
+V/1000. If a coarse geometry (e.g. scanned point clouds or visual
+hull outputs) is available, the initial voxels can also be initialized by voxelizing the coarse geometry.
+5
+Figure 3: Illustration of self-pruning and progressive training
+Self-Pruning Existing volume-based neural rendering works (Lombardi et al., 2019; Mildenhall
+et al., 2020) have shown that it is feasible to extract scene geometry on a coarse level after training.
+Based on this observation, we propose – self-pruning – a strategy to effectively remove non-essential
+voxels during training based on the coarse geometry information which can be further described
+using model’s prediction on density. That is, we determine voxels to be pruned as follows:
+Vi is pruned if min
+j=1...G
+exp(−σ(gi (pj))) > γ, pj ∈ Vi, Vi ∈ V, (6)
+where {pj}Gj=1 are G uniformly sampled points inside the voxel Vi (G = 16
+3 in our experiments),
+σ(gi (pj)) is the predicted density at point pj , γ is a threshold (γ = 0.5 in most of our experiments).
+Since this pruning process does not rely on other processing modules or input cues, we call it self-
+pruning. We perform self-pruning on voxels periodically after the coarse scene geometry emerges.
+Progressive Training The above pruning strategy enables us to progressively adjust voxelization
+to the underlying scene structure and adaptively allocate computational and memory resources to
+important regions. Suppose that the learning starts with an initial ray-marching step size τ and voxel
+size l. After certain steps of training, we halve both τ and l for the next stage. Specifically, when
+halving the voxel size, we subdivide each voxel into 23 sub-voxels and the feature representations of
+the new vertices (i.e. g̃(.) in § 3.1) are initialized via trilinear interpolation of feature representations
+at the original eight voxel vertices. Note that, when using embeddings as voxel representations,
+we essentially increase the model capacity progressively to learn more details of the scene. In our
+experiments, we train synthetic scenes with 4 stages and real scenes with 3 stages. An illustration of
+self-pruning and progressive training is shown in Figure 3.
+4 Experiments
+We evaluate the proposed NSVF on six datasets. We provide qualitative and quantitative comparisons
+to three recent methods on four datasets and show our results on several challenging tasks including
+multi-scene learning, rendering of dynamic and large-scale indoor scenes, and scene editing and
+composition. We also perform ablation studies to validate different kinds of feature representations
+and different options in progressive training. Please see the Appendix for implementation details,
+pre-processing details of datasets and additional results. Please also refer to the supplemental video
+which shows the rendering quality.
+4.1 Experimental Settings
+Datasets We conduct experiments on the following synthetic datasets and real datasets:
+• Synthetic-NeRF: The synthetic dataset used in Mildenhall et al. (2020) includes eight objects
+rendered in 800× 800.
+• Synthetic-NSVF: To demonstrate the ability of NSVF to handle various conditions, we additionally
+render eight objects2 in 800× 800 with more complex geometry and lighting effects.
+• BlendedMVS: We test on four objects from Yao et al. (2020). The rendered images are blended
+with the real images to have realistic ambient lighting with a resolution of 768× 576.
+• Tanks&Temples: We evaluate on five objects from the Tanks&Temples real dataset (Knapitsch
+et al., 2017). Here we use the images and label the object masks ourselves. The image resolution
+is 1920× 1080.
+2Available at https://www.blendswap.com/
+6
+https://www.blendswap.com/
+Figure 4: Comparisons on test views for scenes from the single-scene datasets. For wineholder and
+family, closeups are shown for clearer visual comparison.
+Table 1: The quantitative comparisons on test sets of four datasets. We use three metrics: PSNR (↑),
+SSIM (↑) and LPIPS (↓) (Zhang et al., 2018) to evaluate the rendering quality. Scores are averaged
+over the testing images of all scenes, and we present the per-scene breakdown results in Appendix.
+By default, NSVF is executed with early termination (� = 0.01). We also show results without using
+early termination (� = 0) denoted as NSVF0.
+Synthetic-NeRF Synthetic-NSVF BlendedMVS Tanks and Temples
+Models PSNR SSIM LPIPS PSNR SSIM LPIPS PSNR SSIM LPIPS PSNR SSIM LPIPS
+SRN 22.26 0.846 0.170 24.33 0.882 0.141 20.51 0.770 0.294 24.10 0.847 0.251
+NV 26.05 0.893 0.160 25.83 0.892 0.124 23.03 0.793 0.243 23.70 0.834 0.260
+NeRF 31.01 0.947 0.081 30.81 0.952 0.043 24.15 0.828 0.192 25.78 0.864 0.198
+NSVF0 31.75 0.954 0.048 35.18 0.979 0.015 26.89 0.898 0.114 28.48 0.901 0.155
+NSVF 31.74 0.953 0.047 35.13 0.979 0.015 26.90 0.898 0.113 28.40 0.900 0.153
+• ScanNet: We use two real scenes from ScanNet (Dai et al., 2017). We extract both RGB and depth
+images from the original video and scale the images to 640× 480.
+• Maria Sequence: This sequence is provided by Volucap with the meshes of 200 frames of a moving
+female. We render each mesh to create a dataset.
+Baselines We adopt the following three recently proposed methods as baselines: Scene Repre-
+sentation Networks (SRN, Sitzmann et al., 2019b), Neural Volumes (NV, Lombardi et al., 2019),
+and Neural Radiance Fields (NeRF, Mildenhall et al., 2020), representing surface-based rendering,
+explicit and implict volume rendering, respectively. See the Appendix for implementation details.
+4.2 Results
+Quality Comparison We show the qualitative comparisons in Figure 4. SRN tends to produce
+overly smooth rendering and incorrect geometry; NV and NeRF work better but are still not able to
+synthesize images as sharply as NSVF does. NSVF can achieve photo-realistic results on various
+kinds of scenes with complex geometry, thin structures and lighting effects.
+Also, as shown in Table 1, NSVF significantly outperforms the three baselines on all the four datasets
+across all metrics. Note that NSVF with early termination (� = 0.01) produces almost the same
+quality as NSVF without early termination (denoted as NSVF0 in Table 1). This indicates that
+7
+Figure 5: We report time taken to render one image for all the datasets in (a)-(c) where the x-axis
+stands for ascending foreground to background ratio and the y-axis for rendering time in second. We
+also show a plot curve for rendering time of NSVF on one synthetic scene in (d) when the camera is
+zooming out where the x-axis stands for the distance from the camera to the center of the object and
+the y-axis for rendering time in second.
+Figure 6: Our results on Maria Sequence (left) and ScanNet (right). We render testing trajecties and
+show three sampled frames in both RGB (top) and corresponding surface normals (below).
+early termination would not cause noticeable quality degradation while significantly accelerating
+computation, as will be seen next.
+Speed Comparison We provide speed comparisons on the models of four datasets in Figure 5
+where we merge the results of Synthetic-NeRF and Synthetic-NSVF in the same figure considering
+their image sizes are the same. For our method, the average rendering time is correlated to the average
+ratio of foreground to background as shown in Figure 5 (a)-(c). That is because the higher the average
+ratio of foreground is, the more rays intersect with voxels. Thus, more evaluation time is needed. The
+average rendering time is also correlated to the number of intersected voxels. When a ray intersects
+a large number of voxels in the rendering of a solid object, early termination significantly reduces
+rendering time by avoiding many unnecessary accumulation steps behind the surface. These two
+factors can be seen in Figure 5 (d) where we show a zoom-out example. At the beginning, only part
+of sparse voxels are shown in the view so the rendering time is not at the peak. As the camera zooms
+out, the rendering time reaches the peak when all the voxels are in the view. After that, the rendering
+time decreases as the ratio of foreground to background decreases.
+For other methods, the rendering time is almost constant. This is because they have to evaluate all
+pixels with fixed steps, indicating a fixed number of points are sampled along each ray no matter
+whether the ray hits the scene or not, regardless of the scene complexity. In general, our method is
+around 10 ∼ 20 times faster than the state-of-the-art method NeRF, and gets close to SRN and NV.
+Rendering of Large-scale Indoor Scenes We demonstrate the effectiveness of our method on
+ScanNet dataset under challenging inside-out reconstruction scenarios. Our results are shown in
+Figure 6 where the initial voxels are built upon the point clouds from the depth images.
+Rendering with Dynamic Scenes As shown in Figure 6, we validate our approach on a corpus
+with dynamic scenes using the Maria Sequence. In order to accommodate temporal sequence with
+NSVF, we apply the hypernetwork proposed in Sitzmann et al. (2019b).
+Multi-scene Learning We train a single model for all 8 objects from Synthetic-NeRF together with
+2 additional objects (wineholder, train) from Synthetic-NSVF. We use different voxel embeddings
+for each object while using the same MLPs to predict density and color. For comparison, we train
+NeRF model for the same datasets based on a hypernetwork (Ha et al., 2016). Without voxel
+8
+Figure 7: Scene composition and editing on the Synthetic Datasets. The real images are also presented
+bottom right as a reference.
+Models PSNR↑ SSIM↑ LPIPS↓
+NSVF 32.04 0.965 0.020
+w/o POS 30.89 0.954 0.043
+w/o EMB 27.02 0.931 0.077
+w/o POS, EMB 24.47 0.906 0.118 NSVF w/o EMB NSVF w/o POS NSVF Ground Truth
+Figure 8: The table on the left shows quantitative comparison of NSVF w/o positional encoding (w/o
+POS), w/o voxel embeddings (w/o EMB) or w/o both (w/o POS,EMB). The figure on the right shows
+visual comparison against the ground truth image.
+embeddings, NeRF has to encode all the scene details with the network parameters. Compared to
+single object learning results (Table 1), our model easily scales to encoding multiple objects, with
+only slight decreases 1.40, 0.011, 0.002 on PSNR, SSIM and LPIPS. In contrast, NeRF has much
+worse performance drop as 4.24, 0.074, 0.090, indicating drastic degradation in terms of quality due
+to its limited network capacity.
+Table 2: Ablation for progressive training.
+R PSNR↑ SSIM↑ LPIPS↓ Speed (s)
+1 28.82 0.933 0.063 2.629
+2 30.17 0.946 0.052 2.785
+3 30.83 0.953 0.046 3.349
+4 30.89 0.954 0.043 3.873
+Scene Editing and Scene Composition. As
+shown in Figure 7, the learnt multi-object model
+can be readily used to compose more complex
+scenes by duplicating and moving voxels, and be
+rendered in the same way without overhead. Fur-
+thermore, our approach also supports scene editing
+by directly adjusting the presence of sparse voxels
+(See the re-composition of wineholder in Figure 7).
+4.3 Ablation Studies
+We use one object (wineholder) from the Synthetic-NSVF dataset which consists of parts with complex
+local patterns (grids) for ablation studies.
+Effect of Voxel Representations Figure 8 shows the comparison on different kinds of feature
+representations for encoding a spatial location. Voxel embeddings bring larger improvements to the
+9
+quality than using positional encoding. Also, with both positional encoding and voxel embeddings,
+the model achieves the best quality, especially for recovering high frequency patterns.
+Effect of Progressive Training We also investigate different options for progressive training (see
+Table 2). Note that all the models are trained with voxel embeddings only. The performance is
+improved with more rounds of progressive training. But after a certain number of rounds, the quality
+improves only slowly while the rendering time increases. Based on this observation, our model
+performs 3-4 rounds of progressive training in the experiments.
+5 Related Work
+Neural Rendering Recent works have shown impressive results by replacing or augmenting the
+traditional graphics rendering with neural networks, which is typically referred to as neural rendering.
+We refer the reader to recent surveys for neural rendering (Tewari et al., 2020; Kato et al., 2020).
+• Novel View Synthesis with 3D inputs: DeepBlending (Hedman et al., 2018) predicts blending
+weights for the image-based rendering on a geometric proxy. Other methods (Thies et al., 2019;
+Kim et al., 2018; Liu et al., 2019a, 2020; Meshry et al., 2019; Martin Brualla et al., 2018; Aliev
+et al., 2019) first render a given geometry with explicit or neural textures into coarse RGB images
+or feature maps which are then translated into high-quality images. However, these works need 3D
+geometry as input and the performance would be affected by the quality of the geometry.
+• Novel View Synthesis without 3D inputs: Other approaches learn scene representations for
+novel-view synthesis from 2D images. Generative Query Networks (GQN) (Eslami et al., 2018)
+learn a vectorized embedding of a 3D scene and render it from novel views. However, they
+do not learn geometric scene structure as explicitly as NSVF, and their renderings are rather
+coarse. Following-up works learned more 3D-structure aware representations and accompanying
+renderers (Flynn et al., 2016; Zhou et al., 2018; Mildenhall et al., 2019) with Multiplane Images
+(MPIs) as proxies, which only render a restricted range of novel views interpolating input views.
+RenderNet (Nguyen-Phuoc et al., 2018) and its follow-up works (Nguyen-Phuoc et al., 2019; Liu
+et al., 2019c) use a CNN-based decoder for differentiable rendering to render a scene represented
+as coarse-grained voxel grids. However, this CNN-based decorder cannot ensure view consistency
+due to 2D convolution kernels.
+To enforce view consistency, the other research line (Lombardi et al., 2019; Sitzmann et al., 2019a)
+use classical rendering techniques for differentiable rendering of the learnt scene represented as
+fine-grained voxel grids which makes scene structure more explicit but limits achievable spatial
+resolution. SRN (Sitzmann et al., 2019b) and NeRF (Mildenhall et al., 2020) introduce a neural
+implicit function to model the entire scene. However, their results are either blurry or suffer from
+slow rendering process. In addition, these approaches do not easily permit scene editing and
+composition. The proposed NSVF allows efficient and higher-quality novel view synthesis even of
+larger scenes, and enables scene editing and composition.
+Neural Implicit Representations. Implicit representations have been studied to model 3D ge-
+ometry with neural networks. Compared to explicit representations (such as point cloud, mesh,
+voxels), implicit representations are continuous and have high spatial resolution. Most works re-
+quire 3D supervision during training to infer the SDF value or the occupancy probability of any 3D
+point (Michalkiewicz et al., 2019; Mescheder et al., 2019; Chen and Zhang, 2019; Park et al., 2019;
+Peng et al., 2020), while other works learn 3D representations only from images with differentiable
+renderers (Liu et al., 2019d; Saito et al., 2019, 2020; Niemeyer et al., 2019; Jiang et al., 2020).
+6 Limitations and Future Work
+Although NSVF can efficiently generate high-quality novel views and significantly outperform
+existing methods, there are three major limitations:
+(i) Our method cannot handle scenes with complex background. We assume a simple constant
+background term (cbg). However, real scenes usually have different backgrounds when viewed from
+different points. This makes it challenging to capture their effects correctly without the interference
+on the learning of the target scenes.
+10
+Figure 9: A comparison between NSVF output (left) and the
+groud-truth (right) of a cropped view sampled from scene
+lifestyle (Synthetic-NSVF dataset).
+(ii) Similar to Sitzmann et al. (2019b);
+Mildenhall et al. (2020), NSVF learns
+the color and density as a “black-
+box” function of the query point lo-
+cation and the camera-ray direction.
+Therefore, the rendering performance
+highly depends on the distribution of
+training images, and may produce se-
+vere artifacts when the training data
+is insufficient or biased for predict-
+ing complex geometry, materials and
+lighting effects (see Figure 9 where the refraction on the glass bottle is not learnt correctly). A
+possible future direction is to incorporate the traditional radiance and rendering equation as a physical
+inductive bias into the neural rendering framework. This can potentially improve the robustness and
+generalization of the neural network models.
+(iii) The current learning paradigm requires known camera poses as inputs to initialize rays and their
+direction. For real world images, there is currently no mechanism to handle unavoidable errors in
+camera calibration. When our target data consists of single-view images of multiple objects, it is
+even more difficult to obtain accurately registered poses in real applications. A promising avenue for
+future research would be to use unsupervised techniques such as GANs (Nguyen-Phuoc et al., 2019)
+to simultaneously predict camera poses for high-quality free-viewpoint rendering results.
+7 Conclusion
+We propose NSVF, a hybrid neural scene representations for fast and high-quality free-viewpoint
+rendering. Extensive experiments show that NSVF is over 10 times faster than the state-of-the-art
+(namely, NeRF) while achieving better quality. NSVF can be easily applied to scene editing and
+composition. We also demonstrate a variety of challenging tasks, including multi-scene learning,
+free-viewpoint rendering of a moving human, and large-scale scene rendering.
+8 Broader Impact
+NSVF provides a new way to learn a neural implicit scene representation from images that is able
+to better allocate network capacity to relevant parts of a scene. In this way, it enables learning
+representations of large-scale scenes at higher detail than previous approaches, which also leads to
+higher visual quality of the rendered images. In addition, the proposed representation enables much
+faster rendering than the state-of-the-art, and enables more convenient scene editing and compositing.
+This new approach to 3D scene modeling and rendering from images complements and partially
+improves over established computer graphics concepts, and opens up new possibilities in many
+applications, such as mixed reality, visual effects, and training data generation for computer vision
+tasks. At the same time it shows new ways to learn spatially-aware scene representations of potential
+relevance in other domains, such as object scene understanding, object recognition, robot navigation,
+or training data generation for image-based reconstruction.
+The ability to capture and re-render, only from 2D images, models of real world scenes at very high
+visual fidelity, also enables the possibility to reconstruct and re-render humans in a scene. Therefore,
+any research on and practical application of this and all related reconstruction methods have to strictly
+respect personality rights and privacy regulations.
+Acknowledgments and Disclosure of Funding
+We thank Volucap and the Fraunhofer Heinrich Hertz Institute for providing the Maria dataset. We
+also thank Shiwei Li, Nenglun Chen, Ben Mildenhall for the help with experiments; Gurprit Singh
+for discussion. This work was partially supported by ERC Consolidator Grant 770784 and Lise
+Meitner Postdoctoral Fellowship. The computational work for this article was partially performed on
+resources of the National Supercomputing Centre, Singapore (https://www.nscc.sg).
+11
+References
+Kara-Ali Aliev, Dmitry Ulyanov, and Victor Lempitsky. 2019. Neural point-based graphics. arXiv
+preprint arXiv:1906.08240.
+Z. Chen and H. Zhang. 2019. Learning implicit fields for generative shape modeling. In 2019
+IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), pages 5932–5941.
+Angela Dai, Angel X. Chang, Manolis Savva, Maciej Halber, Thomas Funkhouser, and Matthias
+Nießner. 2017. Scannet: Richly-annotated 3d reconstructions of indoor scenes. In Proc. Computer
+Vision and Pattern Recognition (CVPR), IEEE.
+SM Ali Eslami, Danilo Jimenez Rezende, Frederic Besse, Fabio Viola, Ari S Morcos, Marta Garnelo,
+Avraham Ruderman, Andrei A Rusu, Ivo Danihelka, Karol Gregor, et al. 2018. Neural scene
+representation and rendering. Science, 360(6394):1204–1210.
+John Flynn, Michael Broxton, Paul Debevec, Matthew DuVall, Graham Fyffe, Ryan Overbeck, Noah
+Snavely, and Richard Tucker. 2019. Deepview: View synthesis with learned gradient descent.
+International Conference on Computer Vision and Pattern Recognition (CVPR).
+John Flynn, Ivan Neulander, James Philbin, and Noah Snavely. 2016. Deepstereo: Learning to predict
+new views from the world’s imagery. In Computer Vision and Pattern Recognition (CVPR).
+David Ha, Andrew Dai, and Quoc Le. 2016. Hypernetworks.
+Eric Haines. 1989. Essential Ray Tracing Algorithms, page 33–77. Academic Press Ltd., GBR.
+Peter Hedman, Julien Philip, True Price, Jan-Michael Frahm, George Drettakis, and Gabriel Brostow.
+2018. Deep blending for free-viewpoint image-based rendering. ACM Trans. Graph., 37(6):257:1–
+257:15.
+Yue Jiang, Dantong Ji, Zhizhong Han, and Matthias Zwicker. 2020. Sdfdiff: Differentiable rendering
+of signed distance fields for 3d shape optimization. In The IEEE/CVF Conference on Computer
+Vision and Pattern Recognition (CVPR).
+Hiroharu Kato, Deniz Beker, Mihai Morariu, Takahiro Ando, Toru Matsuoka, Wadim Kehl, and
+Adrien Gaidon. 2020. Differentiable rendering: A survey. arXiv preprint arXiv:2006.12057.
+Hyeongwoo Kim, Pablo Garrido, Ayush Tewari, Weipeng Xu, Justus Thies, Matthias Nießner, Patrick
+Pérez, Christian Richardt, Michael Zollöfer, and Christian Theobalt. 2018. Deep video portraits.
+ACM Transactions on Graphics (TOG), 37.
+Arno Knapitsch, Jaesik Park, Qian-Yi Zhou, and Vladlen Koltun. 2017. Tanks and temples: Bench-
+marking large-scale scene reconstruction. ACM Transactions on Graphics, 36(4).
+Samuli Laine and Tero Karras. 2010. Efficient sparse voxel octrees–analysis, extensions, and
+implementation.
+Lingjie Liu, Weipeng Xu, Marc Habermann, Michael Zollhöfer, Florian Bernard, Hyeongwoo Kim,
+Wenping Wang, and Christian Theobalt. 2020. Neural human video rendering by learning dynamic
+textures and rendering-to-video translation. IEEE Transactions on Visualization and Computer
+Graphics, PP:1–1.
+Lingjie Liu, Weipeng Xu, Michael Zollhoefer, Hyeongwoo Kim, Florian Bernard, Marc Habermann,
+Wenping Wang, and Christian Theobalt. 2019a. Neural rendering and reenactment of human actor
+videos. ACM Transactions on Graphics (TOG).
+Shaohui Liu, Yinda Zhang, Songyou Peng, Boxin Shi, Marc Pollefeys, and Zhaopeng Cui. 2019b.
+Dist: Rendering deep implicit signed distance function with differentiable sphere tracing. arXiv
+preprint arXiv:1911.13225.
+Shichen Liu, Weikai Chen, Tianye Li, and Hao Li. 2019c. Soft rasterizer: Differentiable rendering
+for unsupervised single-view mesh reconstruction. arXiv preprint arXiv:1901.05567.
+12
+https://doi.org/10.1145/3272127.3275084
+https://doi.org/10.1109/TVCG.2020.2996594
+https://doi.org/10.1109/TVCG.2020.2996594
+Shichen Liu, Shunsuke Saito, Weikai Chen, and Hao Li. 2019d. Learning to infer implicit surfaces
+without 3d supervision. In Advances in Neural Information Processing Systems, pages 8295–8306.
+Stephen Lombardi, Tomas Simon, Jason Saragih, Gabriel Schwartz, Andreas Lehrmann, and Yaser
+Sheikh. 2019. Neural volumes: Learning dynamic renderable volumes from images. ACM
+Transactions on Graphics (TOG), 38(4):65.
+Ricardo Martin Brualla, Peter Lincoln, Adarsh Kowdle, Christoph Rhemann, Dan Goldman, Cem
+Keskin, Steve Seitz, Shahram Izadi, Sean Fanello, Rohit Pandey, Shuoran Yang, Pavel Pidlypenskyi,
+Jonathan Taylor, Julien Valentin, Sameh Khamis, Philip Davidson, and Anastasia Tkach. 2018.
+Lookingood: Enhancing performance capture with real-time neural re-rendering. volume 37.
+Lars Mescheder, Michael Oechsle, Michael Niemeyer, Sebastian Nowozin, and Andreas Geiger. 2019.
+Occupancy networks: Learning 3d reconstruction in function space. In Proceedings IEEE Conf.
+on Computer Vision and Pattern Recognition (CVPR).
+Moustafa Meshry, Dan B. Goldman, Sameh Khamis, Hugues Hoppe, Rohit Pandey, Noah Snavely,
+and Ricardo Martin-Brualla. 2019. Neural rerendering in the wild. In Computer Vision and Pattern
+Recognition (CVPR).
+Mateusz Michalkiewicz, Jhony K. Pontes, Dominic Jack, Mahsa Baktashmotlagh, and Anders
+Eriksson. 2019. Implicit surface representations as layers in neural networks. In The IEEE
+International Conference on Computer Vision (ICCV).
+Ben Mildenhall, Pratul P Srinivasan, Rodrigo Ortiz-Cayon, Nima Khademi Kalantari, Ravi Ra-
+mamoorthi, Ren Ng, and Abhishek Kar. 2019. Local light field fusion: Practical view synthesis
+with prescriptive sampling guidelines. ACM Transactions on Graphics (TOG), 38(4):1–14.
+Ben Mildenhall, Pratul P Srinivasan, Matthew Tancik, Jonathan T Barron, Ravi Ramamoorthi, and
+Ren Ng. 2020. Nerf: Representing scenes as neural radiance fields for view synthesis. arXiv
+preprint arXiv:2003.08934.
+Thu Nguyen-Phuoc, Chuan Li, Lucas Theis, Christian Richardt, and Yong-Liang Yang. 2019. Holo-
+gan: Unsupervised learning of 3d representations from natural images. In Proceedings of the IEEE
+International Conference on Computer Vision, pages 7588–7597.
+Thu H Nguyen-Phuoc, Chuan Li, Stephen Balaban, and Yongliang Yang. 2018. Rendernet: A
+deep convolutional network for differentiable rendering from 3d shapes. In Advances in Neural
+Information Processing Systems (NIPS).
+Michael Niemeyer, Lars Mescheder, Michael Oechsle, and Andreas Geiger. 2019. Differentiable
+volumetric rendering: Learning implicit 3d representations without 3d supervision. arXiv preprint
+arXiv:1912.07372.
+Jeong Joon Park, Peter Florence, Julian Straub, Richard Newcombe, and Steven Lovegrove. 2019.
+Deepsdf: Learning continuous signed distance functions for shape representation. International
+Conference on Computer Vision and Pattern Recognition (CVPR).
+Songyou Peng, Michael Niemeyer, Lars M. Mescheder, Marc Pollefeys, and Andreas Geiger. 2020.
+Convolutional occupancy networks. ArXiv, abs/2003.04618.
+Steven M Rubin and Turner Whitted. 1980. A 3-dimensional representation for fast rendering of
+complex scenes. In Proceedings of the 7th annual conference on Computer graphics and interactive
+techniques, pages 110–116.
+Shunsuke Saito, Zeng Huang, Ryota Natsume, Shigeo Morishima, Angjoo Kanazawa, and Hao Li.
+2019. Pifu: Pixel-aligned implicit function for high-resolution clothed human digitization. 2019
+IEEE/CVF International Conference on Computer Vision (ICCV), pages 2304–2314.
+Shunsuke Saito, Tomas Simon, Jason Saragih, and Hanbyul Joo. 2020. Pifuhd: Multi-level pixel-
+aligned implicit function for high-resolution 3d human digitization. In Proceedings of the IEEE
+Conference on Computer Vision and Pattern Recognition.
+13
+Harry Shum and Sing Bing Kang. 2000. Review of image-based rendering techniques. In Visual
+Communications and Image Processing 2000, volume 4067, pages 2 – 13. International Society
+for Optics and Photonics, SPIE.
+Vincent Sitzmann, Justus Thies, Felix Heide, Matthias Niessner, Gordon Wetzstein, and Michael
+Zollhofer. 2019a. Deepvoxels: Learning persistent 3d feature embeddings. In Computer Vision
+and Pattern Recognition (CVPR).
+Vincent Sitzmann, Michael Zollhöfer, and Gordon Wetzstein. 2019b. Scene representation networks:
+Continuous 3d-structure-aware neural scene representations. In Advances in Neural Information
+Processing Systems, pages 1119–1130.
+Richard Szeliski. 2010. Computer vision: algorithms and applications. Springer Science & Business
+Media.
+A. Tewari, O. Fried, J. Thies, V. Sitzmann, S. Lombardi, K. Sunkavalli, R. Martin-Brualla, T. Simon,
+J. Saragih, M. Nießner, R. Pandey, S. Fanello, G. Wetzstein, J.-Y. Zhu, C. Theobalt, M. Agrawala,
+E. Shechtman, D. B Goldman, and M. Zollhöfer. 2020. State of the Art on Neural Rendering.
+Computer Graphics Forum (EG STAR 2020).
+Justus Thies, Michael Zollhöfer, and Matthias Nießner. 2019. Deferred neural rendering: image
+synthesis using neural textures. ACM Transactions on Graphics, 38.
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz
+Kaiser, and Illia Polosukhin. 2017. Attention is all you need. In Advances in neural information
+processing systems, pages 5998–6008.
+Xinchen Yan, Jimei Yang, Ersin Yumer, Yijie Guo, and Honglak Lee. 2016. Perspective transformer
+nets: Learning single-view 3d object reconstruction without 3d supervision. In Advances in neural
+information processing systems, pages 1696–1704.
+Yao Yao, Zixin Luo, Shiwei Li, Jingyang Zhang, Yufan Ren, Lei Zhou, Tian Fang, and Long Quan.
+2020. Blendedmvs: A large-scale dataset for generalized multi-view stereo networks. Computer
+Vision and Pattern Recognition (CVPR).
+Cha Zhang and Tsuhan Chen. 2004. A survey on image-based rendering—representation, sampling
+and compression. Signal Processing: Image Communication, 19(1):1–28.
+Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shechtman, and Oliver Wang. 2018. The unreason-
+able effectiveness of deep features as a perceptual metric. In CVPR.
+Tinghui Zhou, Richard Tucker, John Flynn, Graham Fyffe, and Noah Snavely. 2018. Stereo magnifi-
+cation: Learning view synthesis using multiplane images. In SIGGRAPH.
+A Additional Experimental Settings
+A.1 Datasets
+We present more details about the datasets we used. We conduct the experiments of single-scene
+learning on five datasets, including three synthetic datasets and two real datasets:
+• Synthetic-NeRF. We use the NeRF (Mildenhall et al., 2020) synthetic dataset which includes eight
+objects rendered with path tracing. Each object is rendered to produce 100 views for training and
+200 for testing at 800× 800 pixels.
+• Synthetic-NSVF. To demonstrate the ability of NSVF to handle various conditions, we additionally
+render eight objects in 800× 800 with more complex geometry and lighting effects. Details on the
+original source files and license information are given below:
+– Wineholder(CC-0) https://www.blendswap.com/blend/15899
+– Steamtrain(CC-BY-NC) https://www.blendswap.com/blend/16763
+– Toad(CC-0) https://www.blendswap.com/blend/13078
+14
+https://doi.org/10.1117/12.386541
+https://www.blendswap.com/blend/15899
+ https://www.blendswap.com/blend/16763
+https://www.blendswap.com/blend/13078
+– Robot(CC-BY-SA) https://www.blendswap.com/blend/10597
+– Bike(CC-BY) https://www.blendswap.com/blend/8850
+– Palace(CC-BY-NC-SA) https://www.blendswap.com/blend/14878
+– Spaceship(CC-BY) https://www.blendswap.com/blend/5349
+– Lifestyle(CC-BY) https://www.blendswap.com/blend/8909
+• BlendedMVS. We test on four objects of a recent synthetic MVS dataset, BlendedMVS (Yao et al.,
+2020) 3. The rendered images are blended with the real images to have realistic ambient lighting.
+The image resolution is 768× 576. One eighth of the images are held out as test sets.
+• Tanks & Temples. We evaluate on five objects of Tanks and Temples (Knapitsch et al., 2017) 4 real
+scene dataset. We label the object masks ourselves with the software of Altizure 5, and sample
+One eighth of the images for testing. The image resolution is 1920× 1080.
+• ScanNet. We use two real scenes of an RGB-D video dataset for large-scale indoor scenes,
+ScanNet (Dai et al., 2017)6. We extract both the RGB and depth images of which we randomly
+sample 20% as training set and use the rest for testing. The image is scaled to 640× 480.
+For the multi-scene learning, we show our result of training with all the scenes of Synthetic-NeRF
+and two out of Synthetic-NSVF, and the result of training with all the frames of a moving human:
+• Maria Sequence. This sequence is provided by Volucap with the meshes of 200 frames of a moving
+female. We render each mesh from 50 viewpoints sampled on the upper hemisphere at 1024×1024
+pixels. We also render 50 additional views in a circular trajectory as the test set.
+A.2 Implementation Details
+Architecture The proposed model assigns a 32-dimentional learnable voxel embedding to each
+vertex, and applies positional encoding with maximum frequency as L = 6 (Mildenhall et al., 2020)
+to the feature embedding aggregated by eight voxel embeddings of the corresponding voxel via
+trilinear interpolation. As a comparison, we also train our model without positional encoding where
+we set the voxel embedding dimension d = 416 in order to have comparable feature vectors as the
+complete model. We use around 1000 initial voxels for each scene. The final number of voxels
+after pruning and progressive training varies from 10k to 100k (the exact number of voxels differs
+scene by scene due to varying sizes and shapes), with an effective number of 0.32 ∼ 3.2M learnable
+parameters in our default voxel embedding settings.
+The overall network architecture of our default model is illustrated in Figure 10 with ∼ 0.5M
+parameters, not including voxel embeddings. Note that, our implementation of the MLP is slightly
+shallower than many of the existing works (Sitzmann et al., 2019b; Niemeyer et al., 2019; Mildenhall
+et al., 2020). By utilizing the voxel embeddings to store local information in a distributed way,
+we argue that it is sufficient to learn a small MLP to gather voxel information and make accurate
+predictions.
+Training & Inference We train NSVF using a batch size of 32 images on 8 Nvidia V100 GPUs,
+and for each image we sample 2048 rays. To improve training efficiency, we use a biased sampling
+strategy to sample rays where it hits at least one voxel. We use Adam optimizer with an initial
+learning rate of 0.001 and linear decay scheduling. By default, we set the step size τ = l/8, while
+the initial voxel size (l) is determined as discussed in § 3.3.
+For all experiments, we prune the voxels with Eq (6) periodically for every 2500 steps. All our
+models are trained with 100 ∼ 150k iterations by progressively halving the voxel and step sizes at 5k,
+25k and 75k, separately. At inference time, we use the threshold of � = 0.01 for early termination for
+all models. As a comparison, we also conduct experiments without setting up early termination. Our
+model is implemented in PyTorch using Fairseq framework7.
+3https://github.com/YoYo000/BlendedMVS
+4https://tanksandtemples.org/download/
+5https://github.com/altizure/altizure-sdk-offline
+6http://www.scan-net.org/
+7https://github.com/pytorch/fairseq
+15
+https://www.blendswap.com/blend/10597
+https://www.blendswap.com/blend/8850 
+https://www.blendswap.com/blend/14878
+ https://www.blendswap.com/blend/5349
+https://www.blendswap.com/blend/8909 
+https://github.com/YoYo000/BlendedMVS
+https://tanksandtemples.org/download/
+https://github.com/altizure/altizure-sdk-offline
+http://www.scan-net.org/
+https://github.com/pytorch/fairseq
+Figure 10: A visualization of the proposed NSVF architecture. For any input (p,v), the model first
+obtains the feature representation by querying and interpolating the voxel embeddings with the 8
+corresponding voxel vertices, and then uses the computed feature to further predicts (σ, c) using a
+MLP shared by all voxels.
+Evaluation We measure the quality on test sets with three metrics: PSNR, SSIM and LPIPS (Zhang
+et al., 2018). For the comparisons in speed, we render NSVF and the baselines with one image per
+batch and calculate the average rendering time using a single Nvidia V100 GPU.
+Multi-scene Learning Our experiments also require learning NSVF on multiple objects where
+a voxel location may be shared by different objects. In this work, we present two ways to tackle
+this issue. First, we use the navie approach that learns saperate embedding matrices for each object
+and only the MLP are shared. This is well suitable when the categories of target objects are quite
+distinct, and this can essentially increase the model capacity by extending the number of embeddings
+infinitely. We validate this method on Synthetic-10 dataset.
+However, when modeling multiple objects that have similarities (e.g., a class of objects, or a moving
+sequence of the target object), it is more suitable to have shared voxel representations. Here we learn
+a set of voxel embeddings for each voxel position, while maintaining a unique embedding vector for
+each object. We compute the final voxel representation based on hypernetworks (Sitzmann et al.,
+2019b) with the object embedding as the input. We show our results on Maria Sequence.
+A.3 Additional Baseline Details
+Scene Representation Networks (SRN, Sitzmann et al., 2019b) We use the original code open-
+sourced by the authors 8. To enable training on higher resolution images, we employ the ray-based
+sampling strategy that is similarly used in neural volumes and NeRF. We use the batch size of 8 and
+5120 rays per image. We found that clipping gradient norm to 1 greatly improves stability during
+training. All models are trained for 300k iterations.
+Neural Volumes (NV, Lombardi et al., 2019) We use the original code opensourced by the
+authors 9. We use batch size of 8 and 128× 128 rays per image. The center and scale of each scene
+are determined using the visual hull to place the scene within a cube that spans from -1 to 1 on each
+axis, as required by implementation. All models are trained for 40k iterations.
+Neural Radiance Fields (NeRF, Mildenhall et al., 2020) We use the NeRF code opensourced by
+the authors 10 and train on a single scene with the default settings used in NeRF with 100k-150k
+iterations. We scale the bounding box of each scene used in NSVF so that the bounding box lies
+within a cube of side length 2 centered at origin. To train on multiple scenes, we employ the auto-
+decoding scheme using a hypernetwork as described in SRN (Sitzmann et al., 2019b). We use a
+1-layer hypernetwork to predict weights for all the scenes. The latent code dimension is 256.
+8https://github.com/vsitzmann/scene-representation-networks
+9https://github.com/facebookresearch/neuralvolumes
+10https://github.com/bmild/nerf
+16
+https://github.com/vsitzmann/scene-representation-networks
+https://github.com/facebookresearch/neuralvolumes
+https://github.com/bmild/nerf
+Figure 11: Additional examples and comparisons sampled from Synthetic-NSVF, BlendedMVS and
+Tanks&Temples datasets. Please see more results in the supplemental video.
+17
+Figure 12: An example of zooming in and out without any visible artifacts
+.
+B Additional Results
+B.1 Per-scene breakdown
+We show the per-scene breakdown analysis of the quantitative results presented in the main paper
+(Table 1) for the four datasets (Synthetic-NeRF, Synthetic-NSVF, BlendedMVS and Tanks&Temples).
+Table 3 reports the comparisons with the three baselines in three metrics. Our approach achieves
+the best performance on both PSNR and LPIPS metrics across almost all the scenes, especially for
+datasets with real objects.
+B.2 Additional Examples
+In Figure 11, we present additional examples for individual scenes not shown in the main paper. We
+would like to highlight how well our method performs across a wide variety of scenes, showing much
+better visual fidelity than all the baselines.
+B.3 Additional Analysis
+Effects of Voxel Sizes. In Table 4, we show additional comparison on wineholder where we fix the
+ray marching step size as the initial values, while training the model with different voxel sizes. The
+first column shows the ratio compared to the initial voxel size. It is clear that reducing the voxel size
+helps improve the rendering quality, indicating that progressively increasing the model’s capacity
+alone helps model details better for free-viewpoint rendering.
+Table 4: Effect of voxel size on the wineholder test set.
+Voxel PSNR↑ SSIM↑ LPIPS↓ Speed (s/frame)
+1 28.82 0.933 0.063 2.629
+1/2 29.22 0.938 0.057 1.578
+1/4 29.70 0.944 0.052 1.369
+1/8 30.17 0.948 0.047 1.515
+Geometry Reconstruction Accuracy
+We would like to expand on the obser-
+vation that we have briefly touched on
+in the main paper regarding the nature
+of surface-based and volume-based ren-
+derers. As we have mentioned, surface-
+based rendering methods (e.g. SRN) re-
+quire an accurate surface to be able to
+learn the color well. A failure case where
+geometry fails to be learnt is seen in the
+"Character" scene in Figure 11. In addition, we observe that SRN frequently gets stuck in a local
+minima so that the geometry is incorrect but is nevertheless approximately multi-view consistent. We
+find that this phenomenon occurs much less frequently in volume rendering methods including ours.
+NV, due to limited spatial resolution, is unable to capture high frequency details. NeRF generally
+works well while is still not able to synthesize images as sharply as NSVF does. Furthermore, NeRF
+suffers from a slow rendering process due to its inefficient sampling strategy. For instance. it takes
+30s to render an 800× 800 image with NeRF.
+18
+Table 3: Detailed breakdown of quantitative metrics of individual scenes for all 4 datasets for our
+method and 3 baselines. All scores are averaged over the testing images.
+Synthetic-NeRF
+Chair Drums Lego Mic Materials Ship Hotdog Ficus
+PSNR↑
+SRN 26.96 17.18 20.85 26.85 18.09 20.60 26.81 20.73
+NV 28.33 22.58 26.08 27.78 24.22 23.93 30.71 24.79
+NeRF 33.00 25.01 32.54 32.91 29.62 28.65 36.18 30.13
+Ours 33.19 25.18 32.29 34.27 32.68 27.93 37.14 31.23
+SSIM↑
+SRN 0.910 0.766 0.809 0.947 0.808 0.757 0.923 0.849
+NV 0.916 0.873 0.880 0.946 0.888 0.784 0.944 0.910
+NeRF 0.967 0.925 0.961 0.980 0.949 0.856 0.974 0.964
+Ours 0.968 0.931 0.960 0.987 0.973 0.854 0.980 0.973
+LPIPS↓
+SRN 0.106 0.267 0.200 0.063 0.174 0.299 0.100 0.149
+NV 0.109 0.214 0.175 0.107 0.130 0.276 0.109 0.162
+NeRF 0.046 0.091 0.050 0.028 0.063 0.206 0.121 0.044
+Ours 0.043 0.069 0.029 0.010 0.021 0.162 0.025 0.017
+Synthetic-NSVF
+Wineholder Steamtrain Toad Robot Bike Palace Spaceship Lifestyle
+PSNR↑
+SRN 20.74 25.49 25.36 22.27 23.76 24.45 27.99 24.58
+NV 21.32 25.31 24.63 24.74 26.65 26.38 29.90 27.68
+NeRF 28.23 30.84 29.42 28.69 31.77 31.76 34.66 31.08
+Ours 32.04 35.13 33.25 35.24 37.75 34.05 39.00 34.60
+SSIM↑
+SRN 0.850 0.923 0.822 0.904 0.926 0.792 0.945 0.892
+NV 0.828 0.900 0.813 0.927 0.943 0.826 0.956 0.941
+NeRF 0.920 0.966 0.920 0.960 0.970 0.950 0.980 0.946
+Ours 0.965 0.986 0.968 0.988 0.991 0.969 0.991 0.971
+LPIPS↓
+SRN 0.224 0.082 0.204 0.120 0.075 0.240 0.061 0.120
+NV 0.204 0.121 0.192 0.096 0.067 0.173 0.056 0.088
+NeRF 0.096 0.031 0.069 0.038 0.019 0.031 0.016 0.047
+Ours 0.020 0.010 0.032 0.007 0.004 0.018 0.006 0.020
+BlendedMVS Tanks& Temple
+Jade Fountain Char Statues Ignatius Truck Barn Cate Family
+PSNR↑
+SRN 18.57 21.04 21.98 20.46 26.70 22.62 22.44 21.14 27.57
+NV 22.08 22.71 24.10 23.22 26.54 21.71 20.82 20.71 28.72
+NeRF 21.65 25.59 25.87 23.48 25.43 25.36 24.05 23.75 30.29
+Ours 26.96 27.73 27.95 24.97 27.91 26.92 27.16 26.44 33.58
+SSIM↑
+SRN 0.715 0.717 0.853 0.794 0.920 0.832 0.741 0.834 0.908
+NV 0.750 0.762 0.876 0.785 0.922 0.793 0.721 0.819 0.916
+NeRF 0.750 0.860 0.900 0.800 0.920 0.860 0.750 0.860 0.932
+Ours 0.901 0.913 0.921 0.858 0.930 0.895 0.823 0.900 0.954
+LPIPS↓
+SRN 0.323 0.291 0.208 0.354 0.128 0.266 0.448 0.278 0.134
+NV 0.292 0.263 0.140 0.277 0.117 0.312 0.479 0.280 0.111
+NeRF 0.264 0.149 0.149 0.206 0.111 0.192 0.395 0.196 0.098
+Ours 0.094 0.113 0.074 0.171 0.106 0.148 0.307 0.141 0.063
+19
+Figure 13: Our sampled results on ScanNet of two different rooms. From left to right: the predicted
+image, the initial voxels from the point clouds, and the predicted geometry normals.
+.
+Figure 14: Illustration of scene editing and rendering with NSVF.
+Zoom-In & -Out Our model naturally supports zooming in and out for a trained object. We show
+the results in Figure 12.
+B.4 Details for Experiments on ScanNet
+We list the details of learning on the ScanNet dataset. We first extract point clouds from all the RGBD
+images using known camera poses, and register them in the same 3D space. We then initialize a voxel
+based on the extracted points instead of using a bounding box. No pruning or progressive training are
+applied in this case. Furthermore, we integrate an additional depth loss based on the provided depth
+image, that is,
+Ldepth =
+∑
+p0,v
+|Z(p0,v)− Z∗(p0,v)|1 (7)
+where Z∗ is the ground truth depth and Z is the expected distance where each ray terminates at this
+distance in Algorithm 1. We show more qualitative results in Figure 13.
+B.5 Details for Experiments on Maria Sequence
+We present additional details for learning on the Maria sequence. The Maria sequence consists of 200
+frames of different poses if the same character. Since there exists strong correlation from frame to
+frame, we model all frames with the same set of initial voxels (a bounding box covers all 200 frames)
+and utilize a hypernetwork described in (Sitzmann et al., 2019b) to output the weights of the MLPs
+with the frame index as inputs. Different from single-object learning, we always start from the initial
+voxels and perform self-pruning at every training iteration.
+B.6 Procedure for Scene Editing and Composition
+The learnt NSVF representations can be readily used for editing and composition. We show the
+basic procedure to edit a real scene in the following three steps: (1) learn and extract sparse voxels
+with multi-view 2D input images; (2) apply editing (e.g. translation, cloning, removal, etc.) on the
+voxels; (3) read the modified voxels and render new images. We illustrate the procedure in Figure 14.
+Furthermore, by learning the model with multiple objects, we can easily render composed scenes by
+rearranging learned voxels and rendering at the same time.
+20
+	1 Introduction
+	2 Background
+	2.1 Neural Rendering with Implicit Fields
+	2.2 Limitations of Existing Methods
+	3 Neural Sparse Voxel Fields
+	3.1 Voxel-bounded Implicit Fields
+	3.2 Volume Rendering
+	3.3 Learning
+	4 Experiments
+	4.1 Experimental Settings
+	4.2 Results
+	4.3 Ablation Studies
+	5 Related Work
+	6 Limitations and Future Work
+	7 Conclusion
+	8 Broader Impact
+	A Additional Experimental Settings
+	A.1 Datasets
+	A.2 Implementation Details
+	A.3 Additional Baseline Details
+	B Additional Results
+	B.1 Per-scene breakdown
+	B.2 Additional Examples
+	B.3 Additional Analysis
+	B.4 Details for Experiments on ScanNet
+	B.5 Details for Experiments on Maria Sequence
+	B.6 Procedure for Scene Editing and Composition

@@ -1,0 +1,1034 @@
+Silhouette Vectorization by Affine Scale-space
+Yuchen He, Sung Ha Kang, Jean-Michel Morel
+Abstract
+Silhouettes or 2D planar shapes are extremely important in human communication,
+which involves many logos, graphics symbols and fonts in vector form. Many more shapes
+can be extracted from image by binarization or segmentation, thus in raster form that
+requires a vectorization. There is a need for disposing of a mathematically well defined and
+justified shape vectorization process, which in addition provides a minimal set of control
+points with geometric meaning. In this paper we propose a silhouette vectorization method
+which extracts the outline of a 2D shape from a raster binary image, and converts it to
+a combination of cubic Bézier polygons and perfect circles. Starting from the boundary
+curvature extrema computed at sub-pixel level, we identify a set of control points based
+on the affine scale-space induced by the outline. These control points capture similarity
+invariant geometric features of the given silhouette and give precise locations of the shape’s
+corners.of the given silhouette. Then, piecewise Bézier cubics are computed by least-square
+fitting combined with an adaptive splitting to guarantee a predefined accuracy. When there
+are no curvature extrema identified, either the outline is recognized as a circle using the
+isoperimetric inequality, or a pair of the most distant outline points are chosen to initiate
+the fitting.
+Given their construction, most of our control points are geometrically stable under affine
+transformations. By comparing with other feature detectors, we show that our method can
+be used as a reliable feature point detector for silhouettes. Compared to state-of-the-art
+image vectorization software, our algorithm demonstrates superior reduction on the number
+of control points, while maintaining high accuracy.
+1 Introduction
+A silhouette is a subset of the plane that was traditionally obtained by copying on paper the
+shadow projected on a wall by a person placed in front of a point light source1. In digital
+images, silhouettes of objects can be obtained by a mere luminance threshold (e.g. Otsu’s
+algorithm [11]) as soon as the object is darker or brighter than its surroundings. Then the
+silhouette appears as one of the connected components of an upper or lower set of the image.
+More generally, the study of shape promoted by Mathematical Morphology [24] calls 2D shapes
+any such connected component. We will call our object of study here 2D shape or silhouette.
+Silhouettes are essential for the human perception of shapes, and the distribution of corners
+along its outlines are closely linked to the neurological models of the visual system [9]. The
+geometric features captured by the vectorization are important in feature identification [30],
+remote sensing [21], and others [41, 43, 44]. As proved in [7], if a closed subset of the plane has
+finite perimeter, then it can be described by its essential boundary, which is a countable set of
+Jordan curves with finite length. In image processing upper level sets can be extracted by a
+mere thresholding, in which case they are a finite union of pixels, bounded by a finite number
+of Jordan curves made of vertical and horizontal segments. Using a parametric interpolation
+such as the bilinear, one can also extract the boundary of a level set as a union of pieces of
+hyperbolae [14]. Following [26] an image can therefore be decomposed in a tree of connected
+shapes ordered by inclusion, and each of these shapes (or silhouettes) can be described by its
+1
+https://en.wikipedia.org/wiki/Silhouette
+1
+ar
+X
+iv
+:2
+00
+7.
+12
+11
+7v
+1 
+ [
+cs
+.G
+R
+] 
+ 2
+3 
+Ju
+l 
+20
+20
+https://en.wikipedia.org/wiki/Silhouette
+raster or by its boundary, which is a finite number of Jordan curves described as polygons or
+concatenations of pieces of hyperbolae.
+Thus, there is a standard way to lead back image analysis to the analysis of 2D shapes, and
+eventually to the analysis of its outline, described by a finite set of nested Jordan curves that
+also are level lines of the image. This is not the only way to extract shapes from images. Any
+segmentation algorithm divides an image into connected regions. For example, many software
+vectorization software2 proceed by a mere color quantization which reduces the image to a
+piecewise constant image and therefore to a union of disjoint 2D shapes. The boundaries of
+these shapes can then be encoded in Scalable Vector Graphics (SVG) format3.
+A crucial point of such vector representation is that it is scalable, and therefore used for all
+2D shapes that, like logos or fonts, require printing at many sizes.
+Common silhouette vectorization methods from its outline consist of two steps: identification
+of control points and approximation of curves connecting the control points. In a founding
+work, Montanari [27] introduced a polygonal approximation of outlines of rasterized silhouettes.
+After the discrete boundary is traced, the sub-pixel locations of the polygonal vertices are
+determined by minimizing a global length energy with an L∞ loss to the initial outline. In more
+recent literature, Bézier curves have become widely adopted to replace polygonal lines [29].
+Most developments on silhouette outline vectorization use piecewise Bézier curves, or Bézier
+polygons [18, 28, 31, 35, 43]. Ramer [35] proposed an iterative splitting scheme for identifying
+a set of control points on a polygonal line C such that the Bézier polygon Ĉ defined by these
+vertices approximates C. The Hausdorff distance between Ĉ and C is constrained to stay below a
+predefined threshold, and the number of control points is suboptimal. More recently, Safraz [38]
+proposed an outline vectorization algorithm that splits the outline at corners which are identified
+without computing curvatures [17], then new control points are introduced to improve curve
+fitting. The control points produced by some of these works may correspond to curvature
+extrema of the outline, but this happens by algorithmic convergence rather than by design. It
+is well-known that the direct computation of curvature is not reliable [6]. The above mentioned
+methods reflect the challenges of estimating the outline’s curvature on shapes extracted from
+raster images.
+In this paper, we propose a mathematically founded outline vectorization algorithm. It
+identifies (i) curvature extrema of the outline computed at sub-pixel level by (ii) backpropagating
+control points detected as curvature extrema at coarser scale in the affine scale-space, then (iii)
+computing piecewise least-square cubic Bézier joining these control points while fitting the initial
+outline with a predefined accuracy.
+The main contribution of this paper is to propose a new approach using the sub-pixel
+curvature extrema and affine scale-space for silhouette vectorization. We shall illustrate by
+comparisons how the proposed method can give an accurate vectorization with a generally
+smaller number of more meaningful control points.
+We organize the paper as follows. In section 2, an overview of proposed algorithm is pre-
+sented. In Section 3, we review the level line extraction and sub-pixel curvature computa-
+tion [19]. In Section 4, we introduce the affine scale-space induced by the smooth bilinear
+outline and define the candidate control points. In Section 5, we describe an adaptive piecewise
+least-square Bézier polygon fitting, where the set of candidate points is modified to achieve
+a compact representation and to guarantee a predefined accuracy. The overall algorithm is
+summarized in Section 6. We include various numerical results and comparison with other
+vectorization methods in Section 7, and conclude the paper in Section 8.
+2See (e.g.) https://en.wikipedia.org/wiki/Adobe_Illustrator or Vector Magic
+3
+https://fr.wikipedia.org/wiki/Scalable_Vector_Graphics
+2
+https://en.wikipedia.org/wiki/Adobe_Illustrator
+https://fr.wikipedia.org/wiki/Scalable_Vector_Graphics
+Figure 1: Flowchart of the proposed method. (a) A raster image of a cat’s silhouette. (b) Zoom-
+in of (a). (c) Extracted bilinear outline of (a). (d) Inversely tracing the curvature extrema along
+the affine shortening flow. (e) Zoom-in of (d). (f) The vectorized outline of (a) with control
+points marked as red dots. (g) Zoom-in of (f). (h) Vectorized silhouette of (a) by the proposed
+method. (i) Zoom-in of (h). Notice the difference between the given image (a) and our result
+(h), as well as the zoom of (b) and (i).
+2 Overview of the Proposed Method
+On a rectangular domain Ω = [0, H] × [0,W ] ⊂ R2 with H > 0 and W > 0, a silhouette is
+a compact subset S ⊂ Ω whose topological boundary ∂S, the outline, is a piecewise smooth
+curve. Suppose S is represented by a raster binary image I : Ω∩N2 → {0, 255}, that is, the set
+of black pixels
+S = {(i, j) ∈ Ω ∩ N2 | I(i, j) = 0} (1)
+approximates S. We assume that S ∩ ∂Ω = ∅. Our objective is to find a cubic Bézier polygon
+close to ∂S in the Hausdorff distance. The proposed silhouette vectorization method has three
+main steps:
+1. Estimate the curvature extrema of ∂S across different scales in sub-pixel level.
+2. Based on the affine scale-space induced by ∂S, identify salient curvature extrema which
+are robust against pixelization and noise as the candidate control points.
+3. Fit the outline using a Bézier polygon from the candidate control points which are adap-
+tively modified to achieve a compact representation while guaranteeing a desired accuracy.
+In the following sections, we give the details of the proposed method.
+3
+(a) (b)
+Figure 2: Illustration of the geometric scheme for affine shortening. (a) A convex component
+of a discrete curve and a σ-chord (dashed line). (b) The result of discrete σ-affine erosion is a
+polygonal line (blue lines) whose vertices are middle points (red dots) of the σ-chords.
+3 Sub-pixel Curvature Extrema Localization
+Following the work of [19], we consider the bilinear interpolation u : Ω→ [0, 255] for the raster
+image I whose continuous function form is
+u(x, y) = axy + bx+ cy + d , (x, y) ∈ Ω , (2)
+where a, b, c, d are scalar functions depending on (bxc, byc), and
+u(i+ 1/2, j + 1/2) = I(i, j) , (i, j) ∈ Ω ∩ N2 . (3)
+Here brc is the floor function giving the greatest integer smaller than the real number r. For any
+λ ∈ (0, 255), the level line of u corresponding to λ is defined as Cλ = {(x, y) ∈ Ω | u(x, y) = λ}.
+Since I is binary, the Hausdorff distance between any Cλ and the raster silhouette S (1) is
+bounded above by
+√
+2. Hence Cλ for an arbitrary level λ ∈ (0, 255) approximates the discrete
+outline as a piecewise C2 Jordan curve except for at finitely many points, e.g., saddle points [15].
+In the following, we focus on a single level line Cλ∗ for some λ∗ ∈ (0, 255) extracted by the level
+line extraction algorithm detailed in [16].
+Specifically, Cλ∗ is either piecewise linear line (horizontal or vertical) or a part of a hyperbola
+whose asymptotes are adjacent edges of a single pixel. See Figure 1 (c). Due to pixelization,
+Cλ∗ shows strong staircase effects [13], and such oscillatory behavior is effectively reduced by
+the affine shortening flow [13,37]. For any planar curve C, we smooth it via solving the PDE
+∂C(s, t)
+∂t
+= κ1/3(s, t)N(s, t) , C(s, 0) = C(s) , s ∈ [0,Length(C(·, t))] (4)
+to some short time T > 0. Here each curve C(·, t) is arc-length parametrized for any t, κ denotes
+the curvature, and N is the inward normal at C(s, t). The flow (4) is affine intrinsic, that is, its
+solution is invariant under affine transformations; hence it preserves the geometric properties
+of the original curve during the evolution.
+To solve (4), we apply the fully consistent geometric scheme [25] which is independent of
+grid discretization. The idea is that by iterating the discrete affine erosion with a sufficiently
+small parameter, the convergent morphological operator becomes equivalent to the differential
+operator in (4). Given a discrete curve partitioned by its inflection points, the σ-affine erosion
+of each covex component is a polygonal line whose vertices are the middle points of σ-chords.
+See Figure 2. A σ-chord is a segment joining two points on the curve such that the area enclosed
+by the segment and the curve is σ. After the erosion, we glue the evolved components at the
+inflection points, resample the resulted curve by arc-length, and iterate the procedure above to
+reach the desired scale T . For a sufficiently smooth convex curve, applying the σ-affine erosion
+is equivalent to solving (4) till time ωσ2/3 for some absolute constant ω > 0 [25].
+4
+Denoting the smooth bilinear outline obtained above by Σλ∗ , the curvature at any of its
+vertices can be computed without dependence on the grid discretization. The following discus-
+sion applies for each connected component. Suppose Σλ∗ = {Pi(xi, yi)}Ni=0 with P0 = PN and
+is oriented same as Cλ∗ . Following [19], the discrete curvature at point Pi is computed by
+κ(Pi) =
+−2 det(PiPi−1 PiPi+1)
+||Pi−1Pi|| ||PiPi+1|| ||Pi−1Pi+1||
+, i = 0, 1, 2, . . . , N − 1 (5)
+where
+det(PiPi−1 PiPi+1) := det
+[
+xi−1 − xi xi+1 − xi
+yi−1 − yi yi+1 − yi
+]
+, (6)
+P−1 = PN−1, and || · || denotes the Euclidean 2-norm. It computes the discrete curvature of Σλ∗
+at Pi as the curvature of the circumcircle that passes through three consecutive points Pi−1, Pi,
+and Pi+1. The discrete curvature values can be obtained at arbitrary resolution based on the
+sampling frequency applied to the bilinear outline Cλ∗ , hence it is called “curvature microscope”.
+To identify the curvature extrema, we process the data {κ(Pi)}N−1i=0 by repeatedly applying
+the filter (1/18, 4/18, 8/18, 4/18, 1/18) with periodic boundary condition for 20 times to suppress
+the noise. Based on the filtered data {κ̃(Pi)}N−1i=0 , Pi is a curvature extramum if
+|κ̃(Pi)| > |κ̃(Pj)| , for j = i± 1, i± 2 . (7)
+In practice, to further stabilize the identification, we also require that a curvature extremum
+should have |κ̃(Pi)| > δ for some small value δ > 0. In this paper, we take δ = 0.001.
+Remark 3.1. Our method is also applicable when the input is a raster gray-scale image where
+the intensity variation concentrates around the topological boundary of the underlying silhou-
+ette. The higher the image gradient across the silhouette’s boundary, the more stable the
+position of the extracted outline with respect to the choice of levels.
+4 Affine Scale-space Control Points Identification
+The curvature extrema form a good set of control points, since they capture the geometrical
+changes in the outline. We propose to refine the control points via affine scale-space approach,
+which is detailed in this section.
+4.1 Backward Tracing via Inverse Affine Shortening Flow
+The concept of scale-space, first introduced by Witkin [42], provides a formalism for multiscale
+analysis of signals. Later developments [5, 10, 22, 32] established the axiomatic properties for
+defining a scale-space. In [37], Sapiro et al. proved that the solution of the affine shortening
+flow (4) defines an affine scale-space, where the scale is given by the time parameter, and the
+solution at any scale is affine invariant, i.e., it commutes with planar special affine transforms.
+A critical property satisfied by the affine scale-space is causality: no new information is created
+when passing from fine to coarse scales. In particular, the following is proved in [37]:
+Proposition 4.1. In the affine invariant scale-space of a planar curve, the number of vertices,
+that is, the extrema of Euclidean curvature, is a nonincreasing function of time.
+More precisely, every curvature extremum on the curve at a coarser scale is the continuation
+of at least one of the extrema at a finer scale. The lack of one-to-one correspondence is due to
+the possibility of multiple extrema (e.g. two maxima and one minimum) merging to a single
+one during the evolution.
+5
+In this paper, we propose a new approach for defining the control points as the curvature
+extrema on Σλ∗ which persist across different scales in its affine scale-space. By inversely tracing
+curvature extrema from the coarser scales to the finer scales, the proposed control points are
+more robust to noise and help to capture prominent corners of the silhouette.
+Given a sequence of discrete times t0 = 0 < t1 < · · · < tK for some positive integer K, we
+obtain the curve C(·, tn) at scale tn by the affine shortening flow (4) for n = 0, 1, . . . ,K. For any
+1 ≤ n ≤ K, by a first order Taylor expansion, the affine shortening flow (4) is approximated as
+C(s, tn)− C(s, tn−1)
+tn − tn−1
+= (κn(s))1/3Nn(s) + r(s) , (8)
+where κn and Nn denote the curvature and normal at the scale tn, and r is a remainder such
+that ||r(s)|| = O(tn − tn−1). Rearranging (8) gives
+C(s, tn−1) = C(s, tn)− (tn − tn−1)(κn(s))1/3Nn(s) + (tn − tn−1)r(s) . (9)
+This expression shows that, if tn− tn−1 is sufficiently small, by following the opposite direction
+of the affine shortening flow at C(s, tn), that is,
+−sign(κn(s))Nn(s) , (10)
+we can find C(s, tn−1) nearby. Here sign(r) denotes the sign function which gives +1 if r > 0,
+−1 if r < 0 and 0 if r = 0. This gives a well-defined map from the curve at a coarser scale tn
+to a finer scale tn−1 via the inverse affine shortening flow.
+Starting from K, for any curvature extremum XK on CK = C(·, tK), we set up the following
+constrained optimization problem to find a curvature extremum XK−1 on CK−1 at scale tK−1:
+max
+X∈CK−1
+〈X −XK ,−sign(κK)NK〉
+||X −XK ||
+, s.t.
+
+
+〈X −XK ,−sign(κn)Nn〉
+||X −XK ||
+> α
+||X −XK || < D
+X is a curvature extremum on CK−1
+, (11)
+where D > 0 is a positive parameter that controls the closeness between X and XK , and α
+enforces that the direction of X−XK is similar to that of the inverse affine shortening flow. The
+problem (11) looks for the curvature extremum on CK−1 in the D-neighborhood of XK that is
+the nearest to the line passing XK in the direction of the inverse affine shortening flow. When
+D and α are properly chosen, if (11) has one solution, we define it to be XK−1. If (11) has
+multiple solutions, we choose the one that has the shortest distance from XK to be XK−1. In
+case there are multiple solutions having the same shortest distance from XK , we can arbitrarily
+select one to be XK−1. However, in practice, if (11) has a solution, it is almost always unique.
+We repeat the optimization (11) for K − 1, K − 2, etc. Either the solutions always exist
+until the scale t0, or there exists some m ≥ 1, such that (11) at tm does not have any solution.
+In the first case, we call XK a complete point, and in the second case, we call it incomplete. For
+each curvature extremum XK on CK , we construct a sequence of points L(XK) that contains
+the solutions of (11) for K,K − 1,K − 2, etc., starting at XK in a scale-decreasing order. If
+XK is complete, then L(XK) has exactly K + 1 elements, and we call the sequence complete;
+otherwise, the size of L(XK) is strictly smaller than K+1, and we call the sequence incomplete.
+We define the last elements of the complete sequences as the candidate control points,
+and denote them as {Oi(tK)}
+M(tK)
+i=1 . This set of points is ordered following the orientation of
+Σλ∗ . Here the parameter tK in the parenthesis indicates that the candidate control points are
+associated with the curvature extrema identified at the scale tK . When the scale tK is fixed,
+we simply write {Oi}Mi=1.
+6
+4.2 Degenerate Case
+In the discussion above, if M(tK) = 0, i.e., if there are no candidate control points identified on
+Σλ∗ associated with the curvature extrema at scale tK , then we call it a degenerate case. This
+situation occurs when the underlying silhouette is a disk, or has a smoothly varying boundary,
+provided that the image has sufficiently high resolution. This paper is not considering open
+curves. If we did, the absence of curvature extrema only means that the curve has a monotone
+curvature, hence is a spiral.
+If S is indeed a disk, the vectorization only requires information about its center and radius.
+We use the isoperimetric inequality to determine if Σλ∗ represents a circle: for any closed plane
+curve with area A and perimeter L, we have
+4πA ≤ L2 , (12)
+and the equality holds if and only if the curve is a circle. In practice, we decide that Σλ∗ is a
+circle only if the corresponding ratio 1− 4πA/L2 < 0.005. By this criterion, if Σλ∗ is classified
+as a circle, then its center and radius are easily computed by arbitrarily three distinct points on
+Σλ∗ . For numerical stability, we take three outline points that are equidistant from each other.
+When 1 − 4πA/L2 ≥ 0.005 for a degenerate case, we insert a pair of most distant points
+on Σλ∗ to be the candidate control points. An efficient approach for finding these points is to
+combine a convex hull algorithm, e.g., the monotone chain method [8], which takes O(N logN)
+time, with the rotating calipers [34], which takes O(N) time. Here N is the number of vertices
+of the polygonal line Σλ∗ .
+5 Adaptive Cubic Bézier Polygon Approximation
+Starting from the control points identified by the affine scale-space, H := {Oi}Mi , we adjust
+H by deleting non-salient sub-pixel curvature extrema and inserting new control points for
+guaranteeing a predefined accuracy. This adaptive approach yields a cubic Bézier polygon
+B(H) whose vertices are points in the updated H and edges are cubic Bézier curves computed
+by least-square fittings.
+5.1 Bézier Fitting with Chord-length Parametrization
+A cubic Bézier curve is specified by four points B0, B1, B2, and B3. Its parametric form is
+B(s) = (1− s)3B0 + 3(1− s)2sB1 + 3(1− s)s2B2 + s3B3 , s ∈ [0, 1] . (13)
+Specifically, it has the following properties: (i) B0 and B3 are the two endpoints for B(s); and
+(ii) B1 − B0 is the right tangent of B(s) at B0, and B2 − B3 is the left tangent at B3. To
+approximate a polygonal line segment Σ = {P0, P1, . . . , PN}, we find a cubic Bézier curve that
+is determined by B0 = P0, B1, B2, and B3 = PN such that the squared fitting error
+S̃ =
+N∑
+i=0
+(
+Pi − ((1− s̃i)3B0 + 3(1− s̃i)2s̃iB1 + 3(1− s̃i)s̃i2B2 + s̃i3B3)
+)2
+(14)
+is minimized. Here s̃i = (
+∑i
+k=1 ||Pk−Pk−1||)/(
+∑N
+k=1 ||Pk−Pk−1||) is the chord-length parameter
+for Pi, i = 0, 1, . . . , N . We note that (14) is used to initialize an iterative algorithm in [33] for a
+more accurate Bézier fitting. The benefit of this approximating setup is that we have closed-form
+formulae for the minimizing B1 and B2 as follows:
+B1 = (A2C1 −A12C2)/(A1A2 −A212) , B2 = (A1C2 −A12C1)/(A1A2 −A
+2
+12) , (15)
+7
+where
+A1 = 9
+N∑
+i=1
+t̃i
+2
+(1− t̃i)4 , A2 = 9
+N∑
+i=1
+t̃i
+4
+(1− t̃i)2 , A12 = 9
+N∑
+i=1
+t̃i
+3
+(1− t̃i)3 ,
+and
+C1 =
+N∑
+i=1
+3s̃i(1− s̃i)2[Pi− (1− s̃i)3P0− s̃i3P3] , C2 =
+N∑
+i=1
+3s̃i
+2(1− s̃i)[Pi− (1− s̃i)3P0− s̃i3P3] .
+Hence we gain a better computational efficiency. A similar strategy is also taken in [28] to find
+a Bézier cubic to smooth discrete outlines.
+5.2 Control Point Update: Deletion of Sub-pixel Extrema
+Recall that the candidate control points H = {Oi}Mi=1 in Section 4 are curvature extrema at sub-
+pixel level. Hence it is possible that some of them do not reflect salient corners of the silhouette.
+To remove spurious sub-pixel extrema from H, we propose to compare the left tangent and right
+tangent at each candidate control point, which are obtained via the least-square cubic Bézier
+fitting discussed above.
+We take advantage of the second property of cubic Bézier curves mentioned in Section 5.1.
+For i = 1, . . . ,M , we fit a cubic Bézier to the polygonal line segment whose set of vertices is
+{Oi = Pj(i), Pj(i)+1, . . . , Pj(i+1) = Oi+1} , (16)
+where we take OM+1 = O1, and obtain the estimated defining points Bi,1 and Bi,2 for the Bézier
+curve. The left and right tangent at Oi are computed as
+T−i = Bi−1,2 −Oi , T
++
+i = Bi,1 −Oi , (17)
+respectively, where B−1,2 = BM,2. These tangent vectors are associated with all the points
+between neighboring candidate control points. Therefore, the angle formed by T−i and T
++
+i
+measures the sharpness of Σλ∗ at Oi from a more global perspective. We delete Oi from the set
+of candidate control points H if
+〈T+i , T
++
+i 〉
+||T+i || ||T
+−
+i ||
++ 1 < ε , (18)
+for some small parameter ε > 0, which is equivalent to the condition that the angle between
+T+i and T
+−
+i is close to π. The set H is updated with the remaining control points.
+It is possible that all the candidate control points {Oi}Mi=1 are removed after this procedure,
+thus we encounter a degenerate case. If the underlying outline is a circle, we compute the center
+and radius; if it is not, we take the most distant pair of outline points to update H.
+5.3 Control Point Update: Insertion for Accuracy
+The candidate control points in H split the outline Σλ∗ into polygonal line segments, each of
+which is approximated by a cubic Bézier using least square fitting as described in Section 5.1.
+We obtain a Bézier polygon that approximates Σλ∗ , denoted by B(H). A natural measure for
+the error of approximating Σλ∗ using the Bézier polygon B(H) is
+e = max
+Pi∈Σλ∗
+dist(Pi,B(H)) , (19)
+8
+where dist(Pi,B(H)) = infP∈B(H) ||Pi − P || is the distance from Pi to the curve B(H). It is
+desirable that the user can specify the threshold for the error, τe > 0. To guarantee that e ≤ τe,
+we apply the splitting strategy [35] which inserts Pnew ∈ Σλ∗ to H as a new control point if
+dist(Pnew,B(H)) > τe , (20)
+and among those points on Σλ∗ satisfying (20), dist(Pnew,B(H)) is the largest. After the
+insertion, we fit Σλ∗ using a Bézier polygon based on the new set of control points in H. If the
+error of the newly fitted Bézier polygon is still greater than τe, we insert another point based
+on the same criterion. This series of insertions terminates once the condition e ≤ τe is met.
+Finally, B(H) with the updated set of control points H gives a Bézier polygon that approxi-
+mates the outline ∂S, and with its interior filled with black, we obtain the vectorized silhouette
+for S from the raster image I.
+Remark 5.1. For a further reduction on the size of H, we may consider an optional step to
+merge neighboring Bézier cubics if the union of the underlying polygonal line segments can be
+approximated by a single Bézier cubic via (14) with an error below τe. We can regard the
+insertion in Section 5.3 as controlling the data fidelity, and the simplification described here as
+minimizing the complexity of an estimator. Alternatively iterating these procedures provides a
+numerical scheme for a constrained optimizing problem
+min
+H⊆Σλ∗
+|H| , s.t. max
+Pi∈Σλ∗
+dist(Pi,B(H)) ≤ τe ,
+where |H| denotes the number of elements in H. For any τe ≥ 0, this problem always has a
+solution, yet the uniqueness largely depends on the geometric structure of Σλ∗ .
+6 Pseudo-code for the Proposed Method
+In this section, assuming that the outline of the given silhouette has only one connected com-
+ponent, we summarize the proposed algorithm for silhouette vectorization in three steps:
+1. Extraction of the smooth sub-pixel outline Σλ∗ Extract the level line corresponding to λ
+∗
+from the bilinear interpolation of the image, then discretize it as a polygon with uni-
+form sub-pixel sampling. To reduce the staircase effects, smooth the polygon via affine
+shortening at a scale specified by the smoothness parameter σ0. In this paper, we take
+λ∗ = 127.5.
+2. Identification of candidate control points. Fix an increment ∆σ > 0 and a positive integer
+K > 0. Evolve Σλ∗ via the affine shortening using the scales σ
+∗ = k∆σ, k = 1, 2, . . . ,K.
+Starting from each curvature extremum at scale K∆σ, trace the curvature extrema at
+smaller scales along the inverse affine shortening flow as described by (11). By doing so,
+each curvature extremum at scale K∆σ induces a sequence of traced curvature extrema
+across different scales, which are arranged in a scale-decreasing order. The final elements
+of the complete sequences are defined as the candidate control points, denoted by H =
+{Oi}Mi=1. In this paper, we fix ∆σ = 0.5 and K = 4, so that σ
+∗ = 2.
+In case M = 0, process the degenerate case as described in Section 4.2.
+3. Refinement of the control points. Remove any candidate control point Oi from H whose
+left tangent and right tangent (17) form an angle close to π (20). If all the candidate
+control points are removed, follow the instruction in Section 4.2 to address the degenerate
+case. Then, insert new control points into H by the splitting strategy [35] until the
+approximation error e (19) is bounded by a user-specified threshold τe > 0.
+9
+4. (Optional) Merging neighboring Bézier cubics For i = 1, 2, . . . ,M , delete Oi from H if the
+polygonal line segment bounded by the left and right neighboring control points of Oi in
+H can be fitted by a single Bézier cubic with error smaller than τe.
+As for the output, if Σλ∗ is not a circle, we write the points in H together with the estimated
+defining points (15) for each segment into a SVG format with the specification of drawing cubic
+Bézier curves. For the visualization purpose, if a fitted Bézier curve has a maximal absolute
+curvature smaller than 0.001, we assign a straight line. Note that this value 0.001 is consistent
+with the value for δ in Section 3. If Σλ∗ is a circle, we write its estimated center and radius
+into the SVG with the specification of drawing a circle. The pseudo-codes are presented in
+Algorithm 1 (with sub-procedures described in Algorithm 2 and Algorithm 3), which can be
+parallelized to apply to outlines with multiple connected components.
+7 Numerical Results
+In this section, we present some numerical experiments to demonstrate the performance of our
+proposed algorithm. After obtaining the SVGs from [3], we rasterize them as PNG images, which
+are used as inputs in the following experiments. The inputs are either binary or gray-scale. We
+choose the level line corresponding to λ∗ = 127.5 to approximate the outlines throughout the
+experiments. By default, we set the error threshold τe = 1, so that the vectorized outline is
+guaranteed to have sub-pixel level of accuracy; and the smoothness parameter σ0 = 1. For
+the parameters in (11), we fix D = 10 and α = 0.9. The silhouettes used in the following
+experiments are collectively displayed in Table 3. If without any specifications, we apply the
+proposed method without the optional merging step.
+General Performance
+We present some results of the our proposed algorithm in Figure 3. In (a), we have a silhouette
+of a cat. It has a single outline curve which contains multiple sharp corners on the tail, near the
+neck and around the paws, etc. These features provide informative visual cues for silhouette
+recognition, and our algorithm identifies them as control points for the silhouette vectorization
+shown as the red dots in (b). The outline of a butterfly in (c) has multiple connected components.
+In addition to the control points corresponding to corners, we observe in (d) some others on
+smooth segments of the outline. They are inserted during the refinement step of our algorithm,
+where a single Bézier cubic is inadequate to guarantee the accuracy specified by the error
+threshold τe = 1. In (e), we show a tessellation of words and (f) presents the vectorized result.
+The input is a PNG image of dimension 1934×1332 and takes 346 KB in the storage. In contrast,
+its silhouette vectorization, saved as a SVG file, has in total 2683 control points and takes 68 KB
+if the coordinates are stored in float, 36 Kb if stored in integers. In this example, our algorithm
+provides a compresion ratio of about 80.35% for float type, and a 89.60% compression ratio for
+the integer type. Moreover, the total computational time for this case only takes 0.83 seconds.
+Similar statistics for the other two examples are summarized in Table 1. Our algorithm is both
+effective and efficient.
+Degenerate Cases
+An important feature of our algorithm is that it offers flexibility in face of degenerate cases,
+where the silhouette does not have identifiable curvature extrema on its outline. A disk, as
+shown in Figure 4 (a), is the most common example. Once our algorithm classifies the outline
+as a circle, instead of fitting Bézier cubics, it directly approximates the center and radius of the
+circle and orders the SVG output to draw a perfect circle. See Figure 4 (b).
+10
+Algorithm 1: Shape Vectorization by Affine Scale-space
+Input: Σ0λ∗ : a polygonal Jordan curve sampled from the level line of the bilinear
+interpolated image u corresponding to the level λ∗. τe: approximation error
+threshold. σ0: smoothness parameter. Fixed parameters: ∆σ = 0.5 , K = 4.
+Output: Cubic Bézier polygon B(H) specified by the vertex set H, or a perfect circle.
+1 Apply the affine shortening to smooth Σ0λ∗ up to scale σ0, which yields the sub-pixel
+smooth outline Σλ∗ = {Pi}Ni=0.
+2 for k = 1, 2, . . . ,K do
+3 Evolve Σλ∗ up to scale k∆σ via the affine shortening, denoted by Σ
+k
+λ∗ = {P
+k
+i }
+Nk
+i=0.
+4 Compute curvature κki of Σ
+k
+λ∗ at P
+k
+i according to (5).
+5 Denoise the data {κki }
+Nk
+i=1 by moving average, based on which curvature extrema
+{Xki }
+Sk
+i=1 are located by (7).
+6 Initialize H = ∅.
+7 if SK ≥ 1 then
+8 for i = 1, . . . , SK do
+9 Set X
+(K)
+i = X
+K
+i .
+10 for k = K,K − 1, . . . , 1 do
+11 Solve the problem (11) associated with X
+(k)
+i
+12 if (11) has a solution then
+13 Denote the solution by X
+(k−1)
+i . if k=1 then
+14 Insert X
+(0)
+i into H.
+15 else
+16 break
+17 else
+18 Run Algorithm 2.
+19 for i = 1, . . . ,M do
+20 Fit the line segment {Oi = Pj(i), Pj(i)+1, . . . , Pj(i+1) = Oi+1} ⊂ Σλ∗ using least square
+cubic Bézier (14).
+21 Obtain the right tangent T+i at Oi and left tangent T
+−
+i+1 at Oi+1 according to (17).
+22 for i = 1, . . . ,M do
+23 if Condition (18) holds then
+24 Remove Oi from H.
+25 if H = ∅ then
+26 Run Algorithm 2.
+27 Compute approximation error e of the Bézier polygon B(H) via (19).
+28 while e > τe do
+29 Insert into H a point Pnew ∈ Σλ∗ furthest from B(H) that satisfies (20).
+30 Recompute the error e of B(H).
+31 (Optional) Run Algorithm 3 to further shrink the size of H.
+11
+Algorithm 2: Sub-procedure for the Degenerate Case
+1 if Σλ∗ is a circle then
+2 Take three equidistant points on Σλ∗ to compute the center O and radius r.
+3 return O, r.
+4 else
+5 Find the most distant pair of points on Σλ∗ : O1, O2. Set H = {O1, O2}.
+Algorithm 3: Simple Bézier Cubic Merging
+1 Suppose H = {Oi}Mi=1.
+2 Define M ′ = M , P− = OM ′ , P
+0 = O1, and P
++ = O2.
+3 for i = 1, . . . ,M do
+4 Fit the the polygonal line segment bounded by P− and P+ using least square cubic
+Bézier (14), and denote the fitting error by e.
+5 if e < τe then
+6 P− ← Oi, P 0 ← Omod(i+1,M ′), P+ ← Omod(i+2,M ′).
+7 else
+8 M ′ ←M ′ − 1
+9 P− ← Omod(i−1,M ′), P 0 ← Omod(i+1,M ′), P+ ← Omod(i+2,M ′).
+Shape Image Dim. Size Result Size (float) Result Size (int) Proc. Time
+Cat (a) 700× 537 5 KB 2 KB (60%) 1 KB (80%) 0.10 Sec.
+Butterfly (c) 732× 596 178 KB 5 KB (97.19%) 3 KB (98.31%) 0.15 Sec.
+Text (e) 1934× 1332 346 KB 68 KB (80.35%) 36 KB (89.60%) 0.83 Sec.
+Table 1: Performance statistics of the proposed algorithm applied to examples in Figure 3. The
+float type result stores the control point coordinates as float type, and the int type result stores
+them as integer type.
+12
+(a) (b)
+(c) (d)
+(e) (f)
+(g) (h)
+Figure 3: Examples of results of the proposed algorithm for silhouette vectorization. (a) Cat
+and (b) its vectorized outline (42 control points). (c) Butterfly and (d) its vectorized outline
+(158 control points). (e) Text design and its vectorized outline (2683 control points). Each red
+dot signifies the location of a control point. (g) Two letters exerted from (e) scaled up with the
+same magnitude. (h) Zoom-in of the vectorization (f) on the two letters corresponding to (g).
+13
+Figure 4 (c) shows another degenerate case. It consists of a rectangle in the middle and two
+half disks attached on its opposite sides, whose diameters are equal to the height of the rectangle.
+This particular silhouette has no strict curvature extrema on its outline. By computation, its
+area is 172644 and perimeter is 1742.07; since 4πArea/Perimeter2 = 4×π×172644/(1742.07)2 =
+0.7149 < 1, the outline is not a circle. Hence the algorithm inserts a pair of most distant points
+on the outline, the left-most and the right-most points in this case, and conducts the Bézier
+fitting routine as in the non-degenerate cases.
+The design of this special procedure for degenerate cases is important for two reasons.
+First, it makes the algorithm adaptive to image resolutions. If we reduce the resolution of (c)
+from 774 × 320 to 144 × 58, whose magnified version is shown in (e), due to strong effects
+of pixellization, all the control points are identified as local curvature extrema. (f) shows the
+magnified vectorization of the low resolution image. Second, it improves the compression ratio.
+To fit a circle using Bézier polygon requires at least two pieces of cubics, hence we need to store
+the coordinates of at least 6 points. With our algorithm, only the coordinate of the center and
+the value of the radius are required, which saves the space for 9 float or int type data. Figure 4
+(g) shows mixture of degenerate and non-degenerate outline curves. The vectorization in (h)
+shows that the circles are represented as perfect circles, and the others are represented as Bézier
+polygons.
+Importance of the Control Point Update
+Figure 5 compares the vectorization using control points before and after the control point
+update, which are described in Section 5.2 and 5.3. The outline of the knot silhouette in (a)
+shows curvature variations of multiple scales. If no refinement is applied, as shown in (b), the
+corners of larger scale are captured, while some inflection points are missed on the top-left
+component. Moreover, many unnecessary control points appear on several arcs. In contrast,
+with the refinement, the result in (c) has fewer control points, but with a better approximation
+accuracy. Notice that on the top-left component of the knot, the newly inserted control points
+are close to the inflection points, and on the arcs, only 1 or 2 control points are generally needed.
+By refinement, we remove extrema that do not represent salient corners and inset new control
+points to meet the accuracy requirement. Although the total number of control points may or
+may not decrease after refinement, the distribution of the refined control points shows more
+correlation with the geometric features of the outline, and the vectorized result is improved.
+Effect of the Error Threshold τe
+The error threshold τe controls the accuracy of the Bézier polygon approximating the outline.
+When the value of τe is reduced, the user requires higher accuracy of the Bézier fitting. Since
+any Bézier cubic contains at most one inflection point, a single cubic only allows a limited
+amount of variations. Hence, by adding more control points to split the outline into shorter
+segments, the specified accuracy is achieved.
+To better illustrate the effect of varying the threshold τe, we computed in percentage the
+reduction of the number of control points when the threshold is τe > 0.5 compared to that when
+the threshold is 0.5:
+ρ(τe) =
+#C(τe)−#C(0.5)
+#C(0.5)
+× 100% , τe > 0.5 . (21)
+Here #C(τe) denotes the number of control points when the threshold is τe. Figure 6 (a) shows
+the average values and the standard deviations of (21) when we apply the proposed method to
+the 20 silhouettes in our data set. We observe that when τe < 1, the effect of increasing τe is
+the strongest: the number of control points reduces exponentially. On average, the percentage
+curves show inflection points around τe = 1, that is, when the fitted Bézier polygon has distance
+14
+(a) (b)
+(c) (d)
+(e) (f)
+(g) (h)
+Figure 4: Degenerate cases. In (a) and (c), no candidate control points were identified. Our
+algorithm handles such situations by checking if the outline is a circle. If it is, e.g. (a), the
+center and radius are computed and a circle is drawn without Bézier fitting; hence, there is no
+control point (red dots) on the vectorized outline (b). The blue dot indicates the center of the
+circle. If it is not a circle, e.g., (c), a pair of most distant points are inserted to initiate the
+Bézier fitting, such as in (d). (e) shows the low resolution version of (c) and (f) displays its
+vectorization. When the resolution is reduced, all the control points are identified curvature
+extrema. In (g), three of the outline curves are identified as circles and the others are fitted by
+Bézier polygons. (h) shows the vectorized result.
+15
+(a) (b) (c)
+Figure 5: Importance of refinement. (a) A silhouette of a knot. (b) Result without refinement
+(106 control points). (c) Result with refinement (86 control points). Compared to (b), (c) has
+fewer control points distributed on the smooth curve segments, and some new control points
+are introduced to enhance accuracy.
+(a) (b)
+Figure 6: (a) For the 20 silhouettes in our data set (Table 3), the solid curve shows the average
+relative reduction of the number of control points ρ(τe) (21), and the dashed curves indicate
+the standard deviations. (b) The positive relation between the number of control points when
+τe = 10.0 is large and the number of corners of a silhouette. Each dot represents a sample in our
+data set. The red curve is computed by linear regression with a goodness of fit R2 = 0.75592.
+to the sub-pixel outline less than 1 pixel. After passing τe = 1, increasing τe has less impact on
+the variation of the number of control points. For even larger values of τe, there is almost no
+need of inserting new control points, and the corresponding control points are closely related
+to the corners of the outline. This is justified by the regression in Figure 6 (b), where each
+point represents a silhouette in our data set. It shows that there is a positive relation between
+the number of corners computed by the Harris-Stephens corner detector [20] and the number
+of control points when τe = 10.0, which is relatively large.
+With large values of τe � 1, the silhouette representation is more compact yet less accurate.
+With small values of τe < 1, we have a more accurate representation yet less efficient. From
+this point of view, we would recommend τe = 1.
+Effect of the Smoothness Parameter σ0
+The smoothness parameter σ0 adjusts the regularity of the smooth bilinear outline which ap-
+proximates ∂S. With larger values of σ0, oscillatory features of the given outline are suppressed,
+16
+(a) (b) (c) (d)
+Figure 7: Effect of the smoothing parameter σ0. (a) A silhouette of a tree where the boxed
+region is examined in detail. Vectorization using (b) σ0 = 2.0 (362 control points) (c) σ0 = 1.0
+(448 control points), and (d) σ0 = 0.5 (500 control points). With smaller values of σ0, the
+vectorized outline is sharper, and the number of control points increases.
+while with smaller values of σ0, the vectorized silhouette preserves sharp corners.
+Figure 7 demonstrates this effect of σ0. We apply the proposed method using σ0 = 2.0, 1.0
+and 0.5 on the silhouette of a tree (a), and the zoom-ins of vectorization results within the boxed
+region of (a) are presented in (b), (c), and (d), respectively. Observe that the zig-zag feature
+around the tree’s silhouette is better preserved by reducing σ0. As a trade-off, this introduces
+more control points to recover the sharpness of the outline.
+Stability Under Affine Transformations
+We qualitatively explore the geometric stability of the proposed control points under affine
+transformations. Figure 8 (a) shows a silhouette of a cat. (b) is a rotation of (a), and (c) is
+a sheared (a). The vectorized results of these silhouettes are presented in (d), (e), and (f),
+respectively. To better compare the distributions of the control points on these vectorized
+outlines, we applied the corresponding inverse affine transformations to (d)–(f) and show the
+results in (g)–(i). The numbers of control points are similar: (g) has 52 control points (38 before
+refinement), (h) has 53 control points (37 before refinement), and (i) has 56 control points (41
+before refinement). The distributions of control points between (g) and (h) are almost identical,
+while locations of the control points in (i) are slightly shifted, especially those on the tail. This
+is because Bézier fitting is not affine invariant, and these shifted points are inserted to guarantee
+the accuracy of approximating the transformed outline using a Bézier polygon.
+Qualitative Comparison with Feature Point Detectors
+Our algorithm produces a set of informative point features of the outline. This includes the
+control points which separate the outline curves into segments for cubic Bézier fitting and the
+centers of circles. In Figure 9, we compare the distribution of these points with the results of
+some extensively applied feature point detectors: the Harris-Stephens corner detector [20], the
+features from Accelerated Segment Test (FAST) detector [36], the Speeded Up Robust Features
+(SURF) detector [12], and the Scale-Invariant Feature Transform (SIFT) [23].
+The Harris-Stephens corner detector is a local auto-correlation based method. It locally
+filters the image with spatial difference operators and identifies corners based on the response.
+In (a), the Harris-Stephens corner detector identifies all the corners except for the one on the
+right side of the label. The set of control points produced by our algorithm contains all the
+17
+(a) (b) (c)
+(d) (e) (f)
+(g) (h) (i)
+Figure 8: Stability of control points under affine transformations. (a) Silhouette of a cat. (b)
+Rotation of (a). (c) Shear of (a). (d) Vectorized outline of (a). (e) Vectorized outline of (b).
+(f) Vectorized outline of (c). (g) is identical as (d) for comparison with (h) the inverse affine
+transform of (e), and (i) the inverse affine transform of (f). The control points in (g)–(i) are
+similarly distributed along the outline.
+18
+(a) (b) (c) (d)
+Figure 9: Comparison between the control points (red dots) plus the centers of circles (blue
+dots) produced by the proposed algorithm and other point feature detectors (green crosses).
+(a) Compared with the Harris corner detector [20]. (b) Compared with the FAST feature
+detector [36]. (c) Compared with the SURF detector [12]. (d) Compared with the SIFT
+detector [23]
+corners found by the Harris-Stephens detector plus the missed one.
+The FAST detector only considers the local configurations of pixel intensities, hence it is
+widely applied in real-time applications. From (b), we see that FAST identifies all the prominent
+corners same as our method does. Similarly to (a), there are no FAST points identified around
+the balloon. On the circular outline at the center instead, FAST detects multiple false corners;
+this illustrates how our algorithm is more robust against pixellization
+The SURF detector combines a fast Hessian measure computed via integral images and
+the distribution of local Haar-wavelet responses to identify feature points that are scale- and
+rotation-invariant. There is a similarity that it utilizes the Gaussian scale-space and scale-space
+interpolation to localize the points of interest. The SURF points are marked over scales, hence
+we see most of the green crosses in (c) form sequences converging toward the outline. These limit
+points correspond exactly to our control points (red dots) distributed over the outline, including
+those around the balloon. Moreover, there is a SURF point at the center of the circular hole
+in the label, which overlaps with our identified center of circle (blue dot). Rather than showing
+feature points over scales, our method locates them directly on the original outline. In (c),
+notice that our identified points are much simpler compared to SURF points.
+The SIFT detects scale-invariant features of a given image. As shown in (d), SIFT success-
+fully indicates the presence of corners and marks the centers of the balloon as well as the label,
+which are visually robust features of the silhouette Our method focuses on the outline instead
+of the interior points and provides interesting boundary points’ locations exactly. Around the
+balloon, the symmetric distribution is compatible with the SIFT point at the center.
+The set of control points plus the center of circles produced by our algorithm is comparable
+to some of the frequently used feature point detectors in the literature. Hence,in addition to
+being an effective silhouette vectorization method, the identified control points can be used for
+other applications where feature point detectors are needed.
+19
+Quantitative Comparison with Feature Point Detectors
+To further justify that our method can be applied as a stable point feature detector for silhou-
+ettes, we compare the techniques discussed above with ours by quantitatively evaluating their
+performances via the repeatability ratio [39]. It measures the geometric stability of the detected
+feature points under various transformation.
+In particular, for each method, given any angle α, 0◦ < α < 360◦, we rotate the silhouettes
+in the first column of Figure 10 with respect to their centers by α respectively, record the
+detected feature points, apply the inverse transform on these points by rotating them by −α,
+then compare their positions with the feature points detected on the original silhouette. Let
+nrepeat = 0. For any rotated feature point, within its �-neighborhood, if we find at least one
+feature point on the original silhouette, we increase nrepeat by 1. The �-repeatability ratio is
+computed by
+nrepeat
+min{n0, ntransform}
+(22)
+where n0 denotes the number of feature points detected on the original silhouette, and ntransform
+is the number of feature points detected on the transformed one. During the angle (or scale)
+changes, this value staying near 1 indicates that the applied method is invariant under rotation
+(or scale). We fix � = 1.5.
+The second column of Figure 10 shows the repeatability ratios under rotations. The set of
+feature points produced by our method has superior stability when the silhouette is rotated by
+arbitrary angles. In contrast, the other detectors have low repeatability ratios especially when
+the silhouette is turned almost upside-down. Moreover, our method performs consistently well
+for silhouettes with different geometric features. The house silhouette has straight outlines and
+sharp corners; the butterfly silhouette is defined by smooth curves; and the fish silhouette has
+prominent curvature extrema which are not perfect corners.
+For the third column of Figure 10, we compute the repeatability ratios when the transfor-
+mation is replaced by scaling. Observe that our method is comparable with other detectors,
+and it is the most consistent one across these different silhouettes.
+Comparison with State-of-the-art Software
+There are many software available for image vectorization, e.g., Vector Magic [4], Inkspace [2],
+and Adobe Illustrator 2020 (AI) [1]. In the following set of experiments, we compare our
+method with these software using the number of control points generated for given silhouettes
+as a criteria. This quantity is equal to the number of curve segments used for approximating
+the outline, and a smaller value indicates a more compact silhouette representation.
+To perform this comparison, after acquiring SVG files of various silhouettes, we rasterized
+them and used the PNG images as inputs. Table 2 summarizes the results. For Vector Magic,
+we test three available settings: high, medium, and low for the vectorization quality. For AI,
+we choose the setting“Black and White Logo”, as it is suitable for the style of our inputs. We
+also include the results when the automatic simplification is used, which are marked by daggers.
+For Inkspace, we use the default parameter settings as recommended. As shown by the values
+of the mean relative reduction on the number of control points in the last row, our method
+produces the most compact vectorization results.
+With such an effective reduction on the number of control points, we justify that our method
+does not over-simplify the representation. We show a detailed comparison in Figure 11 between
+our proposed method and AI. In particular, we use AI without simplification and our method
+with two sets of parameters: σ0 = 1, τe = 1 and σ0 = 0.1, τe = 0.5. We note that σ0 specifies
+the smoothness of the recovered outline, and τe controls the accuracy. Notice that under these
+settings, our method gives less number of control points, yet our results preserve more details
+20
+Silhouette Under Rotation Under Scaling
+Figure 10: Repeatability ratios of the methods in comparison when the silhouettes in the
+first column are rotated or scaled. Notice that the blue lines (proposed method) are near 1.
+The performance of our method is the most consistent across these silhouettes with different
+geometric features.
+21
+of the given silhouettes, for example, the strokes on the scales at the bottom, and the sharp
+outlines on the rear fin.
+We quantify the performance of AI and our method by comparing the given image I and the
+image I ′ rasterized from the vectorization result. Denote S0 = {(x, y) ∈ Ω∩N2 | I(x, y) < 127.5}
+and Sr = {(x, y) ∈ Ω ∩ N2 | I ′(x, y) < 127.5} as the interior pixels of the given silhouette and
+the reconstructed one. We evaluate the similarity between S0 and Sr by
+Dice similarity coefficient (DSC) [40] DSC =
+2|S0 ∩ Sr|
+|S0|+ |Sr|
+. (23)
+Higher values of DSC (0 ≤ DSC ≤ 1) imply a better matching between two silhouettes. We
+evaluate the performance with wide ranges of parameters for both AI and the proposed method.
+For AI, we test various combinations of the curve simplification parameter µ (0%–100%) and the
+corner point angle threshold γ (0◦–180◦). For our method, we use different combinations of τe
+and σ0. Roughly speaking, µ in AI corresponds to τe in ours, which controls the approximating
+accuracy, and γ in AI corresponds to σ0 in ours, which adjusts the smoothness of the vectorized
+outline. Figure 12 plots the number of control points against the corresponding DSC values
+for various parameter settings in both methods. In (a), we fix the sharpness requirement, i.e.,
+fixed γ = 150◦ (default value for the automatic simplification used in AI) and fixed σ0 = 1, and
+vary µ for AI (the blue curve) and τe for ours (the red curve). On the blue curve, larger dots
+correspond to smaller values of µ; on the red curve, larger dots correspond to larger values of
+τe. Moving from left to right along both curves indicates more accurate outline approximations.
+Since the red curve stays below the blue one, compared to AI, our method produces less control
+points while achieving the same level of DSC values. In (b), we present the results of AI
+using simplification specified by a set of combinations of parameters (γ = 0◦, 10◦, . . . , 180◦,
+µ = 0%, 10%, . . . , 100%). They are organized such that each blue curve corresponds to a fixed
+value of γ; higher curves (lighter shades of blue) correspond to larger values of γ, while moving
+from left to right (smaller sizes of dots) along each of the curves corresponds to decreasing µ.
+The red curve shows our results using different values of τe when the merging is applied and σ0
+is fixed at 0.5. From left to right, the value of τe decreases. Observe that the red curve gives a
+close lower bound for the blue curves when DSC< 0.93. For higher requirement on the accuracy
+(DSC> 0.93), our method shows superior efficiency: it takes comparatively small number of
+control points to reach greater values of DSC. In contrast, for AI, the best DSC value it can
+achieve is around 0.95, and adding more control points does not offer any improvement.
+8 Conclusion
+In this paper, we proposed an efficient and effective algorithm for silhouette vectorization. The
+outline of the silhouette is interpolated bilinearly and uniformly sampled at sub-pixel level.
+To reduce the oscillation due to pixelization, we applied the affine shortening to the bilinear
+outline. By tracing the curvature extrema across different scales along the well-defined inverse
+affine shortening flow, we identified a set of candidate control points. This set is then refined by
+deleting sub-pixel extrema that do not reflect salient corners, and inserting new points to guar-
+antee any user-specified accuracy. We also designed special procedures to address the degenerate
+cases, such as disks, so that our algorithm adapts to arbitrary resolutions and offers better com-
+pression of information. Our method provides a superior compression ratio by vectorizing the
+outlines. When the given silhouette undergoes affine transformations, the distribution of control
+points generated by our method remains relatively stable. These properties are quantitatively
+justified by the repeatability ratio when compared with popular feature point detectors. Our
+method is competitive compared to some well-established image vectorization software in terms
+of producing results that have less number of control points while achieving high accuracy.
+22
+Number of Control Points (#C)
+Test Image Original VM IS AI Proposed
+405 248/256/245 330 280 (193†) 168
+611 359/343/325 383 340 (293†) 222
+682 296/294/263 272 211 (128†) 120
+1434 915/828/715 932 698 (462†) 379
+4434 2789/2582/2370 3292 2120 (1431†) 1407
+6664 5470/5218/4955 6493 4870 (3441†) 2810
+MRR — 37..97%/40.55%/45.01% 29.88% 45.79% (61.58%†) 67.38%
+Table 2: Comparison with image vectorization software in terms of the number of control points.
+We compared with Vector Magic (VM), Inkspace (IS), and Adobe Illustrator 2020 (AI). For VM,
+we report the number of control points using three optional settings: High/Medium/Low. For
+AI, the values with dagger† indicate the numbers of control points produced by the automatic
+simplification. The input image dimensions are 581 × 564, 625 × 598, 400 × 390, 903 × 499,
+515 × 529, and 1356 × 716 from top to bottom. We also report the mean relative reduction
+(MRR) of the number of control points.
+Figure 11: Comparison among the given raster image (red boxes), AI (orange boxes), the
+proposed with σ0 = 1, τe = 1 (green boxes), and the proposed with σ0 = 0.1, τe = 0.5
+(blue boxes). With smaller numbers of control points (#C), our method preserves better the
+geometric details of the given silhouette.
+23
+(a) (b)
+Figure 12: (a) Comparison between AI (γ = 150◦) and the proposed method (σ0 = 1) when the
+complexity parameters (µ for AI, τe for ours) vary. The circled dot corresponds to our default
+setting. (b) Comparison between AI with simplification specified by various combinations of µ
+and γ, and the proposed method using merging with fixed σ0 = 0.5 and varying τe. In both
+figures, smaller dots indicate higher levels of complexity for AI (µ) and the proposed method
+(τe), respectively. .
+A Silhouette Data Set
+In Table 3, we collectively display the 20 silhouettes used in this paper. They are all download-
+able from https://svgsilh.com, which are released under Creative Commons CC0.
+References
+[1] Adobe Illustrator. https://www.adobe.com/products/illustrator.html.
+[2] Inkspace. https://inkscape.org.
+[3] SVG SILH. https://svgsilh.com. All contents are released under Creative Commons
+CC0.
+[4] Vector Magic. https://vectormagic.com.
+[5] L. Álvarez, F. Guichard, P.-L. Lions, and J.-M. Morel. Axiomes et équations fondamentales
+du traitement d’images.(analyse multiéchelle et edp). Comptes rendus de l’Académie des
+sciences. Série 1, Mathématique, 315(2):135–138, 1992.
+[6] L. Alvarez and J. M. Morel. Formalization and computational aspects of image analysis.
+Acta numerica, 3:1–59, 1994.
+[7] L. Ambrosio, V. Caselles, S. Masnou, and J.-M. Morel. Connected components of sets of fi-
+nite perimeter and applications to image processing. Journal of the European Mathematical
+Society, 3(1):39–92, 2001.
+[8] A. Andrew. Another efficient algorithm for convex hulls in two dimensions. Information
+Processing Letters, 9(5):216–219, 1979.
+[9] F. Attneave. Some informational aspects of visual perception. Psychological review,
+61(3):183, 1954.
+24
+https://svgsilh.com
+https://www.adobe.com/products/illustrator.html
+https://inkscape.org
+https://svgsilh.com
+https://vectormagic.com
+Silhouette Data Set
+Table 3: Silhouette dataset used in the experiments. The last four are used in Figure 6 for
+computing the average ρ(τe). These silhouettes are chosen from [3], which are released under
+Creative Commons CC0.
+[10] J. Babaud, A. P. Witkin, M. Baudin, and R. O. Duda. Uniqueness of the Gaussian kernel
+for scale-space filtering. IEEE transactions on pattern analysis and machine intelligence,
+(1):26–33, 1986.
+[11] J. P. Balarini and S. Nesmachnow. A C++ Implementation of Otsus Image Segmentation
+Method. Image Processing On Line, 6:155–164, 2016.
+[12] H. Bay, T. Tuytelaars, and L. Van Gool. Surf: Speeded up robust features. In European
+conference on computer vision, pages 404–417. Springer, 2006.
+[13] F. Cao. Geometric curve evolution and image processing. Springer Science & Business
+Media, 2003.
+[14] F. Cao, J.-L. Lisani, J.-M. Morel, P. Musé, and F. Sur. A theory of shape identification.
+Springer Science & Business Media, 2008.
+[15] V. Caselles and P. Monasse. Geometric description of images as topographic maps. Springer,
+2009.
+[16] V. Caselles and P. Monasse. Geometric Description if Images as Topographic Maps.
+Springer, 2010.
+[17] D. Chetverikov. A simple and efficient algorithm for detection of high curvature points in
+planar curves. In International Conference on Computer Analysis of Images and Patterns,
+pages 746–753. Springer, 2003.
+[18] L. Cinque, S. Levialdi, and A. Malizia. Shape description using cubic polynomial bezier
+curves. Pattern Recognition Letters, 19(9):821–828, 1998.
+[19] A. Ciomaga, P. Monasse, and J.-M. Morel. The image curvature microscope: Accurate
+curvature computation at subpixel resolution. Image Processing On Line, 7:197–217, 2017.
+[20] C. G. Harris, M. Stephens, et al. A combined corner and edge detector. In Alvey vision
+conference, volume 15, pages 10–5244. Citeseer, 1988.
+[21] A. Kirsanov, A. Vavilin, and K. Jo. Contour-based algorithm for vectorization of satellite
+images. In International Forum on Strategic Technology 2010, pages 241–245. IEEE, 2010.
+[22] J. J. Koenderink. The structure of images. Biological cybernetics, 50(5):363–370, 1984.
+25
+[23] D. G. Lowe. Object recognition from local scale-invariant features. In Proceedings of the
+seventh IEEE international conference on computer vision, volume 2, pages 1150–1157.
+Ieee, 1999.
+[24] G. Matheron. Random sets and integral geometry [by] G. Matheron. Wiley New York,
+1974.
+[25] L. Moisan. Affine plane curve evolution: A fully consistent scheme. IEEE Transactions on
+Image Processing, 7(3):411–420, 1998.
+[26] P. Monasse and F. Guichard. Scale-space from a level lines tree. Journal of Visual Com-
+munication and Image Representation, 11(2):224–236, 2000.
+[27] U. Montanari. A note on minimal length polygonal approximation to a digitized contour.
+Communications of the ACM, 13(1):41–47, 1970.
+[28] A. S. Montero and J. Lang. Skeleton pruning by contour approximation and the integer
+medial axis transform. Computers & Graphics, 36(5):477–487, 2012.
+[29] M. E. Mortenson. Mathematics for computer graphics applications. Industrial Press Inc.,
+1999.
+[30] C. Nadal, R. Legault, and C. Y. Suen. Complementary algorithms for the recognition
+of totally unconstrained handwritten numerals. In [1990] Proceedings. 10th International
+Conference on Pattern Recognition, volume 1, pages 443–449. IEEE, 1990.
+[31] S. Pal, P. Ganguly, and P. Biswas. Cubic bézier approximation of a digitized curve. Pattern
+recognition, 40(10):2730–2741, 2007.
+[32] P. Perona and J. Malik. Scale-space and edge detection using anisotropic diffusion. IEEE
+Transactions on pattern analysis and machine intelligence, 12(7):629–639, 1990.
+[33] M. Plass and M. Stone. Curve-fitting with piecewise parametric cubics. In Proceedings of
+the 10th annual conference on Computer graphics and interactive techniques, pages 229–
+239, 1983.
+[34] F. P. Preparata and M. I. Shamos. Computational geometry: an introduction. Springer
+Science & Business Media, 2012.
+[35] U. Ramer. An iterative procedure for the polygonal approximation of plane curves. Com-
+puter graphics and image processing, 1(3):244–256, 1972.
+[36] E. Rosten and T. Drummond. Fusing points and lines for high performance tracking. In
+Tenth IEEE International Conference on Computer Vision (ICCV’05) Volume 1, volume 2,
+pages 1508–1515. Ieee, 2005.
+[37] G. Sapiro and A. Tannenbaum. Affine invariant scale-space. International journal of
+computer vision, 11(1):25–44, 1993.
+[38] M. Sarfraz. Vectorizing outlines of generic shapes by cubic spline using simulated annealing.
+International Journal of Computer Mathematics, 87(8):1736–1751, 2010.
+[39] C. Schmid, R. Mohr, and C. Bauckhage. Evaluation of interest point detectors. Interna-
+tional Journal of computer vision, 37(2):151–172, 2000.
+[40] T. A. Sorensen. A method of establishing groups of equal amplitude in plant sociology
+based on similarity of species content and its application to analyses of the vegetation on
+danish commons. Biol. Skar., 5:1–34, 1948.
+26
+[41] K. Tombre and S. Tabbone. Vectorization in graphics recognition: to thin or not to thin. In
+Proceedings 15th International Conference on Pattern Recognition. ICPR-2000, volume 2,
+pages 91–96. IEEE, 2000.
+[42] A. P. Witkin. Scale-space filtering. In Readings in Computer Vision, pages 329–332.
+Elsevier, 1987.
+[43] H.-M. Yang, J.-J. Lu, and H.-J. Lee. A bezier curve-based approach to shape description
+for chinese calligraphy characters. In Proceedings of Sixth International Conference on
+Document Analysis and Recognition, pages 276–280. IEEE, 2001.
+[44] J. J. Zou and H. Yan. Cartoon image vectorization based on shape subdivision. In Pro-
+ceedings. Computer Graphics International 2001, pages 225–231. IEEE, 2001.
+27
+	1 Introduction
+	2 Overview of the Proposed Method
+	3 Sub-pixel Curvature Extrema Localization
+	4 Affine Scale-space Control Points Identification
+	4.1 Backward Tracing via Inverse Affine Shortening Flow
+	4.2 Degenerate Case
+	5 Adaptive Cubic Bézier Polygon Approximation
+	5.1 Bézier Fitting with Chord-length Parametrization 
+	5.2 Control Point Update: Deletion of Sub-pixel Extrema
+	5.3 Control Point Update: Insertion for Accuracy
+	6 Pseudo-code for the Proposed Method
+	7 Numerical Results
+	8 Conclusion
+	A Silhouette Data Set

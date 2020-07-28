@@ -1,0 +1,4539 @@
+Imperial/TP/2020/LA/02
+Positivity Bounds and the Massless Spin-2 Pole
+Lasma Alberte,a Claudia de Rham,a,b Sumer Jaitly,a Andrew J. Tolleya,b
+aTheoretical Physics, Blackett Laboratory, Imperial College, London, SW7 2AZ, U.K.
+bCERCA, Department of Physics, Case Western Reserve University, 10900 Euclid Ave, Cleveland, OH 44106,
+USA
+E-mail: l.alberte@imperial.ac.uk, c.de-rham@imperial.ac.uk,
+sumer.jaitly14@imperial.ac.uk, a.tolley@imperial.ac.uk
+Abstract: The presence of a massless spin-2 field in an effective field theory results in a t-channel
+pole in the scattering amplitudes that precludes the application of standard positivity bounds. Despite
+this, recent arguments based on compactification to three dimensions have suggested that positivity
+bounds may be applied to the t-channel pole subtracted amplitude. If correct this would have deep
+implications for UV physics and the Weak Gravity Conjecture. Within the context of a simple renor-
+malizable field theory coupled to gravity we find that applying these arguments would constrain the
+low-energy coupling constants in a way which is incompatible with their actual values. This contra-
+diction persists on deforming the theory. Further enforcing the t-channel pole subtracted positivity
+bounds on such generic renormalizable effective theories coupled to gravity would imply new physics
+at a scale parametrically smaller than expected, with far reaching implications. This suggests that
+generically the positivity bounds are inapplicable with gravity and we highlight a number of issues
+with the compactification arguments.
+ar
+X
+iv
+:2
+00
+7.
+12
+66
+7v
+1 
+ [
+he
+p-
+th
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+mailto:l.alberte@imperial.ac.uk
+mailto:c.de-rham@imperial.ac.uk
+mailto:sumer.jaitly14@imperial.ac.uk
+mailto:a.tolley@imperial.ac.uk
+Contents
+1 Introduction 1
+2 Positivity Bounds — the relevance of the t–channel pole 4
+2.1 Positivity bounds 4
+2.2 Improved positivity bounds 6
+2.3 Compactified positivity bounds 7
+3 Scalar photon QED 7
+4 Scalar photon QED with a spectator field 10
+4.1 Scattering in the low-energy EFT 10
+4.2 Scattering in the UV completion 11
+4.2.1 Electron loops in 4d Minkowski R3,1 12
+4.2.2 Electron loops in the compactified R2,1 × S1 space 13
+5 New UV physics 15
+5.1 Renormalizable operators 15
+5.2 Non-renormalizable operators 16
+5.3 φφ→ φφ scattering 18
+5.4 EFT of two light scalars 19
+5.5 Summary of new UV physics 19
+6 Infrared Regulator and 3d gravity 20
+6.1 IR regulated 3d amplitudes 20
+6.2 Unitarity in 3d 21
+6.3 Failure of positivity in 3d 22
+6.4 Analytic structure of the amplitude in 3d 23
+6.5 Positivity recovered with a mass gap 24
+7 Conclusions 25
+A One–loop electron contribution to photon scattering in scalar QED 27
+B Amplitudes from the Perspective of the Partial UV theory 28
+B.1 Tree–level 29
+B.2 One loop 29
+B.2.1 Aφψ2 amplitude 30
+B.2.2 Aφψ2h amplitude 31
+C Compactified Amplitudes in the Partial UV Theory 32
+– i –
+D Adding interactions to the UV theory 34
+D.1 Cubic operators 35
+D.1.1 The φ3 interaction 35
+D.1.2 The ψφ2 interaction 39
+D.2 Quartic operators 40
+D.2.1 The φ4 interaction 40
+D.2.2 The ψ2φ2 interaction 41
+E Renormalizable spectator field interactions 41
+1 Introduction
+Over the past few decades effective field theories (EFTs) have proven to be an incredibly powerful tool
+for studying physical systems at both high and low energies, with applications in all areas of physics
+ranging from particle physics to cosmology and condensed matter. While it is almost always possible
+to come up with an EFT valid in a given energy range that correctly describes the physical problem
+in question, a theoretically more compelling question is whether a given low-energy EFT can be suc-
+cessfully UV completed into another theory valid at higher energies. The answer depends strongly on
+what requirements one wishes to impose on the high energy theory. Requiring that the low-energy
+EFT has a standard UV completion that is Lorentz invariant, local and causal is known to impose
+strong constraints on the coefficients in the low-energy action [1–3]. These are known as the positivity
+bounds and can be imposed on the scattering amplitudes in the low-energy theory by using the axioms
+of the S-matrix theory, mostly relying on its analyticity properties. First developed for scalar field
+theories in the forward limit, the positivity bounds have been since generalized to particles with spin
+[4–12] and extended away from the forward limit [13]. Including any additional known information
+about the low-energy EFT (e.g. calculable low-energy loop diagrams) has enabled to further expand
+the applications of the positivity bounds, going under the name of improved positivity bounds [7, 8, 14].
+From the point of view of practical applications of positivity bounds to real world EFTs, one
+of the assumptions that turns out to be the most restrictive is that of polynomial boundedness of
+the scattering amplitudes in the complex s-plane, inferred from locality. The famous Froissart bound
+[15, 16], extended beyond the forward limit in [17], states that in the presence of a mass gap, any
+local 2 − 2 scattering amplitude should not grow faster than the fourth power of the center of mass
+energy at sufficiently high energy. Technically speaking, the requirement of the existence of a mass gap
+makes the positivity bounds not directly applicable to one of the most intriguing low-energy effective
+theories — general relativity (GR). Nevertheless, it is typically expected, even with gravity, that the
+scattering amplitude will be bounded at least in the Jin-Martin [17] sense lim|s|→∞ s
+−2A(s, t) = 0 at
+fixed t, as is argued to be the case in string theory for fixed momentum transfer scattering [18], despite
+the violation of polynomial boundedness. This justifies attempting to apply the positivity bounds to
+gravitational EFTs [19, 20].
+A more serious issue associated with applying positivity bounds to gravitational theories, is the
+presence of an infamous t–channel pole whose residue grows faster than the Froissart or Jin-Martin
+– 1 –
+bound. This growth implies that the pole cannot be subtracted, or else the resulting subtracted am-
+plitude would itself violate the Froissart bound. More precisely, this would contradict the assumption
+that we can write a dispersion relation for the pole subtracted scattering amplitude with only two
+subtractions. More importantly though, the pole at t = 0, and the associated branch point that arises
+from graviton loops, prevents the analytic continuation of the partial wave expansion from the physical
+region t < 0 to t ≥ 0 which is a crucial step in deriving positivity bounds. As a result it is impossible
+to use the positivity bounds in their standard form for processes that exhibit a spin-J pole with J ≥ 2.
+Recently, a novel way to deal with this t-channel pole was suggested in [21], which relies on com-
+pactifying one of the spatial dimensions on a circle. Since there is no propagating massless graviton in
+three dimensions (3d) one would expect the unpleasant massless spin-2 t-channel pole1 to be absent
+from the scattering amplitude. While in fact the term is still present perturbatively in the ampli-
+tude written in Mandelstam variables, there is indeed no physical massless graviton mediating the
+exchange. Furthermore, in Mandelstam variables the problematic part of the residue is removed after
+resumming the contributions from higher order ladder diagrams (see, e.g. [22] and appendix A of
+[21]). Motivated by this observation, one can then argue that the standard positivity bound should
+apply to 3d scattering amplitudes. This technique would then allow us to constrain coefficients in
+the low-energy EFTs which were previously beyond the reach of the positivity bounds programme in
+four spacetime dimensions (4d). Interestingly, from the 4d point of view these bounds are equivalent
+to what one would have deduced, would the t-channel pole be simply disregarded. If applicable, this
+would be a remarkable result with far–reaching implications. It could potentially open a whole new
+window on investigating the higher derivative corrections in either GR itself or in any theory that
+includes massless spin-2 or higher fields. We will refer to these as ‘compactified positivity bounds’.
+In [21] the implications of these compactified positivity bounds on the higher derivative correc-
+tions to the Einstein–Maxwell theory were studied in relation to the weak gravity conjecture (WGC)
+[23]. It was found that the positivity bounds imply that extremal black holes of mass M and charge
+Q must satisfy MPlQ/M > 1, exceeding the extremal charge-to-mass ratio in GR and thus proving
+one of the versions of the weak gravity conjecture as suggested in [24, 25]. Another remarkable ex-
+ample of possible consequences of these positivity bounds was studied in [26] where the impact of the
+backreaction of matter fields on the propagation speed of the graviton was studied. It was found that
+imposing the compactified positivity bounds on the couplings of the higher curvature terms arising
+after integrating out matter fields leads to apparent superluminal propagation speed for gravity on
+cosmological backgrounds. Nevertheless there remains no violation of causality [27, 28].
+As the previous few examples already show, applications of these compactified positivity bounds
+to gravitational theories might provide genuine insights in our understanding of gravity at high energy.
+Nevertheless, a few open questions remain on the validity of the procedure. Besides the subtleties asso-
+ciated with defining the massless asymptotic states in 3d, it may also be unclear whether the forward
+limit necessarily commutes with the ‘de-compactification’ limit (where the size of the compactified
+circle is sent to infinity) [29]. So far, in most cases where the compactified positivity bounds have
+been applied, neither a full nor a partial UV completion of the low-energy theories analyzed was in
+fact known and hence there was no explicit way of testing their predictions. Motivated by the current
+1In addition, when graviton loops are included there is a branch cut which extends to t = 0. The two effects come
+in at a different order in 1/M2
+Pl
+which allows us to cleanly separate them.
+– 2 –
+state-of-affairs, in this work we shall therefore apply the compactified positivity bounds to an IR the-
+ory for which a partial UV completion2 is in fact known, hence providing an explicit framework where
+the validity of the compactified positivity bounds can be put to the test.
+In the absence of gravity, positivity bounds are automatically satisfied for renormalizable field
+theories. If they were not, it would be necessary to include irrelevant operators to satisfy them, con-
+tradicting the assumption of renormalizability. Our central interest will be renormalizable theories
+coupled to gravity. By construction, any terms that may potentially violate positivity will necessarily
+vanish in the decoupling limit MPl → ∞. A fundamentally important example of a renormalizable
+theory is none other than QED. Upon minimally coupling QED to gravity, renormalizability is of
+course spoiled, but this spoiling is suppressed by the Planck scale. Naively, one would expect QED or
+a generic renormalizable theory minimally coupled to gravity to be a perfectly well-defined partial UV
+completion. Moreover from decoupling arguments, at sufficiently low-energy scales we would expect
+physics to be insensitive to how QED is fundamentally implemented into a full UV complete quantum
+theory of gravity.
+Inspired by QED, in this work we consider a scalar photon QED toy model where both the vector
+field and the electron are treated as scalar fields [28] while leaving the case of the actual QED to a
+separate work [30]. As we shall see, the compactified positivity bounds that we would have derived
+from compactifying one dimension are inconsistent with the knowledge obtained directly from the
+(partial) UV theory. This represents an explicit example where the positivity bounds inferred from
+3d (or 4d compactified on a circle) would have led to the wrong conclusions, hence casting doubt on
+the generic validity of the procedure. Naturally, the example we provide has its own limitations:
+• First the model we shall propose only has a known partial UV completion and not a full one, its
+non-renormalizability arises entirely from graviton exchange/loops. Nonetheless, this limitation
+is a weak one as corrections from UV physics will be suppressed by additional powers of MPl.
+Although one may argue that our particular example renormalizable field theory belongs to the
+‘swampland’, we will show that these features are in fact common to generic renormalizable field
+theories including QED itself [30], and hence applicable to theories which are known to arise
+from consistent UV completions.
+• Second, and perhaps more to the point, the partial UV completion we are dealing with is not a
+tree-level completion (for example of the string/Regge higher spin type [25])3 since the relevant
+effect from the electron arises at one loop. Yet the beauty of the positivity bounds is that they
+are supposed to be agnostic of the precise type of UV completions one is dealing with, so long
+as it is local, Lorentz-invariant, unitary and causal. The argument of [21] if valid, should apply
+equally well for these heavy loop completions.
+The derivation of the compactified positivity bounds rests on the applicability of positivity bounds
+to 3d gravitational scattering amplitudes. However these are notoriously poorly defined. We critically
+2By partial UV completion we mean an effective theory valid at a higher energy scale than the original low-energy
+EFT. Our partial UV completions shall be theories which are renormalizable in the absence of gravity and for which
+the traditional expectation would be that the cutoff of the EFT is Λ ∼MPl.
+3Often in the literature this is referred to as a weakly coupled UV completion on the grounds that there must be
+some dimensionless parameter that suppressed loops, a role played by the string coupling constant gs (dilaton) in string
+theory. However this terminology can be confusing since the completion we consider is itself weakly coupled in the sense
+that perturbation theory is under control, but the key contribution to the scattering amplitudes arise at one-loop in the
+heavy field.
+– 3 –
+assess this in section 6 where we note that in 3d there is no scattering amplitude which simultaneously
+satisfies: (a) finiteness in the forward scattering limit and (b) positivity of its imaginary part. Since
+these are crucial assumptions in the derivation of positivity bounds, this casts a significant doubt
+on the applicability of positivity bounds with (massless) gravity. Interestingly these issues disappear
+when considering the exchange of massive spin-2 fields. On the other hand, for a massless exchange,
+we show that the issue with the t-channel pole in 4d ends up manifesting itself through a slightly
+different but ultimately equivalent violation of analyticity in 3d, more precisely through the presence
+of a delta function. Attempting to applying the positivity bounds to 3d amplitudes where the delta
+function is removed is ultimately not justified and can lead to incorrect implications.
+The rest of this paper is organized as follows. In section 2 we review the various positivity bounds.
+We then introduce the scalar photon QED in section 3, and present the core of the inconsistency that
+one runs into when applying the compactified positivity bounds of [21] to the low-energy EFT. In
+section 4 we refine this discussion by introducing a spectator field to probe the consistency of the
+partial UV completion, and we summarize the calculation of the amplitude in the low-energy effective
+theory and the partial UV completion both before and after compactification. In section 5 we address
+the question of whether the failing lies in our choice of partial UV completion by amending it with
+both renormalizable and irrelevant operators indicative of new UV physics. We find that only new
+physics at a parametrically low scale Λ ∼ (MMPl)1/2 can ensure the compactified positivity bounds
+are satisfied, (where M would be the equivalent to the electron mass). In section 6 we take the
+opposite perspective and address possible flaws with the derivation of [21], principally those due to
+the ill-defined nature of 3d scattering amplitudes with massless spin-2 exchange. We point out that
+positivity bounds are cleanly respected for massive spin-2 states. However for massless spin-2 states,
+the issue with the 4d t-channel pole manifests itself through a delta function in 3d which ultimately
+precludes the application of the positivity bounds in 3d, just as it was in 4d. All further details
+and consistency checks are presented in appendices. In particular in appendix C we discuss the
+compactification procedure applied to our particular partial UV completion.
+2 Positivity Bounds — the relevance of the t–channel pole
+In this section we lay out the procedure by which we check the consistency and implications of the
+compactified positivity bounds of [21]. We shall start from a known partial UV theory containing a
+heavy field that can be integrated out leading to a known IR theory. Having both the partial UV
+and the IR theory at hand allows us to directly check whether the constraints that the new positivity
+bounds impose on the couplings in the low-energy theory are satisfied by the information that we
+have from the partial UV theory. As our UV theory we shall use a QED-type scalar field theory with
+a massive ‘electron’ that we shall integrate out to obtain the IR theory — a scalar analogue of the
+Einstein–Maxwell theory with higher derivative corrections with specific calculable couplings on which
+we then impose the new positivity bounds as described below.
+2.1 Positivity bounds
+Let us start with a short review of the positivity bounds. The standard positivity bounds (see e.g.
+[1–4, 13, 14]) can be applied to theories where all the fields have a mass gap, or are regulated by adding
+a small mass that can later be sent to zero. We consider the elastic 2− 2 scattering (A+B → A+B)
+of particles of mass m1 and m2, which necessarily respects s− u crossing symmetry, denoting by s, t
+– 4 –
+and u = 2m21 + 2m
+2
+2 − s − t the standard Mandelstam variables. The analyticity properties of the
+elastic scattering amplitude A(s, t) allows to express it as a dispersion relation:
+A(s, t) =
+1
+2πi
+∮
+C
+ds′
+A(s′, t)
+(s′ − s)
+, (2.1)
+where C is a contour in the complex s′ plane that includes the point s and excludes poles and branch
+cuts.
+The essence of the positivity bounds relies on the optical theorem for elastic scatterings with the
+same particle content, i, in the initial and final state of the scattering. The imaginary part of the
+forward limit amplitude of such scattering process is then
+ImAi(s, 0) =
+1
+2
+∑
+f
+∫
+dΠf |Ai→f |2 , (2.2)
+where Ai→f is the scattering amplitude for the process i→ f with f denoting all possible intermediate
+states and dΠf stands for the phase volume. Importantly, this tells us that the contribution from each
+of the possible intermediate scattering processes gives a positive contribution to the imaginary part
+of the amplitude. In terms of the 2 − 2 elastic scattering amplitude A, this tells us that within the
+physical region, ImA(s, 0) > 0. Further positivity of the imaginary part of individual partial waves
+Im al(s) > 0, taken together with the partial wave expansion, implies ∂
+N
+t ImA(s, 0) > 0 for all integer
+N ≥ 0. Making use of the Jin–Martin [17] extension of the Froissart bound lim|s|→∞ s−2A(s, t) = 0
+at fixed t, and s − u crossing symmetry, we infer from (2.1) a dispersion relation for the amplitude
+with two subtractions
+A(s, t) = a0(t) + a1(t)s+
+∑
+I
+λI(t)
+m2I − s
++
+∑
+I
+λI(t)
+m2I − u
++
+s2
+π
+∫ ∞
+(m1+m2)2
+ds′
+ImA(s′, t)
+s′2(s′ − s)
++
+u2
+π
+∫ ∞
+(m1+m2)2
+ds′
+ImA(s′, t)
+s′2(s′ − u)
+, (2.3)
+where we see clearly the separation between the poles at s = m2I , u = m
+2
+I and the left-hand and
+right-hand branch cuts. Defining Ã(s, t) as the pole-subtracted amplitude
+Ã(s, t) ≡ A(s, t)−
+∑
+I
+λI(t)
+m2I − s
+−
+∑
+I
+λI(t)
+m2I − u
+, (2.4)
+we easily infer the positivity bounds:
+d2Ã(s, t)
+ds2
+> 0 , (2.5)
+valid for (m1−m2)2− t < s < (m1 +m2)2 together with 0 ≤ t < Min(4m21, 4m22,m2J)
+4 where m2J is the
+smallest mass of particles with spin J > 2 in the spectrum. For our present purposes it is sufficient to
+utilize these in the forward limit t = 0
+d2Ã(s, 0)
+ds2
+> 0 , (m1 −m2)2 < s < (m1 +m2)2 . (2.6)
+Additional extensions beyond the forward limit are given for example in [13]. Note that Ã(s, t) de-
+notes the s-channel and u-channel pole-subtracted amplitude. Ideally we would also like to remove the
+4The precise range of t depends on what processes are allowed by symmetries and kinematics. It may for instance
+be the higher value 0 ≤ t < (m1 +m2)2.
+– 5 –
+t-channel pole. Since the residue of a t-channel pole associated with the exchange of a spin J particle
+scales as sJ/t at large s, we can only subtract the t-channel pole for exchanged states with spin J < 2
+without contradicting the assumption that the dispersion relation (2.3) only has two subtractions.
+This brings us to the essential point, in a gravitational theory with a massless graviton, the t–channel
+pole scales as s2/t as in (4.11) and so cannot be removed without contradicting the assumption of two
+subtractions. Therefore, in what follows the amplitude Ã(s, t) shall generically denote the amplitude
+for which only the s and u–channel poles of the massless graviton exchange have been removed but
+keeping the t–channel pole, whereas the s, t and u channel poles will be removed for particles with spin
+J < 2. Since the t-pole cannot be subtract it dominates the forward limit rendering (2.6) contentless.
+If a massless spin J ≥ 2 pole is present, there is a second major problem with the standard
+arguments. The proof that ∂Nt ImA(s, 0) > 0 assumes that the partial wave expansion can be continued
+from the physical region t ≤ 0 to the unphysical region t > 0 at least in the neighbourhood of t = 0.
+The presence of a pole and indeed the branch point from graviton loops undermines this. This problem
+is conveniently avoided for J < 2 by analytically continuing the partial wave expansion for ∂2s Ã(s, t)
+for which the associated pole drops out. There remains the branch cut, but these contributions are
+typically suppressed by a loop counting parameter. For J = 2 we can continue the partial wave
+expansion for ∂3s Ã(s, t), at least provided we neglect graviton loops, but this amounts to performing
+one additional subtraction in the dispersion relation (2.3):
+A(s, t) = a0(t) + a1(t)s+ a2(t)s2 +
+∑
+I
+λI(t)
+m2I − s
++
+∑
+I
+λI(t)
+m2I − u
+(2.7)
++
+s3
+π
+∫ ∞
+(m1+m2)2
+ds′
+ImA(s′, t)
+s′3(s′ − s)
++
+u3
+π
+∫ ∞
+(m1+m2)2
+ds′
+ImA(s′, t)
+s′3(s′ − u)
+,
+with the J = 2 t-channel pole now contained in a2(t). While we can infer positivity statements
+for higher order s-derivative positivity bounds, we lose the most valuable information, namely the
+condition (2.6), since a2(t) cannot be determined by analyticity alone.
+2.2 Improved positivity bounds
+Returning to the standard case with only states with J < 2, it is clear from the relation (2.2) that the
+optical theorem carries much more information than what has been used to infer the positivity bound
+(2.6). In particular, it is clear from the relation (2.2) that the contribution from each of the possible
+intermediate scattering processes gives a positive contribution to the imaginary part of the amplitude.
+We can make use of this fact by moving known contributions from the right-hand side of the theorem
+to the left-hand side, thus making the positivity bounds stronger and in fact generating further bounds
+on the couplings in the low-energy EFT. These go under the name of the improved positivity bounds
+[7, 8, 14] and will be relevant in the discussion below when comparing different contributions to the
+2 − 2 scalar scatterings. Specifically we can separate the total imaginary part into two separately
+positive contributions
+ImA(s, t) = ImAknown(s, t) + ImAunknown(s, t) , (2.8)
+and further defining
+Ãimp(s, t) ≡ Ã(s, t)−
+s2
+π
+∫ ∞
+(m1+m2)2
+ds′
+ImAknown(s′, t)
+s′2(s′ − s)
+−
+u2
+π
+∫ ∞
+(m1+m2)2
+ds′
+ImAknown(s′, t)
+s′2(s′ − u)
+. (2.9)
+– 6 –
+Then from (2.3) the improved amplitude Â(s, t) satisfies its own dispersion relation
+Ãimp(s, t) = a0(t)+a1(t)s+
+s2
+π
+∫ ∞
+(m1+m2)2
+ds′
+ImAunknown(s′, t)
+s′2(s′ − s)
++
+u2
+π
+∫ ∞
+(m1+m2)2
+ds′
+ImAunknown(s′, t)
+s′2(s′ − u)
+,
+(2.10)
+from which follows the first of many improved positivity bounds
+d2Ãimp(s, 0)
+ds2
+> 0 , (m1 −m2)2 < s < (m1 +m2)2 . (2.11)
+For instance, one obvious application is to take as ‘known’ the loop contributions calculated within the
+low-energy effective theory, valid for s < �2Λ2c where Λc is the cutoff of the effective theory, and �� 1
+taken small enough that we can reliably trust the calculations, with ‘unknown’ — the remainder, i.e.
+ImAknown(s, t) = θ(�2Λ2c − s)ImA(s, t) , ImAunknown(s, t) = θ(s− �
+2Λ2c)ImA(s, t) . (2.12)
+In the present context of a renormalizable theory coupled to gravity we have processes involving both
+gravitational and non-gravitational intermediate states. The improved positivity bounds, assuming
+applicability once the t-pole is removed, will enable us to remove the known non-gravitational contri-
+butions and focus instead on scatterings involving graviton exchange only. We refer the reader to [30]
+to a detailed analysis of the implications of the improved positivity bounds in the context of QED and
+the low-energy Euler–Heisenberg action.
+2.3 Compactified positivity bounds
+We have already highlighted the difficulties in applying the positivity bound (2.6) to amplitudes that
+manifest a massless t-channel pole with residue growing as s2 (or faster), as is typically the case in
+processes that involve a graviton exchange. In dealing with such a pole, Ref. [21] provided a novel
+procedure for regularizing scattering amplitudes involving a massless graviton exchange. By compacti-
+fying one of the spatial directions on a circle, the initial 4d scattering process can effectively be reduced
+to a 3d one. Since in 3d the graviton is non-dynamical there can be no physical t-pole in the amplitude
+and thus naively no obstacle in applying the standard positivity bounds leading to constraints on the
+couplings in the original 4d low-energy action. In practise, a t-channel pole does remain perturbatively
+but as reviewed in section 6 is expected to be removed on resummation, as is apparent in the eikonal
+approximation.
+In this work we shall check the consistency of these compactified positivity bounds by working
+with low-energy (IR) effective field theories for which the partial UV completion is known. We refer to
+appendix C for explicit details on the compactification process in our example. The advantage of this
+approach is the fact that the coefficients in the IR action are in fact determined by the partial UV theory
+and a direct comparison between these coefficients with the constraints that can be inferred from the
+compactified positivity bounds is possible. We will critically address issues with the compactification
+argument and positivity bounds applied in 3d in section 6.
+3 Scalar photon QED
+In this work we shall deal with a simplified version of the scalar QED where the photon is treated
+as a scalar field [28]. An identical analysis can be also carried out for the vector Maxwell field, and
+spinor QED where the electron is a Dirac spinor [30]. Here we focus on the scalar field example since
+– 7 –
+it proves useful to highlight the apparent contradictions that arise when ignoring the t-channel pole
+due to the graviton exchange. We denote the “scalar photon” by φ, the “scalar electron” by ψ and
+couple the two by a QED type of interaction −αMφψ2, where M is the mass of the heavy field ψ and
+α is a dimensionless coupling constant. This scalar photon QED Lagrangian is
+LsQED =
+√
+−g
+[
+−
+1
+2
+(∂φ)2 −
+1
+2
+(∂ψ)2 −
+1
+2
+M2ψ2 − αMφψ2
+]
+. (3.1)
+In distinction to the standard scalar QED with a massless vector field, ignoring its couplings to gravity,
+this is a super-renormalizable theory and thus has a different (and better) UV behaviour. Coupling this
+super-renormalizable field theory to gravity necessitates both the introduction of an Einstein–Hilbert
+term and covariant derivatives, together with non-renormalizable higher derivative interactions that
+require new UV physics at (or below) the Planck scale MPl. We shall return to the impact of the
+latter corrections in section 5. For now we content ourselves with this theory minimally coupled to
+gravity
+LpUV =
+√
+−g
+[
+M2Pl
+2
+R−
+1
+2
+(∂φ)2 −
+1
+2
+(∂ψ)2 −
+1
+2
+M2ψ2 − αMφψ2
+]
+, (3.2)
+where pUV stands for partial UV completion. It is straightforward to derive from (3.2) the low-energy
+effective theory that describes the dynamics of the photon well below the electron mass. Explicitly
+integrating out the massive electron in the presence of the gravitational field following the heat-kernel
+methods as in [31, 32] (see [33–35] for the original works) then leads to the low-energy effective action:
+L(J)IR =
+√
+−g
+[
+M2Pl
+2
+R−
+1
+2
+(∂φ)2 −
+α3M
+(2π)2
+φ3
+3!
++
+α4
+2π2
+φ4
+4!
++ C
+α2
+M2
+Rµν∂µφ∂νφ+ C̃
+α4
+M4
+(∂φ)
+4
+]
+, (3.3)
+with
+C = −
+1
+90(4π)2
+, C̃ =
+1
+30(4π)2
+. (3.4)
+Let us stress that the sign of the coefficient C in front of the Rµν∂µφ∂νφ term is negative. This new
+interaction redresses the kinetic term of the scalar field and thus directly affects the propagation speed
+of the scalar φ on any gravitational background with a non-vanishing Ricci tensor. Intriguingly, the
+sign C < 0 leads to superluminal low-energy propagation speeds relative to the background metric.
+It was shown in [28], for a shockwave geometry, that despite the apparent causality violations in the
+low-energy theory, these are cleanly resolved in the high-frequency regime and the front velocity re-
+mains luminal. This ensures that the retarded propagator vanishes outside of the metric lightcone.
+The apparent low-energy superluminal phase and group velocity can never lead to any resolvable effect
+and is therefore never in tension with causality [27].
+It is possible to rewrite the action (3.3) in a more familiar form by performing a local field
+redefinition to remove the non-minimal couplings with the Ricci curvature. Naturally, such local
+transformations leave the scattering amplitudes invariant. Transforming the metric as
+gµν → gµν + 2C
+α2
+M2M2Pl
+(
+∂µφ∂νφ−
+1
+2
+(∂φ)2gµν
+)
+, (3.5)
+leads to the Einstein-frame IR action
+LIR =
+√
+−g
+[
+M2Pl
+2
+R−
+1
+2
+(∂φ)2 −
+α3M
+(2π)2
+φ3
+3!
++
+α4
+2π2
+φ4
+4!
++
+α2
+M2
+(
+C
+M2Pl
++
+C̃α2
+M2
+)
+(∂φ)
+4
++ . . .
+]
+, (3.6)
+up to subleading corrections.
+– 8 –
+psiboxcut.pdf ψ
+φ φ
+φ φ
+dscattering2.pdf
+k1 k3
+k2 k4
+φ φ
+χ χ
+=
+φφ
+χχ
++
+φ φ
+χ χ
+dscatteringc.pdf
+k1 k3
+k2 k4
+φ φ
+χ χ
+= + +
+uv3 and uv4
+φ
+χ χ
+φ
+1
+Figure 1: Non–gravitational contribution to the φφ → φφ scattering in the UV theory. Bold lines
+represent propagators of the heavy field ψ.
+Compactified bounds: Consider now the tree-level φφ→ φφ scattering as inferred from this low–
+energy EFT (3.6). The IR observer, only aware of the low-energy action (3.6) with operator
+LIR ⊃
+√
+−g
+a
+M4
+(∂φ)
+4
+, (3.7)
+with coupling a would simply conclude that the coupling needs to be positive i.e. a > 0. This specific
+statement has been long known for scalar field theories in the absence of gravity [1–3]. It was presented
+again in [21] where it was argued that a > 0 should hold also in the presence of gravity for any weakly
+coupled5 UV completion of (3.6) by means of the compactified positivity bounds. In the present
+context, the compactified positivity bounds then imply
+C
+M2Pl
++
+C̃α2
+M2
+> 0 . (3.8)
+Comparing to (3.4) and naively using the fact that M � MPl we could conclude that this bound is
+always satisfied in the UV theory. Another way of seeing the bound above is to rewrite it as bound
+on the charge-to-mass ratio, α/M , giving
+α
+M
+>
+1
+√
+3
+1
+MPl
+, (3.9)
+akin very much to similar arguments in QED made to support the weak gravity conjecture [23, 24].
+Thus it appears to be the case that the positivity bounds are satisfied provided that (3.9) is respected.
+This conclusion is however premature. The reason for this is the fact that the operator C̃ α
+4
+M4
+(∂φ)
+4
+in the IR action (3.6) arises from a non-gravitational loop diagram in the UV theory, shown in Fig. 1
+and computed in appendix A. Rather than working with the low-energy theory (3.6) we may return
+to the partial UV completion (3.2) and apply the improved positivity bounds [7, 8, 14] reviewed in
+section 2.2 to remove the contribution from the box diagram6 in Fig. 1. From the low-energy point
+of view this amounts to simply removing the C̃ term. Hence a UV observer applying the improved
+positivity bounds, would infer instead of (3.8) the statement
+C = −
+1
+90(4π)2
+> 0 , (3.10)
+5In this context we may take weakly coupled to mean calculable within a standard perturbative expansion.
+6Strictly speaking we can only remove the contribution of the box diagram that comes from the low-energy branch
+cut s < �2Λ2c according to (2.11), however as long as Λc � α−1/4(M3MPl)1/4 we are led to an equivalent contradiction
+to (3.10).
+– 9 –
+leading to a contradiction. At this stage we are faced with the conclusion that either scalar QED
+minimally coupled to gravity is not an acceptable partial UV completion, (this will be explored in
+section 5 and as we shall see this would lead to unprecedented implications) — or the compactified
+positivity bounds proposed in [21] can be violated in some situations despite the existence of a stan-
+dard partial UV completion. We stress again that although we have focused on a relatively simple
+(and uninteresting) renormalizable field theory, similar arguments are expected to hold for generic
+renormalizable field theories coupled to gravity, and we will discuss explicitly the case of QED in [30].
+4 Scalar photon QED with a spectator field
+The discussion of the previous section can be considerably sharpened by including an additional light
+spectator field χ in the UV Lagrangian (3.2). We assume that the spectator field χ interacts with the
+scalar QED theory only via gravity7. For simplicity but without loss of generality, we keep both of
+the scalar fields φ and χ massless here8. The scalar photon QED action minimally coupled to gravity
+and including a light spectator field χ takes the form:
+LpUV =
+√
+−g
+[
+M2Pl
+2
+R−
+1
+2
+(∂χ)2 −
+1
+2
+(∂φ)2 −
+1
+2
+(∂ψ)2 −
+1
+2
+M2ψ2 − αMφψ2
+]
+. (4.1)
+We have assumed that the spectator χ is a scalar field here but it could in principle be any other
+(fermion or vector) field coupled to gravity. In this setup we can then focus on the elastic φχ → φχ
+scattering that is always mediated by the massless graviton exchange and only occurs via the t-channel
+scattering. We shall provide more details in exploring the validity of the compactified positivity bounds
+and analyzing the 2− 2 scattering between the spectator and matter both in the partial UV and low-
+energy EFT as well as on the compactified manifold in the appendices.
+4.1 Scattering in the low-energy EFT
+To begin with, we determine the low-energy effective theory associated with (4.1) that arises below
+the electron mass. This is straightforward following the approach of the previous section. Integrating
+out the scalar electron leads to the IR action
+L(J)IR =
+√
+−g
+[
+M2Pl
+2
+R−
+1
+2
+(∂χ)2 −
+1
+2
+(∂φ)2 −
+α3M
+(2π)2
+φ3
+3!
++
+α4
+2π2
+φ4
+4!
++ C
+α2
+M2
+Rµν∂µφ∂νφ+ C̃
+α4
+M4
+(∂φ)
+4
+]
+,
+(4.2)
+which on applying the field redefinition (3.5) is seen to be equivalent to
+LIR =
+√
+−g
+[
+M2Pl
+2
+R−
+1
+2
+(∂χ)2 −
+1
+2
+(∂φ)2 −
+α3M
+(2π)2
+φ3
+3!
++
+α4
+2π2
+φ4
+4!
+(4.3)
++C ′
+α2
+M2M2Pl
+(∂φ)
+4
++ C
+α2
+M2M2Pl
+(∂µφ∂
+µχ)2 + . . .
+]
+,
+7The trick of introducing a spectator field to probe positivity bounds was heavily used in [26]. As highlighted in
+section 3, we can reach the same conclusions without introducing a spectator field, however this relies on implementing
+the improved positivity bounds. The inclusion of a spectator field is only performed so as to bypass this need of going
+through improved bounds. Indeed, when considering the elastic χφ→ χφ scattering there is no need to subtract other
+known contributions.
+8One can in principle introduce a small mass m for either of them for as long as m2/M2 � 1. We shall do so in
+appendix D when considering possible extensions to the action (4.1) leading to processes with light scalar loops. However,
+having a non-zero scalar field mass does not provide any additional insights in the scattering process considered in the
+current section.
+– 10 –
+psiboxcut.pdf ψ
+φ φ
+φ φ
+dscattering2.pdf
+k1 k3
+k2 k4
+φ φ
+χ χ
+=
+φφ
+χχ
++
+φ φ
+χ χ
+dscatteringc.pdf
+k1 k3
+k2 k4
+φ φ
+χ χ
+= + +
+uv3 and uv4
+φ
+χ χ
+φ
+1
+Figure 2: Contributions to χφ → χφ scattering in the IR theory. The wiggly line represents the
+graviton propagator.
+where we have neglected subleading terms and the coefficient C ′ is given by
+C ′α2
+M2M2Pl
+≡
+α2
+M2
+(
+C
+M2Pl
++
+C̃α2
+M2
+)
+. (4.4)
+The new feature is the contact interaction (∂µφ∂
+µχ)2 which contributes directly to the χφ → χφ
+scattering. As usual the scattering amplitude is a physical quantity and is independent on the field
+redefinitions that we have performed to get to the form of the IR action as in (4.3). The field redefi-
+nition is merely used as a tool to make this interaction more explicit.
+At the leading order the χφ→ χφ scattering in the IR theory occurs via two different scattering
+processes shown in Fig. 2. As compared to the previous case, there is a new contact interaction directly
+between the two fields φ and χ. For the leading order scattering amplitude we then find
+AIR(s, t) = −
+s(s+ t)
+M2Plt
++
+Cα2
+M2M2Pl
+[
+s(s+ t) +
+t2
+2
+]
+. (4.5)
+As argued in [21] and as shown in appendix C applying the compactified forward limit positivity
+bounds for this amplitude amounts to dropping the t-pole and requiring that
+d2AIR,no pole(s, 0)
+ds2
+=
+2Cα2
+M2M2Pl
+> 0 , (4.6)
+leading to the requirement that C > 0. In other words, the new positivity bounds state that for this IR
+theory (4.3) to have a standard (local and Lorentz invariant) UV completion the coupling constant C
+has to be positive. However, comparing (4.5) to the corresponding amplitude (4.11) computed below
+in the UV theory we read off
+C = −
+1
+90(4π)2
+< 0 , (4.7)
+which contradicts the positivity bound above. It shows that a theory can have an apparently healthy
+partial UV completion (given in (4.1)) even though the compactified positivity bounds are violated.
+4.2 Scattering in the UV completion
+In the previous subsection we have seen that on introducing a spectator field into the partial UV
+completion, the compactified positivity bounds applied to the low-energy effective theory are violated,
+and no condition analogous to (3.9) can be imposed to save them. Thus (4.1) is a particularly straight-
+forward example of a partial UV completion that would be expected to be well-defined, but for which
+– 11 –
+psiboxcut.pdf ψ
+φ φ
+φ φ
+dscattering2.pdf
+k1 k3
+k2 k4
+φ φ
+χ χ
+=
+φφ
+χχ
++
+φ φ
+χ χ
+dscatteringc.pdf
+k1 k3
+k2 k4
+φ φ
+χ χ
+= + +
+uv3 and uv4
+φ
+χ χ
+φ
+1
+Figure 3: Leading contributions to the χφ → χφ scattering as seen from the point of view of the
+partial UV theory. Wiggly lines stand for the graviton propagator while thick lines stand for the
+propagator of the heavy field ψ.
+compactified positivity bounds are violated. In section 5 we will discuss possible corrections to the
+partial UV completion that may rectify this. For now we would like to see how positivity bounds
+applied directly to the UV theory (4.1) play out.
+This calculation may be performed in two different ways. We may first compute the scattering
+amplitude in the partial UV completion in 4d Minkowski R3,1, and use this to match against the
+low-energy effective theory to confirm the results in the previous section. The compactified positivity
+bounds may then be applied directly in the IR EFT as per the previous section. Alternatively we
+may apply the compactification procedure directly to the partial UV completion (4.1). These two
+procedures are not identical because in the former, the electron loop is computed in 4d Minkowski
+R3,1, whereas in the latter it is computed on a compactified space R2,1×S1. Performing the calculation
+both ways allows us to test whether there is any issue in running the argument due to failure of the
+limits L → ∞ and the low-energy limit E/M → 0 to commute. The former calculation implicitly
+assumes MKK �M , whereas the latter is applicable also when MKK �M . We will save the technical
+details for appendix B for the R3,1 calculation and appendix C for the R2,1 × S1 and review the
+essential results here.
+4.2.1 Electron loops in 4d Minkowski R3,1
+The contributions to the tree-level and one-loop χφ → χφ scattering amplitude ApUV(s, t) relevant
+for the positivity bounds in the partially UV complete theory (4.1) come from the diagrams given in
+Fig. 3, and in the notations of appendix B are
+ApUV(s, t) = Zφ ×Atree,0 +Aφψ2 +Aφψ2h . (4.8)
+Given the wave function renormalization
+Zφ = 1−
+α2
+3(4π)2
+, (4.9)
+explicitly this is
+ApUV(s, t) =
+su
+M2Plt
++
+[
+−
+α2
+3(4π)2
+su
+M2Plt
+(4.10)
++
+8M2α2
+M2Plt
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+{
+A(s, t)
+32π2∆
++
+t
+32π2
+(
+−1− log
+∆
+M2
+)}]
+,
+– 12 –
+with A(s, t) ≡ −s(s + t)(−1 + x + y)2 + M2t and ∆ ≡ M2 − xyt. Let us note that, as expected,
+this amplitude is independent from the renormalization scale. To see this cancellation explicitly we
+have followed the same procedure as highlighted in appendix D.1.1. The role of the wavefunction
+renormalization is to ensure that the terms in square brackets contain no net contribution to the
+t-pole. This confirms the equivalence principle at the quantum level, namely that the graviton only
+couples to the physical energy at the strength MPl. The remaining part of the amplitude contains no
+s-channel branch cut or pole, i.e. there is no imaginary part for physical values of s. This is the virtue
+of introducing the spectator field whose interactions only arise through gravity. Hence there are no
+dispersive imaginary parts to remove via improved positivity bounds and we may just apply the usual
+positivity bounds.
+Expanding at low-energy, we confirm the amplitude determined from the low-energy effective
+theory as expected
+ApUV(s, t) = −
+s2
+M2Plt
+−
+α2s2
+90(4π)2M2M2Pl
++O(t0) , (4.11)
+where O(t0) stands for all other contributions to the amplitude that are finite, non-singular and have
+no s2 dependence. Applying the prescription suggested in Ref. [21] allows us to ignore the t-pole so
+that the positivity bound of Eq. (2.6) implies
+d2ApUV,no pole(s, 0)
+ds2
+= −
+2α2
+90(4π)2M2M2Pl
+> 0 , (4.12)
+which cannot be satisfied for any real values of the coupling α.
+Closer inspection of (4.10) shows that even with the t-channel pole removed, the remaining part
+of the amplitude in square brackets grows as s2 for fixed t at large s, thus invalidating the assumption
+lim|s|→∞ s
+−2A(s, t) → 0. This should not come as a surprise since (4.1) in itself only a partial UV
+completion by virtue of being gravitational, and new physics will come in at higher energies to resolve
+this. How precisely this new physics manifests itself i.e. whether new physics enters through higher
+spins or through other fields is irrelevant to this point, the central issue is rather about the scale at
+which this new physics enters. The naive expectation would be that the cutoff is the Planck scale, or
+the string scale, but as we shall see the cutoff ought to be much lower for the compactified positivity
+bounds to be satisfied. This possibility is indeed explored in section 5 where we show that in order for
+our partial UV completion (4.1) to admit a full UV completion for which the compactified positivity
+bounds apply, new physics has to be introduced at a scale Λ significantly lower than the Planck scale
+Λ ∼ (MMPl)1/2. From the EFT perspective, we know that this result is obtained in a naively sensible
+effective field theory (4.1) where the EFT cutoff — induced by the presence of the Einstein–Hilbert
+term and the minimal coupling to gravity — would naively be expected to coincide with the Planck
+scale, or a scale close to it. Given the simplicity of the model in (4.1) and its resemblance to the
+standard QED this would be a very strong statement with far-reaching implications to even Standard
+Model physics. It seems more likely that these findings point to some inconsistency in the handling
+of the t-channel pole.
+4.2.2 Electron loops in the compactified R2,1 × S1 space
+In order to make sure that the simplified prescription of dropping the t-pole does indeed follow from
+the regularization procedure suggested in [21] we shall repeat the same strategy to the partial UV com-
+pletion (4.1). The technical details are found in appendix C. This calculation is most straightforwardly
+– 13 –
+viewed by compactifying the 4d action while maintaining the contribution from the Kaluza-Klein (KK)
+modes that contribute to the loop processes. To the order needed, the effective 3d action obtained
+from compactification on a S1 of length L is
+SUV,3d ⊃ L
+∫
+d3x
+√
+−g
+{
+M2Pl
+2
+R−
+1
+2
+(∂χ0)
+2 −
+1
+2
+(∂φ0)
+2 −
+1
+2
+(∂ψ0)
+2 −
+1
+2
+M2ψ20 (4.13)
+− αMφ0ψ20 − 2αM
+∞∑
+n=1
+φ0ψnψ
+†
+n −
+∞∑
+n=1
+(
+gµν∂µψn∂νψ
+†
+n +
+(
+M2 +
+4π2n2
+L2
+)
+ψnψ
+†
+n
+)}
+,
+where ψ0, φ0 and χ0 are the KK zero modes and ψn the KK modes with masses M
+2
+n = M
+2 + 4π
+2n2
+L2
+.
+The zero mode elastic scattering amplitude χ0φ0 → χ0φ0 is determined to one-loop order by the
+analogous Feynman diagrams in Figs. 7 and 8 in appendix C. The structure of the one-loop amplitude
+is similar
+ApUV,3d(s, t) = Zφ0 ×Atree,0 +
+∞∑
+n=0
+Aφ0ψ2n +
+∞∑
+n=0
+Aφ0ψ2nh0 . (4.14)
+The wavefunction renormalization factor becomes
+Zφ0 = 1−
+α2M2
+48πL
+∞∑
+n=−∞
+1
+M3n
+, (4.15)
+which is equivalent to (4.9) in the limit L → ∞. As before this ensures the equivalence principle at
+the quantum level, and the low-energy expansion of the 3d amplitude is
+ApUV,3d(s, t) = −
+s2
+M2PlLt
+−
+α2M2
+240(4π)L2M2Pl
+∞∑
+n=−∞
+s2
+M5n
++O(t0) . (4.16)
+Assuming the validity of the eikonal argument that allows us to remove the t-channel pole as argued
+in [21], we would be led to the compactified positivity bound
+d2ApUV,3d(s, 0)
+ds2
+= −
+α̂2
+120(4π)MM3
+×
+1
+M2
+
+1 + 2 ∞∑
+n=1
+1(
+1 + 4π
+2n2
+L2M2
+)5/2
+
+ > 0 , (4.17)
+where we have defined the 3d Planck mass M3 = M
+2
+PlL and effective 3d coupling α̂ = α/
+√
+L. It is
+now clear that this bound is violated for any L. In the limit L→∞ it reproduces (4.12)
+lim
+L→∞
+L
+d2ApUV,3d(s, 0)
+ds2
+= −
+2α2
+90(4π)2M2M2Pl
+> 0 , (4.18)
+whereas in the limit L → 0, only the zero mode contributes in the loop and we obtain the pure 3d
+result
+lim
+L→0
+d2ApUV,3d(s, 0)
+ds2
+= −
+α̂2
+120(4π)M3M3
+> 0 , (4.19)
+that would result from the pure 3d action
+S′UV,3d =
+∫
+d3x
+√
+−g
+{
+M3
+2
+R−
+1
+2
+(∂χ̂)2 −
+1
+2
+(∂φ̂)2 −
+1
+2
+(∂ψ̂)2 −
+1
+2
+M2ψ̂2 − α̂Mφ̂ψ̂2
+}
+, (4.20)
+which is obtained from (4.13) by canonically normalizing ψ0 = ψ̂/
+√
+L, χ0 = χ̂/
+√
+L, φ0 = φ̂/
+√
+L and
+sending L → 0, for fixed α̂, to decouple the KK modes. The partial UV completion (4.20) is itself
+super-renormalizable in the absence of gravity and by itself serves as an example of a partial UV
+completion where 3d positivity bounds are violated.
+– 14 –
+5 New UV physics
+The physical motivation of the specific interactions in our UV theory (4.1) is clearly that of its
+resemblance to the standard QED. As our computations in section 4 clearly show, if we were to apply
+the compactified positivity bounds of Ref. [21] to the IR theory (4.3) we would conclude that the
+theory only admits a standard UV completion if the coefficient C is positive. On the other hand the
+known partial UV completion (4.1) gives C < 0 in Eq. (4.7). As already alluded to, there may be
+different reasons for this disagreement:
+(a) Either the compactified positivity bounds do not generically apply. This could be due to many
+reasons: One issue highlighted in [29] is that the argument relies on taking the forward limit
+before the large L limit. However as we have seen in the previous section, positivity is violated
+for any L for t ∼ 0 and the 3d theory (4.20) by itself violates positivity. This suggests that any
+problems relate directly to the subtleties intrinsic to 3d gravitational theories and 3d scattering
+amplitudes. We will highlight some of these in the next section 6.
+(b) Or the compactified positivity bounds are indeed always valid and in this context they imply
+that by itself the partial UV completion (4.1) (or (3.2)) minimally coupled to gravity is not a
+valid one, at least not without the existence of new UV physics at a scale parametrically lower
+than the Planck scale.
+In this section we shall consider the second possibility. There are two relatively straightforward
+possibilities for enhancing the partial UV theory in attempting to satisfy the new positivity bounds.
+Both rely on introducing interactions already at the level of the partial UV theory, thus providing a
+different UV completion from the one presented in (4.1). The distinction between the two possibilities
+is whether the new interactions would be renormalizable or non-renormalizable in the absence of
+gravity.
+5.1 Renormalizable operators
+In the actual QED case there are of course no further renormalizable interactions in 4 dimensions.
+However, in our scalar photon QED model (4.1) we could supplement (4.1) with the additional terms
+∆L =
+√
+−g
+[
+−aM
+φ3
+3!
+− bMψ
+φ2
+2
+−
+λ
+4!
+φ4 −
+γ
+4
+ψ2φ2 + d1ψ
+3 + d2φψ
+3 + d3ψ
+4 + d4φ
+3ψ
+]
+, (5.1)
+each of which is renormalizable in the absence of gravity. The terms with coefficients di will not
+contribute to χφ→ χφ scattering at one-loop order and we do not consider them any further in what
+follows. The remaining interactions are discussed in great detail in appendix D. As before in all cases
+once the wavefunction renormalization is accounted for, the t-pole is universally −s2/(M2Plt). The
+additional contributions to the positivity bound are
+d2∆ApUV,3d(0, 0)
+ds2
+= −
+a2M2
+16π2
+1
+M2Pl
+(45− 8
+√
+3π)
+162m4ph
+−
+b2
+9(4π)2M2M2Pl
+. (5.2)
+For any choice of coefficients a, b these contributions are negative and so cannot solve the contradic-
+tion. Thus we see that quite generically renormalizable field theories minimally coupled to gravity
+tend to violate the compactified positivity bounds.
+– 15 –
+We could also imagine introducing additional renormalizable interactions between the spectator χ
+and the other matter fields φ and ψ. These are considered in detail in appendix E. The story is quite
+analogous, all contributions to the positivity bounds are negative except that from the box diagram
+pictured in Fig. 12b in appendix E. However the reason this gives a positive contribution is that it is
+a non-gravitational contribution that itself satisfies the Froissart bound. Hence it may be removed by
+application of the improved positivity bounds. We thus find that no introduction of renormalizable
+interactions, even with the spectator field, resolves the contradiction.
+5.2 Non-renormalizable operators
+We are thus led to looking at modifying the partial UV completion by introducing new physics at a
+higher energy scale Λ�M . For instance this may be new physics at the Planck scale, or a lower scale
+such as the string scale. In the latter case the UV completion may require the introduction of a tower
+of higher spin Regge states [25]. Regardless of what this new physics is, it will show up at low energies
+as irrelevant operators extending the partial UV completion (4.1). Indeed, it is straightforward to
+introduce new irrelevant operators so as to satisfy the compactified positivity bounds. The price to
+pay is the fact that these irrelevant interactions must come in at a scale much lower than the Planck
+scale — hence significantly reducing the cutoff of the partial UV theory (4.1). We discuss this case in
+detail in this section.
+The most obvious way to ensure the compactified positivity bounds are satisfied is to supplement
+that partial UV completion (4.1) with the irrelevant operator
+∆L =
+√
+−g BRµν∂µφ∂νφ , (5.3)
+where B is a dimensionful coupling. On integrating out the ψ loop, the net contribution to the IR
+action (4.2) from this interaction will then by
+L(J)IR =
+√
+−g
+(
+B + C
+α2
+M2
+)
+Rµν∂µφ∂νφ , (5.4)
+and so by choosing
+B > −C
+α2
+M2
+, (5.5)
+the compactified positivity bound will be satisfied. The problem is since this is an irrelevant operator
+it will induce a new cutoff in the effective theory. To determine this cutoff it is helpful to perform
+in the partial UV completion (4.1) with the additional operator (5.3) a field redefinition analogous
+to (3.5)
+gµν → gµν +
+2B
+M2Pl
+(
+∂µφ∂νφ−
+1
+2
+(∂φ)2gµν
+)
+, (5.6)
+which generates corrections to (4.1) of the form
+∆L′ =
+B
+M2Pl
+(
+(∂µφ∂
+µφ)2 + (∂µφ∂
+µψ)2 + (∂µφ∂
+µχ)2
+)
++ . . . . (5.7)
+These obviously give another scattering channel contributing to the χφ→ χφ scattering amplitude in
+the UV theory allowing to satisfy the positivity bound as stated above. Assuming α ∼ O(1) then this
+is an irrelevant operator9 of the form M2PlR(∂φ)
+2/Λ4 with cutoff of at most Λ ∼ (MMPl)1/2.
+9A priori the irrelevant operator contains a term behaving as ∂2h(∂φ)2/(MPlM
+2) which would suggest an even lower
+cutoff however this particular term is removable by a field redefinition and does not enter the amplitude. Ultimately
+the irrelevant operator that has to be included in the EFT ought to affect the amplitude at the scale Λ ∼ (MMPl)1/2.
+– 16 –
+psiboxcut.pdf ψ
+φ φ
+φ φ
+dscattering2.pdf
+k1 k3
+k2 k4
+φ φ
+χ χ
+=
+φφ
+χχ
++
+φ φ
+χ χ
+dscatteringc.pdf
+k1 k3
+k2 k4
+φ φ
+χ χ
+= + +
+uv3 and uv4
+φ
+χ χ
+φ
+1
+(a) Tree-level contribution from Aφ2χ2
+ψ
+φ φ
+χχ
+dtree
+k1 k3
+hµν
+k4k2
+φ φ
+χχ
+dloop1
+k1
+p
+k3
+ψ
+hµν
+k2 k4
+φ φ
+χ χ
+2
+(b) One-loop contribution from Aψ2χ2
+Figure 4: Feynman diagrams contributing to χφ→ χφ scattering from the new UV operators in (5.8)
+up to one loop. Bold lines correspond to the propagators of the heavy field ψ.
+Stated differently, we could add to (4.1) generic non-renormalizable operators appearing at some
+scale Λ:
+LpUV,2 =
+√
+−g
+[M2Pl
+2
+R−
+1
+2
+(∂χ)2 −
+1
+2
+(∂φ)2 −
+1
+2
+(∂ψ)2 −
+1
+2
+M2ψ2
+− αMφψ2 +
+γ
+Λ4
+(∂µχ∂
+µψ)2 +
+δ
+Λ4
+(∂µχ∂
+µφ)2 +
+β
+Λ4
+(∂φ)4 +
+σ
+Λ4
+(∂µφ∂
+µψ)2 + . . .
+]
+.
+(5.8)
+Terms such as (∂χ)2(∂ψ)2 will not contribute to s dependence of χφ → χφ scattering and may be
+ignored. The new diagrams relevant for the one-loop χφ→ χφ scattering are shown in Fig. 4:
+• The diagram in Fig. 4a is a simple contact diagram that we have already computed in section 4.1
+with the corresponding vertex Vφ2χ2 given in (B.1). For the scattering amplitude in the forward
+limit it gives
+Aφ2χ2(s, 0) =
+δ
+Λ4
+s2 . (5.9)
+Hence, its contribution is positive for δ > 0. As discussed it can be used to cancel the negative
+s2 contribution to the χφ→ χφ scattering amplitude provided
+δ
+Λ4
+>
+α2
+90(4π)2M2M2Pl
+. (5.10)
+Importantly, this implies that the scale of the new non-renormalizable interaction that we are
+adding in (5.8) has to be Λ ≤ (MMPl)1/2 � MPl. Hence, the new positivity bounds can be
+satisfied in a UV theory with new derivative interactions that become important at a scale
+Λ�MPl. Notably, in comparison to our initial UV theory (4.1) this means that the EFT cutoff
+decreases from MPl to Λ. We will discuss the implications of this low cutoff in more detail below.
+• The diagram in Fig. 4b is new. The corresponding interaction in (5.8) gives the same vertex,
+Vψ2χ2 as in the previous step with φ↔ ψ and δ ↔ γ. The amplitude of the process shown is
+iAψ2χ2(s, t) =
+∫
+ddp
+(2π)d
+V 2φψ2Vψ2χ2∆ψ(p)∆ψ(k3 + p)∆ψ(p− k1) . (5.11)
+It has no t-channel pole and one can evaluate its s2 contribution in forward limit by directly
+setting t = 0. We find
+iAψ2χ2(s, 0) =
+16α2γM2
+Λ4
+∫
+ddk
+(2π)d
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+1
+2
+s2(−1 + x+ y)2
+[k2 +M2]3
+. (5.12)
+– 17 –
+φ
+φφ
+χ χ
+add 6
+φ
+φφ
+χχ
+hµνψ
+φφ
+χχ
+8
+Figure 5: One-loop contribution to χφ → χφ scattering from cubic dimension 5 operators. The
+wiggly line represents the graviton propagator, while the bold line that of the heavy field ψ.
+After integrating over momentum we are left with an integral that we have already performed
+in (B.16). For the amplitude we thus get
+Aψ2χ2(s, 0) =
+α2γ
+48π2Λ4
+× s2 . (5.13)
+Comparing this with the scattering amplitude computed in the initial UV theory we find again
+that in order for the total contribution to the s2 term to be positive the EFT cutoff scale should
+be Λ ≤ (MMPl)1/2 �MPl.
+• The operators considered in (5.8) contribute to the χφ → χφ through other diagrams at up to
+one–loop but all other contributions are suppressed compared with the ones mentioned previously
+and depicted in Fig. 4. Relying on those to ensure that the compactified positivity bounds are
+satisfied for the χφ→ χφ amplitude would only lead to an even smaller cutoff.
+We should also account for the role of irrelevant cubic operators. For instance the dimension 5
+operators
+∆LpUV,2 =
+√
+−g
+(
+f1
+Λ
+(∂φ)2ψ +
+f2
+Λ
+(∂χ)2ψ
+)
+, (5.14)
+will contribute to the amplitude in two ways, one through the process in Fig. 5 mediated partly by
+graviton exchange within a loop. On dimensional grounds this contributes to the positivity bounds
+by an amount
+∆
+d2
+ds2
+ApUV(0, 0) ∼
+f1f2
+M2PlΛ
+2
+. (5.15)
+While the sign can be engineered to be positive, for this to compensate the negative contributions, we
+would need the cutoff at the scale Λ ∼M which is worse than what is needed for quartic interactions.
+In addition this will lead to a simple tree-level ψ exchange process but this does not give rise to any
+s dependence.
+5.3 φφ→ φφ scattering
+So far we have only explored the compactified positivity bounds for the χφ → χφ amplitude as the
+presence of the spectator considerably simplifies the discussion. However as discussed in section 3,
+applying a similar type of 3d regularization argument to the improved positivity bounds for the
+φφ → φφ scattering would lead to a similar contradiction. Attempting to resolve this effect through
+– 18 –
+the introduction of new operators in the partial UV completion would, for instance, require the operator
+(∂φ)4 in (5.8) to give a dominant contribution over that from the electron loop, leading to the condition
+β
+Λ4
+>
+1
+90(4π)2M2PlM
+2
+. (5.16)
+Hence also the irrelevant φ self-interactions have to occur at or below the scale Λ = (MMPl)
+1/2.
+5.4 EFT of two light scalars
+The findings of the previous sections point strongly towards the fact that scalar field theories that would
+otherwise be renormalizable in the absence of gravity, would be forced to carry non-renormalizable
+interactions at a scale much lower than the Planck scale in the presence of gravity if we insisted on
+imposing the compactified positivity bounds. As another argument in favour of this finding is the
+example of two light scalar fields coupled to gravity and described by the action
+Lχ,φ =
+√
+−g
+[
+M2Pl
+2
+R−
+1
+2
+(∂χ)2 −
+1
+2
+(∂φ)2 −
+1
+2
+m2φ2 − aM
+φ3
+3!
+−
+λ
+4!
+φ4
+]
+. (5.17)
+We have computed all the necessary ingredients for the χφ → χφ scattering in the subsections B.1,
+D.1.1, D.2. All the s2 contributions to the scattering amplitude were found to be negative and
+are thus in contradiction with the compactified positivity bounds. We have also considered possible
+renormalizable couplings between the two fields: χφ2, φχ2 in appendix E. All of these are still negative.
+Similarly as in the action (5.8) the only positive s2 contribution to the scattering amplitude can arise
+from the derivative interaction
+δ
+Λ4
+(∂µχ∂νφ)
+2 . (5.18)
+Combining it with the result (D.22) from the scattering process due to the φ3 vertex with M ≡ mph
+and applying the positivity bounds gives the condition
+δ
+Λ4
+&
+a2
+M2Plm
+2
+ph
+, (5.19)
+leading again to Λ . (mphMPl)
+1/2. This would then suggest again the presence of new UV physics
+interactions at a scale well below the Planck scale. Applying this argumentation to for example single
+field inflation and scalar field dark matter of mass m would seem to ‘predict’ interactions between
+these fields and all other scalar fields in the nature (e.g. the Higgs boson) at a scale at or below
+(mMPl)
+1/2.
+5.5 Summary of new UV physics
+To put in perspective the implications of the previous bounds, let us go back to the analogy between
+the model (5.8) and QED minimally coupled to gravity, where M plays the role of the electron mass.
+The ‘need’ for operators of the form (∂χ∂φ)2 for any light (scalar) field χ even if it had no contact with
+φ other than gravitationally, would seem to suggest, in this analogy with QED, that photons ought to
+couple for instance with dark matter and with any other light field, including themselves at or below
+the scale Λ = (MMPl)
+1/2. Taking M to be the electron mass would lead to interactions at or below the
+scale Λ ∼ 1016eV. While this is a relatively high scale, it would still have profound consequences for
+our understanding of the Standard Model. While of course these contributions disappear in the limit
+MPl →∞ where gravity decouples, such a phenomenon would require a cutoff for gravity coupled to
+matter well below the Planck scale, which would be a statement of unprecedented magnitude.
+– 19 –
+6 Infrared Regulator and 3d gravity
+In the previous section we have seen that generic renormalizable field theories coupled to gravity violate
+the compactified positivity bounds unless new physics is introduced at the low scale Λ = (MMPl)
+1/2.
+This is a remarkably strong conclusion and to take its implications seriously we should be clear that the
+assumptions taken in its derivation are valid. One concern relates to the compactification procedure
+and whether the limits t → 0 and L → ∞ can be taken to commute as noted in [29]. Explicit
+calculations at fixed L show that the positivity bounds are violated for finite nonzero t and for any L
+so this seems unlikely to be the issue. Furthermore it seems implausible that we are either not allowed
+to consider 3d compactifications, or that we are not allowed to consider the 3d theory (4.20) in its own
+right. Far more likely the issue lies with the very poorly defined nature of 3d scattering amplitudes
+with massless gravitons [22, 36–38].
+6.1 IR regulated 3d amplitudes
+The central issue is that in 3 dimensions, a point particle generates a conical deficit angle and as such
+its influence is felt at arbitrarily large distances [39, 40]. This means that the traditional notion of an
+S-matrix is poorly defined. In perturbation theory this shows up as infrared divergences that need
+to be regulated. One way to regulate the infrared behaviour is to add a mass to the graviton. In
+this section we shall focus on the effect of such a regulator on the eikonal scattering amplitude. For
+instance, a static particle with mass M∗ can be described by the cosmic string metric with deficit
+angle δ = M∗
+2πM3
+, where M3 is the 3d Planck scale
+ds2 = −dt2 + e−2δ ln r(dr2 + r2dθ2) , (6.1)
+with θ ∈ [0, 2π]. This can be regulated by
+ds2 = −dt2 + e2φ(r)(dr2 + r2dθ2) , (6.2)
+for which the regulated Newtonian potential satisfies
+−∇22φ(r) +m
+2
+gφ(r) =
+M∗
+2M3
+δ2(x) , (6.3)
+with mg the graviton mass. The large distance Yukawa fall-off of φ renders scattering in the regulated
+metric (6.2) well-defined. For a massless particle of energy ω scattering in this geometry, in the eikonal
+limit the scattering phase shift is [22]
+δ`(s) ≈
+1
+8
+√
+s
+∫ 2π
+0
+dθ
+2π
+e−i`θ
+su
+M3(t−m2g)
+≈
+1
+4sM3
+∫ ∞
+−∞
+dq
+2π
+e−iqb
+s2
+q2 +m2g
+=
+s
+8M3mg
+e−|b|mg
+≈
+s
+8M3mg
+−
+s
+8M3
+|b|+O(mg) , (6.4)
+with impact parameter b = `/ω, and with q2 = −t, s = (M∗ + ω)2 − ω2 ≈ 2M∗ω, at high frequencies
+ω � M∗. It is apparent that the phase shift is divergent as mg → 0. To define the limit mg → 0 we
+may rescale the scattering amplitude by an IR divergent phase (which should not change the physics)
+e2iδ`(s) = e
+i s
+4M3mg e2iδ̃`(s) , (6.5)
+and use δ̃`(s) to define a scattering amplitude which is finite in the limit mg → 0
+lim
+mg→0
+δ̃`(s) = −
+s
+8M3
+|b|= −
+M∗
+4M3
+|`| , (6.6)
+– 20 –
+in the physical region where s > 0. This matches the leading term obtained from the semiclassical
+conical deficit calculation of [40], which gives
+δ̃`(s) = −
+π
+2
+|`|
+(
+1
+1− M∗
+2πM3
+− 1
+)
+. (6.7)
+Note however that the phase shift redefinition (6.5) is far from innocent. The positivity bound ar-
+guments rely on the assumption that the fixed t scattering amplitude respects the Jin-Martin bound
+lim|s|→∞ s
+−2A(s, t) = 0 for all complex s on the first Riemann sheet. If this were not the case, we could
+not have written the assumed dispersion relation. When there is a mass gap, and for mg > 0 we expect
+the 3d Froissart bound to hold [41]. However the redefinition (6.5) factorizes out an entire function
+that is not polynomially bounded, and grows exponentially in the lower half of the complex s plane,
+undermining the boundedness assumptions. We thus have no reason to expect that the regulated 3d
+scattering amplitudes for mg = 0 respect any polynomial boundedness.
+6.2 Unitarity in 3d
+Even more damning though is the failure for the scattering amplitude to have the assumed analyticity
+structure, positivity and smoothness properties. By assumption, if the scattering amplitude were to
+satisfy lim|s|→∞ s
+−2A(s, t) = 0 for fixed t with only the usual poles and branch cuts, then up to the
+unknown subtraction constants and known poles, it should be entirely determined by its imaginary
+part ImA(s, t) for s ≥ 0. From the 3d partial wave expansion in the physical region, we have
+A(s, t) =
+4
+√
+s
+i
+∞∑
+`=−∞
+ei`θ
+(
+e2iδ`(s) − 1
+)
+. (6.8)
+The imaginary part (given δ`(s) = δ−`(s) and splitting the phase up to its real and absorptive parts
+δ`(s) = δ
+r
+` (s) + iδ
+a
+` (s)) is
+ImA(s, t) = 4
+√
+s
+[(
+1− cos(2δr0(s))e
+−2δa0 (s)
+)
++ 2
+∞∑
+`=1
+cos(`θ)
+(
+1− cos(2δr` (s))e
+−2δa` (s)
+)]
+. (6.9)
+In particular for t = 0
+ImA(s, 0) = 4
+√
+s
+[(
+1− cos(2δr0(s))e
+−2δa0 (s)
+)
++ 2
+∞∑
+`=1
+(
+1− cos(2δr` (s))e
+−2δa` (s)
+)]
+> 0 , (6.10)
+is obviously positive if the sum is convergent, as are ∂Nt ImA(s, 0). Assuming the validity of the eikonal
+result for mg → 0 (6.6) at large `, or at least that lim|`|→∞ δ`(s) = −α(s)|`|, this series diverges. In
+the IR regulated case (6.4) it is by contrast convergent for fixed s as the graviton mass enforces an
+effective maximum angular momentum `max ∼ s2mgM∗ .
+By contrast the usual implicit approach in the massless case [22, 40] is to enforce convergence with
+an implicit i� regulator, take
+ImA(s, t) = 4
+√
+s
+[(
+1− cos(2δr0(s))e
+−2δa0 (s)
+)
++ 2
+∞∑
+`=1
+cos(`θ)e−�|`|
+(
+1− cos(2δr` (s))e
+−2δa` (s)
+)]
+. (6.11)
+This is qualitatively similar to the regulated case with � ∼ 1/`max, the difference being that the
+regulated problem enforces convergence by having δ`(s) → 0 for ` > `max. For a phase shift of
+– 21 –
+the form δ`(s) = −α(s)|`| the i� regulated expression gives the imaginary part as a sum over delta
+functions.
+ImA(s, t) ∼ 8
+√
+s
+∞∑
+`=1
+cos(`θ)e−�|`| (1− cos(2α|`|)) (6.12)
+= 4π
+√
+s
+[
+2δ̃(θ)− δ̃(θ + 2α(s))− δ̃(θ − 2α(s))
+]
+, (6.13)
+where the δ̃(θ) denote the regulated periodic delta functions
+δ̃(θ) ≡
+1
+2π
+(
+1
+1− eiθe−�
++
+1
+1− e−iθe−�
+− 1
+)
+=
+∑
+n
+δ(θ + 2πn) , (6.14)
+with the sum over n ensuring angular periodicity [40]. Evaluating in the forward scattering limit this
+expression is divergent
+ImA(s, 0) = 8π
+√
+s δ̃(0) ∼ 8
+√
+s �−1 . (6.15)
+As noted in [40] the optical theorem is no longer strictly valid due to the lack of smoothness of these
+functions. Note that the first delta function δ̃(θ) =
+∑
+n δ(θ+2πn) arising in (6.13) is not the same one
+that arises from the no-scattering process 1̂ in the S-matrix split Ŝ = 1̂+iT̂ since this has already been
+subtracted out in (6.8). It is a direct reflection of the ill-defined nature of the scattering amplitude
+in 3d with massless gravitons due to the absence of clearly defined asymptotic states. By contrast in
+the IR regulated case the imaginary part of the forward amplitude (6.10) is finite, and only diverges
+as mg → 0.
+6.3 Failure of positivity in 3d
+It is the previous lack of smoothness for the amplitude A(s, t) near t = 0 that is the root of the failure
+of positivity in 3d as we now show. Given the divergence of the imaginary part, we could just take the
+perspective of simply discarding the contribution from the delta function δ̃(θ) =
+∑
+δ(θ + 2πn) from
+(6.13) leaving the other two δ̃’s, which would amount to working with an amplitude in the form
+Â(s, t) =
+4
+√
+s
+i
+∞∑
+`=−∞
+ei`θe2iδ`(s)e−�|`| . (6.16)
+This is in fact the approach of [22]. Again taking δ`(s) = −α(s)|`| then explicitly evaluating the sum
+in the physical region gives
+Â(s, t) = 4
+(
+s
+√
+s sin(2α(s)− i�)
+s cos(2α(s)− i�)− s− 2t
+)
+. (6.17)
+Most importantly we see that this expression is finite in the forward limit confirming the removal
+of the t-channel pole. The eikonal approximation for the scattering of two massless particles gives
+δ`(s) = −α(s)|`| with α(s) = β
+√
+s with β = 1/(4M3) [22]. In the forward limit t = 0, this expression
+(6.17) is finite and given by
+Â(s, 0) = −4
+( √
+s sin(2β
+√
+s− i�)
+1− cos(2β
+√
+s− i�)
+)
+= −4
+√
+s cot(β
+√
+s− i�) . (6.18)
+– 22 –
+The s-poles are at the locations 2β
+√
+s = 2|n|π, and their imaginary parts are consistent with (6.13)
+Im Â(s, 0) = 4π
+√
+s
+∞∑
+n=−∞
+[
+−δ(2nπ + 2β
+√
+s)− δ(2nπ − 2β
+√
+s)
+]
+(6.19)
+= −8π
+∞∑
+n=0
+s
+β
+δ(s− n2π2/β2) . (6.20)
+However, it is now apparent that Im Â(s, 0) < 0 and so positivity is lost. Indeed more generally
+working with Â(s, t) we have
+Im Â(s, t) = −4
+√
+s
+[
+cos(2δr0(s))e
+−2δa0 (s) + 2
+∞∑
+`=0
+cos(`θ) cos(2δr` (s))e
+−2δa` (s)e−�|`|
+]
+, (6.21)
+which is sign indefinite even in the forward limit, and so destroys the crucial positivity property utilized
+in the dispersion relation arguments. Unitarity is of course still intact |e2iδ`(s)|≤ 1, but its implication
+for the positivity of the dispersion relation is different.
+They key point is that the standard statement of unitary rests on the decomposition Ŝ = 1̂ + iT̂ ,
+so that −i(T̂ − T̂ †) = T̂ T̂ †, which relies on the notion that there is some probability for no scattering.
+However in 3d massless gravity, it would be impossible to have a scenario where no scattering occurs
+since each mass distorts the metric at infinity by means of a deficit angle. This is why if we try to
+enforce the split Ŝ = 1̂ + iT̂ as in (6.8), then the resulting scattering amplitude will result in a delta
+function that compensates the 1̂ as in (6.13). The amplitude which is well-defined is Â which follows
+directly from −iŜ, but this does not have a positive imaginary part since unitarity is realized through
+(−iŜ)(−iŜ)† = 1̂.
+6.4 Analytic structure of the amplitude in 3d
+A closer inspection of (6.18) shows that it has the wrong analytic structure. If we attempt to construct
+the function from its imaginary part via a dispersion integral we obtain rather
+−
+4
+β
++
+s
+π
+∫ ∞
+0
+ds′
+Im Â(s′, 0)
+s′(s′ − s− i�)
+= −
+4
+β
+− 8
+∞∑
+n=0
+1
+β
+s
+(n
+2π2
+β2
+− s− i�)
+= 4
+√
+s cot(β
+√
+s+ i�) , (6.22)
+which has the same imaginary part but opposite sign real part in the physical region. The reason for
+this failure can be traced to the eikonal expression for the partial wave S-matrix e2iδ`(s) = e−2iβ
+√
+s|`|.
+Analytically continuing into the Euclidean region via a counterclockwise rotation s = eiπsE gives the
+exponentially growing behaviour e2iδ`(s) = e2β
+√
+sE |`| for which the sum over ` does not converge10.
+This failure of analyticity can be attributed to the failure of the eikonal approximation for the phase
+shift. This can be solved by a variant application of the eikonal approximation for which the sum
+(6.16) is replaced by an integral over `, giving
+Â(s, t) ∼
+4βs2
+−t− β2s2
+. (6.24)
+10By contrast, if β has been of opposite sign β = −β′ with β′ > 0, then (6.17) would have been
+Â′(s, t) = −4
+(
+s
+√
+s sin(2β′
+√
+s+ i�)
+s cos(2β′
+√
+s+ i�)− s− 2t
+)
+, (6.23)
+which has the correct analytic structure and for which the bounded partial waves would be e2iδ`(s) = e−2β
+′√sE |`|.
+– 23 –
+Expressed in a crossing symmetric form (one of many) [22]
+Â(s, t) =
+4βsu
+t− β2su
+= a(t) +
+b(t)
+µ(t)− s
++
+b(t)
+µ(t)− u
+, (6.25)
+with b(t) = 2q2/
+√
+q2 + β
+2
+4
+q4, µ(t) = 1
+2
+q2 + 1
+β
+√
+q2 + β
+2
+4
+q4, a(t) = − 4
+β
+and with q2 = −t, we can see
+that these expressions amount to replacing the naive eikonal phase shift e2iδ`(s) = e−2iβ|`|
+√
+s with
+e2iδ0(s) =
+1− iβ
+√
+s
+(1 + β2s)
+, and e2iδ`(s) =
+1
+(1 + β2s)
+(
+1− iβ
+√
+s
+1 + iβ
+√
+s
+)|`|
+, |`|≥ 1 , (6.26)
+which are bounded analytic functions up to a right-hand branch cut and multiple poles at s = −β−2.
+The expression (6.25) is a crossing symmetric, analytic function of s for fixed t ≤ 0 up to poles
+at fixed t ≤ 0 with positive imaginary parts Im Â(s, t) > 0 for t ≤ 0. It would then appear to satisfy
+everything we desire for a 3d scattering amplitude. Nevertheless this positivity of the imaginary part
+is accidental rather than implied by unitarity due to (6.21). This is most apparent from the fact that
+the imaginary part vanishes in the forward limit despite nonzero contributions from individual partial
+waves
+Im Â(s, 0) = πb(0)δ(s− µ(0)) = 0 , (6.27)
+which follows since
+4
+√
+s
+i
+∞∑
+`=−∞
+e2iδ` =
+4
+√
+s
+i
+[
+1− iβ
+√
+s
+(1 + β2s)
++ 2
+∞∑
+`=1
+1
+(1 + β2s)
+(
+1− iβ
+√
+s
+1 + iβ
+√
+s
+)`]
+= −
+4
+β
+, (6.28)
+is purely real even though every partial wave contributes with a non-zero imaginary part. Furthermore
+the imaginary part of the fixed angle θ amplitude (6.25) is negative. Even if the expression (6.25) is
+used within the context of improved positivity bounds to remove the eikonal contribution, there is no
+reason to expect that the remaining imaginary part would be positive, due the lack of positivity of
+(6.21). We thus conclude that there is no form of 3d scattering amplitude which is both smooth or at
+least finite at t = 0 and for which positivity of its imaginary part is guaranteed to hold. Since both
+these properties are needed together for the derivation of positivity bounds we conclude that they do
+not apply in 3 dimensions.
+6.5 Positivity recovered with a mass gap
+If, as implied in the previous subsections, it is indeed correct that the problems associated with the
+compactified positivity derivation are the ill-defined IR behaviour of the amplitude A (as defined in
+(6.8)) and the associated lack of positivity of the amplitude Â (as defined in (6.21)), then these issues
+would be resolved if the spin-2 states were massive, for which we may return to using A. As we shall
+see, this is indeed the case and the positivity bounds are only problematic in the case of a massless
+graviton exchange, not for a massive one.
+Returning to the four dimensional amplitude, had we considered the exchange of a massive spin-2
+field of mass mg, the corresponding result for the scattering amplitude would be instead
+ApUVm(s, t) = −
+s2
+M2Pl(t−m2g)
+−
+1
+90(4π)2
+α2s2t
+M2M2Pl(t−m2g)
++O((t−m2g)
+0) . (6.29)
+– 24 –
+As expected, the only relevant effect is the shift of the t-channel pole away from the origin, while the
+overall sign remains unaffected. In particular we emphasize that the slight modification of the polar-
+ization structure of the massive vs massless spin-2 propagator bears no consequences to this discussion.
+The presence of a mass gap allows us to safely continue the partial wave expansion from the
+physical region t ≤ 0 to the region 0 ≤ t < m2g without fear of admonition. The positivity bounds can
+then be applied for any t in the region 0 ≤ t < m2g [13]. Remarkably, the amplitude ApUVm manifestly
+satisfies the positivity bounds as expected. To see this we denote t = xm2g + τ with 0 < x < 1 and
+expand in τ
+ApUVm(s, t) =
+s2
+M2Pl((1− x)m2g − τ)
++
+1
+90(4π)2
+α2s2(xm2g + τ)
+M2M2Pl((1− x)m2g − τ)
++O((t−m2g)
+0) ,
+=
+s2
+M2Pl(1− x)m2g
++
+1
+90(4π)2
+α2s2x
+M2M2Pl(1− x)
++
+∞∑
+n=1
+cn(s)τ
+n . (6.30)
+All coefficients of the expansion are manifestly positive cn(s) > 0 as required, and furthermore
+∂2ApUVm(s, τ)
+∂s2
+∣∣∣
+τ=0, 0<x<1
+> 0 , (6.31)
+without any assumption on the magnitude of α. This strongly suggests that any issue with satisfying
+the positivity bounds in the massless case is not an issue with the partial UV theory considered in this
+work, rather, it suggests that the contradiction apparent in (4.12) with the compactified positivity
+bounds with a massless graviton is due to the absence of a mass gap in the massless case and the
+associated poor IR behaviour. The fact that positivity bounds are applicable for massive spin-2 states
+has been used extensively in recent works [4, 5, 8, 9, 11, 12, 42, 43].
+7 Conclusions
+Positivity bounds are expected to apply to gravitational theories whenever there exists a clean decou-
+pling limit MPl →∞ for which the graviton decouples from other degrees of freedom. This is the case
+whenever the low-energy scattering amplitude takes the schematic form
+A(s, t) ∼ −
+s2
+M2Plt
++
+c
+M4
+s2 + . . . , (7.1)
+with c ∼ O(1) for which we may scale MPl →∞ for fixed M so that the non-gravitational positivity
+bounds imply c > 0. Related arguments have been given in Ref. [25], where it is argued that positivity
+bounds should apply for tree-level UV completions when the higher spin states Reggeizing graviton
+exchange are subdominant in the matter (e.g. photon) scattering.11 In the examples discussed here,
+the scattering amplitude rather takes the form
+A(s, t) ∼ −
+s2
+M2Plt
++
+c̃
+M2M2Pl
+s2 + . . . , (7.2)
+11A weakly–coupled tree-level UV completion is often assumed “as a safety net” for practical computational purposes
+in applying the positivity bounds so as to ensure that amplitudes are dominated by tree-level diagrams, however the
+positivity bounds themselves as expressed for instance in (2.6) are derived with no prior limitation on the type of UV
+realization, so long as it is a standard one as far locality, unitarity, Lorentz invariance and causality are concerned.
+– 25 –
+with c̃ ∼ O(1). In this situation we can no longer decouple gravity without making the whole effect
+vanish (or bringing the cutoff to zero). Furthermore in all of our examples, c̃ arises from loop effects
+rather than tree-level/higher spin UV physics and so is not covered by the argument of [25]. It is
+thus no longer clear whether we require c̃ > 0. As discussed in [27], for the scaling (7.1), having
+c ∼ O(1) < 0 clearly leads to superluminal propagation and violation of causality, which is consistent
+with previous expectations on the connection between positivity bounds [1, 2] and causality [3]. By
+contrast for the scaling (7.2), c̃ ∼ O(1) < 0 does not lead to any resolvable violation of microcausality
+[27, 28]. Consequently we can no longer rely on causality arguments to argue for any bound on c̃.
+The proposed compactified positivity bounds of [21] attempt to bypass this by using positivity of 3d
+scattering amplitudes to indirectly infer c̃ > 0 even for the scaling choice (7.2). If true, these would
+have profound consequences, most notably for the weak gravity conjecture [21, 23–25].
+In the present article, we have shown that these proposed compactified positivity bounds are
+generically violated for typical renormalizable theories coupled to gravity unless new physics is intro-
+duced at the parametrically low scale Λ ∼ (MMPl)1/2. One may take the perspective that this simply
+implies that our renormalizable theory lies in the swampland, however this result remains relatively
+stable under relevant and marginal deformations, and similar observations hold for the more realistic
+case of QED [30]. Such a conclusion about the low scale Λ ∼ (MMPl)1/2 would have profound impli-
+cations for our understanding of the landscape of theories with consistent Lorentz invariant, analytic,
+UV completions.
+There are however as discussed in section 6 a number of technical issues with the derivation of the
+compactified positivity bounds proposed in [21] that prevents us from immediately accepting these
+conclusions. Most critical is the fact that 3d scattering amplitudes in the presence of massless spin-2
+particles are poorly defined, not least because gravitational interactions do not vanish at infinity. This
+shows up as singular behaviour in the usual definition of the scattering amplitude in the forward limit.
+We show explicitly that attempting to remove this singular behaviour gives a scattering amplitude
+that does respect analyticity but no longer respects positivity of its imaginary part (despite unitarity
+being intact). This undermines the applicability of any positivity bound to 3d gravitational scattering
+amplitudes (at least for massless gravitons) and shows how the issues with the 4d massless t-channel
+pole manifest themselves through slightly different but ultimately equivalent pathologies in 3d.
+Conjecture: We conclude by postulating a conjecture on the implications of the t–channel pole
+subtracted positivity bounds and the amount by which they may in principle be violated assuming that
+the arguments of [21] are indeed flawed. Given a theory with a scattering amplitude with low-energy
+expansion of the form (7.1) where M is the cutoff of the low-energy EFT, we can at most expect a
+bound in the weak sense
+c > −
+M2
+M2Pl
+×O(1) . (7.3)
+Generically this seems to suggest that even though negative coefficients could in principle be com-
+patible with standard high-energy completion, they ought to be highly suppressed, and the scaling
+with MPl is such that one recovers the standard positivity bounds c > 0 whenever a decoupling
+limit MPl → ∞ can be taken. Even if suppressed, allowing for the very possibility of a having small
+negative coefficients would have important implications for the weak gravity conjecture where one of
+its manifestations relies precisely on operators suppressed with the precise same powers of MPl, [24, 25].
+– 26 –
+As mentioned previously, it is likely that the bound (7.3) can be further refined to c > 0 using
+appropriate scaling arguments for a restricted class of UV completions, for instance for tree level higher
+spin/Regge state UV completions with subdominant couplings to matter as argued in [25]. Interest-
+ingly, this would imply that observing a negative coefficient c experimentally could be interpreted as
+indications against these types of completions.
+The scaling of the bound (7.3) is similar to that found in [27] where it was argued that superlu-
+minalities within low-energy gravitational theories are consistent with causality and can emerge from
+standard and causal high-energy completions so long as the amount of superluminality scales simi-
+larly at least as M−2Pl and vanishes in a decoupling limit where gravity decouples for which traditional
+causality arguments apply. In the specific case of scalar QED this is consistent with the observa-
+tions of [28]. Future work is needed to better understand the role of both causality and positivity in
+gravitational effective theories.
+Acknowledgments: We would like to thank Andrey Khmelnitsky, Arshia Momeni and Justinas Rum-
+butis for useful discussions. The work of AJT and CdR is supported by an STFC grant ST/P000762/1.
+CdR thank the Royal Society for support at ICL through a Wolfson Research Merit Award. LA and
+CdR are supported by the European Union’s Horizon 2020 Research Council grant 724659 Massive-
+Cosmo ERC–2016–COG. CdR is also supported by a Simons Foundation award ID 555326 under the
+Simons Foundation’s Origins of the Universe initiative, ‘Cosmology Beyond Einstein’s Theory ’. SJ
+is supported by an STFC studentship. AJT thanks the Royal Society for support at ICL through a
+Wolfson Research Merit Award.
+A One–loop electron contribution to photon scattering in scalar QED
+In this appendix we shall provide the key steps for determining the one–loop electron contribution
+to the φφ → φφ scattering amplitude as illustrated in Fig. 1. Accounting for the three channels, the
+amplitude is given by
+Aψ−box = Aψ−box(s, t, u) +Aψ−box(s, u, t) +Aψ−box(t, u, s) , (A.1)
+where the individual amplitudes read
+Aψ−box(s, t, u) =
+α4M4
+π2
+∫
+R
+dxdy dz
+1
+∆2
+, (A.2)
+and the denominator is given by ∆ = M2 +sz(x+y+z−1)− txy. The integration region R is defined
+as R = {x, y, z ∈ R |x, y, z ≥ 0, x + y + z ≤ 1}. Going to the forward limit (t = 0) we can evaluate
+this amplitude in an expansion of s
+2
+M4
+. We find
+Aψ−box =
+α4
+2π2
+(
+1 +
+s2
+60M4
+)
++O
+(
+s4
+M8
+)
+. (A.3)
+Matching these contributions to contact interactions in the one-loop effective action leads to the
+following operators to be included in (3.6):
+LIR ⊃
+√
+−g
+[
+α4
+2π2
+φ4
+4!
++
+1
+480π2
+α4
+M4
+(∂φ)
+4
+]
+. (A.4)
+– 27 –
+ψ
+φ φ
+χχ
+dtree
+k1 k3
+hµν
+k4k2
+φ φ
+χχ
+dloop1
+k1
+p
+k3
+ψ
+hµν
+k2 k4
+φ φ
+χ χ
+2
+(a) Tree diagram for Atree,0.
+ψ
+φ φ
+χχ
+dtree
+k1 k3
+hµν
+k4k2
+φ φ
+χχ
+dloop1
+k1
+p
+k3
+ψ
+hµν
+k2 k4
+φ φ
+χ χ
+2
+(b) One-loop diagram for Aφψ2 .
+dloop2
+k3
+ψk1
+hµν
+k4
+k2
+φ
+φ
+χ
+χ
+vert2
+k1
+k2
+ψ
+ψ
+hµν
+vert3
+hµν φ
+ψ ψ
+vert4
+k1 k3
+k2 k4
+φ φ
+χ χ
+dloop0
+ψ
+φ φ
+dscattering3c
+3
+(c) One-loop diagram for Aφψ2h.
+Figure 6: The detailed Feynman diagrams for the three scattering processes contributing to the χφ→
+χφ one-loop scattering in the UV theory (4.1). The wiggly lines correspond to graviton propagators,
+while bold lines stand for propagators of the heavy field ψ.
+B Amplitudes from the Perspective of the Partial UV theory
+In this section we give the details for the computations of the χφ → χφ scattering amplitude in the
+UV theory (4.1). The relevant Feynman diagrams are shown in Fig. 6. We introduce the following
+short-hand notations for the momentum-dependent vertices
+dloop2
+k3
+ψk1
+hµν
+k4
+k2
+φ
+φ
+χ
+χ
+vert2
+k1
+k2
+ψ
+ψ
+hµν
+vert3
+hµν φ
+ψ ψ
+vert4
+k1 k3
+k2 k4
+φ φ
+χ χ
+dloop0
+ψ
+φ φ
+dscattering3c
+3
+V
+µν
+M (k1, k2) ≡
+−i
+2MPl
+(
+k
+µ
+1 k
+ν
+2 + k
+ν
+1k
+µ
+2 − η
+µν
+(
+k1 · k2 −M2
+))
+,
+dloop2
+k3
+ψk1
+hµν
+k4
+k2
+φ
+φ
+χ
+χ
+vert2
+k1
+k2
+ψ
+ψ
+hµν
+vert3
+hµν φ
+ψ ψ
+vert4
+k1 k3
+k2 k4
+φ φ
+χ χ
+dloop0
+ψ
+φ φ
+dscattering3c
+3
+V
+µν
+φψ2h
+≡
+−iαM
+MPl
+ηµν ,
+dloop2
+k3
+ψk1
+hµν
+k4
+k2
+φ
+φ
+χ
+χ
+vert2
+k1
+k2
+ψ
+ψ
+hµν
+vert3
+hµν φ
+ψ ψ
+vert4
+k1 k3
+k2 k4
+φ φ
+χ χ
+dloop0
+ψ
+φ φ
+dscattering3c
+3
+Vφ2χ2 ≡
+2iCα2
+M2M2Pl
+(
+(k1 · k4)(k2 · k3) + (k1 · k2)(k3 · k4)
+)
+,
+(B.1)
+where we use the (−,+,+,+) signature and all the momenta are taken to be ingoing. We also denote
+the scalar field propagators by ∆φ(p), ∆ψ(p), ∆χ(p) and assign Dµν;αβ(p) to the graviton propagator in
+the harmonic gauge; the φψ2 interaction vertex is denoted by Vφψ2 ≡ −2iαM . Finally, to evaluate the
+loop integrals we use the standard dimensional regulation procedure that for d spacetime dimensions
+reads
+µ�
+∫
+ddk
+(2π)d
+(k2)p
+(k2 + ∆− iε)n
+= µ�
+iΓ
+(
+d
+2
++ p
+)
+Γ
+(
+n− p− d
+2
+)
+(4π)d/2Γ
+(
+d
+2
+)
+Γ (n)
+(∆− iε)
+d
+2
++p−n ≡ Ipn . (B.2)
+– 28 –
+B.1 Tree–level
+The amplitude of the tree-level diagram in Fig. 6a is found to be (using the notations of (B.1))
+iAtree,0 = V µνm (k1, k3)Dµν;αβ(k1 + k3)V
+αβ
+0 (k2, k4)
+=
+−i
+M2Pl
+1
+t
+s(s+ t) =
+i
+M2Plt
+su ,
+(B.3)
+where we have used the Mandelstam variables
+s = −(k1 + k2)2 , t = −(k1 + k3)2 , u = −(k1 + k4)2 , (B.4)
+with k2i = 0 for i = 1, 2, 3, 4. This result is independent on the spacetime dimension and shows the
+presence of a t-channel pole in the tree-level scattering of two scalar fields via a massless graviton
+exchange.
+Before we set off computing the one-loop amplitudes let us note that the −αMφψ2 interaction
+introduces a shift in the self-energy of φ in the resummed propagator and leads to wavefunction
+renormalization Zφ defined as
+−i
+p2 +m2 + Σ(p)
+=
+−iZφ
+p2 +m2phys
+, (B.5)
+with the physical mass for φ determined from the relation[
+p2 +m2 + Σ(p)
+]
+p2=−m2
+phys
+= 0 , (B.6)
+where in this case the bare mass m = 0. In particular, the shift in self-energy arising from the ψ loop
+to quadratic order in α is found as:
+−iΣ(p) =
+dloop2
+k3
+ψk1
+hµν
+k4
+k2
+φ
+φ
+χ
+χ
+vert2
+k1
+k2
+ψ
+ψ
+hµν
+vert3
+hµν φ
+ψ ψ
+vert4
+k1 k3
+k2 k4
+φ φ
+χ χ
+dloop0
+ψ
+φ φ
+dscattering3c
+3
+=
+4α2M2
+2
+∫
+ddk
+(2π)d
+1
+[k2 +M2]
+1
+[(k − p)2 +M2]
+=
+iα2M2
+8π2
+∫ 1
+0
+dx
+[
+MS + log
+µ2
+M2 + x(1− x)p2
+]
+,
+(B.7)
+where the 1/2 on the first line is the symmetry factor of the diagram and the latter equality is
+obtained for d = 4 − �. Here we denote the standard minimal subtraction scheme (MS) terms by
+MS ≡ 2
+�
+−γ+log(4π). Up to leading order in the coupling constant α we then find the renormalization
+factor to be
+Z−1φ = 1 +
+dΣ
+dp2
+∣∣∣∣
+p2=−m2
+= 1 +
+α2
+3(4π)2
+. (B.8)
+The total amplitude due to the tree-level scattering is then given by the LSZ reduction formula as
+Atree = Zφ ×Atree,0 . (B.9)
+B.2 One loop
+There are two contributions to the one-loop amplitude of the χφ→ χφ scattering, shown in Figs. 6b
+and 6c, so that
+A1−loop = Aφψ2 +Aφψ2h . (B.10)
+– 29 –
+B.2.1 Aφψ2 amplitude
+First, let us deal with the loop process supported by the cubic interaction φψ2. This is depicted in
+Fig. 6b and the corresponding amplitude is
+iAφψ2(s, t) =
+∫
+ddp
+(2π)d
+V 2φψ2∆ψ(p)∆ψ(p+ k3)∆ψ(p− k1)
+V
+µν
+M (p+ k3, k1 − p)Dµν;αβ(k2 + k4)V
+αβ
+0 (k2, k4) .
+(B.11)
+This gives
+iAφψ2(s, t) =
+16M2α2
+M2Plt
+∫
+ddp
+(2π)d
+1
+[p2 +M2]
+1
+[(p+ k3)2 +M2]
+1
+[(p− k1)2 +M2]
+×
+[
+−
+s2
+4
+−
+st
+4
++
+M2t
+4
++
+p2t
+4
+−
+1
+2
+sp · (k2 − k4)−
+1
+2
+tp · (k1 + k2) + (p · k2) (p · k4)
+]
+,
+(B.12)
+where we have used momentum conservation k1 +k2 +k3 +k4 = 0. We then combine the three propa-
+gators in the denominator by introducing the Feynman parameters x, y and transform the momentum
+integration variable as pµ → kµ ≡ pµ − xkµ1 + yk
+µ
+3 . This leads to our final expression
+iAφψ2(s, t) =
+8M2α2
+M2Plt
+µ�
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+∫
+ddk
+(2π)d
+A(s, t) +B(t)k2
+[k2 + ∆]
+3
+, (B.13)
+where we have used
+∫
+ddk
+(2π)d
+kµ = 0 and
+∫
+ddk
+(2π)d
+kµkν = 1
+(2π)d
+1
+d
+k2ηµν and have defined
+A(s, t) ≡ −s(s+ t)(−1 + x+ y)2 +M2t ,
+B(t) ≡
+(d− 2)
+d
+t ,
+∆ ≡M2 − xyt .
+(B.14)
+The integral over kµ can be taken using the dimensional regularization result (B.2):
+iAφψ2(s, t) =
+i8M2α2
+M2Plt
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+[
+A(s, t)
+32π2∆
++
+B(t)
+16π2
+(
+−
+1
+2
++ MS− log
+∆
+µ2
+)]
+. (B.15)
+There are a few important features of this amplitude that need to be discussed. First, it is easy to see
+that the quantity ∆, appearing in both the denominator and the logarithm in the expression above,
+vanishes for t ≥ 4M2, and implies that there is a branch cut for these values of t. While it is thus
+apparent that the amplitude Aφψ2(s, t) is non-analytic for t ≥ 4M2 we see that it is polynomial and
+thus analytic in s (the only s-dependence appears in the quantity A(s, t) defined above). Second, as
+we shall show in detail below the amplitude exhibits a t-channel pole, i.e. Aφψ2(s, t) ∼ α
+2
+M2
+Pl
+s2
+t
++ . . . . In
+the low-energy EFT such a contribution to the scattering amplitude can be obtained in the presence
+of a new operator ∼ α2
+√
+−g(∂φ)2, corresponding to a redressing of the kinetic term of φ. Indeed,
+as we shall see, this pole cancels out in the total amplitude for the χφ → χφ scattering once the
+wavefunction renormalization of eq. (B.8) is taken into account. Finally, the amplitude has a finite s2
+contribution thus implying that the positivity bounds (2.6) would give a non-trivial constraint on the
+parameters of the theory. Let us address the two latter points in detail now.
+• t-pole:
+In order to find the contribution to the t-pole, it is sufficient to evaluate the integrands of the
+– 30 –
+full amplitude Aφψ2 at t = 0. Since B(t = 0) = 0 this gives
+iAφψ2, pole(s, t) =
+i8M2α2
+M2Plt
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+A(s, t)
+32π2∆
+∣∣∣∣
+t=0
+, (B.16)
+where A(s, t = 0) ≡ −s2(−1 + x+ y)2 and ∆|t=0 = M
+2 making it easy to perform the integrals
+over Feynman variables. As a result we obtain:
+iAφψ2, pole(s, t) = −
+iα2
+M2Plt
+s2
+3(4π)2
+. (B.17)
+This combines with the result from the tree amplitude in (B.9) as
+iAt−pole = iZφ ×Atree,0 + iAφψ2, pole = −
+is2
+4M2Plt
++O(t0) , (B.18)
+and we see that the O(α2) contribution to the t-pole has cancelled leaving only the original tree-
+level pole. From the definition of A(s, t) and B(t) we see that all their next order contributions
+are proportional to t and the amplitude is thus finite in the forward limit.
+• s2 contribution:
+To find the relevant s2 contribution to the total amplitude (B.15) it is sufficient to expand the
+integrand around t = 0. Indeed, we know that the amplitude is analytic for t ≤ 4M2 and that
+the positivity bounds will be applied in the forward limit with t = 0. This makes the small
+t expansion a valid approximation. We are then only interested in the s2t contribution in the
+integrand which cancels the t in the overall denominator and leads to a finite s2 contribution to
+the scattering amplitude. Since the only s2 dependence is in the quantity A(s, t) we obtain:
+iAφψ2, s2(s, t) =
+i8M2α2
+M2Plt
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+−A(s, t)
+32π2∆2
+∣∣∣∣
+t=0
+×
+d∆
+dt
+× t
+= −
+iα2s2
+90(4π)2M2M2Pl
++ . . . ,
+(B.19)
+where the ellipsis stands for terms that do not have any s2 contribution.
+B.2.2 Aφψ2h amplitude
+The last step in computing the total scattering amplitude for the process χφ→ χφ is determining the
+contribution from the one-loop process shown in Fig. 6c. This is given by
+iAφψ2h(s, t) = 2×
+1
+2
+∫
+ddp
+(2π)d
+Vφψ2∆ψ(p)∆ψ(p+ k3)V
+µν
+φψ2h
+Dµν;αβ(k2 + k4)V
+αβ
+0 (k2, k4)
+= −
+4α2M2
+M2Pl
+µ�
+∫
+ddp
+(2π)d
+1
+[p2 +M2]
+1
+[(p+ k3)2 +M2]
+,
+(B.20)
+where again the 1/2 is the symmetry factor of the diagram and there is an extra factor of 2 as the loop
+can be on either external φ leg. After introducing the Feynman parameter x, shifting the momentum
+to kµ ≡ pµ + xkµ3 and taking the integral as in dimensional regulation in (B.2) for d = 4− � we obtain
+iAφψ2h(s, t) = −
+4iα2M2
+(4π)2M2Pl
+∫ 1
+0
+dx
+[
+MS− log
+M2
+µ2
+]
+. (B.21)
+This amplitude is independent on both s and t and thus has no impact on the positivity bounds.
+– 31 –
+C Compactified Amplitudes in the Partial UV Theory
+We now apply explicitly the procedure suggested in Ref. [21] to our model and show how the contradic-
+tion (4.12) manifests itself in that formalism. We compactify one of the spatial directions (denoted here
+by z) on a circle of length L. In this section we denote the 4d metric by ĝMN where N,M = 0, . . . , 3
+and parameterize it as
+ĝMN = e
+−σ
+(
+e2σgµν + VµVν Vµ
+Vν 1
+)
+, (C.1)
+where the Greek indices µ, ν are the 3d ones. The heavy scalar ψ can be expanded into KK modes
+ψ(xM ) =
+∑
+n
+e
+2πinz
+L ψn(x
+µ) , (C.2)
+so that ψ(z+L) = ψ(z). A similar decomposition can be used for all the other fields we are interested
+in. However, in what follows we shall focus on scatterings of the zero KK modes φ0χ0 → φ0χ0 for which
+(to the order we are working in), only the zero modes of the gravitational fields σ, Vµ, gµν contribute.
+Without loss of generality and in order to avoid unnecessarily heavy notation, in what follows we
+shall therefore simply denote by σ, Vµ, gµν the zero modes of the gravitational fields. Focusing on the
+zero KK modes for all fields aside from the heavy scalar ψ and integrating our model (4.1) over the
+compactified direction we thus get
+SpUV,3d = L
+∫
+d3x
+√
+−g
+{
+M2Pl
+2
+(
+R−
+1
+2
+(∂σ)2 −
+1
+4
+VµνV
+µνe−2σ
+)
+−
+1
+2
+(∂χ0)
+2
+−
+1
+2
+(∂φ0)
+2 −
+1
+2
+(∂ψ0)
+2 −
+1
+2
+M2eσψ20 − αMe
+σφ0ψ
+2
+0 − 2αM
+∞∑
+n=1
+eσφ0ψnψ
+†
+n
+−
+∞∑
+n=1
+[
+gµν∂µψn∂νψ
+†
+n +M
+2eσψnψ
+†
+n − 2
+in
+L
+V µψn∂µψ
+†
+n +
+n2
+L2
+(e2σ + VαV
+α)ψnψ
+†
+n
+]}
+,
+(C.3)
+where now (∂χ0)
+2 ≡ gµν∂µχ0∂νχ0 etc. with µ, ν = 0, 1, 2 and gµν is the 3d metric. We have also
+defined Vµν ≡ ∂µVν − ∂νVµ and are treating the KK modes ψn as complex by identifying ψ−n = ψ†n .
+For the one-loop χ0φ0 → χ0φ0 scattering the relevant terms in the above action are only
+SUV,3d ⊃ L
+∫
+d3x
+√
+−g
+{
+M2Pl
+2
+R−
+1
+2
+(∂χ0)
+2 −
+1
+2
+(∂φ0)
+2 −
+1
+2
+(∂ψ0)
+2 −
+1
+2
+M2ψ20 (C.4)
+− αMφ0ψ20 − 2αM
+∞∑
+n=1
+φ0ψnψ
+†
+n −
+∞∑
+n=1
+(
+gµν∂µψn∂νψ
+†
+n +
+(
+M2 +
+4π2n2
+L2
+)
+ψnψ
+†
+n
+)}
+.
+The scalar fields ψn acquire an effective mass Mn defined as
+M2n ≡M
+2 +
+4π2n2
+L2
+. (C.5)
+The diagrams contributing to the χ0φ0 → χ0φ0 scattering up to one-loop order are shown in Fig. 7.
+Since we are only interested in contributions to the scattering amplitude that grow as s2 we have
+dropped other diagrams, like the one in Fig. 8. The computation of the scattering amplitude is very
+similar to the 4d case shown in great detail in appendix B. Here we only show the main results of the
+computation. Taking care of the appropriate canonical normalizations the vertices expressed in (B.1)
+– 32 –
+k1 k3
+k2 k4
+φ0 φ0
+χ0 χ0
+=
+φ0φ0
+χ0χ0
++
+ψ0
+φ0 φ0
+χ0 χ0
++
+ψn
+φ0 φ0
+χ0 χ0
+dloop3
+φ
+φ φ
+φ φ
+χχ
+dloop6
+φ
+φ
+φ
+χ
+χ
+dloop4
+4
+Figure 7: Principal contributions to χ0φ0 → χ0φ0 scattering. Here n ∈ [1,∞).
+φ
+φφ
+χ χ
+add 6
+φ
+φφ
+χχ
+hµνψ
+φφ
+χχ kkdloop6
+ψn
+φ0
+φ0
+χ0
+χ0
+8
+Figure 8: Additional contributions to χ0φ0 → χ0φ0 scattering. Here n ∈ [0,∞).
+get rescaled by Vφ0ψ2n = −2iαM/
+√
+2πL and V
+µν
+Mn
+= V
+µν
+Mn
+/
+√
+2πL. Using these rules in 3d, the tree-level
+amplitude gives
+iAtree,0(s, t) = −
+i
+M2PlL
+s2 + st
+t
+, (C.6)
+and up to the factor 1/L coincides with the 4d result given in (4.11). Most importantly, it also
+exhibits a t-pole. Taking into account the shift in the self-energy of φ0 due to the ψ0 and ψn loops
+the tree-level amplitude receives α2 corrections as Atree = Zφ0 ×Atree,0 where Zφ0 is the wavefunction
+renormalization factor
+Zφ0 = 1−
+α2M2
+48πL
+∞∑
+n=−∞
+1
+M3n
++O(α4) . (C.7)
+The amplitude for the loop processes in Fig. 7 can be written for both n = 0 and n 6= 0 as
+iAφ0ψ2n(s, t) = N
+∫
+d3p
+(2π)3
+V 2φ0ψ2n
+∆ψn(p)∆ψn(p+ k3)∆ψn(p− k1)
+V
+µν
+Mn
+(p+ k3, k1 − p)Dµν;αβ(k2 + k4)V
+αβ
+0 (k2, k4) ,
+(C.8)
+where the symmetry factor N = 1 for n = 0 and N = 2 for n ≥ 1. Using dimensional-regularization,
+this gives
+iAφ0ψ2n(s, t) = −
+8Nα2M2
+L2M2Plt
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+∫
+d3k
+(2π)3
+(s2 + st)(−1 + x+ y)2 − (d−2)
+d
+k2t−M2nt
+[k2 +M2n − xyt]3
+,
+(C.9)
+where x, y are the Feynman parameters and we have shifted the momentum as kµ ≡ pµ − xkµ1 + yk
+µ
+3 .
+After performing the integration over momenta, as in subsection B.2.1 we find that there is an s2/t
+– 33 –
+pole:
+Aφ0ψ2n, pole(s, t) = −
+α2M2
+48πM2PlL
+2
+∞∑
+n=−∞
+s2
+t
+1
+M3n
+, (C.10)
+that cancels out when added to the tree-level contribution leaving, as in 4d,
+At−pole = Zφ0 ×Atree,0 +Aφψ2n, pole = −
+(s2 + st)
+M2PlLt
++O(t0) . (C.11)
+We then find the s2 contribution — relevant for the positivity bounds (2.6) — by evaluating the
+integrals in (C.9) in t → 0 limit. Combined together with the tree-level result we obtain the final
+expression of the regularized χ0φ0 → χ0φ0 scattering amplitude:
+ApUV,3d(s, t) = −
+s2
+M2PlLt
+−
+α2M2
+240(4π)L2M2Pl
+∞∑
+n=−∞
+s2
+1
+M5n
++O(t0) . (C.12)
+As a consistency check, we can take the continuum limit of the above amplitude by sending L → ∞
+in the expression ApUV,3d(s, t) × L. Using the relation limL→∞
+∑∞
+n=−∞M
+−5
+n =
+2L
+3πM4
+we indeed re-
+cover (4.11).
+We note that formally the pole s2/t is also present in the regularized amplitude (C.12). However,
+since there are no propagating massless spin-2 fields in 3d, this pole cannot be physical. This can be
+seen in the eikonal approximation as discussed in section 6. Roughly speaking the eikonal resummation
+of the t-channel pole in (C.12) amounts to the replacement (6.25)
+su
+M2PlLt
+→
+su
+M2PlL(t− 4su/(M
+4
+PlL
+2))
+, (C.13)
+which remains finite as t → 0 and furthermore asymptotes to a constant at large s for fixed t. For
+this approximation to work, the forward limit must be taken before decompactifying the z-direction
+by L → ∞. In other words, one must ensure that t � 1/L2. Following the prescription of [21]
+one can then further argue that the eikonal approximation will bear no effect on the contributions
+to the scattering amplitude from the second term in (C.12). This can be easily understood from the
+partial wave expansion of the finite terms in the amplitude (C.12). When expanded in terms of partial
+waves, these only have contributions at low `. In contrast, the eikonal approximation is dominated
+by the resummation of the large ` partial waves of the total amplitude and thus leaves specific small
+` contributions unscathed. The validity of applying positivity bounds in 3d is critically discussed in
+section 6, however assuming for now that they would be applicable, we would infer
+d2ApUV,3d(s, 0)
+ds2
+= −
+α2
+120(4π)MM2Pl
+×
+1
+L2M2
+
+1 + 2 ∞∑
+n=1
+1(
+1 + 4π
+2n2
+L2M2
+)5/2
+
+ > 0 . (C.14)
+Clearly this cannot be satisfied for any choice of partial UV completion parameters.
+D Adding interactions to the UV theory
+In this section we shall contemplate the possibility that our partial UV completion is to be blamed and
+establish whether adding other operators that would otherwise be renormalizable in the absence of
+gravity could help satisfying the compactified positivity bounds. Following this approach, we consider
+cubic and quartic non-derivative operators that introduce additional φ, ψ interactions in our UV theory
+(4.1) and discuss their implications for the positivity bounds applied to the χφ → χφ scattering
+amplitude.
+– 34 –
+k1 k3
+k2 k4
+φ0 φ0
+χ0 χ0
+=
+φ0φ0
+χ0χ0
++
+ψ0
+φ0 φ0
+χ0 χ0
++
+ψn
+φ0 φ0
+χ0 χ0
+dloop3
+φ
+φ φ
+φ φ
+χχ
+dloop6
+φ
+φ
+φ
+χ
+χ
+dloop4
+4
+(a) One-loop diagram for Aφ3,1.
+k1 k3
+k2 k4
+φ0 φ0
+χ0 χ0
+=
+φ0φ0
+χ0χ0
++
+ψ0
+φ0 φ0
+χ0 χ0
++
+ψn
+φ0 φ0
+χ0 χ0
+dloop3
+φ
+φ φ
+φ φ
+χχ
+dloop6
+φ
+φ
+φ
+χ
+χ
+dloop4
+4
+(b) One-loop diagram for Aφ3,2.
+Figure 9: Feynman diagrams contributing to scattering processes χφ → χφ from the additional
+−aM φ
+3
+3!
+operator in (D.1), up to one loop. The wiggly lines correspond to graviton propagators.
+D.1 Cubic operators
+We start by supplementing our model with the following additional cubic interactions
+L(3) =
+√
+−g
+[
+−aM
+φ3
+3!
+− bMψ
+φ2
+2
+]
+, (D.1)
+where a, b are dimensionless constants and we have fixed the mass scale in front of the operators to
+coincide with the mass of the heavy scalar, M . The new processes contributing to the χφ → χφ
+scattering are shown in Figs. 9 and 10 and we define the corresponding interaction vertices as Vφ3 =
+−iaM and Vψφ2 = −ibM .
+D.1.1 The φ3 interaction
+The presence of the φ3 interaction allows for two more one-loop scattering channels for the χφ→ χφ
+scattering shown in Figs. (9a) and (9b). Together with the tree-level amplitude, the total scattering
+amplitude due to the φ3 vertex is given by the sum:
+Aφ3 = Zφ ×Atree,0 +Aφ3,1 +Aφ3,2 , (D.2)
+where Zφ is the corresponding wavefunction normalization factor. Due to the presence of the light
+loops we add the mass term − 1
+2
+m2φ2 to the total action. Let us emphasize that, when calculating the
+amplitudes, the mass appearing in the propagators and in the vertices is this bare mass m. On the
+other hand, when substituting the external momenta we use k21 = k
+2
+3 = −m2ph and u = −s− t+ 2m
+2
+ph
+where mph is the physical mass. We determine the relation between the two below.
+Renormalization. The φ3 interaction renormalizes the mass and the kinetic term of φ while the
+cubic coupling aM does not get renormalized in 4d. Let us find the renormalized quantities up to
+one-loop order. For this we first find the self-energy up to quadratic order in the coupling aM :
+Σ(p2) =
+d JBb+X
+aBM+2 Bi �TT2�`b BM �HH i?2 b+�ii2`BM; /B�;`�Kb r2 +�M rQ`F Qmi i?2 7�+iQ` Gµ⌫↵�(k1 + k3)V ↵�(0)
+Gµ⌫↵�(k1 + k3)V
+↵�(0) =
+1
+2t
+(k2µk4⌫ + k2⌫k4µ) . UdXRV
+h?2 M2r /B�;`�Kb �`2-
++ + + UdXkV
+_272`2M+2b
+(R) hX CX >QHHQrQQ/ �M/ :X JX a?Q`2- *�mb�HBiv oBQH�iBQM- :`�pBi�iBQM�H a?Q+Fr�p2b �M/ lo *QKTH2iBQM-
+C>1S yj UkyReV RkN- (R8RkXy9N8k)X
+(k) "X "2HH�xxBMB- JX G2r�M/QrbFB �M/ CX a2``�- �KTHBim/2bǶ SQbBiBpBiv- q2�F :`�pBiv *QMD2+im`2- �M/
+JQ/B}2/ :`�pBiv- S?vbX _2pX G2iiX Rkj UkyRNV k8RRyj- (RNykXyjk8y)X
+Ĝ kj Ĝ
+= −
+a2M2
+32π2
+∫ 1
+0
+dx
+[
+MS + log
+µ2
+m2 + x(1− x)p2
+]
++O(a4M4) . (D.3)
+– 35 –
+Under the assumption −p2 ≤ 4m2 this can be integrated to
+Σ(p2) = −
+a2M2
+32π2
+[
+log
+µ2
+m2
++ f(p2)
+]
+−
+a2M2
+32π2
+MS +O(a4M4) , (D.4)
+f(p2) ≡ 2− 2
+√
+−
+4m2
+p2
+− 1 arctan
+1√
+− 4m2
+p2
+− 1
+. (D.5)
+We determine the physical mass from the relation[
+p2 +m2 + Σ(p2)
+]
+p2=−m2
+ph
+= 0 . (D.6)
+Substituting the above expression for Σ(p2) we find the exact expression for the one-loop mass renor-
+malization:
+m2ph = m
+2 +
+a2M2
+32π2
+(
+log
+m2
+µ2
+− f(−m2ph)−MS
+)
++O(a4M4) . (D.7)
+Since in fact m2 = m2ph +O(a
+2M2) we can substitute m2 = m2ph in the logarithm above and use that
+also f(−m2ph) = f(−m
+2) + O(a2M2) = 2 − π√
+3
+and derive the one-loop renormalization group (RG)
+equation for the bare mass:
+dm2
+d logµ
+=
+a2M2
+16π2
++O(a4M4) , (D.8)
+needed to ensure that the physical mass does not depend on the renormalization scale. The latter
+equation can be solved form to findm2 = a
+2M2
+16π2
+log(cµ) where c is an integration constant. Substituting
+this in (D.7) we obtain
+m2ph =
+a2M2
+32π2
+log
+m2
+c̃2
+, (D.9)
+where we have redefined the integration constant as log c̃ = − log c+ 2− π√
+3
++ MS.
+Similarly, we find the wavefunction renormalization factor
+Z−1φ = 1 +
+dΣ
+dp2
+∣∣∣∣
+p2=−m2
+= 1−
+a2M2
+32π2
+1
+m2ph
+
+1− 4m2
+m2ph
+1√
+m2
+m2
+ph
+− 1
+4
+arctan
+1√
+m2
+m2
+ph
+− 1
+4
+
++O(a4M4) .
+(D.10)
+Using again that m2ph = m
+2 +O(a2M2) we obtain up to one-loop order
+Zφ = 1−
+a2M2
+32π2
+(
+−9 + 2
+√
+3π
+9m2ph
+)
+. (D.11)
+The tree-level amplitude. The tree-level amplitude of the χφ→ χφ scattering is given by Atree =
+Zφ ×Atree,0 with
+Atree,0 = −
+1
+M2Pl
+(s−m2ph)
+2 − (s−m2)t
+t
+, (D.12)
+where we have made the distinction between the physical and bare masses entering the above relation.
+Expressing the bare mass in terms of the physical mass as in (D.7) we obtain the following expression
+for the full tree-level amplitude with O(a2M2) corrections
+Atree =
+(m2ph − s)(m
+2
+ph − u)
+M2Plt
+(
+1−
+a2M2
+32π2
+(
+−9 + 2
+√
+3π
+9m2ph
+))
+−
+a2M2
+32π2M2Pl
+(
+log
+m2ph
+µ2
+− f(−m2ph)−MS
+)
+.
+(D.13)
+– 36 –
+The first loop process. The scattering amplitude for the process in Fig. 9a schematically reads
+iAφ3,1(s, t) =
+∫
+ddp
+(2π)d
+V 2φ3∆φ(p)∆φ(k1 − p)∆φ(p+ k3)
+V µνm (p+ k3, k1 − p)Dµν;αβ(k2 + k4)V
+αβ
+0 (k2, k4) .
+(D.14)
+Performing the simplifications needed and transforming the integration momentum as kµ ≡ pµ −
+(xk
+µ
+1 − yk
+µ
+3 ) leads to
+iAφ3,1(s, t) =
+2M2a2
+M2Plt
+µ�
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+∫
+ddk
+(2π)d
+A(s, t) +B(t)k2
+[k2 + ∆(t)]
+3
+, (D.15)
+where we have again defined:
+A(s, t) ≡ −
+[
+(s−m2ph)
+2 + st
+]
+(−1 + x+ y)2 +m2t ,
+B(t) ≡
+(d− 2)
+d
+t ,
+∆(t) ≡ m2 +m2ph(−1 + x+ y)(x+ y)− xyt .
+(D.16)
+As before, we shall use m2ph = m
+2 +O(a2M2). On evaluating the momentum integral we have
+lim
+�→0
+Aφ3,1 =
+2a2M2
+M2Plt
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+[
+A(s, t)
+32π2∆
++
+t
+32π2
+(
+−1 + MS + log
+µ2
+∆
+)]
+, (D.17)
+where we have also used the explicit form of B(t) since it involved an additional d-dependence. We
+thus obtain for the full one-loop amplitude for the process in Fig. 9a:
+Aφ3,1(s, t) =−
+a2M2
+16π2M2Pl
+(
+(s−m2ph)
+2 + st
+)
+t
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+(−1 + x+ y)2
+∆(t)
++
+a2M2
+32π2M2Pl
+[
+−1 + MS + log
+µ2
+m2ph
++ 2
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+(
+m2ph
+∆(t)
++ log
+m2ph
+∆(t)
+)]
+.
+(D.18)
+The analysis of the amplitude in (D.17) then continues in a manner very similar to section B.2.1 where
+the cubic φψ2 interaction was analyzed in detail. As before we note that the amplitude has a branch
+cut in the complex t-plane starting from the point where the denominator ∆ becomes negative. In
+the expression for ∆ given above it is apparent that in the integration region the first two terms are
+greater than zero and also xy ≥ 0 therefore the branch cut lies along the real positive values of t.
+In particular, we find that there is a branch cut for t ≥ 4m2ph. As before when analyzing the φψ
+2
+interaction, we find that the first line of the one-loop amplitude Aφ3,1 has both a t-channel pole and
+an s2 contribution. The second line is independent on s, t, but depends on the renormalization scale.
+There is no s-dependence on the third line of the amplitude, moreover, it is finite and non-zero in
+t→ 0 limit. Hence, it can be easily disregarded in the context of positivity bounds.
+The second loop amplitude. The scattering amplitude for the process in Fig. 9b reads
+iAφ3,2(s, t) =
+∫
+ddp
+(2π)d
+Vφ3∆φ(p)∆φ(p+ k3)V
+µν
+φ3h
+Dµν;αβ(k2 + k4)V
+αβ
+0 (k2, k4)
+= −
+a2M2
+M2Pl
+µ�
+∫ 1
+0
+dx
+∫
+ddk
+(2π)d
+1
+[k2 +m2 −m2phx(1− x)]2
+,
+(D.19)
+– 37 –
+ψ
+φ φ
+φ φ
+χχ
+dloop5
+φ
+ψ ψ
+φ φ
+χχ .
+dphi4
+φ
+φφ
+χ χ
+5
+(a) One-loop diagram for Aψφ2,1.
+ψ
+φ φ
+φ φ
+χχ
+dloop5
+φ
+ψ ψ
+φ φ
+χχ .
+dphi4
+φ
+φφ
+χ χ
+5
+(b) One-loop diagram for Aψφ2,2.
+Figure 10: The Feynman diagrams for the one-loop scattering processes contributing to χφ → χφ
+from the additional cubic EFT operators in (D.1). Wiggly lines correspond to graviton propagators,
+while bold lines correspond to the propagators of the heavy field ψ.
+where kµ ≡ pµ + xkµ3 and the vertex V
+µν
+φ3h
+≡ −iaM
+2MPl
+ηµν . Integrating we obtain
+Aφ3,2(s, t) = −
+a2M2
+16π2M2Pl
+[
+MS + log
+µ2
+m2ph
++ f(−m2ph)
+]
+, (D.20)
+where f(−p2) is defined in (D.5).
+The total amplitude. Adding all the contributions in (D.13), (D.18), (D.20) we get the total
+amplitude for the χφ→ χφ scattering in φ3 theory. As expected, the prefactors to the scale-dependent
+terms cancel out, a
+2M2
+16π2M2
+Pl
+log µ
+2
+m2
+ph
+(
+1
+2
++ 1
+2
+− 1
+)
+= 0 and so do the MS terms. The total amplitude thus
+becomes
+Aφ3(s, t) = −
+(m2ph − s)(m
+2
+ph − s− t)
+M2Plt
+(D.21)
++
+a2M2
+32π2
+(
+(s−m2ph)
+2 + st
+)
+M2Plt
+[
+−9 + 2
+√
+3π
+9m2ph
+− 2
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+(−1 + x+ y)2
+∆(t)
+]
+−
+a2M2
+32π2M2Pl
+[
+f(−m2ph) +
+2
+√
+3π
+9
+− 2
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+(
+m2ph
+∆(t)
++ log
+m2ph
+∆(t)
+)]
++O(a4M4) ,
+where as before f(−m2ph) = 2−
+π√
+3
++O(a4M4). The first line contains the pure tree-level result. All
+the s-dependence and the apparent one-loop contribution to the t-channel pole appear on the second
+line, while the third line only depends on t. We see from here that the one-loop t-channel pole present
+on the second line cancels out exactly: when the integrand on the second line is evaluated at t = 0 the
+whole contribution in the square brackets equals to zero. Similarly, the term on the third line vanishes
+once the integral is evaluated at t = 0. For the forward limit answer we thus have
+lim
+t→0
+Aφ3(s, t) =−
+(m2ph − s)
+2
+M2Plt
++
+(m2ph − s)
+M2Pl
++
+a2M2
+32π2
+(s−m2ph)
+2
+M2Pl
+(−45 + 8
+√
+3π)
+162m4ph
++O(a4M4) , (D.22)
+where −45 + 8
+√
+3π = −1.49. As for the one-loop amplitude due to the φψ2 interaction for the process
+shown in Fig. 6b the contribution to the s2 term is negative.
+– 38 –
+D.1.2 The ψφ2 interaction
+The addition of the ψφ2 interaction leads to two new diagrams contributing to the χφ→ χφ scattering,
+shown in Figs. 10a and 10b. The analytic properties of the corresponding scattering amplitudes are
+very similar to what was discussed for the QED interaction term −αMφψ2 discussed in section B.2.1.
+We briefly analyze the amplitudes for the new processes below.
+• The process in Fig. 10a. For this scattering process the amplitude reads
+iAψφ2,1(s, t) =
+∫
+ddp
+(2π)d
+V 2ψφ2∆ψ(p)∆φ(k1 − p)∆φ(p+ k3)V
+µν
+m Dµν;αβ(k2 + k4)V
+αβ
+0 . (D.23)
+It can again be manipulated in the familiar form
+iAψφ2,1(s, t) =
+2M2b2
+M2Plt
+µ�
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+∫
+ddk
+(2π)d
+A(s, t) +B(t)k2
+[k2 + ∆]
+3
+, (D.24)
+and we have defined
+A(s, t) ≡ −s(s+ t)(−1 + x+ y)2 ,
+B(t) ≡
+(d− 2)
+d
+t ,
+∆ ≡ −M2(−1 + x+ y)− xyt .
+(D.25)
+Again this amplitude carries both a s2/t pole and a regular s2 contribution. Expanding the
+integrand abound t = 0 we obtain
+Aψφ2,1(s, t) = −
+b2
+(4π)2M2M2Pl
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy xy × s2 +O(s) , (D.26)
+where O(s) stands for all the other terms in the amplitude, growing with at most one power
+of s. The integral over the Feynman parameters gives 1/24. Hence we conclude that the s2
+contribution to the scattering amplitude Aψφ2,1 is again negative.
+• The process in Fig. 10b. Similarly, for the second diagram, the amplitude reads again
+iAψφ2,2(s, t) =
+2M2b2
+M2Plt
+µ�
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+∫
+ddk
+(2π)d
+Ã(s, t) + B̃(t)k2[
+k2 + ∆̃
+]3 , (D.27)
+where this time
+Ã(s, t) ≡ −s(s+ t)(−1 + x+ y)2 +M2t ,
+B̃(t) ≡
+(d− 2)
+d
+t ,
+∆̃ ≡M2(x+ y)− xyt .
+(D.28)
+Again, expanding the integrand abound t = 0 we obtain the following s2 contribution to the
+scattering amplitude
+Aψφ2,2(s, t) = −
+b2
+(4π)2M2M2Pl
+∫ 1
+0
+dx
+∫ 1−x
+0
+dy
+xy(−1 + x+ y)2
+(x+ y)2
+× s2 +O(s) . (D.29)
+Also here the integral is positive and for m = 0 integrates to 1/72, leading to a negative contri-
+bution to the amplitude.
+– 39 –
+ψ
+φ φ
+φ φ
+χχ
+dloop5
+φ
+ψ ψ
+φ φ
+χχ .
+dphi4
+φ
+φφ
+χ χ
+5
+(a) One-loop diagram for Aφ4 .
+dpsi2phi2
+ψ
+φφ
+χ χ
+uv1
+ψ
+φφ
+χ χ
+uv2
+ψ
+φ φ
+χ χ
+add1
+χ
+φ φ
+χχ
+6
+(b) One-loop diagram for Aψ2φ2 .
+Figure 11: The Feynman diagrams for the one-loop scattering processes contributing to χφ → χφ
+from the additional quartic EFT operators in (D.31). Wiggly lines correspond to graviton propagators,
+while bold lines correspond to the propagators of the heavy field ψ.
+As for the s2/t pole appearing in both amplitudes calculated above, it vanishes once added to
+the properly normalized tree-level scattering amplitude Atree = Zφ × Atree,0. Here the wavefunction
+renormalization factor Zφ needs to be computed from the self-energy correction due to the ψφ
+2 vertex.
+As in all the previous cases we then find that the t-pole cancels leaving only the original pole due to
+the tree-level graviton exchange
+At−pole = Zφ ×Atree,0 +Aψφ2,1 +Aψφ2,2 = −
+s2
+M2Plt
++O(t0) . (D.30)
+D.2 Quartic operators
+One can also introduce quartic non-derivative interactions between the light field φ and the heavy field
+ψ as
+L(4) =
+√
+−g
+[
+−
+λ
+4!
+φ4 −
+$
+4
+ψ2φ2
+]
+, (D.31)
+where λ,$ are dimensionless couplings. These give new interaction vertices Vφ4 = −iλ and Vψ2φ2 =
+−i$ allowing for new processes contributing to the χφ→ χφ scattering, shown in Fig. 11.
+D.2.1 The φ4 interaction
+The scattering amplitude for the process in Fig. 11a involves a loop of the light field φ, so we regularize
+it by adding a mass term − 1
+2
+m2φ2. The amplitude can then be written as
+iAφ4(s, t) =
+1
+N
+∫
+ddp
+(2π)d
+Vφ4∆φ(p)∆φ(k1 + k3 − p)V µνm Dµν;αβ(k2 + k4)V
+αβ
+0 , (D.32)
+where N is the symmetry factor of the diagram. After the usual manipulations we find
+Aφ4(s, t) =
+iλ
+NM2Pl
+µ�
+∫ 1
+0
+dx
+∫
+ddk
+(2π)d
+d−2
+d
+k2 +m2
+[k2 +m2 − tx(1− x)]2
+. (D.33)
+This amplitude only depends on t and thus does not contribute to the positivity bounds (2.6). More-
+over, it has a branch cut for t ≥ 4m2, but does not have a t-pole. It is thus finite in the forward
+limit.
+– 40 –
+D.2.2 The ψ2φ2 interaction
+The quartic ψ2φ2 interaction leads to an additional scattering process depicted in Fig. 11b. Since this
+process only contains a heavy loop we can again set m = 0. The scattering amplitude is found to be
+iAψ2φ2(s, t) =
+∫
+ddp
+(2π)d
+Vψ2φ2∆ψ(p)∆ψ(k1 + k3 − p)V
+µν
+M Dµν;αβ(k2 + k4)V
+αβ
+0 , (D.34)
+giving for the final result
+Aψ2φ2(s, t) =
+i$
+M2Pl
+µ�
+∫ 1
+0
+dx
+∫
+ddp
+(2π)d
+d−2
+d
+k2
+[k2 +M2 − tx(1− x)]2
+. (D.35)
+As for the φ4 vertex, this amplitude is finite at t = 0 and does not affect the positivity bounds. As
+expected, it has a branch cut for t ≥ 4M2.
+E Renormalizable spectator field interactions
+An obvious way of deforming the UV completion in (4.1) would be to introduce non-derivative12
+interactions between the spectator χ and ψ. Trying to be as minimalistic as possible let us consider
+LpUV,3 =
+√
+−g
+[
+M2Pl
+2
+R−
+1
+2
+(∂χ)2 −
+1
+2
+(∂φ)2 −
+1
+2
+(∂ψ)2 −
+1
+2
+M2ψ2 − αMφψ2 − %Mχψ2
+]
+, (E.1)
+where we have only added the interaction −%Mχψ2 leading to a new vertex Vχψ2 = −2i%M . This
+introduces two new diagrams contributing to the χφ → χφ scattering shown in Figs. 12a and 12b.
+Note that as in (3.3) this new interaction would also introduce new terms like %
+2
+M2
+Rµν∂µχ∂νχ in the
+IR theory. We shall not work out the IR action explicitly here since it is equivalent to working at the
+level of scattering amplitudes.
+• The first diagram in Fig. 12a is entirely analogous to the diagram shown in Fig. 6b and the
+amplitude reads
+iAχψ2(s, t) =
+∫
+ddp
+(2π)d
+V 2χψ2∆ψ(p)∆ψ(p+ k2)∆ψ(p− k4)
+V
+µν
+M (p+ k2, k4 − p)Dµν;αβ(k1 + k3)V
+αβ
+0 (k1, k3) .
+(E.2)
+Although slightly different in details the final result for the finite s2 contribution gives again the
+second equality in (B.19) with α↔ % thus leading to the same negative contribution
+Aχψ2, s2(s, t) = −
+%2s2
+90(4π)2M2M2Pl
++ . . . . (E.3)
+12One could in principle also introduce non-derivative interactions directly between the light scalars χ and φ. The
+possible cubic operators are φχ2 and χφ2 with the corresponding additional scattering processes shown in Figs. 13
+and 14. The presence of light χ and φ loops in some of these diagrams will again require that we introduce a small
+non-zero masses for χ and φ to regulate the amplitude. All these diagrams have been computed earlier and always
+give negative s2 contribution to the total amplitude. In turn, as was shown in subsection D.2 quartic non-derivative
+interactions do not depend on s.
+– 41 –
+dpsi2phi2
+ψ
+φφ
+χ χ
+uv1
+ψ
+φφ
+χ χ
+uv2
+ψ
+φ φ
+χ χ
+add1
+χ
+φ φ
+χχ
+6
+(a) One-loop diagram for Aχψ2
+dpsi2phi2
+ψ
+φφ
+χ χ
+uv1
+ψ
+φφ
+χ χ
+uv2
+ψ
+φ φ
+χ χ
+add1
+χ
+φ φ
+χχ
+6
+(b) One-loop diagram for Abox
+Figure 12: The Feynman diagrams for the one-loop scattering processes contributing to χφ → χφ
+arising from the new UV operators in (E.1). Wiggly lines correspond to graviton propagators, while
+bold lines correspond to the propagators of the heavy field ψ.
+dpsi2phi2
+ψ
+φφ
+χ χ
+uv1
+ψ
+φφ
+χ χ
+uv2
+ψ
+φ φ
+χ χ
+add1
+χ
+φ φ
+χχ
+6
+add2
+χ
+φ φ
+χχ
+add3
+χ
+φ φ
+χχ
+add4
+χ
+φ φ
+χχ
+add5
+7
+Figure 13: Scattering processes contributing to χφ→ χφ at one-loop from the φχ2 interaction. The
+wiggly line corresponds to the graviton propagator. Note that the diagram on the right also requires
+a χ4 self-interaction.
+add2
+χ
+φ φ
+χχ
+add3
+χ
+φ φ
+χχ
+add4
+χ
+φ φ
+χχ
+add5
+7
+add2
+χ
+φ φ
+χχ
+add3
+χ
+φ φ
+χχ
+add4
+χ
+φ φ
+χχ
+add5
+7
+φ
+φφ
+χ χ
+add 6
+φ
+φφ
+χχ
+8
+φ
+φφ
+χ χ
+add 6
+φ
+φφ
+χχ
+8
+Figure 14: Scattering processes contributing to χφ→ χφ at one-loop from the χφ2 interaction. The
+wiggly lines correspond to the graviton propagators. Note that the last diagram also requires a φ4
+self-interaction.
+• The box diagram in Fig. 12b is new. Its amplitude can be computed as
+iAbox(s, t, u) =
+∫
+ddp
+(2π)d
+V 2φψ2V
+2
+χψ2∆ψ(p)∆ψ(p+ k3)∆ψ(p+ k3 + k4)∆ψ(p− k1)
++ crossed diagrams ,
+(E.4)
+– 42 –
+where one also has to add the contributions from the crossed diagrams, similarly as was done in
+appendix A. For the specific diagram in Fig. 12b, the various denominators can be combined by
+introducing three Feynman parameters x, y, z leading to
+iAbox(s, t) =
+16α2%2M4
+4
+∫
+ddp
+(2π)d
+∫
+R
+3! dx dy dz
+[k2 + ∆]4
+,
+where ∆ ≡M2 + sz(x+ y+ z− 1)− txy and the factor 1/4 appears due to the symmetry of the
+diagram; the integration region is R = {x, y, z ∈ R |x, y, z ≥ 0, x+ y + z ≤ 1}. The momentum
+integral can be easily taken using (B.2) leaving at t = 0
+Abox(s, t) =
+3α2%2M2
+4π2
+∫
+R
+dxdy dz z2(−1 + x+ y + z)2 × s2 +O(t0) . (E.5)
+Since in the integration region R the integrand is positive, so is the integral (and equal to
+1/1260) and so is the contribution to the s2 term in the scattering amplitude. Hence, the positive
+contribution of the box diagram could naively be used to cancel the negative s2 contributions
+coming from the processes shown in Figs. 6b and 12a. However, the situation here is in fact
+very similar to what we have seen earlier in section 3 when discussing the positivity bounds (3.8)
+obtained from the UV theory in (3.2). Also here the positive contribution coming from the loop
+diagram in Fig. 12b can be subtracted by the procedure of improved positivity bounds. As a
+result the negative gravitational s2 contributions to the scattering amplitude remain and the
+improved positivity bounds again lead to an inconsistency.
+We thus conclude that none of the possible renormalizable interactions of the spectator field satisfy
+the new positivity bounds.
+References
+[1] T. N. Pham and T. N. Truong, Evaluation of the Derivative Quartic Terms of the Meson Chiral
+Lagrangian From Forward Dispersion Relation, Phys. Rev. D31 (1985) 3027.
+[2] B. Ananthanarayan, D. Toublan and G. Wanders, Consistency of the chiral pion pion scattering
+amplitudes with axiomatic constraints, Phys. Rev. D51 (1995) 1093–1100, [hep-ph/9410302].
+[3] A. Adams, N. Arkani-Hamed, S. Dubovsky, A. Nicolis and R. Rattazzi, Causality, analyticity and an IR
+obstruction to UV completion, JHEP 10 (2006) 014, [hep-th/0602178].
+[4] C. Cheung and G. N. Remmen, Positive Signs in Massive Gravity, JHEP 04 (2016) 002, [1601.04068].
+[5] J. Bonifacio, K. Hinterbichler and R. A. Rosen, Positivity constraints for pseudolinear massive spin-2
+and vector Galileons, Phys. Rev. D94 (2016) 104001, [1607.06084].
+[6] C. de Rham, S. Melville, A. J. Tolley and S.-Y. Zhou, UV complete me: Positivity Bounds for Particles
+with Spin, JHEP 03 (2018) 011, [1706.02712].
+[7] C. de Rham, S. Melville, A. J. Tolley and S.-Y. Zhou, Massive Galileon Positivity Bounds, JHEP 09
+(2017) 072, [1702.08577].
+[8] C. de Rham, S. Melville and A. J. Tolley, Improved Positivity Bounds and Massive Gravity, JHEP 04
+(2018) 083, [1710.09611].
+[9] C. de Rham, S. Melville, A. J. Tolley and S.-Y. Zhou, Positivity Bounds for Massive Spin-1 and Spin-2
+Fields, JHEP 03 (2019) 182, [1804.10624].
+– 43 –
+http://dx.doi.org/10.1103/PhysRevD.31.3027
+http://dx.doi.org/10.1103/PhysRevD.51.1093
+https://arxiv.org/abs/hep-ph/9410302
+http://dx.doi.org/10.1088/1126-6708/2006/10/014
+https://arxiv.org/abs/hep-th/0602178
+http://dx.doi.org/10.1007/JHEP04(2016)002
+https://arxiv.org/abs/1601.04068
+http://dx.doi.org/10.1103/PhysRevD.94.104001
+https://arxiv.org/abs/1607.06084
+http://dx.doi.org/10.1007/JHEP03(2018)011
+https://arxiv.org/abs/1706.02712
+http://dx.doi.org/10.1007/JHEP09(2017)072
+http://dx.doi.org/10.1007/JHEP09(2017)072
+https://arxiv.org/abs/1702.08577
+http://dx.doi.org/10.1007/JHEP04(2018)083
+http://dx.doi.org/10.1007/JHEP04(2018)083
+https://arxiv.org/abs/1710.09611
+http://dx.doi.org/10.1007/JHEP03(2019)182
+https://arxiv.org/abs/1804.10624
+[10] S. Kim, T. Noumi, K. Takeuchi and S. Zhou, Heavy Spinning Particles from Signs of Primordial
+Non-Gaussianities: Beyond the Positivity Bounds, 1906.11840.
+[11] L. Alberte, C. de Rham, A. Momeni, J. Rumbutis and A. J. Tolley, Positivity Constraints on
+Interacting Spin-2 Fields, JHEP 03 (2020) 097, [1910.11799].
+[12] L. Alberte, C. de Rham, A. Momeni, J. Rumbutis and A. J. Tolley, Positivity Constraints on
+Interacting Pseudo-Linear Spin-2 Fields, 1912.10018.
+[13] C. de Rham, S. Melville, A. J. Tolley and S.-Y. Zhou, Positivity bounds for scalar field theories, Phys.
+Rev. D96 (2017) 081702, [1702.06134].
+[14] B. Bellazzini, Softness and amplitudes’ positivity for spinning particles, JHEP 02 (2017) 034,
+[1605.06111].
+[15] M. Froissart, Asymptotic behavior and subtractions in the Mandelstam representation, Phys. Rev. 123
+(1961) 1053–1057.
+[16] A. Martin, Extension of the axiomatic analyticity domain of scattering amplitudes by unitarity. 1.,
+Nuovo Cim. A42 (1965) 930–953.
+[17] Y. S. Jin and A. Martin, Number of subtractions in fixed-transfer dispersion relations, Phys. Rev. 135
+(Sep, 1964) B1375–B1377.
+[18] S. B. Giddings and R. A. Porto, The Gravitational S-matrix, Phys. Rev. D81 (2010) 025002,
+[0908.0004].
+[19] C. Cheung and G. N. Remmen, Positivity of Curvature-Squared Corrections in Gravity, Phys. Rev. Lett.
+118 (2017) 051601, [1608.02942].
+[20] B. Bellazzini, C. Cheung and G. N. Remmen, Quantum Gravity Constraints from Unitarity and
+Analyticity, Phys. Rev. D93 (2016) 064076, [1509.00851].
+[21] B. Bellazzini, M. Lewandowski and J. Serra, Positivity of Amplitudes, Weak Gravity Conjecture, and
+Modified Gravity, Phys. Rev. Lett. 123 (2019) 251103, [1902.03250].
+[22] M. Ciafaloni, Selfconsistent scattering matrix in (2+1) gravity, Phys. Lett. B 291 (1992) 241–245.
+[23] N. Arkani-Hamed, L. Motl, A. Nicolis and C. Vafa, The String landscape, black holes and gravity as the
+weakest force, JHEP 06 (2007) 060, [hep-th/0601001].
+[24] C. Cheung and G. N. Remmen, Infrared Consistency and the Weak Gravity Conjecture, JHEP 12
+(2014) 087, [1407.7865].
+[25] Y. Hamada, T. Noumi and G. Shiu, Weak Gravity Conjecture from Unitarity and Causality, Phys. Rev.
+Lett. 123 (2019) 051601, [1810.03637].
+[26] C. de Rham and A. J. Tolley, Speed of gravity, Phys. Rev. D 101 (2020) 063518, [1909.00881].
+[27] C. de Rham and A. J. Tolley, Causality in Curved Spacetimes: The Speed of Light & Gravity,
+2007.01847.
+[28] T. J. Hollowood and G. M. Shore, Causality Violation, Gravitational Shockwaves and UV Completion,
+JHEP 03 (2016) 129, [1512.04952].
+[29] G. J. Loges, T. Noumi and G. Shiu, Thermodynamics of 4D Dilatonic Black Holes and the Weak
+Gravity Conjecture, 1909.01352.
+[30] L. Alberte, C. de Rham, S. Jaitly and A. J. Tolley, in preparation, .
+[31] I. Drummond and S. Hathrell, QED Vacuum Polarization in a Background Gravitational Field and Its
+Effect on the Velocity of Photons, Phys. Rev. D 22 (1980) 343.
+– 44 –
+https://arxiv.org/abs/1906.11840
+http://dx.doi.org/10.1007/JHEP03(2020)097
+https://arxiv.org/abs/1910.11799
+https://arxiv.org/abs/1912.10018
+http://dx.doi.org/10.1103/PhysRevD.96.081702
+http://dx.doi.org/10.1103/PhysRevD.96.081702
+https://arxiv.org/abs/1702.06134
+http://dx.doi.org/10.1007/JHEP02(2017)034
+https://arxiv.org/abs/1605.06111
+http://dx.doi.org/10.1103/PhysRev.123.1053
+http://dx.doi.org/10.1103/PhysRev.123.1053
+http://dx.doi.org/10.1007/BF02720568
+http://dx.doi.org/10.1103/PhysRev.135.B1375
+http://dx.doi.org/10.1103/PhysRev.135.B1375
+http://dx.doi.org/10.1103/PhysRevD.81.025002
+https://arxiv.org/abs/0908.0004
+http://dx.doi.org/10.1103/PhysRevLett.118.051601
+http://dx.doi.org/10.1103/PhysRevLett.118.051601
+https://arxiv.org/abs/1608.02942
+http://dx.doi.org/10.1103/PhysRevD.93.064076
+https://arxiv.org/abs/1509.00851
+http://dx.doi.org/10.1103/PhysRevLett.123.251103
+https://arxiv.org/abs/1902.03250
+http://dx.doi.org/10.1016/0370-2693(92)91038-B
+http://dx.doi.org/10.1088/1126-6708/2007/06/060
+https://arxiv.org/abs/hep-th/0601001
+http://dx.doi.org/10.1007/JHEP12(2014)087
+http://dx.doi.org/10.1007/JHEP12(2014)087
+https://arxiv.org/abs/1407.7865
+http://dx.doi.org/10.1103/PhysRevLett.123.051601
+http://dx.doi.org/10.1103/PhysRevLett.123.051601
+https://arxiv.org/abs/1810.03637
+http://dx.doi.org/10.1103/PhysRevD.101.063518
+https://arxiv.org/abs/1909.00881
+https://arxiv.org/abs/2007.01847
+http://dx.doi.org/10.1007/JHEP03(2016)129
+https://arxiv.org/abs/1512.04952
+https://arxiv.org/abs/1909.01352
+http://dx.doi.org/10.1103/PhysRevD.22.343
+[32] G. Shore, A Local effective action for photon gravity interactions, Nucl. Phys. B 646 (2002) 281–300,
+[gr-qc/0205042].
+[33] A. Barvinsky and G. Vilkovisky, Beyond the Schwinger-Dewitt Technique: Converting Loops Into Trees
+and In-In Currents, Nucl. Phys. B 282 (1987) 163–188.
+[34] A. Barvinsky and G. Vilkovisky, Covariant perturbation theory. 2: Second order in the curvature.
+General algorithms, Nucl. Phys. B 333 (1990) 471–511.
+[35] A. Barvinsky, Y. Gusev, V. Zhytnikov and G. Vilkovisky, Covariant perturbation theory. 4. Third order
+in the curvature, 0911.1168.
+[36] G. ’t Hooft, Nonperturbative Two Particle Scattering Amplitudes in (2+1)-Dimensional Quantum
+Gravity, Commun. Math. Phys. 117 (1988) 685.
+[37] S. Deser, J. G. McCarthy and A. R. Steif, UltraPlanck scattering in D = 3 gravity theories, Nucl. Phys.
+B 412 (1994) 305–319, [hep-th/9307092].
+[38] M. Zeni, Forward scattering in (2+1) quantum gravity, Class. Quant. Grav. 10 (1993) 905–911.
+[39] S. Deser, R. Jackiw and G. ’t Hooft, Three-Dimensional Einstein Gravity: Dynamics of Flat Space,
+Annals Phys. 152 (1984) 220.
+[40] S. Deser and R. Jackiw, Classical and Quantum Scattering on a Cone, Commun. Math. Phys. 118
+(1988) 495.
+[41] M. Chaichian, J. Fischer and Y. Vernov, Generalization of the Froissart-Martin bounds to scattering in
+a space-time of general dimension, Nucl. Phys. B 383 (1992) 151–172.
+[42] B. Bellazzini, F. Riva, J. Serra and F. Sgarlata, Beyond Positivity Bounds and the Fate of Massive
+Gravity, Phys. Rev. Lett. 120 (2018) 161101, [1710.02539].
+[43] L. Alberte, C. de Rham, A. Momeni, J. Rumbutis and A. J. Tolley, EFT of Interacting Spin-2 Fields,
+JHEP 01 (2020) 131, [1910.05285].
+– 45 –
+http://dx.doi.org/10.1016/S0550-3213(02)00833-7
+https://arxiv.org/abs/gr-qc/0205042
+http://dx.doi.org/10.1016/0550-3213(87)90681-X
+http://dx.doi.org/10.1016/0550-3213(90)90047-H
+https://arxiv.org/abs/0911.1168
+http://dx.doi.org/10.1007/BF01218392
+http://dx.doi.org/10.1016/0550-3213(94)90504-5
+http://dx.doi.org/10.1016/0550-3213(94)90504-5
+https://arxiv.org/abs/hep-th/9307092
+http://dx.doi.org/10.1088/0264-9381/10/5/009
+http://dx.doi.org/10.1016/0003-4916(84)90085-X
+http://dx.doi.org/10.1007/BF01466729
+http://dx.doi.org/10.1007/BF01466729
+http://dx.doi.org/10.1016/0550-3213(92)90674-Z
+http://dx.doi.org/10.1103/PhysRevLett.120.161101
+https://arxiv.org/abs/1710.02539
+http://dx.doi.org/10.1007/JHEP01(2020)131
+https://arxiv.org/abs/1910.05285
+	1 Introduction
+	2 Positivity Bounds — the relevance of the t–channel pole
+	2.1 Positivity bounds
+	2.2 Improved positivity bounds
+	2.3 Compactified positivity bounds
+	3 Scalar photon QED
+	4 Scalar photon QED with a spectator field
+	4.1 Scattering in the low-energy EFT
+	4.2 Scattering in the UV completion
+	4.2.1 Electron loops in 4d Minkowski R^3,1
+	4.2.2 Electron loops in the compactified R^2,1 S^1 space
+	5 New UV physics
+	5.1 Renormalizable operators
+	5.2 Non-renormalizable operators
+	5.3  scattering
+	5.4 EFT of two light scalars
+	5.5 Summary of new UV physics
+	6 Infrared Regulator and 3d gravity
+	6.1 IR regulated 3d amplitudes
+	6.2 Unitarity in 3d
+	6.3 Failure of positivity in 3d
+	6.4 Analytic structure of the amplitude in 3d
+	6.5 Positivity recovered with a mass gap
+	7 Conclusions
+	A One–loop electron contribution to photon scattering in scalar QED
+	B Amplitudes from the Perspective of the Partial UV theory
+	B.1 Tree–level
+	B.2 One loop
+	B.2.1 A_^2 amplitude
+	B.2.2 A_^2h amplitude
+	C Compactified Amplitudes in the Partial UV Theory
+	D Adding interactions to the UV theory
+	D.1 Cubic operators
+	D.1.1 The ^3 interaction
+	D.1.2 The ^2 interaction
+	D.2 Quartic operators
+	D.2.1 The ^4 interaction
+	D.2.2 The ^2^2 interaction
+	E Renormalizable spectator field interactions

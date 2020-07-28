@@ -1,0 +1,893 @@
+Richardson-Gaudin mean-field for strong correlation in quantum chemistry
+Paul A. Johnson,a) Charles-Émile Fecteau, Frédéric Berthiaume, Samuel Cloutier, Laurie
+Carrier, and Marianne Gratton
+Département de chimie, Université Laval, Québec, Québec, G1V 0A6,
+Canada
+Patrick Bultinck
+Department of Chemistry, Ghent University, Krijgslaan 281 (S3), 9000 Gent,
+Belgium
+Stijn De Baerdemacker
+Department of Chemistry, University of New Brunswick,
+30 Dineen Drive, Fredericton, New Brunswick, E3B 5A3,
+Canada
+Dimitri Van Neck
+Center for Molecular Modeling, Ghent University, Technologiepark 903,
+9052 Zwijnaarde, Belgium
+Peter Limacher and Paul W. Ayers
+Department of Chemistry and Chemical Biology, McMaster University, Hamilton,
+Ontario, L8S 4M1, Canada
+(Dated: 22 July 2020)
+Ground state eigenvectors of the reduced Bardeen-Cooper-Schrieffer Hamiltonian are
+employed as a wavefunction ansatz to model strong electron correlation in quantum
+chemistry. This wavefunction is a product of weakly-interacting pairs of electrons.
+While other geminal wavefunctions may only be employed in a projected Schrödinger
+equation, the present approach may be solved variationally with polynomial cost.
+The resulting wavefunctions are used to compute expectation values of Coulomb
+Hamiltionans and we present results for atoms and dissociation curves which are in
+agreement with doubly-occupied configuration interaction (DOCI) data. The present
+approach will serve as the starting point for a many-body theory of pairs, much as
+Hartree-Fock is the starting point for weakly-correlated electrons.
+a)Electronic mail: paul.johnson@chm.ulaval.ca
+1
+ar
+X
+iv
+:2
+00
+7.
+10
+70
+5v
+1 
+ [
+ph
+ys
+ic
+s.
+ch
+em
+-p
+h]
+  2
+1 
+Ju
+l 
+20
+20
+mailto:paul.johnson@chm.ulaval.ca
+I. INTRODUCTION
+The majority of electronic structure methods are built upon the orbital picture. In the
+simplest models, electrons are understood to behave essentially independently, interacting
+only with the average field produced by the other electrons. This picture is acceptable when
+it is possible to assign orbitals unambiguously as occupied or unoccupied, i.e., when the
+energy gap between the occupied and unoccupied orbitals is large compared with the kinetic
+energy of the valence electrons. The simplest wavefunction ansatz, i.e. a single Slater deter-
+minant with a set of N (number of electrons) occupied orthonormal spin orbitals optimised
+to produce the lowest energy in Hartree-Fock theory already produces a good first approxi-
+mation. Further expansion in terms of Slater determinants is obtained by including singly-,
+doubly-, ... excited Slater determinants with respect to the Hartree-Fock Slater determinant
+leading to a better approximation of the electronic wavefunction that is most often domi-
+nated by the Hartree-Fock determinant1. Systems of this type are weakly-correlated and are
+generally well described by density functional theory (DFT), and coupled-cluster theory2
+with singles, doubles, and (perturbative) triples.
+However, when it is difficult to label orbitals as occupied or unoccupied, this picture
+breaks down. The number of important Slater determinants grows exponentially with the
+system size, so a single Slater determinant is not a qualitative representation of the electronic
+wavefunction. Such systems are strongly-correlated. State of the art methods include the
+density matrix renormalization group (DMRG)3–16 and Slater determinant Monte-Carlo17–30.
+The high computational cost of these methods has motivated the pursuit of approximate
+methods for treating strongly-correlated systems generally with mean-field cost. This con-
+tribution is a step in that direction: we employ the eigenvectors for a schematic system as
+a variational ansatz. The key idea is to work in a framework in which strong-correlation is
+described by the mean-field. In this new basis, the electronic wavefunction will have a short
+expansion dominated by a single contribution, though it will not necessarily be a Slater
+determinant.
+Thus, we have been studying wavefunctions built as products of geminals, i.e. pairs of
+electrons. Geminal wavefunctions have been proposed since the founding days of quantum
+chemistry, as they tie in with the intuitive chemical picture of Lewis bonds as pairs of
+electrons31. Unfortunately, the most general geminal wavefunctions come with a computa-
+2
+tional cost that scales exponentially with the system size, hence they were soon abandoned
+for other methods. The intrinsic reason for the pernicious cost can be inferred from the
+antisymmetrized product of interacting geminals (APIG), which is a general product of
+closed-shell singlet geminals32.
+The expansion coefficients in the basis of Slater determinants are permanents of the gem-
+inal coefficients, and are combinatorially difficult to evaluate in general33. There are several
+approaches to simplifying the problem to one that is tractable, each of which amounts to
+making particular approximations. The first is to make all the geminals identical resulting
+in the antisymmetrized geminal power (AGP)34, or equivalently a number-projection of the
+Bardeen-Cooper-Schrieffer (BCS) ansatz35,36. AGP is well studied and is easy to employ,
+but suffers the major drawback of not being size-consistent. The second is to partition the
+orbitals in such a way that in each geminal, each orbital has one partner as in generalized va-
+lence bond-perfect pairing (GVB-PP)37, a set of unique partners as in the antisymmetrized
+product of strongly-orthogonal geminals (APSG)38, or one major occupied contribution as
+in the antisymmetrized product of 1-reference orbital geminals (AP1roG39). In a series of
+papers, we have proposed and investigated AP1roG as a computationally facile wavefunc-
+tion to describe strong correlation due to bond-breaking39–44. It was found that AP1roG
+systematically reproduces ground-state energies of doubly-occupied configuration interac-
+tion (DOCI) calculations for molecular systems39, even for large system sizes45. The key
+ingredient in the AP1roG formalism is that the Schrödinger equation is solved projectively
+with respect to a set of selected reference states, very much in the spirit of coupled-cluster
+theory (CC). In particular, it is equivalent to pair-coupled-cluster doubles (pCCD)46–49. As
+a result, the permanents one needs to compute all become very easy to evaluate. Indeed,
+the computational bottleneck in the AP1roG calculations is the orbital optimization (OO),
+rather than the computation of the geminal coefficients in the AP1roG wavefunction. The
+energies of geminal theories are strongly dependant on the orbital pairing scheme used43,50.
+It was found that Hartree-Fock orbitals are typically well-suited for pairing correlations
+around equilibrium geometries, whereas pairing occurs preferentially in localized orbitals in
+the bond-dissociation regime50. Geminal theories perform well in the latter regime as strong
+correlations tend to dominate weak ones. Efforts to incorporate weak correlation in these
+geminal wavefunctions rely on multi-reference pertubation theory (MRPT)51,52, the random-
+phase approximation (RPA)53, or generalize the algebraic structure of spin-singlet geminal
+3
+theory in order to include spin-triplet excitations as well54. The main hurdle on the way to
+an all-inclusive geminal theory is the ability to include missing correlations systematically,
+like CC theory or truncated configuration-interaction (CI) approaches1. This is one of the
+main motivations for the approach herein presented. It has recently been observed that the
+seniority scheme provides a new means to organize the Hilbert space for configuration inter-
+action approaches in a hierarchical way. The seniority quantum number counts the number
+of electrons that are not paired55. In this framework, the DOCI method corresponds to the
+seniority-zero rung on the ladder. DOCI is size-extensive, in the correct basis, and captures
+the majority of strong-correlation, at the cost of combinatorial scaling typical for full CI
+methods albeit now in pair space.
+With this in mind, we follow a third approach in this contribution, in which we propose a
+structured geminal wavefunction such that the required permanents may be easily evaluated.
+Specifically, we employ the ground-state eigenvectors of the reduced BCS Hamiltonian, or
+Richardson Hamiltonian56 as a variational wavefunction ansatz. It is well-established that
+the Richardson, or Richardson-Gaudin (RG), model is a quantum integrable system for
+which the eigenvectors can be obtained using Bethe-Ansatz techniques57,58. From a quantum
+chemistry point of view, it is highly remarkable that these eigenvectors have the structure
+of a geminal wavefunction, completely characterized by means of the single-electron model
+parameters, the pairing strength, and a set of so-called rapidities. There are as many
+rapidities as there are electron pairs which means that the eigenvectors can be determined
+by solving a set of equations for the rapidities with a computational scaling that is linear
+with the system size, rather than the typical combinatorial scaling. Moreover, the norms,
+scalar products, and 1- & 2-body reduced density matrices (1-RDM & 2-RDM) can all be
+computed with a polynomial cost. This opens an avenue for a variational geminal theory in
+quantum chemistry. We have already reported first results for LiH, Li2 and HF dissociation
+curves in previous work44, so we will focus on the mathematical details in the present paper.
+It should be emphasized that in our approach the object being optimized is the model
+Hamiltonian (in this case RG), not simply an ansatz for the wavefunction. As a result,
+we obtain a complete set of eigenvectors with which to construct perturbative corrections,
+Green’s functions etc., all of which are physically well-founded and interpretable.
+Similar ideas using the framework of exactly-solvable models as a many-body expansion
+technique are being explored outside the field of quantum chemistry. In nuclear structure
+4
+physics, eigenvectors of RG models are being used as a starting point for a CI approach59. In
+condensed matter physics, a variational RG approach is used to treat integrability-breaking
+interactions in central-spin problems60, and a CI framework has been developed for non-
+integrable spin chains in the truncated spectrum approximation61. Recently, we have de-
+veloped the analogue of Hartree-Fock as a Bethe ansatz to serve as a bridge to the present
+contribution62.
+In section II we outline the basics of RG models, introduce the eigenvectors and develop
+the variational principle to be employed. In section III we present numerical results for 4-,
+6-, 8- and 10-electron atomic systems as well as dissociation curves for H2, H4, H6, H8 and
+N2. We formulate our conclusions in section IV.
+II. VARIATIONAL ANSATZ
+A. Eigenvectors of the Reduced BCS Hamiltonian
+We employ a pseudospin representation of su(2) for a set of spatial orbitals {i}, each of
+which can contain a single pair of opposite spin electrons. For each spatial orbital there are
+three operators:
+S+i = a
+†
+i↑a
+†
+i↓, S
+−
+i = ai↓ai↑, S
+z
+i =
+1
+2
+(
+a
+†
+i↑ai↑ + a
+†
+i↓ai↓ − 1
+)
+, (1)
+where a
+†
+i↑ (ai↓) creates (removes) an up- (down-)spin electron in spatial orbital i, etc. S
++
+i
+adds a pair of electrons to spatial orbital i and S−i removes a pair. Each spatial orbital can
+only hold one pair. Acting on a doubly-occupied spatial orbital, Szi gives
+1
+2
+, while acting on
+an empty spatial orbital Szi gives −
+1
+2
+. Thus Szi “measures” whether spatial orbital i is full or
+empty. For singly occupied orbitals, its action is zero. For doubly-degenerate spin orbitals,
+the seniority quantum number can be obtained as the expectation value of the operator55,63
+Ωi = a
+†
+i↑ai↑ + a
+†
+i↓ai↓ − 2a
+†
+i↑ai↑a
+†
+i↓ai↓. (2)
+We work only in the seniority zero sector 〈Ωi〉 = 0, ∀i in this paper, although it is perfectly
+possible to extend the formalism to other sectors. This extension is one of the strengths of
+the present approach.
+Using the fermionic anticommutation relations, it is easily verified that the operators, (1),
+commute for distinct spatial orbitals, so that the structure constants of their Lie algebra
+5
+may be summarized
+[
+Szi , S
+±
+j
+]
+= ±δijS±i ,
+[
+S+i , S
+−
+j
+]
+= 2δijS
+z
+i . (3)
+With n̂i = 2S
+z
+i + 1, which counts the electrons in spatial orbital i, the reduced BCS
+Hamiltonian56,64,65 for a system with K spatial orbitals is
+ĤBCS =
+1
+2
+K∑
+i
+εin̂i − g
+K∑
+ij
+S+i S
+−
+j , (4)
+where the parameters defining the system are the single particle spectrum {εi}, and the
+pairing strength g. In this convention, a positive g represents an attractive pairing inter-
+action. The eigenvectors are products of electron pairs distributed over the entire space of
+orbitals, each pair being characterized by a complex number u (which we call a rapidity).
+Such an electron pair is denoted
+S+(u) =
+K∑
+i
+S+i
+u− εi
+, (5)
+and for a system with M pairs of electrons, the states
+|{u}〉 =
+M∏
+a
+S+(ua) |θ〉 (6)
+are eigenvectors of the reduced BCS Hamiltonian provided the rapidities satisfy a set of
+coupled non-linear equations, called Richardson’s equations
+2
+g
++
+K∑
+i
+1
+ua − εi
++
+M∑
+b6=a
+2
+ub − ua
+= 0, ∀ a = 1,M. (7)
+The state |θ〉 is the vacuum, defined such that
+S−i |θ〉 = 0, ∀ i = 1, K (8)
+meaning that it is destroyed by all pair removal operators. In this contribution we take |θ〉 to
+be the empty state, but it could easily be taken as a set of non-interacting unpaired electrons
+(Slater determinant). The reduced BCS Hamiltonian was first solved by Richardson56,64 and
+elaborated by Gaudin65. Thus as a shorthand, we will refer to the state (6) as a Richardson-
+Gaudin (RG) state.
+For a system with M pairs distributed among K spatial orbitals, there are
+(
+K
+M
+)
+eigen-
+vectors corresponding to the
+(
+K
+M
+)
+solutions of Richardson’s equations. These equations
+6
+are highly non-linear, with singularities hampering a straightforward numerical character-
+ization of the eigenvectors. In the last decade, many new numerical methods have been
+developed to properly control and possibly avoid the singularities in the equations. These
+methods range from clusterization methods66, Heine-Stieltjes connections67, probabilistic
+approaches68, pseudo-deformations of the su(2) pairing algebra (1)69 and, most recently,
+eigenvalue-based methods70,71.In this work we employed eigenvalue-based methods.
+B. Energy Functional
+We will now outline a variational method employing the eigenvectors of the reduced BCS
+Hamiltonian (as a model system) to approximate solutions of a Coulomb Hamiltonian de-
+scribing physical electrons. The reduced BCS Hamiltonian is defined by K + 1 parameters:
+the single particle energies {ε} and the pairing strength g, which are the variational param-
+eters. Our purpose is to employ the RG state |{u}〉 as a variational ansatz for a Coulomb
+Hamiltonian,
+ĤC =
+K∑
+ij
+hij
+∑
+σ
+a
+†
+iσajσ +
+1
+2
+K∑
+ijkl
+Vijkl
+∑
+στ
+a
+†
+iσa
+†
+jτalτakσ, (9)
+with σ and τ spin variables. The one-electron hij and two-electron integrals Vijkl are calcu-
+lated in a basis of orthonormal spatial orbitals {φ}:
+hij =
+∫
+dr φ∗i (r)
+(
+−
+1
+2
+∇2 −
+∑
+I
+ZI
+|r−RI |
+)
+φj(r) (10)
+Vijkl =
+∫
+dr1dr2
+φ∗i (r1)φ
+∗
+j(r2)φk(r1)φl(r2)
+|r1 − r2|
+(11)
+with RI and ZI being the positions and charges of the nuclei.
+Thus, with the RG state |{u}〉 as an ansatz, our approximation to the ground state energy
+is
+E[{ε}, g] = min
+{ε},g
+〈{u}|ĤC |{u}〉
+〈{u}|{u}〉
+(12)
+The RG state is the ground state of the reduced BCS Hamiltonian, which is in turn defined
+by the parameters {ε} and g. Thus the energy is to be minimized over these parameters.
+We do not optimize over rapidities, as they are dictated as the solutions of Richardson’s
+equations for a set of {ε}, g. It is of paramount importance that we may evaluate (12) with
+7
+a reasonable cost. This is possible thanks to the structure of (6). The 1-body reduced
+density matrix (1-RDM) is diagonal and doubly-degenerate, as the α and β electrons are
+treated identically. We adopt the convention
+γi =
+1
+2
+〈{u}|n̂i|{u}〉 = 〈{u}|Szi |{u}〉+
+1
+2
+〈{u}|{u}〉 . (13)
+Here, n̂i counts the number of electrons in the spatial orbital i, so the elements of the 1-
+RDM count the number of pairs in each site. They are real numbers between zero and one.
+The 2-body reduced density matrix (2-RDM) has two non-zero pieces: the pair correlation
+function,
+Pij = 〈{u}|a
+†
+i↑a
+†
+i↓aj↓aj↑|{u}〉 = 〈{u}|S
++
+i S
+−
+j |{u}〉 (14)
+and the diagonal correlation function
+Dij =
+1
+4
+〈{u}|n̂in̂j|{u}〉 = 〈{u}|Szi S
+z
+j |{u}〉+
+1
+2
+γi +
+1
+2
+γj −
+1
+4
+〈{u}|{u}〉 . (15)
+The diagonal elements Pii and Dii correspond to the same elements of the 2-RDM, so to
+avoid double counting we set the elements Dii = 0. The state (6) is not normalized, and
+hence neither are the expressions for the correlation functions (13), (14), and (15)
+The energy expression becomes:
+E 〈{u}|{u}〉 = 2
+K∑
+i
+hiiγi +
+K∑
+ij
+[(2Vijij − Vijji)Dij + ViijjPij] (16)
+where the summations are performed over only the spatial orbital index.
+The norm and correlation functions of (6) are discussed in refs:64,72–76 The norm of (6)
+is obtained from the determinant
+〈{u}|{u}〉 = detG (17)
+with the elements of the so-called Gaudin matrix
+Gab =
+
+
+∑K
+i
+1
+(ua−εi)2
+− 2
+∑M
+c 6=a
+1
+(ua−uc)2
+a = b
+2
+(ua−ub)2
+a 6= b
+. (18)
+The normalized 1-RDM may be written
+γi =
+1
+2
+(
+1−
+2M
+〈{u}|{u}〉
+det(Qi)∏M
+a=1
+∏M
+b 6=a(ua − ub)
+)
+(19)
+8
+where the matrix Qi is defined:
+(Qi)ba =
+
+
+∏M
+c 6=a(uc − ua)
+(
+1
+2
+∑K
+k
+1
+(εk−ua)2
+−
+∑M
+d6=a
+1
+(ud−ua)2
+− 1
+(εi−ua)2
+)
+a = b∏M
+c6=a(uc − ua)
+(
+1
+(ub−ua)2
+− 1
+(εi−ub)2
+)
+a 6= b
+(20)
+To arrive at these expressions, the interested reader is referred to ref74.
+Unnormalized expressions for both Pij and Dij can be written as sums of determinants
+related to the Gaudin matrix:
+Pij =
+M∑
+a
+ua − εi
+ua − εj
+detA(i,j)a (21)
+Dij = −
+1
+2
+M∑
+a
+(
+detA(i,j)a + detA
+(j,i)
+a
+)
++
+1
+2
+(γi + γj) (22)
+The matrices Aa appear bizarre at first sight as they are the result of column operations
+which have condensed a double sum of determinants into a single sum:
+A(i,j)a =
+
+
+~Gc −
+(εi−uc)(ua−uc+1)
+(εi−uc+1)(ua−uc)
+~Gc+1 c < a− 1
+~Gc +
+2(εj−ua)(εi−ua−1)
+ua−1−ua
+~B c = a− 1
+~C c = a
+~Gc c > a
+(23)
+where ~Gc denotes the cth column of the Gaudin matrix Eq. (18), ~B is the column vector:
+~Bk =
+(2uk − εi − εj)
+(uk − εi)2(uk − εj)2
+, (24)
+and ~C is the column vector:
+~Ck =
+1
+(uk − εi)2
+. (25)
+With explicit expressions for the correlation functions, we can evaluate the energy func-
+tional (16) with a cost of O(N6): each element of the 2-RDM requires a single summation
+over determinants, and there are N2 elements to compute. Through optimal book-keeping
+and storage of computed determinants, it would be possible to improve the scaling, though
+9
+for our purposes we consider this a dead end. More optimal expressions for the correla-
+tion functions exist that we will report in a following publication. Our initial guess for
+the variational parameters {ε} was based on the diagonal elements of the 1-electron inte-
+grals, perturbed with some random noise. For g, we started with a small negative value.
+While the reduced BCS Hamiltonian has N + 1 parameters, 2 degrees of freedom are lost
+to choose the scale and reference point for the energy. Thus we could optimize over N − 1
+parameters, but we found that allowing all N + 1 parameters to vary led to more robust
+convergence. The non-linear relationship between the reduced BCS Hamiltonian parameters
+{ε}, g and the pair-energies {u} suggests that numerical gradients of the energy functional
+are not an effective tool for minimization. Indeed, we have confirmed this with our prelimi-
+nary numerical tests. We instead chose to use the Nelder-Mead simplex algorithm77 which
+worked effectively. There is always the danger that Nelder-Mead will find the wrong opti-
+mum, though we have eliminated this issue by preconditioning with the covariance matrix
+adaptation evolution strategy78.
+III. NUMERICAL RESULTS
+Calculations were performed for a series of four-, six-, eight-, and ten-electron atomic
+systems as well as for dissociation of hydrogren chains and molecular nitrogen. Results are
+compared with doubly-occupied configuration interaction (DOCI)79 and full configuration
+interaction (CI). Full CI calculations were performed with psi480,81 and verified with an in-
+house code, DOCI calculations were performed with an in-house code, and RHF calculations
+were performed with Gaussian 1682. We have noted previously that seniority-zero wavefunc-
+tion ansätze favour localized, valence-bond-like orbitals, rather than the delocalized orbitals
+obtained from RHF. Thus, dissociation curves were computed both in the basis of RHF or-
+bitals and the basis of orbital optimized DOCI (OO-DOCI) orbitals. Orbital optimization in
+the OO-DOCI calculations was performed as MC-SCF calculations in the complete doubly-
+occupied Slater determinant basis with a Newton-Raphson scheme for the optimization for
+the determinant and orbital coefficients as implemented in GAMESS(US)83. To explore the
+orbital optimization space more profoundly, several starting bases were constructed includ-
+ing the RHF orbitals, FCI natural orbitals and random orbitals obtained from rotating the
+other bases.
+10
+The variational RG results should always be compared with DOCI: when computed in
+the same set of orbitals, RG is a strictly variational approximation to DOCI. For atoms,
+calculations were performed with STO-6G and with aug-cc-pVDZ, while dissociation curves
+were computed with STO-6G. As our results are proof of principle, our algorithm is not
+optimal, which unfortunately limits the size of system we can treat. However, results with
+STO-6G will isolate effects of strong-correlation. Effects of weak correlation are minimal in
+STO-6G as there are limited weak excitations possible. Thus, dissociation curves computed
+with STO-6G are meaningful and relevant.
+A. Atoms
+Raw energetic results for atomic systems are reported in Table I (STO-6G) and Table
+II (aug-cc-pVDZ). Each atomic system considered was necessarily treated as a closed-shell
+singlet. All calculations are performed with the RHF orbitals. Again, for a given basis, in
+this case RHF orbitals, the best possible result in the space of seniority-zero wavefunctions
+is DOCI. Thus, we summarize the deviations from DOCI in table III.
+For the four-electron series there is one pair of electrons deeply entrenched in the 1s core,
+while the second pair resides principally in the 2s spatial orbital. The 2s-2p gap shrinks as
+the central charge becomes more positive, and thus the electronic configurations with the
+second pair occupying the 2p spatial orbitals become important, which makes these systems
+strongly correlated. All the important Slater determinants in the physical wavefunction are
+seniority zero, so DOCI is near-exact, as are our variational RG results.
+In the six-electron series there are two pairs of electrons in the valence orbitals, and the
+systems are once again strongly-correlated. However, DOCI is not as good a treatment,
+as there is weak-correlation from open-shell singlet states missing from DOCI. The same is
+generally true for the results of the eight-electron series.
+For the ten-electron series the dominant effect is weak electron correlation. The 2s-2p
+gap again gets smaller as the central charge increases, but the 2p-3s gap remains large, and
+thus there is a single Slater determinant which dominates the physical wavefunction. As a
+result, DOCI is not quantitatively accurate and neither is our variational calculation. We
+do not report results for STO-6G as HF is full CI for this case.
+In each case we were able to reproduce from half to two-thirds of the correlation energy
+11
+a) Be B+ C2+ N3+ O4+ F5+ Ne6+
+RHF -14.50336 -24.19056 -36-34155 -50.87786 -67.89148 -87.35546 -109.32595
+RG -14.55578 -24.25254 -36.40430 -50.94130 -67.95846 -87.42542 -109.39974
+DOCI -14.55578 -24.25254 -36.40430 -50.94130 -67.95847 -87.42542 -109.39974
+FCI -14.55609 -24.25289 -36.40457 -50.94153 -67.95870 -87.42566 -109.40001
+b) Be2− B− C N+ O2+ F3+ Ne4+
+RHF -13.61385 -24.01092 -37.46352 -53.64180 -72.65698 -94.54252 -119.37771
+RG -13.65525 -24.06267 -37.52018 -53.70354 -72.72618 -94.61900 -119.46229
+DOCI -13.65525 -24.06267 -37.52018 -53.70356 -72.72618 -94.61900 -119.46238
+FCI -13.70391 -24.12611 -37.59286 -53.78592 -72.82119 -94.72667 -119.58397
+c) Be4− B3− C2− N− O F+ Ne2+
+RHF -11.16645 -21.79925 -36.25543 -53.76411 -74.37443 -98.27513 -125.52797
+RG -11.19071 -21.83084 -36.29171 -53.80525 -74.42158 -98.32892 -125.58872
+DOCI -11.19071 -21.83089 -36.29171 -53.80525 -74.42189 -98.32892 -125.58872
+FCI -11.23923 -21.89417 -36.36427 -53.88751 -74.51682 -98.43650 -125.71022
+TABLE I: Absolute energies (a.u.) computed with the STO-6G basis set for a)
+four-electron systems, b) six-electron systems and c) eight-electron systems.
+obtainable by DOCI, which is the best-case scenario for this wavefunction ansatz. To recover
+the complete DOCI correlation energy, one way to proceed is to write an expansion in terms
+of eigenvectors of the reduced BCS Hamiltonian. As we already recover the majority of the
+correlation energy, we are optimistic that such an expansion is short, and dominated by one
+RG state. We are now pursuing this line of reasoning and will report in the future.
+B. Dissociation curves: RHF orbitals
+The prototypical strongly-correlated systems are bond-dissociation curves. As it is a
+two-electron problem, we expect to be able to dissociate the hydrogen molecule perfectly.
+Indeed this is the case, as can be seen in Figure 1, where the RG, DOCI, and FCI curves
+overlap. The error with respect to DOCI is very small.
+Moving to the simultaneous dissociation of linear H4 into four hydrogen atoms, as shown
+12
+a) Be B+ C2+ N3+ O4+ F5+ Ne6+
+RHF -14.57238 -24.23501 -36.40165 -51.06854 -68.23528 -87.89994 -110.06183
+RG -14.59411 -24.27572 -36.46351 -51.14659 -68.32741 -88.00447 -110.17753
+DOCI -14.59430 -24.27614 -36.46414 -51.14733 -68.32777 -88.00475 -110.17811
+FCI -14.61747 -24.29450 -36.47469 -51.15446 -68.33310 -88.00914 -110.18197
+b) Be2− B− C N+ O2+ F3+ Ne4+
+RHF -14.42518 -24.47453 -37.59848 -53.75628 -72.92427 -95.09707 -120.26904
+RG -14.44946 -24.50437 -37.62045 -53.80071 -72.98480 -95.17516 -120.36321
+DOCI -14.45682 -24.51240 -37.62790 -53.80695 -72.99078 -95.17980 -120.36782
+FCI -14.50771 -24.57900 -37.71348 -53.88304 -73.06314 -95.24915 -120.43495
+c) Be4− B3− C2− N− O F+ Ne2+
+RHF -13.94252 -24.00987 -37.35787 -54.22984 -74.67005 -98.64114 -126.12742
+RG -13.96797 -24.04881 -37.40351 -54.25914 -74.70246 -98.68616 -126.18290
+DOCI -13.97955 -24.06759 -37.42464 -54.27194 -74.71325 -98.69661 -126.19256
+FCI -14.10357 -24.15193 -37.54951 -54.41593 -74.84971 -98.82188 -126.31146
+d) Be6− B5− C4− N3− O2− F− Ne
+RHF -13.14242 -23.11023 -36.43155 -53.48638 -74.43570 -99.42828 -128.49635
+RG -13.16941 -23.14395 -36.48787 -53.54620 -74.47711 -99.46036 -128.52650
+DOCI -13.17847 -23.16554 -36.51415 -53.59230 -74.50614 -99.48046 -128.54457
+FCI -13.41990 -23.25556 -36.67971 -53.78809 -74.72569 -99.67132 -128.71147
+TABLE II: Absolute energies (a.u.) computed with the aug-cc-pVDZ basis set for a)
+four-electron systems, b) six-electron systems, c) eight-electron systems and d) ten-electron
+systems.
+in figure 2, the results are no longer exact. As all calculations are in the RHF basis, DOCI
+and FCI differ appreciably. The error for RG with respect to DOCI is no longer zero, but
+grows continuously to a maximum before dropping off substantially. At the critical point,
+where the deviation is maximal, more than one RG state is required to match with DOCI.
+The same trends are observed for H6 and H8.
+13
+a) Be B C N O F Ne
+4e 1.94E-6 1.43E-6 5.47E-7 2.53E-7 3.30E-7 8.86E-8 3.15E-7
+6e 2.20E-7 5.93E-7 2.98E-8 2.34E-5 1.07E-7 8.87E-7 8.58E-5
+8e 8.33E-8 4.89E-5 1.10E-8 2.58E-8 3.17E-4 4.68E-8 6.78E-7
+b) Be B C N O F Ne
+4e 1.88E-4 4.23E-4 6.30E-4 7.46E-4 3.59E-4 2.74E-4 5.74E-4
+6e 7.36E-3 8.03E-3 7.44E-3 6.24E-3 5.98E-3 4.64E-3 4.61E-3
+8e 1.16E-2 1.88E-2 2.11E-2 1.28E-2 1.08E-2 1.04E-2 9.67E-3
+10e 9.06E-3 2.16E-2 2.08E-2 2.88E-2 2.90E-2 2.01E-2 1.81E-2
+TABLE III: Deviations of variational RG with DOCI computed in the a) STO-6G and b)
+aug-cc-pVDZ basis sets.
+FIG. 1: a) Bond dissociation curves for H2. RG and DOCI were computed in the basis of
+RHF orbitals. RG, DOCI and FCI coincide and hence are not distinguishable. b) Energy
+difference between RG and DOCI for H2. All results were computed with the STO-6G
+basis set.
+C. Dissociation curves: OO-DOCI orbitals
+Hydrogen dissociation chains were also computed in the basis of OO-DOCI orbitals, in
+which the DOCI curve is much closer to the full CI result. Curves are plotted for H4, H6
+and H8 in figure 3. The results for each of the hydrogen chains are the same. The error
+with respect to DOCI in the RG curve grows continuously before decreasing to less than
+14
+FIG. 2: a-c) Bond dissociation curves for H4, H6 and H8. d-f) Energy difference between
+RG and DOCI for H4, H6 and H8. All results were computed with the STO-6G basis set.
+RG and DOCI were computed in the basis of RHF orbitals.
+1mH at dissociation. That the error tends to zero is a strong indication that the method is
+size-consistent.
+Dissociation curves were also calculated for the nitrogen molecule, and are plotted in
+15
+FIG. 3: a-c) Bond dissociation curves for H4, H6 and H8. d-f) Energy difference between
+RG and DOCI for H4, H6 and H8. All results were computed with the STO-6G basis set.
+RG and DOCI were computed in the basis of OO-DOCI orbitals.
+figure 4. Similar to the case for hydrogen chains, RG differs from DOCI near the minimum,
+but approaches the DOCI curve much more quickly. There is a curve crossing near 5.2
+Bohr which indicates that there is more than one RG state required near that point. At
+16
+dissociation the RG and DOCI curves agree to a tenth of a milliHartree.
+FIG. 4: a) Bond dissociation curves for N2. b) Energy difference between RG and DOCI
+for N2. All results were computed with the STO-6G basis set. RG and DOCI were
+computed in the basis of OO-DOCI orbitals.
+IV. CONCLUSIONS
+We have performed variational calculations for chemical systems employing the ground
+state eigenvector of the exactly solvable reduced BCS Hamiltonian. The key idea is that
+this treatment is a mean-field of pairs of electrons, rather than a mean-field of individual
+electrons, as in conventional orbital-based approaches. Analogous to the way Hartree-Fock is
+the dominant contribution to the wavefunction of a system with weakly-correlated electrons,
+the present method is the dominant contribution to a wavefunction of a system with weakly-
+correlated pairs of electrons.
+Our results serve as a starting point to develop a many-body theory for pairs of electrons.
+We are satisfied that they qualitatively reproduce DOCI. They also highlight issues to be
+addressed in upcoming contributions. It is obvious that RHF orbitals are not optimal
+for seniority-zero wavefunctions, as we have studied previously. Weak-correlation of pairs,
+or inter-pair correlation, is missing, and perturbation theories will need to be developed.
+Finally, while our method scales polynomially, it should be a smaller polynomial to be taken
+seriously. All of these problems are solvable, and we are currently addressing them.
+17
+V. DATA AVAILABILITY
+The data that support the findings of this study are available from the corresponding
+author upon reasonable request.
+VI. ACKNOWLEDGEMENTS
+P.A.J and P.W.A were supported by NSERC and Compute Canada. P.W.A. also thanks
+Canarie. P.W.A and S. D. B. thank the Canada Research Chairs. We thank Toon Verstraelen
+for his implementation of the covariance matrix adaptation evolution strategy, and Pieter
+Claeys for his Richardson’s equations solver.
+REFERENCES
+1T. Helgaker, P. Jorgenson, and J. Olsen. Molecular Electronic-Structure Theory. Wiley &
+Sons, West Sussex, 2000.
+2R. J. Bartlett and M. Musial. Reviews of Modern Physics, 79:291, 2007.
+3G. K. Chan and S. Sharma. Annual Review of Physical Chemistry, 62:465, 2011.
+4S. Wouters, W. Poelmans, S. De Baerdemacker, P. W. Ayers, and D. Van Neck. Computer
+Physics Communications, 191:235, 2015.
+5S. Wouters and D. Van Neck. The European Physical Journal D, 68:272, 2014.
+6S. Wouters, W. Poelmans, P. W. Ayers, and D. Van Neck. Computer Physics Communi-
+cations, 185:1501, 2014.
+7S. R. White. Physical Review B, 48:10345, 1993.
+8S. R. White. Physical Review Letters, 69:2863, 1992.
+9K. H. Marti and M. Reiher. Zeitschrift fr Physikalische Chemie, 224:583, 2010.
+10D. Zgid and M. Nooijen. The Journal of Chemical Physics, 128:144116, 2008.
+11D. Ghosh, J. Hachmann, T. Yanai, and G. K. Chan. The Journal of Chemical Physics,
+128:144117, 2008.
+12G. Moritz and M. Reiher. The Journal of Chemical Physics, 126:244109, 2007.
+13G. K. Chan and M. Head-Gordon. The Journal of Chemical Physics, 116:4462, 2002.
+14G. K. Chan. The Journal of Chemical Physics, 120:3172, 2004.
+15S. R. White and R. L. Martin. The Journal of Chemical Physics, 110:4127, 1999.
+18
+16S. Daul, I. Ciofini, C. Daul, and S. R. White. International Journal of Quantum Chemistry,
+79:331, 2000.
+17G. H. Booth and A. Alavi. The Journal of Chemical Physics, 132:174104, 2010.
+18D. Cleland, G. H. Booth, and A. Alavi. The Journal of Chemical Physics, 132:041103,
+2010.
+19G. H. Booth, A. J. Thom, and A. Alavi. The Journal of Chemical Physics, 131:054106,
+2009.
+20A. J. Thom and A. Alavi. The Journal of Chemical Physics, 123:204106, 2005.
+21M. Honma, T. Mizusaki, and T. Otsuka. Physical Review Letters, 75:1284, 1995.
+22T. Otsuka, T. Mizusaki, and M. Honma. Journal of Physics G: Nuclear and Particle
+Physics, 25:699, 1999.
+23T. Otsuka, M. Honma, T. Mizusaki, N. Shimizu, and Y. Utsuno. Progress in Particle and
+Nuclear Physics, 47:319, 2001.
+24Y. Ohtsuka and S. Nagase. Chemical Physics Letters, 463:431, 2008.
+25Y. Ohtsuka and S. Nagase. Chemical Physics Letters, 485:367, 2010.
+26Y. Ohtsuka and S. Nagase. Theoretical Chemistry Accounts, 130:501, 2011.
+27G. H. Booth, D. Cleland, A. Alavi, and D. P. Tew. The Journal of Chemical Physics,
+137:164112, 2012.
+28D. Cleland, G. H. Booth, C. Overy, and A. Alavi. Journal of Chemical Theory and
+Computation, 8:4138, 2012.
+29T. Abe, P. Maris, T. Otsuka, N. Shimizu, Y. Utsuno, and J. P. Vary. Physical Review C,
+86:054301, 2012.
+30G. H. Booth, A. Gruneis, G. Kresse, and A. Alavi. Nature, 493:365, 2013.
+31A. C. Hurley, J. Lennard-Jones, and J. A. Pople. Proceedings of the Royal Society,
+A220:446, 1953.
+32D. M. Silver. The Journal of Chemical Physics, 50:5108, 1969.
+33H. Minc. Permanents. Addison-Wesley, Reading, 1978.
+34A. J. Coleman. International Journal of Quantum Chemistry, 63:23, 1997.
+35J. Bardeen, L. N. Cooper, and J. R. Schrieffer. Physical Review, 108:1175, 1953.
+36P. Ring and P. Schuck. The Nuclear Many-Body Problem. Springer, Berlin, 1980.
+37W. A. Goddard. Physical Review, 157:81, 1967.
+38P. R. Surján. An Introduction to the Theory of Geminals. Springer, Berlin, 1999.
+19
+39P. A. Limacher, P. W. Ayers, P. A. Johnson, S. De Baerdemacker, D. Van Neck, and
+P. Bultinck. Journal of Chemical Theory and Computation, 9:1394, 2013.
+40P. A. Johnson, P. W. Ayers, P. A. Limacher, S. De Baerdemacker, D. Van Neck, and
+P. Bultinck. Computational and Theoretical Chemistry, 1003:101, 2013.
+41K. Boguslawski, P. Tecmer, P. W. Ayers, P. Bultinck, S. De Baerdemacker, and
+D. Van Neck. Physical Review B, 98:201106(R), 2014.
+42K. Boguslawski, P. Tecmer, P. Bultinck, S. De Baerdemacker, D. Van Neck, and P. W.
+Ayers. Journal of Chemical Theory and Computation, 10:4873, 2014.
+43K. Boguslawski, P. Tecmer, P. A. Limacher, P. A. Johnson, P. W. Ayers, P. Bultinck,
+S. De Baerdemacker, and D. Van Neck. Journal of Chemical Theory and Computation,
+140:214114, 2014.
+44P. Tecmer, K. Boguslawski, P. A. Johnson, M. Chan, T. Verstraelen, and P. W. Ayers.
+Journal of Physical Chemistry, A118:9058, 2014.
+45J. J. Shepherd, T. M. Henderson, and G. E. Scuseria. The Journal of Chemical Physics,
+144:094112, 2014.
+46T. Stein, T. M. Henderson, and G. E. Scuseria. The Journal of Chemical Physics,
+140:214113, 2014.
+47T. M. Henderson, G. E. Scuseria, J. Dukelsky, A. Signoracci, and T. Duguet. Physical
+Review C, 89:054305, 2014.
+48T. M. Henderson, I. W. Bulik, T. Stein, and G. E. Scuseria. The Journal of Chemical
+Physics, 141:244104, 2014.
+49I. W. Bulik, T. M. Henderson, and G. E. Scuseria. Journal of Chemical Theory and
+Computation, 11:3171, 2015.
+50P. A. Limacher, T. D. Kim, P. W. Ayers, P. A. Johnson, S. De Baerdemacker, D. Van Neck,
+and P. Bultinck. Molecular Physics, 112:853, 2014.
+51M. Kobayashi, A. Szabados, H. Nakai, and P. Surjan. Journal of Chemical Theory and
+Computation, 6:2024, 2010.
+52P. A. Limacher, P. W. Ayers, P. A. Johnson, S. De Baerdemacker, D. Van Neck, and
+P. Bultinck. Physical Chemistry Chemical Physics, 16:501, 2014.
+53E. Pastorczak and K. Pernal. Physical Chemistry Chemical Physics, 17:8622, 2015.
+54P. A. Johnson, P. A. Limacher, T. D. Kim, M. Richer, R. A. Miranda-Quintana, F. Heidar-
+Zadeh, P. W. Ayers, P. Bultinck, S. De Baerdemacker, and D. Van Neck. Computational
+20
+and Theoretical Chemistry, 1116:207, 2017.
+55L. Bytautas, T. M. Henderson, C. A. Jimenez-Hoyos, J. K. Ellis, and G. E. Scuseria. The
+Journal of Chemical Physics, 135:044119, 2011.
+56R. W. Richardson. Physics Letters, 3:277, 1963.
+57J. Dukelsky, S. Pittel, and G. Sierra. Reviews of Modern Physics, 76:643, 2004.
+58G. Ortiz, R. Somma, J. Dukelsky, and S. Rombouts. Nuclear Physics B, 707:421, 2005.
+59S. De Baerdemacker, P. W. Claeys, J.-S. Caux, D. Van Neck, and P. W. Ayers. arXiv,
+page 1712.01673.
+60P. W. Claeys, J.-S. Caux, D. Van Neck, and S. De Baerdemacker. Physical Review B,
+96:155149, 2017.
+61A. J. A. James, R. Konik, P. Lecheminant, N. J. Robinson, and A. M. Tsvelik. Reports
+on Progress in Physics, 81:046002, 2018.
+62L. Carrier, C.-. Fecteau., and P. A. Johnson. International Journal of Quantum Chemistry,
+120:e26255, 2020.
+63D. R. Alcoba, A. Torre, L. Lain, G. E. Massaccesi, and O. Oña. The Journal of Chemical
+Physics, 140:234103, 2014.
+64R. W. Richardson. Journal of Mathematical Physics, 6:1034, 1965.
+65M. Gaudin. Journal de Physique, 37:1087, 1976.
+66S. Rombouts, D. Van Neck, and J. Dukelsky. Physical Review C, 69:061303(R), 2004.
+67X. Guan, K. D. Launey, M. Xie, L. Bao, F. Pan, and J. P. Draayer. Physical Review C,
+86:024313, 2012.
+68W. V. Pogosov. Journal of Physics: Condensed Matter, 24:075701, 2012.
+69S. De Baerdemacker. Physical Review C, 86:044332, 2012.
+70A. Faribault, O. El Araby, C. Sträter, and V. Gritsev. Physical Review B, 83:235124, 2011.
+71P. W. Claeys, S. De Baerdemacker, M. Van Raemdonck, and D. Van Neck. Physical Review
+B, 91:155102, 2015.
+72N. A. Slavnov. Theoretical and Mathematical Physics, 79:502, 1989.
+73H.-Q. Zhou, J. Links, R. H. McKenzie, and M. D. Gould. Physical Review B, 65:060502,
+2002.
+74A. Faribault, P. Calabrese, and J.-S. Caux. Physical Review B, 77:064503, 2008.
+75A. Faribault, P. Calabrese, and J.-S. Caux. Physical Review B, 81:174507, 2010.
+76P. W. Claeys, D. Van Neck, and S. De Baerdemacker. SciPost Physics, 3:028, 2017.
+21
+77J. A. Nelder and R. Mead. Computer Journal, 7:308, 1965.
+78N. Hansen and A. Ostermeier. Evolutionary Computation, 9:159, 2001.
+79F. Weinhold and E. B. Wilson. The Journal of Chemical Physics, 46:2752, 1967.
+80R. M. Parrish, L. A. Burns, D. G. A. Smith, A. C. Simmonett, A. E. DePrince, E. G.
+Hohenstein, U. Bozkaya, A. Y. Sokolov, R. Di Remigio, R. M. Richard, J. F. Gonthier,
+A. M. James, H. R. McAlexander, A. Kumar, M. Saitow, X. Wang, B. P. Pritchard,
+P. Verma, H. F. Schaefer, K. Patkowski, R. A. King, E. F. Valeev, F. A. Evangelista, J. M.
+Turney, T. D. Crawford, and C. D. Sherrill. Journal of Chemical Theory and Computation,
+13:3185, 2017.
+81C. D. Sherill and H. F. Schaefer III. Advances in Quantum Chemistry, 34:143, 1999.
+82M. J. Frisch, G. W. Trucks, H. B. Schlegel, G. E. Scuseria, M. A. Robb, J. R. Cheeseman,
+G. Scalmani, V. Barone, G. A. Petersson, H. Nakatsuji, X. Li, M. Caricato, A. V. Marenich,
+J. Bloino, B. G. Janesko, R. Gomperts, B. Mennucci, H. P. Hratchian, J. V. Ortiz, A. F.
+Izmaylov, J. L. Sonnenberg, D. Williams-Young, F. Ding, F. Lipparini, F. Egidi, J. Goings,
+B. Peng, A. Petrone, T. Henderson, D. Ranasinghe, V. G. Zakrzewski, J. Gao, N. Rega,
+G. Zheng, W. Liang, M. Hada, M. Ehara, K. Toyota, R. Fukuda, J. Hasegawa, M. Ishida,
+T. Nakajima, Y. Honda, O. Kitao, H. Nakai, T. Vreven, K. Throssell, J. A. Montgomery,
+Jr., J. E. Peralta, F. Ogliaro, M. J. Bearpark, J. J. Heyd, E. N. Brothers, K. N. Kudin, V. N.
+Staroverov, T. A. Keith, R. Kobayashi, J. Normand, K. Raghavachari, A. P. Rendell, J. C.
+Burant, S. S. Iyengar, J. Tomasi, M. Cossi, J. M. Millam, M. Klene, C. Adamo, R. Cammi,
+J. W. Ochterski, R. L. Martin, K. Morokuma, O. Farkas, J. B. Foresman, and D. J. Fox.
+Gaussian 16 Revision C.01, 2016. Gaussian Inc. Wallingford CT.
+83Giuseppe M. J. Barca, Colleen Bertoni, Laura Carrington, Dipayan Datta, Nuwan De Silva,
+J. Emiliano Deustua, Dmitri G. Fedorov, Jeffrey R. Gour, Anastasia O. Gunina, Emi-
+lie Guidez, Taylor Harville, Stephan Irle, Joe Ivanic, Karol Kowalski, Sarom S. Leang,
+Hui Li, Wei Li, Jesse J. Lutz, Ilias Magoulas, Joani Mato, Vladimir Mironov, Hiroya
+Nakata, Buu Q. Pham, Piotr Piecuch, David Poole, Spencer R. Pruitt, Alistair P. Rendell,
+Luke B. Roskop, Klaus Ruedenberg, Tosaporn Sattasathuchana, Michael W. Schmidt,
+Jun Shen, Lyudmila Slipchenko, Masha Sosonkina, Vaibhav Sundriyal, Ananta Tiwari,
+Jorge L. Galvez Vallejo, Bryce Westheimer, Marta Wloch, Peng Xu, Federico Zahariev,
+and Mark S. Gordon. The Journal of Chemical Physics, 152(15):154102, 2020.
+22
+	Richardson-Gaudin mean-field for strong correlation in quantum chemistry
+	Abstract
+	I Introduction
+	II Variational Ansatz
+	A Eigenvectors of the Reduced BCS Hamiltonian
+	B Energy Functional
+	III Numerical Results
+	A Atoms
+	B Dissociation curves: RHF orbitals
+	C Dissociation curves: OO-DOCI orbitals
+	IV Conclusions
+	V Data Availability
+	VI Acknowledgements
+	 References

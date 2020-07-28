@@ -1,0 +1,762 @@
+MiCo: Mixup Co-Training for
+Semi-Supervised Domain Adaptation
+Luyu Yang1,Yan Wang2,Mingfei Gao3,
+Abhinav Shrivastava1,Kilian Q. Weinberger2,Wei-Lun Chao4,Ser-Nam Lim5
+1University of Maryland 2Cornell University 3Salesforce Research
+4Ohio State University 5Facebook AI
+Abstract
+Semi-supervised domain adaptation (SSDA) aims to adapt models from a labeled
+source domain to a different but related target domain, from which unlabeled
+data and a small set of labeled data are provided. In this paper we propose a
+new approach for SSDA, which is to explicitly decompose SSDA into two sub-
+problems: a semi-supervised learning (SSL) problem in the target domain and an
+unsupervised domain adaptation (UDA) problem across domains. We show that
+these two sub-problems yield very different classifiers, which we leverage with
+our algorithm MixUp Co-training (MICO). MICO applies MIXUP to bridge the
+gap between labeled and unlabeled data of each individual model and employs
+co-training to exchange the expertise between the two classifiers. MICO needs
+no adversarial and minmax training, making it easily implementable and stable.
+MICO achieves state-of-the-art results on SSDA datasets, outperforming the prior
+art by a notable 4% margin on DomainNet.
+1 Introduction
+Domain adaptation (DA) aims to adapt machine learned models from a source domain to a related
+but different target domain [6, 14, 16, 55]. DA is particularly important in settings where target
+data is hard to obtain, but source data is plentiful [25, 45, 69], e.g. adaptation from synthetic to real
+images [25, 49, 50, 57, 58]. Multiple flavors of DA exist. Generally, all assume the existence of
+plenty of labeled source data DS and unlabeled target data DU , but they differ in how much labeled
+target data DT is available. In unsupervised DA (UDA) settings no target labels exist, |DT | = 0,
+whereas in semi-supervised domain adaptation (SSDA) one presumes a small amount of target labels,
+|DT | � |DU |. Despite such a seemingly nuanced difference, what methods are effective for SSDA
+and UDA can vary substantially [56]. One of the most successful approaches for UDA is to align
+the feature spaces, either using generative adversarial training [14] or clever transformations [62].
+However, Saito et al. [56] showed recently that such feature alignment is less effective in SSDA.
+Intrigued by these findings, we investigate the relationship between UDA and SSDA further and
+claim that the differences are more fundamental than previously believed. Ultimately, the two
+learning paradigms follow different perspectives. Classifiers learned in the UDA setting are typically
+dominated by the labeled source data, as they constitute the only source of supervision, whereas for
+SSDA classifiers, the labeled target data, sampled right from the domain of interest, offer another,
+and likely very different, supervision. Consequently, classifiers from the two settings end up rather
+different in what types of mistakes they make and for which samples they are confident and correct.
+In this paper we propose a novel approach to SSDA that exploits exactly this discrepancy. First, we
+decompose the SSDA setting into two learning problems with a shared goal: UDA across domains on
+Preprint. Under review.
+ar
+X
+iv
+:2
+00
+7.
+12
+68
+4v
+1 
+ [
+cs
+.C
+V
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+the labeled, unlabeled data sets DS , DU , and a semi-supervised learning (SSL) problem in the target
+domain on DT , DU . Second, we re-visit co-training [4, 8, 9, 21] and self-training [5, 29, 30, 85].
+Co-training is a well established method for semi-supervised learning, in the presence of two class-
+conditionally independent views of the data, e.g. a web-page text and link graph [4, 8]. In co-training
+one classifier is trained on each view, and the two classifiers then iteratively “teach each other” by
+labeling samples from the unlabeled corpus that they are highly confident on for the other classifier
+as additional (pseudo-labeled) training samples. Co-training works, because the two classifiers are
+trained on different views and therefore classify different samples correctly. We show that by de-
+composing SSDA settings into an SSL and UDA problem, we also obtain two classifiers that, although
+trained in the same feature space, differ sufficiently in predictions that they qualify for co-training to
+work well. We also successfully incorporate self-training by incorporating the pseudo-labels of one
+classifier into its own training set.
+UDASSL
+Co-training
+SSDA
+labeled source
+labeled target
+classifier
+unlabeled target
+pseudo-labeled target
+Figure 1: Mixup Co-training (MICO). We decompose semi-
+supervised domain adaptation (SSDA) into two sub-problems:
+semi-supervised learning (SSL) in the target domain, and un-
+supervised DA (UDA) across domains. The two sub-problems
+offer different pseudo-label confidences to the unlabeled data
+(light blue & light red circles), and we leverage them via
+co-training: exchanging their expertise to teach each other.
+Specifically, for both classifiers we use
+MIXUP [7, 74, 82] to incorporate the
+pseudo-labeled target data with the hard
+labels from either DT or DS . MIXUP in-
+terpolates between two training samples
+linearly in pixel and label space to create
+new training samples as a form of data aug-
+mentation. We find MIXUP to be highly
+robust to wrongly assigned pseudo-labels.
+Moreover, MIXUP synthesizes data that
+smoothly interpolate between the source
+and target domains in the UDA view, es-
+sentially creating the intermediate feature
+spaces to bridge the domain gap [15, 18].
+In each mini-batch, one model will simulta-
+neously be a teacher and a student, provid-
+ing high confidence pseudo-labels to teach
+the other model, and in return learning from
+the other’s high confidence samples. We
+name our algorithm MICO: MixUp Co-
+training. See Fig. 1 for an illustration.
+We evaluate MICO on two benchmark
+datasets for SSDA: DomainNet [45] and
+Office-home [73]. While very simple to im-
+plement, without any adversarial and min-
+max learning, MICO outperforms the state-
+of-the-art results [47, 56] on DomainNet
+by a significant margin, over 4%. Interest-
+ingly, while the two view-specific models will gradually converge to the same predictions on the target
+domain using MICO, their behaviors on the source domain remain quite different. Specifically, the
+UDA view with access to the source data remains highly accurate on the source domain, essentially
+overcoming the catastrophic forgetting problem [1, 67].
+2 Related Work
+Unsupervised domain learning (UDA). UDA has been studied extensively [6, 11, 14, 15, 18, 25, 26,
+29, 42, 55, 57, 63, 69, 72, 77, 83, 85]. Many methods [14, 36, 59, 70] matched the marginal feature
+distributions between domains by minimizing their divergence, assuming that the domain gap results
+from covariate shift [20, 61]. One mainstream approach is by adversarial learning [14, 25, 44, 75–
+77, 79], training a domain discriminator [17] to measure the divergence and learning the domain-
+invariant features to fool the discriminator. More recent works learn features based on the cluster
+assumption [19]: classifier boundaries should not cross high density target data regions. MCD [55]
+and ADR [54] attempted to push target features away from the boundary, using minmax training.
+These methods [32, 54, 55, 59] prioritize preserving the decision boundary on the target domain over
+feature matching. Some other approaches employ self-training [31, 40, 41] to progressively label
+2
+unlabeled data and use them to fine-tune the model [9, 26, 28, 29, 35, 65, 85]. A few very recent UDA
+methods apply MIXUP [82], but mainly to stabilize the domain discriminator [64, 79] or smooth the
+predictions [39]. [80] applies MIXUP at feature and image levels, and within or across domains. All
+of them require adversarial learning with a domain discriminator.
+Semi-supervised domain learning (SSDA). Compared to UDA, SSDA attracts less attention in
+domain adaptation, despite its promising scenario in balancing accuracy and labeling effort. With few
+labeled target data, SSDA can quickly reshape the class boundaries to boost the accuracy [47, 56].
+Many SSDA works are proposed prior to deep learning [24, 34, 46, 81], matching features while
+maintaining accuracy on labeled target data. [2, 71] employed knowledge distillation [23] to regularize
+the training on labeled target data. More recent works use deep learning, and find that the popular
+UDA principle of aligning feature distributions can fail to learn discriminative class boundaries
+in SSDA [56]. [56] thus proposed to gradually move the class prototypes (used to derived class
+boundaries) to the target domain in a minmax fashion; [47] introduced opposite structure learning to
+cluster target data and scatter source data to smooth the process of learning class boundaries. Both
+works [47, 56] simply concatenate the target labeled data with the source data to expand the labeled
+data. [33] incorporates meta-learning to search for better initial condition in domain adaptation.
+Semi-supervised learning (SSL). SSL aims to learn a model with (limited) labeled and unlabeled
+data. SSL generally assumes that both data are from the same distribution. Several recent works [13,
+59] have extended SSL algorithms, like entropy minimization [81] and mean teacher [66], to UDA.
+Co-training and co-teaching. Co-training, a powerful semi-supervised learning method proposed
+in [8],
+looks at the available data with two views from which two models are trained interactively. By adding
+the confident predictions of each model to the training set of the other model, co-training enables
+the models to “teach each other” [9]. There were several assumptions (e.g., class-conditionally
+independent) to ensure co-training’s effectiveness [8], which were later relaxed by [4] with the notion
+of �-expandability. [10] broadened the scope of co-training to a single-view setting; [9] extended the
+work to UDA. Co-teaching [21] shares similar procedure to co-training by learning two models to
+teach each other, but for learning with noisy data. Co-teaching initializes the models differently, and
+uses the fact that neural networks tend to fit easy (e.g., clean) data first to co-filter out noisy data [3].
+3 Approach
+3.1 Background and notation
+Domain adaptation (DA) studies the following problem: given sufficient labeled data DS =
+{(si, yi)}NSi=1 from a source domain (e.g., synthetic images), how can we learn a model that works
+well on a target domain (e.g., real images)? In unsupervised DA (UDA), all samples from the target
+domain, DU = {ui}NUi=1, are unlabeled. In contrast, in semi-supervised DA (SSDA), a limited number
+of labeled target samples, DT = {(ti, yi)}NTi=1, are provided together with a much larger set of DU .
+Our work focuses on the SSDA problem. At first glance, SSDA seems like a simpler problem
+than the widely studied UDA, in that SSDA is simply UDA with extra labels given for the target
+domain, and what we need to do is just extending useful UDA algorithms to SSDA. A recent study
+described in [56], however, shows that the most popular design principles of UDA algorithms —
+matching features across domains [14, 70] and entropy minimization [19] — are less effective in
+SSDA, getting outperformed by the naiv̈e concatenation of DS and DT for supervised learning in
+many cases without even using DU . In some cases, adding these principles to supervised learning
+with DS and DT actually hurts the overall accuracy, leading to negative transfer [1, 51]. These
+observations suggest that the assumptions made on the marginal distributions between domains may
+be sub-optimal [27, 78, 84] towards solving the SSDA problem.
+Inspired by the semi-supervised learning (SSL) field, we take a close look at one popular principle in
+SSL that is known as self-training [4, 8, 31, 40, 41, 68]. Self-training proposes to gradually assign
+“pseudo-labels” to unlabeled data whose predictions are of high confidence
+ŷi = arg max
+c
+p(c|ui;w) if max
+c
+p(c|ui;w) > τ, (1)
+3
+and add them to the labeled data for supervised learning. Here w stands for the weights of the current
+classifier, p(c|u;w) is the probability of u being classified as c, and τ is a confidence threshold.
+Under the condition that (a) the high confidence predictions are correct and (b) the updated model
+gradually improves its confidence to other remaining data, self-training can end up being as powerful
+as performing supervised learning on the entire labeled and unlabeled data given their true labels.
+We note that, the same claim is applicable to domain adaptation as well: self-training for UDA with
+correct pseudo-labels can end up with the so-called ideal joint hypothesis w? [6]
+w? = arg max
+w
+Lsource(w) + Ltarget(w), (2)
+where Lsource and Ltarget stand for the supervised learning losses defined on DS = {(si, yi)}NSi=1 and
+DU = {(ui, yi)}NUi=1, respectively, assuming the labels of DU are given. Self-training has indeed
+been applied to many UDA problems [29, 30, 52, 85]. The key to success lies in how to assign correct
+pseudo-labels to more data and how to be resistant to incorrect pseudo-labels.
+We propose a SSDA algorithm that learns the model similarly to self-training: assigning pseudo-labels
+and fine-tuning. We take a novel insight: the labeled data DS and DT offer different supervisions and
+confidences in assigning pseudo-labels, naturally forming two distinct views. By properly leveraging
+this fact, we derive pseudo-labels that are more accurate, confident and cover more unlabeled data.
+3.2 Self-training with MIXUP for SSDA
+To begin with, we introduce a powerful baseline algorithm for SSDA based on self-training. The
+algorithm learns the model w by mini-batch stochastic gradient descent (SGD). At every iteration, it
+samples three data sets, S = {(sb, yb)}Bb=1 fromDS , T = {(tb, yb)}
+B
+b=1 fromDT , and U = {ub}
+B
+b=1
+from DU , where B is the mini-batch size. It then applies w on U to obtain a pseudo-label set U (w)
+U (w) = {(ub, ŷb = arg max
+c
+p(c|ub;w)); if max
+c
+p(c|ub;w) > τ}. (3)
+Instead of fine-tuning w on S, T , and U (w) directly, we follow recent works of SSL to apply MIXUP
+[7, 38, 82]. MIXUP is an operation to construct virtual examples by convex combinations. Given two
+labeled examples (x1, y1) and (x2, y2), MIXUP performs MIXUP ((x1, y1), (x2, y2);α)
+λ ∼ Beta(α, α), x̃ = (1− λ)x1 + λx2, ỹ = (1− λ)ey1 + λey2 (4)
+to obtain a virtual example (x̃, ỹ), where ey is a one-hot vector with the yth element being 1.
+We perform MIXUP between U (w) and S, and U (w) and T , to obtain two sets of virtual examples
+Ũ
+(w)
+S and Ũ
+(w)
+T . Concretely, the i
+th example in Ũ (w)S is the MIXUP of the i
+th examples in U (m) and
+S. We then update w by SGD,
+w ← w − η
+(
+∇L(w, S) +∇L(w, T ) +∇L(w, Ũ (w)S ) +∇L(w, U
+(w)
+T )
+)
+, (5)
+where η is the learning rate and L is the averaged loss over examples. We use the cross-entropy loss.
+We name this algorithm MixUp Self-Training (MIST). As will be seen in Section 4, MIXUP can
+• effectively denoise an incorrect pseudo-label in U (w). This is done by mixing it with a correct one
+(from DT or DS ). The resulting ỹ at least contains a λ portion of correct labels;
+• smoothly bridge the domain gap between DU and DS . This is done by interpolating between
+u ∈ U (w) and s ∈ S. The resulting x̃ can be seen as an intermediate example between domains.
+One potential drawback of MIST is in its attempt to learn a single w that can simultaneously perform
+well on labeled data of both domains (cf. Eq. (5)) and provide high confident pseudo-labels to cover
+unlabeled target data. As illustrated in Fig. 1, data from the two domains have different feature
+distributions. The labeled data (DS and DT ) that drive self-training can have different confidences
+(specialties) on assigning pseudo-labels. Training a single w can cancel out their specialties.
+3.3 The multi-view perspective of SSDA
+To leverage DS and DT and keep their specialties, we decompose SSDA into two sub-problems:
+4
+• a target-domain SSL problem with DU and DT
+• a cross-domain UDA problem with DU and DS
+To analyze whether these two sub-problems can learn different knowledge in assigning pseudo-labels,
+we learn two models wf and wg , one for each sub-problem independently, using MIST. Specifically,
+each sub-problem constructs its own pseudo-label set (cf. Eq. (3)) using its own model, which is then
+mixed up with its own labeled set to obtain the virtual example set. Each sub-problem then updates
+its model with two loss terms, one on the labeled set and one on the virtual set.
+Figure 2: Analysis on the two-view decom-
+position. We show the number of test ex-
+amples that both, exactly one, and none of
+the models have high confidence on (in to-
+tal, 18, 325). The two views hold unique
+expertise (a 14% data that exactly one view
+is confident on), satisfying the condition of
+co-training in Eq. (8).
+We then compute the following indicators. We apply wf
+to the entire DU and compute for each u ∈ DU the binary
+confidence indicator
+hf (u) =
+{
+1 if maxc p(c|u;wf ) > τ,
+0 otherwise.
+(6)
+We also apply wg to obtain hg(u). Denote by h̄f (u) =
+1 − hf (u) the not function of hf (u), we compute the
+following three indicators to summarize the entire DU
+htwo :
+∑
+u∈DU
+hf (u)hg(u),
+hone :
+∑
+u∈DU
+hf (u)h̄g(u) + h̄f (u)hg(u), (7)
+hzero :
+∑
+u∈DU
+h̄f (u)h̄g(u),
+corresponding to the number of examples that both, exactly
+one, and none of the models have high confidence on,
+respectively. Intuitively, if the two models are exactly the same, hone will be 0, meaning that they are
+either both confident or not on an example. On the contrary, if the two models are well optimized and
+hold their specialties, both hone and htwo will be of high values and hzero will be low.
+We conduct a case study on DomainNet [45], in which we use Real as source and Clipart as target.
+(See Section 4 for details.) We consider a 126-class classification problem, in which |DS | = 70, 358,
+|DU | = 18, 325, and |DT | = 378 (i.e., a three-shot setting where each class in the target domain is
+given three labeled samples). We initialize wf and wg with a ResNet [22] pre-trained on DS , and
+evaluate Eq. (6) and Eq. (7) every 500 iterations (with τ = 0.5).
+Fig. 2 shows the results. The two models do hold their specialties: even at the end of training, there
+is a 14% portion of data that one model is not confident but the other is. If we can properly fuse their
+expertise during training — one model provides the pseudo-labels to the data on which the other
+model is uncertain — we are likely to jointly learn stronger models at the end.
+This is indeed the core idea of co-training [4, 8–10]. Theoretically, the two “views” must satisfy
+certain conditions; e.g., �-expandability [4]. [9, 10] relaxed it and only needed the expanding condition
+to hold on average in the unlabeled set, which can be formulated as follows, with htwo, hone, and hzero
+hone ≥ �min(htwo, hzero). (8)
+That is, there must be sufficient examples that exactly one model is confident so that the two models
+can benefit from teaching each other. As shown in Fig. 2, our two views consistently hold a � around
+2 after the first 500 iterations (i.e., after the models start to learn the view-specific idiosyncrasies),
+suggesting the feasibility of applying co-training to our decomposition.
+3.4 Co-training with MIXUP for SSDA
+To this end, we incorporate co-training to jointly learn the two models wf (SSL) and wg (UDA).
+Compared to learning two models independently in Section 3.3, we make only a single change in
+creating the pseudo-label sets U (f) and U (g) that will be used to update wf and wg .
+U (f) = {(ub, ŷb = arg max
+c
+p(c|ub;wg)); if max
+c
+p(c|ub;wg) > τ},
+U (g) = {(ub, ŷb = arg max
+c
+p(c|ub;wf )); if max
+c
+p(c|ub;wf ) > τ}. (9)
+5
+Figure 3: Comparison of pseudo-label quantity and correctness on DomainNet, Real to Clipart. Left: Comparing
+the correct (marked) and total number (dashed) of pseudo-labels, MICO vs. MIST. Right: Comparing the correct
+and total number of pseudo-labels, S+T+pseudo-U vs. MIST. MICO has the largest correct pseudo-label pool.
+That is, we ask one model to simultaneously be a teacher and a student: it provides confident pseudo-
+labels for the other model to learn from, and learns from the other models’ confident pseudo-labels.
+We summarize our proposed algorithm, MixUp Co-training (MICO), in Algorithm 1.
+Algorithm 1: MIXUP co-training (MICO)
+Input :wf and wg , learning rate η, mini-batch size B,
+iteration Nmax, beta distribution coefficient α,
+confidence threshold τ , labeled source data DS ,
+labeled target data DT , unlabeled target data DU ;
+for n← 1 to Nmax do
+Sample S = {(sb, yb)}Bb=1 from DS ,
+Sample T = {(tb, yb)}Bb=1 from DT ,
+Sample U = {ub}Bb=1 from DU ;
+Set U (f) = ∅, U (g) = ∅;
+for b← 1 to B do
+if maxc p(c|ub;wg) > τ then
+Update U (f) ← U (f) + {(ub, ŷb)},
+ŷb = argmaxc p(c|ub;wg);
+end
+if maxc p(c|ub;wf ) > τ then
+Update U (g) ← U (g) + {(ub, ŷb)},
+ŷb = argmaxc p(c|ub;wf );
+end
+end
+Obtain Ũ (f) = {MIXUP(U (f)i , Ti;α)}
+|U(f)|
+i=1 ;
+Obtain Ũ (g) = {MIXUP(U (g)i , Si;α)}
+|U(g)|
+i=1 ;
+Update
+wf ← wf − η
+(
+∇L(wf , T ) +∇L(wf , Ũ (f))
+)
+;
+Update
+wg ← wg − η
+(
+∇L(wg, S) +∇L(wg, Ũ (g))
+)
+;
+end
+Output :wf and wg (for model ensemble).
+Comparison and discussion. We iden-
+tify key differences between MICO and
+co-training for UDA (CODA) [9] and co-
+teaching [21]. First, compared to CODA,
+MICO explicitly constructs two views to re-
+flect the difference in DS and DU . Second,
+MICO estimates pseudo-labels in a mini-
+batch fashion, and does not fix the pseudo-
+labels. In contrast, CODA estimates the
+pseudo-labels for the entire DU , fixes high
+confidence ones, and permanently moves
+them to the labeled set. Our dynamic
+way allows the models to correct their
+“confident but wrong” predictions made in
+early epochs, one condition to avoid in co-
+training [4, 10]. Finally, compared to co-
+teaching, MICO selects high confident ex-
+amples rather than the small loss ones as
+there is no label provided.
+4 Experiments
+We consider the one-/three-shot settings,
+following [56]. That is, each class has one
+or three labeled target examples. Follow-
+ing the notation in Section 3.1, we train
+with DS , DT , and unlabeled DU . We then
+reveal the true label of DU for evaluation.
+Datasets. We use DomainNet [45], a
+large-scale benchmark dataset for domain
+adaptation that has 345 and six domains.
+We follow [56] to work on the 126-class
+subset with 4 domains (i.e., R: Real, C:
+Clipart, P: Painting, S: Sketch.) and report 7 different adaptation scenarios. We also use Office-
+Home [73], another benchmark that contains 65 classes, with 12 adaptation scenarios constructed
+from 4 domains (i.e., R: Real, C: Clipart, A: Art, P: Product).
+Implementation details. We implement using Pytorch [43]. We follow [56] to use ResNet-34 [22] on
+DomainNet and VGG-16 [60] on Office-Home. Both networks are pre-trained on ImageNet [12, 53].
+We follow [48, 56] to replace the last linear layer with a K-way cosine classifier (e.g., K = 126
+for DomainNet) and train it with a temperature (0.05 in all our experiments). We initialize wf
+6
+Method R to C R to P P to C C to S S to P R to S P to R MEAN
+S+T 60.8 63.6 60.8 55.6 59.5 53.3 74.5 61.2
+DANN 62.3 63.0 59.1 55.1 59.7 57.4 67.0 60.5
+ENT 67.8 67.4 62.9 50.5 61.2 58.3 79.3 63.9
+MME 72.1 69.2 69.7 59.0 64.7 62.2 79.0 68.0
+UODA 75.4 71.5 73.2 64.1 69.4 64.2 80.8 71.2
+MICO 80.4 75.2 78.7 68.6 72.7 71.9 81.5 75.6
+Table 1: Accuracy on DomainNet (%) for three-shot setting with 4 domains
+Method R to C R to P R to A P to R P to C P to A A to P A to C A to R C to R C to A C to P MEAN
+S+T 49.6 78.6 63.6 72.7 47.2 55.9 69.4 47.5 73.4 69.7 56.2 70.4 62.9
+DANN 56.1 77.9 63.7 73.6 52.4 56.3 69.5 50.0 72.3 68.7 56.4 69.8 63.9
+ENT 48.3 81.6 65.5 76.6 46.8 56.9 73.0 44.8 75.3 72.9 59.1 77.0 64.8
+MME 56.9 82.9 65.7 76.7 53.6 59.2 75.7 54.9 75.3 72.9 61.1 76.3 67.6
+UODA 57.6 83.6 67.5 77.7 54.9 61.0 77.7 55.4 76.7 73.8 61.9 78.4 68.9
+MICO 55.8 83.6 69.5 76.6 54.5 62.2 77.2 53.1 77.0 74.1 62.3 79.3 68.8
+Table 2: Accuracy on Office-Home (%) for three-shot setting with 4 domains.
+with a model first fine-tuned on DS , and initialize wg with a model first fine-tuned on DS and then
+fine-tuned on DT . We do so to encourage the two models to be different at the beginning. Then at
+each iteration, we sample three mini-batches S ⊂ DS , T ⊂ DT , and U ⊂ DU of equal sizes B = 24
+(cf. Section 3.2). We set the confidence threshold τ = 0.5, and beta distribution coefficient α = 1.0.
+We use SGD with momentum of 0.9 and an initial learning rate of 0.001, following [56]. We train for
+50K/10K iterations on DomainNet/Office-Home. (See the supplementary material for details.)
+Baselines. We compare to two state-of-the-art SSDA approaches, MME [56] and UODA [47].
+We also compare to S+T, a model trained with DS and DT , without using DU . Besides, we
+compare to DANN [14] (domain adversarial learning) and ENT [19] (entropy minimization), both
+are representative UDA approaches. We modify them such that DS and DT are used jointly to train
+the classifier, following [56]. We denote by S the model trained only with the source data DS .
+Variants of our approach. We consider variants of our approach for extensive ablation studies.
+MIST is the baseline self-training model described in Section 3.2, using MIXUP. S+T+pseudo-U is
+the model trained with self-training, but without MIXUP. Two-view MIST is the direct ensemble of
+independently trained models, one for each view, using MIST (cf. Section 3.3). Ensemble is the
+ensemble model by combing two MIST trained on DS , DT , and DU but with different initialization.
+For all the variants that train only one model, we initialize it with a model fine-tuned on DS and then
+fine-tuned on DT . Otherwise, we initialize the two models in the same way as MICO. We note that,
+for any methods that involve two models, we perform ensemble on their output probability.
+Main results. We summarize the comparison with baselines in Table 1 and Table 2. We mainly report
+the tree-shot results and leave the one-shot results in the supplementary material. MICO outperforms
+all methods by a large margin on DomainNet, and is on the par with UODA on Office-Home.
+We provide detailed analysis on MICO. We mainly report the DomainNet three-shot MEAN results.
+We provide the comprehensive tables in the supplementary material.
+DomainNet Office-Home
+MIST 74.6 63.9
+MICO 75.6 68.8
+Table 3: MICO vs. MIST: MEAN
+One-view vs. two-view. We first compare MICO to MIST.
+As shown in Table 3 (MEAN accuracy over scenarios), MICO
+outperforms MIST by 1% on DomainNet and 5% on Office-
+Home. Fig. 3 (left) further shows the number of pseudo-label
+data involved in model training (those with confidence larger
+than τ = 0.5). We see that MICO always generates more
+pseudo-label data with a higher accuracy than MIST, justifying our claim that the decomposition can
+keep DS ’s and DT ’s specialties to make high confidence predictions to more unlabeled data.
+Co-training. We then compare MICO to two-view MIST. Both methods decompose the data into a
+SSL and a UDA problems. The difference lies in how to generate the pseudo-label set (cf. Eq. (9)):
+Two-view MIST constructs each set by its own model. MICO outperforms two-view MIST by a
+notable margin, not only on ensemble, but also on each view alone, demonstrating the effectiveness
+of two models exchanging their specialties to benefit each other. Each model of MICO outperforms
+MIST.
+7
+(a) (b) (c)
+Target
+Source
+𝜆
+Figure 4: t-SNE visualization of DS and DU : (a) before and (b) after including MIXUP in deriving the
+projection. (c): t-SNE of DS , DU , and MIXUP(DS , DU ). We see a clear data transition along λ.
+wf wg combined
+2-view MIST 67.0 70.7 72.0
+MICO 75.2 75.0 75.6
+Table 4: MICO vs. 2-view MIST on
+DomainNet. We show accuracy of each
+view alone and their ensemble.
+.
+MIXUP. We examine the importance of MIXUP. Specifi-
+cally, we compare MIST and S+T+pseudo-U. The second
+model trains in the same way as MIST, except that it does not
+apply MIXUP. On DomainNet (3-shot), MIST outperforms
+S+T+pseudo-U by 9% on average.
+We attribute this difference to the denoising effect by MIXUP:
+MIXUP is performed after the pseudo-label set is defined, so it
+does not directly affect the number of pseudo-label data, but their quality. We further calculate the
+number of correctly assigned pseudo-labels along training, as shown in Fig. 3 (right). With MIXUP,
+the correct pseudo-label pool boosts consistently. In contrast, S+T+pseudo-U reinforces itself with
+wrongly assigned pseudo-labels, the percentage thus remains constantly low.
+DomainNet Office-Home
+Ensemble 74.7 64.7
+MICO 75.6 68.8
+Table 5: MICO vs. Ensemble.
+Comparison to model ensemble. Since MICO combines wf
+and wg in making predictions, for a fair comparison we train
+two MIST models (both use DS + DT + DU ), each with
+different initialization, and perform model ensemble. As shown
+in Table 5, MICO outperforms model ensemble, especially on
+Office-Home, suggesting that our improvement does not simply
+come from model ensemble, but from co-training to benefit two models.
+wf wg MICO S
+65.3 98.2 93.5 98.8
+Table 6: Accuracy on the source
+domain. We compare S, MICO, and
+each view.
+Results on the source domain. While wf and wg have simi-
+lar accuracy on DU , the fact that wf does not learn from DS
+suggest their difference in classifying source domain data. We
+verify this in Table 6, where we apply each model individually
+on a hold-out set from the source domain (provided by Domain-
+Net). We see that wg clearly dominates wf . Its accuracy is
+even on the par with a model trained only on DS , showing one
+advantage of self-training compared to feature matching — the
+model can better memorize its discriminative ability on the source domain.
+MIXUP t-SNE [37]. To further understand the role of MIXUP in domain adaptation, we plot the
+t-SNE figures on (a) DS + DU and (b) DS + DU + MIXUP(DS , DU ). We extract features with a
+model trained only with DS so we can see a clear domain gap. For (b), after projecting the features
+into 2D, we only keep the points of DS + DU . We see in Fig. 4, without MIXUP, the features of
+DS + DU in the high-dimensional space are quite separated, which, however, can be bridged after
+including the MIXUP(DS , DU ) data. We further plots all the points of (b) in (c), and give points
+mixed-up with different λ different colors: λ = 1 corresponds to DS and λ = 0 corresponds to DU .
+We can see a smooth transitions (paths) of points going from the source to the target (colors turn from
+red to blue), suggesting that MIXUP indeed creates the intermediate feature space to connect two
+domains, reminiscent of the attempt made in the seminal work in [15, 18].
+5 Conclusion
+We introduce MICO, a simple yet effective approach to SSDA. In the SSDA setting, there is an
+inherent tension between two very different sources of supervision: the labeled target and source data
+8
+sets. Instead of trying to combine them, MICO explicitly decomposes SSDA into a semi-supervised
+learning problem on the target domain and an unsupervised domain adaptation problem across
+domains. We show that the two resulting classifiers are excellent candidates for Co-Training, a
+well-established technique to let classifiers train each other. The resulting approach is far simpler
+than other competitive approaches for SSDA, as it neither requires adversarial nor minmax training.
+However, MICO consistently outperforms the prior state-of-the-art on several large-scale SSDA
+benchmark datasets.
+6 Broader Impact
+Our work introduces a novel approach to a well-established and decade old sub-field of machine
+learning and computer vision, SSDA. As far as we know, it does not imply any additional ethical
+concerns beyond the already existing and ongoing debate about the use of AI and computer vision.
+One societal advantage of our approach is that it is significantly simpler than most established
+state-of-the-art algorithms, which may lower the bar of entry and ease reproducability for researchers
+with smaller computing budgets.
+Acknowledgement
+This research is supported by Facebook AI, National Science Foundation NSF (III-1724282), the
+Office of Naval Research DOD (N00014-17-1-2175), and Defense Advanced Research Projects
+Agency (DARPA) via ARO contract number W911NF2020009. We are thankful for generous support
+by Ohio Supercomputer Center and AWS Cloud Credits for Research. The views, opinions, and
+findings expressed are those of the authors and should not be interpreted as representing the official
+views or policies of the Department of Defense or the U.S. Government. There is no collaboration
+between Facebook and the government agencies.
+References
+[1] Muhammad Abdullah Jamal, Haoxiang Li, and Boqing Gong. Deep face detector adaptation
+without negative transfer or catastrophic forgetting. In CVPR, 2018. 2, 3
+[2] Shuang Ao, Xiang Li, and Charles X Ling. Fast generalized distillation for semi-supervised
+domain adaptation. In AAAI, 2017. 3
+[3] Devansh Arpit, Stanisław Jastrzębski, Nicolas Ballas, David Krueger, Emmanuel Bengio,
+Maxinder S Kanwal, Tegan Maharaj, Asja Fischer, Aaron Courville, Yoshua Bengio, et al. A
+closer look at memorization in deep networks. In ICML, 2017. 3
+[4] Maria-Florina Balcan, Avrim Blum, and Ke Yang. Co-training and expansion: Towards bridging
+theory and practice. In NIPS, 2005. 2, 3, 5, 6
+[5] Michele Banko and Eric Brill. Scaling to very very large corpora for natural language dis-
+ambiguation. In Proceedings of the 39th annual meeting on association for computational
+linguistics, pages 26–33. Association for Computational Linguistics, 2001. 2
+[6] Shai Ben-David, John Blitzer, Koby Crammer, Alex Kulesza, Fernando Pereira, and Jen-
+nifer Wortman Vaughan. A theory of learning from different domains. Machine learning, 79
+(1-2):151–175, 2010. 1, 2, 4
+[7] David Berthelot, Nicholas Carlini, Ian Goodfellow, Nicolas Papernot, Avital Oliver, and Colin A
+Raffel. Mixmatch: A holistic approach to semi-supervised learning. In NeurIPS, 2019. 2, 4
+[8] Avrim Blum and Tom Mitchell. Combining labeled and unlabeled data with co-training. In
+COLT, 1998. 2, 3, 5
+[9] Minmin Chen, Kilian Q Weinberger, and John Blitzer. Co-training for domain adaptation. In
+NIPS, 2011. 2, 3, 5, 6
+[10] Minmin Chen, Kilian Q Weinberger, and Yixin Chen. Automatic feature decomposition for
+single view co-training. In ICML, 2011. 3, 5, 6
+9
+[11] Yuhua Chen, Wen Li, Christos Sakaridis, Dengxin Dai, and Luc Van Gool. Domain adaptive
+faster r-cnn for object detection in the wild. In CVPR, 2018. 2
+[12] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li Fei-Fei. Imagenet: A large-scale
+hierarchical image database. In CVPR, 2009. 6
+[13] Geoffrey French, Michal Mackiewicz, and Mark Fisher. Self-ensembling for visual domain
+adaptation. In ICLR, 2018. 3
+[14] Yaroslav Ganin, Evgeniya Ustinova, Hana Ajakan, Pascal Germain, Hugo Larochelle, François
+Laviolette, Mario Marchand, and Victor Lempitsky. Domain-adversarial training of neural
+networks. JMLR, 17(1):2096–2030, 2016. 1, 2, 3, 7
+[15] Boqing Gong, Yuan Shi, Fei Sha, and Kristen Grauman. Geodesic flow kernel for unsupervised
+domain adaptation. In CVPR, 2012. 2, 8
+[16] Boqing Gong, Kristen Grauman, and Fei Sha. Learning kernels for unsupervised domain
+adaptation with applications to visual object recognition. JMLR, 109(1-2):3–27, 2014. 1
+[17] Ian Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley, Sherjil
+Ozair, Aaron Courville, and Yoshua Bengio. Generative adversarial nets. In Advances in neural
+information processing systems, pages 2672–2680, 2014. 2
+[18] Raghuraman Gopalan, Ruonan Li, and Rama Chellappa. Domain adaptation for object recogni-
+tion: An unsupervised approach. In ICCV, 2011. 2, 8
+[19] Yves Grandvalet and Yoshua Bengio. Semi-supervised learning by entropy minimization. In
+NIPS, 2005. 2, 3, 7
+[20] Arthur Gretton, Alex Smola, Jiayuan Huang, Marcel Schmittfull, Karsten Borgwardt, and
+Bernhard Schölkopf. Covariate shift by kernel mean matching. Dataset shift in machine
+learning, 3(4):5, 2009. 2
+[21] Bo Han, Quanming Yao, Xingrui Yu, Gang Niu, Miao Xu, Weihua Hu, Ivor Tsang, and Masashi
+Sugiyama. Co-teaching: Robust training of deep neural networks with extremely noisy labels.
+In NeurIPS, 2018. 2, 3, 6
+[22] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learning for image
+recognition. In CVPR, 2016. 5, 6
+[23] Geoffrey Hinton, Oriol Vinyals, and Jeff Dean. Distilling the knowledge in a neural network.
+arXiv preprint arXiv:1503.02531, 2015. 3
+[24] Judy Hoffman, Erik Rodner, Jeff Donahue, Trevor Darrell, and Kate Saenko. Efficient learning
+of domain-invariant image representations. In ICLR, 2013. 3
+[25] Judy Hoffman, Eric Tzeng, Taesung Park, Jun-Yan Zhu, Phillip Isola, Kate Saenko, Alexei A
+Efros, and Trevor Darrell. Cycada: Cycle-consistent adversarial domain adaptation. In ICML,
+2018. 1, 2
+[26] Naoto Inoue, Ryosuke Furuta, Toshihiko Yamasaki, and Kiyoharu Aizawa. Cross-domain
+weakly-supervised object detection through progressive domain adaptation. In CVPR, 2018. 2,
+3
+[27] Fredrik D Johansson, David Sontag, and Rajesh Ranganath. Support and invertibility in
+domain-invariant representations. arXiv preprint arXiv:1903.03448, 2019. 3
+[28] Mehran Khodabandeh, Arash Vahdat, Mani Ranjbar, and William G Macready. A robust
+learning approach to domain adaptive object detection. In ICCV, 2019. 3
+[29] Seunghyeon Kim, Jaehoon Choi, Taekyung Kim, and Changick Kim. Self-training and adver-
+sarial background regularization for unsupervised domain adaptive one-stage object detection.
+In ICCV, 2019. 2, 3, 4
+10
+[30] Ananya Kumar, Tengyu Ma, and Percy Liang. Understanding self-training for gradual domain
+adaptation. arXiv preprint arXiv:2002.11361, 2020. 2, 4
+[31] Dong-Hyun Lee. Pseudo-label: The simple and efficient semi-supervised learning method for
+deep neural networks. In Workshop on challenges in representation learning, ICML, 2013. 2, 3
+[32] Seungmin Lee, Dongwan Kim, Namil Kim, and Seong-Gyun Jeong. Drop to adapt: Learning
+discriminative features for unsupervised domain adaptation. In ICCV, 2019. 2
+[33] Da Li and Timothy Hospedales. Online meta-learning for multi-source and semi-supervised
+domain adaptation. arXiv preprint arXiv:2004.04398, 2020. 3
+[34] Limin Li and Zhenyue Zhang. Semi-supervised domain adaptation by covariance matching.
+TPAMI, 41(11):2724–2739, 2018. 3
+[35] Jian Liang, Ran He, Zhenan Sun, and Tieniu Tan. Distant supervised centroid shift: A simple
+and efficient approach to visual domain adaptation. In CVPR, 2019. 3
+[36] Mingsheng Long, Yue Cao, Jianmin Wang, and Michael I Jordan. Learning transferable features
+with deep adaptation networks. arXiv preprint arXiv:1502.02791, 2015. 2
+[37] Laurens van der Maaten and Geoffrey Hinton. Visualizing data using t-sne. Journal of machine
+learning research, 9(Nov):2579–2605, 2008. 8
+[38] Zhijun Mai, Guosheng Hu, Dexiong Chen, Fumin Shen, and Heng Tao Shen. Metamixup: Learn-
+ing adaptive interpolation policy of mixup with meta-learning. arXiv preprint arXiv:1908.10059,
+2019. 4
+[39] Xudong Mao, Yun Ma, Zhenguo Yang, Yangbin Chen, and Qing Li. Virtual mixup training for
+unsupervised domain adaptation. arXiv preprint arXiv:1905.04215, 2019. 3
+[40] David McClosky, Eugene Charniak, and Mark Johnson. Effective self-training for parsing. In
+ACL, 2006. 2, 3
+[41] David McClosky, Eugene Charniak, and Mark Johnson. Reranking and self-training for parser
+adaptation. In ACL, 2006. 2, 3
+[42] Sinno Jialin Pan, Ivor W Tsang, James T Kwok, and Qiang Yang. Domain adaptation via
+transfer component analysis. IEEE Transactions on Neural Networks, 22(2):199–210, 2010. 2
+[43] Adam Paszke, Sam Gross, Soumith Chintala, Gregory Chanan, Edward Yang, Zachary DeVito,
+Zeming Lin, Alban Desmaison, Luca Antiga, and Adam Lerer. Automatic differentiation in
+pytorch. 2017. 6
+[44] Zhongyi Pei, Zhangjie Cao, Mingsheng Long, and Jianmin Wang. Multi-adversarial domain
+adaptation. In Thirty-Second AAAI Conference on Artificial Intelligence, 2018. 2
+[45] Xingchao Peng, Qinxun Bai, Xide Xia, Zijun Huang, Kate Saenko, and Bo Wang. Moment
+matching for multi-source domain adaptation. In Proceedings of the IEEE International
+Conference on Computer Vision, pages 1406–1415, 2019. 1, 2, 5, 6
+[46] Luis AM Pereira and Ricardo da Silva Torres. Semi-supervised transfer subspace for domain
+adaptation. Pattern Recognition, 75:235–249, 2018. 3
+[47] Can Qin, Lichen Wang, Qianqian Ma, Yu Yin, Huan Wang, and Yun Fu. Opposite structure
+learning for semi-supervised domain adaptation. arXiv preprint arXiv:2002.02545, 2020. 2, 3,
+7
+[48] Rajeev Ranjan, Carlos D Castillo, and Rama Chellappa. L2-constrained softmax loss for
+discriminative face verification. arXiv preprint arXiv:1703.09507, 2017. 6
+[49] Stephan R Richter, Vibhav Vineet, Stefan Roth, and Vladlen Koltun. Playing for data: Ground
+truth from computer games. In ECCV, 2016. 1
+11
+[50] German Ros, Laura Sellart, Joanna Materzynska, David Vazquez, and Antonio M Lopez. The
+synthia dataset: A large collection of synthetic images for semantic segmentation of urban
+scenes. In CVPR, 2016. 1
+[51] Michael T Rosenstein, Zvika Marx, Leslie Pack Kaelbling, and Thomas G Dietterich. To
+transfer or not to transfer. In NIPS 2005 workshop on transfer learning, 2005. 3
+[52] Aruni RoyChowdhury, Prithvijit Chakrabarty, Ashish Singh, SouYoung Jin, Huaizu Jiang,
+Liangliang Cao, and Erik Learned-Miller. Automatic adaptation of object detectors to new
+domains using self-training. In CVPR, 2019. 4
+[53] Olga Russakovsky, Jia Deng, Hao Su, Jonathan Krause, Sanjeev Satheesh, Sean Ma, Zhiheng
+Huang, Andrej Karpathy, Aditya Khosla, Michael Bernstein, et al. Imagenet large scale visual
+recognition challenge. IJCV, 115(3):211–252, 2015. 6
+[54] Kuniaki Saito, Yoshitaka Ushiku, Tatsuya Harada, and Kate Saenko. Adversarial dropout
+regularization. arXiv preprint arXiv:1711.01575, 2017. 2
+[55] Kuniaki Saito, Kohei Watanabe, Yoshitaka Ushiku, and Tatsuya Harada. Maximum classifier
+discrepancy for unsupervised domain adaptation. In CVPR, 2018. 1, 2
+[56] Kuniaki Saito, Donghyun Kim, Stan Sclaroff, Trevor Darrell, and Kate Saenko. Semi-supervised
+domain adaptation via minimax entropy. In ICCV, 2019. 1, 2, 3, 6, 7
+[57] Fatemeh Sadat Saleh, Mohammad Sadegh Aliakbarian, Mathieu Salzmann, Lars Petersson, and
+Jose M Alvarez. Effective use of synthetic data for urban scene semantic segmentation. In
+ECCV. Springer, 2018. 1, 2
+[58] Swami Sankaranarayanan, Yogesh Balaji, Arpit Jain, Ser Nam Lim, and Rama Chellappa.
+Learning from synthetic data: Addressing domain shift for semantic segmentation. In CVPR,
+2018. 1
+[59] Rui Shu, Hung H Bui, Hirokazu Narui, and Stefano Ermon. A dirt-t approach to unsupervised
+domain adaptation. In ICLR, 2018. 2, 3
+[60] Karen Simonyan and Andrew Zisserman. Very deep convolutional networks for large-scale
+image recognition. arXiv preprint arXiv:1409.1556, 2014. 6
+[61] Masashi Sugiyama, Matthias Krauledat, and Klaus-Robert MÃžller. Covariate shift adaptation
+by importance weighted cross validation. JMLR, 8(May):985–1005, 2007. 2
+[62] Baochen Sun and Kate Saenko. Deep coral: Correlation alignment for deep domain adaptation.
+In ECCV, 2016. 1
+[63] Baochen Sun, Jiashi Feng, and Kate Saenko. Return of frustratingly easy domain adaptation. In
+AAAI, 2016. 2
+[64] Yuhua Tang, Zhipeng Lin, Haotian Wang, and Liyang Xu. Adversarial mixup synthesis training
+for unsupervised domain adaptation. In ICASSP, 2020. 3
+[65] Qingyi Tao, Hao Yang, and Jianfei Cai. Zero-annotation object detection with web knowledge
+transfer. In ECCV, 2018. 3
+[66] Antti Tarvainen and Harri Valpola. Mean teachers are better role models: Weight-averaged
+consistency targets improve semi-supervised deep learning results. In NIPS, 2017. 3
+[67] Brian Thompson, Jeremy Gwinnup, Huda Khayrallah, Kevin Duh, and Philipp Koehn. Over-
+coming catastrophic forgetting during domain adaptation of neural machine translation. In
+NAACL, 2019. 2
+[68] Isaac Triguero, Salvador García, and Francisco Herrera. Self-labeled techniques for semi-
+supervised learning: taxonomy, software and empirical study. Knowledge and Information
+systems, 42(2):245–284, 2015. 3
+12
+[69] Yi-Hsuan Tsai, Wei-Chih Hung, Samuel Schulter, Kihyuk Sohn, Ming-Hsuan Yang, and
+Manmohan Chandraker. Learning to adapt structured output space for semantic segmentation.
+In CVPR, 2018. 1, 2
+[70] Eric Tzeng, Judy Hoffman, Ning Zhang, Kate Saenko, and Trevor Darrell. Deep domain
+confusion: Maximizing for domain invariance. arXiv preprint arXiv:1412.3474, 2014. 2, 3
+[71] Eric Tzeng, Judy Hoffman, Trevor Darrell, and Kate Saenko. Simultaneous deep transfer across
+domains and tasks. In ICCV, 2015. 3
+[72] Eric Tzeng, Judy Hoffman, Kate Saenko, and Trevor Darrell. Adversarial discriminative domain
+adaptation. In CVPR, 2017. 2
+[73] Hemanth Venkateswara, Jose Eusebio, Shayok Chakraborty, and Sethuraman Panchanathan.
+Deep hashing network for unsupervised domain adaptation. In CVPR, 2017. 2, 6
+[74] Vikas Verma, Alex Lamb, Christopher Beckham, Amir Najafi, Ioannis Mitliagkas, Aaron
+Courville, David Lopez-Paz, and Yoshua Bengio. Manifold mixup: Better representations by
+interpolating hidden states. In ICML, 2019. 2
+[75] Riccardo Volpi, Pietro Morerio, Silvio Savarese, and Vittorio Murino. Adversarial feature
+augmentation for unsupervised domain adaptation. In Proceedings of the IEEE Conference on
+Computer Vision and Pattern Recognition, pages 5495–5504, 2018. 2
+[76] Ximei Wang, Liang Li, Weirui Ye, Mingsheng Long, and Jianmin Wang. Transferable attention
+for domain adaptation. In Proceedings of the AAAI Conference on Artificial Intelligence,
+volume 33, pages 5345–5352, 2019.
+[77] Yan Wang, Chen Xiangyu, You Yurong, Erran Li Li, Bharath Hariharan, Mark Campbell,
+Kilian Q. Weinberger, and Chao Wei-Lun. Train in germany, test in the usa: Making 3d object
+detectors generalize. In CVPR, 2020. 2
+[78] Yifan Wu, Ezra Winston, Divyansh Kaushik, and Zachary Lipton. Domain adaptation with
+asymmetrically-relaxed distribution alignment. arXiv preprint arXiv:1903.01689, 2019. 3
+[79] Minghao Xu, Jian Zhang, Bingbing Ni, Teng Li, Chengjie Wang, Qi Tian, and Wenjun Zhang.
+Adversarial domain adaptation with domain mixup. In AAAI, 2020. 2, 3
+[80] Shen Yan, Huan Song, Nanxiang Li, Lincan Zou, and Liu Ren. Improve unsupervised domain
+adaptation with mixup training. arXiv preprint arXiv:2001.00677, 2020. 3
+[81] Ting Yao, Yingwei Pan, Chong-Wah Ngo, Houqiang Li, and Tao Mei. Semi-supervised domain
+adaptation with subspace learning for visual recognition. In CVPR, 2015. 3
+[82] Hongyi Zhang, Moustapha Cisse, Yann N Dauphin, and David Lopez-Paz. mixup: Beyond
+empirical risk minimization. In ICLR, 2018. 2, 3, 4
+[83] Yang Zhang, Philip David, and Boqing Gong. Curriculum domain adaptation for semantic
+segmentation of urban scenes. In ICCV, 2017. 2
+[84] Han Zhao, Remi Tachet des Combes, Kun Zhang, and Geoffrey J Gordon. On learning invariant
+representation for domain adaptation. arXiv preprint arXiv:1901.09453, 2019. 3
+[85] Yang Zou, Zhiding Yu, BVK Vijaya Kumar, and Jinsong Wang. Unsupervised domain adaptation
+for semantic segmentation via class-balanced self-training. In ECCV, 2018. 2, 3, 4
+13

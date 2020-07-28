@@ -1,0 +1,1330 @@
+On the robustness of topological corner modes in photonic crystals
+Matthew Proctor,1 Paloma Arroyo Huidobro,2, ∗ Barry Bradlyn,3, † Maŕıa Blanco
+de Paz,4 Maia G. Vergniory,4, 5 Dario Bercioux,4, 5 and Aitzol Garćıa-Etxarri4, 5, ‡
+1Department of Mathematics, Imperial College London, London, SW7 2AZ, U.K.
+2Instituto de Telecomunicações, Instituto Superior Tecnico-University of Lisbon, Portugal
+3Department of Physics and Institute for Condensed Matter Theory,
+University of Illinois at Urbana-Champaign, Urbana, IL, 61801-3080, USA
+4Donostia International Physics Center, 20018 Donostia-San Sebastián, Spain
+5IKERBASQUE, Basque Foundation for Science, Maria Diaz de Haro 3, 48013 Bilbao, Spain
+(Dated: July 22, 2020)
+We analyze the robustness of corner modes in topological photonic crystals, taking a C6-symmetric
+breathing honeycomb photonic crystal as an example. First, we employ topological quantum chem-
+istry and Wilson loop calculations to demonstrate that the topological properties of the bulk crystal
+stem from an obstructed atomic limit phase. We then characterize the topological corner modes
+emerging within the gapped edge modes employing a semi-analytical model, determining the ap-
+propriate real space topological invariants. For the first time, we provide a detailed account of the
+effect of long-range interactions on the topological modes in photonic crystals, and we quantify their
+robustness to perturbations. We conclude that, while photonic long-range interactions inevitably
+break chiral symmetry, the corner modes are protected by lattice symmetries.
+Introduction.— Photonic topological insulators host
+protected boundary modes that are robust against a
+range of defects and imperfections [1]. While the paradig-
+matic case of two-dimensional (2D) topological pho-
+tonic crystals (PhCs) hosting one-dimensional (1D) edge
+modes immune to back-scattering has been extensively
+studied [2], a hierarchy of protected boundary states of
+lower dimensionality are possible in higher-order topo-
+logical insulators (HOTIs) [3]. For instance, quantized
+quadrupole insulators in 2D, which were introduced in
+a generalization of the Su-Schrieffer-Heeger (SSH) model
+to a square lattice with a flux [3], host 1D edge states,
+as well as zero-dimensional (0D) corner modes. These
+higher-order topological modes (HOTMs) localized at the
+0D corners of a 2D lattice benefit from topological pro-
+tection. Just as HOTIs in condensed matter systems are
+characterized by charge fractionalization due to a filling
+anomaly of the bulk states [4–7], classical wave HOTIs
+reveal an analogous fractional corner anomaly of the den-
+sity of states [8]. In systems with short-range hoppings
+and approximate chiral symmetry, these corner modes
+are mid-gap states [9, 10].
+HOTMs have been realised in a variety of classi-
+cal systems including PhCs [11–14], coupled photonic
+waveguides [15–17], phononic crystals [18], acoustic sys-
+tems [19–21], elastic systems [22] and microwave cir-
+cuits [23], and their robustness has been exploited for
+stable lasing [24–26]. However, a rigorous study of the
+effect of long-range interactions (the coupling between el-
+ements) which is unavoidable in many photonic systems
+[14, 27–29], as well as a detailed analysis of the robustness
+of the HOTMs has not been undertaken. Here we con-
+sider a PhC with a C6-symmetric lattice [15, 30], and fill
+the aforementioned gap by taking advantage of a semi-
+analytical model with long-range interactions [31], that
+FIG. 1. (a) Unit cells of the bulk lattice in the contracted and
+expanded phases, characterised by a contraction/expansion
+parameter, δ. The relevant Wyckoff positions are labelled 1a
+(black circle) and 3c (red star). (b) Band structure of the
+silicon photonic crystal in the expanded phase for the TM
+modes. The expansion coefficient δ is 0.11, and the radius of
+the cylinders is 0.12a0, a0 being the lattice constant of the
+crystal. (c) Wilson loops for bands 4 to 6 (Wilson loops for
+bands 1 to 3 are similar, see [32]).
+is, interactions beyond nearest neighbours between all the
+lattice elements. This allows us to perform an extensive
+study of the robustness of these modes against defects
+and imperfections. Crucially, we show that the HOTMs
+are protected by lattice symmetries; we quantify their
+degree of robustness against chiral-symmetry breaking
+long-range interactions, as well as to strong defects.
+Photonic crystal.— We consider the breathing honey-
+comb PhC introduced in Ref. [30], Fig. 1(a). Each unit
+cell in the triangular lattice consists of six silicon rods
+(ε = 11.7) in vacuum of radius r = 0.12a0 located at
+a distance R = R0(1 ± δ) from the origin of the unit
+cell. Here, a0 is the lattice parameter, and R0 = a0/3
+the location of the rods in the unperturbed honeycomb
+ar
+X
+iv
+:2
+00
+7.
+10
+62
+4v
+1 
+ [
+co
+nd
+-m
+at
+.m
+es
+-h
+al
+l]
+  2
+1 
+Ju
+l 
+20
+20
+2
+arrangement. The perturbation of the honeycomb lattice
+of rods by ±δ yields expanded and contracted phases, re-
+spectively, where the doubly degenerate Dirac point at Γ
+splits and a bulk band gap opens between ωa/(2πc) = 0.4
+to 0.5. Although this band gap hosts 1D edge states
+as measured in several photonic experiments [33–39], we
+now discuss how they are not an instance of a Z2 topo-
+logical insulator [40].
+Figure 1(b) presents the band structure of the ex-
+panded phase for δ = 0.11. We first determine the topo-
+logical properties of the system though the application of
+topological quantum chemistry [41, 42]. The irreducible
+representations of the eigenfields at the high symmetry
+points (irrep labels), displayed in the band structure, are
+calculated using GTPack [43, 44]. Using the catalogue
+of Elementary Band Representations (EBRs) in the Bil-
+bao Crystallographic Server [41, 45–49], along with the
+irrep labels we can identify the topological properties of
+each set of connected bands of our PhC. Counting from
+ω = 0, bands 4-6 are all interconnected and their irrep
+labels are accordant to Wannier functions centered in the
+3c Wyckoff position transforming in the (E1 ↑ G)3c band
+representation. Since these bands can be identified with
+an EBR, we can conclude that the system presents a triv-
+ial Z2 topological invariant. Nevertheless, the 3c Wyck-
+off position of the band representation indicates that the
+Wannier functions of this set of bands are not centered
+around the origin of the unit cell, but at their edges. This
+situation can be understood as a 2D analog of the topo-
+logical hybridization of eigenstates of a 1D SSH chain.
+This topological phase was labeled in the past in anal-
+ogy with solid-state systems as the photonic obstructed
+atomic limit (OAL), because although an atomic limit
+exists it is ‘obstructed’ since the Wannier centers are not
+located at the position where the photonic atoms sit [50].
+Note that here the photonic atom is the collection of the
+six contracted/expanded cylinders inside the unit cell.
+Moreover, we characterize our system through the calcu-
+lation of the eigenvalues of the Wilson loop [50] for this
+set of connected bands, Fig. 1(c). The resulting Wilson
+loops present no windings (which are characteristic of Z2
+or Chern insulators), but the Wannier centers are not
+only localized in the origin of the unit cell (W = 0) as in
+a trivial system, but also at its edges (W = ±π), indi-
+cating that the system presents an obstruction similar to
+the 1D SSH chain [51]. On the other hand, the PhC in
+the contracted phase is a trivial photonic insulator. This
+can be seen from the Wannier centers of the EBRs being
+located at the origin of the unit cell (1a Wyckoff posi-
+tion), and by looking at the eigenvalues of Wilson loop
+(see [32]).
+It should be emphasized here that in 2D systems, there
+is a subtle relationship between OAL and HOTIs. In toy
+models with nearest neighbour interactions, it is often
+possible to define a chiral symmetry, which forces the
+spectrum to be symmetric about a fixed energy (often
+taken to be zero in the literature). If an OAL model has
+chiral symmetry, then it is sometimes possible to define a
+bulk topological invariant which counts the number of 0D
+corner modes in a finite-sized system preserving the crys-
+tal symmetries [52]. Systems with non-zero values of this
+invariant are properly termed HOTIs. In the absence of
+chiral symmetry, as is the case in photonic systems with
+long-range interactions, however, there is no guarantee
+that a finite-sized system will have corner modes pinned
+to a special frequency. These systems are regarded as
+OAL systems, and can be characterized by the centers
+of their Wannier functions (as above), by real-space in-
+variants (see [32] and Ref. [53]), or a filling anomaly (see
+[32] and Refs. [5, 6]). In order to make semi-analytical
+predictions about the presence and robustness of corner
+modes, for the remainder of this work we will exploit the
+fact that our model is deformable to a chiral-symmetric
+limit although this symmetry is strictly broken by un-
+avoidable long-range interactions.
+While the 0D corner modes in 2D SSH-like PhC
+particles (that is, finite size crystals containing several
+unit cells) with C4 symmetry have been extensively ex-
+plored [11–13, 24, 25]. In photonic crystal particles with
+C6 symmetry, only the 1D edge states have been stud-
+ied [54–56]. Firstly, we analyze the emergence of 0D
+photonic corner states in this system by looking at 2D
+particles made of cells in the expanded phase and sur-
+rounded by cells in the contracted phase, see Figs. 2(a)
+and 2(b) [57]. Results of MPB supercell calculations [58]
+are shown in Figs. 2(c) and 2(d). The frequency eigenval-
+ues 2(c) show a clear band-gap, with 6 mid-gap states.
+The real part of the displacement field eigenvectorsDz for
+these 6 states are shown in Fig. 2(d). These are concen-
+trated at the corners of the particles, thus classify them
+as corner modes — marked in red in Fig. 2(c). States
+2A,B and 3A,B are degenerate pairs. The states imme-
+diately above and below the bandgap can be classified as
+edge states (cyan) [54–56], followed by bulk eigenstates
+(gray). Thus, the 0D corner states in this PhC particle
+are hosted within the gapped 1D edge states, in contrast
+to HOTMs in C3- and C4-symmetric PhCs [12–14].
+Coupled dipole model.— Since the spectrum of the
+PhC particle is determined by lattice symmetries to-
+gether with long-range interactions, we now exploit a
+semi-analytical model to unveil the properties of corner
+modes in a closely related nanophotonic system. The
+coupled dipole model is a versatile method for investi-
+gating the optical response of arrays of subwavelength
+elements such as cold atoms or plasmonic nanoparticles
+(NPs) [31]. Within this model we can reproduce all the
+relevant features found in full field simulations of the PhC
+topological particle. Then, we use it to shed further light
+on the properties of the corner modes, particularly on
+their robustness against disorder. This model goes be-
+yond tight-binding, nearest neighbour models by includ-
+ing interactions between all the lattice elements (exclud-
+3
+FIG. 2. (a) Scheme for the topological particle supercell. (b) Particle lattice, with sublattices a (green) and b (purple).
+(c,d) Modes of a photonic crystal particle: Frequency (ω) of topological corner (red), edge (cyan) and bulk (grey) states (c),
+and displacement field plots, showing Dz (d). (e,f) Quasistatic model of the topological particle. (e) Frequency of topological
+corner, edge and bulk states, for silver nanoparticles with radius 10 nm and height 40 nm. (f) Dipole moments of the six corner
+eigenmodes. In the color scale used in (d) and (f) red (blue) represents positive (negative) values. In both cases, δ = 0.11.
+ing self-interactions) with the appropriate propagator. In
+this formalism, the modes can be found by solving a gen-
+eralised eigenvalue equation,
+
+
+∑
+i 6=j
+Î
+1
+α(ω)
+− Ĝ(dij , ω)
+
+ · pj = 0, (1)
+where pj are the dipole moments, Ĝ is the dyadic Green’s
+function that describes dipole-dipole interactions, α is
+the polarizability of the subwavelength elements, ω is
+the frequency and the separation between NPs is dij =
+di − dj . The specifics of the physical dipolar elements
+enter through the polarizability, from which the reso-
+nance frequencies of the modes can be extracted [32].
+In Figs. 2(e) and 2(f) we present results of the dipole
+model for the OAL particle with the same geometry as
+the PhC in Figs. 2(c) and 2(d). Here we particularise
+the system to the out-of-plane modes of subwavelength
+spheroidal metallic NPs, which correspond to the TM
+modes in the PhC [59]. We take a quasistatic approxi-
+mation, and only include the near-field interaction term
+in the Green’s function (∝ 1/d3), which is accurate for
+these subwavelength NPs. In this approximation, the
+eigenvalues of Eq. (1), E = 1/α(ω), only depend on the
+particular geometrical arrangement of the dipoles. Fig-
+ure 2(e) shows the frequency spectrum around the band
+gap with corner modes within the gapped edge and bulk
+bands [60]. For the plasmonic system, zero eigenvalue
+(E = 0) maps to ωLSP, the localized surface plasmon fre-
+quency of the NPs. We see that the center of the band
+gap is located close to but not exactly at ωLSP, and that
+the spectrum is not exactly symmetric around that point.
+This is a consequence of chiral-symmetry breaking due to
+long-range interactions, as we discuss below in detail.
+In Fig. 2(f) we plot the real space dipole moments
+of the first mid-gap corner eigenmode, which reproduce
+well the Dz field distributions of the PhC. Importantly,
+the corner modes are localized on a particular sublat-
+tice, while the dipole moments in the opposite sublat-
+tice remain virtually zero, shown in Fig. 2(b). A similar
+sublattice localization of coner modes is present in the
+PhC, though weaker due to the fully retarded interac-
+tions. Nevertheless, this shows that both systems are
+approximately chiral-symmetric despite the long-range
+interactions, which has implications on the robustness
+of these 0D modes. In addition, these modes are well
+separated from the gapped bulk and edge states and are
+tightly confined to the corners.
+We now use the coupled dipole model to better charac-
+terise the properties of the corner modes. First, we study
+the behaviour of the system as a function of δ, the devi-
+ation the lattice of NPs away from a perfect honeycomb.
+In Fig. 3(a), we plot the eigenvalue spectrum, such that
+the symmetry properties of the spectrum around zero
+eigenvalue are clearer. Starting from the unperturbed
+honeycomb lattice (δ = 0), we see how increasing δ con-
+trols the size of the bulk band-gap. At the same time,
+the corner modes (red) stay at approximately constant
+eigenvalue, only slightly shifted away from zero due to
+the inherent breaking of chiral symmetry. In addition,
+edge modes (cyan) appear at the edges of the bulk bands.
+As δ increases, the corner modes are more isolated in the
+band structure, and hence more strongly confined to cor-
+ners of the particle. For δ & 0.12 new sets of corner
+modes (magenta) emerge from the bulk for positive and
+negative eigenvalues. In contrast to the corner modes
+discussed here, these modes do not lie at the middle of
+the gap, and they are not localized only on one of the
+sublattices.
+The coupled dipole model also enables us to analyze
+the photonic corner modes analytically, as detailed in the
+SM [32]. We find that when interactions are short-range,
+the eigenvalue problem for the coupled dipoles maps onto
+a tight-binding Schrödinger equation for a system with
+six s-orbitals at the 6d Wyckoff position in the unit cell
+(there is one s-orbital at the position of each NP). As δ
+4
+FIG. 3. Topological particle eigenvalues. (a) Evolution with
+increasing unit cell perturbation δ, with topological corner
+modes (red) well separated from the edge (cyan) and bulk
+(grey) modes. Other corner modes are shown in magenta.
+(b) Dependence on interaction length between lattice sites,
+γ, for δ = 0.2. As interactions go from nearest neighbours
+γ = 0.1 to long range, chiral symmetry is broken and the
+spectrum is no longer symmetrical about E = 0.
+increases, the model undergoes a transition between an
+atomic limit phase with Wannier centers on the 1a posi-
+tion, to an OAL phase with Wannier centers on the 3c
+position; in the short-range limit these Wannier functions
+are compactly supported, and can be found exactly. For
+a finite-sized system, the two atomic limits are distin-
+guished by the p6mm real space invariants of Ref. [53],
+which confirms that HOTMs are protected by lattice
+symmetries. Furthermore, we can solve for the corner
+modes in a topological particle in the long-wavelength
+approximation. We find that the low-energy theory of
+the domain between trivial and OAL particle naively re-
+sembles the edge of a quantum-spin Hall (QSH) insulator
+if only the lowest-order terms are considered. However,
+when we include crystalline- and chiral-symmetric per-
+turbations, we find that the QSH edge states gap to yield
+six corner modes pinned to mirror lines and related by
+sixfold rotational symmetry. Since the corner modes are
+eigenstates of the chiral symmetry, they must be local-
+ized to a single sublattice. We can then include chiral
+symmetry breaking perturbatively to find that the cor-
+ner modes are lifted from zero eigenvalue (or ω = ωLSP),
+consistent with calculations as we discuss next.
+We study the effect of long-range interactions by intro-
+ducing an artificial cut-off in the coupled dipole model.
+We introduce an exponential decay to the dipole-dipole
+interactions, fc.o.(dij) = exp
+[
+−(dij − d0ij)/(d0ijγ)
+]
+, where
+d0ij is the nearest neighbour separation for each dipole
+and γ is a cut-off parameter to control the interaction
+range [32]. This allows us to continuously tune the
+interaction range from nearest neighbours (γ = 0.1),
+to electronic-like exponentially suppressed ones, all the
+way to full dipolar interactions (γ ≈ 5), as we show in
+Fig. 3(b) for fixed δ = 0.2. For small values of γ, inter-
+actions in practice are only between nearest neighbours,
+such that there is no coupling between dipoles of the same
+sublattice. This preserves chiral symmetry and results
+in a spectrum that is symmetric about zero eigenvalue,
+with six degenerate topological corner modes (red) that
+are pinned at zero.
+Increasing the range of the interaction breaks chiral
+symmetry through coupling of elements in the same sub-
+lattice. This shifts the corner modes away from zero
+eigenvalue, lifts their degeneracy (from six degenerate
+states to 1+2+2+1, as in Fig. 2), and removes the sym-
+metry of the spectrum about zero eigenvalue [or ω =
+ωLSP in Fig. 2(e)]. Finally, it is interesting to note that
+the other set of corner modes (magenta) are not pinned at
+zero even for nearest neighbour interactions. This is dif-
+ferent from the type II corner states identified in Ref. [14]
+for the breathing kagome lattice, which emerge due to
+long-range interactions.
+Robustness against defects and disorder.— We now
+take advantage of the coupled dipole model to test the
+degree of protection of the corner modes against defects.
+Hence, we quantify protection by evaluating if the num-
+ber of states within the band gap, together with the sym-
+metries and degeneracies they satisfy, are left invariant.
+First, we create a strong defect in the crystal by remov-
+ing one lattice site next to the corner of the particle,
+Fig. 4(a). Since this breaks the C6 and mirror symme-
+tries that protect the corner modes, one of them disap-
+pears and the remaining five satisfy new symmetry re-
+lations and degeneracies, see field plots and eigenvalue
+spectrum in Fig. 4(a). Next, we consider removing one
+lattice site at exactly the corner Fig. 4(b), breaking the
+C6 symmetry but respecting one mirror symmetry. Re-
+markably, the corner states are robust against this de-
+fect: there are 6 mid-gap states and they satisfy the same
+symmetries and degeneracies as before the perturbation.
+This is a consequence of the system being deformable
+to a chirally-symmetric system. Despite the presence of
+long-range interactions, the modes still sit on alternate
+sublattices, and the mode intensity is virtually zero at
+the removed lattice site.
+Finally, we test robustness against random positional
+disorder. In Fig. 4(c) we consider a system with maxi-
+mum 5% random disorder in lattice sites. Crucially, this
+breaks the C6 symmetry across the whole lattice, such
+that the degeneracies of the corner modes are lifted, and
+each of the six mid-gap states localizes at one of the cor-
+ners. On the other hand, we see in the spectrum how,
+despite the other corner modes and edge modes being
+lost to the bulk, the mid-gap corner modes remain well
+isolated at mid-gap energies. For practical purposes they
+are robust against random spatial perturbations. This is
+confirmed in Fig. 4(d), where we plot a close up of the
+band gap and the HOTMs for increasing random posi-
+tional disorder, up to a maximum of 10%.
+5
+FIG. 4. Robustness of corner states against defects and
+disorder in the quasistatic model, for δ = 0.2. (a) A C6-
+symmetry breaking defect in the lattice affects the mid-gap
+corner modes. (b) The corner states are robust against an-
+other kind of C6-symmetry breaking defect due to the corner
+modes being close to chiral-symmetric. (c) The degeneracy of
+the corner modes is lifted by random disorder: the position of
+the lattice sites is shifted randomly up to 5%. (d) Eigenvalue
+spectrum for increasing positional disorder.
+Conclusions.— We have studied the emergence of
+topologically protected corner modes in breathing hon-
+eycomb PhC particles. By analyzing the lattice through
+topological quantum chemistry, Wilson loops and the
+calculation of real space topological invariants, we con-
+clude that the topological properties emerge from an ob-
+structed atomic limit phase, which in 2D is reminiscent
+of higher-order topology. Finally, we quantify the ro-
+bustness of topological corner modes in PhCs to different
+kinds of perturbations. We conclude that, while long-
+range interactions inevitably break chiral symmetry, the
+corner modes are still protected by lattice symmetries.
+Although we have focused here on the breathing hon-
+eycomb lattice PhC, our analysis applies to all classical
+wave systems.
+M.P. and P.A.H. acknowledge funding from the Lev-
+erhulme Trust. P.A.H. acknowledges funding from
+Fundação para a Ciência e a Tecnologia and Instituto de
+Telecomunicações under projects CEECIND/03866/2017
+and UID/EEA/50008/2020. B.B. acknowledges sup-
+port of the Alfred P. Sloan foundation. M.G.V. ac-
+knowledges support from DFG INCIEN2019-000356 from
+Gipuzkoako Foru Aldundia and the Spanish Ministerio de
+Ciencia e Innovacion (grant number PID2019-109905GB-
+C21). D.B. acknowledges supported by the Span-
+ish Ministerio de Ciencia, Innovation y Universidades
+(MICINN) through the project FIS2017-82804-P, and
+by the Transnational Common Laboratory Quantum-
+ChemPhys.
+∗ p.arroyo-huidobro@lx.it.pt
+† bbradlyn@illinois.edu
+‡ aitzolgarcia@dipc.org
+[1] T. Ozawa, H. M. Price, A. Amo, N. Goldman, M. Hafezi,
+L. Lu, M. C. Rechtsman, D. Schuster, J. Simon, O. Zil-
+berberg, and I. Carusotto, Rev. Mod. Phys. 91, 015006
+(2019).
+[2] L. Lu, J. D. Joannopoulos, and M. Soljačić, Nature pho-
+tonics 8, 821 (2014).
+[3] W. A. Benalcazar, B. A. Bernevig, and T. L. Hughes,
+Science 357, 61 (2017).
+[4] S. N. Kempkes, M. R. Slot, J. J. van den Broeke,
+P. Capiod, W. A. Benalcazar, D. Vanmaekelbergh,
+D. Bercioux, I. Swart, and C. Morais Smith, Nature
+Materials 18, 1292 (2019).
+[5] B. J. Wieder, Z. Wang, J. Cano, X. Dai, L. M. Schoop,
+B. Bradlyn, and B. A. Bernevig, Nature communications
+11, 1 (2020).
+[6] W. A. Benalcazar, T. Li, and T. L. Hughes, Phys. Rev.
+B 99, 245151 (2019).
+[7] P. Zhu, K. Loehr, and T. L. Hughes, Phys. Rev. B 101,
+115140 (2020).
+[8] C. W. Peterson, T. Li, W. A. Benalcazar, T. L. Hughes,
+and G. Bahl, Science 368, 1114 (2020).
+[9] W. P. Su, J. R. Schrieffer, and A. J. Heeger, Phys. Rev.
+Lett. 42, 1698 (1979).
+[10] J. K. Asbóth, L. Oroszlány, and A. Pályi, A Short Course
+on Topological Insulators (Springer International Pub-
+lishing, 2016).
+[11] Y. Ota, F. Liu, R. Katsumi, K. Watanabe, K. Wak-
+abayashi, Y. Arakawa, and S. Iwamoto, Optica 6, 786
+(2019).
+[12] B.-Y. Xie, G.-X. Su, H.-F. Wang, H. Su, X.-P. Shen,
+P. Zhan, M.-H. Lu, Z.-L. Wang, and Y.-F. Chen, Phys.
+Rev. Lett. 122, 233903 (2019).
+[13] X.-D. Chen, W.-M. Deng, F.-L. Shi, F.-L. Zhao,
+M. Chen, and J.-W. Dong, Phys. Rev. Lett. 122, 233902
+(2019).
+[14] M. Li, D. Zhirihin, M. Gorlach, X. Ni, D. Filonov,
+A. Slobozhanyuk, A. Alù, and A. B. Khanikaev, Nature
+Photonics 14, 89 (2020).
+[15] J. Noh, W. A. Benalcazar, S. Huang, M. J. Collins, K. P.
+Chen, T. L. Hughes, and M. C. Rechtsman, Nature Pho-
+tonics 12, 408 (2018).
+[16] S. Mittal, V. V. Orre, G. Zhu, M. A. Gorlach, A. Pod-
+dubny, and M. Hafezi, Nature Photonics 13, 692 (2019).
+[17] A. El Hassan, F. K. Kunst, A. Moritz, G. Andler, E. J.
+Bergholtz, and M. Bourennane, Nature Photonics 13,
+697 (2019).
+[18] M. Serra-Garcia, V. Peri, R. Süsstrunk, O. R. Bilal,
+T. Larsen, L. G. Villanueva, and S. D. Huber, Nature
+555, 342 (2018).
+[19] X. Ni, M. A. Gorlach, A. Alu, and A. B. Khanikaev,
+6
+New Journal of Physics 19, 055002 (2017).
+[20] X. Ni, M. Weiner, A. Alù, and A. B. Khanikaev, Nature
+Materials 18, 113 (2019).
+[21] Y. Qi, C. Qiu, M. Xiao, H. He, M. Ke, and Z. Liu,
+Physical Review Letters 124, 206601 (2020).
+[22] H. Fan, B. Xia, L. Tong, S. Zheng, and D. Yu, Phys.
+Rev. Lett. 122, 204301 (2019).
+[23] C. W. Peterson, W. A. Benalcazar, T. L. Hughes, and
+G. Bahl, Nature 555, 346 (2018).
+[24] H.-R. Kim, M.-S. Hwang, D. Smirnova, K.-Y. Jeong,
+Y. Kivshar, and H.-G. Park, “Lasing from multipole
+topological corner states,” (2020), arXiv:2004.13993
+[physics.optics].
+[25] C. Han, M. Kang, and H. Jeon, “Lasing from complete
+set of topological states in two dimensional photonic crys-
+tal structure,” (2020), arXiv:2002.04757 [physics.app-
+ph].
+[26] Y. Gong, S. Wong, A. J. Bennett, D. L. Huf-
+faker, and S. S. Oh, “Topological insulator laser using
+valley-hall photonic crystals,” (2020), arXiv:2001.03661
+[physics.optics].
+[27] A. F. Koenderink and A. Polman, Phys. Rev. B 74,
+033402 (2006).
+[28] S. R. Pocock, X. Xiao, P. A. Huidobro, and V. Giannini,
+ACS Photonics 5, 2271 (2018).
+[29] S. R. Pocock, P. A. Huidobro, and V. Giannini,
+Nanophotonics 8, 1337 (2019).
+[30] L.-H. Wu and X. Hu, Phys. Rev. Lett. 114, 223901
+(2015).
+[31] F. J. Garca de Abajo, Reviews of Modern Physics 79,
+12671290 (2007).
+[32] (2020), See Supplemental Material at [url] for: Bulk band
+structures and Wilson loops of both phases, Topological
+analysis of the quasistatic analytical model, Details on
+the Coupled Dipole Model and exponential cut-off, Sum-
+mary table on defects and disorder.
+[33] S. Barik, A. Karasahin, C. Flower, T. Cai, H. Miyake,
+W. DeGottardi, M. Hafezi, and E. Waks, Science 359,
+666 (2018).
+[34] M. A. Gorlach, X. Ni, D. A. Smirnova, D. Korobkin,
+D. Zhirihin, A. P. Slobozhanyuk, P. A. Belov, A. Alù,
+and A. B. Khanikaev, Nature Communications 9, 909
+(2018).
+[35] S. Peng, N. J. Schilder, X. Ni, J. van de Groep, M. L.
+Brongersma, A. Alù, A. B. Khanikaev, H. A. Atwater,
+and A. Polman, Phys. Rev. Lett. 122, 117401 (2019).
+[36] D. Smirnova, S. Kruk, D. Leykam, E. Melik-Gaykazyan,
+D.-Y. Choi, and Y. Kivshar, Phys. Rev. Lett. 123,
+103901 (2019).
+[37] N. Parappurath, F. Alpeggiani, L. Kuipers, and E. Ver-
+hagen, Science Advances 6, eaaw4137 (2020).
+[38] W. Liu, M. Hwang, Z. Ji, Y. Wang, G. Modi, and
+R. Agarwal, Nano Letters 20, 13291335 (2020).
+[39] Z.-Q. Yang, Z.-K. Shao, H.-Z. Chen, X.-R. Mao, and
+R.-M. Ma, Phys. Rev. Lett. 125, 013903 (2020).
+[40] J. Cano, B. Bradlyn, Z. Wang, L. Elcoro, M. G.
+Vergniory, C. Felser, M. I. Aroyo, and B. A. Bernevig,
+Phys. Rev. Lett. 120, 266401 (2018).
+[41] B. Bradlyn, L. Elcoro, J. Cano, M. G. Vergniory,
+Z. Wang, C. Felser, M. I. Aroyo, and B. A. Bernevig,
+Nature 547, 298 (2017).
+[42] M. B. de Paz, M. G. Vergniory, D. Bercioux, A. Garćıa-
+Etxarri, and B. Bradlyn, Physical Review Research 1,
+032005 (2019).
+[43] R. M. Geilhufe and W. Hergert, Frontiers in Physics 6,
+86 (2018).
+[44] W. Hergert and R. M. Geilhufe, Group Theory in Solid
+State Physics and Photonics: Problem Solving with
+Mathematica (Wiley-VCH, 2018) isbn: 978-3-527-41133-
+7.
+[45] M. I. Aroyo, J. M. Perez-Mato, D. Orobengoa, E. Tasci,
+G. de la Flor, and A. Kirov, Bulg. Chem. Commun.
+43(2), 183 (2011).
+[46] M. I. Aroyo, J. M. Perez-Mato, C. Capillas, E. Kroumova,
+S. Ivantchev, G. Madariaga, A. Kirov, and H. Won-
+dratschek, Z. Krist. 221, 15 (2006).
+[47] M. I. Aroyo, A. Kirov, C. Capillas, J. M. Perez-Mato,
+and H. Wondratschek, Acta Cryst. A62, 115 (2006).
+[48] M. G. Vergniory, L. Elcoro, Z. Wang, J. Cano, C. Felser,
+M. I. Aroyo, B. A. Bernevig, and B. Bradlyn, Phys. Rev.
+E 96, 023310 (2017).
+[49] L. Elcoro, B. Bradlyn, Z. Wang, M. G. Vergniory,
+J. Cano, C. Felser, B. A. Bernevig, D. Orobengoa,
+G. de la Flor, and M. I. Aroyo, J. Appl. Cryst. 50, 1457
+(2017).
+[50] M. Blanco de Paz, C. Devescovi, G. Giedke, J. J. Saenz,
+M. G. Vergniory, B. Bradlyn, D. Bercioux, and A. Garca-
+Etxarri, Advanced Quantum Technologies 3, 1900117
+(2020).
+[51] D. Vanderbilt, Berry Phases in Electronic Structure
+Theory: Electric Polarization, Orbital Magnetization
+and Topological Insulators (Cambridge University Press,
+2018).
+[52] G. van Miert and C. Ortix, “On the topological immu-
+nity of corner states in two-dimensional crystalline insu-
+lators,” (2020), arXiv:2005.00560 [cond-mat.mes-hall].
+[53] Z.-D. Song, L. Elcoro, and B. A. Bernevig, Science 367,
+794 (2020).
+[54] G. Siroki, P. A. Huidobro, and V. Giannini, Phys. Rev.
+B 96, 041408 (2017).
+[55] M. J. Mehrabad, A. P. Foster, R. Dost, E. Clarke, P. K.
+Patil, I. Farrer, J. Heffernan, M. S. Skolnick, and L. R.
+Wilson, Applied Physics Letters 116, 061102 (2020).
+[56] S. Barik, A. Karasahin, S. Mittal, E. Waks, and
+M. Hafezi, “Chiral quantum optics using a topological
+resonator,” (2019), arXiv:1906.11263 [physics.optics].
+[57] We build supercells of 21 unit cells in the a1 and a2 lat-
+tice directions, filling a central hexagonal portion of the
+supercell with 5 lattice constants in the expanded phase
+(δ = 0.11). To prevent the leaking of energy to the vac-
+uum, we surround the central hexagon by cells in the
+contracted phase (δ = −0.11), which behaves as a trivial
+photonic insulator with a matched band gap.
+[58] S. G. Johnson and J. D. Joannopoulos, Optics express 8,
+173 (2001).
+[59] We take silver NPs with parameters �∞ = 5, ωp =
+8.9 eV [61], radius r = 10 nm and height h = 40 nm.
+[60] For plasmonic NPs the energy ordering of the modes
+is opposite to that of dielectric cylinders. This is be-
+cause the bonding mode of out-of-plane dipoles which
+minimises energy corresponds to the hexapole, while the
+monopole has antibonding mode and lies at highest en-
+ergy.
+[61] H. U. Yang, J. D’Archangel, M. L. Sundheimer,
+E. Tucker, G. D. Boreman, and M. B. Raschke, Phys.
+Rev. B 91, 235137 (2015).
+Supplemental Material:
+On the robustness of topological corner modes in photonic crystals
+Matthew Proctor,1 Paloma Arroyo Huidobro,2, ∗ Barry Bradlyn,3, † Maŕıa Blanco
+de Paz,4 Maia G. Vergniory,4, 5 Dario Bercioux,4, 5 and Aitzol Garćıa-Etxarri4, 5, ‡
+1Department of Mathematics, Imperial College London, London, SW7 2AZ, U.K.
+2Instituto de Telecomunicações, Instituto Superior Tecnico-University of Lisbon, Portugal
+3Department of Physics and Institute for Condensed Matter Theory,
+University of Illinois at Urbana-Champaign, Urbana, IL, 61801-3080, USA
+4Donostia International Physics Center, 20018 Donostia-San Sebastián, Spain
+5IKERBASQUE, Basque Foundation for Science, Maria Diaz de Haro 3, 48013 Bilbao, Spain
+BULK BAND STRUCTURES AND WILSON LOOPS
+Here we present the unit cell arrangements, as well as the band structure and the Wilson loops characterization for
+the lowest bands of the expanded and contracted lattice. The Wilson loops for the expanded lattice show that the
+Wannier functions are centered at the 3c position, whereas for the contracted lattice they are centered at 1a.
+FIG. S1. (a) Unit cell arrangements for the honeycomb, contracted and expanded lattices. Band structures and Wilson loops
+for expanded lattice, R = R0 + 0.11, in panels (b, d) and contracted lattice, R = R0 − 0.11, in panels (c, e).
+COUPLED DIPOLE MODEL
+In the quasistatic (QS) approximation, we consider an array of point dipoles and model interactions between the
+them using the coupled dipole method [S1]. In the absence of an external electric field, the (electric) dipole moment
+at position di due to a dipole at position dj is given by,
+1
+α(ω)
+pi = Ĝ(dij , ω) · pj , (S1)
+where ω is the frequency and the separation between dipoles is dij = di − dj . The dyadic Green’s function, which
+describes the dipole-dipole interaction; it can be written as:
+Ĝ(dij , ω) = k
+2 e
+ikd
+d
+[(
+1 +
+i
+kd
+− 1
+k2d2
+)
+Î −
+(
+1 +
+3i
+kd
+− 3
+k2d2
+)
+n⊗ n
+]
+, (S2)
+ar
+X
+iv
+:2
+00
+7.
+10
+62
+4v
+1 
+ [
+co
+nd
+-m
+at
+.m
+es
+-h
+al
+l]
+  2
+1 
+Ju
+l 
+20
+20
+2
+where d = |dij |, n = dij/d and wavenumber k =
+√
+�mω/c; we assume the permittivity of the medium �m = 1. In the
+QS approximation, we retain only the quickly decaying 1/d3 terms in the Green’s function by letting k → 0. Then
+for a periodic array of dipoles, we can we write the following eigenvalue equation,
+(
+Î
+1
+α(ω)
+− Ĥ(kB , ω)
+)
+· p = 0, (S3)
+where p is a vector which contains all dipole moments in the unit cell. The interaction matrix Ĥ(kB , ω) has elements,
+Hij =
+
+
+
+∑
+R
+Ĝ(di − dj + R, ω) eikB ·R i 6= j
+∑
+|R|6=0
+Ĝ(R, ω) eikB ·R i = j
+, (S4)
+with Bloch wavevector kB and lattice sites R = na1+ma2, where the lattice vectors are defined in the main text. The
+dipole model accurately describes a nanophotonic system of resonators such as metallic nanoparticles (NPs), provided
+the NP radius satisfies r < 3R, where R is the nearest neighbour spacing. The optical response of an individual NP
+is given by the polarizability α(ω). In the following, we assume a static polarizability,
+α(ω) =
+V
+4π
+�(ω)− 1
+L [�(ω) + 2]
+, (S5)
+V is the NP volume, L is a geometrical factor and �(ω) is the Drude permittivity [S2]. The quasistatic Drude
+permittivity is written,
+�(ω) = �∞ −
+ω2p
+ω2
+. (S6)
+In this manuscript, we use silver spheroidal NPs with material parameters �∞ = 5, ωp = 8.9 eV and size parameters
+radius r = 10 nm, height h = 40 nm. [S3] The spheroidal shape causes the in-plane and out-of-plane resonances of
+the NP to split in frequency and become completely decoupled, meaning we can consider them separately. To make
+comparisons with the 2D photonic crystal, we only consider the out-of-plane interactions and take the ẑẑ component
+of the dyadic in Eq. (S2), Ĝ(dij , ω) = −1/r3. The size of the interaction matrix in will then be N ×N where N is the
+number of elements in the supercell. Additionally, to model a finite system we only consider normal incidence and
+solve the eigenvalue problem at Γ, kB = (0, 0).
+TOPOLOGICAL ANALYSIS OF THE QUASISTATIC MODEL: REAL SPACE INVARIANTS
+To analyze the topological properties of our nanophotonic resonator (coupled dipole) system, we can reinterpret
+the interaction matrix Hij of the quasistatic model as a (long-ranged) Hamiltonian for a topological phase transition.
+While Hij is in general long range (it has power-law decaying matrix elements in position space) which can lead to
+cusp singularities in the band structure (which are removed when a fully retarded Green’s function is used), we can
+nevertheless probe the presence and topological protection of edge and corner modes originating from analytic regions
+in the band structure. To this end, we can truncate the interaction matrix at the nearest neighbor level. Doing
+so, we can reinterpret Hij as a tight-binding model for dipolar resonators at the 6d Wyckoff position in space group
+p6mm. In reduced coordinates, the positions of the dipoles are q0 = (s, 0), q1 = (s,−s), q2 = (0,−s), q3 = (−s, 0), q4 =
+(−s, s), q5 = (0, s). In the basis of these six orbitals, the C6 symmetry is represented by
+ρ(C6) =
+
+
+0 1 0 0 0 0
+0 0 1 0 0 0
+0 0 0 1 0 0
+0 0 0 0 1 0
+0 0 0 0 0 1
+1 0 0 0 0 0
+
+
+, (S7)
+3
+mirror symmetry about the x-axis is represented by
+ρ(mx) =
+
+
+1 0 0 0 0 0
+0 0 0 0 0 1
+0 0 0 0 1 0
+0 0 0 1 0 0
+0 0 1 0 0 0
+0 1 0 0 0 0
+
+
+, (S8)
+and time-reversal symmetry is represented by complex conjugation. We can write the interaction matrix Hij as the
+sum of two terms
+H(k, s) = (1− t(s))M + t(s)N(k) (S9a)
+where
+M =
+
+
+0 1 0 0 0 1
+1 0 1 0 0 0
+0 1 0 1 0 0
+0 0 1 0 1 0
+0 0 0 1 0 1
+1 0 0 0 1 0
+
+
+, (S9b)
+N(k) =
+
+
+0 0 0 eik1 0 0
+0 0 0 0 ei(k1−k2) 0
+0 0 0 0 0 e−ik2
+e−ik1 0 0 0 0 0
+0 e−i(k1−k2) 0 0 0 0
+0 0 eik2 0 0 0
+
+
+(S9c)
+Here M is the intra-cell hopping matrix, and N is the inter-cell hopping matrix. Note that this is written in an
+embedding where we keep the positions of the dipoles fixed at s = 0, while we vary the hoppings t(s) in accordance
+with the analysis of the main text (c.f. the treatment of the Peierls transition in the Su-Schrieffer-Heeger model [S4]).
+The function t(s) smoothly and monotonically interpolates between t(0) = 0 in the maximally contracted (triangular)
+lattice, and t(1) = 1 in the maximally expanded (kagome) lattice. There is a critical point t(s∗) = 1/2, where the
+intra- and inter-cell hopping amplitudes are equal. H(k, s) has a gap at zero energy for all k and all s 6= s∗, with
+three negative and three positive energy bands.
+We will now proceed to show that the critical point separates the trivial and obstructed atomic limit phases of
+our model. First, we will compute the band representations carried by the occupied (negative energy) states in both
+gapped phases, and show that there is a transition between a phase with Wannier centers at the 1a position, and a
+phase with Wannier centers at the 3c position. Furthermore, we will show that the little group representations in
+these phases are consistent with what is found in the photonic crystal model. Then we will compute the “real space
+invariants[S5]” for the trivial and OAL phases, and show that point group symmetric topological particles in the two
+phases are topologically distinct. Finally, by analyzing the low-energy theory of the critical point H(k, s∗+δs) we will
+show that the interface between the trivial and topological phase must host a set of six corner states of topological
+origin.
+Band representation analysis
+Here we will establish that the Hamiltonians H(k, s < s∗) and H(k, s > s∗) describe topologically distinct atomic
+limits. To do so, let us note that, since H(k, s) is gapped for all s 6= s∗, we can always adiabatically deform the
+Hamiltonian either to s = 0 or s = 1. It is thus sufficient to determine the topology of the bands when s = 0, 1.
+Let us focus first on s = 0, where we have
+H(k, 0) = M. (S10)
+4
+We can easily diagonalize the k-independent matrix to find that the three occupied (E < 0) states have eigenvectors
+v1 =
+1√
+6
+(1,−1, 1,−1, 1,−1)T , (S11a)
+v2 =
+1√
+12
+(2,−1,−1, 2,−1,−1)T , (S11b)
+v3 =
+1
+2
+(0, 1,−1, 0, 1,−1)T , (S11c)
+with corresponding energies
+E1 = −2, E2 = E3 = −1 (S12)
+Since these eigenvectors give us k-independent linear combinations of our basis orbitals, they can be Fourier trans-
+formed to yield exponentially localized (in fact, delta-function localized) Wannier functions at the 1a position of
+the unit cell. To determine the band representation under which these Wannier functions transform, we project the
+symmetry operations into the space of occupied states to obtain the sewing matrices
+B(0)(C6)ij ≡ 〈vi|ρ(C6)|vj〉 =
+
+
+−1 0 0
+0 − 1
+2
+√
+3
+2
+0
+√
+3
+2
+− 1
+2
+
+ , (S13a)
+B(0)(mx)ij ≡ 〈vi|ρ(mx)|vj〉 =
+
+
+1 0 0
+0 1 0
+0 0 −1
+
+ . (S13b)
+Comparing with the character tables on the Bilbao Crystallographic server, we see that this is the B2 ⊕E2 represen-
+tation of the site-symmetry group G1a ≈ p6mm of the 1a Wyckoff position. Hence, when s = 0 the occupied bands
+transform in the (B2 ⊕ E2)1a ↑ G band representation[S6–S8].
+Next, let us analyze the case when s = 1, where the Hamiltonian takes the form
+H(k, 1) = N(k) (S14)
+We can diagonalize N(k) to obtain the three occupied-band eigenvectors, which now have energies E1 = E2 = E3 =
+−1,
+w1 =
+1√
+2
+(0, 0,−e−ik2 , 0, 0, 1)T (S15a)
+w2 =
+1√
+2
+(0,−ei(k1+k2), 0, 0, 1, 0)T (S15b)
+w3 =
+1√
+2
+(−eik1 , 0, 0, 1, 0, 0)T (S15c)
+Although these eigenvectors are k-dependent, they are periodic and analytic, and hence can be Fourier transformed to
+yield compactly-supported Wannier functions. In this case, we can see from computing the position matrix elements
+〈wi|x|wj〉 = −i〈wi|∇kwj〉 (S16)
+that these Wannier functions will be centered at the 3c Wyckoff position, with reduced coordinates (1/2, 0), (0, 1/2),
+(1/2, 1/2). To determine under which band representation these Wannier functions transform, we can again compute
+the sewing matrices for the symmetry operations, yielding
+B(1)(C6)ij ≡ 〈wi(C6k)|ρ(C6)|wj(k)〉 =
+1
+2
+
+
+0 0 −eik1
+1 0 0
+0 1 0
+
+ , (S17a)
+B(1)(mx)ij ≡ 〈wi(mxk)|ρ(mx)|wj(k)〉 =
+
+
+0 −ei(k1−k2) 0
+−e−ik2 0 0
+0 0 1
+
+ . (S17b)
+Specializing to the high-symmetry points, we can verify that these are the sewing matrices obtained via induction
+from the B1 representation of the site symmetry group G3c ≈ p2mm of the 3c Wyckoff position. Thus, when s = 1
+the occupied bands transform in the (B1)3c ↑ G band representation. Thus, we have verified that as the parameter
+s is tuned, the Hamiltonian H(k, s) describes an obstructed atomic limit transition between the 1a and 3c Wyckoff
+positions.
+5
+Real Space Invariants
+Having established the presence of a bulk OAL transition for the Hamiltonian H(k, s), we know that bulk systems
+with s < s∗ are topologically distinct from bulk systems with s > s∗. We would like to extend this analysis, however,
+to the case of finite-sized topological particles, and hence establish that the topological particles for the two different
+bulk phases are topologically distinguishable. To do this, we will employ the method of Real Space Invariants (RSIs)
+presented in Ref. [S5]. In that work, it was shown that there exist point group invariants which distinguish the classes
+of occupied states of a topological particle that can be deformed into each other through point group symmetric
+deformations of the Hamiltonian, as well as point-group symmetric addition of states from outside the topological
+particle. While these invariants are most generally formulated in terms of real-space point group irreps, in many cases
+they can be calculated from the momentum-space irreps of a band structure. In p6mm, there are seven invariants
+which can be computed in terms of the multiplicities of momentum-space irreps: they are
+δ1,1a = n(M3)− n(K1)− n(Γ2) (S18a)
+δ2,1a = n(Γ3) + n(Γ5)− n(Γ2)− n(K1) (S18b)
+δ3,1a = n(Γ3)− 2n(Γ2)− n(Γ6)− n(K1) + n(K2) + n(M3) (S18c)
+δ1,2b = n(K1)− n(Γ1)− n(Γ3) (S18d)
+δ1,3c = n(Γ3) + n(Γ6)− n(M3) (S18e)
+δ1,6d = n(K2) = n(K1) (S18f)
+δ1,6e = 2n(Γ2)− 2n(Γ1) + n(K1)− n(K2) (S18g)
+where n(ρ) is the multiplicity of the little group representation ρ in the set of occupied bands. Note that each RSI is
+labelled by a Wyckoff position, indicating that it is an invariant computed from the set of orbitals localized to that
+Wyckoff position in the topological particle.
+For the case at hand, as s is tuned from 0 to 1, our Hamiltonian undergoes a band inversion at the Γ point. From
+the sewing matrices computed above, we find that as we tune from the trivial to the OAL phase, n(Γ5) decreases by
+1, while n(Γ6) increases by 1. This implies that the real space invariants δ2,1a, δ3,1a, and (−)δ1,3c each differ by (−)1
+between the trivial and the OAL phases. This implies that even in a finite-sized topological particle, the trivial and
+OAL phases can be distinguished by their transformation properties under the point group 6mm. We now analyze
+the consequences of this distinguishability in terms of corner states.
+Corner states
+The key consequence of the topological distinction between the trivial and obstructed topological particles is the
+presence of protected corner states at a point-group symmetric boundary between the two phases. To see that the
+corner states are an inevitable consequence of the bulk topology, we will here adapt the method of Ref. [S9] to
+analyze the low-energy theory of the topological particle system. This does not alter the topological properties of the
+Hamiltonian, but will simplify the analysis below. To begin, we replace the matrix M with the spectrally flattened
+M̃ = I− 2
+3∑
+i=1
+vi ⊗ vi, (S19)
+which shares the same negative energy eigenspace as the matrix M , but moves all states to the same eigenvalue
+E1 = E2 = E3 = 1. We can then focus on the deformed Hamiltonian
+H̃(k, s) = (1− t(s))M̃ + t(s)N(k) (S20)
+Our strategy here is to expand the Hamiltonian about the band-inversion point (Γ, s∗), Fourier transform to position
+space, and allow the mass parameter s to be spatially varying with s(R) = s∗, where R � 1. We will then perform
+a Jackiw-Rebbi analysis of the boundary states near r ≈ R, and analyze their stability to perturbations of the bulk
+Hamiltonian. Following this procedure, we will establish the existence of corner modes and a filling anomaly for our
+OAL topological particles even in the absence of chiral symmetry.
+Let us project the Hamiltonian near k = 0, s = s∗ into the low-energy subspace of the topological band inversion.
+We find that at the gap-closing point, there is a fourfold band degeneracy at the Γ point. This fourfold degenracy is
+6
+the critical point between the trivial and OAL phases. Diagonalizing the critical Hamiltonian H̃(0, s∗) = M̃ + N(0)
+at the Γ point, we find that the space of states at the critical point is spanned by the four zero-energy eigenvectors
+u1 =
+1√
+2
+(0,−1, 0, 0, 0, 1)T , (S21)
+u2 =
+1√
+2
+(−1, 0, 0, 0, 1, 0)T , (S22)
+u3 =
+1√
+6
+(0,−1, 0, 2, 0,−1)T , (S23)
+u4 =
+1√
+6
+(−1, 0, 2, 0,−1, 0)T (S24)
+After a suitable transformation to Cartesian coordinates, we can expand the Hamiltonian to first order in k and
+m = t(s)− t(s∗) to find the Dirac-like Hamiltonian
+H̃(k, δs) ≈ 1
+4
+(kxΓx − kyΓy − 8mΓz) (S25)
+where we have introduced anticommuting 4× 4 gamma matrices
+Γx =
+1
+2
+(τz −
+√
+3τx)σy = σyτ
+′
+z, (S26a)
+Γy =
+1
+2
+(τx +
+√
+3τz)σy = σyτ
+′
+x, (S26b)
+Γz =
+1
+2
+(σxτ0 +
+√
+3σyτy) (S26c)
+Γ4 =
+1
+2
+(σyτy −
+√
+3σxτ0) (S26d)
+where the τ Pauli matrices act in the block subspace of {(u1,u2), (u3,u4)}, while the σ Pauli matrices act within
+the blocks.
+We will now let m → m(r) depend on position. To be concrete, we assume that m(r → 0) = −t0,m(r → ∞) =
+t0,m(r = R) = 0, and we furthermore assume that m(r) = m(r) is circularly symmetric. We will look for zero-energy
+states localized near the domain wall r = R by solving the eigenvalue equation [S10]:
+(−i∂xΓx + i∂yΓy − 2m(r)Γz)f(r)|φ〉 = Ef(r)|φ〉 (S27)
+Re-expressing this in polar coordinates, we have
+[
+−2m(r)Γz − iσyτ1(θ)∂r + iσy
+1
+r
+τ2(θ)∂θ
+]
+f(r)|φ〉 = Ef(r)|φ〉 (S28)
+where we have introduced
+τ1(θ) = τ
+′
+z cos θ − τ ′x sin θ, (S29a)
+τ2(θ) = τ
+′
+z sin θ + τ
+′
+x cos θ (S29b)
+We would like to look for solutions to this equation near r = R, where the mass changes sign. for R sufficiently large,
+we can then treat the angular dispersion term 1/r∂θ ≈ 1/R∂θ as a small perturbation. We will then find the spectrum
+of edge states by first solving
+[−2m(r)Γz − iσyτ1(θ)∂r] f(r)|φ〉 = 0, (S30)
+from which we will derive a low-energy edge Hamiltonian by projecting the angular velocity into this eigenbasis.
+Equation (S30) is solved by functions of the form
+f(r) ∝ e−
+∫
+r
+R
+2m(r′)dr′ − iΓzσyτ1(θ)|φi〉 − |φi〉 (S31)
+7
+We can write |φ1〉, |φ2〉 explicitly as
+|φ1〉 =
+eiθ/2√
+2
+(
+i sin
+(
+π
+6
+− θ
+2
+)
+, cos
+(
+π
+6
++
+θ
+2
+)
+,−i cos
+(
+π
+6
+− θ
+2
+)
+,− sin
+(
+π
+6
++
+θ
+2
+))T
+(S32)
+|φ2〉 =
+e−iθ/2√
+2
+(
+−i sin
+(
+π
+6
+− θ
+2
+)
+, cos
+(
+π
+6
++
+θ
+2
+)
+, i cos
+(
+π
+6
+− θ
+2
+)
+,− sin
+(
+π
+6
++
+θ
+2
+))T
+. (S33)
+We have chosen this basis because it yields particularly simple projections of the symmetry operations:
+〈φi(θ)|TR|φj(θ)〉 = sx (S34)
+〈φi(θ + π/3)|C6|φj(θ)〉 = exp(iπsz/3) (S35)
+〈φi(−θ)|mx|φj(θ)〉 = −sx, (S36)
+where we have introduced Pauli matrices si acting in the space of |φi〉. Using this basis, we can project the angular
+dispersion into the space of low-lying edge states to find the effective Hamiltonian
+1
+R
+〈φi|iσyτ2(θ)∂θ|φj〉 =
+1
+R
+(isz∂θ −
+1
+2
+s0), (S37)
+which is the Hamiltonian for a pair of counter-propagating edge excitations. The term proportional to the identity
+accounts for the fact that our topological particle geometry has a constant-curvature edge[S9]; we will neglect it in
+the following as it does not contribute to our topological analysis.
+At first glance, Eq. (S37) resembles the edge theory for the helical states of a two-dimensional topological insulator.
+In fact, the low-energy critical point Eq. (S25) coincides with the critical theory of a 2D TI. This observation led Wu
+and Hu to predict that topological particles such as ours should have a Z2 invariant with gapless counterpropagating
+edge states [S11]. However, there is a fundamental distinction between our model and a two-dimensional TI due to
+the symmetries we require. To analyze the edge of our topological particle system, we should include higher-order
+terms in the bulk that preserve the 6mm point group symmetry, and ask what effect they have on the edge dispersion.
+Here, we will focus only on terms that cannot close a bulk gap, and that simultaneously gap the edge theory (S37).
+This means we look for potentials V (θ) that anticommute with both the bulk mass mΓz and the edge kinetic term
+σyτ2(θ). However, we also require that V (θ) commute with Γzσyτ1(θ), in order that 〈φi|V (θ)|φj〉 6= 0. We find that
+this restricts the form of V (θ) to
+V (θ) = m4(θ)Γ4 +m5(θ)Γ5, (S38)
+where we have introduced Γ5 = iΓxΓyΓzΓ4. Crucially, both Γ4 and Γ5 anticommute with the sewing matrices for C6
+and mx, we find:
+〈wi|C6|wj〉 =
+1
+4
+(
+τ0(σx − 3iσy) +
+√
+3τy(σy − iσx)
+)
+, (S39a)
+〈wi|mx|wj〉 = −
+1
+2
+(σ0τ
+′
+z −
+√
+3σzτ
+′
+x). (S39b)
+Accounting for the action of the symmetries on the angular coordinate θ, we can thus write a Fourier expansion
+V (θ) =
+∑
+n
+m4n sin((3 + 6n)θ)Γ4 +m5n cos((3 + 6n)θ), (S40)
+where n indexes the different Fourier harmonics. Projecting these onto the edge, we find that the edge Hamiltonian
+becomes
+Hedge =
+1
+R
+(isz∂θ − 1/2s0) +
+∑
+n
+[
+m4n sin((3 + 6n)θ)
+(
+0 ie−iθ
+−ieiθ 0
+)
++m5n cos((3 + 6n)θ)
+(
+0 e−iθ
+eiθ 0
+)]
+.
+Let us focus on the case when only the n = 0 masses are nonzero. To analyze this, we will without loss of generality
+take m40 6= 0, m50 = 0 to start, and then we will perturbatively reintroduce m50: the mass term m40 sin(3θ) vanishes
+at the special values
+θm =
+mπ
+3
+. (S41)
+8
+K M
+-3
+0
+3
+(a) (b)
+FIG. S2. (a) Band structure for the nanophotonic tight-binding model at the transition point between trivial and OAL phases.
+(b) Corner states for a C2 symmetric topological particle in the OAL phase. The blue (red) circles represent the probability
+densities for the first (second) corner state.
+Near each zero we have corner states which satisfy
+1
+R
+[
+∂θ + 3im40(−1)mszθ
+(
+0 ie−iθm
+−ieiθm 0
+)]
+|Θm〉 = 0, (S42)
+and so repeating our Jackiw-Rebbi analysis we find a zero-energy corner state satisfying
+im40(−1)mszθ
+(
+0 ie−iθm
+−ieiθm 0
+)
+|Θm〉 = (−1)m+1|Θm〉,
+yielding a total of six zero-energy corner states. We thus see that symmetry-allowed mass terms gap the counterprop-
+agating edge states of Ref. [S11], yielding corner states consistent with our MPB and coupled dipole simulations.
+To complete the analysis, we next perturbatively restore m50. Projecting into the space of corner modes for each
+m, we find
+m50 cos(3θm)〈Θm|
+(
+0 e−iθ
+eiθ 0
+)
+|Θm〉 = +m50. (S43)
+This means that although m50 breaks chiral symmetry and shifts the corner modes away from zero energy, it does
+not break the degeneracy of the corner modes. This leads to the so-called “filling anomaly”: when both m4 and m5
+are nonzero, the difference between the number of states in the positive and negative energy subspaces of the model
+is six.
+Note that we could have performed our same analysis with m5 initially nonzero instead, which would result in corner
+modes localized at θ′m = (2m + 1)π/3 (the other conjugacy class of mirror lines in the point group). Additionally,
+we could have considered higher Fourier harmonics in the mass term, which would yield additional sets of 12 corner
+modes at generic points along the boundary, which gap non-anomalously. Finally, our analysis holds as well for a
+C2-symmetric topological particle, in which case we can add mass terms of the form Γ5 cos 2θ and Γ4 sin 2θ, which
+gap all but one pair of corner modes, yielding a filling anomaly of 2. We can see an example of this in the topological
+particle pictures in Fig. S2.
+To conclude, let us comment on the applicability of our tight-binding calculation to the nanophotonic calculation.
+Because the full interaction matrix contains power-law decaying terms in position space, we cannot guarantee a priori
+that the Bloch Hamiltonian will permit a series expansion near the Γ point in the Brillouin zone. However, for our
+model we find that the cusp singularities arising in the band structure due to the long-range hopping appear only in
+the highest positive and lowest negative energy bands in the band structure (one of which maps to the cusp singularity
+at ω = 0 in the full photonic model). Crucially, however, we have seen that it is only the bands close to the mid-gap
+band inversion that contribute to the formation of corner states in this model. Thus, we expect that our analysis here
+is robust to the inclusion of long range hoppings. It is an interesting open problem for future work to consistently
+incorporate band structure singularities due to long-range hoppings into the general theory of topological photonic
+systems.
+9
+EXPONENTIAL CUTOFF
+FIG. S3. Example exponential cut off function, fc.o., for a nearest neighbour distance d
+0 = 40 nm, for varying γ, from 0.1
+(log γ = −1) (red) to 5.01 (log γ = 0.7) (blue). A cut off factor with γ = 0.1 for interactions ∝ −1/d3 is approximately nearest
+neighbour.
+EFFECT OF DISORDER
+C6 breaking defects Effect on topological corner states Emergence of new states
+Corner
+defects
+Remove 1 particle, trivial sublattice 6 degenerate corner modes unaffected one new localized state
+Remove 1 particle, topological sublattice 5 degenerate corner modes w/o C6 symmetry no
+Remove trimer at corner 5 degenerate corner modes w/o C6 symmetry no
+Expanded cell at corner 5 degenerate corner modes w/o C6 symmetry yes, on both sublattices
+Contracted cell at corner 5 degenerate corner modes w/o C6 symmetry yes, on both sublattices
+Edge
+defects
+One expanded cell at edge, 4+2 degenerate corner modes, yes, on both sublattices
+preserving 1 mirror symmetry w/ mirror symmetry
+One expanded cell at edge, 4 degenerate corner modes w/ mirror symmetry, yes, on both sublattices
+breaking all mirror symmetries + 2 non-degenerate w/o mirror symmetry
+Bulk
+defects
+Random position disorder 6 non-degenerate state, no
+on topological sublattice
+TABLE I. Effect of different C6 breaking defects on the topological corner states for particles with long range interactions. For
+a nearest neighbour model the corner states survive all perturbations except for the second corner defect type.
+Table I summarizes the effect of different kinds of C6 symmetry breaking defects on the topological corner modes of
+Types A and B particles: defects at corners, edges and random bulk disorder are considered. From the main text, the
+6 degenerate corner modes survive when one particle belonging to the sublattice immediately at the corner is removed,
+even if C6 symmetry is broken. All the other defects have an effect to some extent as shown in the table. In contrast,
+in a nearest neighbour model the topological corner modes are robust against all the perturbations considered in the
+table (except if one of the particles at the corner where the mode resides is removed). The effect on the topological
+robustness of the corner modes then emerges both from the spatial symmetries and the range of the interactions. At
+the critical point s∗, the Hamiltonian H(k, s) is gapless with a fourfold Dirac degeneracy at the Γ (k = 0) point.
+These results hold true regardless of the edge termination, provided the particle has the same lattice symmetries. It
+should be noted that corner modes in particles with complete unit cells at the interface are more strongly affected by
+edge and bulk disorder, compared to the broken unit cell interface termination presented in the main text. This is
+due to the longer localization length of these modes.
+10
+∗ p.arroyo-huidobro@lx.it.pt
+† bbradlyn@illinois.edu
+‡ aitzolgarcia@dipc.org
+[S1] F. J. Garca de Abajo, Reviews of Modern Physics 79, 12671290 (2007).
+[S2] A. Moroz, J. Opt. Soc. Am. B 26, 517 (2009).
+[S3] H. U. Yang, J. D’Archangel, M. L. Sundheimer, E. Tucker, G. D. Boreman, and M. B. Raschke, Phys. Rev. B 91, 235137
+(2015).
+[S4] W. P. Su, J. R. Schrieffer, and A. J. Heeger, Phys. Rev. Lett. 42, 1698 (1979).
+[S5] Z.-D. Song, L. Elcoro, and B. A. Bernevig, Science 367, 794 (2020).
+[S6] B. Bradlyn, L. Elcoro, J. Cano, M. G. Vergniory, Z. Wang, C. Felser, M. I. Aroyo, and B. A. Bernevig, Nature 547, 298
+(2017).
+[S7] J. Cano, B. Bradlyn, Z. Wang, L. Elcoro, M. G. Vergniory, C. Felser, M. I. Aroyo, and B. A. Bernevig, Phys. Rev. B 97,
+035139 (2018).
+[S8] L. Elcoro, B. Bradlyn, Z. Wang, M. G. Vergniory, J. Cano, C. Felser, B. A. Bernevig, D. Orobengoa, G. de la Flor, and
+M. I. Aroyo, J. Appl. Cryst. 50, 1457 (2017).
+[S9] B. J. Wieder, Z. Wang, J. Cano, X. Dai, L. M. Schoop, B. Bradlyn, and B. A. Bernevig, Nature communications 11, 1
+(2020).
+[S10] R. Jackiw and C. Rebbi, Physical Review D 13, 3398 (1976).
+[S11] L.-H. Wu and X. Hu, Phys. Rev. Lett. 114, 223901 (2015).

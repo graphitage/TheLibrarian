@@ -1,0 +1,497 @@
+Tromino Tilings with Pegs via Flow Networks
+Javier T. Akagi1, Eduardo A. Canale2, and Marcos Villagra1
+1 Universidad Nacional de Asunción
+NIDTEC, Campus Universitario, San Lorenzo C.P. 111421, Paraguay
+akagi.tada@gmail.com, mvillagra@pol.una.py
+2 Universidad de la República
+Facultad de Ingenieŕıa, Montevideo PC 11300, Uruguay
+canale@fing.edu.uy
+Abstract. A tromino tiling problem is a packing puzzle where we are
+given a region of connected lattice squares and we want to decide whether
+there exists a tiling of the region using trominoes with the shape of an
+L. In this work we study a slight variation of the tromino tiling problem
+where some positions of the region have pegs and each tromino comes
+with a hole that can only be placed on top of the pegs. We present
+a characterization of this tiling problem with pegs using flow networks
+and show that (i) there exists a linear-time parsimonious reduction to
+the maximum-flow problem, and (ii) counting the number of such tilings
+can be done in linear-time. The proofs of both results contain algorithms
+that can then be used to decide the tiling of a region with pegs in O(n)
+time.
+Keywords: tromino tilings, linear-time reduction, parsimonious reduc-
+tion, maximum-flow, bipartite matchings
+1 Introduction
+1.1 Background
+A polyomino tiling problem is a packing puzzle where a player attempts to cover
+a board or region with polyominoes of a given shape. A polyomino is a set of
+square cells joined together by their edges. Of particular interest are polyominoes
+of two cells called dominoes, and polyominoes of three cells called trominoes of
+which there are two types: L-trominoes with the shape of an L and I-trominoes
+with the shape of an I. From now on, and for the remainder of this work, we will
+refer to L-trominoes simply as trominoes.
+One of the first rigorous studies of polyominoes is due to Golomb [5] who
+introduced a hierarchy of tiling capabilities by polyominoes. Later, Conway and
+Lagarias [2] presented an algebraic necessary condition to cover a region with
+polyominoes. In particular, the study of domino tilings uncovered many tight
+connections with matrix algebra through the theory of alternating-sign matrices
+and graph matchings [4].
+ar
+X
+iv
+:2
+00
+7.
+12
+65
+1v
+1 
+ [
+cs
+.D
+S
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+2 Javier T. Akagi, Eduardo A. Canale, and Marcos Villagra
+In computational complexity theory, Moore and Robson [7] showed that de-
+ciding the tiling of a given region with trominoes is NP-complete. Demaine and
+Demaine [3] showed the polynomial-time equivalence between polyomino tilings,
+edge-matching puzzles and jigsaw puzzles. Horiyama et al. [6] strengthened the
+NP-completeness result of Moore and Robson and proved that counting the
+number of tromino packings of a region is #P-complete. More recently, Akagi
+et al. [1] showed that the NP-completeness of deciding a tromino tiling heavily
+depends on geometrical properties of the region; for example, a region with the
+shape of an Aztec rectangle admits a polynomial time algorithm that decides a
+tromino tiling, whereas the problem remains NP-complete for an Aztec rectangle
+with at least two holes.
+1.2 Contributions
+In all cited works of the previous paragraphs most of the arguments rely on
+a (partial) characterization of the tiling problem using a graph-theoretic idea.
+One such idea is the so-called dual graph1 of a region, which is a graph where
+each cell of the region is a vertex and there is an edge between two vertices if
+their corresponding cells are adjacent. There is a natural correspondence between
+domino tilings and perfect matchings in dual graphs. Likewise, Akagi et al. [1]
+showed that tromino tilings correspond to independent sets in a slight variation
+of dual graphs called an intersection graph.
+In this work we present yet another way to characterize tromino tiling prob-
+lems using this time an idea of flow networks. This characterization, however,
+applies to a slight variation of the tromino tiling problem where a region contains
+pegs, see Fig. 1. To cover a region with pegs we use a special type of tromino that
+we call p-tromino which contains a hole in its corner cell as shown in Fig. 2. In
+a tiling of a region with pegs, only p-trominos can be placed on top of pegs and
+we assume that there is an infinite supply of p-trominoes and only p-trominoes;
+that is, there are no regular trominoes with no holes and the hole of a p-tromino
+cannot be placed on top of a cell with no peg. See Fig. 3 for an example of a
+correct placement of a p-tromino. We thus define the P-Tromino Tiling Problem
+as the problem of deciding, given a region with pegs, whether there is a tiling of
+the region with p-trominos. More formally, the decision problem is:
+P-Trominon,k
+INPUT : Region R with n cells and a list P of k positions in R.
+OUTPUT : “Yes” if there exists a tiling of R with p-trominoes; “No” otherwise.
+Now let us recall that in a maximum-flow problem we are given a flow network
+represented by a directed graph and we want to find a flow of maximum value
+that can be pushed from a source vertex to a sink vertex. Intuitively, the value
+of a flow is the rate at which some hypothetical material moves through the
+network. We consider the following decision problem:
+1 Note that this is an abuse of the term dual graph used in graph theory. The practise
+is, however, standard in combinatorics of tilings.
+Tromino Tilings with Pegs via Flow Networks 3
+Fig. 1: Region with pegs. Aerial view on the left and a 3D view on the right.
+Fig. 2: A p-tromino. The corner cell contains a hole and can only be placed on
+top of a peg on a region with pegs.
+MaxFlowk
+INPUT : Flow network G, positive integer k.
+OUTPUT : “Yes” if the value of a maximum flow in G equals k; “No” otherwise.
+Now we are ready to state the main result of this work.
+Theorem 1. There exists a parsimonious reduction from P-Trominon,n/3 to
+MaxFlown/3 that is computable in linear-time.
+The main idea for a proof of Theorem 1 is the construction of a flow network
+representation of a region with pegs such that flow passing through a path in
+the network, from source to sink, corresponds to the placement of a p-tromino
+on the region.
+As a second result we show that the counting version of P-Trominon,n/3,
+namely #P-Trominon,n/3, is computable in linear-time.
+Theorem 2. #P-Trominon,n/3 is computable in O(n) time.
+The idea of a proof of Theorem 2 exploits the structure in the flow network
+representation of a region with pegs. In particular, we show the existence of
+induced bipartite subgraphs in the flow network where any maximum matching
+is a perfect matching of size n/3 and each perfect matching agrees with a p-
+tromino tiling of the region. This reduces our problem of counting p-tromino
+tilings to counting perfect matchings in a highly structured bipartite graph.
+If we are only interested in finding a p-tromino tiling, we can slightly modify
+our algorithm of Theorem 2 for counting perfect matchings and obtain an O(n)
+time algorithm that finds a p-tromino tiling.
+4 Javier T. Akagi, Eduardo A. Canale, and Marcos Villagra
+Fig. 3: Placement of a p-tromino. Aerial view on the left and 3D view on the
+right.
+1.3 Outline
+The rest of the paper is organized as follows. In Section 2 we introduce the
+notation used throughout this work and give some precise definitions of tromino
+tilings and flow networks. In sections 3 and 4 we present our proofs of theorems
+1 and 2, respectively. Finally, we close this paper in Section 5.
+2 Preliminaries
+In this section we review some definitions from tromino tilings and flow networks
+and present the notation used throughout this work. We use Z to denote the set
+of all integers, and N will denote the set of all natural numbers including 0. We
+also denote by [a, b] the discrete interval {a, a + 1, . . . , b}.
+2.1 Tromino Tilings
+A region R is a finite union of cells whose interior is connected. If [a, a + 1] ×
+[b, b+1] is a cell in R, its coordinate in R is (a, b). To denote the cell at coordinate
+(a, b) we use the shorthand notation R(a,b). Two cells are neighbors or adjacent
+if the Manhattan distance between the two cells is 1; thus, two cells in diagonal
+to each other are not adjacent.
+A tromino is a polyomino of 3 cells with the shape of an L, as we explained
+in the previous section. Given a tromino T , we will refer to the cell in its corner
+as the corner cell of T and the other two cells we will refer to them as the tips
+of T . A cover or tiling of a region R is a set of trominoes covering all cells of
+R with no overlapping and each tromino is inside R. The size of a cover is the
+number of trominoes in it.
+Given a region R and a list of k positions in R denoting positions of pegs on
+the board, we define the tromino tiling with pegs problem denoted P-Trominon,k,
+where each tromino comes with a hole in its corner cell and can be placed on
+the region R only if that corner cell is placed on top of a position with a peg. A
+tromino with a hole in its corner is called a p-tromino. A cover of R with pegs
+is called a p-cover, and P-Trominon,k is the problem of deciding whether there
+is a p-cover or not.
+Tromino Tilings with Pegs via Flow Networks 5
+2.2 Flow Networks
+Given a graph G = (V,E), let V (G) and E(G) denote its set of vertices and
+edges, respectively. The degree of a vertex v in G is the number dG(v) of vertices
+adjacent with v on G.
+A flow network G = (V,E) is a directed graph where each directed edge
+(u, v) has an assigned capacity c(u, v) ≥ 0. If (u, v) is an edge of G, then (v, u)
+is not an edge of G. For edges not appearing in G we will usually assign them a
+capacity of 0. Furthermore, self-loops are not allowed in flow networks. We also
+assign to each vertex v ∈ V (G) a capacity c(v) ≥ 0. Note that we overload our
+notation and we use c(u, v) with (u, v) ∈ E(G) to denote capacities on edges and
+c(v) with v ∈ V (G) to denote capacities on vertices.
+Every flow network G have two distinguished vertices called a source denoted
+s and a sink denoted t. A path in G from s to t is called an st-path and it is
+denoted s ; t. The in-degree of s and the out-degree of t are always 0. If v is a
+vertex in G, an st-path passing through v is denoted s
+v
+; t.
+A flow in G is a function f : E(G) → N that satisfy the following three
+constraints: (i) a capacity constraint on the edges 0 ≤ f(u, v) ≤ c(u, v) for all
+(u, v) ∈ E(G), (ii) a capacity constraint on the vertices
+∑
+(u,v)∈E(G) f(u, v) ≤
+c(v) for all v ∈ V (G), and (iii) a flow conservation constraint
+∑
+v∈V (G) f(v, u) =∑
+v∈V (G) f(u, v) for all u ∈ V (G) \ {s, t}. If e is an edge of G we call f(e)
+the flow through e, and the flow through an st-path is defined as f(s ; t) =
+mine∈E(G){f(e)}. The value of a flow f is defined as |f | =
+∑
+v∈V (G) f(s, v). The
+maximum-flow problem is thus the problem of finding a flow of maximum value.
+3 Proof of Theorem 1
+Let R be a connected region with n cells and let P be a collection of cells
+from R that contain pegs, where |P | = n/3. We assume that n is a multiple of
+3. The following procedure is an algorithm that takes an instance (R,P ) from
+P-Trominon,n/3 and transforms it to an instance (G,n/3) of MaxFlown/3.
+1. Color each cell R(a,b) ∈ R according to its row number. A cell in an even
+row is colored black, and a cell in an odd row is colored white; see Fig. 4.
+2. Partition the cells of R \ P into two sets B and W . We define B to be
+the set of all cells of R that are colored black and do not contain a peg,
+that is, B = {R(a,b) ∈ R \ P : a is even }. We define W to be the set
+of all cells of R that are colored white and do not contain a peg, that is,
+W = {R(a,b) ∈ R \ P : a is odd }.
+3. Construct a flow network G = (V,E) as follows.
+(a) Let s be a source vertex and t be a sink vertex.
+(b) Each cell R(a,b) in R is a vertex (a, b) in V .
+(c) Add an edge from s to each vertex (a, b) whose corresponding cell is
+colored black, that is, R(a,b) ∈ B.
+(d) Add an edge from each vertex (a, b) whose corresponding cell is colored
+white to t.
+6 Javier T. Akagi, Eduardo A. Canale, and Marcos Villagra
+Fig. 4: Coloring of the cells with respect the row number. We start counting from
+row 0 which is the bottom row of the region.
+Fig. 5: Each cell with a peg has at most 2 incoming edges from black cells and
+at most 2 outgoing edges to white cells. The adjacent cells on the sides of a cell
+with a peg in the region R are always of the same color, for example, a black cell
+with a peg always has black horizontal neighbors and white vertical neighbors.
+(e) For each black cell R(a,b) ∈ B and each cell with a peg R(c,d) ∈ P , there
+is an edge ((a, b), (c, d)) in E if and only if R(a,b) and R(c,d) are adjacent
+in the region R; see for example Fig. 5.
+(f) For each cell with a peg R(c,d) ∈ P and for each white cell R(a,b) ∈ W ,
+there is and edge ((c, d), (a, b)) in E if and only if R(c,d) and R(a,b) are
+adjacent in the region R.
+(g) All edges in items (e) and (f) have a capacity of 1, all edges coming from
+s and all edges going to t have capacity 1, and all remaining missing
+edges have a capacity of 0.
+(h) Each vertex (a, b) ∈ V (G) \ {s, t} has c((a, b)) = 1 and c(s) = c(t) =∞.
+In this work we refer to the graph G obtained from the procedure above
+as the region network of R, see for example Fig. 6. It is easy to see that any
+region network has n + 2 vertices and at most 2n/3 + 4n/3 edges, and can be
+constructed in O(n) time. Also note that a region network is a dual graph with
+two new vertices, some edges removed, and direction given to the remaining
+edges.
+Proposition 1. The value of a maximum flow in G equals |R|/3 if and only
+there is a p-cover of R.
+Proposition 1 follows from lemmas 2 and 3 below. First, however, we show a
+technical lemma concerning the uniqueness of st-paths in the region network.
+Tromino Tilings with Pegs via Flow Networks 7
+Fig. 6: Region network of the region on the right. Note that there are no edges
+(incoming or outgoing) between cells with no pegs. Similarly, there are no edges
+between cells with pegs.
+Lemma 1. Let f be a flow in G with |f | = n/3. For any R(a,b) there exists an
+unique path s
+(a,b)
+; t with f(s
+(a,b)
+; t) = 1.
+Proof. The flow passing through (a, b) is upper bounded by 1, either because
+c((a, b)) = 1 if R(a,b) ∈ P or because the in-degree or out-degree is 1 if R(a,b) ∈ B
+or R(a,b) ∈ W , respectively. Therefore, if there is flow passing through (a, b) we
+have that there is an unique path s
+(a,b)
+; t with f(s
+(a,b)
+; t) = 1. In order to finish
+the proof we need to prove that f(s
+(a,b)
+; t) = 1 for all R(a,b). Indeed, suppose
+otherwise that there exists (a, b) such that for any path s
+(a,b)
+; t the flow through
+(a, b) is 0. Then, if R(a,b) ∈ B (respectively P , W ), the flow through the edge-cut
+({s}, {s}c) (respectively ({s} ∪B,P ∪W ∪ {t}), ({s} ∪B ∪ P,W ∪ {t})) will be
+of value n/3− 1, which contradicts that the flow has value n/3. ut
+Lemma 2. If the value of a maximum flow in G equals n/3, then the region R
+with k = n/3 pegs has a p-cover.
+Proof. Let f be a flow of maximum value in G, with |f | = n/3. Let R(a,b) be
+a cell with a peg. By Lemma 1 we known that there is a unique path s
+(a,b)
+; t
+with a flow of 1 going through it. Moreover, from our construction of G, a path
+s
+(a,b)
+; t always has the form
+s→ (c, d)→ (a, b)→ (f, g)→ t, (1)
+where R(c,d) is a black cell with no peg and R(f,g) is a white cell with no peg.
+Now we can construct a p-cover of R using the following “p-tromino place-
+ment rule:” place the tromino T = R(c,d) ∪R(a,b) ∪R(f,g) on top of R(a,b).
+In Fig. 7 we show a correspondence between a flow in the region network and
+a tromino cover.
+8 Javier T. Akagi, Eduardo A. Canale, and Marcos Villagra
+Fig. 7: Maximum flow in a region network on the left. Dashed lines are the edges
+of the graphs with no flow, and solid lines are the edges with flow. The right
+subfigure shows the region network over the region.
+To finish the proof we need to show that our placement of the trominoes is
+a p-cover of R. This follows from Lemma 1 since for each cell R(a,b) the vertex
+(a, b) appears in exactly one st-path. ut
+Lemma 3. If the region R with k = n/3 pegs has a p-cover, then the value of a
+maximum flow in G equals n/3.
+Proof. Let C be a p-cover of size n/3. We construct a maximum flow f whose
+value is n/3.
+Take any tromino T ∈ C. With no loss of generality, suppose that T =
+and that its corner cell R(a,b) is colored white. Hence, the upper cell R(c,d) is
+black and its left tip R(f,g) is white. Thus we have a path s
+(a,b)
+; t in the network
+graph G of the form s→ (c, d)→ (a, b)→ (f, g)→ t. For all edges e of this path
+we assign a flow f(e) = 1. We do this for all other trominos in C.
+First we show that f is a flow with value |f | = n/3. Since C is a cover, there
+are no overlapping trominoes and all cells are covered. This is equivalent to say
+that each vertex of G that is not the source s or the sink t appears in exactly
+one st-path s ; t with f(s ; t) = 1. This implies that f is a flow because each
+vertex has an incoming and outgoing flow of 1. Furthermore, since we have n/3
+trominoes in C, there are n/3 such st-paths, and hence, |f | = n/3.
+To finish the proof, we show that |f | = n/3 is maximum. This follows directly
+by considering the cut ({s}, {s}c) consisting on the n/3 edges incident with the
+source s, and any flow is always greater than the capacity of any cut. ut
+With lemmas 2 and 3 we finish our proof of Proposition 1. Now we show that
+our reduction is parsimonious.
+Lemma 4. The reduction is parsimonious.
+Proof. Let H be our reduction presented in this section and let us fix a region
+R and a list of pegs P . Recall that H is parsimonious if it preserves the number
+Tromino Tilings with Pegs via Flow Networks 9
+of yes-certificates. That is, the sets
+{C : (R,P ) ∈ P-Trominon,n/3 and C is a p-cover of (R,P )}
+and
+{f : (H(R,P ), n/3) ∈MaxFlown/3, f is a flow in H(R,P ) with |f | = n/3}
+are of the same size.
+The existence of a bijective function between both sets above follows from the
+following argument. By our p-tromino placement rule of Lemma 2, to any unique
+st-path in H(R,P ) of the form of Eq.(1) with flow passing through it, there is
+exactly one p-tromino T ∈ C; a different st-path corresponds to a different p-
+tromino T ′ ∈ C. Likewise, for any T ∈ C there is exactly one st-path of the form
+of Eq.(1) with a flow of 1 passing through the vertices corresponding to the cells
+in T . ut
+4 Proof of Theorem 2
+Let us start by stating some trivial facts about matchings in graph theory. (i)
+The number of perfect matchings of a graph is the product of the number of
+perfect matchings of its components. (ii) The number of perfect matchings of a
+cycle is 0 or 2 whenever the cycle is odd or even, respectively. (iii) The number
+of perfect matchings of the union of k cycles is 2k if the cycles are all even and
+0 if some of them are odd.
+Let G = (P ∪ B ∪W ∪ {s, t}, E) be the region network that is constructed
+with our reduction of Section 3. From G, let us consider the following two graphs
+G′ = (P ∪ B ∪ {s, t′}, E′) and G′′ = (P ∪ W ∪ {s′, t}, E′′) given by E′ =
+E(G−W−{t})∪B×{t′} and E′ = E(G−B−{s′})∪{s′}×W , with distinguished
+sources and sinks s, t′ and s′, t, respectively. Note that G has a flow of value n/3
+if and only if there exists a flow on G′ and a flow on G′′ both with value n/3.
+Furthermore, the number of flows of value n/3 in G equals the number of flows
+with value n/3 in G′ and G′′ multiplied.
+Lemma 5. There exists a flow on (G′, s, t′) of value n/3 if and only if there is
+a perfect matching M on H = (P ∪B, {xy : xy ∈ E′}).
+Proof. Let f be a flow of value n/3, then define M as those edges with flow value
+equals to 1. We claim that two of such edges are not adjacent. Indeed, if for
+instance, (x, y) and (x′, y) where two adjacent edges, then the flow conservation
+constraint could not be satisfied on vertex y, because the capacity of edge (y, t′)
+is 1. Therefore, the edges in M form a matching on H, which is perfect since
+has value |B|. Conversely, given a perfect matching on H, just define f as 1 on
+the matching as well as on edges incident with s and t′, but 0 otherwise. Clearly
+such definition of f makes f a flow on (G′, s, t′). ut
+10 Javier T. Akagi, Eduardo A. Canale, and Marcos Villagra
+Input: graph H
+Output: number of perfect matchings of H
+1 M ← ∅; H ′ ← H;
+2 while there is a leaf v in H ′ do
+3 Let w ∼ v;
+4 M ←M ∪ {vw};
+5 H ′ ← H ′ − v − w;
+6 end while
+7 Let H1, . . . , Hk the connected components of H
+′, where k = 0 if V (H ′) = ∅;
+8 if there is i such that Hi has odd order then
+9 return 0;
+10 else
+11 return 2k;
+12 end if
+Algorithm 1: Counting perfect matchings in H.
+In Algorithm 1 we present a method for counting perfect matchings on the
+graph H of Lemma 5. Let us prove the correctness of Algorithm 1.
+The while loop of lines 2–6 has one key invariant, namely that variable M
+is always a matching of H and M should be contained in any possible perfect
+matching of H.
+Algorithm 1 halts if M cannot be extended to a perfect matching of H. In
+particular the while loop always ends because those edges incident to pending
+vertices must be in any perfect matching.
+In lines 3–5 inside the while loop Algorithm 1 erases those pending vertices
+together with its unique neighbor, since its incident edge should be on any perfect
+matching of H ′. Thus, the new graph H ′ obtained contains a perfect matching
+if and only if H does.
+Let us call Ĥ the graph H ′ at the end of the loop. By the condition of line
+2 of the while loop, the graph Ĥ has no leafs.
+Lemma 6. Ĥ is the union of isolated vertices and cycles.
+Proof. By the construction of graph H, a vertex v of H has degree dH(v) ≤ 2 if
+v ∈ P and dH(v) ≤ 4 if it is in B. The same holds for vertices on H ′ (and then
+on Ĥ), since H ′ is a subgraph of H.
+Let P̂ (resp. B̂) be those vertices of Ĥ in P (resp. in B), i.e. P̂ = V (Ĥ) ∩ V
+and B̂ = V (Ĥ) ∩ B. We distinguish two cases depending upon Ĥ has isolated
+vertices or not. If Ĥ has some isolated vertices, then Ĥ has no perfect matching,
+and the algorithm proceeds correctly to line 9, since an isolated vertex is an odd
+component. If on the other hand, Ĥ has no isolated vertices, then we claim all
+its vertices have degree 2. Indeed, since all vertices have degree greater than 1,
+all vertices in P̂ should have degree 2. Now
+2|P̂ | =
+∑
+v∈P̂
+2 =
+∑
+v∈P̂
+d
+Ĥ
+(v) = |E(Ĥ)| =
+∑
+v∈B̂
+d
+Ĥ
+(v) ≥
+∑
+v∈B̂
+2 = 2|B̂|.
+Tromino Tilings with Pegs via Flow Networks 11
+However, |P̂ | = |B̂|, and hence, the inequality should be an equality which
+happens only if d
+Ĥ
+(v) = 2 for all v ∈ B̂. Therefore, the vertices of Ĥ have
+degree 2, and Ĥ should be the union of some number of cycles. ut
+From Lemma 6 it follows that the connected components of line 7 in Algo-
+rithm 1 are all cycles and isolated vertices. Therefore if one of them has odd
+order, there will be no perfect matching; otherwise, there are 2k perfect match-
+ings. This proves the correctness of Algorithm 1.
+Algorithm 1 runs in linear time maintaining the degree of each vertex of H ′
+and a list of the leafs of H ′. Since the degree is upper bounded by 4, computing
+the degrees takes at most 2× 4n/3 time, and in that run it is possible to build a
+list of leafs. Given a list of leafs, the condition of the while loop uses constant
+time, while the deletion of vertices in line 5 also takes constant time because of
+the bound on the degrees. After line 5 is executed, the degrees are refreshed at
+those vertices incident with vertex w, and if one of them becomes a leaf, it will
+be added to the list of leafs. All theses operations require constant time. The
+while loop is executed at most n/3 times. The connected components of Ĥ are
+also computed in linear time.
+5 Concluding Remarks and Open Problems
+In this work we showed how to characterize the tromino tiling problem with
+pegs using flow networks. We called this characterization the region network
+representation of a region with pegs. Then we showed that perfect matchings in
+bipartite subgraphs of a region network correspond to p-covers in a region with
+pegs. Thus, the number of perfect matchings in such bipartite graphs give us
+the number of p-covers and we showed that counting these perfect matchings
+can be done in linear-time. All these results present a tight connection between
+tromino tilings with pegs, maximum flows in flow networks and perfect bipartite
+matchings, thus giving us a new way to understand tromino tiling problems.
+Below we give a couple of open problems that we believe are challenging and
+will deepen our understanding of tromino tilings in general.
+1. In Theorem 1 we showed that our reduction holds only when the number of
+pegs is n/3 and n is a multiple of 3. Suppose now that beside p-trominoes,
+we also have normal (with no hole) trominoes at our disposal. A natural
+question to ask is what will happen if we have n/3− k pegs and k is given.
+Intuitively, if k is “small,” we can construct in linear-time a region network
+and run a polynomial-time algorithm for maximum flow to place p-trominoes
+on pegs. Then, for the squares that remain to be covered we use normal
+trominoes and, since k is close to 0, we can find a tiling by brute force and
+thus in constant-time. On the other hand, if k is “large,” we have only a few
+pegs on the region and our brute force approach does not give us an efficient
+algorithm and in general should be NP-complete. What are the values of k for
+which the P-Tromino tiling problem is NP-complete or admits a polynomial-
+time algorithm? We believe the P-Tromino tiling problem is fixed-parameter
+tractable with k as a parameter.
+12 Javier T. Akagi, Eduardo A. Canale, and Marcos Villagra
+2. The P-Tromino tiling problem, as defined in this paper, is given by a region
+with pegs and trominoes with holes. Now let us suppose that we interchange
+those roles and this time the trominoes have pegs in their corner cells and
+the region has holes. Suppose further that we can place a tromino on any
+hole on the region, even if the tips of the tromino is covering another hole.
+This version of the problem is similar to a p-tromino tiling but it is no the
+same, because now the tips of the trominoes can cover other holes on the
+region. Here we need to change our construction of a region network to allow
+edges between cells with pegs. In this new version of the problem we can also
+ask: how does the number of holes on the region affects the computational
+complexity of the tiling problem? If the number of holes on the region is
+close to n, then the tiling problem is NP-complete. Then, for which number
+of holes on the region does the problem admits a polynomial-time algorithm?.
+References
+1. Akagi, J.T., Gaona, C.F., Mendoza, F., Saikia, M.P., Villagra, M.: Hard and easy
+instances of L-tromino tilings. Theoretical Computer Science 815, 197 – 212 (2020).
+https://doi.org/10.1016/j.tcs.2020.02.025
+2. Conway, J., Lagarias, J.: Tiling with polyominoes and combinatorial group
+theory. Journal of Combinatorial Theory, Series A 53(2), 183 – 208 (1990).
+https://doi.org/10.1016/0097-3165(90)90057-4
+3. Demaine, E.D., Demaine, M.L.: Jigsaw puzzles, edge matching, and polyomino
+packing: Connections and complexity. Graphs and Combinatorics 23(S1), 195–208
+(2007). https://doi.org/10.1007/s00373-007-0713-4
+4. Elkies, N., Kuperberg, G., Larsen, M., Propp, J.: Alternating-sign matrices and
+domino tilings (part I). Journal of Algebraic Combinatorics 1(2), 111–132 (1992).
+https://doi.org/10.1023/a:1022420103267
+5. Golomb, S.W.: Tiling with polyominoes. Journal of Combinatorial Theory 1(2),
+280–296 (1966). https://doi.org/10.1016/S0021-9800(66)80033-9
+6. Horiyama, T., Ito, T., Nakatsuka, K., Suzuki, A., Uehara, R.: Complexity of tiling a
+polygon with trominoes or bars. Discrete & Computational Geometry 58(3), 686–
+704 (2017). https://doi.org/10.1007/s00454-017-9884-9
+7. Moore, C., Robson, J.: Hard tiling problems with simple tiles. Discrete & Computa-
+tional Geometry 26(4), 573–590 (2001). https://doi.org/10.1007/s00454-001-0047-6
+https://doi.org/10.1016/j.tcs.2020.02.025
+https://doi.org/10.1016/0097-3165(90)90057-4
+https://doi.org/10.1007/s00373-007-0713-4
+https://doi.org/10.1023/a:1022420103267
+https://doi.org/10.1016/S0021-9800(66)80033-9
+https://doi.org/10.1007/s00454-017-9884-9
+https://doi.org/10.1007/s00454-001-0047-6
+	Tromino Tilings with Pegs via Flow Networks

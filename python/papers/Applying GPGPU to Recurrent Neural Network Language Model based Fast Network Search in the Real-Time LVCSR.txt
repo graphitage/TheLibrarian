@@ -1,0 +1,486 @@
+Applying GPGPU to Recurrent Neural Network Language Model based Fast
+Network Search in the Real-Time LVCSR
+Kyungmin Lee, Chiyoun Park, Ilhwan Kim, Namhoon Kim, and Jaewon Lee
+DMC R&D Center, Samsung Electronics, Suwon, Korea
+{karaf.lee, chiyoun.park, ilhwans.kim, namhoon.kim, jwonlee}@samsung.com
+Abstract
+Recurrent Neural Network Language Models (RNNLMs) have
+started to be used in various fields of speech recognition due
+to their outstanding performance. However, the high compu-
+tational complexity of RNNLMs has been a hurdle in apply-
+ing the RNNLM to a real-time Large Vocabulary Continuous
+Speech Recognition (LVCSR). In order to accelerate the speed
+of RNNLM-based network searches during decoding, we ap-
+ply the General Purpose Graphic Processing Units (GPGPUs).
+This paper proposes a novel method of applying GPGPUs to
+RNNLM-based graph traversals. We have achieved our goal
+by reducing redundant computations on CPUs and amount of
+transfer between GPGPUs and CPUs. The proposed approach
+was evaluated on both WSJ corpus and in-house data. Experi-
+ments shows that the proposed approach achieves the real-time
+speed in various circumstances while maintaining the Word Er-
+ror Rate (WER) to be relatively 10% lower than that of n-gram
+models.
+Index Terms: Recurrent Neural Network, Language Model,
+General Purpose Graphics Processing Units, Large Vocabulary
+Continuous Speech Recognition
+1. Introduction
+Recently, the Recurrent Neural Network Language Model
+(RNNLM) has gained its popularity in the field of Automatic
+Speech Recognition (ASR). Various academic research has re-
+ported the effectiveness of RNNLMs, which can train unseen
+contexts by sharing the statistics between words with syntacti-
+cally and semantically similar contexts [1, 2, 3, 4, 5]. However,
+heavy computational load of RNNLM over traditional n-gram
+based approaches has been a hurdle in applying the RNNLM
+to diverse areas of ASR applications. Especially, when ASR
+systems are required to run under real-time constraint (i.e., less
+than 1xRT), the real-time decoder is hardly attainable with di-
+rect application of RNNLMs in place of traditional n-grams.
+In order to overcome such computational issues, most of the
+RNNLN systems adopt two-pass decoding strategy, which gen-
+erates lattices or a set of n-best results based on n-gram in the
+first path, and then performs the rescoring on the hypotheses
+with RNNLMs.
+Prior studies have investigated the possibility of implement-
+ing real-time decoder with RNNLM [5]. The study reduced
+computational complexity of the RNNLMs by caching the con-
+ditional probabilities of the words and the results of RNN com-
+putation and reusing the cached data. However, even though the
+computational load was minimized by introducing cache strat-
+egy and reducing redundant computations, the result was still
+far from achieving real-time performance with large vocabulary
+based RNNLM.
+Recent studies have applied the General Purpose Graphic
+Processing Units (GPGPUs) in various fields of ASR [6, 7, 8, 9].
+One of the studies applied the GPGPU to training RNNLMs,
+and showed that the outstanding parallelization capability of
+GPGPU was suitable in minimizing the computational load of
+probability normalization processes [9].
+In this paper, we investigate the possibility of imple-
+menting a GPGPU-based real-time Large Vocabulary Contin-
+uous Speech Recognition (LVCSR) that utilizes RNNLM. Even
+though GPGPUs have powerful parallelization capabilities, ob-
+stacles such as their insufficient memory size and slow data
+transfer speed between GPGPUs and CPUs discourage the use
+of GPGPUs among RNNLM-based real-time decoders. More-
+over, it is also important to balance the computation time be-
+tween GPGPU and CPU, as the acceleration on GPGPU may
+not have a prominent impact on the overall speed if the GPGPU
+needs to wait for the CPU computation to finish.
+In order to achieve real-time decoding of RNNLM-based
+LVCSR, we apply on-the-fly rescoring of RNNLM to GPGPU
+based network traversal technique proposed in [8]. We acceler-
+ate the speed of data exchange between the two heterogeneous
+processors and reduce redundant computations on CPUs by ap-
+plying cache strategies. The resulting recognition system has
+shown almost twice faster than real-time speed when experi-
+mented under various conditions, while maintaining relatively
+10% lower Word Error Rate (WER) than that of conventional
+n-gram models.
+This paper is organized as the following. In section 2, the
+structure of RNNLMs is explained. Section 3 explains how we
+applied GPGPUs to RNNLM-based network search. Section 4
+explains the RNNLM rescoring with caches. Section 5 evalu-
+ates the improvement of the proposed method, followed by the
+conclusion in Section 6.
+2. Recurrent Neural Network
+In order to speed up RNNLM computations, we apply an ef-
+ficient RNNLM architecture described in this section, which
+consists of the hierarchically decomposed output layer [10], and
+Maximum Entropy (MaxEnt) strategy [11].
+2.1. Hierarchical Softmax
+In RNNLM-based ASR system, directly computing the condi-
+tional probability of an input word for a given word sequence
+has high computational complexity since the system needs to
+normalize probabilities over the all the words in the vocabulary.
+In order to alleviate the computational burden, the hierarchi-
+cal softmax method was applied for our RNNLM implementa-
+tion [12].
+The output layer consists of a binary tree. We used Huff-
+ar
+X
+iv
+:2
+00
+7.
+11
+79
+4v
+1 
+ [
+cs
+.C
+L
+] 
+ 2
+3 
+Ju
+l 
+20
+20
+Figure 1: The process of RNNLM-based graph traversals
+man tree method to build up the binary tree because it assigns
+shorter codes to more frequently used words and it leads to fast
+training and decoding speed [14]. In the output layer, the soft-
+max normalization for computing the likelihood is performed
+only over the nodes on the path of the binary tree from the root
+to the input word node so that the computational cost is reduced
+from O(n) to O(logn), where n represents the vocabulary size.
+2.2. Maximum Entropy
+In order to further reduce the computational cost, we interpo-
+lated hash-based MaxEnt models with the RNNLM itself. We
+have used n-gram based MaxEnt models, which has similar ac-
+curacy to traditional n-gram maximum likelihood model and is
+easy to integrate with neural network configuration [13].
+Because the RNN-based and MaxEnt-based Language
+Models (LMs) are complementary to each other [11], interpo-
+lating both LM scores enables us to reduce the size of the num-
+ber of nodes in RNNLM without loss of accuracy. Because the
+size of a hidden layer is a dominant factor for the computational
+complexity of RNNLMs, the amount of computation can be re-
+duced.
+3. GPGPU Acceleration in RNNLM-based
+Graph Search
+GPGPUs have been successfully applied in various fields of
+ASR by virtue of their characteristics of the powerful paral-
+lelism. However, there are some obstacles in utilizing GPGPUs
+for accelerating RNNLM-based network search. First, GPG-
+PUs have insufficient memory to load the whole content of large
+vocabulary RNNLMs. Moreover, the data transfers between
+GPGPUs and CPUs are very time consuming works. This sec-
+tion explains how we apply GPGPUs to RNNLM-based graph
+traversals.
+3.1. On-the-fly RNNLM Rescoring
+We employ the GPGPU-CPU hybrid architecture as noted
+in [8]. The RNNLM-based rescoring is deployed to both GPG-
+PUs and CPUs in such a way that the Weighted Finite State
+Transducer (WFST) which is composition of HCLG networks.
+The G network is composed with a short span n-gram, which
+can be resided in the available GPGPU memory. While the
+frame-synchronous Viterbi search is performed to generate lat-
+tices on the GPGPU side, the LM portion of the lattice score is
+simultaneously rescored with RNNLM in on-the-fly manner on
+the CPU side.
+3.2. RNNLM Context Transfer
+Whenever a new word hypothesis is output from the WFST
+graph traversal on the GPGPU, the word hypothesis and its prior
+RNNLM context are sent to the CPU side so that the RNNLM
+computation can be done on the CPU. After the RNNLM com-
+putation, the resulting rescored score and the updated RNNLM
+context are sent back to GPGPU.
+The exact size of each RNNLM context may depend on the
+structure of the RNNLM, but it is generally larger than a few
+hundreds of bytes. Moreover, the number of new word hy-
+potheses per each frame can be as high as a few thousands,
+and so millions of RNNLM lookups may be requested per an
+utterance. Considering the size of RNNLM context and the
+number of data exchange, the data transfer between GPGPU
+and CPU can cause speed degradation of RNNLM-based on-
+the-fly rescoring WFST traversals. We reduced the size of the
+data transfer by storing the RNNLM contexts on the CPU side,
+and only transferring the indices of the stored context to the
+GPGPU.
+Figure 1 depicts the proposed RNNLM-based graph traver-
+sal processes. Each number and arrow represents bytes and
+the flow of data, respectively. We have created an IndexTable
+for storing and retrieving RNNLM contexts and put the table
+into the CPU memory. The IndexTable is in charge of con-
+verting a large-sized RNNLM context into an 8-byte index, and
+vice versa. Because both encoding and decoding of the con-
+texts need to be performed in a short time, we have made In-
+dexTable bidirectional to handle both purposes. In addition to
+the RNNLM index, the index of the small LM, which corre-
+sponds to an ngram of the LM used to build the WFST graph,
+also needs to be transferred in order to compute and replace the
+small LM score with the RNNLM score. Instead of exchang-
+ing the two index sequences separately, we concatenate the two
+indices into one numerical value in order to further reduce the
+data size per each transaction. With the indexing and packing
+method, we could reduce the exchanged data size to approxi-
+mately 1/30 compared to transmitting the whole context infor-
+mation including a recurrent layer.
+4. RNNLM Rescoring with Cache
+In GPGPU-CPU hybrid architectures, the balance between the
+GPGPU and CPU speed is important, because relatively slower
+speed of CPUs can degrade the overall speed of RNNLM-based
+graph traversals since GPGPUs have to wait until the compu-
+tations on CPUs are finished in order to work synchronously.
+Therefore, a fast RNNLM computation strategy on the CPU
+side is crucial in accelerating the overall on-the-fly rescoring
+time. This section explains the efficient method to speed up
+RNNLM-based graph search on the hybrid architecture.
+4.1. The structure of RNNLM Context Cache
+We have optimized the computation on the CPU side by re-
+ducing the number of redundant computations during RNNLM
+calculation. We use a cache strategy which stores the once-
+computed results and reuses them for the same input contexts.
+Each element in the cache consists of a key-value pair: the
+key consists of a prior RNNLM context and a new word hypoth-
+RnnlmProb(w, c)
+1 I← (w, c)
+2 if Cache[I] exists then
+3 O← Cache[I]
+4 else
+5 C← IndexTable[c]
+6 (p,C′)← ComputeRnnlm(w,C)
+7 if IndexTable−1[C′] exists then
+8 c′← IndexTable−1[C′]
+9 else
+10 c′← lengthOf(IndexTable) + 1
+11 IndexTable[c′]← C′
+12 end if
+13 O← (p,c′)
+14 Cache[I]← O
+15 end if
+16 return O
+Table 1: The process of RNNLM computation with caches
+esis, and the value consists of the resulting RNNLM score for
+the given word and the updated RNNLM context. The RNNLM
+context generally consists of the values in the previous hidden
+layer, but we also use the previous word sequence for computing
+the MaxEnt portion of the RNNLM. Since we are compressing
+the hundred bytes of context data into a 8-byte index by using
+IndexTable as explained in Section 3, we store the compressed
+indices instead of the whole context data.
+4.2. RNNLM Probability Computation with Cache
+Table 1 shows a procedure for the probability computation of
+a word hypothesis in the proposed RNNLM-based network
+search. I represents the key structure of the Cache element and
+it consists of the current RNNLM context index c and the fol-
+lowing word index w. O represents the value structure of the
+Cache element and it consists of the LM probability p and the
+updated RNNLM context index c′. IndexTable compresses the
+RNNLM context data C into an index variable c, and Cache
+stores the already computed pairs of inputs and outputs (I, O).
+The context index c is associated with each path on the
+graph traversal on GPGPUs, and at every time the WFST net-
+work outputs a new word index w, the parameters w and c are
+sent back to the CPU side and fed into the RNNLM likelihood
+computation process. At line 1 of Table 1, the two input pa-
+rameters are stored to the input structure I. In lines 2–3, if I
+is already cached, then the retrieved value of Cache[I] is saved
+to O and is returned without having to do any further compu-
+tations. Otherwise, in lines 4–6, the C is retrieved from the
+IndexTable with the index c, and the function ComputeRnnlm
+computes the conditional probability of w based on the prior
+context C, outputting the RNNLM probability value p and the
+updated context C′.
+On a side note, the hidden layer value is initialized to a
+zero vector at the beginning of each utterance. The length of
+the word sequence in the RNNLM context C is restricted to the
+order of MaxEnt model, and the latest word sequence is main-
+tained by removing the oldest word from the sequence when-
+ever the number of previous words in the context exceeds the
+predefined size.
+In lines 7–12, the updated context C′ is stored into the In-
+dexTable and its index value c′ is retrieved. When the context
+has been already stored before, the corresponding index is re-
+trieved without adding it to the table again. In lines 13–15, p
+and c′ are saved to O, and I and O are cached as a pair of key
+and value for later use. Finally at line 16, O is returned. Dif-
+ference between the returned value and the score of short span
+n-gram will be sent back to the GPGPU side and will be used to
+rescore the partially decoded WFST lattice.
+5. Result
+5.1. Experimental Setup
+The experiments were performed both with the Wall Street Jour-
+nal (WSJ) database and with a much larger set of data collected
+within the company (in-house).
+The acoustic model for evaluating the in-house data was
+trained on 2,000 hours of the fully-transcribed Korean speech
+data. All the speech data were sampled at 16 kHz and were
+coded with 40-dimensional mel-frequency filterbank features,
+plus an additional dimension for the log-energy. The frames
+were computed every 10ms, and was windowed by 25ms
+Hamming window. Five frames to the left and right of the
+given frame were concatenated to the features to make a 451-
+dimensional acoustic feature vector in total. All the acoustic
+models were trained with the Deep Neural Network (DNN)
+which consisted of 5 hidden layers with 2,000 modes each. Rec-
+tified linear unit (ReLU) was used for the activation functions.
+The total number of output states was approximately 6,000.
+The LM trained for evaluation of the in-house data was
+based on a total of 4GB text corpus, which amounts to approx-
+imately 74 million sentences with 475 million words, and the
+vocabulary size was about 1 million. The RNNLMs consist of
+one hidden layer with one hundred nodes, and the order of Max-
+Ent LM features was 3. As for the n-gram models used for the
+comparison to the RNNLM, the 3-gram back-off models with
+Kneser-Ney smoothing were used.
+The WFST was compiled with a bigram LM and all the ep-
+silon transitions were removed from the graph so that the com-
+putation on the GPGPU side can be optimized.
+The evaluation tasks were performed on Intel Xeon X5690
+3.47GHz processors with a total of 12 physical CPU cores and
+one Nvidia Tesla M2075 GPU equipped with 6GB memory.
+5.2. Speed up by Cache
+By considering that the number of rescoring request per each
+utterance is as large as millions, it was expected that naively
+applying RNNLM-based on-the-fly rescoring to ASR system
+would lead to high computational complexity.
+As a matter of fact, our experiment showed that the naive
+application of the RNNLM to the on-the-fly rescoring decoder
+resulted in the speed slower than 10xRT. However, the RTF was
+significantly dropped to much lower than 1xRT when the cache
+strategy explained in section 4 was adopted. The hit ratio of the
+cache was at least 88.66% over all the test cases, showing that
+most of the RNNLM computations were highly redundant.
+5.3. Performance Evaluation
+Figure 2 depicts the performance comparison between RNNLM
+and 3-gram in the in-house 1 million vocabulary evaluation set.
+Various beam widths were applied to each LM in order to in-
+vestigate how the word error rate changes with respect to the
+decoding speed. The figure shows that while the lowest WER
+that 3-gram model can achieve is at around 8.49%, RNNLM
+Figure 2: Comparison of decoding speed and WER for RNNLM
+and 3-gram (in-house)
+Type in-house eval92 dev93
+Pass / Model WER xRT WER xRT WER xRT
+1 / 3-gram 8.49 0.19 5.74 0.16 11.73 0.20
+1 / RNNLM 6.83 0.64 4.15 0.43 10.80 0.40
+2 / hybrid 7.57 0.33 5.74 0.25 11.31 0.27
+2 / RNNLM 8.34 0.33 5.81 0.25 11.46 0.27
+Table 2: Performance comparison of different types of LM
+rescorings
+can reach as low as 6.83% WER at the speed of 0.33 xRT.
+Table 2 shows the performance comparison of four differ-
+ent rescoring methods with same decoding options which show
+the best performance all over the types of decodings. The one-
+pass types were computed by the proposed on-the-fly rescoring
+method, and the two-pass types were evaluated by rescoring the
+1000-best hypotheses extracted from the lattices with 3-gram
+models. The two-pass hybrid type used interpolated score be-
+tween 3-gram and RNNLMs.
+Although the speed of the 1-pass RNNLM type was gener-
+ally slower than that of other types, it was well within a real-
+time speed. This improvement shows that applying more ac-
+curate LMs at the WFST traversal stage at the first-pass leads
+to a better overall recognition result, instead of depending on
+the rescoring on the less accurate hypotheses generated from
+n-gram models.
+5.4. Memory Efficiency
+Another measure to consider is the memory footprint of the In-
+dexTable. Whereas Cache elements consists of only four integer
+values, each element in IndexTable is as large as a few hundred
+bytes and may increase rapidly as the decoding goes on. In
+our experimental settings, each IndexTable item consists of four
+types of information and is as big as 432 bytes, as shown in Ta-
+ble 3. The size of the whole table increases during the decoding
+process and it is proportional to the number of unique elements.
+During the in-house evaluation task, the average memory
+usage for IndexTable per utterance was 191.78MB. More than
+80% of utterances over all evaluation data sets were shorter than
+10 seconds, and average utterance length was about 7.69 sec.
+Considering that the size of the IndexTable will be generally
+proportional to the length of the utterance, we can reasonably
+assume that the memory footprint for the IndexTable is con-
+tained within acceptable size.
+Total Memory # of Elem. Size of Elem.
+Hidden layer 400 100 4
+Word sequence 24 3 8
+MaxEnt Order 4 1 4
+RNNLM Index 4 1 4
+Table 3: The composition and the size of an element in In-
+dexTable (in bytes)
+Capacity(KB) # of Cache Mem.(MB) xRT
+0(=per utt) 69K 57.30 0.64
+250 164K 135.43 0.59
+500 282K 232.86 0.57
+750 406K 334.70 0.57
+1000 560K 461.49 0.57
+Table 4: Cache memory usage and decoding speed depending
+on the capacity of cache (in-house)
+5.5. Caching Over Multiple Utterances
+We noticed that many speakers tend to repeat similar commands
+in different utterances, and so we hypothesized that maintaining
+the cache and IndexTable over multiple utterances may increase
+the hit ratio of the cache and will decrease the decoding speed
+further. Therefore, instead of resetting the caches for each ut-
+terance, we set a certain size boundary for the number of cache
+to be maintained, and kept the information over multiple utter-
+ances. We expected that a larger cache size will lead to a faster
+decoding speed, due to increased cache hit ratio.
+Table 4 shows the decoding speed for different cache ca-
+pacity. The memory usages of caches and the number of caches
+are averaged over all the utterances in the test set.
+However, as can be seen from the table, the decoding speed
+did not get much faster than 1.12x even though the capacity
+of cache increased. We concluded that the result reflects the
+fact that even if the users are prone to speak the similar com-
+mands repeatedly, most of the word hypotheses are different
+for different utterances, and so the cache hit ratio does not
+get higher. Although the multi-utterance cache strategy only
+showed a marginal improvement, it would still be meaningful
+to adopt a smart cache strategy that limits the size of the cache
+by removing the cached items that are least frequently used, so
+that the size of the cache table does not overflow.
+6. Conclusions
+This paper explained how we applied RNNLMs to a real-
+time large vocabulary decoder by introducing the use of GPG-
+PUs. We tried to accelerate RNNLM-based WFST traversals
+in GPGPU-CPU hybrid architectures by solving some practical
+issues for applying GPGPUs. Moreover, in order to minimize
+the computation burden on CPUs, we applied a cache strategy.
+The decoding speed of RNNLMs was still slower than that of
+n-gram models, but the proposed method achieved the real-time
+speed while maintaining relatively 10% lower WER as shown
+in Table 2, and so we could perfectly apply this approach to
+an on-line streaming speech recognition engine. The memory
+footprint for the cache method was small enough to perform the
+experiment on the large data set. However, it will be more desir-
+able to employ efficient cache techniques to reduce the memory
+usage further.
+7. References
+[1] T. Mikolov et al, “Recurrent neural network based language
+model,”in Proc. Interspeech, pp. 1045–1048, 2010.
+[2] L. Gwnol et al, “Conversion of Recurrent Neural Network Lan-
+guage Models to Weighted Finite State Transducers for Automatic
+Speech Recognition,”in Proc. Interspeech, 2012.
+[3] E. Arisoy et al, “Converting Neural Network Language Models
+into Back-off Language Models for Efficient Decoding in Auto-
+matic Speech Recognition,”TASLP,vol. 22, no. 1, 2014.
+[4] T. Hori et al, “Real-time one-pass decoding with recurrent neural
+network language model for speech recognition,” ICASSP, 2014
+[5] Z. Huang et al, “Cache based recurrent neural network language
+model inference for first pass speech recognition,”, ICASSP, 2014
+[6] H. Kou et al, “Parallelized Feature Extraction and Acoustic Model
+Training,” in Proc. Int’l Conf. on DSP, 2014
+[7] I. KIM et al, “Development of Highly Accurate Real-Time Large
+Scale Speech Recognition System,” ICCE,2015
+[8] J. KIM et al, “Efficient On-The-Fly Hypothesis Rescoring in a Hy-
+brid GPGPU/CPU-based Large Vocabulary Continuous Speech
+Recognition Engine,” in Proc. ICASSP, 2014
+[9] X. Chen et al, “Efficient GPGPU-based Training of Recur-
+rent Neural Network Language Models Using Spliced Sentence
+Bunch, ”in Proc. Interspeech, 2014
+[10] F. Morin et al, “Hierarchical probabilistic neural network lan-
+guage model,” in Proc. the Int’l Workshop on AIStats, pp. 246-
+252, 2005
+[11] R. Rosenfeld, “Strategies for training large scale neural network
+language models,” ASRU, 2011.
+[12] A. Mnih et al, “A Scalable Hierarchical Distributed Language
+Model,” NIPS, pp. 1081–1088, 2008
+[13] T. Alumae et al, “Efficient estimation of maximum entropy lan-
+guage models with N-gram features: an SRILM extension,” in
+Proc. Interspeech, 2010.
+[14] T. Mikolov et al, “Distributed Representations of Words and
+Phrases and their Compositionality,” NIPS, pp. 3111–3119, 2013
+	1  Introduction
+	2  Recurrent Neural Network
+	2.1  Hierarchical Softmax
+	2.2  Maximum Entropy
+	3  GPGPU Acceleration in RNNLM-based Graph Search
+	3.1  On-the-fly RNNLM Rescoring
+	3.2  RNNLM Context Transfer
+	4  RNNLM Rescoring with Cache
+	4.1  The structure of RNNLM Context Cache
+	4.2  RNNLM Probability Computation with Cache
+	5  Result
+	5.1  Experimental Setup
+	5.2  Speed up by Cache
+	5.3  Performance Evaluation
+	5.4  Memory Efficiency
+	5.5  Caching Over Multiple Utterances
+	6  Conclusions
+	7  References

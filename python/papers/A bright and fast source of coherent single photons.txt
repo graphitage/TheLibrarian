@@ -1,0 +1,1722 @@
+A bright and fast source of coherent single photons
+Natasha Tomm,1, ∗) Alisa Javadi,1, †) Nadia O. Antoniadis,1 Daniel Najer,1 Matthias C. Löbl,1 Alexander R.
+Korsch,1, 2 Rüdiger Schott,2 Sascha R. Valentin,2 Andreas D. Wieck,2 Arne Ludwig,2 and Richard J. Warburton1
+1)Department of Physics, University of Basel, Klingelbergstrasse 82, CH-4056 Basel,
+Switzerland
+2)Lehrstuhl für Angewandte Festkörperphysik, Ruhr-Universität Bochum, D-44780 Bochum,
+Germany
+(Dated: 27 July 2020)
+A single photon source is a key enabling technology in device-independent quantum communication1,2,
+quantum simulation for instance boson sampling3,4, linear optics-based5,6 and measurement-based quan-
+tum computing7. These applications involve many photons and therefore place stringent requirements on the
+efficiency of single photon creation. The scaling on efficiency is an exponential function of the number of
+photons. Schemes taking full advantage of quantum superpositions also depend sensitively on the coherence
+of the photons, i.e. their indistinguishability8. It is therefore crucial to maintain the coherence over long
+strings of photons. Here, we report a single photon source with an especially high system efficiency: a photon
+is created on-demand at the output of the final optical fibre with a probability of 57%. The coherence of
+the photons is very high and is maintained over a stream consisting of thousands of photons; the repetition
+rate is in the GHz regime. We break with the established semiconductor paradigms, such as micropillars9–14,
+photonic crystal cavities15 and waveguides16–18. Instead, we employ gated quantum dots in an open, tunable
+microcavity. The gating ensures low-noise operation; the tunability compensates for the lack of control in
+quantum dot position and emission frequency; the output is very well-matched to a single-mode fibre. An
+increase in efficiency over the state-of-the-art by more than a factor of two, as reported here, will result in an
+enormous decrease in run-times, by a factor of 107 for 20 photons4.
+A single emitter can be used as a single photon source.
+Unlike a cold atom in vacuum19, an emitter in the solid-
+state is naturally trapped in space20. Semiconductor
+quantum dots have large optical dipole moments, very
+high radiative efficiency and a relatively weak coupling to
+phonons, advantages over other solid-state emitters21–23.
+A single quantum dot under resonant excitation at low
+temperature mimics a two-level system. Photonic en-
+gineering on a nano- or micro-scale is required to fun-
+nel the photons into one specific mode and to couple
+the photons from this mode into a single-mode fibre24,25.
+There are two established techniques. First, in a resonant
+microcavity, photons are emitted preferentially into the
+microcavity mode (the Purcell effect), and in an asym-
+metric microcavity, photon leakage from the microcavity
+acts as an out-coupler. Much success has been achieved
+with micropillars9–14 (for which the β-factor, the proba-
+bility of emission into the microcavity mode, is as high as
+88%9) and with photonic crystal cavities15. Secondly, in
+an on-chip waveguide, photons are emitted preferentially
+into a laterally-propagating mode and a grating couples
+the light off the chip16–18. In this case, a β-factor as
+high as 98% has been demonstrated16. However, in both
+schemes, the system efficiency, the efficiency as measured
+in the final optical fibre, is limited by losses and inefficien-
+cies in the out-coupling. The highest system efficiency
+reported to date is 24%14.
+Coherence depends sensitively on the noise in the de-
+vice. Charge noise results in a fluctuating emission fre-
+∗)Natasha Tomm and Alisa Javadi contributed equally to this work
+†)Electronic mail: alisa.javadi@unibas.ch
+quency; it may also result in telegraph noise should the
+charge state of the quantum dot itself fluctuate. Charge
+noise is extremely low in gated, high-quality material26.
+In particular, the charge state of the quantum dot can be
+locked by Coulomb blockade27. This not only eliminates
+telegraph noise associated with a fluctuating quantum
+dot charge but also allows a single electron (or hole) to be
+trapped on the quantum dot, facilitating a spin-photon
+interface. In a “best of both worlds” device, photonic
+engineering is combined with gated operation.
+Here, we take the microcavity-route to generating sin-
+gle photons from single quantum dots. We use an open
+microcavity28–30. There are some compelling features:
+the microcavity is tunable28; the output is very close to
+a simple Gaussian mode; it is straightforward to incor-
+porate gates29; scattering and absorption losses are ex-
+tremely small29.
+In the generic case (Jaynes-Cummings Hamiltonian
+with atom-cavity coupling g, cavity loss-rate κ, atom de-
+cay rate into non-cavity modes γ), β = FP/(FP + 1)
+where the Purcell factor is FP = 4g
+2/(κγ). The con-
+version efficiency of an exciton in the quantum dot to
+a photon exciting the cavity is η = β · κ/(κ + γ). For
+fixed g and γ, η can be maximised31 by choosing κ = 2g.
+Taking a quantum dot with transform-limited linewidth
+(γ/(2π) = 0.29 GHz) in a microcavity (g/(2π) = 4.4
+GHz)29, the condition κ = 2g implies an efficiency η as
+high as 94%. In other words, ideal behaviour results in
+high efficiency single photon generation. We present a
+realisation of this concept.
+We use a highly miniaturised Fabry-Perot cavity
+(Fig. 1a). The “top” mirror has a concave shape and
+is micro-machined into a silica substrate (Supplemen-
+ar
+X
+iv
+:2
+00
+7.
+12
+65
+4v
+1 
+ [
+qu
+an
+t-
+ph
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+mailto:alisa.javadi@unibas.ch
+2
+-4 -2 0 2 4
+x ( m)
+101 102
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+E
+ff
+ic
+ie
+n
+cy
+S
+tr
+o
+n
+g
+ C
+o
+u
+p
+lin
+g
+ W
+e
+a
+k 
+C
+o
+u
+p
+lin
+g
+top
+/( + )
+top
+/( + )
+10 9 8 7 6 5
+Mirror pairs (N)
+0.5
+0.6
+0.7
+0.8
+0.9
+1
+-100 -50 0 50 100 150
+f (GHz)
+In
+te
+n
+si
+ty
+Laser pulse
+QD
+H-mode
+V-mode
+Intra-cavity pulse
+(a)
+/2  (GHz)
+(b)
+(c)
+FIG. 1. (a) The microcavity. The semiconductor heterostructure consists of a GaAs/AlAs Bragg mirror, the “bottom” mirror,
+and a p-i-n diode. The InGaAs quantum dots are located in the intrinsic region, in tunnel-contact with the Fermi sea in the
+n-layer. The position of the heterostructure can be adjusted (↔, l) with respect to the “top” mirror, a concave mirror in a
+silica substrate, using an XYZ-nanopositioner. A simulation (red points) shows that the output is very close to a Gaussian
+beam (black line). (b) Calculated conversion efficiency, quantum dot exciton to photon exiting the top mirror, as a function
+of the microcavity decay rate κ for “atom”-photon coupling g/(2π) = 4.3 GHz and atom decay rate γ/(2π) = 0.30 GHz.
+η = κtop/(κ+ γ) · β; β = FP/(FP + 1) with FP = 4g2/(κγ). (c) Excitation scheme. The quantum dot is in resonance with the
+H-polarised microcavity mode; the laser is blue-detuned and V-polarised. The driving intensity as experienced by the quantum
+dot is shown.
+tary Information Sec. II); the “bottom” mirror is a
+highly reflective planar mirror, part of the semicon-
+ductor heterostructure28 (Supplementary Information
+Sec. I). Quantum dots in this structure exhibit close-
+to-transform-limited linewidths29. With a highly reflec-
+tive top mirror, the microcavity has Q-factors up to 106
+and the strong coupling regime of cavity-QED can be
+reached29. This allows a precise measurement of the cou-
+pling (g/(2π) = 4.0 GHz) and an estimation of the resid-
+ual losses in the semiconductor (373 ppm per round-trip).
+Here, we use a modest reflectivity top mirror (trans-
+mission 10,300 ppm per round-trip according to the de-
+sign) chosen such that κ ' κtop � κbottom and κ ≈ 2g
+(Fig. 1b). The measuredQ-factor is 12,600, matching the
+value expected from the design of the two mirrors (Sup-
+plementary Information Sec. V). At these Q-factors, the
+residual losses in the semiconductor are negligible. The
+heterostructure contains thin n- and p-type layers with
+the quantum dots in tunnel contact with the electron
+Fermi sea in the n-type layer such that Coulomb block-
+ade is established (Supplementary Information Sec. I). It
+is straightforward to make contacts to the n- and p-type
+layers even in the full microcavity structure. The chip
+is positioned relative to the top mirror in situ (Fig. 1a):
+this tunability is exploited to ensure a match between a
+particular quantum dot and the microcavity mode, both
+in frequency and lateral position.
+A challenge in all optically-driven quantum dot sin-
+gle photon sources is to separate the single photon out-
+put from the driving laser light. A standard scheme is
+to excite and detect in a cross-polarised configuration32.
+Applied to a charged exciton for which the transitions
+are circularly polarised, this scheme leads to a 50% loss
+in the collection efficiency. Here, we avoid this loss.
+We work with the positively-charged exciton, X+. The
+microcavity mode splits into two modes, H- and V-
+3
+-50 -25 0 25 50
+-20
+-10
+0
+10
+20
+f Q
+D
+ (
+G
+H
+z)
+X+
+0
+5
+10
+Counts
+(MHz)
+2.2 1.1 0 -1.1 -2.2
+L
+cavity
+ (nm)
+0.36
+0.41
+0.46
+0.51
+0.57
+V
+g
+ (
+V
+)
+-50 -25 0 25 50
+f
+cavity
+ (GHz)
+0
+5
+10
+15
+20
+D
+e
+ca
+y 
+ra
+te
+ (
+n
+s
+-1
+) H
+V
+0 5 10 15
+0
+10
+20
+30
+40
+C
+o
+u
+n
+ts
+ (
+M
+H
+z)
+0.4
+0.8
+1.2
+1.6
+A
+tt
+e
+n
+u
+a
+te
+d
+ C
+o
+u
+n
+ts
+ (
+M
+H
+z)
+Repetition rate = 76.3 MHz
+(a)
+(b)
+(c)
+Power     nW
+FIG. 2. Single photon flux. (a) Quantum dot (QD1) signal versus z-piezo voltage (microcavity detuning) and bias voltage
+(quantum dot detuning). The positively charged trion X+ is resonant with the microcavity; the dashed lines denote the bound-
+aries of the Coulomb blockade plateau. (b) Radiative decay rate γ (following pulsed resonant excitation) versus microcavity
+detuning for constant bias and constant (x, y)-position. The total Purcell factor FP is determined to be 11 implying β = 93%.
+Via Lorentzian fits, the β-factor specific to the H-polarised mode is determined: βH = 86%. (c) Measured signal versus square
+root of laser power for zero microcavity-X+ detuning. The laser repetition frequency is 76.3 MHz; the detector has an efficiency
+of 42 ± 3%. The signal is deliberately attenuated by a factor of 9.9 (right y-axis). The left y-axis shows the expected signal
+without the attenuation and with a perfect detector. The solid-line is the result of the calculation, describing the response of
+the quantum dot to the driving field (Fig. 1c).
+polarised, separated by 50 GHz, on account of a small
+birefringence (Supplementary Information Sec. III); the
+spectrum of the laser pulses is larger than this splitting
+(Fig. 1c). The quantum dot is tuned into resonance with
+the higher-frequency, H-polarised mode. The laser is V-
+polarised and blue-detuned with respect to both micro-
+cavity modes such that the tails of the laser spectrum
+and the V-polarised microcavity mode overlap at the fre-
+quency of the H-polarised mode (Fig. 1c). The quantum
+dot emits preferentially into the H-polarised microcav-
+ity mode. A cross-polarised scheme now separates the
+V-polarised laser pulses from the H-polarised single pho-
+tons with a loss depending only on the unwanted coupling
+of the quantum dot to the V-polarised mode (Supple-
+mentary Information Sec. VI). Provided that the mode-
+splitting is larger than the mode linewidths14, this loss is
+small.
+Experimentally, we choose a quantum dot and max-
+imise the coupling of the X+-resonance to the microcav-
+ity. To do this, we record a decay curve following res-
+onant excitation: the radiative decay rate is largest at
+maximum coupling. The quantum dot and microcavity
+frequencies are tuned to establish a resonance (Fig. 2a).
+The Purcell-factor is determined by scanning the micro-
+cavity frequency: on resonance with a microcavity mode,
+the decay time is just 47.5 ps; far detuned, the decay
+time tends to 520 ps, resulting in FP = 10 for QD1 (12
+for QD6) (Fig. 2b). On resonance with the H-polarised
+microcavity mode, we determine βH, the probability of
+emission into the H-polarised mode, to be βH = 86%.
+We now maximise the flux of single photons. Imple-
+menting the excitation scheme (Fig. 1c), the central fre-
+quency of the laser is tuned to find the maximum sig-
+nal. As a function of laser power, the quantum dot sig-
+nal exhibits oscillations, indicative of Rabi oscillations
+(Fig. 2c). The laser power is set at the maximum signal
+corresponding to the best implementation of a π-pulse.
+An intensity autocorrelation measurement demonstrates
+clear photon antibunching and a high purity of single
+photon generation, g(2)(0) = 2.1% (Fig. 3a). The purity
+4
+is limited by a small amount of laser light leaking into
+the detection channel (0.3% of total signal) and double-
+excitation events.
+The main new feature over previous experiments is the
+very high efficiency of the source. On excitation with a
+π-pulse, we obtain an on-demand, coherent single photon
+at the output of the collection fibre (a standard optical
+fibre) with a probability of 57%. The efficiency is deter-
+mined from the photon flux. At a repetition frequency
+of 76.3 MHz, we attenuate the beam by a factor of 9.9
+(to avoid saturating the detector) and measure the count
+rate (Fig. 2c). Taking account of the detector efficiency
+and a small nonlinearity in the detector’s response (Sup-
+plementary Information Sec. VII), we determine the sys-
+tem efficiency, the probability of creating a single photon
+at the output of the system’s final optical fibre, to be
+53± 3% for QD1 (57± 3% for QD6).
+The coherence of the single photons is probed with
+two-photon interference, a Hong-Ou-Mandel (HOM) ex-
+-15 -10 -5 0 5 10 15
+ (ns)
+0
+1
+2
+3
+E
+ve
+n
+ts
+ (
+1
+0
+3
+)
+g(2)(0) = 2.1%
+-15 -10 -5 0 5 10 15
+0
+1
+2
+3
+-3 -2 -1 0 1 2 3
+ (ns)
+0
+2
+4
+6
+8
+E
+ve
+n
+ts
+ (
+1
+0
+3
+) Delay = 1 ns
+V = 96.0%
+V
+raw
+ = 91.6%
+HOM 
+HOM ||
+-3 -2 -1 0 1 2 3
+-15 -10 -5 0 5 10 15
+ (ns)
+0
+5
+10
+E
+ve
+n
+ts
+ (
+1
+0
+3
+)
+Delay = 1.5 s
+V = 97.5%
+V
+raw
+ = 91.3%
+HOM 
+HOM ||
+-15 -10 -5 0 5 10 15
+(a)
+(b)
+(c)
+FIG. 3. Quantum-optics characterisation. (a) Autocorrela-
+tion g(2) versus delay τ (QD1). (b), (c) Hong-Ou-Mandel
+(HOM) experiment (QD1) showing two-photon interference
+for photons created 1 ns and 1.5 µs apart in time, (b) and
+(c), respectively.
+periment. On creating two photons 1 ns apart in time,
+the raw HOM visibility is Vraw = 91.6% (Fig. 3b). Cor-
+recting for a small imperfection in the HOM interferom-
+eter, Vraw = 92.5%. The HOM visibility is negatively
+influenced by the finite g(2)(0): following the standard
+procedure33, the “true” photon overlap can be estimated
+to be V ' (1 + 2g(2)(0)) · Vraw = 96.7% (Supplemen-
+tary Information Sec. IV). This demonstrates that suc-
+cessively generated photons are highly coherent. Crucial
+however is the coherence of photons separated much fur-
+ther apart in time. The HOM visibility on interfering
+two photons separated by 1.5 µs in time is equally high
+(Fig. 3c). Given that photons can be created each nano-
+second (Fig. 3b), these experiments demonstrate that
+the device can produce a string consisting of thousands
+of highly coherent photons. The coherence time of the
+source is clearly much larger than 1.5 µs (Supplementary
+Information Sec. IV).
+The single-photon source is very stable in time. The
+noise in the single photon flux is limited by shot-noise on
+time-scales of one hour (Fig. 4a), increasing only slightly
+on time-scales of multiple hours (Fig. 4b). The tunabil-
+ity of the microcavity enables us to bring multiple quan-
+tum dots one-by-one into resonance with the same mi-
+crocavity mode. Six quantum dots were investigated in
+detail. All six have essentially the same values of single
+photon purity, system efficiency (Fig. 4c) and coherence
+(Fig. 4d).
+The system efficiency, Σ, here 53%–57% (QD1–QD6),
+is a product of factors, Σ = π ·βH ·κtop/(γ+κtotal) ·ηoptics
+where π is the probability of producing a photon on ex-
+citation with a laser pulse; and ηoptics represents the
+throughput of the entire optical system (from micro-
+cavity to the output from the final output fibre). βH
+and κtop/(γ + κtotal) are both determined precisely in
+the experiment, 86% and 96%, respectively. βH matches
+theoretical expectations based on the optical dipole mo-
+ment and the microcavity geomertry (Supplementary In-
+formation Sec. V). To determine π, we describe the ex-
+citation scheme, a detuned laser pulse followed by ring-
+down, and how it drives a two-level system, including an
+intensity-dependent phonon-related dephasing process34
+(Supplementary Information Sec. VIII). This calculation
+describes the Rabi oscillations very successfully (Fig. 2c),
+enabling us to infer that at the peak signal, π = 96.3%.
+The remaining factor, ηoptics (68%), accounts for the
+throughput losses in the optical components, losses on
+coupling the single photons into the single-mode fibre,
+and reflection losses at three surfaces (upper surface of
+top mirror, two fibre facets) which lacked an antireflec-
+tion coating. The conclusion of this analysis is that the
+main contribution to the losses lies in ηoptics, i.e. in the
+classical optics. The quantum effects, the coupling to
+the vacuum mode of the microcavity and the scheme to
+invert the two-level system via the off-resonance micro-
+cavity mode, are under excellent control.
+Based on this analysis, a single photon source with a
+system efficiency of 80% is within reach by eliminating
+5
+0 0.5 1
+Time (hours)
+158
+159
+160
+161
+162
+163
+C
+o
+u
+n
+ts
+ (
+k/
+0
+.1
+s)
+/mean = 0.30%
+0 5000
+Events
+158
+159
+160
+161
+162
+163
+0 5 10
+Time (hours)
+160
+162
+164
+166
+C
+o
+u
+n
+ts
+ (
+k/
+0
+.1
+s)
+/mean = 0.44%
+0 100
+Events
+1 2 3 4 5 6
+Quantum dot number
+35
+40
+45
+C
+o
+u
+n
+t 
+ra
+te
+ (
+M
+H
+z)
+1 2 3 4 5 6
+Quantum dot number
+0.9
+0.95
+1
+H
+O
+M
+ v
+is
+ib
+ili
+ty
+(a)
+(b)
+(c)
+(d)
+FIG. 4. Stability. Single photon flux versus time and associated histogram recorded over one hour and over ten hours, (a) and
+(b), respectively, on QD1. Maximum count rates and HOM visibilities recorded on six separate quantum dots, (c) and (d),
+respectively. The blue data points correspond to the corrected visibility of the source, V ; the green points represent Vraw.
+the losses in the optical components. Even better
+performance is conceivable by improving the quantum
+effects – an increased coupling (via miniaturisation of
+the top mirror), a decreased bare decay rate (via lateral
+structuring), and a larger microcavity mode-splitting
+will all increase the efficiency. In addition to the
+applications as a single photon source, a further broad
+area of application exploits the spin of the trapped hole.
+Implementing spin manipulation in the microcavity
+device, for instance via lateral excitation (an “atom”
+drive), will facilitate applications such as a single photon
+transistor35, the efficient and fast creation of spin-photon
+entangled pairs, and an efficient source of multi-photon
+cluster states36.
+Acknowledgements We thank Alistair Brash, Peter
+Lodahl, Nicolas Sangouard and Sebastian Starosielec for
+fruitful discussions. We acknowledge financial support
+from SNF project 200020 156637, NCCR QSIT and
+Horizon-2020 FET-Open Project QLUSTER. A.J. ac-
+knowledges support from the European Unions Horizon
+2020 Research and Innovation Programme under the
+Marie Sk lodowska-Curie grant agreement No. 840453
+(HiFig). S.R.V., R.S., A.L. and A.D.W. acknowledge
+gratefully support from DFH/UFA CDFA05-06, DFG
+TRR160, DFG project 383065199, and BMBF Q.Link.X.
+Author contributions N.T. and A.J. contributed
+equally to this work. N.T., A.J., N.O.A. and D.N.
+carried out the microcavity experiments. M.C.L. char-
+acterised the quantum dots and optimised the photon
+counting hardware. N.T. and D.N. fabricated the curved
+mirror. D.N., A.L. and R.J.W. designed the heterostruc-
+ture. D.N. developed the surface passivation technique.
+A.R.K., R.S., S.R.V., A.D.W. and A.L. fabricated the
+semiconductor device. A.J. developed the model of the
+excitation mechanism. D.N. carried out the numerical
+simulations of the microcavity mode. N.T., A.J. and
+R.J.W. wrote the paper with input from all authors.
+Competing interests The authors declare no compet-
+ing interests.
+Correspondence and requests for materials should
+be addressed to A.J.
+6
+SUPPLEMENTARY INFORMATION
+I. HETEROSTRUCTURE DESIGN AND GROWTH
+The heterostructure is grown by molecular beam epi-
+taxy (MBE) and consists of an n-i-p diode with embedded
+self-assembled InGaAs quantum dots (QDs). This design
+allows for QD frequency tuning via the dc Stark effect as
+well as QD charging via Coulomb blockade. The n-i-
+p diode is grown on top of a semiconductor distributed
+Bragg reflector (DBR), a planar “bottom” mirror, com-
+posed of 46 pairs of AlAs (80.6 nm thick)/GaAs (67.9 nm
+thick) quarter-wave layers (QWLs) with a centre wave-
+length of nominally 940 nm (measured: 917 nm). Below
+the DBR, an AlAs/GaAs short-period superlattice (SPS)
+composed of 18 periods of 2.0 nm AlAs and 2.0 nm GaAs
+is grown for stress-relief and surface-smoothing.
+From bottom to top (see Supplementary Fig. 1a), the
+diode consists of an n-contact, 41.0 nm Si-doped GaAs,
+n+, doping concentration 2 · 1018 cm−3. A 25.0 nm layer
+of undoped GaAs acts as a tunnel barrier between the
+n-contact and the QDs. The self-assembled InGaAs QDs
+are grown by the Stranski-Krastanov process and the QD
+emission is blue-shifted via a flushing-step37. The QDs
+are capped by an 8.0 nm layer of GaAs. A blocking bar-
+rier, 190.4 nm of Al.33Ga.67As, reduces current flowing
+across the diode in forward-bias. The p-contact consists
+of 5.0 nm of C-doped GaAs, p+ (doping concentration
+2 · 1018 cm−3) followed by 20.0 nm of p++-GaAs (doping
+concentration 1 · 1019 cm−3). Finally, there is a 54.6 nm-
+thick GaAs capping layer.
+The layer thicknesses are chosen to position the QDs at
+an antinode of the vacuum electric field. The p-contact
+is centred around a node of the vacuum electric field to
+minimise free-carrier absorption in the p-doped GaAs.
+Coulomb blockade is established on times comparable to
+the radiative decay time for GaAs tunnel barriers typi-
+cally <∼ 40 nm thick. This is less than the thickness of a
+QWL thereby preventing the n-contact being positioned
+likewise at a node of the vacuum electric field. How-
+ever, at a photon energy 200 meV below the bandgap38,
+the free-carrier absorption of n+-GaAs (α ≈ 10 cm−1) is
+almost an order-of-magnitude smaller than that of p++-
+GaAs (α ≈ 70 cm−1). The weak free-carrier absorption of
+n+-GaAs is exploited in the design presented here by us-
+ing a standard 25 nm thick tunnel barrier. The n-contact
+is positioned close to a vacuum field node, although not
+centred around the node itself.
+After growth, individual 3.0 × 2.5 mm2 pieces are
+cleaved from the wafer. The QD density increases from
+zero to ∼ 1010 cm−2 in a roughly centimetre-wide stripe
+across the wafer. The sample used in the experiments
+presented here was taken from this stripe. Its QD den-
+sity, measured by photoluminescence imaging, is approx-
+imately 7× 106 cm−2.
+Separate ohmic contacts are made to the p++ and n+
+layers. For the n-contact, the capping layer, the p-doped
+layers and part of the blocking barrier are removed by
+a local etch in citric acid. On the new surface, NiAuGe
+is deposited by electron-beam physical vapour deposi-
+tion (EBPVD). Low-resistance contacts form on thermal
+annealing. To contact the p-doped layer, the capping
+layer is removed by another local etch. On the new sur-
+face, a Ti/Au contact pad (100 nm thick) is deposited
+by EBPVD. Although this contact is not thermally an-
+nealed, it provides a reasonably low-resistance contact to
+the top-gate on account of the very high p-doping (Sup-
+plementary Fig. 1a).
+After fabricating the contacts to the n- and p-layers,
+the contacts are covered with photoresist and a passiva-
+tion layer is deposited onto the sample surface. A thin
+native oxide layer on the surface is removed by etching a
+few nm of GaAs in HCl. Following a rinse in deionised
+water, the sample is immersed in a bath of ammonium
+sulphide ((NH4)2S). Subsequently, the sample is trans-
+ferred rapidly into the chamber of an atomic-layer de-
+position (ALD) setup. An 8 nm layer of Al2O3 is de-
+posited using ALD at a temperature of 150◦C. With the
+present heterostructure, this process is essential to re-
+duce surface-related absorption: a low-loss microcavity
+is only achieved following surface-passivation29. An ad-
+vantage of the surface passivation lies in the fact that it
+prevents the native oxide of GaAs from re-forming after
+its removal: it provides a stable termination to the GaAs
+heterostructure39. Following the surface-passivation pro-
+cedure and photoresist stripping, the NiAuGe and Ti/Au
+films are wire-bonded to large Au pads on a sample
+holder. Using silver paint, macroscopic wires (twisted
+pairs) are connected to the Au pads.
+When applying a voltage across the gates of this n-type
+device, the neutral exciton, X0, is observed at intermedi-
+ate biases. The negatively-charged trion, X−, is observed
+at more positive bias, and the positively-charged trion,
+X+ at more negative voltages. This particular device
+presents a small leakage current at the X− voltage, mak-
+ing it more appropriate to work with X+ instead. Given
+a source of holes, n-type devices exhibit Coulomb block-
+ade of positively-charged excitons40. The X0 and X+ can
+both be excited by the same laser pulse. The splitting
+between X0 and X+ varies from QD to QD in a range
+between 606 GHz (QD1) to 143 GHz (QD3). At lower
+voltages, the QD is initially empty. On exciting an X0
+the electron tunnels out rapidly leaving a single hole, al-
+lowing the X+ transition. Should the QD lose its residual
+hole for any reason, the process repeats very rapidly.
+II. CURVED MIRROR FABRICATION
+The top mirror is fabricated in a 0.5 mm thick fused-
+silica substrate. An atomically-smooth crater is ma-
+chined at the silica surface via CO2-laser ablation
+41,42.
+We achieve craters with a similar radius of curvature as
+described in Ref.42, but with a shallower profile by sub-
+stituting the focusing lens in the ablation setup by a lens
+with NA = 0.67.
+7
+��� ������
+1 µm
+p++ GaAs
+InAs QDs
+GaAs
+n+ GaAs
+p++ GaAs
+p+ GaAs
+passivation layer
+AlAs (λ/4)
+GaAs (λ/4)
+×46
+AlAs/GaAs SPS (λ/4)
+GaAs (100)-wafer
+Al.33Ga.66As
+blocking barrier
+Vg capping layer
+Ti
+/A
+u
+N
+iA
+uG
+e
+0 2 4 6
+4
+6
+8
+10
+12
+14
+16
+18
+z
+(µ
+m
+)
+r (µm)
+0.0
+0.50
+1.0
+|E /Emax|
+fit:
+w0= 1.05 µm
+(NA=0.28)
+Supplementary Fig. 1. Heterostructure design and numerical simulation of the microcavity. (a) The semiconductor het-
+erostructure consists of a DBR and an n-i-p diode structure with embedded self-assembled InGaAs QDs. (b) Numerical simulation of the
+vacuum electric field |Evac| confined by the microcavity (image to scale). (c) Colour-scale plot: normalised electric field within the SiO2
+substrate supporting the “top” mirror. Contour lines: fit of a Gaussian beam to the calculated normalised electric field. The fit yields a
+beam waist of w0 = 1.05µm corresponding to a numerical aperture of NA = 0.279. |Emax| is the maximum electric field amplitude in this
+particular domain.
+The profile of the fabricated crater is measured by
+a confocal laser scanning microscope (Keyence Corpo-
+ration), as shown in Supplementary Fig. 2a. From the
+two-dimensional height profile, two principal axes can be
+identified, and the profile parameters can be extracted
+(Supplementary Fig. 2b). The radius of curvature of
+this crater is R = (11.98 ± 0.02)µm and the sagittal
+height s = (0.41 ± 0.02)µm. After laser ablation, the
+crater is coated with 8 QWL-pairs of Ta2O5 (refractive
+index n = 2.09 at λ0 = 920 nm) and SiO2 (n = 1.48
+at λ0 = 920 nm) layers (terminating with a layer of
+Ta2O5) by ion-beam sputtering at a commercial com-
+pany (Laseroptik GmbH), see Supplementary Fig. 1b.
+III. MICROCAVITY CHARACTERISATION
+The microcavity is a highly miniaturised Fabry-Perot
+type resonator. A fundamental mode is resonant for a
+given laser frequency at a particular microcavity length.
+In order to determine the Q-factor of the microcavity, a
+dark-field measurement is performed, as shown in Sup-
+plementary Fig. 3. Given the spectral tunability of the
+microcavity, its Q-factor can be determined for a wide
+wavelength range within the stopband of the mirrors,
+centred around λ0 = 919 nm.
+Supplementary Fig. 3 shows such a measurement per-
+formed on a fundamental mode at λ0 = 922 nm. The fun-
+damental mode splits into two modes, each linearly po-
+larised, with opposite polarisations, H and V. The mode-
+splitting is 34.6 GHz in Supplementary Fig. 3. The H and
+V axes align with the crystal axes of the semiconductor
+wafer. This points to the physical origin of the mode-
+splitting: a small birefringence in the semiconductor.
+The birefringence is probably induced by a very small
+uniaxial strain. The splitting of the fundamental micro-
+cavity mode into two separate modes together with the
+linear, orthogonal polarisations of these two modes are
+exploited in the experiment to achieve high efficiencies
+in our experiment, as discussed in Sec. VIII. The mode-
+splitting is, therefore, an important parameter. Perform-
+ing this measurement at different locations on the sample
+yields similar values of Q-factor but a spread in mode-
+splittings. For the quantum dots investigated, QD1 to
+QD6, the splitting lies between 34.6 (QD6) and 50 GHz
+(QD1).
+The Q-factors of both H- and V-polarised modes are
+extracted from the dark-field spectrum (green and blue
+curves in Supplementary Fig. 3) yielding QH = 11, 900
+and QV = 12, 800. The finesse is F = 506 ± 13. F was
+determined by microcavity scanning at a wavelength of
+922 nm, the same wavelength used for the determination
+of theQ-factors. Unlike the mode-splitting, theQ-factors
+are the same at different locations on the sample.
+The microcavity does not have a monolithic design and
+is potentially susceptible to environmental noise, vibra-
+8
+5 10 15
+5
+10
+15
+ 
+ 
+x (µm)
+y 
+(µ
+m
+)
+0
+0.44
+Height (µm)
+���
+* *
+���
+0 5 10 15
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+H
+ei
+gh
+t (
+µm
+)
+Radial distance (µm)
+R = 12 µm 
+s = 0.41 µm 
+Supplementary Fig. 2. Geometrical characterisation of the curved mirror. Following CO2-laser machining, the fabricated crater’s
+profile is measured with a confocal laser scanning microscope. (a) Height map of the crater determined with sub-nm resolution. From
+the height map, the two principal planes are extracted by fitting a two-dimensional Gaussian function to the data. (b) By evaluating
+the height information along the two principal axes, it is possible to extract the crater’s parameters such as the radius of curvature
+R = (11.98 ± 0.02)µm, sagittal height s = (0.41 ± 0.01)µm, and asymmetry of 4.5%. This crater is exactly the one used in the single
+photon experiments described in the main text.
+tions and acoustic noise. The microcavity is operated in
+a helium bath-cryostat. The cryostat is shielded from
+vibrational noise by an active damping stage and from
+air-borne acoustic noise by an acoustic enclosure. Using
+the microcavity itself as a noise sensor shows that envi-
+ronmental noise is significant only when operating with
+a finesse above 10, 00042, corresponding to a Q-factor of
+approximately 105 with the present design. Here, the Q-
+factor is approximately 104 and the experiment was not
+troubled by residual environmental noise.
+IV. COHERENCE OF THE SINGLE PHOTONS
+We outline the procedure to extract the visibility of
+the Hong-Ou-Mandel (HOM) interference and present
+the visibility of the HOM interference as a function of
+the delay between single photons from the same source.
+The HOM interference between subsequent photons is
+measured by launching the stream of single photons into
+a Mach-Zehnder interferometer with a variable arm. The
+variable arm introduces a time delay between the photons
+that interfere. Supplementary Fig. 4a shows the optical
+setup for the HOM measurements. The combination of
+a half-wave plate and a polarising beam splitter (PBS)
+is used to realise a variable beam-splitter. Three fibre-
+based wave-retarders are utilised to match the polarisa-
+tion of the light at the inputs of the fibre beam-splitter,
+and hence to maximise the classical visibility of the in-
+terferometer (1−�). In order to quantify the interference
+between the two photons, the time delay between the
+“clicks” on the two detectors D1 and D2 is measured in
+the case when the classical visibility of the interferome-
+ter is maximised (HOM‖). The red data-points in Fig. 3b
+and 3c of the main text correspond to HOM‖ measure-
+ments. A second half-wave plate can be inserted into the
+beam path to make the photons from the two arms dis-
+HV
+D
+ar
+k-
+fie
+ld
+ s
+ig
+na
+l (
+co
+un
+ts
+/s
+)
+∆fcavity (GHz)
+-100 -80 -60 -40 -20 0 20 40 60 80 100
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+0.0
+Supplementary Fig. 3. Dark-field spectroscopy of the mi-
+crocavity. Signal versus optical frequency expressed as a detuning
+with respect to the upper-frequency resonance. The microscope
+operates in dark-field mode with principal axes lying at 45 de-
+grees to the principal axes of the microcavity. The wavelength is
+λ0 = 922 nm. The fundamental mode splits into two modes both
+with linear polarisation, one H-polarised, the other V-polarised.
+The H- and V-axes correspond to the crystal axes of the GaAs
+wafer. The transmission data (red dots) are fitted to a double-
+Lorentzian function (blue and green curves) yielding Q-factors for
+the two polarised modes: QH = 11, 900 and QV = 12, 800. The
+mode-splitting is 34.6 GHz.
+9
+���
+0    500           1000        1500
+Delay (ns)
+0.88
+0.9
+0.92
+0.94
+0.96
+0.98
+1
+1.02
+H
+O
+M
+ v
+is
+ib
+ili
+ty
+Raw visibility
+Corrected visibility
+���
+Supplementary Fig. 4. HOM setup and the visibility
+of HOM interference versus time delay between the
+photons. (a) The optical setup used for HOM measure-
+ments. The particular structure of the setup increases the
+mechanical stability of the interferometer and makes it easy
+to change the delay between the two photons by changing the
+fibre delay-loop. (b) V and Vraw as a function of the delay
+between the interfering photons.
+tinguishable and hence yield the curves labeled HOM⊥,
+grey data points in Fig. 3b and 3c of the main text. The
+raw visibility of the HOM interference is calculated as
+the ratio of the area underneath the curve around zero
+delay for the two measurements, Vraw = 1−
+A‖
+A⊥
+.
+Imperfections in the HOM setup as well as the finite
+value of g(2)(0) influence the measured Vraw. These im-
+perfections can be accounted for in order to determine
+the true overlap V of two single photon states produced
+by the source. If P2 is the probability of creating two
+photons with one laser pulse, P1 the probability of creat-
+ing a single photon and P0 the probability of creating the
+vacuum state, then V can be calculated from Vraw under
+the assumptions that P2 � P1 � P0 and that the two
+photons in the two-photon pulse are distinguishable33. In
+principle, further corrections arise in the case P2 � P1
+but P1 ≥ P0, as achieved at the output fibre of the
+experiment. (An additional HOM signal arises when a
+two-photon and a single-photon pulse are created succes-
+sively.) In practice however, the HOM setup has a low
+throughput and hence the assumption P2 � P1 � P0 is
+reasonably fulfilled in the HOM measurements.The result
+is:
+V =
+1
+(1− �)2
+(
+1 + 2g(2) (0)
+)(R2 + T 2
+2RT
+)
+Vraw, (1)
+where T and R are the transmission and reflection coeffi-
+cients of the fibre beam-splitter, and (1−�) is the classical
+visibility of the interferometer. Assuming further that R
+and T are close to 50%,
+V =
+1
+(1− �)2
+(
+1 + 2g(2) (0)
+)(
+1 + 2 (R− T )2
+)
+Vraw. (2)
+We characterised the optical setup and extracted R =
+0.495, T = 0.505 and (1 − �) = 0.995 ± 0.0025. The
+correction due to the imbalance in the beam-splitter is
+negligible as the splitting ratio is close to 0.5:0.5 such
+that the main contributions to the correction arise from
+the limited visibility of the interferometer and the small
+but finite g(2)(0) of the source.
+Supplementary Fig. 4b shows the raw and the cor-
+rected HOM visibilities as a function of the delay in the
+interferometer. The error bars on Vraw represent the er-
+rors arising from the shot noise of the detector. The
+error bars on V include in addition uncertainties in the
+exact visibility of the interferometer and uncertainties in
+g(2)(0). Within error, V is insensitive to the time de-
+lay between the interfering photons, indicating that the
+coherence time of the source is significantly longer than
+1.5 µs.
+V. NUMERICAL SIMULATION OF THE MICROCAVITY
+A. Calculation of the Q-factor
+The microcavity Q-factor was calculated using a one-
+dimensional transfer matrix simulation (The Essential
+Macleod, Thin Film Center Inc.). The top mirror is de-
+scribed using the design parameters taking the manu-
+facturer’s values for the refractive index (mirror design:
+silica-(HL)7H with H (L) a quarter-wave layer in the
+high- (low-) index material at wavelength 920 nm, refrac-
+tive indices 2.09 (1.48)). The transmission loss per round
+trip of the top mirror is 10,300 ppm. The bottom mirror
+has a nominal design GaAs-(HL)46-active layer with H
+(L) a quarter-wave layer in GaAs (AlAs) at wavelength
+940 nm, as shown in Supplementary Fig. 1a. In prac-
+tice, the layers become gradually thinner during growth.
+The wavelength of the stopband and the oscillations in
+reflectivity out with the stopband can be very well de-
+scribed by postulating a linear change in thickness dur-
+10
+5 10 15 20 25
+Radius of curvature ( m)
+910
+920
+930
+940
+950
+960
+W
+a
+ve
+le
+n
+g
+th
+ (
+n
+m
+)
+0
+5000
+10000
+15000
+Q-factor
+101
+Radius of curvature ( m)
+0.4
+0.6
+0.8
+1
+1.2
+1.4
+1.6
+Q
+-f
+a
+ct
+o
+r
+104
+wavelength = 920nm
+Experiment
+(a) (b)
+Supplementary Fig. 5. Effect of diffraction losses on the Q-factor. (a) Calculated Q-factor as a function of the wavelength and
+the radius of the curvature of the top mirror. The Q-factor is maximum at the centre of the stopband (920 nm). (b) A cut-through of the
+data at the wavelength of 920 nm corresponding to the blue line in part (a). The Q-factor drops significantly for radii smaller than 6µm
+signalling diffraction losses. For larger radii the Q-factor approaches 15,200.
+ing growth29. The losses in the entire semiconductor het-
+erostructure (including the free-carrier absorption in ac-
+tive layer) can be assessed by measuring the Q-factors
+with an extremely reflective, extremely low-loss top mir-
+ror: the transmission loss is just 1 ppm per round trip;
+the absorption/scattering losses amount to 373 ppm per
+round-trip29. These losses are negligible compared to
+the transmission loss of the top mirror. The simulated
+Q-factor for the semiconductor DBR – GaAs active layer
+(6 QWLs) – air-gap (4 QWLs) – top mirror structure is
+about 14,000. This is very close to the measured value,
+12,600, taking here an average over the positions of the 6
+QDs evaluated in this work, and averaging over the two
+microcavity modes.
+Another possible source of losses in a microcavity is
+diffraction losses at the DBR mirrors, also termed “side-
+losses” in the micropillar community43,44. For tightly
+confined modes, the angular spread in k-space expands,
+increasing the losses in the DBR mirrors and reducing the
+Q-factor. We carried out numerical simulations to probe
+the effect of the radius of the curvature on the Q-factor.
+Supplementary Fig. 5a shows the Q-factor as a function
+of the wavelength and R. Supplementary Fig. 5b shows
+a cut-through of the data at the centre of the stopband
+(920 nm). As expected, for small radii the Q-factor is a
+strong function of R and drops to 4,600 at R = 2.3µm.
+At large radii (R > 6µm), the Q-factor is a weak func-
+tion of R, and saturates at a value of 15,200. We use a
+top mirror with R = 11.98µm in our experiments. We
+calculate a Q-factor of 15,000 for this R at the centre
+of the stopband, very close to the value at large radii.
+Hence, we conclude that side losses are negligible in our
+experiment. The Q-factor calculated with the exact top
+mirror used in the experiment reduces to 14,000 due to
+slightly reduced reflectivity achieved during coating rel-
+ative to the designed structure.
+B. Calculation of the QD-microcavity coupling
+In order to estimate the QD-microcavity coupling, a
+finite-elements method (Wave-Optics Module of COM-
+SOL Multiphysics) is used to compute the vacuum elec-
+tric field amplitude |Evac(r, z)| confined by the micro-
+cavity (Supplementary Fig. 1b). The model assumes ax-
+ial symmetry about the optical axis ((x, y) = 0). We
+use a 1µm thick perfectly index-matched layer at all
+outer boundaries of the simulation to prevent internal
+reflections. The model takes a top mirror with radius
+of curvature R = 11.98µm and sagittal height s =
+0.41µm, exactly the mirror used in the experiments (see
+Sec. II). This model also allows the Q-factor to be de-
+termined, yielding Q = 14, 000, in agreement with the
+one-dimensional transfer matrix calculation. Q = 14, 000
+corresponds to κ/(2π) = 23.3 GHz where κ is the de-
+cay rate of the microcavity. At the location of the QDs
+(z = zQD) in the exact anti-node of the microcavity mode
+(r = 0), the field is |Evac(0, zQD)| = 35, 000 V/m. A QD
+at these wavelengths (920 nm) has an optical dipole of
+µ/e = 0.71 nm where e is the elementary charge45. The
+X+ consists of two degenerate circularly-polarised dipole
+transitions (at zero magnetic field). We consider the in-
+teraction of one of these circularly-polarised dipoles with
+a linearly-polarised microcavity mode. The predicted
+QD-cavity coupling is therefore h̄g = µ ·Evac(0, zQD)/
+√
+2
+giving g/(2π) = 4.24 GHz. This dipole moment implies
+a natural radiative decay rate of 1.72 ns−1, equivalently
+γ/(2π) = 0.27 GHz (assuming the dipole approximation
+in an unstructured medium). The calculated Purcell fac-
+tor is therefore FP = 4g
+2/(κγ) = 11.4.
+The Purcell factor and coupling g can be determined
+from the experiment. We focus on QD1. The natural
+radiative decay γ rate can be determined by gradually
+tuning the microcavity out of resonance with the QD,
+extrapolating the decay rate to large detunings (main
+text, Fig. 2b). This gives γ/(2π) = 0.30 GHz. This
+11
+agrees well with the estimate above. On resonance, the
+total decay rate increases to 3.33 GHz. In the exper-
+iment however, the polarisation-degeneracy of the mi-
+crocavity is lifted (see Sec. III) and the QD exciton, an
+X+, interacts with both microcavity modes. We focus
+on the resonance with the H-polarised mode. We deter-
+mine the contribution to the total decay rate from the
+presence of the V-polarised microcavity mode by fitting
+the total decay rate as a function of microcavity detun-
+ing to two Lorentzians (main text, Fig. 2b). We sub-
+tract the contribution from the V-polarised mode and the
+free-space modes at the resonance with the H-polarised
+mode, giving a decay rate of γH/(2π) = 2.87 GHz. This
+is the decay rate contribution we would expect if the V-
+polarised mode were highly detuned, in other words if
+the microcavity mode-splitting were very large. At this
+limit, a circularly-polarised dipole interacting with a sin-
+gle linearly-polarised microcavity mode, allows a compar-
+ison to be made with the calculated properties of the mi-
+crocavity. The Purcell factor arising from the H-polarised
+mode alone is therefore FHP = γH/γ = 9.6, close to the
+calculated value (11.4). Using FHP = 4g
+2/(γκ) and tak-
+ing κ/(2π) = 24.00 GHz, the experimental value for the
+H-polarised mode (wavelength 919 nm, Q = 13, 600), we
+determine g/(2π) = 4.16 GHz. This is close to the calcu-
+lated value (4.24 GHz). (Exact agreement is not expected
+as the QD dipole fluctuates from QD to QD.) We can con-
+clude that, first, the vacuum field in the real microcavity
+is compatible with the value calculated from the micro-
+cavity’s geometry; and second, that the lateral tuning of
+the microcavity enables the QD to be positioned at the
+anti-node of the vacuum field.
+C. Properties of the output mode
+A simulation of the microcavity mode was used to de-
+termine the parameters of the output beam of the micro-
+cavity, notably the beam waist. The calculated beam in
+the SiO2 substrate, i.e. in the region above the top mirror
+(Supplementary Fig. 1c), is fitted to a Gaussian beam46
+of the form
+|E(r, z)| = |E0|
+w0
+w(z)
+e−r
+2/w2(z) (3)
+with waist radius at z given by
+w2(z) = w20
+(
+1 +
+(
+z
+zR
+)2)
+. (4)
+zR = nπw
+2
+0/λ0 is the Rayleigh range in the medium
+(refractive index n = 1.4761 is taken for SiO2). The
+fit taking w0 (and |E0|) as fit parameters results in
+w0 = 1.05µm. This corresponds to a numerical aper-
+ture of NA = λ0/(πw0) = 0.279.
+VI. OPTICAL SETUP
+In the experiment, the microcavity and one lens, the
+objective lens, are mounted in a helium bath-cryostat
+(T = 4.2 K). A window enables free optical-beams to
+propagate from an optical setup at room temperature to
+the microcavity system at low temperature28,29,42,47, as
+shown in Supplementary Fig. 6. The top-mirror of the
+microcavity is fixed at the top of a titanium “cage”, in-
+side which the sample, mounted on a piezo-driven XYZ
+nano-positioner, is placed28,29,42,47. The nano-positioner
+allows for full in situ spatial (XY) and spectral (Z) tun-
+ing of the microcavity. The titanium cage sits on another
+XYZ nano-positioner, which allows for positioning of the
+microcavity relative to the objective lens, an aspheric lens
+of focal length fobj = 4.51 mm (355230-B, NA = 0.55,
+Thorlabs Inc.), leading to close-to-perfect mode match-
+ing of the microcavity and the microscope. The micro-
+scope has a polarisation-based dark-field capability32. As
+shown in Supplementary Fig. 6, laser light is input into
+the microscope via a single-mode fibre. The beam is
+collimated by a ffibre = 11 mm aspheric lens (60FC-4-
+A11-02, Schäfter + Kirchhoff GmbH). A linear polariser
+(LP) guarantees the polarisation-matching of the input
+beam to a polarising beam-splitter (PBS) which reflects
+the light towards the microcavity. A half-wave plate al-
+lows the axis of the polarisation to be rotated: the out-
+put state is chosen to match one of the principal axes of
+the microcavity, the V-axis. The light is then coupled
+into the microcavity by the objective lens. The same
+lens collects the microcavity output. H-polarised light is
+transmitted by the PBS and focussed by a lens (60FC-4-
+A11-02, Schäfter + Kirchhoff GmbH) into a single-mode
+optical fibre (780HP fiber, Thorlabs Inc). In the dark-
+field scheme, the suppression of V-polarised laser light is
+optimised by adjusting an additional quarter-wave plate
+in the main beam-path. Confocal detection is crucial.
+For pulsed excitation, an extinction ratio up to 106 is
+achieved (for continuous wave excitation, it is up to 108)
+and remains stable over many days of measurement32.
+The estimation of the microcavity beam waist
+(Sec. V C) was used to optimise the fibre-coupling effi-
+ciency by selecting an appropriate aspheric lens in front
+of the optical fibre. The objective lens (355230-B, NA =
+0.55, Thorlabs Inc.) has a focal length fobj = 4.51 mm.
+Its NA is considerably larger than the NA of the mi-
+crocavity in order to minimise clipping losses. The lens
+coupling the output into the final optical fibre should be
+chosen to ensure mode-matching with the single-mode
+in the fibre. The fibre has a nominal mode-field ra-
+dius of w1 = (2.71 ± 0.27)µm at λ0 = 920 nm (780HP
+fiber, Thorlabs Inc.). The focal length for optimum fibre-
+coupling is ffibre = fobj ·w1/w0 = (11.6±1.2) mm. Thus,
+an ffibre = 11 mm aspheric lens was chosen for the exper-
+iments.
+The mode-locked laser (Mira 900-D picosecond mode,
+Coherent GmbH) operates at a repetition rate of
+76.3 MHz. The spectral width lies in the range between
+12
+T = 4 K
+T = 297 K
+λ/2
+λ/4
+LP
+PBS
+f = 11.0 mm
+f = 11.0 mm
+f = 4.51 mm
+Laser Pulses
+Single Photons
+Supplementary Fig. 6. The optical setup. The microcavity
+system resides in a cryostat at T = 4.2 K. Light is coupled in and
+out of the microcavity with a polarisation-based dark-field micro-
+scope. The objective lens is placed inside the cryostat along with
+the microcavity; the rest of the microscope is located outside the
+cryostat. Laser light enters via a single-mode optical fibre and
+is collimated with an f = 11 mm lens, passing through a linear-
+polariser (LP). The input is reflected by a polarising beam-splitter
+(PBS); the polarisation axis of the excitation, the V-axis, is set
+by the half-wave plate (λ/2). The PBS and a quarter-wave plate
+(λ/4) suppress the coupling of unwanted back-reflected laser light
+into the collection arm. H-polarised single photons generated by
+the emitter are transmitted through the PBS and focused into the
+final single-mode optical fibre.
+60 and 100 GHz corresponding in the transform-limited
+case to temporal widths between 5 and 3 ps, respectively.
+The temporal width is the full-width-at-half-maximum
+of the intensity.
+VII. CALIBRATION OF DETECTORS
+Two photon-counting detectors were used to perform
+experiments in this work, a superconducting NbTiN-
+nanowire single-photon detector (SNSPD) unit (EOS 210
+CS Closed-cycle, Single Quantum B.V.) optimised for
+operation at 950 nm; and a near-infrared optimised,
+fibre-coupled silicon avalanche photodiode (APD, model
+SPCM-NIR, Excelitas Technologies GmbH & Co. KG).
+In order to determine the efficiency of single-photon cre-
+ation in this work, a careful calibration of the detectors’
+efficiencies was performed.
+The measurement relies on a setup with a free-space
+laser beam (out-coupled from an optical fibre with angled
+facet), a set of calibrated neutral density filters (NDs)
+that can be placed in and out of the beam path, and
+a second optical fibre into which the beam is coupled
+(in-coupling via an angled facet). The frequency ν of
+the laser light is determined precisely prior to measure-
+ment with a interferometric device (HighFinesse Laser
+and Electronic Systems GmbH). For optical power P ,
+the photon flux is P
+hν
+where h is Planck’s constant.
+With the NDs removed from the beam’s path, the
+optical power emerging out of the second fibre is mea-
+sured with a calibrated silicon photodiode (Sensor Model
+S130C, Power measuring console PM100D, Thorlabs
+Inc.). The attenuating NDs are subsequently placed into
+the beam’s path in order to avoid saturating the photon-
+counting detectors. The photon rate out of the fibre is
+then measured using both the SNSPD and the APD. The
+efficiency of each detector is given by the ratio of the mea-
+sured count-rate to the known photon flux.
+The efficiency of the SNSPD is determined to be
+ηSNSPD =(82±5)%. This value matches closely the spec-
+ifications provided by the manufacturer at a wavelength
+of 940 nm. The efficiency of the APD is ηAPD =(42±3)%
+with an angled facet directly in front of the detector
+(FC-APC type fibre). The efficiency is slightly higher,
+ηAPD =(44±3)%, with a flat facet directly in front of
+the detector (FC-PC type fibre). The errors in the mea-
+surements arise from 4% in the calibration of the NDs,
+1.5% in the calibration of the NDs, 3% nominal error of
+the silicon photodiode, and shot noise in the detectors
+(1.0%).
+We note that for the APD, due to the dead-time of
+the detector (typically ∼ 20 ns), a linearity correction
+factor must be applied to count rates above 200 kHz. This
+correction factor scales quadratically from 1 at 200 kHz
+to 3.32 at 25 MHz. For the experiments performed in
+this work, the appropriate correction factor was applied
+to take this effect into account. It results in a change in
+efficiency of a few % at the count rates in Fig. 2c (main
+paper).
+VIII. THEORY: FILTERED PULSE EXCITATION
+MECHANISM
+This section outlines the excitation mechanism and de-
+scribes the theoretical model that is used to describe the
+experimental results. The Hamiltonian of a two-level sys-
+tem (TLS) interacting with a drive field and a resonant
+cavity mode, the H-polarised mode is given by:
+Ĥ =
+h̄ω0
+2
+σ̂z +
+h̄
+2
+(
+Ω−(t)σ̂+ + Ω
++(t)σ̂−
+)
++
+h̄g
+(
+â
+†
+H σ̂− + âH σ̂+
+)
+, (5)
+where h̄ω0 is the energy difference between the excited
+state and the ground state of the TLS, g is the coupling
+constant between the cavity and the TLS, Ω±(t) are the
+positive and negative frequency components of the driv-
+ing field, and âH is the annihilation operator for the H-
+polarised cavity mode.
+In this work, the TLS is resonant with the H-polarised
+cavity mode but the optical pulses enter the cavity via the
+red-detuned V-polarised cavity mode. The optical pulse
+(frequency ωL) is blue-detuned (by frequency ∆L) with
+respect to the H-polarised cavity mode, ∆L = ωL − ω0.
+(The scheme is shown in Fig. 1c of the main paper.) As
+13
+-200 -100 0 100 200
+L
+/2  (GHz)
+0
+10
+20
+30
+40
+d
+t 
+(
+)
+0
+0.2
+0.4
+0.6
+0.8
+Excitation
+cavity
+0 5 10 15
+0
+10
+20
+30
+40
+C
+o
+u
+n
+ts
+ (
+M
+H
+z)
+0
+0.2
+0.4
+0.6
+0.8
+1
+(a) (b)
+Power     nW
+Supplementary Fig. 7. Calculated photon emission probability of a two-level system driven by filtered optical pulses. (a)
+The photon emission probability
+∫
+κ
+〈
+â
+†
+H
+âH
+〉
+dt as a function of the laser detuning, ∆L, and the excitation power. For this simulation,
+κ/(2π) = 25 GHz and A =32 fs/K. The detuning between the excitation cavity and the TLS is 50 GHz, as indicated by the green dashed
+line on the colour plot. (b) Photon emission probability as a function of power: the theory (black line) along with scaled experimental
+results (red points). The theoretical curve corresponds to the dashed black line in part (a). The dashed blue line is the theory calculated
+with the same parameters except A = 0.
+such, the TLS is driven not by the bare optical pulse but
+by the pulse modified by the off-resonant V-polarised cav-
+ity mode. Ω±(t) can be calculated by convoluting the op-
+tical pulse with the impulse response function of a cavity,
+i.e. e(−κt/2)cos(ωct), retaining the positive (negative) fre-
+quency components. (ωc is the angular-frequency of the
+cavity, here that of the V-polarised cavity mode.) We
+introduce leakage out of the cavity mode with the Lind-
+blad operator L̂ =
+√
+κ âH, where κ is the decay rate of
+the cavity mode. Phonon-induced dephasing is modeled
+with L̂ =
+√
+AT/2 |Ω(t)| σ̂z, where T is the temperature
+of the phonon bath, and A is the parameter describing
+the interaction between the phonons and the exciton48.
+Finally, the photon emission probability is calculated as∫
+κ
+〈
+â
+†
+HâH
+〉
+dt.
+We use the Python package Qutip49,50 to set up and
+solve the equations of motion based on the Hamiltonian
+in Eq. 5. Supplementary Fig. 7a shows the photon emis-
+sion probability as a function of the laser frequency and
+excitation power. In these simulations, the excitation
+cavity is −50 GHz away from the TLS resonance corre-
+sponding to the mode-splitting of our cavity (QD1), and
+the pulse width is tp = 5.2 ps (defined as the full-width-at-
+half-maximum of the laser intensity). The photon emis-
+sion probability shows Rabi-like oscillations as expected
+from a driven TLS. However, as evident from the plot,
+the full inversion of the TLS takes place when the exci-
+tation laser is blue-detuned from the TLS resonance con-
+trary to the textbook case where maximum inversion is
+obtained under strict resonance conditions. The crucial
+point is that the incomplete Rabi oscillations do not sig-
+nify an incomplete inversion of the TLS. On the contrary,
+by choosing the optimal detuning of the laser pulse, the
+photon emission probability reaches values close to one,
+Supplementary Fig. 7b.
+We model the experimental results with the follow-
+ing parameter set: ∆L/(2π) = 32 GHz, tp = 5.2 ps,
+and A = 32 fs/K. These parameters match well with
+the expected pulse-width based on the measured spec-
+tral width and the detuning ∆L/(2π) = 32 GHz found
+in the experiment. There is a mismatch between the
+phonon-induced dephasing rate and the value reported in
+Ref.48. However, such a discrepancy is not uncommon in
+the literature48,51,52, and could hint at other excitation-
+induced dephasing mechanisms. With these parameters,
+the model shows that a near complete inversion of the
+TLS is possible. As shown in Supplementary Fig. 7b,
+the calculated photon emission probability is 96.3% at
+the first Rabi peak. Excitation-induced dephasing is im-
+portant to describe the subsequent Rabi peak but results
+in only a small decrease at the first Rabi peak.
+1Barrett, J., Hardy, L. & Kent, A. No signaling and quantum key
+distribution. Phys. Rev. Lett. 95, 010503 (2005).
+2Aćın, A. et al. Device-independent security of quantum cryp-
+tography against collective attacks. Phys. Rev. Lett. 98, 230501
+(2007).
+3Aaronson, S. & Arkhipov, A. The computational complexity of
+linear optics. Proceedings STOC ’11, 333–243 (2011).
+4Wang, H. et al. Boson sampling with 20 input photons and a 60-
+mode interferometer in a 1014-dimensional Hilbert space. Phys.
+Rev. Lett. 123, 250503 (2019).
+5Rudolph, T. Why I am optimistic about the silicon-photonic
+route to quantum computing. APL Photonics 2, 030901 (2017).
+6Wang, J., Sciarrino, F., Laing, A. & Thompson, M. G. Inte-
+grated photonic quantum technologies. Nat. Photonics 14, 273–
+284 (2019).
+7Raussendorf, R. & Harrington, J. Fault-tolerant quantum com-
+putation with high threshold in two dimensions. Phys. Rev. Lett.
+98, 190504 (2007).
+8Sangouard, N. & Zbinden, H. What are single photons good for?
+J. Mod. Opt. 59, 1458–1464 (2012).
+9Somaschi, N. et al. Near-optimal single-photon sources in the
+solid state. Nat. Photonics 10, 340–345 (2016).
+10Loredo, J. C. et al. Scalable performance in solid-state single-
+photon sources. Optica 3, 433–440 (2016).
+14
+11Ding, X. et al. On-demand single photons with high extrac-
+tion efficiency and near-unity indistinguishability from a reso-
+nantly driven quantum dot in a micropillar. Phys. Rev. Lett.
+116, 020401 (2016).
+12Wang, H. et al. Near-transform-limited single photons from an ef-
+ficient solid-state quantum emitter. Phys. Rev. Lett. 116, 213601
+(2016).
+13Unsleber, S. et al. Highly indistinguishable on-demand resonance
+fluorescence photons from a deterministic quantum dot micropil-
+lar device with 74% extraction efficiency. Opt. Express 24, 8539–
+8546 (2016).
+14Wang, H. et al. Towards optimal single-photon sources from
+polarized microcavities. Nat. Photonics 13, 770–775 (2019).
+15Liu, F. et al. High Purcell factor generation of indistinguishable
+on-chip single photons. Nat. Nanotechnol. 13, 835–840 (2018).
+16Arcari, M. et al. Near-unity coupling efficiency of a quantum
+emitter to a photonic crystal waveguide. Phys. Rev. Lett. 113,
+093603 (2014).
+17Thyrrestrup, H. et al. Quantum optics with near-lifetime-limited
+quantum-dot transitions in a nanophotonic waveguide. Nano
+Lett. 18, 1801–1806 (2018).
+18Uppu, R. et al. Scalable integrated single-photon source.
+arXiv:2003.08919 (2020).
+19McKeever, J. et al. Deterministic generation of single photons
+from one atom trapped in a cavity. Science 303, 1992–1994
+(2004).
+20Aharonovich, I., Englund, D. & Toth, M. Solid-state single-
+photon emitters. Nat. Photonics 10, 631–641 (2016).
+21Kurtsiefer, C., Mayer, S., Zarda, P. & Weinfurter, H. Stable
+solid-state source of single photons. Phys. Rev. Lett. 85, 290–
+293 (2000).
+22Babinec, T. M. et al. A diamond nanowire single-photon source.
+Nat. Nanotechnol. 5, 195–199 (2010).
+23Sipahigil, A. et al. Indistinguishable photons from separated
+silicon-vacancy centers in diamond. Phys. Rev. Lett. 113, 113602
+(2014).
+24Lodahl, P., Mahmoodian, S. & Stobbe, S. Interfacing single pho-
+tons and single quantum dots with photonic nanostructures. Rev.
+Mod. Phys. 87, 347–400 (2015).
+25Senellart, P., Solomon, G. & White, A. High-performance semi-
+conductor quantum-dot single-photon sources. Nat. Nanotech-
+nol. 12, 1026–1039 (2017).
+26Kuhlmann, A. V. et al. Charge noise and spin noise in a semi-
+conductor quantum device. Nat. Physics 9, 570–575 (2013).
+27Warburton, R. J. et al. Optical emission from a charge-tunable
+quantum ring. Nature 405, 926–929 (2000).
+28Barbour, R. J. et al. A tunable microcavity. J. Appl. Phys. 110,
+053107 (2011).
+29Najer, D. et al. A gated quantum dot strongly coupled to an
+optical microcavity. Nature 575, 622–627 (2019).
+30Wang, D. et al. Turning a molecule into a coherent two-level
+quantum system. Nat. Physics 15, 483–489 (2019).
+31Cui, G. & Raymer, M. G. Quantum efficiency of single-photon
+sources in the cavity-QED strong-coupling regime. Opt. Express
+13, 9660–9665 (2005).
+32Kuhlmann, A. V. et al. A dark-field microscope for background-
+free detection of resonance fluorescence from single semiconduc-
+tor quantum dots operating in a set-and-forget mode. Rev. Sci.
+Instrum. 84, 073905 (2013).
+33Santori, C., Fattal, D., Vuckovic, J., Solomon, G. & Yamamoto,
+Y. Indistinguishable photons from a single-photon device. Nature
+419, 594–597 (2002).
+34Ramsay, A. J. et al. Damping of exciton Rabi rotations by acous-
+tic phonons in optically excited InGaAs/GaAs quantum dots.
+Phys. Rev. Lett. 104, 017402 (2010).
+35Chang, D. E., Sorensen, A. S., Demler, E. A. & Lukin, M. D. A
+single-photon transistor using nanoscale surface plasmons. Nat.
+Physics 3, 807–812 (2007).
+36Schwartz, I. et al. Deterministic generation of a cluster state of
+entangled photons. Science 354, 434–437 (2016).
+37Wasilewski, Z., Fafard, S. & McCaffrey, J. Size and shape en-
+gineering of vertically stacked self-assembled quantum dots. J.
+Cryst. Growth 201-202, 1131–1135 (1999).
+38Casey, H. C., Sell, D. D. & Wecht, K. W. Concentration de-
+pendence of the absorption coefficient for n- and p-type GaAs
+between 1.3 and 1.6 eV. J. Appl. Phys. 46, 250–257 (1975).
+39Guha, B. et al. Surface-enhanced gallium arsenide photonic res-
+onator with quality factor of 6× 106. Optica 4, 218–221 (2017).
+40Ediger, M. et al. Peculiar many-body effects revealed in the
+spectroscopy of highly charged quantum dots. Nat. Phys. 3,
+774–779 (2007).
+41Hunger, D., Deutsch, C., Barbour, R. J., Warburton, R. J. &
+Reichel, J. Laser micro-fabrication of concave, low-roughness
+features in silica. AIP Advances 2, 012119 (2012).
+42Greuter, L. et al. A small mode volume tunable microcavity: De-
+velopment and characterization. Appl. Phys. Lett. 105, 121105
+(2014).
+43Lalanne, P., Hugonin, J.-P. & Gèrard, J.-P. Electromagnetic
+study of the quality factor of pillar microcavities in the small
+diameter limit. Appl. Phys. Lett. 84, 4726–4728 (2004).
+44Gregersen, N. et al. Numerical and experimental study of the Q
+factor of high-Qmicropillar cavities. IEEE J. Quantum Electron.
+46, 1470–1483 (2010).
+45Dalgarno, P. A. et al. Coulomb interactions in single charged self-
+assembled quantum dots: Radiative lifetime and recombination
+energy. Phys. Rev. B 77, 245311 (2008).
+46Nagourney, W. Quantum electronics for atomic physics. Oxford
+University Press (2010).
+47Greuter, L., Starosielec, S., Kuhlmann, A. V. & Warburton, R. J.
+Towards high-cooperativity strong coupling of a quantum dot in
+a tunable microcavity. Phys. Rev. B 92, 045302 (2015).
+48Ramsay, A. J. et al. Phonon-induced rabi-frequency renormal-
+ization of optically driven single InGaAs/GaAs quantum dots.
+Phys. Rev. Lett. 105, 177402 (2010).
+49Johansson, J., Nation, P. & Nori, F. Qutip: An open-source
+python framework for the dynamics of open quantum systems.
+Comput. Phys. Commun. 183, 1760 – 1772 (2012).
+50Johansson, J., Nation, P. & Nori, F. Qutip 2: A python frame-
+work for the dynamics of open quantum systems. Comput. Phys.
+Commun. 184, 1234 – 1240 (2013).
+51Ulrich, S. M. et al. Dephasing of triplet-sideband optical emission
+of a resonantly driven InAs/GaAs quantum dot inside a micro-
+cavity. Phys. Rev. Lett. 106, 247402 (2011).
+52Monniello, L. et al. Excitation-induced dephasing in a resonantly
+driven InAs/GaAs quantum dot. Phys. Rev. Lett. 111, 026403
+(2013).
+	A bright and fast source of coherent single photons
+	Abstract
+	 Supplementary Information
+	I Heterostructure design and growth
+	II Curved mirror fabrication
+	III Microcavity characterisation
+	IV Coherence of the single photons
+	V Numerical simulation of the microcavity
+	A Calculation of the Q-factor
+	B Calculation of the QD-microcavity coupling
+	C Properties of the output mode
+	VI Optical setup
+	VII Calibration of Detectors
+	VIII Theory: Filtered Pulse Excitation Mechanism

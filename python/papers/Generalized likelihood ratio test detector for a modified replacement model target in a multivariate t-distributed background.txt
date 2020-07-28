@@ -1,0 +1,839 @@
+1
+Generalized likelihood ratio test detector
+for a modified replacement model target
+in a multivariate t-distributed background
+James Theiler
+Abstract—A closed-form expression is derived for the gen-
+eralized likelihood ratio test (GLRT) detector of a subpixel
+target in a multispectral image whose area and brightness
+are both unknown. This expression extends a previous result
+(which assumed a Gaussian background distribution) to a fatter
+tailed elliptically-contoured (EC) multivariate t-distributed back-
+ground. Numerical experiments with simulated data indicate that
+the EC-based detector outperforms the simpler Gaussian-based
+detectors, and that the relative performance of the new detector,
+compared to other EC-based detectors depends on the regime of
+target strength and background occlusion.
+Index Terms—Adaptive matched filter, Clutter, Clairvoyant fu-
+sion, Composite hypothesis testing, Elliptically-contoured distri-
+bution, Generalized likelihood ratio test, Hyperspectral imagery,
+Target detection
+I. INTRODUCTION
+TO OBTAIN a signal processing solution to the problemof subpixel target detection in hyperspectral imagery, one
+requires a model for the target signature, a model for the
+background distribution, and a model for how the target signal
+interacts with the background.
+Usually the target signature is treated as “known.” Although
+this signature can exhibit considerable variability due to both
+extrinsic environmental factors and intrinsic material factors
+[1], the extent of this variability is in most cases assumed to
+be known, and is very often treated as a constant.
+The background is not “known” in the same a priori sense
+that the target is known, but it is modeled by a probability
+distribution that can often be estimated directly from the hyper-
+spectral imagery in which the target is sought. The Gaussian
+is perhaps the most popular choice; it is parameterized by
+a mean vector µ and covariance matrix R. The multivariate
+t distribution is an attractive choice: like the Gaussian, it
+requires a vector-valued mean and a matrix-valued covari-
+ance, but it takes one further parameter, the scalar ν, which
+characterizes the tail of the distribution. The multivariate t
+is an elliptically contoured (EC) distribution, because the
+contours of constant probability density are ellipsoids centered
+at µ (indeed, the same ellipsoids that characterize contours
+of the Gaussian distribution), but it exhibits fatter tails than
+a Gaussian. Manolakis et al. [2], [3] have argued that these
+fatter-tailed EC distributions are appropriate for modeling
+hyperspectral background variability.
+The author is with the Space Data Science and Systems Group at
+Los Alamos National Laboratory, Los Alamos, NM 87545, USA; email:
+jt@lanl.gov.
+Several models have been described that characterize how
+the target interacts with the background. For an opaque target
+that occupies a full pixel, there is no interaction, and the
+detector is straightforward to the point of trivial. Here, we
+have a simple hypothesis testing problem:
+Ho : x = z (1)
+H1 : x = t (2)
+where x is the observed spectrum at a pixel, z is the back-
+ground at that pixel (i.e., what the spectrum would be if no
+target were present), and t is the target spectrum. There are no
+nuisance parameters in this model, so the optimal detector is
+given by the likelihood ratio D(x) = pt(x)/pz(x), where pz
+and pt are the probability density functions associated with the
+background and target, respectively. We can interpret pz(x) is
+the likelihood of observing x in a background pixel, and pt(x)
+as the likelihood of observing x in a target pixel.
+For subpixel targets (or for models that incorporate ad-
+jacency effects, or include translucency, such as gas-phase
+plume targets [4]), there is an interaction of target with
+background. The most common models are the additive and
+replacement models, though Vincent and Besson [5] have
+recently suggested a hybrid “modified replacement” model that
+generalizes both of them, though at the cost of introducing a
+second parameter:
+H1: x = z+ αt Additive model
+H1: x = (1− α)z+ αt Replacement model
+H1: x = βz+ αt Modified replacement model
+The additive model corresponds to a target whose strength
+depends on α, where “strength” in this case might correspond
+to intrinsic brightness (or reflectance) of the target, depending
+on linear factors that might include illumination, temperature
+(for infrared imaging), concentration (especially for gas-phase
+plumes), etc. The replacement model treats the subpixel target
+as opaque, and having an area (relative to the pixel size) of α;
+thus its contribution to the observed signal is proportional
+to α but the contribution of the background is correspondingly
+diminished by a factor of 1 − α. The modified replacement
+model is attractive in that it can account both for the dimin-
+ishing background contribution (β < 1) due to an opaque
+(or partially opaque) target, and for target strength variability
+due to more intrinsic brightness effects. Solid materials often
+exhibit spectral variability due, for instance, to powder grain
+size, and although that variability may be somewhat complex,
+ar
+X
+iv
+:2
+00
+7.
+12
+66
+2v
+1 
+ [
+ee
+ss
+.S
+P
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+2
+it is often seen in practice that the dominant effect is in the
+overall magnitude of the reflectance of the material.
+Unlike the full-pixel case, the alternative hypotheses (the
+H1’s) for these target-background interaction models involve
+unknown, or nuisance, parameters: α, or α and β. For this
+reason, they are not simple but composite hypothesis testing
+problems. There are a number of approaches for dealing
+with composite hypothesis testing problems: Bayes factor [6],
+penalized likelihood [7], [8], and clairvoyant fusion [9], [10]
+among them. The most popular, and usually quite effective
+(albeit not always optimal [11]), is the generalized likeli-
+hood ratio test (GLRT), which is based on maximizing the
+likelihoods used in the likelihood ratio test, or equivalently
+on employing maximum likelihood estimates of the nuisance
+parameters in the likelihood ratio test.
+Using the GLRT, closed-form expressions have been identi-
+fied for a variety of target models on a variety of background
+distributions.
+For an additive target on a Gaussian background, the adap-
+tive matched filter (AMF) is the appropriate detector [12],
+[13]; indeed, it is provably optimal as the uniformly most
+powerful (UMP) detector [6]. For solid subpixel targets, a
+replacement model is appropriate. The target signal is pro-
+portional to the fraction a of the pixel that the target covers,
+but the background is occluded by that same fraction. For
+Gaussian background, this leads to the finite target matched
+filter (FTMF) [14]. Finally, a generalization of additive and
+replacement is given by the modified replacement model: here
+both the target and the background scale, and the Gaussian
+GLRT is given by Vincent and Bresson [5]. In [5], both one-
+step and two-step variants are derived, and the one-step variant
+is called SPADE (Sub-Pixel Adaptive DEtection); the interest
+in this paper is with the two-step variant, which I will call
+2SPADE.
+These are two-step detectors; the mean and covariance are
+computed from a (large) sample of off-target pixels, and are
+treated as exact and fixed for the pixels under test. For global
+methods (in which a single mean and covariance is estimated
+for the whole image) and even for semi-local methods (in
+which the mean is computed locally, but a single global
+covariance is estimated), the sample size will be large and
+the two-step methods are appropriate. In practice, we may
+not know if a set of pixels are truly target-free, and in that
+case some level of contamination may occur. As long as the
+contaminating targets are rare and/or weak, the effect of this
+contamination will usually be small [15].
+But for local methods, in which both the mean and co-
+variance are recomputed in a (small) moving window, the
+one-step methods are potentially better detectors because they
+account for the statistical imprecision in the estimates of mean
+and covariance. The one-step derivations are more difficult to
+derive, but a one-step AMF is given by Kelly [16], and one-
+step replacement (ACUTE) by Vincent and Bresson [17], and
+one-step modified replacement (SPADE) [5]. In all three of
+these cases, as the sample size becomes large, the one-step
+detector approaches the two-step detector.
+The extension of these two-step detectors to elliptically-
+contoured multivariate t-distributed backgrounds has been
+TABLE I
+SUMMARY OF DETECTORS FOR VARIOUS TARGET MODELS ON VARIOUS
+BACKGROUND DISTRIBUTIONS. THE EC-2SPADE DETECTOR IS DERIVED
+IN THIS PAPER.
+Target Model Background distribution
+Model Name Expression Gaussian multivariate t
+Additive x = z+ αt AMF [12], [13] EC-AMF [18]
+Replacement x = (1− α)z+ αt FTMF [14] EC-FTMF [19]
+Modified x = βz+ αt 2SPADE [5] EC-2SPADE
+developed for the additive [18] and for the replacement [19]
+models. In this exposition, the two-step modified replacement
+model will be extended to an elliptically contoured back-
+ground, here called EC-2SPADE.
+Also, beyond Gaussian and multivariate-t are non-
+parametric methods, such as NP-AMF [20], which enable far
+more flexible modeling of the background.
+II. SET UP THE PROBLEM
+A. Background model
+In the absence of target, the background is assumed to be
+distributed as a multivariate t distribution. A background pixel
+spectrum is denoted z ∈ Rd where d is the number of spectral
+channels in the hyperspectral imagery. Here,
+pz(z) = c [(ν − 2) +A(z)]
+−(d+ν)/2 (3)
+where c is a normalizing constant, ν is a scalar parameter that
+characterizes the tail of the distribution, and
+A(z) = (z− µ)′R−1(z− µ) (4)
+is a squared Mahalanobis distance. Here, µ and R are the
+mean and covariance of the background, and the fact that p(z)
+depends on z through A(z) ensures that the distribution is
+elliptically contoured. Note that in the limit as ν → ∞, the
+distribution becomes Gaussian. For ν ≤ 2, the distribution is
+so fat-tailed that the second moment does not exist.
+B. Target-background interaction model
+Under the null hypothesis (which is that the target is not
+present in the given pixel), the observed spectrum is the
+background. The alternative hypothesis is that the target is
+present. The target has a known signature t, but what is
+observed is a linear combination of target and background.
+Thus:
+Ho : x = z (5)
+H1 : x = βz+ αt (6)
+with constraints 0 ≤ β ≤ 1 and 0 ≤ α.
+III. GLRT SOLUTION
+Because this is a two-step solution, we will begin with the
+assumption that we have an adequate estimate of µ, R, and ν,
+usually obtained from a large number of background pixels.
+3
+Under the hypothesis that a target is present, we have x =
+βz+ αt, where β and α are unknown. Then
+z =
+x− αt
+β
+(7)
+and the probability distribution associated with observation x
+is given by
+px(α, β; x) = pz(z)
+∣∣∣∣ dzdx
+∣∣∣∣ = pz
+(
+x− αt
+β
+)
+· β−d (8)
+= cβ−d
+[
+(ν − 2) +A
+(
+x− αt
+β
+)]−(d+ν)/2
+(9)
+The GLRT detector the is based on the likelihood ratio,
+maximized over the nuisance parameters; specifically
+D(x) =
+maxα,β px(α, β; x)
+px(0, 1;x)
+=
+px(α̂, β̂; x)
+pz(x)
+(10)
+where α̂ and β̂ are the values (they are both functions of x)
+that maximize px(α, β; x).
+We will begin with maximization over α. This occurs at
+α̂ = argmaxα px(α, β; x) (11)
+= argmaxα A
+(
+x− αt
+β
+)
+(12)
+= argmaxα (x− αt− βµ)
+′R−1(x− αt− βµ) (13)
+=
+t′R−1(x− βµ)
+t′R−1t
+(14)
+Observe that
+x− α̂t
+β
+− µ =
+1
+β
+(
+I −
+tt′R−1
+t′R−1t
+)
+(x− βµ) (15)
+Thus, if we write
+Q =
+(
+I −
+tt′R−1
+t′R−1t
+)′
+R−1
+(
+I −
+tt′R−1
+t′R−1t
+)
+(16)
+then we have
+A
+(
+x− α̂t
+β
+)
+=
+(x− βµ)′Q(x− βµ)
+β2
+(17)
+= a+ bβ−1 + cβ−2 = q(β) (18)
+where q(β) is a scalar quadratic expression in β−1 with
+a = µ′Qµ, (19)
+b = −2µ′Qx, (20)
+c = x′Qx. (21)
+With α = α̂, our expression for likelihood in Eq. (9)
+becomes
+px(β; x) = px(α̂(β,x), β; x) (22)
+= cβ−d [(ν − 2) + q(β)]−(d+ν)/2 (23)
+Writing the log likelihood (minus a constant) for hypothesis
+H1, we have
+L1(β; x) = log px(β; x)− log c (24)
+= −d log β −
+d+ ν
+2
+log [(ν − 2) + q(β)] (25)
+To maximize this log likelihood we take the derivative with
+respect to β and set the result to zero:
+0 =
+∂
+∂β
+L1(β; x) = −dβ−1 −
+d+ ν
+2
+∂
+∂β
+q(β)
+(ν − 2) + q(β)
+(26)
+Multiplying both sides by (ν − 2) + q(β), we obtain
+0 = −dβ−1[(ν − 2) + q(β)]−
+d+ ν
+2
+[−bβ−2 − 2cβ−3]
+(27)
+Now, multiply both sides by −β3/ν:
+0 =
+d(ν − 2 + a)
+ν
+β2 +
+db
+ν
+β + dc+
+d+ ν
+2ν
+[−bβ − 2c] (28)
+= Aβ2 +Bβ + C (29)
+which is a quadratic equation in β and can be solved in closed-
+form. Here,
+A = d+
+d(a− 2)
+ν
+(30)
+B = −
+b
+2
++
+db
+2ν
+(31)
+C = −c (32)
+from which
+β̂ = min
+(
+−B +
+√
+B2 − 4AC
+2A
+, 1
+)
+(33)
+Note that since A > 0 and C < 0, we can be sure that β̂ > 0.
+We can further observe that β̂ = 1 whenever −C ≥ (A+B).
+Finally, given α̂ from Eq. (14) and β̂ from Eq. (33), the
+GLRT target detector for the modified replacement model is
+given by Eq. (10).
+A. Special case: ν →∞
+In the ν →∞ limit, the EC distribution becomes Gaussian.
+The expressions for A, B, and C become
+A = d (34)
+B = −b/2 = µ′Qx (35)
+C = −c = −x′Qx (36)
+which is consistent with Eq(6) from Ref. [5].
+B. Remark on Q
+Note that Eq. (16) can equivalently be written
+Q = R−1/2
+(
+I −
+R−1/2tt′R−1/2
+t′R−1t
+)
+R−1/2 (37)
+which can be interpreted as a projection operator sandwiched
+between two whitening operators. If we consider the matched
+filter vector
+q = R−1t/
+√
+t′R−1t (38)
+then we have another expression for Q given by
+Q = R−1 − qq′ (39)
+4
+IV. CLAIRVOYANT DETECTOR
+If α and β were known, then the so-called clairvoyant
+detector [21] provides optimal detection, but it is an odd
+scenario to know the strength of the target without knowing
+whether or not the target is present. Still, the clairvoyant
+provides a useful upper bound on the performance of a target
+detector, and shows the penalty paid by replacing the true
+(but unkonwn) α and β with the estimates α̂ and β̂ which
+are recomputed for each pixel. The detector is given by any
+monotonic transform (h) of the likelihood ratio:
+D(α, β,x) = h
+(
+px(α, β; x)
+pz(x)
+)
+. (40)
+If we let
+h(w) =
+exp
+(
+2
+d+ν
+[logw + d log β]
+)
+− 1
+ν − 2
+, (41)
+then
+D(α, β,x) =
+1
+1 +
+A(x)
+ν − 2
+[
+A
+(
+x− αt
+β
+)
+−A(x)
+]
+(42)
+is a clairvoyant detector. In the ν →∞ limit, this is simply
+D(α, β,x) = A
+(
+x− αt
+β
+)
+−A(x). (43)
+V. NUMERICAL ILLUSTRATION
+Fig. 1 shows ROC curves, illustrating detector performance
+for α = 0.2 and a range of values of β. One very general
+trend is that detection becomes harder as β gets larger, and
+more background signal is mixed in with the target signal.
+The performance is computed using simulated data, and
+since that simulated data is based on an elliptically-contoured
+(EC) multivariate t background, it is not surprising to observe
+that the EC-based algorithms (shown with solid lines) gener-
+ally outperform their Gaussian counterparts (dashed lines).
+We see for small values of β that the 2SPADE and EC-
+2SPADE are the best detectors, with EC-2SPADE outperform-
+ing 2SPADE by a considerable margin. As β increases toward
+1−α, the FTMF and EC-FTMF algorithms begin provide the
+best performance, with EC-FTMF outperforming FTMF. This
+cross-over in ROC curve performance between 2SPADE and
+FTMF was also observed by Vincent and Besson [5]. Finally,
+as α→ 1, the EC-AMF exhibits the best performance.
+Similar curves are seen in Fig. 2, but here α = 0.6 which
+provides more examples with α+ β > 1. For 0.3 ≤ β ≤ 0.5,
+we see that EC-FTMF outperforms EC-2SPADE. For β = 0.6,
+EC-2SPADE is best, but for β ≥ 0.7, EC-AMF outperforms
+EC-2SPADE. On the other hand, in none of the cases here
+is EC-2SPADE the worst detector, and it is never as bad as
+EC-AMF at small β or EC-FTMF at large β.
+Because we are comparing performance to the optimal clair-
+voyant detector, we can see that, at their points of optimailtiy,
+the EC-FTMF (at β = 1− α = 0.8) and EC-AMF (β = 1.0)
+detectors are very nearly optimal in their performance. By con-
+trast the EC-2SPADE detector does not seem to approach the
+performance of the clairvoyant detector. Fitting two parameters
+instead of one seems to incur a performance penalty.
+VI. DISCUSSION
+Applied to simulated data, tailored to the assumptions of the
+new detector, the new detector performs well. Further work
+will be needed to examine how well this detector behaves in
+the “wild,” with real targets in real imagery.
+Introducing, and optimizing over, more parameters does
+lead to a more flexible detector, but not necessarily a more
+powerful one. We saw that imposing an assumption (e.g., that
+β = 1 − α) that reduced the number of free parameters led
+to improved detection performance even when the assumption
+was only approximately true.
+REFERENCES
+[1] J. Theiler, A. Ziemann, S. Matteoli, and M. Diani, “Spectral variability
+of remotely-sensed target materials: causes, models, and strategies for
+mitigation and robust exploitation,” Geoscience and Remote Sensing
+Magazine, vol. 7, pp. 8–30, June 2019.
+[2] D. Manolakis, D. Marden, J. Kerekes, and G. Shaw, “On the statistics of
+hyperspectral imaging data,” Proc. SPIE, vol. 4381, pp. 308–316, 2001.
+[3] D. B. Marden and D. Manolakis, “Using elliptically contoured distri-
+butions to model hyperspectral imaging data and generate statistically
+similar synthetic data,” Proc. SPIE, vol. 5425, pp. 558–572, 2004.
+[4] J. Theiler and A. Schaum, “Some closed-form expressions for absorptive
+plume detection,” Proc. IEEE International Geoscience and Remote
+Sensing Symposium (IGARSS), 2020, to appear.
+[5] F. Vincent and O. Besson, “Generalized likelihood ratio test for modified
+replacement model in hyperspectral imaging detection,” Signal Process-
+ing, vol. 174, p. 107643, 2020.
+[6] E. L. Lehmann and J. P. Romano, Testing Statistical Hypotheses. New
+York: Springer, 2005.
+[7] J. Chen, “Penalized likelihood-ratio test for finite mixture models with
+multinomial observations,” Canadian Journal of Statistics, vol. 26, pp.
+583–599, 1998.
+[8] A. Vexler, C. Wu, and K. F. Yu, “Optimal hypothesis testing: from semi
+to fully Bayes factors,” Metrika, vol. 71, pp. 125–138, 2010.
+[9] A. Schaum, “Continuum fusion: a theory of inference, with applications
+to hyperspectral detection,” Optics Express, vol. 18, pp. 8171–8181,
+2010.
+[10] ——, “Clairvoyant fusion: a new methodology for designing robust
+detection algorithms,” Proc. SPIE, vol. 10004, p. 100040C, 2016.
+[11] J. Theiler, “Confusion and clairvoyance: some remarks on the composite
+hypothesis testing problem,” Proc. SPIE, vol. 8390, p. 839003, 2012.
+[12] I. S. Reed, J. D. Mallett, and L. E. Brennan, “Rapid convergence rate in
+adaptive arrays,” IEEE Trans. Aerospace and Electronic Systems, vol. 10,
+pp. 853–863, 1974.
+[13] F. C. Robey, D. R. Fuhrmann, E. J. Kelly, and R. Nitzberg, “A CFAR
+adaptive matched filter detector,” IEEE Trans. Aerospace and Electronic
+Systems, vol. 28, pp. 208–216, 1992.
+[14] A. Schaum and A. Stocker, “Spectrally selective target detection,” in
+Proc. ISSSR (Int. Symp. Spectral Sensing Research), 1997, p. 23.
+[15] J. Theiler and B. R. Foy, “Effect of signal contamination in matched-
+filter detection of the signal on a cluttered background,” IEEE Geo-
+science and Remote Sensing Letters, vol. 3, pp. 98–102, 2006.
+[16] E. J. Kelly, “Performance of an adaptive detection algorithm: rejection
+of unwanted signals,” IEEE Trans. Aerospace and Electronic Systems,
+vol. 25, pp. 122–133, 1989.
+[17] F. Vincent and O. Besson, “One-step generalized likelihood ratio test
+for subpixel target detection in hyperspectral imaging,” IEEE Trans.
+Geoscience and Remote Sensing, pp. 4479–4489, 2020.
+[18] J. Theiler and B. R. Foy, “EC-GLRT: Detecting weak plumes in non-
+Gaussian hyperspectral clutter using an elliptically-contoured general-
+ized likelihood ratio test,” in Proc. IEEE International Geoscience and
+Remote Sensing Symposium (IGARSS), 2008, p. I:221.
+[19] J. Theiler, B. Zimmer, and A. Ziemann, “Closed-form detector for solid
+sub-pixel targets in multivariate t-distributed background clutter,” in
+Proc. IEEE International Geoscience and Remote Sensing Symposium
+(IGARSS), 2018, pp. 2773–2776.
+[20] S. Matteoli, M. Diani, and G. Corsini, “Closed-form nonparametric
+GLRT detector for subpixel targets in hyperspectral images,” IEEE
+Trans. Aerospace and Electronic Systems, vol. 56, pp. 1568–1581, 2020.
+[21] S. M. Kay, Fundamentals of Statistical Signal Processing: Detection
+Theory. New Jersey: Prentice Hall, 1998, vol. II.
+5
+(a) β = 0.3
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(b) β = 0.4
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(c) β = 0.5
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(d) β = 0.6
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(e) β = 0.7
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(f) β = 0.8
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(g) β = 0.9
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(h) β = 1.0
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+Clairvoyant
+EC-2SPADE
+2SPADE
+EC-FTMF
+FTMF
+EC-AMF
+AMF
+Fig. 1. ROC curves showing detector performance for a range of β values from 0.3 to 1.0. For these simulations, N = 107 matched-pair samples are
+generated; for each pair, one is without target (x = z) and one includes target (x = βz + αt). The data are simulated from a multivariate t distribution,
+with d = 10 and ν = 10, mean µ = [2, 2, . . . , 2]′, and unit covariance R = I . The target signature is t = µ+ [T, 0, . . . , 0], with T = 15, and the target
+strength for all these simulations was α = 0.2. (Very roughly speaking, the target is “three sigmas” away from the background mean.) Note that three curves
+are drawn for each case in order to provide a sense of trial-to-trial variability; for the curves here, however, that variability rarely exceeds the linewidth on
+the plots.
+(a) β = 0.3
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(b) β = 0.4
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(c) β = 0.5
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(d) β = 0.6
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(e) β = 0.7
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(f) β = 0.8
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(g) β = 0.9
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+(h) β = 1.0
+10 4 10 3 10 2 10 1
+False Alarm Rate
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+D
+et
+ec
+tio
+n 
+Ra
+te
+Clairvoyant
+EC-2SPADE
+2SPADE
+EC-FTMF
+FTMF
+EC-AMF
+AMF
+Fig. 2. ROC curves showing detector performance for a range of β values from 0.3 to 1.0. Same as Fig. 1, but here α = 0.6 (three times larger) and T = 5
+(three times weaker), so there is still a roughly three-sigma distance from the target to the mean.

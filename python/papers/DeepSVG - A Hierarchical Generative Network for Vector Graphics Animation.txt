@@ -1,0 +1,1058 @@
+DeepSVG: A Hierarchical Generative Network for
+Vector Graphics Animation
+Alexandre Carlier1,2 Martin Danelljan2 Alexandre Alahi1 Radu Timofte2
+1 Ecole Polytechnique Fédérale de Lausanne 2 ETH Zurich
+Abstract
+Scalable Vector Graphics (SVG) are ubiquitous in modern 2D interfaces due to
+their ability to scale to different resolutions. However, despite the success of deep
+learning-based models applied to rasterized images, the problem of vector graphics
+representation learning and generation remains largely unexplored. In this work,
+we propose a novel hierarchical generative network, called DeepSVG, for complex
+SVG icons generation and interpolation. Our architecture effectively disentangles
+high-level shapes from the low-level commands that encode the shape itself. The
+network directly predicts a set of shapes in a non-autoregressive fashion. We
+introduce the task of complex SVG icons generation by releasing a new large-scale
+dataset along with an open-source library for SVG manipulation. We demonstrate
+that our network learns to accurately reconstruct diverse vector graphics, and can
+serve as a powerful animation tool by performing interpolations and other latent
+space operations. Our code is available at https://github.com/alexandre01/
+deepsvg.
+Figure 1: DeepSVG generates vector graphics by predicting draw commands, such as lines and
+Bézier curves. Our latent space allows meaningful animations between complex vector graphics
+icons.
+1 Introduction
+Despite recent success of rasterized image generation and content creation, little effort has been
+directed towards generation of vector graphics. Yet, vector images, often in the form of Scalable
+Vector Graphics [23] (SVG), have become a standard in digital graphics, publication-ready image
+assets, and web-animations. The main advantage over their rasterized counterpart is their scaling
+ability, making the same image file suitable for both tiny web-icons or billboard-scale graphics.
+Generative models for vector graphics could serve as powerful tools, allowing artists to generate,
+manipulate, and animate vector graphics, potentially enhancing their creativity and productivity.
+Preprint. Under review.
+ar
+X
+iv
+:2
+00
+7.
+11
+30
+1v
+1 
+ [
+cs
+.C
+V
+] 
+ 2
+2 
+Ju
+l 
+20
+20
+https://github.com/alexandre01/deepsvg
+https://github.com/alexandre01/deepsvg
+Encoder Decoder
+(a) One-stage autoregressive
+Constant
+Encoder
+DecoderEncoder
+Encoder
+Decoder
+Decoder
+(b) DeepSVG (ours)
+Figure 2: One-stage autoregressive autoencoder architectures [5, 11, 19] (a) take the entire draw
+commands as input and decode the latent vector one command at a time. Our approach (b) exploits
+the hierarchical nature of vector graphics in both the encoder and decoder, and decodes the draw
+commands with a single forward pass (non-autoregressively).
+Raster images are most often represented as a rectangular grid of pixels containing a shade or color
+value. The recent success of deep learning on these images much owes to the effectiveness of
+convolutional neural networks (CNNs) [9], learning powerful representations by taking advantage of
+the inherent translational invariance. On the other hand, vector images are generally represented as
+lists of 2D shapes, each encoded as sequence of 2D points connected by parametric curves. While
+this brings the task of learning SVG representations closer to that of sequence generation, there
+are fundamental differences with other applications, such as Natural Language Processing. For
+instance, similar to the translation invariance in raster images, an SVG image experiences permutation
+invariance as the order of shapes in an SVG image is arbitrary. This brings important challenges in
+the design of both architectures and learning objectives.
+We address the task of learning generative models of complex vector graphics. To this end, we
+propose a Hierarchical Transformer-based architecture that effectively disentangles high-level shapes
+from the low-level commands that encode the shape itself. Our encoder exploits the permutation
+invariance of its input by first encoding every shape separately, then producing the latent vector by
+reasoning about the relations between the encoded shapes. Our decoder mirrors this 2-stage approach
+by first predicting, in a single forward pass, a set of shape representations along with their associated
+attributes. These vectors are finally decoded into sequences of draw commands, which combined
+produce the output SVG image. A schematic overview of our architecture is given in Fig. 2.
+Contributions Our contributions are three-fold: 1. We propose DeepSVG, a hierarchical transformer-
+based generative model for vector graphics. Our model is capable of both encoding and predicting
+the draw commands that constitute an SVG image. 2. We perform comprehensive experiments,
+demonstrating successful interpolation and manipulation of complex icons in vector-graphics format.
+Examples are presented in Fig. 1. 3. We introduce a large-scale dataset of SVG icons along with a
+framework for deep learning-based SVG manipulation, in order to facilitate further research in this
+area. To the best of our knowledge, this is the first work to explore generative models of complex
+vector graphics, and to show successful interpolation and manipulation results for this task.
+2 Related Work
+Previous works [20, 14] for icon and logo generation mainly address rasterized image, by building
+on Generative Adversarial Networks [3]. Unlike raster graphics, vector graphics generation has
+not received extensive attention yet, and has been mostly limited to the simplified task of sketch
+generation, using the ’Quick, Draw!’ [22] dataset. SketchRNN [5] was the first Long Short Term
+Memory (LSTM) [6] based variational auto-encoder (VAE) [7] addressing the generation of sketches.
+More recently, Sketchformer [19] has shown that a Transformer-based architecture enables more
+stable interpolations between sketches, without tackling the generation task. One reason of this
+success is the ability of transformers [24] to more effectively represent long temporal dependencies.
+SVG-VAE [11] was one of the first deep learning-based works that generate full vector graphics
+outputs, composed of straight lines and Bézier curves. However, it only tackles glyph icons, without
+global attributes, using an LSTM-based model. In contrast, we consider the hierarchical nature of
+SVG images, crucial for representing and generating complex vector graphics, such as icons. Fig. 2
+compares previous one-stage autoregressive approaches [5, 11, 19] to our hierarchical architecture.
+Our work is also related to the very recent PolyGen [16] for generating 3D polygon meshes using
+sequential prediction vertices and faces using a Transformer-based architecture.
+2
+Figure 3: Samples from the SVG-Icons8 dataset in vector graphics format. Although icons have
+similar scale and style, they have drastically diverse semantic meanings, shapes and number of paths.
+3 DeepSVG
+Here, we introduce our DeepSVG method. First, we propose a dataset of complex vector graphics
+and describe the SVG data representation in Sec. 3.1. We describe our learned embedding in Sec. 3.2.
+Finally, we present our architecture in Sec. 3.3 and training strategy in Sec. 3.4.
+3.1 SVG Dataset and Representation
+SVG-Icons8 Dataset. Existing vector graphics datasets either only contain straight lines [22] or are
+constrained to font generation [11]. These datasets therefore do not pose the challenges associated
+with the generation of complex vector graphics, addressed in this work. Thus, we first introduce a new
+dataset, called SVG-Icons8. It is composed of SVG icons obtained from the https://icons8.com
+website. In the compilation of the dataset, we carefully considered the consistency and diversity of
+the collected icons. This was mainly performed by ensuring that the vector graphics have similar
+scale, colors and style, while capturing diverse real-world graphics allowing to learn meaningful
+and generalizable shape representations. In summary, our dataset consists of 100,000 high-quality
+icons in 56 different categories. Samples from the dataset are shown in Fig. 3. We believe that
+the SVG-Icons8 dataset, which is to be released upon acceptance, will serve as a challenging new
+benchmark for the growing task of vector graphics generation and representation learning.
+Vector Graphics and SVG. In contrast to Raster graphics, where the content is represented by a
+rectangular grid of pixels, Vector graphics employs in essence mathematical formulas to encode
+different shapes. Importantly, this allows vector graphics to be scaled without any aliasing or loss
+in detail. Scalable Vector Graphics (SVG) is an XML-based format for vector graphics [23]. In its
+simplest form, an SVG image is built up hierarchically as a set of shapes, called paths. A path is itself
+defined as a sequence of specific draw-commands (see Tab. 1) that constitute a closed or open curve.
+Data structure. In order to learn deep neural networks capable of encoding and predicting vector
+graphics, we first need a well defined and simple representation of the data. This is obtained by
+adopting the SVG format with the following simplifications. We employ the commands listed in
+Tab. 1. In fact, this does not significantly reduce the expressivity since other basic shapes can
+be converted into a sequence of Bézier curves and lines. We consider a Vector graphics image
+V = {P1, . . . , PNP } to be a set of NP paths Pi. Each path is itself defined as a triplet Pi =
+(Si, fi, vi), where vi ∈ {0, 1} indicates the visibility of the path and fi ∈ {0, 1, 2} determines
+Table 1: List of the SVG draw-commands, along with their arguments and a visualization, used in this
+work. The start-position (x1, y1) is implicitly defined as the end-position of the preceding command.
+Command Arguments Description Visualization
+<SOS> ∅ ’Start of SVG’ token.
+M
+(MoveTo)
+x2, y2
+Move the cursor to the end-point (x2, y2)
+without drawing anything.
+L
+(LineTo)
+x2, y2 Draw a line to the point (x2, y2).
+C
+(Cubic
+Bézier)
+qx1, qy1
+qx2, qy2
+x2, y2
+Draw a cubic Bézier curve with control
+points (qx1, qy1), (qx2, qy2) and end-point
+(x2, y2).
+z
+(ClosePath)
+∅
+Close the path by moving the cursor back
+to the path’s starting position (x0, y0).
+<EOS> ∅ ’End of SVG’ token.
+3
+https://icons8.com
+the fill property. Each Si = (C1i , . . . , C
+NC
+i ) contains a sequence of NC commands C
+j
+i . The
+command Cji = (c
+j
+i , X
+j
+i ) itself is defined by its type c
+j
+i ∈ {<SOS>, m, l, c, z, <EOS>} and arguments,
+as listed in Tab. 1. To ensure efficient parallel processing, we use a fixed-length argument list
+X
+j
+i = (q
+j
+x1,i
+, q
+j
+y1,i
+, q
+j
+x2,i
+, q
+j
+y2,i
+, x
+j
+2,i, y
+j
+2,i) ∈ R
+6, where any unused argument is set to −1. Therefore,
+we also use a fixed number of pathsNP and commandsNC by simply padding with invisible elements
+in each case. Further details are given in appendix.
+3.2 SVG Embedding
+By the discrete nature of the data and in order to let the encoder reason between the different
+commands, every Cji is projected to a common continuous embedding space of dimension dE ,
+similarly to the de facto approach used in Natural Language Processing [24]. This enables the
+encoder to perform operations across embedded vectors and learn complex dependencies between
+argument types, coordinate values and relative order of commands in the sequence. We formulate
+the embedding of the SVG command in a fashion similar to [1]. In particular, the command Cji is
+embedded to a vector eji ∈ R
+dE as the sum of three embeddings, eji = e
+j
+cmd,i + e
+j
+coord,i + e
+j
+ind,i. We
+describe each individual embedding next.
+Command embedding. The command type (see Tab. 1) is converted to a vector of dimension dE
+using a learnable matrix Wcmd ∈ RdE×6 as e
+j
+cmd,i = Wcmd δcj
+i
+∈ RdE , where δ
+c
+j
+i
+designates the
+6-dimensional one-hot vector containing a 1 at the command index cji .
+Coordinate embedding. Inspired by works such as PixelCNN [17] and PolyGen [16], which
+discretize continuous signals, we first quantize the input coordinates to 8-bits. We also include a
+case indicating that the coordinate argument is unused by the command, thus leading to an input
+dimension of 28 + 1 = 257 for the embedding itself. Each coordinate is first embedded separately
+with the weight matrix WX ∈ RdE×257. The combined result of each coordinate is then projected to
+a dE-dimensional vector using a linear layer Wcoord ∈ RdE×6dE ,
+e
+j
+coord,i = Wcoord vec
+(
+WXX
+j
+i
+)
+, X
+j
+i =
+[
+q
+j
+x1,i
+q
+j
+y1,i
+q
+j
+x2,i
+q
+j
+y2,i
+x
+j
+2,i y
+j
+2,i
+]
+∈ R257×6 . (1)
+Here, vec(·) denotes the vectorization of a matrix.
+Index embedding. Similar to [1], we finally use a learned index embedding1 that indicates the index
+of the command in the given sequence using the weight Wpos ∈ RdE×NS as e
+j
+ind,i = Wind δj ∈ R
+dE ,
+where δj is the one-hot vector of dimension NS filled with a 1 at index j.
+3.3 Hierarchical Generative Network
+In this section, we describe our Hierarchical Generative Network architecture for complex vector
+graphics interpolation and generation, called DeepSVG. A schematic representation of the model is
+shown in Fig. 4. Our network is a variational auto-encoder (VAE) [7], consisting of an encoder and a
+decoder network. Both networks are designed by considering the hierarchical representation of an
+SVG image, which consists of a set of paths, each path being a sequence of commands.
+Feed-forward prediction. For every path, we propose to predict the NC commands (ĉ
+j
+i , X̂
+j
+i ) in a
+purely feed-forward manner. Our generative model is thus factorized as,
+p
+(
+V̂ |z, θ
+)
+=
+NP∏
+i=1
+p(v̂i|z, θ)p(f̂i|z, θ)
+NC∏
+j=1
+p(ĉ
+j
+i |z, θ)p(X̂
+j
+i |z, θ) , (2)
+where z is the latent vector and p(X̂ji |z, θ) further factorizes into the individual arguments. Note that
+our approach is conceptually different to the autoregressive strategy used in previous works [5, 11],
+which learns a model predicting the next command conditioned on the history. We found our approach
+to lead to significantly better reconstructions and smoother interpolations, as analyzed in Sec. 4.
+Intuitively, the feed-forward strategy allows the network to primarily rely on the latent encoding to
+reconstruct the input, without taking advantage of the additional information of previous commands
+1Known as positional embedding in the Natural Language Processing literature [24].
+4
+..
+.
+..
+.
+...
+...
+Matching
++
+*
+..
+.
+..
+.
+...
+Figure 4: Our Hierarchical Generative Network, DeepSVG. Input paths {Pi}NP1 are encoded sepa-
+rately using the path encoderE(1). The encoded vectors are then aggregated using the second encoder
+E(2), which produces the latent vector z. The decoder D(2) outputs the path representations along
+with their fill and visibility attributes {(ûi, f̂i, v̂i)}NP1 . Finally {ûi}
+NP
+1 are decoded independently
+using the path decoder D(1), which outputs the actual draw commands and arguments.
+and arguments. Importantly, a feed-forward model brings major advantages during training, since
+inference can be directly modeled during training. On the other hand, autoregressive methods [4,
+24] condition on ground-truth to ensure efficient training through masking, while the inference stage
+conditions on the previously generated commands.
+Encoder. To keep the permutation invariance property of the paths set {Pi}NP1 , we first encode every
+path Pi independently using path encoder E(1). More specifically,E(1) takes the embeddings (e
+j
+i )
+NC
+j=1
+as input and outputs vectors (e′ji )
+NC
+j=1 of same dimension. To retrieve the single dE-dimensional
+path encoding ui, we average-pool the output vectors along the sequential dimension. The NP
+path encodings {ui}NP1 are then input in encoder E
+(2) which, after pooling along the set-dimension,
+outputs the parameters of a Gaussian distribution µ̂ and σ̂. Note how the index embedding in vector eji
+enables E(1) to reason about the sequential nature of its input while E(2) maintains the permutation
+invariance of the input paths. The latent vector is finally obtained using the reparametrization trick
+[7] as z = µ̂+ σ̂ · �, where � ∼ N (0, I).
+Decoder. The decoder mirrors the two-stage construction of the encoder. D(2) inputs the latent
+vector z repeatedly, at each transformer block, and predicts a representation of each shape in the
+image. Unlike the corresponding encoder stage, permutation invariance is not a desired property for
+D(2), since its purpose is to generate the shapes in the image. We achieve this by using a learned
+index embedding as input to the decoder. The embeddings are thus distinct for each path, breaking
+the symmetry during generation. The decoder is followed by a Fully Connected Network (FCN)
+that outputs, for each index 1 ≤ i ≤ NP , the predicted path encoding ûi, filling f̂i and visibility
+v̂i attributes. Symmetrically to the encoder, the vectors {ûi}NP1 are decoded by D
+(1) into the final
+output path representations {(Ĉ1i , · · · , Ĉ
+NC
+i )}
+NP
+1 . As for D
+(2), we use learned constant embeddings
+as input and an FCN to predict the command and argument logits. Detailed descriptions about the
+architectures are given in the appendix.
+Transformer. Inspired by the success of transformer-based architectures for a variety of tasks [19,
+10, 1, 25], we also adopt it as the basic building block for our network. Both the Encoders and the
+Decoders are Transformer-based. Specifically, as in [19], we use L = 4 layers, with a feed-forward
+dimension of 512 and dE = 256.
+5
+3.4 Training Objective
+Next, we present the training loss used by our DeepSVG. We first define the loss between a predicted
+path (Ŝı̂, f̂ı̂, v̂ı̂) and a ground-truth path (Si, fi, vi) as,
+Lı̂,i(θ) = wvis`(vı̂, v̂i) + vi ·
+(
+wfill`(fı̂, f̂i) +
+NC∑
+j=1
+(
+wcmd`(c
+j
+ı̂ , ĉ
+j
+i ) + wargs l
+j
+args,̂ı,i
+))
+. (3)
+Here, ` denotes the Cross-Entropy loss. The impact of each term is controlled by its weight w. The
+losses for filling, commands and arguments are masked when the groundtruth path is not visible. The
+loss ljargs,̂ı,i over the argument prediction is defined as,
+l
+j
+args,̂ı,i = 1cj
+i
+∈{m,l,c}
+(
+`(x
+j
+2,̂ı, x̂
+j
+2,i)+`(y
+j
+2,̂ı, ŷ
+j
+2,i)
+)
++ 1
+c
+j
+i
+=c
+∑
+k∈{1,2}
+`(q
+j
+xk ,̂ı
+, q̂
+j
+xk,i
+)+`(q
+j
+yk ,̂ı
+, q̂
+j
+yk,i
+). (4)
+Having formulated the loss for a single path, the next question regards how to this can be used to
+achieve a loss on the entire prediction. However, recall that the collection of paths in a vector image
+has no natural ordering, raising the question of how to assign ground-truth paths to each prediction.
+Formally, a ground-truth assignment π is a permutation π ∈ SNP , mapping the path index of the
+prediction ı̂ to the corresponding ground-truth path index i = π(̂ı). We discuss two alternatives for
+solving the ground-truth assignment problem.
+Ordered assignment. One strategy is to define the assignment π by sorting the ground-truth paths
+according to some specific criterion. This induces an ordering πord, which the network learns to
+reproduce. We found defining the ground-truth assignment using the lexicographic order of the
+starting location of the paths to yield good results. Given any sorting criterion, the loss is defined as,
+L(θ) = wKLKL (pθ(z)‖N (0, I)) +
+∑NP
+ı̂=1 Lı̂,πord(ı̂)(θ) , (5)
+where the first term corresponds to the latent space prior induced by the VAE learning.
+Hungarian assignment. We also investigate a strategy that does not require defining a sorting
+criterion. For each prediction, we instead find the best possible assignment π in terms of loss,
+L(θ) = wKLKL (pθ(z)‖N (0, I)) + min
+π∈SNP
+∑NP
+ı̂=1 Lı̂,π(ı̂)(θ) . (6)
+The best permutation is found through the Hungarian algorithm [8, 15].
+Training details. We use the AdamW [12] optimizer with initial learning rate 10−4, reduced by a
+factor of 0.9 every 5 epochs and a linear warmup period of 500 initial steps. We use a dropout rate of
+0.1 in all transformer layers and gradient clipping of 1.0. We train our networks for 100 epochs with
+a total batch-size of 120 on two 1080Ti GPUs, which takes about one day.
+Figure 5: Comparison of interpolations between baseline (top row, in green), one-stage feed-forward
+(2nd row, in pink), ours – Hungarian (3rd row, in orange) and ours – ordered (bottom row, in blue).
+Ordered generally leads to the smoothest interpolations. The last two examples show interpolations
+where Hungarian yields visually more meaningful shape transitions. For a better visualization of
+these transitions, paths are colored according to their index (or order for one-stage architectures).
+6
+Table 2: Human study ablating our DeepSVG model.
+Feed-forward Hierarchical Matching 1st rank % Average rank
+Baseline 9.7 3.26
+One-stage feed-forward X 19.5 2.40
+Ours – Hungarian X X Hungarian 25.8 2.29
+Ours – Ordered X X Ordered 44.8 1.99
+4 Experiments
+We validate the performance of our DeepSVG method on the introduced SVG-Icons8 dataset. We
+also demonstrate results for glyph generation on the SVG-Fonts [11] dataset. Further experiments
+and interactive examples are presented in the supplementary material.
+4.1 Ablation study
+We ablate our model by conducting a human study. As baseline, we use an autoregressive one-
+stage architecture by concatenating the set of (unpadded) input sequences, sorted using the Ordered
+criterion 3.4. The number of paths therefore becomes NP = 1 and only Encoder E(1) and Decoder
+D(1) are used; filling is ignored in that case. We analyze the effect of feed-forward prediction, and
+then our hierarchical DeepSVG architecture, using either the Ordered or Hungarian assignment
+loss 3.4. The human study is conducted by randomly selecting 100 pairs of SVG icons, and
+showing the interpolations generated by the four models to 10 human participants, which rank them
+best (1) to worst (4). In Tab. 2 we present the results of this study by reporting the percentage
+of 1st rank votes, as well as the average rank for each model. We also show qualitative results
+in Fig. 5, here ignoring the filling attribute since it is not supported by one-stage architectures.
+Compared to the autoregressive baseline, the use of feed-forward prediction brings substantial
+improvement in reconstruction and interpolation quality, as also confirmed by the qualitative results.
+In our human study, our hierarchical architecture with ordered assignment yields superior results.
+Although providing notably better reconstruction quality, this version provides much more stable and
+meaningful interpolations compared to the other approaches.
+The Hungarian assignment achieves notably worse results compared to ordered assignment in average.
+Note that the latter is more related to the loss employed for the one-stage baselines, although there
+acting on a command level. We hypothesize that the introduction of a sensible ordering during
+training helps the decoder learning by providing an explicit prior, which better breaks symmetries
+and reduces competition between the predicted paths. Fig. 6 further shows how the latent SVG
+representation translates to meaningful decodings by performing interpolation between 4 SVG icons.
+4.2 Animation by interpolation
+As visually demonstrated in the previous subsection, we observe significantly better reconstruction
+capability of our model than previous works. This property is crucial for real-world applications
+involving SVGs since users should be able to perform various operations on vector graphics while
+keeping their original drawings unchanged. With this requirement in mind, we examine if DeepSVG
+can be used to animate SVGs, by interpolating between two user-drawn ones. Fig. 7 shows the results
+Figure 6: Interpolation between multiple icons in the latent space of DeepSVG – Ordered.
+7
+Figure 7: Animating SVG scenes by interpola-
+tion. Leftmost and rightmost frames are drawn
+by a user, while images in between are interpola-
+tions. DeepSVG smoothly interpolates between
+challenging path deformations while accurately re-
+constructing the 1st and last frames. A failure case
+is shown in the last row where the deformation of
+the player’s right leg is not smoothly interpolated.
+of challenging scenes, after finetuning the model on the both frames for about 1,000 steps. Notice
+how DeepSVG handles well both translations and deformations.
+4.3 Latent space algebra
+Figure 8: Global operations on SVG representations using latent
+directions. Subtracting/adding ∆square makes an icon look more
+round/rectangular, while ∆add adds or removes paths. ∆add is
+obtained by removing the last path of an icon, and averaging the
+difference over 500 random icons.
+Given DeepSVG’s smooth latent
+space and accurate reconstruction
+ability, we next ask if latent di-
+rections may enable to manipulate
+SVGs globally in a semantically
+meaningful way. We present two
+experiments in Fig. 8. In both
+cases, we note ∆ the difference
+between encodings of two similar
+SVGs differing by some visual se-
+mantics. We show how this la-
+tent direction can be added or sub-
+tracted to the latent vector z of
+arbitrary SVG icons. More ex-
+periments are presented in the ap-
+pendix. In particular, we examine
+whether DeepSVG’s hierarchical
+construction enables similar oper-
+ations to be performed on single
+paths instead of globally.
+4.4 Font generation
+Our experiments have demonstrated so far reconstruction, interpolation and manipulation of vector
+graphics. In this section, we further show the generative capability of our method, by decoding
+random vectors sampled from the latent space. We train our model on the SVG-Fonts dataset, for the
+task of class-conditioned glyph generation. DeepSVG is extended by adding label embeddings at
+every layer of each Transformer block. Fig. 9 presents random samples of our model. More details
+on the architecture, results and comparisons are shown in the appendix.
+Figure 9: Glyph generation samples of our method, by conditioning on each class label. We sample
+the latent vector z from a Gaussian distribution with standard deviation σ = 0.5.
+5 Conclusion
+We have demonstrated how our hierarchical network can successfully perform SVG icons interpo-
+lations and manipulation. We hope that our architecture will serve as a strong baseline for future
+research in this, to date, little-explored field. Interesting applications of our architecture include
+raster-to-vector conversion or the more general task of XML generation by extending the two-level
+hierarchy used in this work. Furthermore, while DeepSVG was designed specifically for the natural
+representation of SVGs, our architecture can be used for any task involving data represented as a set
+8
+of sequences. We therefore believe it can be used, with minimal modifications, in a wide variety of
+tasks, including multi-instrument audio generation, multi-human motion trajectory generation, etc.
+Broader Impact
+DeepSVG can be used as animation tool by performing interpolations and other latent space operations
+on user-drawn SVGs. Similarly to recent advances in rasterized content creation, we believe this
+work will serve as a potential way for creators and digital artists to enhance their creativity and
+productivity.
+References
+[1] Rewon Child et al. “Generating Long Sequences with Sparse Transformers”. In: CoRR
+abs/1904.10509 (2019). arXiv: 1904.10509. URL: http://arxiv.org/abs/1904.10509.
+[2] David H. Douglas and Thomas K. Peucker. “Algorithms for the Reduction of the Number of
+Points Required to Represent a Digitized Line or its Caricature”. In: 1973.
+[3] Ian J. Goodfellow et al. “Generative Adversarial Nets”. In: Advances in Neural Informa-
+tion Processing Systems 27: Annual Conference on Neural Information Processing Systems
+2014, December 8-13 2014, Montreal, Quebec, Canada. Ed. by Zoubin Ghahramani et al.
+2014, pp. 2672–2680. URL: http://papers.nips.cc/paper/5423- generative-
+adversarial-nets.
+[4] Alex Graves. “Generating Sequences With Recurrent Neural Networks”. In: CoRR
+abs/1308.0850 (2013). arXiv: 1308.0850. URL: http://arxiv.org/abs/1308.0850.
+[5] David Ha and Douglas Eck. “A Neural Representation of Sketch Drawings”. In: 6th In-
+ternational Conference on Learning Representations, ICLR 2018, Vancouver, BC, Canada,
+April 30 - May 3, 2018, Conference Track Proceedings. OpenReview.net, 2018. URL: https:
+//openreview.net/forum?id=Hy6GHpkCW.
+[6] Sepp Hochreiter and Jürgen Schmidhuber. “Long Short-Term Memory”. In: Neural Compu-
+tation 9.8 (1997), pp. 1735–1780. DOI: 10.1162/neco.1997.9.8.1735. URL: https:
+//doi.org/10.1162/neco.1997.9.8.1735.
+[7] Diederik P. Kingma and Max Welling. “Auto-Encoding Variational Bayes”. In: 2nd Interna-
+tional Conference on Learning Representations, ICLR 2014, Banff, AB, Canada, April 14-16,
+2014, Conference Track Proceedings. Ed. by Yoshua Bengio and Yann LeCun. 2014. URL:
+http://arxiv.org/abs/1312.6114.
+[8] Harold W Kuhn. “The Hungarian method for the assignment problem”. In: Naval research
+logistics quarterly 2.1-2 (1955), pp. 83–97.
+[9] Y. Lecun et al. “Gradient-based learning applied to document recognition”. In: Proceedings of
+the IEEE 86.11 (1998), pp. 2278–2324.
+[10] Guang Li et al. “Entangled Transformer for Image Captioning”. In: 2019 IEEE/CVF Inter-
+national Conference on Computer Vision, ICCV 2019, Seoul, Korea (South), October 27 -
+November 2, 2019. IEEE, 2019, pp. 8927–8936. DOI: 10.1109/ICCV.2019.00902. URL:
+https://doi.org/10.1109/ICCV.2019.00902.
+[11] Raphael Gontijo Lopes et al. “A Learned Representation for Scalable Vector Graphics”. In:
+2019 IEEE/CVF International Conference on Computer Vision, ICCV 2019, Seoul, Korea
+(South), October 27 - November 2, 2019. IEEE, 2019, pp. 7929–7938. DOI: 10.1109/ICCV.
+2019.00802. URL: https://doi.org/10.1109/ICCV.2019.00802.
+[12] Ilya Loshchilov and Frank Hutter. “Decoupled Weight Decay Regularization”. In: 7th Interna-
+tional Conference on Learning Representations, ICLR 2019, New Orleans, LA, USA, May 6-9,
+2019. OpenReview.net, 2019. URL: https://openreview.net/forum?id=Bkg6RiCqY7.
+[13] L Maisonobe. Drawing an elliptical arc using polylines, quadratic or cubic Bézier curves.
+2003.
+[14] Ajkel Mino and Gerasimos Spanakis. “LoGAN: Generating Logos with a Generative Adver-
+sarial Neural Network Conditioned on Color”. In: 17th IEEE International Conference on
+Machine Learning and Applications, ICMLA 2018, Orlando, FL, USA, December 17-20, 2018.
+Ed. by M. Arif Wani et al. IEEE, 2018, pp. 965–970. DOI: 10.1109/ICMLA.2018.00157.
+URL: https://doi.org/10.1109/ICMLA.2018.00157.
+9
+http://arxiv.org/abs/1904.10509
+http://arxiv.org/abs/1904.10509
+http://papers.nips.cc/paper/5423-generative-adversarial-nets
+http://papers.nips.cc/paper/5423-generative-adversarial-nets
+http://arxiv.org/abs/1308.0850
+http://arxiv.org/abs/1308.0850
+https://openreview.net/forum?id=Hy6GHpkCW
+https://openreview.net/forum?id=Hy6GHpkCW
+http://dx.doi.org/10.1162/neco.1997.9.8.1735
+https://doi.org/10.1162/neco.1997.9.8.1735
+https://doi.org/10.1162/neco.1997.9.8.1735
+http://arxiv.org/abs/1312.6114
+http://dx.doi.org/10.1109/ICCV.2019.00902
+https://doi.org/10.1109/ICCV.2019.00902
+http://dx.doi.org/10.1109/ICCV.2019.00802
+http://dx.doi.org/10.1109/ICCV.2019.00802
+https://doi.org/10.1109/ICCV.2019.00802
+https://openreview.net/forum?id=Bkg6RiCqY7
+http://dx.doi.org/10.1109/ICMLA.2018.00157
+https://doi.org/10.1109/ICMLA.2018.00157
+[15] James Munkres. “Algorithms for the assignment and transportation problems”. In: Journal of
+the society for industrial and applied mathematics 5.1 (1957), pp. 32–38.
+[16] Charlie Nash et al. “PolyGen: An Autoregressive Generative Model of 3D Meshes”. In: CoRR
+abs/2002.10880 (2020). arXiv: 2002.10880. URL: https://arxiv.org/abs/2002.10880.
+[17] Aäron van den Oord et al. “Conditional Image Generation with PixelCNN Decoders”. In:
+Advances in Neural Information Processing Systems 29: Annual Conference on Neural Informa-
+tion Processing Systems 2016, December 5-10, 2016, Barcelona, Spain. Ed. by Daniel D. Lee
+et al. 2016, pp. 4790–4798. URL: http://papers.nips.cc/paper/6527-conditional-
+image-generation-with-pixelcnn-decoders.
+[18] Emilio Parisotto et al. “Stabilizing Transformers for Reinforcement Learning”. In: CoRR
+abs/1910.06764 (2019). arXiv: 1910.06764. URL: http://arxiv.org/abs/1910.06764.
+[19] Leonardo Sampaio Ferraz Ribeiro et al. “Sketchformer: Transformer-based Representation
+for Sketched Structure”. In: CoRR abs/2002.10381 (2020). arXiv: 2002.10381. URL: https:
+//arxiv.org/abs/2002.10381.
+[20] Alexander Sage et al. “Logo Synthesis and Manipulation With Clustered Generative Adver-
+sarial Networks”. In: 2018 IEEE Conference on Computer Vision and Pattern Recognition,
+CVPR 2018, Salt Lake City, UT, USA, June 18-22, 2018. IEEE Computer Society, 2018,
+pp. 5879–5888. DOI: 10.1109/CVPR.2018.00616. URL: http://openaccess.thecvf.
+com/content%5C_cvpr%5C_2018/html/Sage%5C_Logo%5C_Synthesis%5C_and%5C_
+CVPR%5C_2018%5C_paper.html.
+[21] Philip J. Schneider. “An Algorithm for Automatically Fitting Digitized Curves”. In: Graphics
+Gems. USA: Academic Press Professional, Inc., 1990, pp. 612–626.
+[22] The Quick, Draw! dataset. https://github.com/googlecreativelab/quickdraw-
+dataset.
+[23] The W3C SVG Working Group. https://www.w3.org/Graphics/SVG.
+[24] Ashish Vaswani et al. “Attention is All you Need”. In: Advances in Neural Information
+Processing Systems 30: Annual Conference on Neural Information Processing Systems 2017,
+4-9 December 2017, Long Beach, CA, USA. Ed. by Isabelle Guyon et al. 2017, pp. 5998–6008.
+URL: http://papers.nips.cc/paper/7181-attention-is-all-you-need.
+[25] Zhou Yu et al. “Deep Modular Co-Attention Networks for Visual Question Answering”. In:
+IEEE Conference on Computer Vision and Pattern Recognition, CVPR 2019, Long Beach,
+CA, USA, June 16-20, 2019. Computer Vision Foundation / IEEE, 2019, pp. 6281–6290. DOI:
+10.1109/CVPR.2019.00644.
+10
+http://arxiv.org/abs/2002.10880
+https://arxiv.org/abs/2002.10880
+http://papers.nips.cc/paper/6527-conditional-image-generation-with-pixelcnn-decoders
+http://papers.nips.cc/paper/6527-conditional-image-generation-with-pixelcnn-decoders
+http://arxiv.org/abs/1910.06764
+http://arxiv.org/abs/1910.06764
+http://arxiv.org/abs/2002.10381
+https://arxiv.org/abs/2002.10381
+https://arxiv.org/abs/2002.10381
+http://dx.doi.org/10.1109/CVPR.2018.00616
+http://openaccess.thecvf.com/content%5C_cvpr%5C_2018/html/Sage%5C_Logo%5C_Synthesis%5C_and%5C_CVPR%5C_2018%5C_paper.html
+http://openaccess.thecvf.com/content%5C_cvpr%5C_2018/html/Sage%5C_Logo%5C_Synthesis%5C_and%5C_CVPR%5C_2018%5C_paper.html
+http://openaccess.thecvf.com/content%5C_cvpr%5C_2018/html/Sage%5C_Logo%5C_Synthesis%5C_and%5C_CVPR%5C_2018%5C_paper.html
+https://github.com/googlecreativelab/quickdraw-dataset
+https://github.com/googlecreativelab/quickdraw-dataset
+https://www.w3.org/Graphics/SVG
+http://papers.nips.cc/paper/7181-attention-is-all-you-need
+http://dx.doi.org/10.1109/CVPR.2019.00644
+Appendix
+In this appendix, we first present a visualization of the data structure used for SVGs in Sec. A. We
+provide detailed instructions used to preprocess our data in Sec.B. Additional details on training and
+architectures are given in Sec. C and Sec. D. Sec. E goes through the procedure to predict filling
+along with SVG paths. Finally, additional results for font generation, icons generation, latent space
+algebra, animations and interpolations are presented in sections F, G, H, I and J respectively.
+A SVG Representation visualization
+For a visual depiction of the data structure described in Sec. 3.1, we present in Fig. 10 an example of
+SVG image along with its tensor representation. The SVG image consists of 2 paths, P1 and P2. The
+former, P1 starts with a move m command from the top left corner. The arc is constructed from two
+Cubic Bézier curve c commands. This is followed by a line l and close path z command. The <EOS>
+command indicates the end of path P1. P2 is constructed in a similar fashion using only a single
+Cubic Bézier curve.
+Index Command Arguments Index Command Arguments
+2
+1 5
+4
+3
+21
+1
+2
+6
+5
+4
+3
+0 <SOS>
+m
+c
+c
+l
+<EOS>
+143 180 215 6616 14
+-1 -1 -1 -1-1 -1
+-1 -1 -1 -1-1 -1
+z -1 -1 -1 -1-1 -1
+-1 -1 95 54-1 -1
+-1 -1 95 54-1 -1
+255 244 191 181118 152
+1
+2
+6
+5
+4
+3
+0 <SOS> -1 -1 -1 -1-1 -1
+<EOS> -1 -1 -1 -1-1 -1
+<EOS> -1 -1 -1 -1-1 -1
+<EOS> -1 -1 -1 -1-1 -1
+<EOS> -1 -1 -1 -1-1 -1
+m
+c 93 48 11 125183 176
+-1 -1 132 130-1 -1
+Figure 10: Example of SVG representation. Left: Input SVG image. Right: Corresponding tensor
+representations with 2 paths and 7 commands (NP = 2, NC = 7). Commands in the image and the
+corresponding tensor are color-coded for a better visualization. The arguments are listed in the order
+qx1, qy1, qx2, qy2, x2 and y2. Best viewed in color.
+B SVG Preprocessing
+In Sec. 3.1, we consider that SVG images are given as a set of paths, restricted to the 6 commands
+described in Tab. 1. As mentioned, this does not reduce the expressivity of vector graphics since
+other basic shapes and commands can be converted to that format. We describe next the details of
+these conversions.
+Path commands conversion. Lower-case letters in SVG path commands are used to specify that
+their corresponding arguments are relative to the preceding command’s end-position, as opposed
+to absolute for upper-case letters. We start by converting all commands to absolute. Other avail-
+able commands (H: HorizonalLineTo, V: VerticalLineTo, S: SmoothBezier, Q: QuadraticBezier, T:
+SmoothQuadraticBezier) can be trivially converted to the commands subset of Tab. 1. The only
+missing command that needs further consideration is the elliptical-arc command A, described below.
+Elliptical arc conversion. As illustrated in Fig. 11, command A rx, ry ϕ fA fS x2, y2 draws
+an elliptical arc with radii rx and ry (semi-major and semi-minor axes), rotated by angle ϕ to the
+x-axis, and end-point (x2, y2). The bit-flags fA and fS are used to uniquely determine which one
+of the four possible arcs is chosen: large-arc-flag fA is set to 1 if the arc spanning more than 180◦
+is chosen, 0 otherwise; and sweep-flag fs is set to 0 if the arc is oriented clockwise, 1 otherwise.
+We argue that this parametrization, while being intuitive from a user-perspective, adds unnecessary
+complexity to the commands argument space described in Sec.3.1 and the bit-flags make shapes
+non-continuous w.r.t. their arguments, which would result in less smooth animations. We therefore
+convert A commands to multiple Cubic Bézier curves. We first start by converting the endpoint
+parametrization (x1, y1), (x2.y2) to a center parametrization (cx, cy). The center of the ellipse is
+11
+Figure 11: Elliptical Arc command visualization. The command is parametrized with arguments: rx,
+ry , ϕ, fA, fS , x2 and y2.
+computed using: (
+cx
+cy
+)
+=
+(
+cosϕ − sinϕ
+sinϕ cosϕ
+)(
+c′x
+c′y
+)
++
+(
+x1+x2
+2
+y1+y2
+2
+)
+(7)
+where, (
+c′x
+c′y
+)
+= ±
+√√√√r2xr2y − r2x (y′1)2 − r2y (x′1)2
+r2x (y
+′
+1)
+2
++ r2y (x
+′
+1)
+2
+(
+rxy
+′
+1
+ry
+− ryx
+′
+1
+rx
+)
+(8)
+(
+x′1
+y′1
+)
+=
+(
+cosϕ sinϕ
+− sinϕ cosϕ
+)(
+x1−x2
+2
+y1−y2
+2
+)
+(9)
+We then determine the start angle θ1 and angle range ∆θ which are given by computing:
+θ1 = ∠
+((
+1
+0
+)
+,
+(
+x′1−c
+′
+x
+rx
+y′1−c
+′
+y
+ry
+))
+(10)
+∆θ = ∠
+((
+x′1−c
+′
+x
+rx
+y′1−c
+′
+y
+ry
+)
+,
+(−x′1−c′x
+rx
+−y′1−c
+′
+y
+ry
+))
+(11)
+Using (cx, cy), θ1 and ∆θ, we obtain the parametric elliptical arc equation as follows (for θ ranging
+from θ1 to θ1 + ∆θ):
+E(θ) =
+(
+cx + rx cosϕ cos θ − ry sinϕ sin θ
+cy + rx sinϕ cos θ − ry cosϕ sin θ
+)
+(12)
+and the derivative of the parametric curve is:
+E′(θ) =
+(
+−rx cosϕ sin θ − ry sinϕ cos θ
+−rx sinϕ sin θ − ry cosϕ cos θ
+)
+(13)
+Given both equations, [13] shows that the section of elliptical arc between angles θ1 and θ2 can be
+approximated by a cubic Bézier curve whose control points are computed as follows:
+
+P1 = E(θ1)
+P2 = E(θ2)
+Q1 = P1 + αE
+′(θ1)
+Q2 = P2 − αE′(θ2)
+(14)
+where α = sin θ2 − θ1
+√
+4+3 tan2
+θ2−θ1
+2
+−1
+3
+.
+Basic shape conversion. In addition to paths, SVG images can be built using 6 basic shapes:
+rectangles, lines, polylines, polygons, circles and ellipses. The first four can be converted to paths
+12
+Table 3: Examples of conversion from basic shapes (rectangle, circle, ellipse, line, polyline and
+polygon) to paths.
+Basic Shape Path equivalent
+<rect x="0" y="0"
+width="1" height="1" />
+<path d="M0,0 L1,0 L1,1
+L0,1 L0,0 z" />
+<circle cx="1" cy="1"
+r="1" />,
+<ellipse cx="1" cy="1"
+rx="1" ry="1" />
+<path d="M1,0 A1,1 0 0 1 2,1
+A1,1 0 0 1 1,2
+A1,1 0 0 1 0,1
+A1,1 0 0 1 1,0 z" />
+<line x1="0" x2="1" y1="0"
+y2="1" />
+<path d="M0,0 L1,1" />
+<polyline points="0, 0 1, 0 1,
+1" />
+<path d="M0,0 L1,0 L1,1" />
+<polgon points="0, 0 1, 0 1, 1"
+/>
+<path d="M0,0 L1,0 L1,1 z" />
+using Line commands, while the latter two are transformed to a path using four Elliptical Arc
+commands, which themselves are converted to Bézier curves using the previous section. Table 3
+below shows examples of these conversions.
+Path simplification. Similarly to Sketch-RNN [5], we preprocess our dataset in order to simplify
+the network’s task of representation learning. However, unlike the latter work, our input consists
+of both straight lines and parametric curves. Ideally, if shapes were completely smooth, one could
+reparametrize points on a curve so that they are placed equidistantly from one another. In practice
+though, SVG shapes contain sharp angles, at which location points should remain unchanged. We
+therefore first split paths at points that form a sharp angle (e.g. where the angle between the incoming
+and outgoing tangents is less than some threshold η = 150◦). We then apply either the Ramer-
+Douglas-Peucker [2] algorithm to simplify line segments or the Philip J. Schneider algorithm [21] for
+segments of cubic Bézier curves. Finally, we divide the resulting lines and Bézier curves in multiple
+subsegments when their lengths is larger than some distance ∆ = 5. Examples of SVG simplifications
+are shown in Fig. 12. Notice how our algorithm both adds points when curve segments are too long
+or reduces the amount of points when the curve resolution is too high.
+Figure 12: Examples of SVG simplifications. Top: original SVGs as downloaded from the https:
+//icons8.com website. Bottom: Same icons after path simplification.
+13
+https://icons8.com
+https://icons8.com
+SVG normalization. All SVGs are scaled to a normalized viewbox of size 256× 256, and paths are
+canonicalized, meaning that a shape’s starting position is chosen to be the topmost leftmost point,
+and commands are oriented clockwise.
+C Additional Training details
+We augment every SVG of the dataset using 20 random augmentations with the simple transformations
+described as follows.
+Scaling. We scale the SVG by a random factor s in the interval [0.8, 1.2].
+Translation. We translate the SVG by a random translation vector t where tx and ty are sampled
+independently in the interval [−2.5, 2.5].
+We believe further robustness in shape representation learning and interpolation stability can be
+obtained by simply implementing more complex data augmentation strategies.
+D Architectural details
+Fig. 4 presents an overview illustration of our Hierarchical autoencoder architecture. In Fig. 13, we
+here show a more detailed view of the four main components of DeepSVG, i.e. the two encoders E(1),
+E(2) and decoders D(2), D(1). Similarly to [16], we use the improved Transformer variant described
+in [1, 18] as building block in all our components. E(1) and E(2) employ a temporal pooling module
+to retrieve a single dE-dimensional vector from the NC and NP outputs respectively. D(2) and D(1)
+use learned embeddings as input in order to generate all predictions in a single forward-pass (non-
+autoregressively) and break the symmetry. The decoders are conditioned on latent vector z or path
+representation ui by applying a linear transformation and adding it to the intermediate transformer
+representation in every block.
+Figure 13: Detailed view of architectures of E(1), E(2), D(2) and D(1).
+14
+E Filling procedure visualization
+Thanks to its hierarchical construction, DeepSVG can predict any number of global path-level
+attributes, which could be e.g. color, dash size, stroke-width or opacity. As a first step towards
+a network modeling all path attributes supported by the SVG format, we demonstrate support for
+filling. When using the default non-zero fill-rule in the SVG specification, a point in an SVG path is
+considered inside or outside the path based on the draw orientations (clockwise or counter-clockwise)
+of the shapes surrounding it. In particular, the insideness of a point in the shape is determined by
+drawing a ray from that point to infinity in any direction, and then examining the places where a
+segment of the shape crosses the ray. Starting with a count of zero, add one each time a path segment
+crosses the ray from left to right and subtract one each time a path segment crosses the ray from right
+to left. We argue that this parametrization is not optimal for neural networks to encode filling/erasing.
+Therefore, we simply let the network output a fill-attribute that can take one of three values: outline,
+fill or erase. This attribute is trained in a supervised way along with the other losses and is then used
+to export the actual SVG file. In particular, overlapping fill and erase shapes are grouped together in
+a same path and oriented in a clockwise/counterclockwise fashion respectively, while outlined shapes
+remain unchanged.
+Figure 14: Examples of icon interpolations when using the fill attribute, predicted by the global
+decoder D(1). Look at how shapes’ filling generally changes at the middle of interpolation, while
+being deformed in a smooth way.
+15
+F Font generation
+In this section, we provide details and additional results for font generation, presented in Sec. 4.4.
+Experimental setup. We train our models on the SVG-Fonts dataset [11] for 5 epochs using the
+same training hyper-parameters as described in Sec. 3.4, reducing the learning rate by a factor 0.9
+every quarter epoch. Furthermore, all encoder and decoder Transformer blocks are extended to
+be class-conditioned. Similarly to how latent vector z is fed into D(2), we add the learned label
+embedding to the intermediate transformer representation, after liner transformation. This is done in
+E(1), E(2), D(2) and D(1) and applies for both our final model and the one-stage baselines.
+Results. We compare the generative capability of our final model with the same baselines as in
+Sec. 4.1. In addition, we show random samples from SVG-VAE [11]. Results are shown in Fig. 15.
+Notice how the non-autoregressive settings generate consistently visually more precise font characters,
+without having to pick the best example from a larger set or use any post-processing. We also note
+that due to the simplicity of the SVG-Font dataset, no significant visual improvement from our
+hierarchical architecture can be observed here. To validate that our model generates diverse font
+samples, we also present in Fig. 16 different samples for every glyph. Note how the latent vector z
+is decoded into a style-consistent set of font characters. Diversity here includes different levels of
+boldness and more or less italic glyphs.
+Figure 15: Comparison of samples for font generation using the same latent vector z, without careful
+selection of generated samples nor post-processing. Top row: SVG-VAE [11]. 2nd row: baseline. 3rd
+row: one-stage feed-forward. 4th row: ours – Hungarian. Bottom row: ours – Ordered.
+16
+Figure 16: Font samples from DeepSVG – Ordered, generated from 7 different latent vectors. As
+observed in SVG-VAE [11], we notice a style consistency across the generated glyphs for a same
+latent vector. For instance, note how columns 5 & 6 correspond to an italic font style, column 4 to an
+extra thin one, and column 2 to a bolder one.
+G Random samples of icons
+In this section, we show random samples of icons by our model. Fig. 17 presents a set of icons
+generated by DeepSVG, obtained by sampling a random latent vector z for each. These results show
+diverse icons that look visually reasonable. Note that the problem of generic icon generation is much
+more challenging than font generation. These results are promising, but much scope for improvement
+remains.
+17
+Figure 17: Random samples of icons.
+H Additional results on latent space algebra
+As mentioned in Sec.4.3, operations on vectors in the latent space lead to semantically meaningful
+SVG manipulations. By the hierarchical nature of our architecture, we here demonstrate that such
+operations can also be performed at the path-level, using path encodings (ûi)
+NP
+1 . In Fig. 18 we
+consider the difference ∆ between path encodings of similar shapes, that differ by a horizontal or
+vertical translation. Adding or removing ∆ from a path encoding in arbitrary SVG images applies the
+same translation to it.
+Figure 18: Vector operations at the path-level. û1 corresponds to the path encoding of the blue shape,
+while û2 corresponds to the shape in green.
+I Additional animations by interpolation
+We here show three additional animations, generated by DeepSVG from two user-created drawings.
+DeepSVG handles well deformation, scaling and rotation of shapes, see Fig. 19.
+Figure 19: Additional animation examples.
+J Additional interpolations
+Finally, we present additional interpolation results in Fig. 20 using our DeepSVG – ordered model,
+showing successful interpolations between challenging pairs of icons, along with some failure cases.
+18
+Figure 20: Additional interpolations of DeepSVG – ordered. The last two rows show examples of
+challenging icons, where interpolations appear visually less smooth.
+19
+	1 Introduction
+	2 Related Work
+	3 DeepSVG
+	3.1 SVG Dataset and Representation
+	3.2 SVG Embedding
+	3.3 Hierarchical Generative Network
+	3.4 Training Objective
+	4 Experiments
+	4.1 Ablation study
+	4.2 Animation by interpolation
+	4.3 Latent space algebra
+	4.4 Font generation
+	5 Conclusion
+	A SVG Representation visualization
+	B SVG Preprocessing
+	C Additional Training details
+	D Architectural details
+	E Filling procedure visualization
+	F Font generation
+	G Random samples of icons
+	H Additional results on latent space algebra
+	I Additional animations by interpolation
+	J Additional interpolations

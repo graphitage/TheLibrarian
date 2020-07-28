@@ -1,0 +1,1490 @@
+MPC-enabled Privacy-Preserving Neural Network Training against Malicious Attack
+ar
+X
+iv
+:2
+00
+7.
+12
+55
+7v
+1 
+ [
+cs
+.C
+R
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+MPC-enabled Privacy-Preserving Neural Network Training
+against Malicious A�ack
+Ziyao Liu
+Nanyang Technological University
+ziyao002@e.ntu.edu.sg
+Ivan Tjuawinata
+Nanyang Technological University
+ivan.tjuawinata@ntu.edu.sg
+Chaoping Xing
+Shanghai Jiaotong University
+xingcp@sjtu.edu.cn
+Kwok Yan Lam
+Nanyang Technological University
+kwokyan.lam@ntu.edu.sg
+ABSTRACT
+In the past decades, the application of secure multiparty compu-
+tation (MPC) to machine learning, especially privacy-preserving
+neural network training, has attracted tremendous attention from
+both academia and industry. MPC enables several data owners to
+jointly train a neural network while preserving their data privacy.
+However, most previous works focus on semi-honest threat model
+which cannot withstand fraudulent messages sent by malicious
+participants. In this work, we propose a construction of efficient n-
+party protocols for secure neural network training that can secure
+the privacy of all honest participants even when a majority of the
+parties are malicious. Compared to the other designs that provides
+semi-honest security in a dishonest majority setting, our actively
+secured neural network training incurs affordable efficiency over-
+heads. In addition, we propose a scheme to allow additive shares
+defined over an integer ring ZN to be securely converted to addi-
+tive shares over a finite field ZQ . This conversion scheme is essen-
+tial in correctly converting shared Beaver triples in order to make
+the values generated in preprocessing phase to be usable in online
+phase, which may be of independent interest.
+CCS CONCEPTS
+• Security and privacy→ Privacy-preserving protocols.
+KEYWORDS
+Secure multi-party computation, neural network training, SPDZ,
+share conversion, malicious attack
+ACM Reference Format:
+Ziyao Liu, Ivan Tjuawinata, Chaoping Xing, and Kwok Yan Lam. 2018.MPC-
+enabled Privacy-Preserving Neural Network Training against Malicious At-
+tack. In Proceedings of ACM Conference (Conference’17). ACM, New York,
+NY, USA, 12 pages. https://doi.org/10.1145/1122445.1122456
+Permission to make digital or hard copies of all or part of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for profit or commercial advantage and that copies bear this notice and the full cita-
+tion on the first page. Copyrights for components of this work owned by others than
+ACMmust be honored. Abstracting with credit is permitted. To copy otherwise, or re-
+publish, to post on servers or to redistribute to lists, requires prior specific permission
+and/or a fee. Request permissions from permissions@acm.org.
+Conference’17, July 2017, Washington, DC, USA
+© 2018 Association for Computing Machinery.
+ACM ISBN 978-x-xxxx-xxxx-x/YY/MM. . . $15.00
+https://doi.org/10.1145/1122445.1122456
+1 INTRODUCTION
+During this last decade, with the development of machine learn-
+ing, especially deep neural network (DNN), the scenario where dif-
+ferent parties, e.g., data owners or cloud service providers, jointly
+solve a machine learning problem while preserving their data pri-
+vacy has attracted tremendous attention from both academia and
+industry. Federated learning scheme [45] seems to offer the possi-
+bility for distributed privacy-preserving machine learning, focus-
+ing on cross-device and cross-silo setting [39]wheremultiple clients
+train local models using their raw data, then aggregate their mod-
+els under the coordination of a central server. However, there is
+still no formal privacy guarantee to this baseline learning model.
+Therefore, secure multiparty computation (MPC) [31] as a practi-
+cal mature privacy-preserving technique aiming to enable multi-
+ple parties jointly evaluating a function, is natural to be applied to
+address such privacy issues of training neural networks in a dis-
+tributed manner.
+Previous Results: There have been several schemes proposed
+to perform distributed neural network. This research direction is
+arguably pioneered by the design of SecureML by Mohassel and
+Zhang[47] where they propose several MPC-friendly activation
+functions to enable neural network training on secret shared data.
+The study of neural network on shared data can be classified to
+several classes based on their goals, number of parties and threat
+model. First, some models focus on the neural network prediction.
+A scheme designed for neural network prediction called MiniONN
+[44] was constructed based on the design of SecureML[47]. With
+the extensive use of packing techniques and additive homomor-
+phic encryption (AHE) cryptosystem along with garbled circuit,
+Gazelle[38] provides a neural network prediction protocol with a
+more efficient linear computation.
+Secondly, some other models provides secure neural network
+training for two active parties providing security against one cor-
+rupted party. As discussed above, SecureML [47] provides us with
+a neural network training protocol for two parties which is secure
+against semi-honest adversary controlling one party. Chameleon
+[54] proposes a different neural network training protocol for two
+parties. Instead of using the relatively more costly oblivious trans-
+fer (OT) protocols, the design relies on the use of external par-
+ties that aid the computation without having their own private
+inputs. In this case, the protocol is proven to be secure against semi-
+honest adversary under honest majority setting. ABY[30] presents
+a framework of efficient conversion between various two-party
+http://arxiv.org/abs/2007.12557v1
+https://doi.org/10.1145/1122445.1122456
+https://doi.org/10.1145/1122445.1122456
+Conference’17, July 2017, Washington, DC, USA Liu, et al.
+computation schemes to support different machine learning algo-
+rithms. It is proven to be secure against semi-honest adversary
+controlling one party. SecureNN[59] relies on more sophisticated
+protocols and up to two non-colluding external parties to provide
+neural network training protocols for two active parties. Its secu-
+rity is guaranteed against semi-honest adversary controlling up
+to 1 party. QUOTIENT [4] deeply integrates OT protocols with
+advanced neural network techniques such as ternary weight neu-
+ral network [43] in 2-server setting against semi-honest adversary
+controlling 1 of the two servers. Note that all the designs men-
+tioned here are designed for two parties with only semi-honest
+security guarantee with number of corrupted parties being at most
+half of the total number of participating parties. Despite some ef-
+forts to extend these designs to a larger number of active parties[46],
+the improvement has been rather limited.
+Lastly, there have also been some designs dedicated for system
+with more than two parties with active security guarantee in dis-
+honest majority setting. Most of theseworks are based on the SPDZ
+scheme[28]. These works[20, 24, 56] utilizes SPDZ to provide sev-
+eral accurate and efficient machine learning algorithms. Neverthe-
+less, these works only rely on existing libraries, such as SCALE-
+MAMBA [7] and FRESCO [5], which do not offer primitives and
+optimizations for neural network training. Therefore, in this work,
+we present dedicated MPC protocols based on SPDZ for convolu-
+tional neural networks (CNN) training and demonstrate that our
+protocols obtain active security with affordable overheads com-
+pared to the existing secure neural network training in semi-honest
+setting.
+For SPDZ protocol, the main efficiency improvement and ac-
+tive security come from the extensive use of pre-computed Beaver
+triples [9] with Message authentication code (MAC) (see Section
+3.2) to accelerate arithmetic operations. During this last decade, fol-
+lowing the initial scheme proposed in BDOZ [10],many researchers
+have been working on protocols of efficient Beaver triple genera-
+tion in malicious setting. Both HE based schemes such as [27, 28,
+41], and OT based schemes such as [23, 40, 48] offer reasonable effi-
+ciency and security. Relying on these schemes, all parties are able
+to jointly generate Beaver triples over a finite field FQ or a ring
+Z2k which can be directly used for MAC checking in the online
+phase of SPDZ and its variants. Specifically, for HE based schemes,
+we have to choose a proper crypto-system to be used in the of-
+fline phase, e.g., leveled BGV [15] is used in [27, 41, 52] for its high
+performance due to the extensive use of packing technique, e.g.,
+single-instruction multiple data (SIMD) trick [57]. Unfortunately,
+Beaver triples generated based on AHE crypto-systems over ZN ,
+e.g., Paillier [53] or DGK [26] as used in SecureML [47], cannot be
+directly used for the verification of standard SPDZ which is based
+on a finite field. Therefore, an instance of SPDZ that is based on
+Paillier or DGK requires a secure scheme to transform the triples
+generated modulo ZN to the underlying field of the SPDZ, ZQ .
+Our contributions: In this work, we propose construction of
+efficient n-party protocols for secure CNN training in malicious
+majority setting, including linear and convolutional layer, Recti-
+fied Linear Unit (ReLU) layer, Maxpool layer, normalization layer,
+dropout layer, and their derivatives. In addition, we present a se-
+cure conversion scheme for shares defined over an integer ring ZN
+to shares over a prime field ZQ which can also be used to correctly
+convert shared Beaver triples. We believe that this result may be of
+independent interest. Our experimental results show that our pro-
+tocols for secure neural network training provide affordable over-
+heads compared with existing schemes in semi-honest setting.
+Organisation of the paper: The rest of the paper is organized
+as follows. In Section 2, we provide notations and threat model
+used in this paper, as well as a brief discussion of secure com-
+putation and neural network. In Section 3, we introduce several
+supporting protocols including Distributed Paillier crypto-system,
+SPDZ protocol, and protocols of secure computation of fixed-point
+numbers. Section 4 contains ourMPC protocols which can be used
+to construct an efficient secure neural network protocol as illus-
+trated in Section 5. Then we analyze the performance of our pro-
+tocol in Section 6. Finally, we present our experimental evaluation
+in Section 7 and give the conclusion in Section 8.
+2 PRELIMINARIES
+2.1 Privacy Considerations in Neural Network
+Training
+Neural network consists ofmany layers with nodes defined by a set
+of linear operations, such as addition and multiplication, and non-
+linear operations such as ReLU, Maxpool, and dropout. At a very
+high level, we represent a neural network as a function w = f (x)
+where x represents the set of input data with their respective labels,
+w represents the set of weights of neural network, and function f
+can be represented with linear operations and non-linear opera-
+tions as mentioned above. The target of training neural network is
+to obtain these weights w which can be used to map a new unla-
+beled data x∗ to its predicted label ℓ∗, i.e., prediction.
+2.2 Secure multiparty computation
+Privacy-preserving technology provides privacy guarantee for data
+in various purposes such as for computation or for publishing. This
+technology broadly encompasses all schemes for privacy preserv-
+ing function evaluations, including but not limited to differential
+privacy (DP), secure multiparty computation (MPC), and homo-
+morphic encryption (HE). It is well known that DP provides a trade-
+off between accuracy and privacy that can be mathematically ana-
+lyzedwhileMPC andHE offer cryptographic privacy but with high
+communication or computation overheads. In this work, we focus
+on MPC to construct efficient neural network training protocols.
+Since its general definition in [60], thanks to both theoretical and
+engineering breakthroughs, MPC has moved from pure theoreti-
+cal interests to practical implementations, e.g., Danish sugar beets
+auction [13] and Estonian students study [12].
+In addition to pure homomorphic encryption based MPC, there
+are two schemes which can be used to construct MPC protocols,
+i.e., circuit garbling and secret sharing. Circuit garbling, as used
+in SecureML [47], involves encrypting and decrypting keys in a
+specific order [8], while the latter emulates a function evaluation
+more efficiently based on the "secretly-shared" inputs between all
+parties. Our work leverages on an additive secret sharing MPC pro-
+tocol called SPDZ (see Section 3.2), such that for each data x , it will
+be randomly split up into n pieces and then be distributed among
+n parties (see Algorithm 1 in Section 3.2). In the rest of the pa-
+per, we write [x]t = [〈x1〉t , ..., 〈xn 〉t ] to denote x ∈ Zt being
+MPC-enabled Privacy-Preserving Neural Network Training against Malicious A�ack Conference’17, July 2017, Washington, DC, USA
+secretly shared between all parties such that each Pi holds 〈xi 〉t
+and x =
+∑n
+i=1〈xi 〉
+t . For simplicity of notation, when the context is
+clear, we abuse the notation and use xi instead of 〈xi 〉t , the share
+of x owned by party Pi . Similarly, when the underlying space Zt
+is clear from the context, we write [x] instead of [x]t .
+2.3 Threat model and security
+In many real life neural network applications, the training data are
+distributed across multiple parties which are independent business
+entities and are required to complywith the applicable data privacy
+regulations. Therefore, due to the competitive nature of business
+organizations, in this work, we consider the scenario where a ma-
+jority of parties may collude to obtain the data from the other par-
+ties by sending fraudulent messages to them. Such threat model is
+the same as the one used in SPDZ, i.e. a security against malicious
+adversary controlling up to n − 1 parties. This means that in an
+n-party setting, such MPC protocol is secure even if n − 1 parties
+are corrupted by a malicious adversary. Such threat model is differ-
+ent from that of MPC protocols in SecureML [47] and SecureNN
+[59], which are against semi-honest adversary. As demonstrated
+in [22], semi-honest protocols can be elevated into the malicious
+model, whichmay incur infeasible cost overhead. However, thanks
+to the online-offline architecture of SPDZ, such overhead can be
+moved from online phase to offline phase and thus the amortized
+efficiency of function evaluation can be improved. Our security def-
+inition is based on Universal Composability (UC) framework and
+we refer interested readers to [16] for the details.
+The correctness and security of our proposed protocol depends
+on the supporting building blocks, i.e., distributed Paillier crypto-
+system, SPDZ, and secure computationof fixed-point numbers. Data
+representation follows the format in [18] andwe use standard SPDZ
+scheme over a finite field ZQ . The subprotocol of SPDZ involved in
+this works include protocol for data resharing Resharing(·), multi-
+plicationMulTri(·), Paillier based Beaver triple generation TriGen(·),
+andMAC checking. The details of all the abovementioned support-
+ing protocols can be found in the Section 3.
+3 SUPPORTING PROTOCOLS
+3.1 Distributed Paillier cryptosystem
+Paillier [53] is a public key encryption scheme that possesses par-
+tial homomorphic property [3]. The public key is N = p · q and
+the secret key is (p,q) pair where p and q are large primes. First,
+we fix д to be a random invertible integer modulo N 2. The encryp-
+tion of a messagem is defined to be c = E(m) = дmrN (mod N 2)
+for a randomly chosen invertible r ∈ ZN . The decryption func-
+tion is D(c) =
+L
+(
+cλ( mod N 2)
+)
+L(дλ ( mod N 2)) mod N where function L is defined
+as L(x) = x−1
+N
+and λ = φ(N ) where φ is Euler’s totient function.
+Paillier supports homomorphic addition between two ciphertexts
+and homomorphic multiplication between a plaintext and a cipher-
+text, in particular, E(m1) ·E(m2) (mod N 2) = E(m1+m2 (mod N ))
+and E(m1)m2 (mod N 2) = E(m1 · m2 (mod N )). For simplicity,
+we denote the following two functions: E(m1 +m2 (mod N )) =
+PAdd(E(m1),E(m2)) and E(m1 ·m2 (mod N )) = PMult(E(m1),m2).
+We can easily generalize the two notations such that E(m1 +m2 +
+· · · +mr (mod N )) = PAdd(E(m1),E(m2), · · · , E(mr )) and E(m1 ·
+m2 · · · · ·mr (mod N )) = PMult(E(m1),m2, · · · ,mr ). Due to the
+invertibility of д and r modulo N 2, it is easy to see that a Pail-
+lier ciphertext is invertible modulo N 2. Hence, if c = E(m), we
+will also have c−1 (mod N 2) to be a valid encryption of −m. We
+denote PInv(E(m)) = E(−m (mod N )) ≡ E(m)−1 (mod N 2). Us-
+ing PInv, Paillier can support homomorphic subtraction, E(m1 −
+m2 (mod N )) = PAdd(E(m1), PInv(E(m2))). These homomorphic
+properties enable several protocolsproposed in Section 3.2 and Sec-
+tion 4. However, in terms ofMPC scenario, the secret key pair is not
+allowed to be owned by any party. To keep the hardness of compos-
+ite residuosity [37] used for the security of Paillier, the value of p
+and q can not be known by anyone. Hence we need to generate the
+public key in distributed manner and keep its factors secret while
+still enabling joint decryption to be done without revealing the
+private key. Fortunately, such distributed Paillier does exist. Dis-
+tributed Paillier key generation includes two sub-protocols, i.e., (i)
+distributed RSA modulus generation, and (ii) distributed biprimal-
+ity test to verify the validity of generated RSA modulus in (i). In-
+spired by [14] which proposed the first RSA modulus generation
+protocol in multiparty setting, several works [32, 34, 49] provides
+solutions in different threat models. Note that to ensure our pro-
+tocol is secure against malicious adversaries, we have to guaran-
+tee that all the sub-protocols are also secure against same threat
+model in n-party setting. Thus we rely on the scheme proposed in
+[35]. We denote the Paillier cryptosystem with plaintext space ZN
+as PaillierN , as well as its encryption and distributed decryption,
+i.e., EncN (·), DecN (·).
+3.2 SPDZ
+SPDZ is a well known secret sharing based MPC protocol against
+malicious majority proposed in [28]. Following this initial some-
+what homomorphic encryption (SHE) based work, several variants
+are proposed including its improved version [27], OT based version
+called MASCOT [40], improved SHE based version called Over-
+drive [41], and the versions over Z2k such as SPDZ2k [23] and
+Overdrive2k [52]. We will refer to all of these variants in SPDZ
+family as SPDZ.
+SPDZ consists of a pre-processing or offline phase, which is
+independent from both the input data and the very efficient on-
+line phase for function evaluation. In the offline phase, all parties
+jointly generate some "raw materials", typically the Beaver triples
+[9]. In the online phase, the parties only need to exchange some
+shares and perform some efficient verification. The active security
+is guaranteed by the MAC which enables the validation of parties’
+behavior during computation. In the rest of this section, several
+important techniques in SHE based SPDZ are introduced in order
+to construct some higher level protocols proposed in Section 4.
+Data Resharing: Given Enct (x), all parties can follow the pro-
+tocol given in Algorithm 1 to obtain [x]t as the shares of x . We note
+that this resharing of an encrypted value is only done during pre-
+processing phase to help in the generation of auxiliary values and
+it is not used in the sharing protocol of private inputs of the func-
+tion f . For the sharing of private inputs during the online phase
+of the computation, it follows the protocol given in Algorithm 2.
+Conference’17, July 2017, Washington, DC, USA Liu, et al.
+Algorithm 1 Data Resharing: [x]t ← Resharing(Enct (x))
+1: Each party Pj publishes Enct (r j ), where r j is uniformly se-
+lected from Zt .
+2: All parties calculate Enct (r + x) =
+PAdd(Enct (r1),Enct (r2), · · · ,Enct (rn),Enct (x)) using ho-
+momorphic addition.
+3: All parties jointly decrypt Enct (r + x) to obtain r + x .
+4: P1 sets its share x1 = r + x − r1, Pj sets its share xj = −r j for
+j , 1.
+5: Return [x]t
+Algorithm 2 Data Sharing: [x]t ← Share(x) where x is a private
+value owned by Pi
+Require: A shared random value [r ]t
+1: Each party Pj sends his share of [r ]t , 〈r 〉tj to Pi enabling Pi to
+recover the value of r .
+2: Pi sets 〈x〉ti = x + r − 〈r 〉
+t
+i
+and for j , i, Pj sets 〈x〉ti = −〈r 〉
+t
+j
+.
+3: Return [x]t = (〈x〉t
+1
+, · · · , 〈x〉tn )
+Arithmetic operation: SPDZ is based on secret sharing, thus
+there is no communication cost for addition and scaling by a pub-
+lic constant. Multiplication between two secretly shared values is
+more complex but we can use the well known Beaver triple trick to
+accelerate this operation. In the following discussion, all values are
+secretly shared using the additive secret sharing scheme over the
+same space. Assume that we have generated three secret shared
+values [a], [b], and [c], called Beaver triples, such that c = a · b .
+Given [x] and [y], all parties can follow the protocol in Algorithm
+3 to calculate [x · y]. Correctness and security are proven in [9].
+Note that all the protocols in SPDZ can be applied to matrices.
+Algorithm 3 Multiplication based on Beaver triple: [x · y] ←
+MulTri([x], [y], [a], [b], [c])
+1: Each party Pi publishes xi − ai and yi − bi .
+2: Each party Pi compute x − a and y − b .
+3: P1 sets its share z1 = c1+ (x−a) ·b1+ (y−b) ·a1+ (x−a) · (y−b),
+Pj sets its share z j = cj + (x − a) · bj + (y − b) · aj for j , 1.
+4: Return [z]
+Considering that 1 triple cannot be used to perform 2 multipli-
+cations for privacy reason [10], the number of triples we need to
+generate depends on the number of multiplications we want to
+complete. Furthermore, these Beaver triples do not depend on in-
+puts data as well as the function to be evaluated, which means
+they can be generated at any point prior to evaluating the func-
+tion, i.e., the offline phase in SPDZ, thus enabling highly efficient
+online phase.
+Beaver triple generation: Algorithm 4 describes the n-party
+protocol for Beaver triple generation based on Paillier such that
+[a]N , [b]N , [c]N ← TriGen(). For simplicity of discussion, we only
+discuss the protocols under semi-honest setting. As discussed be-
+fore, such protocols can be made secure against malicious adver-
+sary by the combination of zero knowledge proof and standard
+technique of sacrificing an auxiliary value to check the correct-
+ness of another. A more detailed discussion of this technique can
+be found in[55]. As mentioned in Section 1, these Beaver triples
+generated using Algorithm 4 are over ZN , thus cannot be directly
+in the online phase of SPDZ which is over a finite field..
+Algorithm 4 Beaver triple generation based on Paillier:
+[a]N , [b]N , [c]N ← TriGen()
+1: Each party Pi publishes EncN (ai ) and EncN (bi ), where ai and
+bi are uniformly selected from ZN .
+2: Each party Pi computes EncN (a) =
+PAdd(EncN (a1), · · · , EncN (an)).
+3: Each party Pi computes and publishes EncN (a · bi ) =
+PMult(EncN (a),bi ) = EncN (a)bi using homomorphic multi-
+plication in Paillier.
+4: Each party Pi computes EncN (c) = PAdd(EncN (a ·
+b1), · · · , EncN (a,bn)).
+5: All parties call Resharing(EncN (c)) to get [c]N .
+6: Return [a]N , [b]N , [c]N
+Note that in step 3 of Algorithm 4, only Pi knows the value ofbi ,
+which enables the homomorphic multiplication between a plain-
+text and ciphertext (refer Section 3.1), i.e., EncN (a) and bi , thus no
+information leaks.
+MAC checking: To obtain active security over ZQ , the main
+idea of SPDZ is to use unconditional MAC which enables verifica-
+tion of computation correctness. This authentication scheme pre-
+vents parties from cheating on their interactive computation with
+high probability. In SPDZ, to enable authentication, each private
+value, including the Beaver triples that are generated, come with
+their respective tags. To obtain this, first the parties agree on a
+random MAC key α ∈ ZQ which is secretly shared among all par-
+ties. To compute the tag of a secretly shared value [x]Q , the parties
+compute [α · x]Q and store it along with their shares of [x]Q . We
+can observe that if some adversaries cheat such that the secretly
+shared value is changed from x to x ′, they can do so undetected
+only if they can modify the corresponding tag [m] to [m′] such that
+m′ = α .x ′. This means that the probability of cheating without
+being detected is equal to the probability of guessing α correctly,
+which is inversely proportional to the finite field sizeQ .When con-
+sidering a similar scheme over a ring ZN , the security is no longer
+as strong. This is due to the fact that, contrary to ZQ , not all non-
+zero value in ZN is invertible. Because of this, the probability that
+m′ = α .x ′ becomes larger. For example, if N = 2k and α = 2k−1,
+m′ can only be either 0 or 1 making the probability 1/2. As illus-
+trated above, we use Paillier to generate Beaver triples with MAC,
+which means all the secret shared values are in ZN , hence we have
+to convert all these shares from ZN to ZQ while preserving the re-
+lationship between them. Note that for any sub-protocols, all the
+inputs and outputs should always be secretly shared and not be
+in clear. In addition to the shares of the outputs [y]Q , the parties
+should also hold a secret share of their respective tags [α · y]Q .
+3.3 Secure computation of fixed-point numbers
+For typical neural networks, data and weights are represented by
+floating point numbers. However, in terms of combining neural
+MPC-enabled Privacy-Preserving Neural Network Training against Malicious A�ack Conference’17, July 2017, Washington, DC, USA
+network with cryptographic techniques such as HE and MPC, we
+have to use a very large finite field to preserve full accuracy [33].
+Thismethod supports for only limited number ofmultiplications to
+avoid the overflow, which is prohibitive for neural network where
+a large number of multiplications are involved. Fortunately, the
+authors in [47] illustrate that rational numbers can be treated as
+fixed point number relying on a truncation technique while pre-
+serving appropriate accuracy of neural network prediction. Other
+prior works regarding neural network with MPC, such as [59] and
+[4] also show their accuracy in terms of truncation. In our work,
+we follow the same methodology and extend its applications to
+secure n-party truncation, comparison, and arithmetic operations
+based on the protocols given in [17, 18, 25, 58]. Note that the cor-
+rectness of these protocols are given in above mentioned works
+and security is guaranteed by the MAC-checking method in SPDZ.
+Data representation: Rational numbers can be treated as a
+sequence of digits including integer and fractional parts split by
+a radix point. More specifically, for any real number x̃ , set e and
+f as positive integers such that |x̃ | < 2e−1 and the storage accu-
+racy is within 2−f . Then we can find a sign bit s ∈ {0, 1} and
+d−f , · · · ,de−2 ∈ {0, 1} such that x̃ = (−1)s ·
+∑e−2
+i=−f di2
+i . To encode
+x̃, we first encode it as an integer x̄ by multiplying it by 2f . Hence
+we have x̄ = (−1)s
+∑e+f −2
+i=0
+di−f 2
+i
+= 2f x̃ . Next, we set Q to be a
+prime number that is at least k + κ bits where k = e + f and κ is
+the security parameter. To encode x̃ as a field element in ZQ , we
+map x̃ to the element x̄ ∈ ZQ . Calculation can then be done using
+MPC schemes that is over ZQ .
+Truncation and comparison: In order to maintain the same
+resolution of secretly shared values and enable comparison, two
+truncation protocols are used in our work, i.e., probabilistic trunca-
+tion TruncPr and deterministic truncation Trunc, as given in [18].
+Probabilistic truncation supports efficient truncation as no bit-wise
+operation is involved and some "raw materials" needed in the pro-
+tocol can be prepared during the pre-processing phase. However,
+it introdcues error with probability depending on the size of the
+Least Significant Bit (LSB) after truncation. In terms of data rep-
+resentation of x , the Most Significant Bit (MSB) of x determines
+whether x is greater than 0 or not, which can be obtained by sim-
+ply truncating the lastk−1 least significant bits. Due to the fact that
+the LSB after truncation is now large, using TruncPr for this pur-
+pose will yield a non-negligible error. Hence, an alternative trunca-
+tion protocol is required. Deterministic truncation is less efficient
+but enables truncation with zero error probability. Therefore, al-
+though probabilistic truncationmay be used to avoid overflow dur-
+ing multiplication computation, deterministic truncation is needed
+for comparison computation. We denote by GEZ, an adapted ver-
+sion of comparison protocol LTZ following the notation given in
+[17] such that GEZ([x],k) = 1 if x ≥ 0, and 0 otherwise, in order
+to keep the consistency with ReLU function (see Section 2.1).
+Arithmetic operations: Addition and public scaling on ad-
+ditive shares can be done without interaction, while maintaining
+the same resolution. Multiplication can be done using Beaver triple
+method (see Section 3.2) with its resolution changing from 2−f to
+2−2f , which means probabilistic truncation is needed. Protocols of
+division with public divisor and secretly shared divisor are also
+given in [18] that offers reasonable accuracy and efficiency.
+4 PROPOSED PROTOCOLS
+In this section, we describe protocols to support Beaver triple con-
+version and neural network training. We assume that there are two
+distributed Paillier crypto-systems with different plaintext space
+ZN and ZN ′ . Based on the definition of Paillier and the notation
+introduced in Section 3.1, let N = p ·q where 2κ < p,q < 2κ+1, and
+N ′ = p ′ ·q′ where 22κ < p ′,q′ < 22κ+1, such that N ′ > N 2. All the
+multiplications involved in these protocols can be done following
+the similar multiplication protocol in Paillier based Beaver triple
+generation given in Section 3.2. In the rest of the paper, we write
+[x]t = [〈x1〉t , ..., 〈xn 〉t ] to denote x ∈ Zt being secretly shared be-
+tween all parties such that each Pi holds 〈xi 〉t and x =
+∑n
+i=1〈xi 〉
+t .
+For simplicity of notation, when the context is clear, we abuse the
+notation and use xi instead of 〈xi 〉t , the share of x owned by party
+Pi . Similarly, when the underlying space Zt is clear, we write [x]
+instead of [x]t .
+4.1 Comparison over ZN
+The first supporting protocol that we want to introduce is the se-
+cure comparison protocol GEZN over ZN . More specifically, this
+function receives a secretly shared value [x]N and the bit length
+k of x . It then outputs [s]N where s = 1 if x ≥ 0 and 0 other-
+wise. Note that this function can be used to compare two secretly
+shared values [x]N , [y]N by computing GEZ([x − y]N ,k). This al-
+gorithm is an adapted version combining LTZ protocol in [17] and
+the deterministic comparison protocol in [18], which is based on
+the following remark: for x with k-bit length (refer to data repre-
+sentation in Section 3.3), if x < 0 then ⌊x/2k−1⌋ = 1, and if x ≥ 0
+then ⌊x/2k−1⌋ = 0. This protocol, which depends on a subprotocol
+BitLTC, cannot be directly applied in our case due to the difference
+in the underlying space. BitLTC([xk−1], · · · , [x0], [yk−1], · · · , [y0])
+is a protocol that returns 1 if x < y and 0 otherwise where x =
+∑k−1
+i=0 xi2
+i and y =
+∑k−1
+i=0 yi2
+i are secretly shared in their binary
+representations. In the scheme proposed in[1], BitLTC involves
+protocols to generate random bits and random invertible integers
+over the underlying finite field. In order to have a similar protocol
+to BitLTC over ZN , we first describe some subprotocols that are
+required, namely random bit generation and random invertible in-
+teger generation modulo ZN .
+Algorithm 5 describes our n-party protocol for random bit gen-
+eration over ZN . The standard protocol in ZQ setting, such as
+RAN2() in [25], is to take an inverse of root from squaring mod-
+uloQ by dividing the initial value, i.e., x/
+√
+x2 ∈ {−1, 1}. However,
+this may no longer works when working modulo N . Fortunately,
+we can rely on existing Paillier crypto-system and Resharing pro-
+tocol in SPDZ (see Section 3.2). Correctness is easily proved and
+security depends on the Resharing protocol in SPDZ and Indistin-
+guishability under chosen-plaintext attack (IND-CPA) security of
+Paillier crypto-system which guarantees the security when n < N .
+Furthermore, Enc(ai · ai+1) in Step 2 must be calculated either by
+Pi or Pi+1 but not anyone else.
+Algorithm 6 describes our n-party protocol for random integer
+with inverse generated over ZN , which is an adapted version of
+PRandInv in [1]. Algorithm 6 is built on another secure protocol
+RndInt(ZN ). This protocol generates a random share [r ]N where
+r is unknown to any of the parties. This can be done by letting
+Conference’17, July 2017, Washington, DC, USA Liu, et al.
+Algorithm 5 Random bit generation over ZN : [a]N ← RndBitN ()
+1: Each party Pi generates a uniformly random bit a0, j,k ∈ {0, 1}
+and computes ci = EncN (ai ). Let b1 = a1 and d1 = c1
+2: for i = 1, · · · ,n − 1 do
+3: Pi sends di = Enc(bi ) to Pi+1
+4: Pi+1 calculatesdi+1 = Enc(bi+1) = Enc(bi⊕ai+1) = Enc(bi+
+ai+1 − 2biai+1) = PAdd(di , ci+1, PMult(PInv(di), 2ai+1))
+5: end for
+6: Return [a]N ← Resharinд(Enc(bn)).
+each party Pi deal a sharing [ri ]N and [r ]N is defined to be [r ]N =
+∑N
+i=1[ri ]
+N . Note that as long as there is one honest party, the re-
+sulting [r ]N can be proved to be uniformly distributed in ZN . The
+correctness of the algorithm is straightforward sinceu is invertible
+if and only if x and y are also invertible. Security proof is similar
+to that of PRandInv in[1].
+Algorithm 6 Random integer with inverse generation over ZN :
+([r ]N , [r−1]N ) ← RndInvN (N )
+1: All parties call RndInt(ZN ) to generate [x]N ← RndInt(ZN ),
+[y]N ← RndInt(ZN ), and then computeu ← Output([x] · [y]).
+2: Repeat step 1 until u is invertible.
+3: Return ([x]N ,u−1[y]N ).
+Now we are ready to present our n-party protocol GEZ for com-
+parison over ZN . This algorithm is an adapted version combining
+LTZ protocol in [17] and the deterministic comparison protocol
+in [18], which is based on the following remark: for x with k-bit
+length (refer to data representation in Section 3.3), if x < 0 then
+⌊x/2k−1⌋ = 1, and if x ≥ 0 then ⌊x/2k−1⌋ = 0. However this
+protocol which depends on a subprotocol BitLTC, cannot be di-
+rectly applied in our case due to the difference in the underlying
+space. [b] ← BitLTC(([xk−1], · · · , [x0]), ([yk−1], · · · , [y0]) is a pro-
+tocol that returns 1 if x < y and 0 otherwise where x =
+∑k−1
+i=0 xi2
+i
+and y =
+∑k−1
+i=0 yi2
+i are secretly shared in their binary representa-
+tions. In the scheme proposed in[1], BitLTC involves protocols to
+generate random bits and random invertible integers over the un-
+derlying finite field. In order to have a similar protocol to BitLTC
+over ZN , we propose the protocol over ZN for generating random
+bit in Algorithm 5. For random integer generation over ZN , we can
+simply follow the protocol PRandInt given in [51]. Correctness and
+security are proven in [17].
+4.2 Wrap, modulo reduction, share conversion
+In this section, we discuss the secure conversion protocol that will
+help us in converting the values we generated during offline phase
+(modulo N for some RSA modulusN > n) to equivalent value that
+is compatiblewith the online phase (moduloQ for a primeQ). More
+specifically, given [a]N , the additive share of a secret value a mod-
+ulo N , we want to calculate [a]Q , the additive share of the same
+secret value modulo Q for some prime Q . First, for simplicity, we
+discuss about the transformation of the secret sharing values. Note
+Algorithm 7 Comparison over ZN : [s]N ← GEZN ([x],k)
+1: For each i ∈ [0, ...,k − 1], all parties calculate [ri ] = RndBitN ()
+in parallel, and thus obtain [r ′] =
+∑k−2
+i=0 2
+i · [ri ].
+2: All parties calculate [r ′′] = RndIntN (κ + 1).
+3: All parties publish c ← Output(2k−1 · [r ′′]+ [r ′]+ 2k−1 + [x]),
+and then calculate c ′ = c mod 2k−1.
+4: All parties call [u] = BitLTCN (c ′, (
+[
+r ′
+k−2
+]
+, ...,
+[
+r ′
+0
+]
+)).
+5: All parties compute [x ′] = c ′ − [r ′] + 2k−1[u].
+6: All parties compute [s] = 1 + ([x] − [x ′]) (2−k+1 mod N ).
+that initially, we want our secret value and its shares to be an el-
+ement in S1 =
+{
+−n−12 , · · · ,
+n−1
+2
+}
+. For simplicity of our argument
+in this section, we transform all these values to be non-negative
+value in S2 = {0, · · · ,n − 1} via congruence operation. Note that
+this does not change the correctness of any sharing and transfor-
+mation between the two formats can be done trivially.
+Note that if [x]N = (xN
+1
+, · · · ,xNn ), there exists δ ∈ {0, · · · ,n −
+2,n − 1} such that
+x = xN1 + · · · + x
+N
+n − δN . (1)
+Hence if we want to consider the equation moduloQ,we will have
+x ≡ (x
+N
+1
+(mod Q)) + · · · + (xNn (mod Q))
+−(δ (mod Q)) · (N (mod Q)) (mod Q). (2)
+So in order to calculate [x]Q from [x]N , we need to calculate
+the value of δ which can be rewritten as δ =
+⌊
+∑
+n
+i=1 x
+N
+i
+N
+⌋
+.
+Now we discuss how we can calculate the value of δ . Note that
+Equation (1) will not yield the value of δ if it is computed modulo
+N . Intuitively, if we consider the equation moduloN ′ for some N ′
+such that N ′ > N 2, the equation does not become equivalence and
+hence we can use it to calculate δ . Once we have the equationmod-
+ulo N ′, we can find the maximum value of j such that
+∑n
+i=1 x
+N
+i
+−
+jN ≥ 0. It is easy to see that δ =
+∑n−1
+j=0 (
+∑n
+i=1 x
+N
+i
+− jN ≥ 0). Now
+since the equation is moduloN ′, the calculationwill give us [δ ]N
+′
+.
+We let this procedure to be called [δ ]N
+′
+← Li�Wrap([x]N ,N ′)
+which is only applicable if N ′ > N 2 > n2. Algorithm 8 provides
+the complete Li�Wrap protocol. Note that the security of the pro-
+tocol is guaranteed due to the security of GEZ protocol and the
+fact that no intermediate values is revealed.
+Algorithm 8 LiftWrap: [δ ]N
+′
+← Li�WrapN ([x]N ,N ′)
+1: Each party Pi computes 〈x ′〉N
+′
+i = 〈x〉
+N
+i mod N
+′.
+2: For each i ∈ {1, ...,n − 1}, all parties compute [δi ]N
+′
+=
+GEZN ′
+(
+[x ′]N
+′
+− [i · N ]N
+′
+, l
+)
+, where l = ⌈log2 N ′⌉.
+3: Return [δ ]N
+′
+=
+∑n−1
+i=1 [δi ]
+N ′ .
+The next step is to convert [δ ]N
+′
+to [δ ]N . In other words, we
+need a secure conversion protocol DropMod to convert a secretly
+shared value [x]N
+′
+back to [x]N where N ′ > N 2 > n2. In order
+to complete this, first, we observe that given [δ ]N
+′
+= (δ1, · · · , δn),
+setting yi ≡ xi − δiN (mod N ′), we have
+∑n
+i=1 yi = x (mod N
+′).
+MPC-enabled Privacy-Preserving Neural Network Training against Malicious A�ack Conference’17, July 2017, Washington, DC, USA
+In other words, for any [x]N ,we can calculate [x]N
+′
+. Let this proce-
+dure be called [x]N
+′
+← Li�Mod([x]N ,N ′)which is only applicable
+if N ′ > N 2 > n2. Algorithm 9 provides the complete Li�Mod pro-
+tocol. The security is guaranteed based on the security guarantee
+of Li�Wrap protocol.
+Algorithm 9 Lift shares in ZN to ZN ′ : [x]N
+′
+←
+Li�ModN ([x]N ,N ′)
+1: Parties jointly compute [δ ]N
+′
+= (δ ′
+1
+, · · · ,δ ′n) =
+Li�WrapN ([x]N ,N ′).
+2: For each i ∈ {1, · · · ,n}, having xi and δ ′i (the shares of [x]
+N
+and [δ ]N
+′
+respectively), Pi calculates x
+′
+i
+≡ xi −δ ′iN (mod N
+′).
+3: Return [x]N
+′
+= (x ′
+1
+, · · · , x ′n ).
+Now we are ready to discuss the last subprotocol needed for the
+Wrap function, [x]N ← DropMod([x]N
+′
+,N ). Intuitively, assuming
+the existence of the protocols RndInt and Li�Mod over ZN , we
+can generate a random value r ∈ ZN that is secretly shared twice,
+once over ZN and another over ZN ′ . Having [r ]N and [r ]N
+′
+, we
+can calculate and reveal the value of y ≡ x + r (mod N )′. Taking
+z ≡ y (mod N ), a simple algebraic manipulation gives us z − [r ]N
+gives us a valid secret sharing of x over ZN . Since the only value
+that is revealed is masked using a fresh secretly shared random
+value [r ]N
+′
+where r < N , along with the security guarantees of
+the other subprotocols being used, security is guaranteed if x < N .
+Algorithm 10 provides a complete DropMod protocol.
+Algorithm 10 Convert shares in ZN ′ to ZN : [x]N ←
+DropModN ([x]N
+′
+,N )
+1: Parties jointly compute [r ]N = RndInt(ZN ).
+2: Parties jointly compute [r ]N
+′
+= Li�Mod([r ]N ,N ′)
+3: Parties locally compute [y]N
+′
+= [x]N
+′
++ [r ]N
+′
+, publish their
+shares of [y]N
+′
+and recover y ∈ ZN ′
+4: Return [x]N = y − [r ]N .
+Note that we can apply DropMod to obtain [δ ]N from [δ ]N
+′
+.We
+note that in this use, DropMod is secure since δ < n < N . So this
+also guarantees the security of the protocol [δ ]N ←WrapN ([x]N ,N ′).
+Algorithm 11 provides the complete WrapN protocol.
+Algorithm 11Wrap over ZN : [δ ]N ←WrapN ([x]N ,N ′)
+1: Parties jointly compute [δ ]N
+′
+= Li�WrapN ([x]N ,N ′).
+2: Parties jointly compute and return [δ ]N =
+DropModN ([δ ]N
+′
+,N ).
+Note that the conversion protocols Li�Mod and DropMod are
+only securely applicable in very restrictive case. More specifically,
+Li�Mod can only convert from ZS to ZS ′ where S
+′ > S2 > n2 and
+GEZ must be well defined over ZS . So in other words, S must be ei-
+ther an RSAmodulus or a prime. On the other hand, DropMod can
+only convert from ZS ′ to ZS with S and S
+′ having the same require-
+ments as the ones in Li�Mod. Furthermore, DropModS ([x]S
+′
+, S) is
+only secure when x < S .
+Recall that ourmain objective of this part is to have a secure con-
+version protocol to convert a secret sharing [x]N to [x]Q where N
+is an RSA modulus while Q is a prime. Since this needs to be used
+to convert secret sharing of random values or Beaver Triple gener-
+atedmoduloN , in order to have all possible random values modulo
+Q, we need to have N > Q . Note that if we use DropMod for this
+purpose, the value of N needs to be much bigger than Q, more
+specifically, N > Q2. In the following, we propose another conver-
+sion protocol ShaConv which can accomplish this goal securely as
+long as N > Q .
+Following Equation (2), having [x]N = (x1, · · · , xn ), the first
+n terms can be calculated locally by each party Pi . Now in or-
+der for the conversion to be completed, we need the last term,
+(δ (mod Q)) · (N (mod Q)). Recall that the only information we
+have about δ is its secret sharing modulo N , [δ ]N . Note that to be
+able to calculate [δ ]Q · (N (mod Q)),we need to first convert [δ ]N
+to [δ ]Q . Note that we can use a variant of DropMod to achieve
+this. However, this can only be achieved securely if δ < Q . So
+in order to guarantee this, in our discussion, we will assume that
+n < Q < N <
+√
+N ′. Now suppose that we have [δ ]N and we
+would like to calculate [δ ]Q . Since we do not have the guarantee
+that Q < N 2, we cannot apply DropMod directly. Instead, we will
+again use the space ZN
+′
+for this purpose. More specifically, after
+the calculation of Li�Wrap to obtain [δ ]N
+′
+, we can directly call
+DropMod to obtain [δ ]Q instead of [δ ]N . Now once [δ ]Q is ob-
+tained, we can obtain [δ ]Q · (N (mod Q)) completing the calcula-
+tion of Equation (2). It is easy to see that since all the subprotocols
+being used here are secure, the protocol that calculates Equation (2)
+we have just discussed is secure. The complete protocol of ShaConv
+can be found in Algorithm 12.
+Algorithm 12 Share conversion: [x]Q ← ShaConv([x]N ,Q,N ′)
+1: Parties jointly compute [δ ]N
+′
+= Li�Wrap([x]N ,N ′)
+2: Parties jointly compute [δ ]Q = (δ1, · · · ,δn ) =
+DropModQ ([δ ]N
+′
+,Q)
+3: for i = 1, · · · ,n do
+4: Pi possesses xi and δi , the i-th share of [x]N and [δ ]Q re-
+spectively
+5: Pi locally computes x
+′
+i
+≡ xi − δi · (N (mod Q)) (mod Q).
+6: end for
+7: Return [x]Q = (x ′
+1
+, · · · , x ′n ).
+Note that Algorithm 12 can be used for anyQ and N securely as
+long as they satisfy the following requirements: (i) n < Q < N ., (ii)
+we have a secure GEZ protocol moduloN ., and (iii) we have secure
+RndInt and GEZ protocols moduloQ . Due to this observation, we
+have that ShaConv is applicable as long asQ and N are either RSA
+moduli or prime numbers.
+4.3 Beaver triple conversion
+Share conversion is not trivial in terms of MPC as proved in [11],
+let alone Beaver triple conversion. Inspired by [21], several share
+Conference’17, July 2017, Washington, DC, USA Liu, et al.
+conversion protocols have been developed. To convert a sharing
+over ZQ to a sharing over ZQ ′ , we can rely on the method of [6]
+and themixed-protocol framework given in ABY [30] which gener-
+alizes the conversion protocols between different sharing schemes
+including Arithmetic sharing, Boolean sharing, and Yao’s garbled
+circuit. However, for additive sharing of integer over ZQ , the con-
+version protocol follows the scheme ZQ → Z2t → ZQ ′ , which
+involves bit decomposition and bit sharing conversion over a field
+to another field [29]. These approaches are complicated and expen-
+sive. In our work, we do not use these protocols to construct share
+conversion, instead, we rely on two Paillier crypto-systems which
+enables us to convert Beaver triples from ZN to ZQ .
+First we observe that given a triple ([a]N , [b]N , [c]N ), we have
+c ≡ ab (mod N ) or equivalently, ab = c + σN for some integer
+σ such that |σ | ≤ n − 1. Similar to the discussion of δ in the pre-
+vious section, in order to get the value of σ , we need to lift the
+equation modulo N ′ for some N ′ > N 2 > n2. Using the algorithm
+Li�Mod described above, we can obtain ([a]N
+′
+, [b]N
+′
+, [c]N
+′
+). Then
+[σN ]N
+′
+= [ab − c]N
+′
+. Note that it is not secure to use DropMod
+to obtain [σN ]Q from [σN ]N
+′
+even if N ′ is an RSA modulus or
+a prime. This is because it is impossible that σN < Q . Hence
+we will need to use ShaConv to achieve this. In order to make
+this possible, we require that the N ′ we choose to be either an
+RSA modulus or a prime. Once we have [σ ]Q , it is easy to see
+that [ab]Q ≡ [c]Q + [δN ]Q (mod Q). This protocol, denoted by
+TripConv is secure due to the security of all the subprotocols in-
+volved. The complete protocol of TripConv can be found in Algo-
+rithm 13.
+Algorithm 13 Beaver triple conversion: ([a′]Q , [b ′]Q , [c ′]Q ) ←
+TripConv(([a]N , [b]N , [c]N ),Q)
+1: Parties agree on N ′ such that N ′ > N 2 and N ′ is either an
+RSA modulus or a prime. Parties also agree on N ′′ such that
+N ′′ > (N ′)2.
+2: Parties jointly compute ([a]Q , [b]Q , [c]Q ) =
+ShaConv(([a]N , [b]N , [c]N ),Q,N ′).
+3: Parties jointly compute ([a]N
+′
+, [b]N
+′
+, [c]N
+′
+=
+Li�Mod([a]N , [b]N , [c]N ,N ′)
+4: Parties jointly compute [σN ]N
+′
+= [a]N
+′
+· [b]N
+′
+− [c]N
+′
+5: Parties jointly compute [σN ]Q = ShaConv([σN ]N
+′
+,Q,N ′′)
+6: Set [c ′]Q = [c]Q + [δN ]Q .
+7: Return ([a]Q , [b]Q , [c ′]Q ).
+4.4 Probabilistic bit generation
+Algorithm 14 describes our n-party protocol for probabilistic ran-
+dom bit generation over ZQ such that [b]Q = PrRndBitQ (p), where
+b = 0 with probability p, and b = 1 with probability 1 − p. The
+generated bit share can be used for computation in dropout layer
+in neural network. Note that a ∈ ZQ , thus a − ⌊p · Q⌋ < 0 with
+probability approximately p, and a − ⌊p · Q⌋ ≥ 0 with probability
+approximately 1 − p. Therefore, GEZQ ([a − ⌊p · Q⌋], l) = 0 with
+approximate probability p and GEZQ ([a − ⌊p ·Q⌋], l) = 1 with ap-
+proximate probability 1−p. Note that we can have a more accurate
+probability by using a larger Q .
+Algorithm 14 Probabilistic bit generation over ZQ : [b]Q ←
+PrRndBitQ (p)
+1: All parties deal a random sharing [a]Q , where a ∈ ZQ .
+2: All parties calculate [b]Q = GEZQ ([a]Q − ⌊p · Q⌋, l), where
+l = ⌈log2Q⌉.
+3: Return [b]Q .
+5 MPC FOR NEURAL NETWORK
+In this section, we describe various protocols to support efficient
+secure neural network training based on protocols given in Sec-
+tion 3.2, Section 3.3, and Section 4. Our protocols focus on n-party
+setting where correctness and security are guaranteed by our sup-
+porting protocols. Compared with MPC based neural network pro-
+tocols in SecureML [47] and SecureNN [59], our protocols are ap-
+plicable to a larger number of parties. Furthermore, compared to
+SecureNN[59], our protocols do not require external parties to as-
+sist the computation. Note that all the secret shares in this section
+are over finite field ZQ .
+5.1 Linear and convolutional layer
+Since operations in linear layer and convolutional layer are exactly
+multiply-and-accumulates on matrix [19], all parties can jointly
+call addition and multiplication protocols in SPDZ to make an effi-
+cient evaluation. Note thatmultiplications onmatrix rely onmatrix
+Beaver triples such that ar×s · bs×t = cr×t , where ar×s , bs×t , cr×t
+are matrix. Indeed, matrix Beaver triple generation involves ex-
+tra multiply-and-accumulates compared with that of single Beaver
+triple, hence takes more time. However, this can be done during
+offline phase, thus greatly improves the efficiency of evaluating
+multiply-and-accumulates in online phase.
+5.2 ReLU with derivative
+In neural network, ReLU function is a function that depends on the
+non-negativity of the input such that
+ReLU(x) =
+{
+x x ≥ 0
+0 x < 0
+Therefore, evaluating ReLU function boils down to comparison
+between x and 0. In addition, it is easy to see that the derivative of
+ReLU, denoted by DReLU, can be formulated as follows.
+DReLU(x) =
+{
+1 x ≥ 0
+0 x < 0
+Therefore we can conclude that for any matrix x of any size,
+DReLU(x) = s = (x ≥ 0)where the comparison is done entry-wise
+and ReLU(x) = x × s where × is an entry-wise matrix multiplica-
+tion. Following this argument, the parties can then consecutively
+calculate ReLU and DReLU given a secretly shared input [x]Q fol-
+lowing the protocol described in Algorithm 15. We note that the
+security of this protocol is guaranteed by the security of all the
+subprotocols being used during its calculation.
+MPC-enabled Privacy-Preserving Neural Network Training against Malicious A�ack Conference’17, July 2017, Washington, DC, USA
+Algorithm 15 ReLU: ([y], [s]) ← ReLU([x])
+1: All parties call GEZ([x]) to obtain [s] = [x ≥ 0].
+2: All parties call MulTrip([x], [s]) to obtain [y] = [x]× [s]where
+× represents entry-wise matrix multiplication.
+3: Return [y] and [s].
+5.3 Maxpool with derivative
+Maxpool is a layer of neural network that outputs the maximum
+values of various submatrices of the input matrix determined by
+several parameters, namely filter size and stride. Since each sub-
+matrix can be handled independently in parallel, we simply focus
+on finding the maximum value of a submatrix, which can be rep-
+resented as a list of s elements. To find such maximum value, we
+use the divide and conquer strategy where the comparison can be
+done in log s rounds. To simplify the description of the protocol,we
+first assume that s = 2p for some positive integer p. In each round,
+we can pair up the elements and keep the larger element for the
+next round of comparison. This way, the number of elements to
+be compared in each round is reduced by half from the previous
+round. This can be done until we are left with one element, which
+is the largest element required as the output of Maxpool.
+In order to enable backward propagation, we will need the de-
+rivative of Maxpool,which we denote by DMaxpool. Suppose that
+given an input list x = (x1, · · · , xs ) with Maxpool(x) = x∗ where
+x∗ is the i∗-th entry of x. Then DMaxpool(x) = v = (v1, · · · ,vs )
+where vi∗ = 1 andvj = 0 for all other j . it is easy to see that the in-
+termediate comparison results from the protocol Maxpool can be
+used to provide “path” from the maximum value to the xi which
+is the maximum value. So multiplying all the intermediate com-
+parison results in the path from the maximum value to any of the
+values will return 0 if the value is not the maximum value while it
+will be 1 in exactly one of the paths, as required. Our complete pro-
+tocols for Maxpool and DMaxpool can be found in Algorithms 16
+and 17 respectively. Here comp is a s×log s matrix with its i-th row
+storing all the intermediate comparison results in the path from xi
+to the maximum value.
+5.4 Dropout with derivative
+Dropout layer is performedby dropping out some valueswith some
+fixed probability p such that
+Dropout(x) =
+{
+0 probability p
+x/(1 − p) probability 1 − p
+Algorithm 18 describes our n-party protocol for Dropout which
+outputs the product of input matrix [x], matrix of probabilistic ran-
+dom bit [b], and public scaling factor c = (1−p)−1which is encoded
+to c̄ using the fixed point method discussed in Section 3.3. Since
+in Step 1, the matrix of probabilistic random bits [b] can be gener-
+ated in the offline phase of SPDZ, only one multiplication is needed
+for the evaluation of the Dropout layer. In addition, according to
+the definition of Dropout and backward propagation, the deriva-
+tive of Dropout is to propagate the gradients to the nodes except
+for the nodes that drop their values in the forward propagation.
+Therefore, DDropout can be simply obtained from the calculation
+of corresponding Dropout layer, i.e., DDropout([x]) = [b]× c̄. Here
+Algorithm 16 Maxpool: ([y], [comp]) ← Maxpool([x] =
+([x1], · · · , [xs ]), s), s = 2p for some positive integer p
+1: for i = j, · · · , s do
+2: Parties set [y(0, j)] = [xi ].
+3: end for
+4: for i = 1, · · · ,p do
+5: for j = 1, · · · , s
+2i
+do
+6: All parties compute [ci, j ] = GEZ([y(i−1,2j−1) − y(i−1,2j)])
+7: Parties set [y(i, j)] = [y(i−1,2j)] + [ci, j ] · ([y(i−1,2j−1) −
+y(i−1,2j)])
+8: for k = 1, · · · , 2i−1 do
+9: Parties set [comp((j − 1) · 2i + k, i)] = [ci, j ] + [0] and
+[comp((j − 1) · 2i + 2i−1 + k, i)] = [1 − ci, j ] + [0]
+10: end for
+11: end for
+12: end for
+13: Return ([y(p,1)], [comp]).
+Algorithm 17 DMaxpool: [ind] ← DMaxpool([x], [comp])
+1: for i = 1, · · · , s do
+2: Parties compute [indi] =
+∏p
+j=1
+[comp(i, j)]
+3: end for
+4: Return [ind] = ([ind1], · · · , [inds ]).
+[b] is the matrix with random bit entries used in the correspond-
+ing Dropout layer while c̄ is the fixed point encoding of a public
+scaling factor c = (1 − p)−1.
+Algorithm 18 Dropout: ([y], [b]) ← Dropout([x],p)
+1: All parties call PrRndBit(p) to generate a matrix which has the
+same size of [x] of secret sharing probabilistic random bit [b].
+2: All parties compute [y] = [x] × [b] × c̄ where c̄ is the fixed
+point encoding of c = (1 − p)−1 and the operator × represents
+the entry-wise multiplication of involved matrices.
+3: Return ([y], [b]).
+6 COMMUNICATION AND ROUNDS
+We summarize the communication and round complexity of our
+neural network training protocols for 3PC compared with those of
+SecureNN [59] in Table 1.We use the same ℓ as the length of bits for
+data representation for the protocols both in SecureNN and ours.
+P and Q are the finite field size of SecureNN and our’s protocol re-
+spectively. Linearr ,s,t denotes multiplication between two matrix
+of dimension r ×s with s×t . Conv2dm,i, f ,o denotes the operations
+in convolutional layer with input matrix of dimensionm ×m, i in-
+put channels, o output channels, and a filter of dimension f × f .
+Maxpoolj and DMaxpoolj denote maxpool with its derivative over
+j elements. In addition, Dropoutj and DDropoutj denote dropout
+with its derivative over j elements, which are not available in Se-
+cureNN.
+Note that (i) compared with SecureNN, we encode data in a
+larger finite field ZQ where Q is approximately ℓ + κ bits, as our
+Conference’17, July 2017, Washington, DC, USA Liu, et al.
+design relies on SPDZ which is more general than the specific de-
+sign of SecureNN that enables protocols running over a small ring
+or field, and (ii) we also do the same operation on MAC which in-
+creases the communication cost, although Beaver triples are gener-
+ated offline in our protocol thus do not need a party as "assistant",
+i.e., P2 in [59], which saves the communication rounds. We can
+observe the round improvement of DMaxpool which is because
+we use a general constant-round comparison protocol instead of
+the protocol in [59] consisting of share conversion, reconstruction,
+and multiplication. In addition, the round improvement of DReLU
+and DMaxpool comes from the increase of storage of intermediate
+comparison results, while Dropout and DDropout save the rounds
+by moving some steps to the offline phase of SPDZ.
+7 EXPERIMENTS
+In this section, we present our experimental results for secure con-
+volutional neural network training.
+System setting.Our prototype is tested over three Linux work-
+stations with an Intel Xeon Silver 4110 CPU (2.10GHz) and 128 GB
+of RAM, running CentOS7 in the same region. In this LAN setting,
+the average latency is 0.216 ms and the average bandwidth is 1.25
+GB/s. In our experiment, data is represented in 64 bits including
+12 bits (with sign bit) for integer part and 52 bits for fractional
+part. Our protocols are implemented using Gmpy2 [36] which is a
+Python version of GMP multiple-precision library [2] and several
+other standard libraries. The ring size of the two Paillier crypto-
+systems are set be greater than 21048 and 22048 respectively and
+the finite field sizeQ is set to be a prime which is greater than 2145.
+Lastly, we set the security parameter κ to be 80. Note that to enable
+the comparison between SecureNN and our protocols, our exper-
+iments use the same bit length to represent the data ℓ as the one
+used in the experiment conducted in SecureNN[59].
+Neural network architecture. We implement two types of
+neural network: a deep neural network and a convolutional neural
+network. The former is the same model as used in [59] and [47],
+with architecture of fully connected layer (784, 128) - ReLU - fully
+connected layer (128, 10)- ReLU. The latter has the architecture of
+padding (32, 32) - convolutional layer (4, 28, 28) - ReLU - Maxpool
+(4, 14, 14) - convolutional layer (12, 10, 10) - ReLU - dropout - Max-
+pool (12, 5, 5) - flatten (1, 300) - fully connected layer (300, 120)
+- fully connected layer (120, 10) - ReLU. Both neural networks are
+implemented based on reproduced SecureNN protocols in [59] and
+our protocols, while plaintext implementation is based on Numpy
+[50]. We use MNIST dataset [42] which consists of 70,000 black-
+white hand-written digit images of size 28×28 in 10 classes. In our
+experiment, 60,000 images are used for training and 10,000 images
+are used for testing. Note that we only give the performance eval-
+uation on neural network training, i.e., the online phase of SPDZ,
+as "raw materials" to be used can be prepared in the offline phase.
+As shown in Table 2, with batch size of 64, our protocol offers a
+prediction accuracy of 97.75% after 10 epochs for DNNwhich takes
+2.92 hours. For CNN, it takes 16.50 hours to complete 10 epochs
+training and achieves accuracy of 98.08%. Table 3 shows the train-
+ing time of 1 epoch with different batch size for DNN and CNN.
+Table 4 summarizes the training comparison between our protocol,
+SecureNN, and plaintext in terms of training time and communi-
+caiton cost. We can observe that our protocol improves the threat
+model from semi-honest to dishonest majority with overheads of
+around 2X in LAN setting.
+8 CONCLUSIONS
+In this paper, we propose a new scheme with several primitives
+for secure neural network training in malicious majority setting
+leveraging on SPDZ. Our experimental results show that our pro-
+tocols offer active security with affordable overheads of around
+2X in LAN time compared with existing schemes in semi-honest
+setting. In addition, we propose a scheme for Beaver triple conver-
+sion from a ring ZN to a finite field ZQ to enable MAC checking
+in SPDZ, relying on two instances of Paillier crypto-systems.
+REFERENCES
+[1] 2009. SecureSCM. In Deliverable D9.2, EU FP7 Project Secure Supply Chain Man-
+agement (SecureSCM).
+[2] 2020. GMP: GNU multiple precision arithmetic library. http://gmplib.org.
+[3] Abbas Acar, Hidayet Aksu, A Selcuk Uluagac, and Mauro Conti. 2018. A sur-
+vey on homomorphic encryption schemes: Theory and implementation. ACM
+Computing Surveys (CSUR) 51, 4 (2018), 1–35.
+[4] Nitin Agrawal, Ali Shahin Shamsabadi, Matt J Kusner, and Adrià Gascón. 2019.
+QUOTIENT: two-party secure neural network training and prediction. In Pro-
+ceedings of the 2019 ACM SIGSAC Conference on Computer and Communications
+Security. 1231–1247.
+[5] Alexandra Institute. 2020. FRESCO - A FRamework for Efficient Secure COmpu-
+tation. https://github.com/aicis/fresco. Online;.
+[6] Joy Algesheimer, Jan Camenisch, and Victor Shoup. 2002. Efficient computation
+modulo a shared secret with application to the generation of shared safe-prime
+products. In Annual International Cryptology Conference. Springer, 417–432.
+[7] Abdelrahaman Aly, Marcel Keller, Emmanuela Orsini, Dragos Rotaru, Peter
+Scholl, Nigel P Smart, and Tim Wood. 2019. SCALE–MAMBA v1. 3: Documen-
+tation. Technical Report. Technical Report.
+[8] Benny Applebaum, Yuval Ishai, and Eyal Kushilevitz. 2014. How to garble arith-
+metic circuits. SIAM J. Comput. 43, 2 (2014), 905–929.
+[9] Donald Beaver. 1991. Foundations of secure interactive computing. In Annual
+International Cryptology Conference. Springer, 377–391.
+[10] Rikke Bendlin, Ivan Damgård, Claudio Orlandi, and Sarah Zakarias. 2011. Semi-
+homomorphic encryption and multiparty computation. In Annual International
+Conference on the Theory and Applications of Cryptographic Techniques. Springer,
+169–188.
+[11] Fabrice Benhamouda, Akshay Degwekar, Yuval Ishai, and Tal Rabin. 2018. On
+the local leakage resilience of linear secret sharing schemes. In Annual Interna-
+tional Cryptology Conference. Springer, 531–561.
+[12] Dan Bogdanov, Sven Laur, and Jan Willemson. 2008. Sharemind: A framework
+for fast privacy-preserving computations. In European Symposium on Research
+in Computer Security. Springer, 192–206.
+[13] Peter Bogetoft, Dan Lund Christensen, Ivan Damgård, Martin Geisler, Thomas
+Jakobsen, Mikkel Krøigaard, Janus Dam Nielsen, Jesper Buus Nielsen, Kurt
+Nielsen, Jakob Pagter, et al. 2009. Secure multiparty computation goes live. In
+International Conference on Financial Cryptography and Data Security. Springer,
+325–343.
+[14] DanBoneh andMatthew Franklin. 1997. Efficient generation of shared RSA keys.
+In Annual international cryptology conference. Springer, 425–439.
+[15] Zvika Brakerski, Craig Gentry, and Vinod Vaikuntanathan. 2014. (Leveled) fully
+homomorphic encryption without bootstrapping. ACM Transactions on Compu-
+tation Theory (TOCT) 6, 3 (2014), 1–36.
+[16] Ran Canetti. 2001. Universally composable security: A new paradigm for crypto-
+graphic protocols. In Proceedings 42nd IEEE Symposium on Foundations of Com-
+puter Science. IEEE, 136–145.
+[17] Octavian Catrina and Sebastiaan De Hoogh. 2010. Improved primitives for se-
+cure multiparty integer computation. In International Conference on Security and
+Cryptography for Networks. Springer, 182–199.
+[18] Octavian Catrina and Amitabh Saxena. 2010. Secure computation with fixed-
+point numbers. In International Conference on Financial Cryptography and Data
+Security. Springer, 35–50.
+[19] Kumar Chellapilla, Sidd Puri, and Patrice Simard. 2006. High performance con-
+volutional neural networks for document processing.
+[20] Valerie Chen, Valerio Pastro, and Mariana Raykova. 2019. Secure computation
+for machine learning with SPDZ. arXiv preprint arXiv:1901.00329 (2019).
+http://gmplib.org
+https://github.com/aicis/fresco
+MPC-enabled Privacy-Preserving Neural Network Training against Malicious A�ack Conference’17, July 2017, Washington, DC, USA
+Rounds Communication
+Protocol SecureNN Our’s SecureNN Our’s
+Linearr ,s,t 2 1 2(2rs + 2st + rt)ℓ 12(rs + st) logQ
+Conv2dm,i, f ,o 2 1 2(2m2 f 2o + 2f 2oi +m2o)ℓ 12(m2 f 2o + f 2oi) logQ
+ReLU 2 3 10ℓ 12(3ℓ + 1) logQ
+DReLU 8 1 8ℓ logP + 22ℓ + 4 12 logQ
+Maxpoolj 9j 6 log j (8ℓ logP + 42ℓ + 4)j 36ℓj logQ
+DMaxpoolj 2 log j 2(j + 1)ℓ 12j log j logQ
+Dropoutj NA 1 NA 12j logQ
+DDropoutj NA 1 NA 12j logQ
+Table 1: Communication and round complexity comparison for 3PC protocols
+Type Epochs Accuracy Training time (hr)
+DNN
+1 95.03% 0.29
+5 96.99% 1.45
+10 97.75% 2.92
+CNN
+1 97.00% 1.65
+5 97.94% 8.27
+10 98.08% 16.50
+Table 2: Secure training for 3PC in LAN setting with batch
+size 64
+Type Batch size Accuracy Training time (hr)
+DNN
+16 94.99% 0.36
+64 95.03% 0.29
+128 96.75% 0.18
+CNN
+16 96.11% 1.94
+64 97.00% 1.65
+128 97.05% 1.42
+Table 3: Secure training for 3PC in LAN setting for 1 epoch
+Type Protocol Accuracy Training time Comm (MB)
+DNN
+SecureNN 94.21% 0.13 hr 6.08
+Our’s 94.03% 0.29 hr 460.82
+Plaintext 95.92% 10.47 s NA
+CNN
+SecureNN 97.01% 0.78 hr 56.92
+Our’s 97.00% 1.65 hr 2423.86
+Plaintext 97.07% 53.47 s NA
+Table 4: Training comparison with SecureNN for 1 epoch
+[21] Ronald Cramer, Ivan Damgård, and Yuval Ishai. 2005. Share conversion, pseu-
+dorandom secret-sharing and applications to secure computation. In Theory of
+Cryptography Conference. Springer, 342–362.
+[22] Ronald Cramer, Ivan Bjerre Damgård, and Jesper Buus Nielsen. 2015. Secure
+multiparty computation. Cambridge University Press.
+[23] R Cramer, I Damgrd, D Escudero, P Scholl, and C Xing. 2018. SPDZ2k: efficient
+MPC mod 2k for dishonest majority. In Annual international cryptology confer-
+ence.
+[24] Ivan Damgård, Daniel Escudero, Tore Frederiksen, Marcel Keller, Peter Scholl,
+and Nikolaj Volgushev. 2019. New primitives for actively-secureMPC over rings
+with applications to private machine learning. In 2019 IEEE Symposium on Secu-
+rity and Privacy (SP). IEEE, 1102–1120.
+[25] Ivan Damgård, Matthias Fitzi, Eike Kiltz, Jesper Buus Nielsen, and Tomas Toft.
+2006. Unconditionally secure constant-rounds multi-party computation for
+equality, comparison, bits and exponentiation. In Theory of Cryptography Con-
+ference. Springer, 285–304.
+[26] Ivan Damgard, Martin Geisler, and Mikkel Kroigard. 2008. Homomorphic en-
+cryption and secure comparison. International Journal of Applied Cryptography
+1, 1 (2008), 22–31.
+[27] Ivan Damgård, Marcel Keller, Enrique Larraia, Valerio Pastro, Peter Scholl, and
+Nigel P Smart. 2013. Practical covertly secure MPC for dishonest majority–or:
+breaking the SPDZ limits. In European Symposium on Research in Computer Se-
+curity. Springer, 1–18.
+[28] Ivan Damgård, Valerio Pastro, Nigel Smart, and Sarah Zakarias. 2012. Multiparty
+computation from somewhat homomorphic encryption. In Annual Cryptology
+Conference. Springer, 643–662.
+[29] Ivan Damgård and Rune Thorbek. 2008. Efficient Conversion of Secret-shared
+Values Between Different Fields. IACR Cryptology ePrint Archive 2008 (2008),
+221.
+[30] Daniel Demmler, Thomas Schneider, and Michael Zohner. 2015. ABY-A frame-
+work for efficient mixed-protocol secure two-party computation.. In NDSS.
+[31] David Evans, Vladimir Kolesnikov, Mike Rosulek, et al. 2018. A pragmatic intro-
+duction to secure multi-party computation. Foundations and Trends® in Privacy
+and Security 2, 2-3 (2018), 70–246.
+[32] Yair Frankel, Philip D MacKenzie, and Moti Yung. 1998. Robust efficient dis-
+tributed RSA-key generation. In Proceedings of the thirtieth annual ACM sympo-
+sium on Theory of computing. 663–672.
+[33] Ran Gilad-Bachrach, Nathan Dowlin, Kim Laine, Kristin Lauter, Michael
+Naehrig, and John Wernsing. 2016. Cryptonets: Applying neural networks to
+encrypted data with high throughput and accuracy. In International Conference
+on Machine Learning. 201–210.
+[34] Niv Gilboa. 1999. Two party RSA key generation. In Annual International Cryp-
+tology Conference. Springer, 116–129.
+[35] Carmit Hazay, Gert Læssøe Mikkelsen, Tal Rabin, Tomas Toft, and An-
+gelo Agatino Nicolosi. 2019. Efficient RSA key generation and threshold paillier
+in the two-party setting. Journal of Cryptology 32, 2 (2019), 265–323.
+[36] CV Horsen. 2016. Gmpy2: Mupltiple-precision arithmetic for python.
+[37] Tibor Jager. 2012. The generic composite residuosity problem. In Black-Box
+Models of Computation in Cryptology. Springer, 49–56.
+[38] Chiraag Juvekar, Vinod Vaikuntanathan, and Anantha Chandrakasan. 2018.
+{GAZELLE}: A low latency framework for secure neural network inference. In
+27th {USENIX} Security Symposium ({USENIX} Security 18). 1651–1669.
+[39] Peter Kairouz,HBrendanMcMahan, BrendanAvent, Aurélien Bellet, Mehdi Ben-
+nis, Arjun Nitin Bhagoji, Keith Bonawitz, Zachary Charles, Graham Cormode,
+Rachel Cummings, et al. 2019. Advances and open problems in federated learn-
+ing. arXiv preprint arXiv:1912.04977 (2019).
+[40] Marcel Keller, Emmanuela Orsini, and Peter Scholl. 2016. MASCOT: faster ma-
+licious arithmetic secure computation with oblivious transfer. In Proceedings of
+the 2016 ACM SIGSAC Conference on Computer and Communications Security.
+830–842.
+[41] Marcel Keller, Valerio Pastro, and Dragos Rotaru. 2018. Overdrive:making SPDZ
+great again. In Annual International Conference on the Theory and Applications
+of Cryptographic Techniques. Springer, 158–189.
+[42] Yann LeCun and Corinna Cortes. 2010. MNIST handwritten digit database.
+http://yann.lecun.com/exdb/mnist/. (2010). http://yann.lecun.com/exdb/mnist/
+[43] Fengfu Li, Bo Zhang, and Bin Liu. 2016. Ternaryweight networks. arXiv preprint
+arXiv:1605.04711 (2016).
+[44] Jian Liu, Mika Juuti, Yao Lu, and Nadarajah Asokan. 2017. Oblivious neural net-
+work predictions via minionn transformations. In Proceedings of the 2017 ACM
+http://yann.lecun.com/exdb/mnist/
+Conference’17, July 2017, Washington, DC, USA Liu, et al.
+SIGSAC Conference on Computer and Communications Security. 619–631.
+[45] H Brendan McMahan, Eider Moore, Daniel Ramage, Seth Hampson, et al. 2016.
+Communication-efficient learning of deep networks from decentralized data.
+arXiv preprint arXiv:1602.05629 (2016).
+[46] Payman Mohassel and Peter Rindal. 2018. ABY3: A mixed protocol framework
+formachine learning. In Proceedings of the 2018 ACMSIGSAC Conference on Com-
+puter and Communications Security. 35–52.
+[47] Payman Mohassel and Yupeng Zhang. 2017. Secureml: A system for scalable
+privacy-preserving machine learning. In 2017 IEEE Symposium on Security and
+Privacy (SP). IEEE, 19–38.
+[48] Jesper Buus Nielsen, Peter Sebastian Nordholt, Claudio Orlandi, and Sai She-
+shank Burra. 2012. A new approach to practical active-secure two-party compu-
+tation. In Annual Cryptology Conference. Springer, 681–700.
+[49] Takashi Nishide and Kouichi Sakurai. 2010. Distributed paillier cryptosystem
+without trusted dealer. In International Workshop on Information Security Appli-
+cations. Springer, 44–60.
+[50] Travis E Oliphant. 2006. A guide to NumPy. Vol. 1. Trelgol Publishing USA.
+[51] Wakana Omori and Akira Kanaoka. 2017. Efficient Secure Arithmetic on Float-
+ing Point Numbers. In International Conference on Network-Based Information
+Systems. Springer, 924–934.
+[52] Emmanuela Orsini, Nigel P Smart, and Frederik Vercauteren. 2020. Overdrive2k:
+Efficient Secure MPC over Z
+2k
+from Somewhat Homomorphic Encryption. In
+Cryptographers’ Track at the RSA Conference. Springer, 254–283.
+[53] Pascal Paillier. 1999. Public-key cryptosystems based on composite degree resid-
+uosity classes. In International conference on the theory and applications of cryp-
+tographic techniques. Springer, 223–238.
+[54] M Sadegh Riazi, ChristianWeinert, Oleksandr Tkachenko, EbrahimM Songhori,
+Thomas Schneider, and Farinaz Koushanfar. 2018. Chameleon: A hybrid secure
+computation framework for machine learning applications. In Proceedings of the
+2018 on Asia Conference on Computer and Communications Security. 707–721.
+[55] Dragos Rotaru and Nigel P Smart. [n.d.]. Actively Secure Setup for SPDZ.
+([n. d.]).
+[56] Shreya Sharma, Chaoping Xing, and Yang Liu. [n.d.]. Privacy-Preserving Deep
+Learning with SPDZ. ([n. d.]).
+[57] Nigel P Smart and Frederik Vercauteren. 2014. Fully homomorphic SIMD oper-
+ations. Designs, codes and cryptography 71, 1 (2014), 57–81.
+[58] Tomas Toft et al. 2007. Primitives and applications for multi-party computation.
+Unpublished doctoral dissertation, University of Aarhus, Denmark (2007).
+[59] Sameer Wagh, Divya Gupta, and Nishanth Chandran. 2019. Securenn: 3-party
+secure computation for neural network training. Proceedings on Privacy Enhanc-
+ing Technologies 2019, 3 (2019), 26–49.
+[60] Andrew C Yao. 1982. Protocols for secure computations. In 23rd annual sympo-
+sium on foundations of computer science (sfcs 1982). IEEE, 160–164.
+This figure "sample-franklin.png" is available in "png"
+ format from:
+http://arxiv.org/ps/2007.12557v1
+http://arxiv.org/ps/2007.12557v1
+	Abstract
+	1 Introduction
+	2 Preliminaries
+	2.1 Privacy Considerations in Neural Network Training
+	2.2 Secure multiparty computation
+	2.3 Threat model and security
+	3 Supporting protocols
+	3.1 Distributed Paillier cryptosystem
+	3.2 SPDZ
+	3.3 Secure computation of fixed-point numbers
+	4 Proposed protocols
+	4.1 Comparison over ZN
+	4.2 Wrap, modulo reduction, share conversion
+	4.3 Beaver triple conversion
+	4.4 Probabilistic bit generation
+	5 MPC for Neural network
+	5.1 Linear and convolutional layer
+	5.2 ReLU with derivative
+	5.3 Maxpool with derivative
+	5.4 Dropout with derivative
+	6 Communication and rounds
+	7 Experiments
+	8 Conclusions
+	References

@@ -1,0 +1,1097 @@
+AI in FinTech: A Research Agenda
+Longbing Cao
+University of Technology Sydney, Australia
+Abstract—Smart FinTech has emerged as a new area that
+synthesizes and transforms AI and finance, and broadly data
+science, machine learning, economics, etc. Smart FinTech also
+transforms and drives new economic and financial businesses,
+services and systems, and plays an increasingly important role
+in economy, technology and society transformation. This arti-
+cle presents a highly summarized research overview of smart
+FinTech, including FinTech businesses and challenges, various
+FinTech-associated data and repositories, FinTech-driven busi-
+ness decision and optimization, areas in smart FinTech, and
+research methods and techniques for smart FinTech.
+Keywords—AI, data science, machine learning, FinTech, fi-
+nance, economics, AI in FinTech, AI in finance
+I. INTRODUCTION
+In recent years, finance has become increasingly interactive
+with the new-generation artificial intelligence (AI) techniques
+and data science (DS) [1], [2], [3], [4], [5]. In particular,
+FinTech (or Fintech, i.e., financial technology in full) [6], [7]
+is at the epicentre of synthesizing, innovating and transforming
+financial services, economy, technology, media, communica-
+tion, and society broadly driven by AIDS techniques [8]. Here,
+AIDS broadly refers to both classic AI areas including logic,
+planning, knowledge representation, modeling, autonomous
+systems, multiagent systems, expert system (ES), decision
+support system (DSS), simulation, pattern recognition, im-
+age processing, and natural language processing (NLP) and
+modern AI and DS areas such as representation learning,
+machine learning, optimization, statistical modeling, mathe-
+matical modeling, data analytics, knowledge discovery, com-
+plexity science, computational intelligence, event and behavior
+analysis, social media/network analysis, and more recently
+deep learning and cognitive computing. In contrast, we broadly
+refer finance to areas including capital market, trading, bank-
+ing, insurance, leading/loan, investment, wealth management,
+risk management, marketing, compliance and regulation, pay-
+ment, contract, auditing, accounting, financial infrastructure,
+blockchain, financial operations, financial services, financial
+security, and financial ethics. In addition, economics and
+finance (EcoFin for short) are increasingly synergized with
+each other and with AIDS.
+AIDS is the keystone enabler of the new-generation of
+EcoFin and FinTech [9], [10], [11], [12]. The new-generation
+AIDS is reshaping or even redefining the concepts, objectives,
+content and tasks of EcoFin and FinTech. AIDS essentially and
+comprehensively transforms the way and effect that modern
+economic and financial (economic-financial) businesses oper-
+ate, transact, interact and collaborate with their participants
+∗A comprehensive review on ‘AI in Finance: A Review’ can be provided
+on request.
+(incl. consumers, markets, and regulators) and environments.
+AIDS nurtures new economic-financial mechanisms, models,
+products, services, and many tangible and intangible opportu-
+nities. As a result, AIDS not only strengthens the efficiency,
+cost-effectiveness, customer experience, risk mitigation, regu-
+lation, and security of existing economic-financial systems but
+also innovates unprecedented and more intelligent, efficient,
+convenient, personalized, explainable, secure and proactive
+economic-financial products and services. In this paper, we call
+the synthetic product of AIDS and EcoFin as smart FinTech.
+Figure 1 presents a four-dimensional, systematic and inter-
+active landscape of the synthesis between AIDS and EcoFin
+to form smart FinTech. The landscape connects the main
+EcoFin businesses (bottom) to the EcoFin data and reposi-
+tories (left), the broad-based AIDS techniques (right), and the
+EcoFin business objectives (top). In the rest of this paper,
+we will discuss and summarize the main business domains,
+technical areas, and techniques associated with smart FinTech
+in terms of the FinTech businesses and challenges, FinTech
+business objectives, FinTech data, areas in smart FinTech, and
+AIDS techniques for smart FinTech. We will conclude with
+opportunities for future smart FinTech developments.
+II. FINTECH BUSINESSES AND CHALLENGES
+The FinTech business areas that build on AIDS techniques
+involve almost all aspects of an economic-financial system
+and its environment and broadly all EcoFin businesses [1],
+[12]. Here, we highlight the following major business areas
+in smart FinTech: (1) economic-financial innovations: e.g.,
+new mechanisms and products; (2) economic-financial mar-
+kets: including products and services; (3) economic-financial
+participants: including individual and retail investors, institu-
+tions and regulators; (4) economic-financial behaviors: e.g.,
+investor activities and company announcements; (5) economic-
+financial events: e.g., company merger and financial crisis; (6)
+economic-financial services: e.g., banking, insurance, lending,
+financing, and crowdfunding services; (7) economic-financial
+mechanisms: e.g., market mechanisms, business models, and
+derivative pricing; (8) economic-financial systems: e.g., a
+company’s finance; (9) economic-financial infrastructure: in-
+cluding fundamental supporting systems and blockchain; (10)
+economic-financial pricing: including the valuation of under-
+lying and derivative assets in capital markets; (11) economic-
+financial trading: including trading, investment, and execution;
+(12) economic-financial payment: e.g., online, mobile and
+contactless payment; (13) economic-financial valuation: e.g.,
+the estimation of property value, credit and intangible assets;
+(14) economic-financial marketing: including campaign, and
+customer care; (15) economic-financial relationship manage-
+ment: e.g., stakeholder relations, and business partnership;
+ar
+X
+iv
+:2
+00
+7.
+12
+68
+1v
+1 
+ [
+q-
+fi
+n.
+G
+N
+] 
+ 1
+0 
+Ju
+l 
+20
+20
+Fig. 1. A Four-dimensional Research Landscape of the Synthesis between AIDS and EcoFin toward Fostering Smart FinTech. Shapes in different colors
+represent distinct dimensions in the synthetic landscape. Each dimension initiates its interactions and communications with the three other dimensions through its
+same-colored, directed connectors and channels. Each channel carries business, problem, data (incl. information and knowledge), intelligence, and technology,
+etc. from one end to another. The four dimensions interact with each other to address specific economic-financial business problems of underlying businesses
+by particular AIDS techniques on the corresponding data.
+(16) economic-financial resource management: including man-
+agement of human, material, informational and intangible
+assets; (17) economic-financial operations: e.g., the processes
+and services for supporting financial innovation, design and
+production; (18) economic-financial compliance and regula-
+tion: e.g., enforcing operational orders and business rules by
+authorities; (19) economic-financial crisis, risk and security:
+e.g., investment risk, systemic risk, and cybersecurity; and (20)
+economic-financial ethics: including social and ethical issues
+and privacy.
+Major FinTech challenges associated with the above Fin-
+Tech business areas as well as their associated EcoFin busi-
+nesses, problems, data and objectives in Fig. 1 can be cat-
+egorized into (1) innovation challenges: e.g., AIDS tech-
+niques for inventing novel, efficient, intelligent and sustain-
+able mechanisms, products, services and platforms; (2) busi-
+ness complexities: such as AIDS techniques for representing,
+learning and managing the intricate working mechanisms,
+structures, interactions, relations, hierarchy, scale, dynamics,
+anomaly, uncertainty, emergence and exceptions associated
+with a market, a product or a participant; (3) organizational
+and operational complexities: such as AIDS techniques for
+understanding and managing the diversity and personalization
+of individuals and departmental teams, the departmental and
+institutional coherence and consensus, and the inconsistent
+and volatile efficiency and performance; (4) human and social
+complexities: such as AIDS techniques for modeling and
+managing the diversity and inconsistency of participant’s cog-
+nitive, emotional and technical capabilities and performance,
+and for enabling effective communications, cooperation and
+collaboration within a department and between stakeholders;
+(5) environmental complexities: such as AIDS techniques for
+modeling and managing the interactions with contextual and
+environmental factors and systems and their influence on a
+target business system and problem; (6) regional and global
+challenges: such as understanding and managing the relations
+between an economy entity and its financial systems with the
+related regional and global counterparts and stakeholders and
+their influence on a target problems; (7) data complexities:
+such as extracting, representing, analyzing and managing data
+quality issues, misinformation and complicated data charac-
+teristics, e.g., uncertainty and extreme dimensionality, sparsity
+and skewness; (8) dynamic complexities: such as modeling,
+predicting and managing evolving but nonstationary behaviors,
+events and activities of individual and block markets, products,
+services and participants; and (9) integrative complexities: e.g.,
+systematically modeling and managing the various aspects
+of the above complexities that are often tightly and loosely
+coupled with each other in an underlying economic-financial
+system.
+III. THE SYNTHETIC AREAS OF SMART FINTECH
+Figure 2 summarizes the synergy between major AIDS
+techniques and finance areas to generate various synthetic
+smart FinTech areas. Our discussion focuses on AIDS tech-
+niques for transforming the following smart FinTech areas
+[12], [7]: smart banking, smart insurance, smart lending, smart
+marketing, smart payment, smart regulation, smart risk, smart
+security, smart trading, smart wealth, and smart blockchain,
+in addition to the foundations for smart FinTech. Each of
+these primary areas is further explained in terms of specific
+problems and tasks where AIDS techniques can play distinct
+and significant roles [3].
+The foundations of smart FinTech refer to the AIDS
+areas and techniques to enable smart FinTech. Examples
+are actionable financial intelligence; AIDS for financial in-
+frastructure; analyzing big economic-financial data; analyzing
+cloud, online and mobile economic-financial services; ana-
+lyzing environmental, social and governance data; analyz-
+ing global economic-financial event and impact; analyzing
+high-dimensional, sequential and evolving economic-financial
+data; analyzing multisource, multimodal and heterogeneous
+economic-financial data; automated economic-financial sys-
+tems and services; computational intelligence for EcoFin; data
+mining and knowledge discovery for EcoFin; deep learning
+and representation for EcoFin; distributed learning, feder-
+ated learning and transfer learning for EcoFin; intelligent
+cross-market economic-financial data processing; intelligent
+economic-financial recommendation; modeling economic in-
+centives; modeling economic mechanisms and social wel-
+fare; modeling evolutionary equilibrium of financial markets;
+modeling economic-financial chaos, uncertainty and change;
+modeling economic-financial couplings, interactions and de-
+pendencies; modeling economic-financial information flow;
+modeling economic-financial information propagation and in-
+fluence; modeling financial market microstructure; modeling
+economic-financial mechanisms, models, products and ser-
+vices; modeling economic-financial networking and intercon-
+nections; modeling economic-financial structures and hierar-
+chy; modeling natural, online, socioeconomic, political and
+cultural factors; personalized economic-financial recommen-
+dation; reinforcement learning for EcoFin; and statistical and
+mathematical learning for EcoFin.
+The smart banking are active, personalized, automated,
+trusted, robust, secure, risk-averse, and fragility-averse bank-
+ing businesses and services. AIDS research for enabling smart
+banking includes AIDS techniques for detecting, analyzing
+and managing bank network risk and risk contagion; AIDS
+for modeling, detecting and managing banking risk and fraud;
+AIDS for conducting credit analysis and improving pricing;
+AIDS for optimizing, validating and risk-managing credit
+loans; AIDS for creating, mining, securing, risk-managing
+and optimizing cryptocurrencies; AIDS for creating, securing,
+evaluating, risk-managing and optimizing digital currencies;
+AIDS for personalizing, automating, validating, securing, risk-
+managing and optimizing Internet/online banking; AIDS for
+enabling, personalizing, automating, securing, risk-managing
+and optimizing open banking; AIDS for evaluating, securing
+and risk-managing shadow banking; and AIDS for making
+smarter and more automated, personalized, mobile and engag-
+ing banking services; etc.
+The smart insurance enables insurance businesses and ser-
+vices that are proactive, tailored, trustful, resilient, secure and
+risk-averse. The AIDS research for enabling smart insurance
+includes AIDS for tailoring individual, business and commer-
+cial insurance products and services; AIDS for insurance fraud
+detection; AIDS for enabling personalized recommendation
+of insurance products and services; AIDS for evaluating,
+analyzing, detecting, managing and optimizing insurance risk
+and compliance; AIDS for evaluating, automating, detecting
+and optimizing insurance security; AIDS for creating novel
+insurance models, products and services; AIDS for evaluating,
+automating and improving insurance business operations; and
+AIDS for integrating, recommending and optimizing multi-
+policy, multi-product and cross-selling insurance products and
+services; etc.
+The smart lending supports lending businesses and services
+that are efficient, risk-averse, personalized, context-oriented,
+predictive, robust and secure. AIDS research directions for
+smart leading cover problems and tasks such as AIDS for
+addressing various aspects and problems of blockchain; AIDS
+for automating crowdfunding, e.g., campaign design and strat-
+egy optimization; AIDS for creating and optimizing distributed
+ledger technologies; AIDS for fundraising, e.g., creating per-
+sonalized recommendations, efficient fundraising models, and
+intelligent services; AIDS for analyzing, detecting, managing
+and mitigating lending risk and security; AIDS for enabling
+smart, efficient and low-risk peer-to-peer lending; and AIDS
+for creating, validating and optimizing smart contracts; etc.
+The smart marketing offers marketing activities and ser-
+vices that are cost-effective, relevant, proactive, personalized,
+positive, sequential and context-oriented. AIDS-enabled smart
+marketing involves many research areas, such as AIDS for
+conducting consumer and client sentiment analysis; under-
+standing consumer and client opinion and intention; AIDS for
+evaluating and optimizing customer relationship management;
+AIDS for validating, enhancing, synergizing and optimizing
+econometrics; AIDS for evaluating, risk-managing, person-
+alizing and optimizing stakeholder relationship; AIDS for
+making, evaluating and optimizing financial recommendations;
+and AIDS for enabling, automating, evaluating, securing, risk-
+Fig. 2. The Synthesis between AI/DS Techniques and Financial Businesses to Form Smart FinTech. The upper fin refers to broad AI and DS areas and
+techniques, the lower fin consists of major financial areas, and the ridge includes various synthetic areas of smart FinTech.
+managing and optimizing supply chain finance; etc.
+The smart payment includes online, mobile, wifi and
+contactless payment methods and services that are secure,
+risk-averse, fast and convenient. Smart payment becomes
+increasing important in digital society and economy. AIDS-
+enabled smart payment research include areas such as AIDS
+for validating, automating, securing and risk-managing con-
+tactless payment; AIDS for enabling, securing, risk-managing
+and optimizing e-payment; AIDS for automating, securing,
+risk-managing and optimizing Internet and online payment;
+AIDS for automating, securing, risk-managing and optimizing
+mobile payment; AIDS for modeling, detecting, analyzing and
+mitigating payment risk; and AIDS for validating, detecting,
+analyzing and mitigating payment security; etc.
+The smart regulation supports automated or human-
+machine-cooperative, risk-sensitive, proactive, systematic, dy-
+namic and evidence-based regulation and compliance opera-
+tions, governance and risk control. AIDS-empowered smart
+regulation consists of many research topics, such as AIDS
+for enhancing corporate finance transparency; AIDS for eval-
+uating and optimizing corporate governance and regulation;
+AIDS for making and optimizing cross-market regulation;
+AIDS for creating and optimizing digital currency regulation;
+AIDS for detecting, analyzing, risk-managing and managing
+financial crime; AIDS for verifying, automating, securing and
+optimizing financial digital authentication; AIDS for enabling,
+validating, verifying, detecting, risk-managing and optimizing
+financial digital identification; AIDS for quantifying, validat-
+ing, monitoring, detecting, analyzing and mitigating financial
+fragility, crisis and stability; AIDS for recognizing, detecting,
+analyzing and mitigating financial fraud; AIDS for enabling
+smarter and more efficient and personalized financial market
+regulation, design and policy implication; AIDS for automat-
+ing, evaluating and optimizing financial operations; AIDS for
+quantifying, evaluating and managing information asymme-
+try and transparency; AIDS for enabling, automating and
+optimizing international regulation; AIDS for validating and
+improving market legitimacy; AIDS for quantifying, verifying,
+detecting, analyzing and improving market social justice; and
+AIDS for quantifying, evaluating, automating and improving
+marketplace trust and coordination; etc.
+The smart risk and security offers whole-of-time, business
+and customer risk and security management, which are pre-
+dictive, systematic, evidence-based, and dynamic. AIDS can
+play critical roles with many research tasks customizable for
+specific economic-financial businesses, products and services.
+Typical AIDS-enabled smart risk and security tasks include
+AIDS for automating, evaluating and optimizing anti-money
+laundering; AIDS for monitoring, detecting, categorizing, fac-
+torizing, predicting and intervening client financial security,
+retail investor risk, financial systematic risk, financial institu-
+tional risk, financial network risk, and cross-market risk; AIDS
+for detecting and quantifying financial risk factors and predict-
+ing and evaluating financial risk factors and areas; AIDS for
+quantifying, characterizing, evaluating, predicting and improv-
+ing consumer confidence and sentiment, market reputation and
+trust; AIDS for quantifying, analyzing, detecting, predicting
+and mitigating financial crisis and crisis contagion; AIDS
+for categorizing, monitoring, detecting, analyzing, predicting,
+evaluating and managing financial event, market movement,
+change, exception and emergence and their consequences
+and impact; AIDS for modeling, detecting, evaluating and
+managing financial system security, financial network security,
+and financial instrument security; AIDS for characterizing,
+quantifying, analyzing, evaluating, predicting and managing
+financial system vulnerability; etc.
+The smart trading supplies predictive, active, dynamic,
+risk-averse, anti-fragility, and high-utility trading strategies
+and services. Smart trading involves a very broad and widely
+explored area. The AIDS-driven smart trading involves many
+research topics, e.g., AIDS for making and optimizing al-
+gorithmic trading, arbitrage trading, high frequency (cross-
+market) trading, and institutional trading; AIDS for model-
+ing, automating and optimizing digital asset pricing; AIDS
+for enabling smart e-commerce; AIDS for enabling smart,
+efficient, personalized and secure Internet finance; AIDS for
+designing, automating and optimizing novel, secure, smart and
+personalized financial mechanisms, financial models, financial
+products, and financial services; AIDS for conducting portfolio
+analytics and enabling smart portfolio management; AIDS
+for predictive trading and strategic trading; AIDS for design-
+ing, automating and optimizing trading strategies, algorithms
+and platforms; AIDS for enabling and optimizing socially
+responsible investment; AIDS for modeling, evaluating and
+optimizing trading complementarity and substitutionary; and
+AIDS for characterizing and improving trading incentive and
+campaign; etc.
+The smart wealth becomes increasing topical, with such
+expected businesses and services for safe, secure, personal-
+ized, anti-fragility, and automated wealth management. AIDS-
+supported smart wealth involves many emergent research
+areas, including AIDS for making, evaluating and optimizing
+data monetization; AIDS for valuating, analyzing, evaluating,
+optimizing and managing digital assets, Internet wealth, public
+welfare, institutional welfare, and superannuation; AIDS for
+enabling, automating, risk-managing and optimizing digital
+financial advising; AIDS for designing and optimizing novel,
+personalized, secure and healthy financing mechanisms; AIDS
+for enabling, automating, evaluating and optimizing roboadvis-
+ing; and AIDS for supporting secure, personalized, low-risk
+and sustainable venture capital management; etc.
+The smart blockchain enables efficient, secure, risk-
+tolerant, automated or semi-automated, dynamic, and high-
+performing blockchain infrastructures, computing and ser-
+vices. Both classic and advanced AIDS techniques can play
+critical roles in enabling smart blockchains. Examples are pre-
+dicting the price movement of cryptocurrencies, constructing
+risk-averse cryptocurrency trading strategies and portfolios,
+detecting risk and assuring smart contracts, efficient mining
+of bitcoins in distributed systems, supporting proactive and
+systemic blockchain governance and regulation, and detecting
+risk, intrusion and fragility in blockchain systems, behaviors
+and activities, etc.
+IV. AI TECHNIQUES FOR SMART FINTECH
+The AIDS techniques required to achieve the aforemen-
+tioned smart FinTech objectives and EcoFin businesses are
+very broad and diversified. Each technique may play distinct
+roles in addressing respective EcoFin business challenges and
+data complexities. Here, we group the main AIDS techniques
+for smart FinTech into the following technical families [13],
+[14], [9], [15], [16], [17], [18], [19], [20], [3], [21], [22],
+[23], [24], [25]: (a) Mathematical and statistical modeling,(b)
+Complex system methods,(c) Classic analysis and learning
+methods,(d) Computational intelligence methods,(e) Modern
+AIDS methods,(f) Hybrid AIDS methods.Table I summarizes
+these AIDS techniques and their applications for smart Fin-
+Tech.
+A. Mathematical and Statistical Modeling
+The family of mathematical and statistical modeling lays
+the foundation for characterizing, formulating and modeling
+economic-financial systems and their working mechanisms,
+problems and solutions. Accordingly, here, we discuss four
+areas that are widely used for analyzing economic-financial
+systems and enable smart FinTech.
+Numerical methods are used to build quantitative rep-
+resentation and analysis of economic-financial systems and
+problems, e.g., for value-at-risk (VaR), option valuation, option
+pricing, portfolio simulation, portfolio optimisation, hedging,
+and capital budgeting. Typical methods include linear and
+nonlinear equations, least squares problems, interpolation,
+optimization, binomial and trinomial methods, finite difference
+methods, dependency modeling, financial simulation, Monte-
+Carlo simulation, random number generators, and econometric
+models such as term structure modelling and regression.
+Time-series and signal analysis describe, characterize,
+analyze and forecast the temporal movement, its transition,
+regression, trend and change by treating economic-financial
+indicators as time-series and signals. Time-series analysis and
+signal processing are widely used in EcoFin. For example, the
+signals of a security price and its derivative price and market
+index and their relations can be analyzed by multivariate
+regression and modeling high-frequency trading signals jointly
+by time-domain sequence analysis and frequency-domain
+wavelet. Typical methods include state space modeling, lin-
+ear time-series analysis, nonlinear time-series analysis, time-
+frequency and time-scale analysis, spectral analysis, Kalman
+filter, fractional time-series analysis, long-memory time-series
+analysis, seasonal time-series analysis, transfer function mod-
+els, multiscale analysis, multivariate analysis, stationary anal-
+ysis, nonstationary analysis, and outlier analysis.
+Statistical learning methods measure, estimate and learn
+the uncertainty, randomness, risk, pricing, rating, performance
+or dependency of economic-financial systems, products and
+problems in terms of probabilistic theories. Examples are
+estimating the pricing of options, forecasting the VaR and
+performance of a portfolio, modeling the sequential trading
+behaviors of a group of investors or a firm by coupled
+hidden Markov models, modeling the high-dimensional de-
+pendency between multiple time series by a copula method,
+and measuring the probabilistic relations between financial
+indicators as a Bayesian network. Typical methods include ran-
+dom walk models, efficient portfolio theories, factor models,
+Black-Sholes models, Monte-Carlo methods, Delta-Gamma
+approximation, Lévy processes, stochastic volatility models,
+copula methods, filtering methods e.g. particle filters, and non-
+parametric methods such as Bayesian networks and Markov
+networks.
+AIDS areas AIDS methods AIDS techniques Examples of smart FinTech applications
+Mathematical
+modeling
+Numerical
+methods
+Linear and nonlinear equations, least square problem,
+finite difference methods, dependence modeling, Monte-
+Carlo simulation
+Valuation, pricing, portfolio simulation, portfolio optimization, capital
+budgeting, hedging, price movement prediction, risk modeling, and
+trend forecasting.
+Time-series and
+signal analysis
+State space modeling, time-series analysis, spectral
+analysis, long-memory time-series analysis, nonstation-
+ary analysis
+Price prediction, trend forecasting, market movement prediction, IPO
+prediction, equity-derivative correlation analysis, change detection, fi-
+nancial crisis analysis, trading strategy discovery, and cross-market
+analysis.
+Statistical
+learning
+methods
+Random walk models, factor models, stochastic volatil-
+ity models, copula methods, nonparametric methods
+Market trend forecasting, pricing, valuation, price estimation, VaR fore-
+casting, financial variable dependency modeling, portfolio performance
+estimate, and cross-market analysis.
+Random meth-
+ods
+Random sampling, random walk models, random forest,
+stochastic theory, fuzzy set theory, quantum mechanics
+Abnormal behavior analysis, outlier detection, market event analysis,
+market movement modeling, influence transition analysis, associated
+account analysis, crowdsourcing modeling, and marketing modeling.
+Complex
+systems
+Complexity sci-
+ence
+Systems theory, complex adaptive systems, chaos the-
+ory, random fractal theory
+System complexity modeling, market simulation, market mechanism
+design, globalization analysis, crisis contagion, and market information
+flow.
+Game theory Zero-sum game, differential game, combinatorial game,
+evolutionary game, Bayesian game
+Interaction modeling, policy simulation and optimization, regional con-
+flict modeling, mechanism testing, coalition formation, and cryptocur-
+rency mechanism testing.
+Agent-based
+modeling
+Multiagent systems, belief-desire-intention model, reac-
+tive model, swarm intelligence, reinforcement learning
+Testing economic hypotheses, simulating policies, supply/chain rela-
+tion modeling and optimization, cooperation analysis, self-organization
+modeling, portfolio optimization, and reinforcement learning.
+Network
+science
+Linkage analysis, graph methods, power law, small
+worlds, contagion theory
+Modeling entity movement, community formation, interactions and link-
+age, influence and contagion propagation; pool manipulation analysis,
+and analyzing investor relations.
+Classic
+analytics and
+learning
+Pattern mining
+methods
+Frequent itemset mining, sequence analysis, combined
+pattern mining, high-utility pattern mining, tree pattern,
+network pattern, knot pattern, interactive pattern
+Trading behavior analysis, abnormal trading analysis, outlier detection,
+investor relation analysis, customer profiling, high-utility trading pattern
+analysis, and cross-market trading behavior analysis.
+Kernel learning
+methods
+Vector space kernel, tree kernel, support vector machine,
+spectral kernel, Fisher kernel, nonlinear kernel, multi-
+kernel methods
+Price and market movement prediction, cross-market time series analy-
+sis, financial crisis analysis, crowdfunding estimate, market dependency
+modeling, and customer profiling and classification.
+Event and be-
+havior analysis
+Sequence analysis, Markov chain process, high-impact
+behavior, high-utility behavior, nonoccurring behavior
+analysis
+Financial event analysis, investor behavior analysis, price co-movement
+prediction, abnormal behavior analysis, market exception and change
+analysis, market event detection, and group behavior analysis.
+Document anal-
+ysis and NLP
+Language models, case-based reasoning, statistical lan-
+guage model, Bayesian model, latent Dirichlet alloca-
+tion, Transformer, BERT
+Financial event analysis, investor sentiment analysis, company valua-
+tion, financial review and auditing analysis, misinformation and rumor
+analysis, automated question-answering, and keyword searching.
+Model-based
+methods
+Probabilistic graphical model, Bayesian networks,
+expectation-maximization model, clustering, classifica-
+tion, deep neural models
+Hypothesis testing, customer clustering, price prediction, trend fore-
+casting, index modeling, event analysis, fraud detection, movement
+forecasting, valuation, and risk scoring and prediction.
+Social media
+analysis
+Topic modeling, sentiment analysis, emotional analysis,
+influence analysis, linkage analysis, interaction learning
+Social influence analysis, investment linkage analysis, associated ac-
+count analysis, sentiment analysis, influence modeling, market and price
+movement, detecting manipulation and insider trading, and understand-
+ing company branding and development.
+Computational
+intelligence
+methods
+Neural comput-
+ing methods
+Wavelet neural network, genetic neural network, recur-
+rent neural network, deep neural network
+Macroeconomic and microeconomic factor correlation analysis, val-
+uation and pricing modeling, relation analysis, sequence modeling,
+portfolio optimization, and trend and movement prediction.
+Evolutionary
+computing
+methods
+Ant algorithm, genetic programming, self-organizing
+map, artificial immune system, swarm intelligence,
+neural-genetic algorithm
+New product simulation, financial objective optimization, portfolio
+optimization, marketing strategy optimization, price and policy testing,
+market risk analysis, and market performance optimization.
+Fuzzy set meth-
+ods
+Fuzzy set theory, fuzzy logic, fuzzy neural network,
+genetic fuzzy logic
+Modeling market momentum, financial solvency analysis, risk and
+capital cost modeling, and market uncertainty modeling.
+Modern AIDS
+methods
+Representation
+learning
+Probabilistic model, graph network, network embed-
+ding, tree model, neural embedding
+Representation of stocks, assets, capital markets, portfolios, financial
+events, behaviors, and financial reports.
+Short and infor-
+mal text analy-
+sis
+Conceptualization, term/tag/phrase similarity learning,
+dependency parsing, word embedding, deep neural mod-
+els
+Text-based trend forecasting of price, market, sentiment and reputation,
+question/answering modeling and recommendation.
+Optimization
+methods
+Nonlinear, stochastic and dynamic programming, infor-
+mation theory, Bayesian optimization
+Optimizing policies, portfolios, trading strategies, VaR, and market
+performance, cost-benefit optimization.
+Reinforcement
+learning
+Bellman Equation, actor-critic model, Markov dynamic
+progress, deep Q-network, adversarial reinforcement
+learning
+Simulating and optimizing supply/demand of new assets and services,
+optimizing portfolios and trading strategies, option valuation optimiza-
+tion.
+Deep learning
+methods
+Convolutional neural network, attention network, gen-
+erative adversarial network, autoencoder, deep Bayesian
+network
+Market modeling, behavior modeling, trading modeling, risk analysis,
+price and movement prediction, financial event modeling, cross-market
+analysis
+Hybrid AIDS
+methods
+Parallel ensem-
+ble
+Evolutionary neural models, deep Bayesian model, cop-
+ula graph neural network, combining complexity sci-
+ence and game theory
+Price and market movement forecasting, multi-aspect risk analysis,
+macro/microeconomic factor analysis, financial event detection, cus-
+tomer profiling, blockchain and cryptocurrency modeling.
+Sequential and
+hierarchical hy-
+bridization
+Time-series analysis plus classification,
+macro/microeconomic dependency modeling, deep
+sequential modeling-based event detection
+Financial review-based fraud detection, macroeconomic influence on
+market movement, social media impact on price movement, epidemic
+evolution, and impact on index.
+Cross-
+disciplinary
+hybridization
+Deep multi-time series analysis, copula deep models,
+autoregression deep model, behavioral economics and
+finance
+Psychological factor and irrational market behavior analysis, behavioral
+finance, misinformation and mispricing on market inefficiency, financial
+ethics modeling, interpretable financial modeling.
+Behavioral eco-
+nomics and fi-
+nance
+Prospect theory, nudge theory, natural experiment, ex-
+perimental economics, behavior informatics, intention
+learning, next-best action modeling
+Modeling investment rationality, irrational behaviors, mispricing, market
+efficiency, mental activities, decision-making process, intention, emo-
+tion, and cognitive activities.
+TABLE I
+AIDS TECHNIQUES AND THEIR REPRESENTATIVE APPLICATIONS FOR SMART FINTECH.
+Random methods characterize, model, simulate and an-
+alyze an economic-financial problem in terms of theory of
+randomness and uncertainty. For example, one can model
+the evolution of abnormal and exceptional market behaviors,
+global events, and black swan events by random methods. Typ-
+ical random methods include random sampling, random walk
+models, random forest, stochastic theory, fuzzy set theory, and
+quantum mechanics.
+B. Theories of Complex Systems
+The theories of complex systems have been widely used
+in classic AI-driven EcoFin research and applications. They
+are powerful for understanding, simulating and analyzing the
+working mechanisms, system characteristics and complexities,
+and emergence and consequences of economic and financial
+systems and problems. We introduce four of such methods
+below.
+Complexity science methods model an economic-financial
+system (e.g., a bitcoin market) as a complex system. Then,
+complexity science can understand its intrinsic and intricate
+working mechanisms and system complexities, global econ-
+omy and its evolution, inter-regional and inter-country rela-
+tion analysis, migration, crisis contagion, conflict modeling,
+international trading and information flow. Combined with
+sociology and systems theory, typical methods include theories
+of complexities, systems theory, emergence, self-organization,
+complex adaptive systems, ABM, chaos theory, and random
+fractal theory.
+Game theory methods build mathematical and logic mod-
+els to design, characterize, simulate and analyze the inter-
+actions, conflict, cooperation, communication, coalition, un-
+certainty, behavioral relations, social norm, reputation, trust,
+Nash equilibrium, and consensus-building mechanisms and
+processes in complex economic and financial systems. They
+can be used to model the conflict between political systems,
+estimate rational and irrational threats in regional conflict, and
+model the market mechanisms of blockchain and cryptocur-
+rencies by continuous game theories, to name a few. Typical
+methods include zero-sum games, continuous games, differen-
+tial games, combinatorial games, evolutionary games, stochas-
+tic games, Bayesian games, strategic-form games, extensive-
+form games, and the communication, bargaining, cooperation,
+coalition in collective and cooperative games.
+Agent-based modeling and simulation model and simulate
+the working mechanisms, dynamic formation processes, in-
+ternal interactions between entities (i.e., agents), and learning
+and evolutionary processes of economic and financial systems.
+ABM builds multiagent systems to simulate an economic-
+financial problem as a complex system, and incorporates
+such mechanisms as perception, interaction, policy selection,
+rules, reinforcement learning and optimization to simulate the
+working mechanisms in such systems. ABM has been widely
+explored in economics and finance.
+Network science characterizes, models, analyzes and pre-
+dicts the directed and undirected connections and interac-
+tions, entity movement, community formation and influence
+propagation and contagion in economic-financial systems by
+modeling such systems as complex networks. Typical methods
+include network linkage analysis, graph methods, scale-free
+and power law, small worlds, influence diffusion and contagion
+theories and tools. Such methods can be used to model group
+investor interactions, relations and communications as a di-
+rected network, e.g., by Poisson factorization-based Bayesian
+models or modeling the interactions between market partici-
+pants in an economic market.
+C. Classic Analytics and Learning Methods
+Classic analytics and learning methods have played critical
+roles in making EcoFin intelligent. This can be achieved by
+analyzing economic-financial data, discovering the patterns,
+clusters, classes, trends and outliers in economic-financial
+systems. We categorize such methods into the following six
+methods.
+Pattern mining methods model and discover patterns and
+patternable behaviors, structures and relations in economic-
+financial systems. Examples are identifying arbitrage trading
+behaviors by mining frequent and high-utility cross-market in-
+vestment strategies, discovering high-frequency trading strate-
+gies, and analyzing financial and social relations between
+investors and firms. Typical methods include discovering fre-
+quent patterns, sequential patterns, graph patterns, network
+patterns, tree patterns, knot patterns, interactive patterns, and
+combined patterns.
+Kernel learning methods describe, represent and analyze
+the distributions and numerical relations between economic-
+financial indicators by individual or multiple (linear or non-
+linear) kernel functions and their couplings. Typical methods
+include linear and nonlinear kernels, vector (space) kernels,
+tree kernels, sequence kernels, support vector machines, Fisher
+kernels, spectrum kernels and multi-kernel learning. Such
+methods can characterize the inter-dependency between micro-
+market variables such as security price and volume and
+between macro-economic indicators such as GDP values,
+exchange rates, and gold prices by multi-distribution kernel
+functions.
+Event and behavior analysis characterize the occurrences,
+driving forces, evolution and consequences of events, ac-
+tivities and behaviors undertaken by or on an economic-
+financial object, and detect and predict abnormal, unexpected
+and changing events and behaviors. Examples are detect-
+ing exceptional co-movement between an underlying equity,
+derivative products, and the equity company’s announcement
+releasing activities by coupling learning and coupled behavior
+analysis of their activity sequences. Typical methods including
+historical event analysis, sequence analysis, Markov chain
+process, nonoccurring behavior analysis, high-impact behavior
+analysis, high-utility behavior analysis, and group behavior
+analysis.
+Document analysis and NLP recognize, identify, ex-
+tract, summarize, and classify sentiments, opinions, financial
+events, and entities. They can support topic-oriented modeling,
+sentiment-oriented analysis, searching, counting and compar-
+ison of rule-violated, suspicious, malicious, fragile, decep-
+tive and risky statements, claims, announcements, opinions,
+sentiments or entities within and between economic-financial
+documents, reports, and news. Examples are identifying and
+comparing problematic descriptions, revenue and budget statis-
+tics, misleading or misclassified reporting and review com-
+ments across monthly financial review reports by Transformer
+and BERT-derived neural models. Typical methods include
+language models, named entity analysis, case-based reasoning,
+sequence labeling, statistical language models, context-free
+parsing, logical and dependency semantics, distributional and
+distributed semantics, topic modeling such as latent Dirichlet
+allocation, word embedding, Bayesian networks, and neural
+models such as Transformer and BERT models.
+Model-based methods characterize, represent and analyze
+economic and financial problems in terms of given hypotheses
+and models. Examples are modeling trading behaviors, mar-
+ket movements, institutional trading, price and index trend,
+and the influence of trader’s sentiment on the dynamics of
+financial indicators. Typical models include numerical com-
+putation models such as kernel functions, statistical models
+such as probabilistic graphical models and Bayesian networks,
+expectation-maximization models, the models for clustering,
+classification and semi-supervised learning, deep reinforce-
+ment learning (DRL) models, and deep neural models.
+Social media analysis characterizes, detects, classifies,
+clusters and predicts linkages, interactions, feedback, senti-
+ment and networking behaviors between entities of economic-
+financial systems. Such methods model economic-financial
+systems as social networks by involving networking data from
+relevant social media, mobile apps, and instant messaging
+platforms to characterize, quantify and trace the sentiment and
+opinion and their influence on a security price movement or
+a market index movement by short text analysis and network
+analysis. Typical methods include topic modeling, sentiment
+analysis, emotional analysis, influence analysis, and modeling
+linkage and interactions.
+D. Computational Intelligence Methods
+Computational intelligence methods model the working
+mechanisms of economic-financial systems, investment analy-
+sis, economic forecasting, portfolio analysis, and inflation pre-
+diction, etc. Such methods are inspired by natural, biological
+and evolutionary systems, and categorized into the following
+three classes.
+Neural computing methods model the relations, struc-
+tures, sequential movements, transitions and influence between
+economic-financial variables by neural networks (NN), in
+particular, deep neural networks (DNN) nowadays. Examples
+are modeling the coupled dependencies and dynamics between
+a stock price movement and macroeconomic variables such as
+petrol and gold prices by recurrent neural networks (RNN).
+Typical methods include various artificial neural networks,
+wavelet neural networks, genetic neural networks, fuzzy neural
+networks, and DNN.
+Evolutionary computing methods characterize, simulate,
+analyze and optimize the working mechanisms, evolution,
+interactions, variances, performance and risk of economic-
+financial systems inspired by biological and evolutionary
+models. Examples are simulating and optimizing the devel-
+opment and evolution of a newly released financial product
+in a market by a particle swarm organization (PSO) model,
+and estimating and optimizing security price, market index,
+exchange rate and inflation rate, and credit profiling. Typical
+methods include ant algorithms, self-organizing map, genetic
+computing/programming, artificial immune systems, gene ex-
+pression programming, particle swarm optimization, swarm
+intelligence, and neural-genetic algorithms.
+Fuzzy set methods characterize the relationships, distribu-
+tions and structures of economic-financial systems in terms
+of fuzzy set and fuzzy system theories. Examples are model-
+ing market momentum, capital cost, risk, financial solvency,
+financial structures, and relations between costs on profit and
+between financial structures and capital costs. Typical methods
+include fuzzy set theories, fuzzy systems, fuzzy logic, fuzzy
+neural networks, and genetic fuzzy logic models.
+E. Modern AIDS Methods
+Here, we discuss several categories of modern AIDS meth-
+ods, which have been focused for the economic-financial
+problem-solving in the recent decade or so. They are represen-
+tation learning, short and informal text analysis, optimization,
+reinforcement learning, and deep learning methods.
+Representation learning methods describe, characterize
+and model the intrinsic processes, interactions, relations, struc-
+tures, distributions and characteristics of economic-financial
+systems, products or problems. Examples include establish-
+ing a probabilistic, mathematical, graph-based, network-based,
+tree-like or neural representation of the assets, participants,
+and role interactions in a derivative market, and representing
+stocks by involving tick-by-tick data and external news and
+social media data about the stocks. Typical methods include
+probabilistic models, graph networks, network embedding, tree
+models, neural embedding models, and adversarial learning
+methods.
+Short and informal text analysis collects, extracts, recog-
+nizes, analyzes and classifies short text in social media, SMS
+and instant messaging systems about economic-financial insti-
+tutions, products, services, trends, news or participants. Such
+information is alternative to core data available in markets
+and economic-financial institutions, but consists of important
+messages. It can be used for various purposes, e.g., predicting
+the trend and movements of price, index and exchange rate,
+extracting and representing keywords, phrases and expres-
+sions in a social and virtual community about manipulating
+a commodity price, and predicting the market sentiment,
+reputation and confidence on a product or service. Typical
+methods include explicit short text understanding such as con-
+ceptualization for segmentation and labeling, term/tag/phrase
+similarity learning, dependency parsing, syntax structure anal-
+ysis, short text classification, query and recommendation; and
+implicit short-text analysis, e.g., word/phrase/sentence em-
+bedding, contextual embedding, short-text conversation (e.g.,
+chatbot), question/answering by neural models such as long
+short-term memory, attentive RNN, neural models with multi-
+head attention, encoder-decoder, and variational autoencoder,
+Transformer, etc.
+Optimization methods model economic-financial problems
+as optimization problems or apply optimization methods to
+characterize and analyze optimal economic-financial solutions.
+Examples include optimizing portfolio design and strategies
+and return on investment w.r.t. relevant micro- and macro-level
+financial indicators, optimizing the VaR of a cross-market port-
+folio with transaction cost, and optimizing algorithmic trad-
+ing strategies. Typical methods include linear programming,
+nonlinear programming, quadratic programming, stochastic
+programming, dynamic programming, multi-objective evolu-
+tionary computing, swarm intelligence, information theory,
+and Bayesian optimization.
+Reinforcement learning methods model an economic-
+financial system as a reinforcement learning problem by
+optimizing actions, policies and rewards. Examples include
+modeling the portfolio management of derivative products to
+optimize the trading objectives, forecasting the price and trend
+of foreign currencies, modeling property market supply and
+demand, optimizing order routing in foreign exchange and
+features markets, and optimizing trading agent actions, trading
+behaviors, option valuation, and trading and asset manage-
+ment. Typical methods include classic reinforcement learning
+such as on policy learning, e.g., Bellman Equation, on-policy
+actor-critic reinforcement learning and Markov dynamic pro-
+cess reinforcement learning, and off policy learning e.g., Q-
+learning and deterministic policy gradient. Recent focuses have
+been on deep reforcement learning (DRL) for EcoFin problem
+modeling, such as deep Q-network (DQN), double DQN, �-
+greedy policy Q-learning, �-greedy policy double Q-learning
+and weighted Q-learning, deep deterministic policy gradient,
+hierarchical reinforcement learning, recurrent reinforcement
+learning by integrating RNN with Q-learning, and adversarial
+learning in reinforcement learning.
+Deep learning methods represent financial variables and
+their hidden relations and structures in economic-financial sys-
+tems by multi-layer abstractions and hidden representations.
+Deep learning can be used for stock representation, asset
+representation, portfolio representation; modeling sequential
+trading behaviors and strategies; modeling sequential trading;
+predicting risk, profit and return of a portfolio; analyzing the
+couplings, interactions and influence between macroeconomic
+and microeconomic variables; detecting abnormal movements
+and financial activities in markets and banking; discovering
+incompliant behaviors and events in financial reports; un-
+derstanding customer sentiment and feedback for marketing;
+supporting smart crowdfunding and crowdsourcing; modeling
+the influence of external events and news on market move-
+ment; and analyzing and predicting the likelihood of financial
+crisis, vulnerability, and cross-market influence. Typical deep
+models including convolutional neural networks (CNN), RNN,
+attention networks, memory networks, generative adversarial
+networks (GAN), encoder-decoder, autoencoder, graph neural
+networks (GNN), deep Bayesian networks and neural lan-
+guage models (e.g., Transformer) can be used for the above
+economic-financial purposes.
+F. Hybrid AIDS Methods
+Hybrid methods and ensemble methods model economic-
+financial systems and problems by multiple complementary
+AIDS techniques through their hybridization, ensembling or
+synthesis. Such approaches are typically used to address (a)
+single yet complex economic-financial problems that cannot
+be well handled by single models; and (b) mixed problems
+that require multiple methods. Accordingly, there are two main
+directions of synergy. On one hand, the aforementioned AIDS
+techniques may be selectively integrated in parallel, sequential
+or hierarchical ways to enhance their capacity and ability.
+Parallel hybridization, also called ensemble, integrates
+multiple same or different models to address the underlying
+problems. Examples include combining evolutionary comput-
+ing and neural computing to generate evolutionary neural
+models to simulate and analyze a capital market; integrating
+complexity science and game theory to model and simulate
+blockchain and cryptocurrencies; training a deep Bayesian
+network composed of Bayesian dependency learning and hier-
+archical networks; and learning a copula GNN handling both
+dependency and connectivity.
+Sequential and hierarchical hybridization integrates mul-
+tiple methods sequentially or hierarchically to address underly-
+ing problems. Examples are to model stock price relations by
+time series analysis and then predict the abnormal movement
+by a decision tree classifier; model the micro/macro-economic
+variable dependency by a copula method and then forecast the
+VaR by a time series model; hierarchically represent market
+variables as input and then model the trading behaviors in a
+market by a RNN before the prediction of market movement.
+Parallel, sequential and hierarchical hybridization have been
+widely explored in the relevant communities.
+Cross-disciplinary hybridization integrates economic the-
+ories and financial theories with AIDS methods, which has
+been booming in recent years. Examples include migrating
+multivariate time series to deep sequential models, combining
+copula methods with deep neural models, integrating autore-
+gression with DNN, learning high-utility behavior sequences,
+training actionable trading agents and strategies for learning
+trading history and satisfying portfolio optimization objectives
+(e.g., VaR). This direction presents a more genuine yet chal-
+lenging approach for addressing significant economic-financial
+complexities.
+Behavioral economics and finance is a typical area that
+integrates multiple disciplines of thinking, theories and meth-
+ods (e.g., psychology, neuroscience, applied behavior analysis,
+and computational intelligence) to understand, interpret and
+model the less rational to irrational investment, mispricing
+behaviors, market inefficiency and market hiddenness that
+drive market decisions and evolution. It migrates from the
+hypothetical rationality, bounded rationality and efficiency and
+transparency in classic economics and finance (i.e., System 1)
+to the less rational and irrational human choices, market ineffi-
+ciency (System 2) in real-life human decision-making. Typical
+behavioral economics and finance methods include prospect
+theory, nudge theory, natural experiments, and experimen-
+tal economics. More advanced directions are to incorporate
+AIDS-driven proactive, personalized, sequential, contextual,
+online and dynamic modeling, analytics, simulation, learning
+and optimization into behavioral economics and finance to
+understand, analyze and interpret human cognitive emotion,
+mental activities and intention, thinking, decision-making and
+action-taking in markets and financial businesses.
+V. CONCLUSIONS
+This review briefs a comprehensive picture and promis-
+ing potential of AI-enabled smart FinTech. The new gen-
+eration of AI, in particular data science, machine learning
+and deep learning, drives the era of data and intelligence-
+driven economy and finance, where tremendous opportunities
+emerge in transforming economic-financial theories, research
+and practice and advancing AI for tackling real-life significant
+economic-financial challenges and complexities and delivering
+actionable intelligence-driven economy and finance.
+VI. ACKNOWLEDGMENTS
+This work is supported in part by Australian Research
+Council Discovery Grant (DP190101079) and ARC Future
+Fellow grant (FT190100734).
+REFERENCES
+[1] H. Arslanian and F. Fischer, The Future of Finance: The Impact of
+FinTech, AI, and Crypto on Financial Services. Palgrave Macmillan,
+2019.
+[2] L. Cao, “Data science: challenges and directions,” Commun. ACM,
+vol. 60, no. 8, pp. 59–68, 2017.
+[3] Y. Hilpisch, Artificial Intelligence in Finance. O′Reilly, 2020.
+[4] Y. Qi and J. Xiao, “Fintech: AI powers financial services to improve
+people’s lives,” Commun. ACM, vol. 61, no. 11, pp. 65–69, 2018.
+[5] L. Ryll, M. E. Barton, B. Z. Zhang, R. J. McWaters, E. Schizas, R. Hao,
+K. Bear, M. Preziuso, E. Seger, R. Wardrop, P. R. Rau, P. Debata,
+P. Rowan, N. Adams, M. Gray, and N. Yerolemou, “Transforming
+paradigms: A global ai in financial services survey,” 2020.
+[6] V. Dhar and R. M. Stein, “Fintech platforms and strategy,” Commun.
+ACM, vol. 60, no. 10, pp. 32–35, 2017.
+[7] B. Nicoletti, Future of FinTech. Palgrave Macmillan, 2017.
+[8] L. Cao, G. Yuan, T. Leung, and W. Zhang, “Special issue on ai and
+fintech: The challenge ahead,” IEEE Intelligent Systems, vol. 35, no. 2,
+pp. 3–6, 2020.
+[9] C. L. Dunis, P. W. Middleton, A. Karathanasopolous, and K. Theofilatos,
+Artificial Intelligence in Financial Markets. Springer, 2019.
+[10] International Telecommunication Union, “Assessing the economic im-
+pact of artificial intelligence,” 2018, issue Paper No. 1, September 2018.
+[11] B. Li and S. C. H. Hoi, “Online portfolio selection: A survey,” ACM
+Comput. Surv., vol. 46, no. 3, pp. 1–36, 2014.
+[12] T. Lynn, J. G. Mooney, P. Rosati, and M. Cummins, Disrupting finance:
+Fintech and strategy in the 21st century. Palgrave Pivot, 2019.
+[13] B. G. Buchanan, “Artificial intelligence in finance,” Tech. Rep., 2019.
+[14] G. Cornuéjols, J. Peña, and R. Tütüncü, Optimization Methods in
+Finance (2nd ed.). Cambridge University Press, 2018.
+[15] N. Ehrentreich, Agent-Based Modeling. Springer, 2008.
+[16] J. E. Gentle, W. K. Hardle, and Y. Mori, Handbook of Computational
+Finance. Springer, 2012.
+[17] M. Gilli, D. Maringer, and E. Schumann, Numerical Methods and
+Optimization in Finance. Academic Press, 2019.
+[18] I. Goodfellow, Y. Bengio, and A. Courville, Deep Learning. The MIT
+Press, 2016.
+[19] L. Hamill and N. Gilbert, Agent-Based Modelling in Economics. John
+Wiley & Sons, 2016.
+[20] J. B. Heaton, N. G. Polson, and J. H. Witte, “Deep learning for finance:
+Deep portfolios,” Applied Stochastic Models in Business and Industry,
+vol. 33, pp. 3–12, 2017.
+[21] C. Kearney and S. Liu, “Textual sentiment in finance: A survey of
+methods and models,” International Review of Financial Analysis,
+vol. 33, pp. 171–185, 2013.
+[22] B. Kovalerchuk and E. E. Vityaev, Data Mining in Finance: Advances
+in relational and hybrid methods. Kluwer Academic Publishers, 2000.
+[23] T. L. Meng and M. Khushi, “Reinforcement learning in financial
+markets,” Data, vol. 4, no. 3, pp. 110:1–17, 2019.
+[24] G. Mitra and L. Mitra, The Handbook of News Analytics in Finance.
+Wiley, 2012.
+[25] A. M. Özbayoglu, M. U. Gudelek, and O. B. Sezer, “Deep learning for
+financial applications : A survey,” CoRR, vol. abs/2002.05786, 2020.
+	I Introduction
+	II FinTech Businesses and Challenges
+	III The Synthetic Areas of Smart FinTech
+	IV AI Techniques for Smart FinTech
+	IV-A Mathematical and Statistical Modeling
+	IV-B Theories of Complex Systems
+	IV-C Classic Analytics and Learning Methods
+	IV-D Computational Intelligence Methods
+	IV-E Modern AIDS Methods
+	IV-F Hybrid AIDS Methods
+	V Conclusions
+	VI Acknowledgments
+	References

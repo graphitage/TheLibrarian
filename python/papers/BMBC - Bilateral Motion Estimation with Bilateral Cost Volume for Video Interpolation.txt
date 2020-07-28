@@ -1,0 +1,852 @@
+BMBC:Bilateral Motion Estimation with
+Bilateral Cost Volume for Video Interpolation
+Junheum Park1[0000−0002−9094−128X], Keunsoo Ko1[0000−0003−0203−4530],
+Chul Lee2[0000−0001−9329−7365], and Chang-Su Kim1[0000−0002−4276−1831]
+1 School of Electrical Engineering, Korea University, Seoul, Korea
+2 Department of Multimedia Engineering, Dongguk University, Seoul, Korea
+{jhpark,ksko}@mcl.korea.ac.kr, chullee@dongguk.edu,
+changsukim@korea.ac.kr
+Abstract. Video interpolation increases the temporal resolution of a
+video sequence by synthesizing intermediate frames between two consec-
+utive frames. We propose a novel deep-learning-based video interpola-
+tion algorithm based on bilateral motion estimation. First, we develop
+the bilateral motion network with the bilateral cost volume to estimate
+bilateral motions accurately. Then, we approximate bi-directional mo-
+tions to predict a different kind of bilateral motions. We then warp the
+two input frames using the estimated bilateral motions. Next, we develop
+the dynamic filter generation network to yield dynamic blending filters.
+Finally, we combine the warped frames using the dynamic blending fil-
+ters to generate intermediate frames. Experimental results show that the
+proposed algorithm outperforms the state-of-the-art video interpolation
+algorithms on several benchmark datasets. The source codes and pre-
+trained models are available at https://github.com/JunHeum/BMBC.
+Keywords: Video interpolation, bilateral motion, bilateral cost volume
+1 Introduction
+A low temporal resolution causes aliasing, yields abrupt motion artifacts, and
+degrades the video quality. In other words, the temporal resolution is an impor-
+tant factor affecting video quality. To enhance temporal resolutions, many video
+interpolation algorithms [2–4, 12, 14, 16–18, 20–22] have been proposed, which
+synthesize intermediate frames between two actual frames. These algorithms are
+widely used in applications, including visual quality enhancement [32], video
+compression [7], slow-motion video generation [14], and view synthesis [6]. How-
+ever, video interpolation is challenging due to diverse factors, such as large and
+nonlinear motions, occlusions, and variations in lighting conditions. Especially,
+to generate a high-quality intermediate frame, it is important to estimate mo-
+tions or optical flow vectors accurately.
+Recently, with the advance of deep-learning-based optical flow methods [5,10,
+25, 30], flow-based video interpolation algorithms [2, 3, 14] have been developed,
+yielding reliable interpolation results. Niklaus et al. [20] generated intermedi-
+ate frames based on the forward warping. However, the forward warping may
+ar
+X
+iv
+:2
+00
+7.
+12
+62
+2v
+1 
+ [
+cs
+.C
+V
+] 
+ 1
+7 
+Ju
+l 
+20
+20
+https://github.com/JunHeum/BMBC
+2 J. Park et al.
+cause interpolation artifacts because of the hole and overlapped pixel problems.
+To overcome this, other approaches leverage the backward warping. To use the
+backward warping, intermediate motions should be obtained. Various video in-
+terpolation algorithms [2–4,14,16,20,32] based on the bilateral motion estimation
+approximate these intermediate motions from optical flows between two input
+frames. However, this approximation may degrade video interpolation results.
+In this work, we propose a novel video interpolation network, which con-
+sists of the bilateral motion network and the dynamic filter generation network.
+First, we predict six bilateral motions: two from the bilateral motion network
+and the other four through optical flow approximation. In the bilateral motion
+network, we develop the bilateral cost volume to facilitate the matching process.
+Second, we extract context maps to exploit rich contextual information. We then
+warp the two input frames and the corresponding context maps using the six
+bilateral motions, resulting in six pairs of warped frame and context map. Next,
+these pairs are used to generate dynamic blending filters. Finally, the six warped
+frames are superposed by the blending filters to generate an intermediate frame.
+Experimental results demonstrate that the proposed algorithm outperforms the
+state-of-the-art video interpolation algorithms [2, 3, 18, 22, 32] meaningfully on
+various benchmark datasets.
+This work has the following major contributions:
+– We develop a novel deep-learning-based video interpolation algorithm based
+on the bilateral motion estimation.
+– We propose the bilateral motion network with the bilateral cost volume to
+estimate intermediate motions accurately.
+– The proposed algorithm performs better than the state-of-the-art algorithms
+on various benchmark datasets.
+2 Related Work
+2.1 Deep-learning-based video interpolation
+The objective of video interpolation is to enhance a low temporal resolution
+by synthesizing intermediate frames between two actual frames. With the great
+success of CNNs in various image processing and computer vision tasks, many
+deep-learning-based video interpolation techniques have been developed. Long
+et al. [18] developed a CNN, which takes a pair of frames as input and then
+directly generates an intermediate frame. However, their algorithm yields severe
+blurring since it does not use a motion model. In [19], PhaseNet was proposed
+using the phase-based motion representation. Although it yields robust results
+to lightning changes or motion blur, it may fail to faithfully reconstruct detailed
+texture. In [21,22], Niklaus et al. proposed kernel-based methods that estimate an
+adaptive convolutional kernel for each pixel. The kernel-based methods produce
+reasonable results, but they cannot handle motions larger than a kernel’s size.
+BMBC:Bilateral Motion Estimation . . . for Video Interpolation 3
+To exploit motion information explicitly, flow-based algorithms have been
+developed. Niklaus and Liu [20] generated an intermediate frame from two con-
+secutive frames using the forward warping. However, the forward warping suf-
+fers from holes and overlapped pixels. Therefore, most flow-based algorithms are
+based on backward warping. In order to use backward warping, intermediate
+motions (i.e. motion vectors of intermediate frames) should be estimated. Jiang
+et al. [14] estimated optical flows and performed bilateral motion approximation
+to predict intermediate motions from the optical flows. Bao et al. [3] approxi-
+mated intermediate motions based on the flow projection. However, large errors
+may occur when two flows are projected onto the same pixel. In [2], Bao et
+al. proposed an advanced projection method using the depth information. How-
+ever, the resultant intermediate motions are sensitive to the depth estimation
+performance. To summarize, although the backward warping yields reasonable
+video interpolation results, its performance degrades severely when intermedi-
+ate motions are unreliable or erroneous. To solve this problem, we propose the
+bilateral motion network to estimate intermediate motions directly.
+2.2 Cost volume
+A cost volume records similarity scores between two data. For example, in pixel-
+wise matching between two images, the similarity is computed between each
+pixel pair: one in a reference image and the other in a target image. Then, for
+each reference pixel, the target pixel with the highest similarity score becomes
+the matched pixel. The cost volume facilitates this matching process. Thus, the
+optical flow estimation techniques in [5,10,30,31] are implemented using cost vol-
+umes. In [5,10,31], a cost volume is computed using various features of two video
+frames, and optical flow is estimated using the similarity information in the cost
+volume through a CNN. Sun et al. [30] proposed a partial cost volume to signif-
+icantly reduce the memory requirement while improving the motion estimation
+accuracy based on a reduced search region. In this work, we develop a novel cost
+volume, called bilateral cost volume, which is different from the conventional
+volumes in that its reference is an intermediate frame to be interpolated, instead
+of one of the two input frames.
+3 Proposed Algorithm
+Fig. 1 is an overview of the proposed algorithm that takes successive frames I0
+and I1 as input and synthesizes an intermediate frame It at t ∈ (0, 1) as out-
+put. First, we estimate two ‘bilateral’ motions Vt→0 and V0→t between the input
+frames. Second, we estimate ‘bi-directional’ motions V0→1 and V1→0 between I0
+and I1 and then use these motions to approximate four further bilateral mo-
+tions. Third, the pixel-wise context maps C0 and C1 are extracted from I0 and
+I1. Then, the input frames and corresponding context maps are warped using
+the six bilateral motions. Note that, since the warped frames become multiple
+4 J. Park et al.
+Warping
+Layer
+Frame 
+Synthesis
+Frame 𝐼𝑡
+Intermediate Candidates
+& Warped Context Maps
+Frame 𝐼0
+Frame 𝐼1
+Bilateral 
+Motion
+Network
+Bilateral Motions
+𝑉𝑡→0, 𝑉𝑡→1
+Context
+Extractor
+𝑡
+Bilateral 
+Motion
+Network
+Motion 𝑉0→1
+0
+Bilateral 
+Motion
+Network
+Motion 𝑉1→0
+1
+Motion 
+Approximation
+Bilateral Motions
+𝑉𝑡→0
+𝑓𝑤
+, 𝑉𝑡→1
+𝑓𝑤
+Motion 
+Approximation
+Bilateral Motions
+𝑉𝑡→0
+𝑏𝑤 , 𝑉𝑡→1
+𝑏𝑤
+Context Maps 𝐶0, 𝐶1
+Warping
+Layer
+Warping
+Layer
+Input frames
+v
+v
+Shared
+Fig. 1. An overview of the proposed video interpolation algorithm.
+candidates of the intermediate frame, we refer to each warped frame as an in-
+termediate candidate. The dynamic filter network then takes the input frames,
+and the intermediate candidates with the corresponding warped context maps
+to generate the dynamic filters for aggregating the intermediate candidates. Fi-
+nally, the intermediate frame It is synthesized by applying the blending filters
+to the intermediate candidates.
+3.1 Bilateral motion estimation
+Given the two input frames I0 and I1, the goal is to predict the intermediate
+frame It using motion information. However, it is impossible to directly estimate
+the intermediate motion between the intermediate frame It and one of the input
+frames I0 or I1 because there is no image information of It. To address this issue,
+we assume linear motion between successive frames. Specifically, we attempt to
+estimate the backward and forward motion vectors Vt→0(x) and Vt→1(x) at x,
+respectively, where x is a pixel location in It. Based on the linear assumption,
+we have Vt→0(x) = − t1−t × Vt→1(x).
+We develop a CNN to estimate bilateral motions Vt→0 and Vt→1 using I0 and
+I1. To this end, we adopt an optical flow network, PWC-Net [30], and extend
+it for the bilateral motion estimation. Fig. 2 shows the key components of the
+modified PWC-Net. Let us describe each component subsequently.
+Warping layer: The original PWC-Net uses the previous frame I0 as a reference
+and the following frame I1 as a target. On the other hand, the bilateral motion
+estimation uses the intermediate frame It as a reference, and the input frames
+I0 and I1 as the target. Thus, whereas the original PWC-Net warps the feature
+cl1 of I1 toward the feature c
+l
+0 of I0, we warp both features c
+l
+0 and c
+l
+1 toward
+the intermediate frame, leading to cl0→t and c
+l
+1→t, respectively. We employ the
+spatial transformer networks [11] to achieve the warping. Specifically, a target
+feature map ctgt is warped into a reference feature map cref using a motion vector
+field by
+cwref(x) = ctgt
+(
+x + Vref→tgt(x)
+)
+(1)
+BMBC:Bilateral Motion Estimation . . . for Video Interpolation 5
+𝑉𝑡→1
+𝑙
+𝑉𝑡→0
+𝑙
+𝑐1
+𝑙
+𝑐0
+𝑙
+෨𝑉𝑡→1
+𝑙
+෨𝑉𝑡→0
+𝑙 Warping Layer
+Bilateral
+Cost Volume 
+Layer
+O
+p
+ti
+c
+a
+l 
+F
+lo
+w
+ E
+st
+im
+a
+to
+r
+C
+o
+n
+te
+x
+t 
+N
+e
+tw
+o
+rk
+c
+c
+c
+c : Concat
+𝐼0 𝐼1
+Feature
+pyramid 0
+Feature
+pyramid 1
+𝑐0
+𝑙 𝑐1
+𝑙 Warping Layer
+Fig. 2. The architecture of the bilateral motion network: The feature maps cl0 and
+cl1 of the previous and following frames I0 and I1 at the lth level and the up-sampled
+motion fields Ṽ lt→0 and Ṽ
+l
+t→1 estimated at the (l − 1)th level are fed into the CNN to
+generate the motion fields V lt→0 and V
+l
+t→1 at the lth level.
+𝑐1
+𝑙
+𝑐0
+𝑙
+𝐼𝑡
+𝑙 𝐷2
+𝐱
+𝐵𝐶𝑡
+𝑙
+𝐻𝑙
+𝑊𝑙
+𝐱
+𝐷2
+෤𝐯𝑡→0
+𝑙
+෤𝐯𝑡→1
+𝑙
+Fig. 3. Illustration of the bilateral cost volume layer for a specific time t.
+where Vref→tgt is the motion vector field from the reference to the target.
+Bilateral cost volume layer: A cost volume has been used to store the match-
+ing costs associating with a pixel in a reference frame with its corresponding
+pixels in a single target frame [5, 9, 30, 31]. However, in the bilateral motion es-
+timation, because the reference frame does not exist and should be predicted
+from two target frames, the conventional cost volume cannot be used. Thus, we
+develop a new cost volume for the bilateral motion estimation, which we refer
+to as the bilateral cost volume.
+Fig. 3 illustrates the proposed bilateral cost volume generation that takes
+the features cl0 and c
+l
+1 of the two input frames and the up-sampled bilateral
+motion fields Ṽ lt→0 and Ṽ
+l
+t→1 estimated at the (l − 1)th level. Let x denote a
+pixel location in the intermediate frame I lt. Then, we define the matching cost
+as the bilateral correlation between features cl0 and c
+l
+1, indexed by the bilateral
+motion vector that passes through x, given by
+BClt(x,d) = c
+l
+0(x + Ṽ
+l
+t→0(x)− 2t× d)
+T cl1(x + Ṽ
+l
+t→1(x) + 2(1− t)× d) (2)
+where d denotes the displacement vector within the search window D = [−d, d]×
+[−d, d]. Note that we compute only |D| = D2 bilateral correlations to construct
+6 J. Park et al.
+(a) (b) (c) (d) (e) (f) (g)
+Fig. 4. Comparison of interpolation results obtained by the bilinear motion estimation
+and the motion approximation: (a) ground-truth intermediate frame; (b), (c) enlarged
+parts for the green and yellow squares in (a); (d), (e) interpolation results using the
+bilateral motion estimation; (f), (g) those using the motion approximation. The red
+squares in (d) and (g) contain visual artifacts caused by motion inaccuracies.
+a partial cost volume, where D = 2d + 1. In the L-level pyramid architecture,
+a one-pixel motion at the coarsest level corresponds to 2L−1 pixels at the finest
+resolution. Thus, the search range D of the bilateral cost volume can be set to
+a small value to reduce the memory usage. The dimension of the bilateral cost
+volume at the lth level is D2 × H l ×W l, where H l and W l denote the height
+and width of the lth level features, respectively. Also, the up-sampled bilateral
+motions Ṽ lt→0 and Ṽ
+l
+t→1 are set to zero at the coarsest level.
+Most conventional video interpolation algorithms generate a single interme-
+diate frame at the middle of two input frames, i.e. t = 0.5. Thus, they cannot
+yield output videos with arbitrary frame rates. A few recent algorithms [2, 14]
+attempt to interpolate intermediate frames at arbitrary time instances t ∈ (0, 1).
+However, because their approaches are based on the approximation, as the time
+instance gets far from either of the input frames, the quality of the interpolated
+frame gets worse. On the other hand, the proposed algorithm takes into account
+the time instance t ∈ [0, 1] during the computation of the bilateral cost volume
+in (2). Also, after we train the bilateral motion network with the bilateral cost
+volume, we can use the shared weights to estimate the bilateral motions at an
+arbitrary t ∈ [0, 1]. In the extreme cases t = 0 or t = 1, the bilateral cost vol-
+ume becomes identical to the conventional cost volume in [5,10,24,30,31], which
+is used to estimate the bi-directional motions V0→1 and V1→0 between input
+frames.
+3.2 Motion approximation
+Although the proposed bilateral motion network effectively estimates motion
+fields Vt→0 and Vt→1 from the intermediate frame at t to the previous and fol-
+lowing frames, it may fail to find accurate motions, especially at occluded regions.
+For example, Fig. 4(d) and (e) show that the interpolated regions, reconstructed
+by the bilateral motion estimation, contain visual artifacts. To address this issue
+and improve the quality of an interpolated frame, in addition to the bilateral
+motion estimation, we develop an approximation scheme to predict a different
+kind of bilateral motions Vt→0 and Vt→1 using the bi-directional motions V0→1
+and V1→0 between the two input frames.
+BMBC:Bilateral Motion Estimation . . . for Video Interpolation 7
+𝐼0 𝐼𝑡 𝐼1
+𝑂𝑐𝑐
+𝐱
+(a) V0→1 and V1→0
+𝐼0 𝐼𝑡 𝐼1
+𝐱
+(b) V
+fw
+t→0 and V
+fw
+t→1
+𝐼0 𝐼𝑡 𝐼1
+𝐱
+(c) V bwt→0 and V
+bw
+t→1
+Fig. 5. Motion approximation: bi-directional motions in (a) are used to approximate
+forward bilateral motions in (b) and backward bilateral motions in (c).
+Fig. 5 illustrates this motion approximation, in which each column represents
+a frame at a time instance and a dot corresponds to a pixel in the frame. In
+particular, in Fig. 5(a), an occluded pixel in I0 is depicted by a green dot. To
+complement the inaccuracy of the bilateral motion at pixel x in It, we use two
+bi-directional motions V0→1(x) and V1→0(x), which are depicted by green and
+red lines, respectively. We approximate two forward bilateral motions V
+fw
+t→1 and
+V
+fw
+t→0 in Fig. 5(b) using V0→1. Specifically, for pixel x in It, depicted by an orange
+dot, we approximate a motion vector V
+fw
+t→1(x) by scaling V0→1(x) with a factor
+(1−t), assuming that the motion vector field is locally smooth. Since the bilateral
+motion estimation is based on the assumption that a motion trajectory between
+consecutive frames is linear, two approximate motions V
+fw
+t→1(x) and V
+fw
+t→0(x)
+should be symmetric with respect to x in It. Thus, we obtain an additional
+approximate vector V
+fw
+t→0(x) by reversing the direction of the vector V
+fw
+t→1(x). In
+other words, we approximate the forward bilateral motions by
+V
+fw
+t→1(x) = (1− t)× V0→1(x), (3)
+V
+fw
+t→0(x) = (−t)× V0→1(x). (4)
+Similarly, we approximate the backward bilateral motions by
+V bwt→0(x) = t× V1→0(x), (5)
+V bwt→1(x) = −(1− t)× V1→0(x), (6)
+as illustrated in Fig. 5(c). Note that Jiang et al. [14] also used these equations
+(3)∼(6), but derived only two motion candidates: Vt→1(x) by combining (3) and
+(6) and Vt→0(x) by combining (4) and (5). Thus, if an approximated motion in
+(3)∼(6) is unreliable, the combined one is also degraded. In contrast, we use all
+four candidates in (3)∼(6) directly to choose reliable motions in Section 3.3.
+Fig. 4 shows that, whereas the bilateral motion estimation provides visual
+artifacts in (d), the motion approximation provides results without noticeable
+artifacts in (f). On the other hand, the bilateral motion estimation is more
+effective than the motion approximation in the cases of (e) and (g). Thus, the
+two schemes are complementary to each other.
+8 J. Park et al.
+𝐼𝑡
+1:6
+𝐶𝑡
+1:6
+Dynamic Filter 
+Generation Network
+𝐼0
+𝐼1
+𝐼𝑡
+Local
+Convolution
+𝐹𝑡
+𝐹𝑡
+𝑥,𝑦
+Fig. 6. Frame synthesis using dynamic local blending filters.
+3.3 Frame synthesis
+We interpolate an intermediate frame by combining the six intermediate candi-
+dates, which are warped by the warping layers in Fig. 1. If we consider only color
+information, rich contextual information in the input frames may be lost dur-
+ing the synthesis [16,20,27], degrading the interpolation performance. Hence, as
+in [2,3,20], we further exploit contextual information in the input frames, called
+context maps. Specifically, we extract the output of the conv1 layer of ResNet-
+18 [8] as a context map, which is done by the context extractor in Fig. 1.
+By warping the two input frames and the corresponding context maps, we
+obtain six pairs of a warped frame and its context map: two pairs are recon-
+structed using the bilateral motion estimation, and four pairs using the motion
+approximation. Fig. 1 shows these six pairs. Since these six warped pairs have
+different characteristics, they are used as complementary candidates of the inter-
+mediate frame. Recent video interpolation algorithms employ synthesis neural
+networks, which take warped frames as input and yield final interpolation results
+or residuals to refine pixel-wise blended results [2,3,20]. However, these synthesis
+networks may cause artifacts if motions are inaccurately estimated. To alleviate
+these artifacts, instead, we develop a dynamic filter network [13] that takes the
+aforementioned six pairs of candidates as input and outputs local blending fil-
+ters, which are then used to process the warped frames to yield the intermediate
+frame. These local blending filters compensate for motion inaccuracies, by con-
+sidering spatiotemporal neighboring pixels in the stack of warped frames. The
+frame synthesis layer performs this synthesis in Fig. 1.
+Dynamic local blending filters: Fig. 6 shows the proposed synthesis network
+using dynamic local blending filters. The coefficients of the filters are learned
+from the images and contextual information through a dynamic blending filter
+network [13]. We employ the residual dense network [34] as the backbone for the
+filter generation. In Fig. 6, the generation network takes the input frames I0 and
+I1 and the intermediate candidates {I1:6t } with the corresponding context maps
+{C1:6t } as input. Then, for each pixel x = (x, y), we generate six blending filters
+to fuse the six intermediate candidates, given by
+F
+x,y
+t ∈ R
+5×5×6. (7)
+BMBC:Bilateral Motion Estimation . . . for Video Interpolation 9
+For each x, the sum of all coefficients in the six filters are normalized to 1.
+Then, the intermediate frame is synthesized via the dynamic local convolu-
+tion. More specifically, the intermediate frame is obtained by filtering the inter-
+mediate candidates, given by
+It(x, y) =
+6∑
+c=1
+2∑
+i=−2
+2∑
+j=−2
+F
+x,y
+t (i, j, c)I
+c
+t (x+ i, y + j). (8)
+3.4 Training
+The proposed algorithm includes two neural networks: the bilateral motion net-
+work and the dynamic filter generation network. We found that separate training
+of these two networks is more efficient than the end-to-end training in training
+time and memory space. Thus, we first train the bilateral motion network. Then,
+after fixing it, we train the dynamic filter generation network.
+Bilateral motion network: To train the proposed bilateral motion network,
+we define the bilateral loss Lb as
+Lb = Lp + Ls (9)
+where Lp and Ls are the photometric loss [26,33] and the smoothness loss [17].
+For the photometric loss, we compute the sum of differences between a
+ground-truth frame I lt and two warped frames I
+l
+0→t and I
+l
+1→t using the bilateral
+motion fields V lt→0 and V
+l
+t→1, respectively, at all pyramid levels,
+Lp =
+L∑
+l=1
+αl
+[∑
+x
+ρ(I l0→t(x)− I
+l
+t(x)) + ρ(I
+l
+1→t(x)− I
+l
+t(x))
+]
+(10)
+where ρ(x) =
+√
+x2 + �2 is the Charbonnier function [23]. The parameters αl and
+� are set to 0.01 × 2l and 10−6, respectively. Also, we compute the smoothness
+loss to constrain neighboring pixels to have similar motions, given by
+Ls = ‖∇Vt→0‖1 + ‖∇Vt→1‖1. (11)
+We use the Adam optimizer [15] with a learning rate of η = 10−4 and shrink
+it via η ← 0.5η at every 0.5M iterations. We use a batch size of 4 for 2.5M
+iterations and augment the training dataset by randomly cropping 256 × 256
+patches with random flipping and rotations.
+Dynamic filter generation network: We define the dynamic filter loss Ld as
+the Charbonnier loss between It and its synthesized version Ît, given by
+Ld =
+∑
+x
+ρ(Ît(x)− It(x)). (12)
+Similarly to the bilateral motion network, we use the Adam optimizer with
+η = 10−4 and shrink it via η ← 0.5η at 0.5M, 0.75M, and 1M iterations. We
+use a batch size of 4 for 1.25M iterations. Also, we use the same augmentation
+technique as that for the bilateral motion network.
+10 J. Park et al.
+Datasets: We use the Vimeo90K dataset [32] to train the proposed networks.
+The training set in Vimeo90K is composed of 51,312 triplets with a resolution of
+448× 256. We train the bilateral motion network with t = 0.5 at the first 1M it-
+erations and then with t ∈ {0, 0.5, 1} for fine-tuning. Next, we train the dynamic
+filter generation network with t = 0.5. However, notice that both networks are
+capable of handling any t ∈ (0, 1) using the bilateral cost volume in (2).
+4 Experimental Results
+We evaluate the performances of the proposed video interpolation algorithm
+on the Middlebury [1], Vimeo90K [32], UCF101 [28], and Adobe240-fps [29]
+datasets. We compare the proposed algorithm with state-of-the-art algorithms.
+Then, we conduct ablation studies to analyze the contributions of the proposed
+bilateral motion network and dynamic filter generation network.
+4.1 Datasets
+Middlebury: The Middlebury benchmark [1], the most commonly used bench-
+mark for video interpolation, provides two sets: Other and Evaluation. ‘Other’
+contains the ground-truth for fine-tuning, while ‘Evaluation’ provides two frames
+selected from each of 8 sequences for evaluation.
+Vimeo90K: The test set in Vimeo90K [32] contains 3,782 triplets of spatial
+resolution 256× 448. It is not used to train the model.
+UCF101: The UCF101 dataset [28] contains human action videos of resolution
+256× 256. Liu et al. [17] constructed the test set by selecting 379 triplets.
+Adobe240-fps: Adobe240-fps [29] consists of high frame-rate videos. To assess
+the interpolation performance, we selected a test set of 254 sequences, each of
+which consists of nine frames.
+4.2 Comparison with the state-of-the-arts
+We assess the interpolation performances of the proposed algorithm in compari-
+son with the conventional video interpolation algorithms: MIND [18], DVF [17],
+SpyNet [25], SepConv [22], CtxSyn [20], ToFlow [32], SuperSloMo [14], MEMC-
+Net [3], CyclicGen [16], and DAIN [2]. For SpyNet, we generated intermediate
+frames using the Baker et al.’s algorithm [1].
+Table 1 shows the comparisons on the Middlebury Evaluation set [1], which
+are also available on the Middlebury website. We compare the average inter-
+polation error (IE) and normalized interpolation error (NIE). A lower IE or
+NIE indicates better performance. The proposed algorithm outperforms all the
+state-of-the-art algorithms in terms of average IE and NIE scores. Fig. 7 visually
+compares interpolation results. SepConv-L1 [22], ToFlow [32] SuperSlomo [14],
+BMBC:Bilateral Motion Estimation . . . for Video Interpolation 11
+Table 1. Quantitative comparisons on the Middlebury Evaluation set. For each metric,
+the numbers in red and blue denote the best and the second best results, respectively.
+Mequon Schefflera Urban Teddy Backyard Basketball Dumptruck Evergreen Average
+IE NIE IE NIE IE NIE IE NIE IE NIE IE NIE IE NIE IE NIE IE NIE
+SepConv-L1 [22] 2.52 0.54 3.56 0.67 4.17 1.07 5.41 1.03 10.2 0.99 5.47 0.96 6.88 0.68 6.63 0.70 5.61 0.83
+ToFlow [32] 2.54 0.55 3.70 0.72 3.43 0.92 5.05 0.96 9.84 0.97 5.34 0.98 6.88 0.72 7.14 0.90 5.49 0.84
+SuperSlomo [14] 2.51 0.59 3.66 0.72 2.91 0.74 5.05 0.98 9.56 0.94 5.37 0.96 6.69 0.60 6.73 0.69 5.31 0.78
+CtxSyn [20] 2.24 0.50 2.96 0.55 4.32 1.42 4.21 0.87 9.59 0.95 5.22 0.94 7.02 0.68 6.66 0.67 5.28 0.82
+MEMC-Net* [3] 2.47 0.60 3.49 0.65 4.63 1.42 4.94 0.88 8.91 0.93 4.70 0.86 6.46 0.66 6.35 0.64 5.24 0.83
+DAIN [2] 2.38 0.58 3.28 0.60 3.32 0.69 4.65 0.86 7.88 0.87 4.73 0.85 6.36 0.59 6.25 0.66 4.86 0.71
+BMBC (Ours) 2.30 0.57 3.07 0.58 3.17 0.77 4.24 0.84 7.79 0.85 4.08 0.82 5.63 0.58 5.55 0.56 4.48 0.70
+(a) (b) (c) (d) (e) (f) (g) (h)
+Fig. 7. Visual comparison on the Middlebury Evaluation set. (a) Input, (b) SepConv-
+L1 [22], (c) ToFlow [32], (d) SuperSlomo [14], (e) CtxSyn [20], (f) MEMC-Net* [3],
+(g) DAIN [2], and (h) BMBC (Ours).
+CtxSyn [20], MEMC-Net [3], and DAIN [2] yield blurring artifacts around the
+balls, losing texture details. On the contrary, the proposed algorithm reconstructs
+the clear shapes of the balls, preserving the details faithfully.
+In Table 2, we provide quantitative comparisons on the UCF101 [28] and
+Vimeo90K [32] datasets. We compute the average PSNR and SSIM scores. The
+proposed algorithm outperforms the conventional algorithms by significant mar-
+gins. Especially, the proposed algorithm provides 0.3 dB higher PSNR than
+DAIN [2] on Vimeo90K. Fig. 8 compares interpolation results qualitatively. Be-
+cause the cable moves rapidly and the background branches make the motion
+estimation difficult, all the conventional algorithms fail to reconstruct the cable
+properly. In contrast, the proposed algorithm faithfully interpolates the inter-
+mediate frame, providing fine details.
+The proposed algorithm can interpolate an intermediate frame at any time
+instance t ∈ (0, 1). To demonstrate this capability, we assess the ×2, ×4, and
+×8 frame interpolation performance on the Adobe240-fps dataset [29]. Because
+the conventional algorithms in Table 3, except for DAIN [2], can generate only
+intermediate frames at t = 0.5, we recursively apply those algorithms to interpo-
+late intermediate frames at other t’s. Table 3 shows that the proposed algorithm
+12 J. Park et al.
+Table 2. Quantitative comparisons on the UCF101 and Vimeo90K datasets.
+Runtime
+(seconds)
+#Parameters
+(million)
+UCF101 [17] Vimeo90K [32]
+PSNR SSIM PSNR SSIM
+SpyNet [25] 0.11 1.20 33.67 0.9633 31.95 0.9601
+MIND [18] 0.01 7.60 33.93 0.9661 33.50 0.9429
+DVF [17] 0.47 1.60 34.12 0.9631 31.54 0.9462
+ToFlow [32] 0.43 1.07 34.58 0.9667 33.73 0.9682
+SepConv-Lf [22] 0.20 21.6 34.69 0.9655 33.45 0.9674
+SepConv-L1 [22] 0.20 21.6 34.78 0.9669 33.79 0.9702
+MEMC-Net [3] 0.12 70.3 34.96 0.9682 34.29 0.9739
+CyclicGen [16] 0.09 3.04 35.11 0.9684 32.09 0.9490
+CyclicGen large [16] - 19.8 34.69 0.9658 31.46 0.9395
+DAIN [2] 0.13 24.0 34.99 0.9683 34.71 0.9756
+BMBC (Ours) 0.77 11.0 35.15 0.9689 35.01 0.9764
+(a) (b) (c) (d) (e) (f) (g)
+Fig. 8. Visual comparison on the Viemo90K test set. (a) Ground-truth, (b)
+ToFlow [32], (c) SepConv-Lf [22], (d) CyclicGen [16], (e) MEMC-Net* [3], (f) DAIN [2],
+and (g) BMBC (Ours).
+outperforms all the state-of-the-art algorithms. As the frame rate increases, the
+performance gain of the proposed algorithm against conventional algorithms gets
+larger. In Fig. 9, the proposed algorithm reconstructs the details in the rotating
+wheel more faithfully than the conventional algorithms.
+4.3 Model analysis
+We conduct ablation studies to analyze the contributions of the three key com-
+ponents in the proposed algorithm: bilateral cost volume, intermediate motion
+approximation, and dynamic filter generation network. By comparing various
+combinations of intermediate candidates, we analyze the efficacy of the bilateral
+cost volume and the intermediate motion approximation jointly.
+Intermediate candidates: To analyze the effectiveness of the bilateral motion
+estimation and the intermediate motion approximation, we train the proposed
+networks to synthesize intermediate frames using the following combinations:
+BMBC:Bilateral Motion Estimation . . . for Video Interpolation 13
+Table 3. Quantitative comparisons on the Adobe240-fps dataset for ×2, ×4, and ×8
+frame interpolation.
+×2 ×4 ×8
+PSNR SSIM PSNR SSIM PSNR SSIM
+ToFlow [32] 28.51 0.8731 29.20 0.8807 28.93 0.8812
+SepConv-Lf [22] 29.14 0.8784 29.75 0.8907 30.07 0.8956
+SepConv-L1 [22] 29.31 0.8815 29.91 0.8935 30.23 0.8985
+CyclicGen [16] 29.39 0.8787 29.72 0.8889 30.18 0.8972
+CyclicGen large [16] 28.90 0.8682 29.70 0.8866 30.24 0.8955
+DAIN [2] 29.35 0.8820 29.73 0.8925 30.03 0.8983
+BMBC (Ours) 29.49 0.8832 30.18 0.8964 30.60 0.9029
+(a) (b) (c) (d) (e) (f) (g)
+Fig. 9. Visual comparison on the Adobe240-fps dataset. (a) Ground-truth, (b)
+ToFlow [32], (c) SepConv-Lf [22], (d) SepConv-L1 [22], (e) CyclicGen [16], (f) DAIN [2],
+and (g) BMBC (Ours).
+– Appx4: Four intermediate candidates, obtained using approximated bilateral
+motions in (3)∼(6), are combined.
+– BM: Two intermediate candidates, obtained using bilateral motions, are
+combined.
+– BM+Appx2: In addition to BM, two more candidates obtained using ap-
+proximated bilateral motions V
+fw
+t→0 in (4) and V
+bw
+t→1 in (6) are used.
+– BM+Appx4: Six intermediate candidates are used as well (proposed model).
+Table 4 compares these models quantitatively. First, Appx4 shows the worst
+performance, while it is still comparable to the state-of-the-art algorithms. Sec-
+ond, BM provides better performance than Appx4 as well as the state-of-the-art
+algorithms, which confirms the superiority of the proposed BM to the approxi-
+mation. Third, we can achieve even higher interpolation performance with more
+intermediate candidates obtained through the motion approximation.
+Dynamic blending filters We analyze the optimal kernel size and the input
+to the dynamic filter generation network. Table 5 compares the PSNR perfor-
+mances of different settings. First, the kernel size has insignificant impacts, al-
+though the computational complexity is proportional to the kernel size. Next,
+when additional information (input frames and context maps) is fed into the
+dynamic filter generation network, the interpolation performance is improved.
+More specifically, using input frames improves PSNRs by 0.10 and 0.15 dB on the
+14 J. Park et al.
+Table 4. PSNR comparison of combination of the intermediate candidates.
+Intermediate candidates
+UCF101 [28] Vimeo90K [32]
+PSNR PSNR
+Appx4 34.99 34.72
+BM 35.12 34.93
+BM+Appx2 35.14 34.95
+BM+Appx4 35.15 35.01
+Table 5. Analysis of the dynamic filter generation network. In all settings, the six
+warped frames are input to the network.
+Kernel size
+Input to filter generation network UCF101 [28] Vimeo90K [32]
+Input frames Context maps PSNR PSNR
+5× 5 34.98 34.81
+3× 3 X 35.09 34.90
+5× 5 X 35.08 34.96
+7× 7 X 35.02 34.98
+5× 5 X X 35.15 35.01
+UCF101 and Vimeo90K datasets. Also, using context maps further improves the
+performances by 0.07 and 0.05dB. This is because the input frames and context
+maps help restore geometric structure and exploit rich contextual information.
+5 Conclusions
+We developed a deep-learning-based video interpolation algorithm based on the
+bilateral motion estimation, which consists of the bilateral motion network and
+the dynamic filter generation network. In the bilateral motion network, we de-
+veloped the bilateral cost volume to estimate accurate bilateral motions. In the
+dynamic filter generation network, we warped the two input frames using the
+estimated bilateral motions and fed them to learn filter coefficients. Finally, we
+synthesized the intermediate frame by superposing the warped frames with the
+generated blending filters. Experimental results showed that the proposed al-
+gorithm outperforms the state-of-the-art video interpolation algorithms on four
+benchmark datasets.
+Acknowledgements
+This work was supported in part by the Agency for Defense Development (ADD)
+and Defense Acquisition Program Administration (DAPA) of Korea under grant
+UC160016FD and in part by the National Research Foundation of Korea (NRF)
+grant funded by the Korea Government (MSIP) (No. NRF-2018R1A2B3003896
+and No. NRF-2019R1A2C4069806).
+BMBC:Bilateral Motion Estimation . . . for Video Interpolation 15
+References
+1. Baker, S., Scharstein, D., Lewis, J., Roth, S., Black, M.J., Szeliski, R.: A database
+and evaluation methodology for optical flow. Int. J. Comput. Vis. 92(1), 1–31 (Mar
+2011), http://vision.middlebury.edu/flow/eval/ 10
+2. Bao, W., Lai, W.S., Ma, C., Zhang, X., Gao, Z., Yang, M.H.: Depth-aware video
+frame interpolation. In: Proc. IEEE CVPR. pp. 3703–3712 (Jun 2019) 1, 2, 3, 6,
+8, 10, 11, 12, 13
+3. Bao, W., Lai, W.S., Zhang, X., Gao, Z., Yang, M.H.: MEMC-Net: Motion estima-
+tion and motion compensation driven neural network for video interpolation and
+enhancement. IEEE Trans. Pattern Anal. Mach. Intell. (Sep 2019) 1, 2, 3, 8, 10,
+11, 12
+4. Choi, B.D., Han, J.W., Kim, C.S., Ko, S.J.: Motion-compensated frame interpo-
+lation using bilateral motion estimation and adaptive overlapped block motion
+compensation. IEEE Trans. Circuits Syst. Video Technol. 17(4), 407–416 (Apr
+2007) 1, 2
+5. Dosovitskiy, A., Fischer, P., Ilg, E., Hausser, P., Hazirbas, C., Golkov, V., Van
+Der Smagt, P., Cremers, D., Brox, T.: FlowNet: Learning optical flow with con-
+volutional networks. In: Proc. IEEE ICCV. pp. 2758–2766 (Dec 2015) 1, 3, 5,
+6
+6. Flynn, J., Neulander, I., Philbin, J., Snavely, N.: DeepStereo: Learning to predict
+new views from the world’s imagery. In: Proc. IEEE CVPR. pp. 5515–5524 (Jun
+2016) 1
+7. G. Lu, X. Zhang, L.C., Gao, Z.: Novel integration of frame rate up conversion and
+hevc coding based on rate-distortion optimization. IEEE Trans. Image Process.
+27(2), 678–691 (Feb 2018) 1
+8. He, K., Zhang, X., Ren, S., Sun, J.: Deep residual learning for image recognition.
+In: Proc. IEEE CVPR. pp. 770–778 (Jun 2016) 8
+9. Hosni, A., Rhemann, C., Bleyer, M., Rother, C., Gelautz, M.: Fast cost-volume
+filtering for visual correspondence and beyond. IEEE Trans. Pattern Anal. Mach.
+Intell. 35(2), 504–511 (Feb 2013) 5
+10. Ilg, E., Mayer, N., Saikia, T., Keuper, M., Dosovitskiy, A., Brox, T.: FlowNet 2.0:
+Evolution of optical flow estimation with deep networks. In: Proc. IEEE CVPR.
+pp. 2462–2470 (Jul 2017) 1, 3, 6
+11. Jaderberg, M., Simonyan, K., Zisserman, A., Kavukcuoglu, K.: Spatial transformer
+networks. In: Proc. NIPS. pp. 2017–2025 (2015) 4
+12. Jeong, S.G., Lee, C., Kim, C.S.: Motion-compensated frame interpolation based on
+multihypothesis motion estimation and texture optimization. IEEE Trans. Image
+Process. 22(11), 4497–4509 (Nov 2013) 1
+13. Jia, X., De Brabandere, B., Tuytelaars, T., Gool, L.V.: Dynamic filter networks.
+NIPS pp. 667–675 (2019) 8
+14. Jiang, H., Sun, D., Jampani, V., Yang, M.H., Learned-Miller, E., Kautz, J.: Super
+SloMo: High quality estimation of multiple intermediate frames for video interpo-
+lation. In: Proc. IEEE CVPR. pp. 9000–9008 (Jun 2018) 1, 2, 3, 6, 7, 10, 11
+15. Kingma, D.P., Ba, J.: Adam: A method for stochastic optimization. In: Proc. ICLR
+(May 2015) 9
+16. Liu, Y.L., Liao, Y.T., Lin, Y.Y., Chuang, Y.Y.: Deep video frame interpolation
+using cyclic frame generation. In: Proc. AAAI (Jan 2019) 1, 2, 8, 10, 12, 13
+17. Liu, Z., Yeh, R.A., Tang, X., Liu, Y., Agarwala, A.: Video frame synthesis using
+deep voxel flow. In: Proc. IEEE ICCV. pp. 4463–4471 (Oct 2017) 1, 9, 10, 12
+http://vision.middlebury.edu/flow/eval/
+16 J. Park et al.
+18. Long, G., Kneip, L., Alvarez, J.M., Li, H., Zhang, X., Yu, Q.: Learning image
+matching by simply watching video. In: Proc. ECCV. pp. 434–450 (Oct 2016) 1,
+2, 10, 12
+19. Meyer, S., Djelouah, A., McWilliams, B., Sorkine-Hornung, A., Gross, M., Schroers,
+C.: PhaseNet for video frame interpolation. In: Proc. IEEE CVPR. pp. 498–507
+(Jun 2018) 2
+20. Niklaus, S., Liu, F.: Context-aware synthesis for video frame interpolation. In:
+Proc. IEEE CVPR. pp. 1701–1710 (Jun 2018) 1, 2, 3, 8, 10, 11
+21. Niklaus, S., Mai, L., Liu, F.: Video frame interpolation via adaptive convolution.
+In: Proc. IEEE CVPR. pp. 670–679 (Jul 2017) 1, 2
+22. Niklaus, S., Mai, L., Liu, F.: Video frame interpolation via adaptive separable
+convolution. In: Proc. IEEE ICCV. pp. 261–270 (Oct 2017) 1, 2, 10, 11, 12, 13
+23. P. Charbonnier, L. Blanc-Feraud, G.A., Barlaud, M.: Two deterministic half-
+quadratic regularization algorithms for computed imaging. In: Proc. IEEE ICIP.
+pp. 168–172 (Nov 1994) 9
+24. Qifeng Chen, V.K.: Full flow: Optical flow estimation by global optimization over
+regular grids. In: Proc. IEEE CVPR. pp. 4706–4714 (Jun 2016) 6
+25. Ranjan, A., Black, M.J.: Optical flow estimation using a spatial pyramid network.
+In: Proc. IEEE CVPR. pp. 4161–4170 (Jul 2017) 1, 10, 12
+26. Ren, Z., Yan, J., Ni, B., Liu, B., Yang, X., Zha, H.: Unsupervised deep learning
+for optical flow estimation. In: Proc. AAAI (Feb 2017) 9
+27. Ronneberger, O., Fischer, P., Brox, T.: U-Net: Convolutional networks for biomed-
+ical image segmentation. In: Proc. Int. Conf. Medical Image Comput. Comput.-
+Assisted Intervention. pp. 234–241 (Oct 2015) 8
+28. Soomro, K., Zamir, A.R., Shah, M.: UCF101: A dataset of 101 human actions
+classes from videos in the wild. arXiv preprint arXiv:1212.0402 (2012) 10, 11, 14
+29. Su, S., Delbracio, M., Wang, J., Sapiro, G., Heidrich, W., Wang, O.: Deep video
+deblurring for hand-held cameras. In: Proc. IEEE CVPR. pp. 1279–1288 (Jun
+2017) 10, 11
+30. Sun, D., Yang, X., Liu, M.Y., Kautz, J.: PWC-Net: CNNs for optical flow using
+pyramid, warping, and cost volume. In: Proc. IEEE CVPR. pp. 8934–8943 (Jun
+2018) 1, 3, 4, 5, 6
+31. Xu, J., Ranftl, R., Koltun, V.: Accurate optical flow via direct cost volume pro-
+cessing. In: Proc. IEEE CVPR. pp. 1289–1297 (Jun 2017) 3, 5, 6
+32. Xue, T., Chen, B., Wu, J., Wei, D., Freeman, W.T.: Video enhancement with
+task-oriented flow. IJCV 127(8), 1106–1125 (Feb 2019) 1, 2, 10, 11, 12, 13, 14
+33. Yu, J., Harley, A., Derpanis, K.: Back to basics: Unsupervised learning of optical
+flow via brightness constancy and motion smoothness. In: Proc. ECCV. pp. 3–10
+(Oct 2016) 9
+34. Zhang, Y., Tian, Y., Kong, Y., Zhong, B., Fu, Y.: Residual dense network for image
+super-resolution. In: Proc. IEEE CVPR. pp. 2472–2481 (Jun 2018) 8

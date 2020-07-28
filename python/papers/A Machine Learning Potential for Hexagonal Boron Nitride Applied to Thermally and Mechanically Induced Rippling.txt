@@ -1,0 +1,1951 @@
+A Machine Learning Potential for Hexagonal
+Boron Nitride Applied to Thermally and
+Mechanically Induced Rippling
+Fabian L. Thiemann,†,‡ Patrick Rowe,† Erich A. Müller,‡ and Angelos
+Michaelides∗,†
+†Thomas Young Centre, London Centre for Nanotechnology, and Department of Physics
+and Astronomy, University College London, Gower Street, London, WC1E 6BT, United
+Kingdom
+‡Department of Chemical Engineering, Imperial College London, South Kensington
+Campus, London SW7 2AZ, United Kingdom
+E-mail: angelos.michaelides@ucl.ac.uk
+Abstract
+We introduce an interatomic potential for
+hexagonal boron nitride (hBN) based on the
+Gaussian approximation potential (GAP) ma-
+chine learning methodology. The potential is
+based on a training set of configurations col-
+lected from density functional theory (DFT)
+simulations and is capable of treating bulk and
+multilayer hBN as well as nanotubes of arbi-
+trary chirality. The developed force field faith-
+fully reproduces the potential energy surface
+predicted by DFT while improving the effi-
+ciency by several orders of magnitude. We test
+our potential by comparing formation energies,
+geometrical properties, phonon dispersion spec-
+tra and mechanical properties with respect to
+benchmark DFT calculations and experiments.
+In addition, we use our model and a recently de-
+veloped graphene-GAP to analyse and compare
+thermally and mechanically induced rippling
+in large scale two-dimensional (2D) hBN and
+graphene. Both materials show almost identi-
+cal scaling behaviour for the height fluctuations
+indicating the possibility of a generally applica-
+ble scaling exponent of η ≈ 0.85 for 2D ma-
+terials. Based on its lower resistance to bend-
+ing, however, hBN experiences slightly larger
+out-of-plane deviations both at zero and finite
+applied external strain. Upon compression a
+phase transition from incoherent ripple motion
+to soliton-ripples is observed for both materi-
+als. Our potential is freely available online at
+[http://www.libatoms.org].
+Introduction
+Hexagonal boron nitride (hBN), though less
+well-known than its isostructural analogue,
+graphene, is no less fascinating from the per-
+spective of its properties and potential appli-
+cations. The insulating character,1 resistance
+to oxidation,2 high thermal conductivity,3 and
+mechanical strength4 of hBN have been ex-
+ploited in various fields ranging from electronic
+devices,5,6 water purification,7 and industrial
+chemistry8–11 to biomedical science and engi-
+neering.12–14 Yet, certain aspects of the be-
+haviour of low-dimensional hBN remain to be
+rationalised and explored further. For instance,
+the origin of experimentally observed differ-
+ences in friction15 and surface charge16,17 be-
+tween graphene and hBN surfaces in contact
+with water requires a deeper understanding on
+the microscopic level18 to exploit the full po-
+tential of hBN for desalination processes and
+1
+ar
+X
+iv
+:2
+00
+7.
+11
+44
+8v
+1 
+ [
+co
+nd
+-m
+at
+.m
+tr
+l-
+sc
+i]
+  2
+2 
+Ju
+l 
+20
+20
+angelos.michaelides@ucl.ac.uk
+http://www.libatoms.org
+osmotic power generation.19 Similarly, the im-
+pact of intrinsic ripples on layered hBN has not
+received as much attention as for graphene,20,21
+where these out-of-plane deviations have a sig-
+nificant impact on properties such as graphene’s
+bandgap22–24 or reactivity.25 Assuming analo-
+gous behaviour for two-dimensional (2D) hBN
+the ability to predict, and potentially adjust
+the ripple texture through strain would be of
+value to future applications.26
+Molecular dynamics (MD) simulations offer
+a computational approach to gain insight into
+nanoscale properties of materials. A faithful
+representation of the potential energy surface
+(PES) is a crucial requirement for reliable sim-
+ulations, in particular an accurate description
+of the phonon dispersion spectrum which deter-
+mines a variety of mechanical and thermody-
+namic properties as well as diffusion processes
+across low-dimensional materials. Due to the
+strong coupling between the adsorbate’s mo-
+tion and the phonon modes of the solid,27–30
+potential inaccuracies in the predicted lattice
+vibrations are directly propagated to dynamical
+and interfacial properties. Various force fields
+for hBN are available, including Tersoff-type
+potentials,31–41 reactive force fields,42–46 and
+potentials fitted to density functional theory
+(DFT).47 Despite the valuable and excellent
+work on thermal and mechanical properties of
+hBN allotropes48–51 based on these established
+models and notwithstanding their computa-
+tional efficiency, none of them predicts the vi-
+brational properties in good agreement with
+experiments as we learned in the course of this
+work. Thus, these models cannot be expected
+to give reliable results for our systems of inter-
+est.
+Incorporating electronic structure based
+methods and performing ab initio molecular
+dynamics (AIMD) represents an alternative ap-
+proach which often offers a significantly more
+accurate description of the PES and the phonon
+dispersion spectrum. DFT driven AIMD has
+been employed to study hBN in various con-
+texts including proton transfer through a hBN
+sheet,52 interfacial behaviour with water,53 and
+the impact of strain on the vibrational prop-
+erties of single and multiple layers of hBN.54
+These methods, however, come with a high
+computational cost that severely restricts the
+accessible system sizes and time scales. Finite-
+size effects remain a practical issue of AIMD
+simulations and can compromise the reliability
+of calculated transport properties for confined
+fluids.55 This is also true for ripples where the
+amplitude of the out-of-plane deviations is par-
+tially determined by the dimensions of the 2D
+layer.21,56
+The rise of machine learning (ML) method-
+ologies and their fruitful application in the
+development of interatomic potentials has pro-
+vided a pathway for achieving an accuracy close
+to that of their ab initio reference while lower-
+ing the computational costs by several orders
+of magnitude.57–60 These potentials are based
+on a transformation of atomic coordinates us-
+ing high dimensional descriptors58 which serve
+as input for the ML algorithm to establish a
+structure-energy mapping. In order to actually
+“learn” this relationship, a large database of
+configurations and related ab initio energies
+and forces is required. In recent years, many
+ML-based potentials have been developed for
+a significant number of materials spanning a
+variety of algorithms including Gaussian kernel
+regression, artificial neural networks and per-
+mutationally invariant polynomials.61–65 A ma-
+chine learning potential based on the Gaussian
+Approximation Potential (GAP)62,66 frame-
+work was recently presented by some of us
+for hBN’s isostructural analogue, graphene.67
+This model achieves a very good agreement
+with experiments throughout a large range of
+properties including the thermal expansion and
+phonon dispersion spectrum. GAP models also
+have been proposed to study amorphous and
+crystalline carbon,68,69 tungsten,70 silicon,62 as
+well as hybrid perovskites.71
+In this work we introduce a GAP for hBN
+which is able to treat the bulk phase, isolated
+and multilayered sheets of hBN, as well as nan-
+otubes of arbitrary chirality. We evaluate the
+performance of our model by comparing against
+2
+DFT as well as frequently applied force fields
+for a variety of properties. In particular, signif-
+icant improvements for the phonon spectra are
+obtained with the hBN-GAP compared to es-
+tablished force fields. We, then, perform large-
+scale MD simulations using our new potential
+and the recently published graphene-GAP67
+to investigate the behaviour of thermally and
+mechanically induced rippling in 2D hBN and
+graphene. We find an almost identical scaling
+exponent for both materials, while the am-
+plitude and shape of the height fluctuations
+depends on the material’s properties as well as
+on the applied strain. Looking forward, the
+hBN-GAP will be particularly valuable where
+an accurate description of the system’s vibra-
+tions and dynamics is required. This includes
+quantitative studies on diffusion of adsorbates
+across layered hBN or through hBN nanotubes.
+The remainder of this paper is structured as
+follows. Next, we give a brief overview of the
+GAP methodology as well as a detailed expla-
+nation of technical aspects which are crucial to
+consider in the construction of a ML potential.
+This is followed by a detailed validation of the
+accuracy of the hBN-GAP. The results of the
+rippling analysis are reported before we draw
+the conclusions of this study.
+Construction of the hBN-
+GAP
+A detailed derivation of the theory behind the
+GAP framework is available elsewhere.62,66–68,70
+For completeness, we will an abridged explana-
+tion and focus on the practical issues within
+the construction. GAP mimics the Born-
+Oppenheimer PES without treating electrons
+explicitly by establishing a link between struc-
+ture and energy based on a transformation of
+the atomic positions into local environments
+using so-called descriptors.62 To this end, the
+target PES is represented by a large database of
+ab initio energies which is then interpolated by
+using Gaussian kernel regression (GKR). The
+decomposition into local contributions is an
+approximation inherent to all interatomic po-
+tentials and can vary from atom-pair distances
+to complex many-body (MB) descriptors.58
+Independent of their dimensionality, however,
+descriptors are generally required to be trans-
+lationally, rotationally, and permutationally
+invariant to guarantee a one to one mapping of
+energy to configuration.72
+In this work, the PES of hBN is described
+by a sum of two-body (2B) terms and the high
+dimensional smooth overlap of atomic positions
+(SOAP)73 MB descriptor. Within SOAP, each
+atomic environment is represented by a local
+neighbour density generated by summing over
+Gaussians placed on all atoms within a certain
+cut-off. This density is expanded in a basis
+set of radial functions and spherical harmon-
+ics wherein the related coefficients form the
+so-called SOAP vectors. The product of two
+independent SOAP vectors represents the sim-
+ilarity between the related local environments,
+which can be easily made invariant to rotations.
+This so-called SOAP kernel is constructed for
+a certain set of training environments and the
+corresponding weight of their local contribu-
+tion to the total energy of the global configu-
+rations is determined within the GKR fitting
+procedure. In addition to the energies, we also
+train on the atomic forces and virial stresses. A
+deeper insight and detailed derivation of the ex-
+tension to use partial derivatives can be found
+elsewhere.66
+Clearly, an accurate description of the PES is
+critically dependent on a comprehensive train-
+ing set comprised of configurations of the de-
+sired phase space region. Here, this covers pe-
+riodic and defect-free sheets and nanotubes of
+arbitrary chiralities. We generated a structural
+database containing more than 22,000 config-
+urations. While most of them were extracted
+from AIMD trajectories, others originated from
+trajectories obtained with earlier GAP ver-
+sions or were based on distinct displacements
+of atoms to capture particular properties. The
+number of atoms was limited to 200 and dif-
+ferent thermodynamic conditions were sampled
+varying the temperature between 30 and 3000
+K as well as applying uniaxial strain of up to
+3
+5 % to layered hBN. Based on this variety of
+structures, we also expect an accurate interpo-
+lation to strained nanotubes.
+For each configuration, we conducted tightly
+converged DFT calculations to obtain the to-
+tal energy, atomic forces, and virial stresses
+on which the GAP model was then trained.
+For all configurations we used the VASP plane-
+wave DFT code,74–77 with the optB86b-vdW
+non-local dispersion exchange-correlation func-
+tional,78 an energy cut-off of 700 eV, a Gaus-
+sian smearing of 0.05 eV, and projector aug-
+mented wave pseudopotentials.79,80 We chose
+the optB86b-vdW functional based on its per-
+ceived accuracy for vdW bonded systems.81,82
+A comparison to other functionals is included in
+the supplementary information. The reciprocal
+lattice was sampled in periodic directions with
+a maximum distance between the k -points of
+0.02 Å−1 whereby the grid was either centered
+at the zone centre in case of hexagonal cells or
+Monkhorst-Pack based for orthorombic cells.
+For ionic and cell relaxations, cell shape and
+atomic positions were optimised independently
+until all forces were below 10−3 eV Å
+−1
+and the
+total energy was converged to less than 10−6
+eV. These settings were consistently used in
+this work if not stated otherwise.
+In practice, it is not desirable to use the entire
+structural database ( ≈ 22, 000 configurations)
+as training set due to the redundant informa-
+tion and the related increase of computational
+costs. Here a subset of ≈ 2000 structures was
+used. These were selected through a combina-
+tion of farthest point sampling59,72 and manual
+structure selection.
+In order to obtain a qualitative overview of
+the complexity of problem we are attempting
+to fit, we performed a dimensionality reduction
+using sketch-map83,84 to visualise our struc-
+tural database in two dimensional space. The
+resulting sketch-map, shown in figure 1, clusters
+configurations based on their global similarity.
+Similar structures are located closely together
+while points with a high covariance are sepa-
+rated further apart. The clustering indicates
+the heterogeneity of the phase space region and
+provides useful information on the capabili-
+ties of the SOAP descriptor. For example, the
+sketch-map highlights the anticipated similarity
+between monolayers (Fig. 1D) and nanotubes
+with large diameter (Fig. 1C) while less sta-
+ble thermally deformed nanotubes with high
+curvature are represented as an isolated island
+(Fig. 1B). Single layer and bulk hBN (Fig. 1G)
+are separated most far apart given the change
+of environment induced by the adjacent lay-
+ers. This dissimilarity distance is bridged by
+bulk configurations with large interlayer spac-
+ing, strong thermal fluctuations (Fig. 1F) and
+bilayers (Fig. 1E). Interestingly, compressed bi-
+layers (Fig. 1A) are singled out from the large
+clusters as well as sheared bulk configurations
+(Fig. 1H).
+Having selected the training configurations,
+an appropriate choice of certain model parame-
+ters has to be made. Here, we will only discuss
+those parameters to which the model is most
+sensitive while a full overview is contained in
+table 1 and a more detailed explanation can
+be found elsewhere.66,70 Intuitively, cut-off and
+basis-set expansion of the SOAP vector have
+a high impact on the performance of the po-
+tential. We chose to truncate the spherical
+harmonic expansion after the eighth order, i.e.
+l = 8 and n = 8, and set the SOAP cut-off
+to 4.5 Å which has been proven to be suffi-
+cient to reproduce the binding energy curve of
+graphite.69 However, this cut-off for the SOAP
+descriptor is too short to reproduce the in-
+terlayer interaction curve between hBN layers
+which does not tail off to zero until roughly
+10 Å. Thus, we followed the procedure re-
+cently introduced69 to fit a 2B-based model to
+the interaction curve using a cut-off of 10 Å.
+The predicted energy and forces were then sub-
+tracted during the actual fit where we used a
+shorter 2B descriptor with the same cut-off as
+SOAP.
+In practice, rather than using all local en-
+vironments of the training set, the covariance
+matrix is constructed based on M uncorrelated
+sparse points.70 Here, we chose 50 points for the
+4
+A
+B
+C
+D
+E
+F
+G
+H
+Figure 1: Sketch-map representation of the structural database generated for this work. Each
+point corresponds to one atomic configuration for which the local SOAP vectors are averaged and
+the SOAP kernel measures the global similarity between the structures. Short distances between
+points represent higher similarity while points far apart from each other express a strong structural
+deviation. The points are coloured according to their respective energy per atom calculated with
+DFT. Periodic images in z-direction are blurred to visualise bulk structures. (A) Compressed
+bilayer at 0 K (interlayer spacing ≈ 2.5 Å); (B) Nanotube (4,0) at 1000 K; (C) Nanotube (10,0)
+at 300 K; (D) Monolayer at 30 K;(E) Bilayer at 3000 K; (F) Bulk at 3000 K; (G) Bulk at 300 K;
+(H) Compressed bulk at 700 K.
+2B descriptor and 5000 for SOAP. The number
+of sparse points needed depends on the com-
+plexity of the target phase space region the
+model is fitted to. Given the focus on the
+defect-free hexagonal phase of BN, the selected
+number of sparse points for SOAP is in line with
+recent work.69 Besides these descriptor related
+parameters, the desirable target deviation, σ,
+of the fit to the target properties is a critical
+ingredient for an accurate model. While values
+which are too large result in poor agreement
+with the DFT reference per se, too small a cho-
+sen value can lead to overfitting depriving the
+GKR of its interpolation capability. Here, we
+used configuration-specific tolerances in order
+to distinguish between competing phases. For
+example, the PES of bulk hBN is very shallow
+close to the equilibrium resulting in energy dif-
+ferences of distorted cells of less than 1 meV.
+Thus, the tolerance was adapted for this kind
+of system while for high energy configurations
+larger values were set.
+5
+Table 1: Model parameters of the hBN-
+GAP. Different target deviations (σ) were
+used depending on the configuration.
+Here, we only list the default values
+which are applicable to most of the struc-
+tures in our training set.
+2b Descriptor
+Cut-off (Å) 4.5
+Cut-off width (Å) 0.5
+δ 0.5
+Sparse method Uniform
+Sparse points 50
+SOAP Descriptor
+Cut-off (Å) 4.5
+Cut-off width (Å) 0.5
+δ 0.1
+Sparse method CUR
+Sparse points 5000
+lmax 8
+nmax 8
+ζ 2
+Target Deviations
+σenergy 0.001
+σforce 0.01
+σvirial 0.05
+Validation of the GAP
+model
+We validate the hBN-GAP and benchmark
+its predictive capabilities against its DFT ref-
+erence, comparing it to other frequently used
+force fields, specifically the Tersoff potential31,32
+parametrised by Sevik et al.,39 the extended
+Tersoff potential (ExTeP) employing a modified
+bond-order parameter,41 and the ReaxFF42,43
+parametrised by Weismiller et al.44 In addition
+to the standard versions, we also evaluated the
+predictions made by both Tersoff and ExTeP
+when combined with the recently developed
+interlayer potential (ILP).85–87 This coupling
+enables these models to account for the in-
+termolecular interactions between hBN sheets.
+These are typically neglected by the indepen-
+dent bond-order potentials due to a cut-off of
+2.0 Å which is below the equilibrium separation
+between layers in bulk hBN of about 3.3 Å. The
+list of force field models tested is by no means
+exhaustive and is merely meant to serve as
+baseline for our newly developed model in the
+context of previous work. We also note that all
+DFT comparisons employ the very same func-
+tional, optB86b-vdW, and electronic structure
+setup as applied in generation of training data.
+While this is essential to appropriately evalu-
+ate the quality of the constructed hBN-GAP,
+it might distort the benchmarking by implying
+that established force fields are in error when
+deviating from DFT results based on our chosen
+functional. To go some way to address this bias,
+we compared the performance of different func-
+tionals – local density approximation (LDA)
+and other generalised gradient approximations
+(GGA) – for basic crystalline properties of hBN
+(see supplementary information for details).
+The most intuitive measure to evaluate the
+performance of a ML potential is through force
+and energy errors on a basis of a validation set
+of configurations. This analysis has been car-
+ried out for most existing GAP models describ-
+ing a great variety of materials.62,67,68 Force
+correlation plots as well as a comparison of
+computational costs for DFT, GAP, and the
+established models can be found in the sup-
+plementary information. Here, we will only
+report the root mean square errors (RMSE)
+with respect to DFT for the different models.
+For a validation set of 1450 randomly picked
+structures the hBN-GAP achieves a RMSE of
+0.07 eV/Å. The established potentials are one
+order of magnitude less accurate with Tersoff,
+ExTeP, and ReaxFF yielding RMSEs of 1.09,
+1.18, and 6.15 eV/Å, respectively. The ILP ex-
+tended bond-order potentials perform surpris-
+ingly slightly worse with 1.10 and 1.20 eV/Å
+for Tersoff+ILP and ExTeP+ILP, respectively.
+While a correct reproduction of the atomic
+forces is a crucial requirement for any accurate
+interatomic potential, it is, however, not a suffi-
+cient criterion to secure an accurate description
+of the system of interest. In the course of this
+work, we observed that previously developed
+versions of our potential showed similar force
+6
+Table 2: Comparison of lattice parameters and interlayer distances for the different
+hBN phases between DFT (optB86b-vdW), the hBN-GAP, and other force fields. The
+lattice parameters are given in absolute values while the relative error with respect
+to DFT is given in percentage in brackets. For bulk hBN the out-of-plane lattice
+parameter c corresponds to the length of the respective lattice vector while for an
+isolated bilayer c̃ is defined as the interlayer distance. Due to the short cut-off of
+Tersoff and ExTeP no values (–) are given for the out-of-plane lengths of bilayer and
+bulk hBN.
+Lattice Parameter [Å] (% Error)
+DFT GAP Tersoff Tersoff + ILP ExTeP ExTeP + ILP ReaxFF
+Bulk hBN (a) 2.51 2.51 (0.0) 2.50 (0.4) 2.50 (0.4) 2.50 (0.4) 2.50 (0.4) 2.55 (1.6)
+Bulk hBN (c) 6.51 6.50 (0.1) – 6.46 (0.8) – 6.45 (0.9) 5.88 (9.7)
+Bilayer (a) 2.51 2.51 (0.0) 2.50 (0.4) 2.50 (0.4) 2.50 (0.4) 2.50 (0.4) 2.55 (1.6)
+Bilayer (c̃) 3.28 3.34 (1.8) – 3.26 (0.6) – 3.26 (0.6) 2.99 (8.8)
+Monolayer (a) 2.51 2.51 (0.0) 2.50 (0.4) 2.50 (0.4) 2.50 (0.4) 2.50 (0.4) 2.55 (1.6)
+Nanotube (10,0) 4.34 4.34 (0.0) 4.32 (0.5) 4.32 (0.5) 4.32 (0.5) 4.32 (0.5) 4.34 (0.0)
+Nanotube (10,10) 2.51 2.51 (0.0) 2.50 (0.4) 2.50 (0.4) 2.51 (0.0) 2.50 (0.4) 2.55 (1.6)
+errors but diverged significantly when compar-
+ing material properties. Therefore, the valida-
+tion presented will be focused on how the GAP
+model performs for energetic, geometrical, me-
+chanical, and vibrational properties of different
+hBN phases.
+The reproduction of lattice parameters for
+different phases is an essential requirement an
+accurate potential must fulfil. A comprehensive
+comparison of lattice parameters predicted by
+the hBN-GAP and other force fields as well as
+the relative deviation from DFT can be found
+in table 2. The DFT results agree well with
+experimental results88 for the bulk phase al-
+though the out-of-plane lattice parameter is
+underestimated by 0.15 Å. Overall, our model
+performs very well with respect to its DFT
+reference showing the lowest relative error for
+almost all lattice lengths and structures. The
+only exception is the interlayer spacing of a
+hBN bilayer revealing a relative deviation from
+DFT of 1.8 %. As found for the general carbon
+GAP and graphite, it is rather difficult to cor-
+rectly describe the shallow energy minimum of
+the interlayer binding curve.69 On the whole,
+however, the performance of the hBN-GAP is
+satisfactory with an average error of 0.27 %.
+The established force fields considered also
+achieve a very good performance for the geo-
+metric properties albeit being slightly less ac-
+curate than our hBN-GAP. Tersoff and ExTeP
+yield average errors of 0.42 % and 0.34 %, re-
+spectively, although their actual score is some-
+what biased as no out-of-plane lengths were
+considered. Coupling both potentials tuned
+with ILP, however, allows for the description
+of multilayered hBN and they both yield an
+average error of 0.46 % comparable with the
+hBN-GAP. Despite the better agreement for the
+interlayer distance between two isolated sheets,
+it should be noted that none of the existing po-
+tentials is able to capture the qualitative trend
+of an increased distance with respect to bulk
+hBN. ReaxFF achieves a sufficient accuracy for
+the in-plane and nanotubes lattice parameters
+but it fails dramatically to capture the out-of-
+plane lengths resulting in an overall error of
+3.56 %.
+In addition to the structural characteristics,
+we now consider the energetics of the relevant
+phases as shown in figure 2. To this end, the
+computed formation energies of the optimised
+structures are given per atom and relative to
+7
+bulk hBN which is the thermodynamically most
+stable phase. In the case of layered hBN, the
+observations from the lattice parameters for
+Tersoff and ExTEP are confirmed. Due to
+the lack of non-bonded contributions to the
+energy these potentials cannot distinguish be-
+tween different numbers of sheets yielding an
+RMSE of more than 58 meV/atom for both
+models. Compensating for this with the ILP,
+the tuned Tersoff and ExTeP potentials achieve
+good agreement with DFT with an improved
+RMSE of 11 and 27 meV/atom, respectively.
+While the performance of ReaxFF is mediocre
+with an error of 45 meV/atom, our hBN-GAP
+achieves an excellent agreement with DFT with
+a RMSE < 1 meV/atom. This high accuracy is
+persistent throughout the tested configurations
+including the energetically less favourable nan-
+otubes irrespective of diameter or chirality. To
+avoid confusion it is worth mentioning that the
+total energy of the nanotubes predicted by Ter-
+soff and ExTeP is identical to those predicted
+by their versions enhanced by ILP. The energy
+shift in the plot is caused by the change of the
+energy for the reference bulk hBN.
+Part of the attention garnered by hBN is due
+to its excellent mechanical properties. More-
+over, a system’s response to mechanical com-
+pression and tension is an essential property
+for 2D materials as it affects the shape of rip-
+ples in atomically thin sheets.21,89 In order to
+ensure an accurate description of the strain-
+deformation relationship we computed the rel-
+evant elastic constants of bulk hBN with DFT,
+GAP, and existing potentials. An overview
+of these results and a comparison to experi-
+mental measurements90 can be found in table
+3. In order to determine the elastic constants,
+finite distortions were made to the optimised
+cell and the ions were allowed to relax. The
+respective constants were then calculated from
+the stress-strain relationship whereby different
+magnitudes of strain were applied to guaran-
+tee a linear behaviour. For ReaxFF this linear
+relationship could not be achieved. Instead
+physically unrealistic and negative elastic con-
+stants were obtained. This indicates that the
+parametrisation of the ReaxFF used44 does not
+Figure 2: Formation energies of the hBN
+configurations computed with DFT (optB86b-
+vdW), the hBN-GAP, and other established
+force fields. Both bond-order potentials Ter-
+soff and ExTeP are shown with and without
+the correction for multiple layers contributed
+by the ILP. All energies are plotted relative to
+bulk hBN. The lines are a guide to the eye.
+yield a satisfactory description of the equilib-
+rium shape of bulk hBN, namely AA′ stacking
+in a hexagonal unit cell. This issue could not
+be solved by changing to a different parameter
+set46 for ReaxFF. The results for ReaxFF are,
+thus, not included in table 3.
+As the elastic constants are quite sensitive
+to the basis set of the DFT calculations, the
+plane wave cut-off was increased to 1000 eV to
+converge results for the mechanical properties.
+Our DFT calculations match the measurements
+for most constants within the experimental un-
+certainty. Both approaches predict that there
+is no coupling between in-plane stress (strain)
+and out-of-plane strain (stress), i.e. C13 = 0.
+Our hBN-GAP achieves a very good agreement
+with its reference DFT, particularly for the in-
+plane constants C11, C12 and the out-of-plane
+8
+Table 3: Mechanical properties of bulk hBN calculated with DFT (optB86b-vdW), the
+hBN-GAP, and other force fields in comparison to experimental measurements.90 For
+the experiments the values in parenthesis correspond to the experimental uncertainty.
+Due to the short cut-off of Tersoff and ExTeP no values (–) are given for the out-of-
+plane elastic constants C13, C33, C44, and the bulk modulus.
+Elastic constants [GPa]
+DFT GAP Tersoff Tersoff + ILP ExTeP ExTeP + ILP Experiment90
+C11 884.0 860.0 969.9 858.0 849.1 861.9 811.0 (12.0)
+C12 202.2 191.9 303.0 269.8 152.4 156.3 169.0 (24.0)
+C13 0.0 7.1 – 2.8 – 2.8 0.0 (3.0)
+C33 33.8 33.5 – 37.9 – 37.7 27.0 (5.0)
+C44 3.1 19.5 – 6.5 – 6.5 7.7 (5.0)
+B (eq) 31.6 32.6 – 35.9 – 35.4
+25.6 (8.0)
+B (MEoS) 38.3 39.3 – 39.8 – 39.7
+coupling C33 which also corresponds to a high
+accuracy of the interlayer binding curve.82 The
+prediction for C13 and C44 is slightly less accu-
+rate while the actual behaviour is still captured
+qualitatively. Beyond the individual couplings
+between different directions, a correct descrip-
+tion of the overall compressibility of the mate-
+rial, i.e. the bulk modulus B, is desirable. Here,
+we calculate B via a relationship91 dependent
+on the elastic constants,
+B =
+C33(C11 + C12)− 2(C13)2
+C11 + C12 + 2C33 − 4C12
+, (1)
+and by fitting the Murnaghan equation of state
+(MEoS)92 to the energy-volume curve. For
+the latter approach, the anisotropic character
+of hBN requires a non-isotropic compression
+to avoid erroneous results. As shown in table
+3, both methods yield similar results and the
+hBN-GAP agrees very well with DFT.
+Evaluating the performance of established
+potentials, both Tersoff and ExTeP suffer from
+their unsatisfactorily short cut-off predicting
+infinite compressibility for any reasonable ge-
+ometry. Therefore, no values are included for
+elastic constants dependent on out-of-plane
+strain. By applying the ILP correction both
+tuned potentials perform very well compared
+to DFT and experiments. While they are 2 to
+4 GPa less accurate for the in-plane constants
+they show an even better agreement for C13
+and C44 than the hBN-GAP. Despite this good
+performance, it should be noted that the high
+accuracy seems to be mainly based on the ILP
+correction. Therefore, doubts must be cast on
+the predictive capability of these potentials for
+isolated hBN sheets and nanotubes as the ILP
+has no contribution to the potential energy in
+these cases.
+For low-dimensional materials, it has been
+shown that phonon modes affect adsorbate
+(notably water) diffusion through carbon nan-
+otubes27 and across graphene.93 Other relevant
+thermodynamic properties, such as heat ca-
+pacity, thermal conductivity, and thermal ex-
+pansion coefficients are also closely linked to
+phonons. Therefore, an accurate description
+of the dynamics of the lattice is an essential
+requirement for the hBN-GAP.
+Before discussing the performance of the
+hBN-GAP, it is important to emphasise some
+essential aspects in the calculation of the
+phonon dispersion curves for hBN. In princi-
+ple, phonon frequencies are readily calculated
+using the finite displacement method wherein
+the force matrix is constructed based on the
+displacement of a single atom while the re-
+maining ions are held at their equilibrium po-
+sition. In the case of polar bulk materials,
+9
+A B
+C
+Figure 3: Phonon dispersion curves calculated
+for different phases of hBN. The black data
+corresponds to the reference DFT (optB86b-
+vdW) while the red data represents our hBN-
+GAP. (A) Phonon dispersion for an isolated
+hBN sheet. (B) Predicted dispersion curves for
+bulk hBN. The deviations close to Γ stem from
+an implicit treatment of charges (see main text
+for more details). (C) Phonon dispersion for a
+selected nanotube with chirality (6,6) as well as
+the density of states (DOS) predicted with GAP
+and DFT. The blue line corresponds to the nor-
+malised deviation between the individual DOS.
+Due to the number of bands, the phonon dis-
+persion for other force fields are included in the
+supplementary information.
+however, a dipole is induced by the longitudi-
+nal optical (LO) phonon modes which creates a
+macroscopic electric field resulting in an upshift
+of the LO frequencies in the long wavelength
+limit, i.e. q → 0. The non-degeneracy of LO
+and the transverse optical (TO) modes close to
+the Γ -point, also known as LO-TO splitting,
+complicates the determination of phonon dis-
+persion curves within the finite displacement
+method. Theoretically, an infinitely large su-
+percell is required to calculate the frequencies
+at very small wavevectors exactly.94 This can
+be avoided by adding a non-analytical correc-
+tion to the dynamic matrix based on the Born
+effective charges as shown by Gonze et al.95,96
+The required Born effective charges can be
+easily obtained within density functional per-
+turbation theory (DFPT).97 As an alternative
+to the finite displacement, the analytical part
+of the dynamic matrix is also readily calculated
+by the linear response of the electron density
+providing the entire dispersion curve based on
+the unit cell only.98
+Here, as first-principle reference we conduct
+DFPT calculations because it has been shown
+that the LO-TO splitting vanishes for 1D and
+2D structures99,100 and an appropriate treat-
+ment of the Coulombic interactions has recently
+been implemented101 in the DFPT framework
+in the QUANTUM ESPRESSO (QE)102,103
+software package. Equivalent setups for the
+DFPT and DFT calculations conducted with
+QE and VASP, respectively, were used. We
+ensured a high agreement between both codes
+throughout different properties and a more
+detailed comparison can be found in the sup-
+plementary information. For GAP and other
+potentials the phonon dispersion curves are cal-
+culated using the finite displacement method
+provided by the Phonopy package.104 For po-
+tentials treating charges explicitly, contribu-
+tions due to the non-analytical correction ac-
+cording to Gonze et al.95,96 can be added. This,
+however, does not apply for the bond-order po-
+tentials and the hBN-GAP.
+In this work, we compare the phonon disper-
+sion of a hBN single layer, bulk hBN, and a hBN
+nanotube with chirality (6,6). Excellent agree-
+ment was obtained between our DFT reference
+and inelastic X-ray scattering (IXS) measure-
+ments105–108 for bulk hBN which is reported
+in the supplementary information. The disper-
+sion curves computed with DFT and hBN-GAP
+are shown in figure 3 and the performance of
+other force fields can be found in the supple-
+mentary information. As shown in figure 3A
+the GAP achieves a very good agreement with
+its DFT reference, particularly for the acous-
+tic modes. The predicted frequencies of the
+optical branches at the Γ-point are correct to
+< 5 meV. GAP is not able to reproduce the fi-
+10
+nite slope of the LO dispersion close to the zone
+center. Despite a vanishing LO-TO splitting,
+the generated electric field still causes a non-
+zero slope which can be captured by adding
+the non-analytical correction to the dynamic
+matrix as described above.101 As charges and
+related electrostatics are treated implicitly, the
+current version of the hBN-GAP cannot repro-
+duce this characteristic behaviour. While this
+also applies for the LO-TO splitting of bulk
+hBN shown in figure 3B, all other features of
+the dispersion curve are captured with an error
+of < 3 meV also for out-of-plane wavevectors.
+The good performance of the hBN-GAP for
+the vibrations in layered hBN becomes even
+more apparent when comparing to existing
+force fields shown in the supplementary infor-
+mation. Both the Tersoff and ExTeP potentials
+provide a good though less accurate description
+of the acoustic modes yielding deviations of
+more than 20 meV. Further, the phonon energy
+of the optical modes, particularly LO and TO,
+is overestimated by up to 40 meV for both po-
+tentials. Applying the ILP to the bond-order
+potentials results in an accurate description of
+the acoustic modes between A and Γ for bulk
+hBN, however, the higher frequency modes are
+almost unaffected by the correction. As with
+the hBN-GAP, the LO-TO splitting cannot be
+captured by these potentials due to the lack of
+explicit charges.
+To understand the performance of the hBN-
+GAP for a (6,6) nanotube, we focus on the
+overall phonon density of states (DOS) rather
+than individual bands due to the large num-
+ber of atoms in the unit cell. As depicted in
+figure 3C, the hBN-GAP reproduces the DFT
+results very well showing only small deviations
+of typically < 3 meV. The DOS predicted by
+the hBN-GAP is almost congruent with the one
+obtained from DFT calculations. For the estab-
+lished force fields we observe a similar trend to
+layered hBN. While the low energy modes are
+described sufficiently accurately yielding devia-
+tions of about 7 meV, the high energy modes
+shifted by more than 30 meV for both Tersoff
+and ExTeP potential (see supplementary infor-
+mation).
+Application to rippling in
+hBN and graphene
+After the careful validation in the previous
+section, we focus on the application of the
+hBN-GAP to investigate rippling in single
+layer hBN in comparison to graphene. Al-
+though their name may suggest otherwise, these
+2D materials are not perfectly flat at finite
+temperature but exhibit local height fluctua-
+tions.21,26,56,109–112 These thermally activated
+ripples are caused by anharmonic coupling be-
+tween bending and stretching modes and are an
+intrinsic feature of 2D materials, stabilising the
+crystal.20,89,113–115 Moreover, the corrugation of
+the surface can strongly affect the material’s
+properties22–24 indicating a close link between
+atomic and electronic structure. The behaviour
+of the 2D crystal is, thus, directly affected by
+the average amplitude of the height fluctua-
+tions, 〈h〉, which, according to the theory of
+flexible membranes,113–115 scales with the sys-
+tem size, L, as 〈h〉 ∝ L1−η/2, with η being
+the anomalous rigidity exponent. While the
+results of atomistic simulations on graphene56
+and a general nonperturbative renormalisation-
+group approach116 suggest the transferability
+of η = 0.85, yet, despite the existence of pre-
+vious studies on rippling in hBN,110,117,118 it is
+unclear whether an identical scaling exponent
+can be applied to hBN. Here, we first utilise
+the hBN-GAP to determine η based on MD
+simulations following the procedure described
+by Los et al.56 For the sake of comparabil-
+ity, we also compute η for graphene using the
+same methodology whereby the interatomic in-
+teractions are described by the graphene-GAP
+potential.67 However, as the actual shape and
+amplitude of the ripples can be strongly altered
+by externally introduced strain,26,93,112 we sub-
+sequently analyse the impact of tension and
+compression on the mean amplitude and phase
+behaviour of both materials.
+All simulations were performed in LAMMPS119
+using a hexagonal simulation box comprising
+11
+7200 atoms applying a timestep of 1 fs. The un-
+strained sheets span a size of 15×15 nm varying
+slightly according to the respective bond length.
+While this scale is beyond the usually accessible
+system size for DFT-based MD, GAP models
+can easily cope with these dimensions. First,
+we sampled the equilibrium lattice parameter
+of both materials at 300 K and zero external
+pressure in the isothermal-isobaric ensemble.
+A Nosé-Hoover chain thermostat and barostat
+was applied to ensure the target temperature
+and pressure. Then, we adjusted the systems’
+dimensions to sample the configurational space
+of the unstrained sheets in the canonical en-
+semble. In an analogous manner, we adapted
+the box dimensions to achieve relative strains
+between −2.0 % and +2.0 % to study the shape
+of mechanically induced ripples. The sampling
+time for all considered strains was roughly 0.5
+ns.
+The scaling exponent η was then computed
+based on the comparison between the results
+of our atomistic simulations and the prediction
+of the normal-normal correlation G(q) func-
+tion provided by the theory of flexible mem-
+branes.113–115 A general expression for G(q) is
+given by the Dyson equation
+G−1(q) = G−10 (q) + Σ(q) , (2)
+where G0(q) represents the harmonic approxi-
+mation,
+G0(q) =
+TN
+κS0q2
+, (3)
+and Σ(q) is the self energy accounting for the
+anharmonic coupling at small wavevectors,
+Σ(q) =
+AS0
+N
+q2
+(
+q0
+q
+)η
+, (4)
+with q as length of the 2D wavevector q, T
+as temperature in energy units, N as num-
+ber of atoms, κ as bending rigidity, S0 as area
+per atom, A as an unknown prefactor, q0 =
+2π
+√
+B/κ, B as 2D bulk modulus, and η as
+the desired scaling exponent. In the limit of
+slowly varying height fluctuations (|∇h|2 � 1),
+G(q) as defined in equation 2 is identical to
+q2〈|h(q)|2〉, where h(q) represents the Fourier
+transform of the atomic out-of-plane displace-
+ment, h(x), which is directly obtained from
+a MD trajectory.21,56,109 In practice, however,
+h(x) is smoothed by averaging over the nearest
+neighbours before numerically calculating the
+Fourier components.109 Further, the wavevec-
+tors are restricted by the system size to a min-
+imum length of 2π/L corresponding to ≈ 0.048
+Å
+−1
+for our system, which has been shown to
+be sufficiently small to access the anharmonic
+region.56
+Figure 4: Normal-normal correlation function
+G(q)/N calculated for graphene and hBN based
+on MD simulations using the hBN-GAP and the
+graphene-GAP, respectively. The pale mark-
+ers correspond to the numerical results directly
+obtained from our simulations. This data was
+then smoothed and averaged within small inter-
+vals of wavevectors which is represented by the
+continuous line including error bars. The dot-
+ted lines imply the asymptotic behaviour with
+power-law q−2 for the harmonic approximation
+for large q and q−(2−η) for long wavelengths
+where the anharmonic contributions dominate.
+For graphene and hBN values of η = 0.87 and
+η = 0.83, respectively, are obtained
+Figure 4 depicts G(q)/N calculated from
+the MD trajectories for unstrained hBN and
+graphene. While for large wavevectors the
+continuum theory breaks down, G(q) is accu-
+12
+rately reproduced by the harmonic approxima-
+tion G0(q) for wavevectors in range q
+∗ . q .
+1 Å
+−1
+where q∗ is given by the Ginzburg crite-
+rion115
+q∗ =
+√
+3TB
+8πκ2
+, (5)
+quantifying the long-wavelength limit where
+anharmonic contributions become dominant.
+We extracted the bending rigidity κ at 300 K
+for both materials by comparing equation
+3 to the simulation results for wavevectors
+0.3 < q < 1 Å
+−1
+yielding κ = 1.14 eV and
+κ = 1.65 eV for hBN and graphene, respec-
+tively. As these values seem very high in com-
+parison to previous work using classical po-
+tentials,21,56,110 we computed κ at 0 K based
+on the out-of-plane acoustic phonon branch
+(ZA)120 for both GAP models. The results of
+κ = 0.90 eV and κ = 1.58 eV for hBN and
+graphene, respectively, agree very well with
+previous DFT calculations.121,122
+We now focus on the long-wavelength simu-
+lation data in the range q ≤ q∗ which we com-
+pare to the anharmonic self energy Σ(q) given
+by equation 4. Due to the rather weak tem-
+perature dependence of the 2D bulk modulus
+B,123 we used the predicted values of the GAP
+models for 0 K which are B = 11.19 eV/Å
+2
+and B = 13.59 eV/Å
+2
+for hBN and graphene,
+respectively. Further, to be comparable with
+previous work21,56 we fixed the prefactor A = 1.
+This way, a best fit to the simulation data yields
+scaling exponents of η = 0.83 for hBN and
+η = 0.87 for graphene which agree very well
+with established findings.56,116 The small devi-
+ations between the materials might be caused
+by the limited availability of fitting data in the
+long-wavelength range. While larger systems
+are required to resolve this issue, this should
+only have an influence in the order of 10−2 for
+the scaling exponent. Our results, therefore,
+confirm the observation made by Los et al.56
+that the scaling exponent is independent of the
+bending rigidity κ. In fact, our findings go
+beyond this statement by revealing an almost
+identical scaling behaviour for two different ma-
+terials, hinting at the possibility of a universal
+value of η ≈ 0.85 for 2D materials. Conversely,
+the distinct materials’ properties strongly affect
+the actual height of the ripples where small val-
+ues of κ result in larger height fluctuations as
+shown by the shift of hBN in figure 4. Also, ac-
+cording to equation 5 the crossover between the
+harmonic and anharmonic regime is switched
+to lower q for lower values of B/κ2 which is also
+confirmed by our results.
+So far, we have shown that the scaling be-
+haviour of ripples is almost identical in hBN
+and graphene while the amplitude of the out-
+of-plane deviations for a given system size will
+be slightly larger in hBN than in graphene.
+However, these findings apply in the limit of
+no external strain. To go beyond this, we anal-
+yse the average height of these mechanically
+induced ripples based on MD trajectories of
+hBN and graphene exposed to different inten-
+sities of strain. To this end, we determined the
+atom which shows the highest deviation from
+the centre mass perpendicular to the flat sheet.
+This measure is then averaged over the entire
+trajectory and the respective error based on
+block averages was computed to quantify the
+uncertainty. We also evaluated the influence of
+the box geometry on the shape and amplitude
+of the ripples in compressed systems. While the
+shape changes significantly from a hexagonal to
+an orthorombic simulation box the magnitude
+of the height fluctuations is almost unaffected
+(see supplementary material).
+In analogy to our findings for the unstrained
+systems, ripples in hBN and graphene show a
+very similar reaction to strain as shown in fig-
+ure 5A. The measured amplitudes agree with
+previous simulation work based on established
+force fields for both graphene93 and hBN.118
+Throughout the entire strain range, hBN shows
+a larger average rippling height than graphene
+due to its lower bending rigidity κ. Large neg-
+ative strains lead to a compression of the 2D
+sheets as the system stabilises by deforming
+in the third dimension while uniaxial tension
+causes the amplitude of the out-of-plane de-
+formations to shrink. We observed a phase
+transition from short-lived fluctuations (figure
+13
+A
+B
+C
+Figure 5: (A) Averaged out-of-plane devia-
+tion as function of applied strain for hBN (red)
+and graphene (black) predicted by the hBN-
+GAP and graphene GAP, respectively.(B-C)
+Snapshot of the MD simulations for an un-
+strained and hBN monolayer and compression
+of −2.0%. The atoms are coloured according
+to their displacement from the center of mass
+in z-direction. The simulation box is indicated
+in black and the scale bar in the bottom left
+represents 2 nm.
+5B) to spatially coherent soliton-like ripples
+(figure 5C) which takes place between a strain
+of −0.25% and −0.5% for both materials. This
+is in line with simulations performed on isolated
+graphene sheets.93 Interestingly, for multilay-
+ered graphene previous simulations124 have led
+to the suggestion that a much higher strain of
+−2.8% is required to induce spatially coherent
+ripples. Exploring this issue for hBN and the
+impact of vdW forces between multiple layers
+on the phase transition of ripples is a fascinat-
+ing field and will be subject of future work.
+Finally, it is worth mentioning that these
+studies on ripples show that the hBN-GAP
+proves to be transferable to system sizes outside
+both the training set and the accessible scale
+of DFT. Indeed, the predicted phase transition
+from figure 5B to a rippling pattern as in fig-
+ure 5C is exclusively based on an interpolation
+between the local environments in the training
+set.
+Conclusion
+In this work, we introduced a machine learning-
+based atomistic model to treat different phases
+of hBN ranging from isolated sheets to the
+bulk phase and nanotubes of any chirality. Our
+model was constructed using the GAP method-
+ology and was trained on energies, forces, and
+virial stresses obtained from tightly converged
+vdW-inclusive DFT calculations. We bench-
+marked the hBN-GAP against its DFT ref-
+erence and other established potentials and
+demonstrated its capabilities through a vari-
+ety of tests including the elastic constants and
+the phonon dispersion spectra for nanotubes
+and layered hBN. Based on this validation we
+believe to have developed an accurate model,
+however, we do not claim perfect accuracy for
+each property. Rather, we acknowledge that
+the prediction for individual properties may be
+compromised due to the variety of configura-
+tions and thermodynamic conditions consid-
+ered.
+We applied our model as part of a compar-
+ative analysis of thermally and mechanically
+induced rippling in graphene and hBN. In the
+course of this study, we found that the bend-
+ing rigidities predicted by both GAP models
+are significantly larger than reported by previ-
+ous work based on established force fields. We
+showed that the scaling behaviour of the rip-
+14
+pling height is with η ≈ 0.85 almost identical
+for hBN and graphene and, thus, independent
+of material properties. This highlights the gen-
+eral applicability of the theory of flexible mem-
+branes and indicates that η = 0.85 could be
+universally valid for 2D materials. Testing this
+suggestion on other 2D materials (e.g. clays
+and transition metal dichalcogenides) would
+make interesting work for the future. In con-
+trast to the scaling behaviour, however, the
+actual height of the out-of-plane deviations for
+a given system size is directly affected by the
+material’s resistance to bending showing larger
+values for hBN. This observation also holds for
+mechanically deformed ripples irrespective of
+whether the system was exposed to compres-
+sion or tension. Eventually, the phase transi-
+tion from randomly fluctuating to soliton-like
+ripples occurs at roughly the same strain rate
+for both materials.
+It is important, however, to point out some
+of the limitations and shortcomings of our po-
+tential. Despite being computationally several
+orders of magnitude more efficient than DFT,
+the evaluation of the SOAP descriptor is de-
+manding and the hBN-GAP is roughly three
+order of magnitude more expensive than the
+established hBN force fields. Although we ex-
+tended the range of the 2B descriptor to 10 Å,
+our model is constrained by its finite cut-off
+and is, thus, not able to appropriately treat
+long-range interactions due to electrostatics or
+dispersion. Further, treating charges only im-
+plicitly prevents a correct description of the
+phonon dispersion curves at small wavevectors.
+Additionally, in reality hBN is inevitably found
+with defects and dopants are incorporated in
+the crystal’s lattice.125 While we did not con-
+sider such systems in this study, they will be
+part of future extensions of our training set and
+GAP model.
+Looking forward, future applications of the
+hBN-GAP could involve the study of how rip-
+pling is affected by dispersion interactions in
+bilayer and multilayer hBN. Another applica-
+tion may include treating our model as struc-
+ture generator for rippled sheets to investigate
+the impact of the corrugation on proton trans-
+fer52,126 and the adsorption and, potentially,
+permeation of small atoms and molecules with
+DFT.127,128 Moreover, the hBN-GAP can be
+readily combined with any other force field
+and, thus, could be used to study the interface
+with fluids such as liquid water. In this con-
+text, a high resolution of the phonon modes, as
+achieved with our model, is essential as adsor-
+bate motion on layered materials, and through
+nanotubes couples with phonon modes of the
+solid.27–30
+We have made our potential as well as train-
+ing and evaluation sets freely available at [http:
+//www.libatoms.com]. The hBN-GAP can
+be readily applied within the QUIP software
+package and used to run MD simulations in
+LAMMPS.119
+Supporting Information Avail-
+able
+The following files are available free of charge.
+The Supporting Information is available free
+of charge on the ACS Publications website at
+DOI: .
+Comparison of DFT functionals.
+Benchmarking of the hBN GAP includ-
+ing formation energies of nanotubes, the
+binding curve in bulk hBN, as well as the
+computational efficiency.
+Phonon dispersion curves predicted by
+the various force fields.
+Analysis of the impact of box shape and
+box size on the predicted rippling ampli-
+tudes.
+Acknowledgement We thank Gábor Csányi
+for fruitful discussions and valuable advice dur-
+ing the fitting process of the GAP model.
+We also thank Piero Gasparotto for his guid-
+ance and support in creating the sketch-map.
+The authors are grateful to the UK Materi-
+als and Molecular Modelling Hub for compu-
+tational resources, which is partially funded
+15
+http://www.libatoms.com
+http://www.libatoms.com
+by EPSRC (EP/P020194/1). Via our mem-
+bership of the UK’s HEC Materials Chem-
+istry Consortium, which is funded by EPSRC
+(EP/L000202, EP/R029431), this work used
+the ARCHER UK National Supercomputing
+Service (http://www.archer.ac.uk). Addition-
+ally, we are also grateful for the use of the
+UCL Grace High Performance Computing Fa-
+cility (Grace@UCL), and associated support
+services, in the completion of this work. Sim-
+ilarly, we are also grateful for the use of the
+Imperial College Research Computing Service,
+DOI: 10.14469/hpc/2232.
+References
+(1) Watanabe, K.; Taniguchi, T.; Kanda, H.
+Direct-bandgap properties and evidence
+for ultraviolet lasing of hexagonal boron
+nitride single crystal. Nature Materials
+2004, 3, 404–409.
+(2) Chen, Y.; Zou, J.; Campbell, S. J.;
+Caer, G. L. Boron nitride nanotubes:
+Pronounced resistance to oxidation. Ap-
+plied Physics Letters 2004, 84, 2430–
+2432.
+(3) Pakdel, A.; Bando, Y.; Golberg, D. Nano
+boron nitride flatland. Chemical Society
+Reviews 2014, 43, 934–959.
+(4) Geim, A. K.; Grigorieva, I. V. Van der
+Waals heterostructures. Nature 2013,
+499, 419–425.
+(5) Britnell, L.; Gorbachev, R. V.; Jalil, R.;
+Belle, B. D.; Schedin, F.; Mishchenko, A.;
+Georgiou, T.; Katsnelson, M. I.;
+Eaves, L.; Morozov, S. V. et al. Field-
+Effect Tunneling Transistor Based on
+Vertical Graphene Heterostructures.
+Science 2012, 335, 947–951.
+(6) Xia, F.; Wang, H.; Xiao, D.; Dubey, M.;
+Ramasubramaniam, A. Two-dimensional
+material nanophotonics. Nature Photon-
+ics 2014, 8, 899–907.
+(7) Lei, W.; Portehault, D.; Liu, D.;
+Qin, S.; Chen, Y. Porous boron nitride
+nanosheets for effective water cleaning.
+Nature Communications 2013, 4, 1777.
+(8) Zhi, C.; Xu, Y.; Bando, Y.; Gol-
+berg, D. Highly thermo-conductive fluid
+with boron nitride nanofillers. ACS Nano
+2011, 5, 6571–6577.
+(9) Taha-Tijerina, J.; Narayanan, T. N.;
+Gao, G.; Rohde, M.; Tsentalovich, D. A.;
+Pasquali, M.; Ajayan, P. M. Electrically
+insulating thermal nano-oils using 2D
+fillers. ACS Nano 2012, 6, 1214–1220.
+16
+(10) Krishnam, M.; Bose, S.; Das, C. Boron
+nitride (BN) nanofluids as cooling agent
+in thermal management system (TMS).
+Applied Thermal Engineering 2016, 106,
+951–958.
+(11) Zhao, H.; Ding, J.; Xu, B.; Zhao, X.;
+Zheng, Y.; Shao, Z.; Yu, H. Green Syn-
+thesis of Graphene/Boron Nitride Com-
+posites for Ultrahigh Thermally Conduc-
+tive Fluids. ACS Sustainable Chemistry
+and Engineering 2019, 7, 14266–14272.
+(12) Ciofani, G.; Danti, S.; Genchi, G. G.;
+Mazzolai, B.; Mattoli, V. Boron nitride
+nanotubes: Biocompatibility and poten-
+tial spill-over in nanomedicine. Small
+2013, 9, 1672–1685.
+(13) Weng, Q.; Wang, B.; Wang, X.; Hana-
+gata, N.; Li, X.; Liu, D.; Wang, X.;
+Jiang, X.; Bando, Y.; Golberg, D. Highly
+water-soluble, porous, and biocompatible
+boron nitrides for anticancer drug deliv-
+ery. ACS Nano 2014, 8, 6123–6130.
+(14) Weng, Q.; Wang, X.; Wang, X.;
+Bando, Y.; Golberg, D. Functionalized
+hexagonal boron nitride nanomaterials:
+Emerging properties and applications.
+Chemical Society Reviews 2016, 45,
+3989–4012.
+(15) Secchi, E.; Marbach, S.; Niguès, A.;
+Stein, D.; Siria, A.; Bocquet, L. Massive
+radius-dependent flow slippage in carbon
+nanotubes. Nature 2016, 537, 210–213.
+(16) Siria, A.; Poncharal, P.; Biance, A. L.;
+Fulcrand, R.; Blase, X.; Purcell, S. T.;
+Bocquet, L. Giant osmotic energy conver-
+sion measured in a single transmembrane
+boron nitride nanotube. Nature 2013,
+494, 455–458.
+(17) Grosjean, B.; Pean, C.; Siria, A.;
+Bocquet, L.; Vuilleumier, R.; Boc-
+quet, M. L. Chemisorption of Hydroxide
+on 2D Materials from DFT Calculations:
+Graphene versus Hexagonal Boron Ni-
+tride. Journal of Physical Chemistry Let-
+ters 2016, 7, 4695–4700.
+(18) Secchi, E.; Niguès, A.; Jubin, L.;
+Siria, A.; Bocquet, L. Scaling behavior
+for ionic transport and its fluctuations
+in individual carbon nanotubes. Physical
+Review Letters 2016, 116, 154501.
+(19) Siria, A.; Bocquet, M.-L.; Bocquet, L.
+New avenues for the large-scale harvest-
+ing of blue energy. Nature Reviews Chem-
+istry 2017, 1, 0091.
+(20) Meyer, J. C.; Geim, A. K.; Katsnel-
+son, M. I.; Novoselov, K. S.; Booth, T. J.;
+Roth, S. The structure of suspended
+graphene sheets. Nature 2007, 446, 60–
+63.
+(21) Fasolino, A.; Los, J. H.; Katsnelson, M. I.
+Intrinsic ripples in graphene. Nature Ma-
+terials 2007, 6, 858–861.
+(22) Guinea, F.; Horovitz, B.; Le Dous-
+sal, P. Gauge field induced by ripples
+in graphene. Physical Review B - Con-
+densed Matter and Materials Physics
+2008, 77, 205421.
+(23) Guinea, F.; Katsnelson, M. I.; Vozme-
+diano, M. A. Midgap states and charge
+inhomogeneities in corrugated graphene.
+Physical Review B - Condensed Matter
+and Materials Physics 2008, 77, 075422.
+(24) Vázquez De Parga, A. L.; Calleja, F.;
+Borca, B.; Passeggi, M. C.; Hinare-
+jos, J. J.; Guinea, F.; Miranda, R.
+Periodically rippled graphene: Growth
+and spatially resolved electronic struc-
+ture. Physical Review Letters 2008, 100,
+056807.
+(25) Boukhvalov, D. W.; Katsnelson, M. I.
+Enhancement of chemical activity in cor-
+rugated graphene. Journal of Physical
+Chemistry C 2009, 113, 14176–14178.
+(26) Bao, W.; Miao, F.; Chen, Z.; Zhang, H.;
+Jang, W.; Dames, C.; Lau, C. N. Con-
+trolled ripple texturing of suspended
+graphene and ultrathin graphite mem-
+branes. Nature Nanotechnology 2009, 4,
+562–566.
+17
+(27) Ma, M.; Grey, F.; Shen, L.; Urbakh, M.;
+Wu, S.; Liu, J. Z.; Liu, Y.; Zheng, Q.
+Water transport inside carbon nanotubes
+mediated by phonon-induced oscillating
+friction. Nature Nanotechnology 2015,
+10, 692–695.
+(28) Ghoufi, A.; Szymczyk, A.; Malfreyt, P.
+Ultrafast diffusion of Ionic Liquids Con-
+fined in Carbon Nanotubes. Scientific
+Reports 2016, 6, 28518.
+(29) Cruz-Chú, E. R.; Papadopoulou, E.;
+Walther, J. H.; Popadić, A.; Li, G.;
+Praprotnik, M.; Koumoutsakos, P. On
+phonons and water flow enhancement in
+carbon nanotubes. Nature Nanotechnol-
+ogy 2017, 12, 1106–1108.
+(30) Marbach, S.; Dean, D. S.; Bocquet, L.
+Transport and dispersion across wiggling
+nanopores. Nature Physics 2018, 14,
+1108–1113.
+(31) Tersoff, J. New Empirical Model for the
+Structural Properties of Silicon. Physical
+Review Letters 1986, 56, 632–635.
+(32) Tersoff, J. Empirical Interatomic Po-
+tential for Carbon, with Applications
+to Amorphous Carbon. Physical Review
+Letters 1988, 61, 2879–2882.
+(33) Tersoff, J. Modeling solid-state chem-
+istry: Interatomic potentials for multi-
+component systems. Physical Review B
+1989, 39, 5566–5568.
+(34) Brenner, D. W. Empirical potential for
+hydrocarbons for use in simulating the
+chemical vapor deposition of diamond
+film. Physical Review B 1990, 42, 9458–
+9471.
+(35) Albe, K.; Möller, W.; Heinig, K. H. Com-
+puter simulation and boron nitride. Radi-
+ation Effects and Defects in Solids 1997,
+141, 85–97.
+(36) Sekkal, W.; Bouhafs, B.; Aourag, H.;
+Certier, M. Molecular-dynamics simula-
+tion of structural and thermodynamic
+properties of boron nitride. Journal of
+Physics Condensed Matter 1998, 10,
+4975–4984.
+(37) Matsunaga, K.; Fisher, C.; Matsub-
+ara, H. Tersoff Potential Parameters for
+Simulating Cubic Boron Carbonitrides
+solid solution model Tersoff Potential
+Parameters for Simulating Cubic Boron
+Carbonitrides. Japanese Journal of Ap-
+plied Physics 2000, 39, 48–51.
+(38) Matsunaga, K.; Iwamoto, Y. Molecular
+Dynamics Study of Atomic Structure and
+Diffusion Behavior in Amorphous Sili-
+con Nitride Containing Boron. Journal of
+the American Ceramic Society 2001, 84,
+2213–2219.
+(39) Sevik, C.; Kınacı, A.; Haskins, J. B.;
+Çağın, T. Characterization of thermal
+transport in low-dimensional boron ni-
+tride nanostructures. Physical Review B -
+Condensed Matter and Materials Physics
+2011, 84, 085409.
+(40) Kınacı, A.; Haskins, J. B.; Sevik, C.;
+Çağın, T. Thermal conductivity of BN-
+C nanostructures. Physical Review B -
+Condensed Matter and Materials Physics
+2012, 86, 115410.
+(41) Los, J. H.; Kroes, J. M.; Albe, K.;
+Gordillo, R. M.; Katsnelson, M. I.; Fa-
+solino, A. Extended Tersoff potential
+for boron nitride: Energetics and elas-
+tic properties of pristine and defective
+h -BN. Physical Review B 2017, 96,
+184108.
+(42) van Duin, A. C. T.; Dasgupta, S.; Lo-
+rant, F.; Goddard III, W. A. ReaxFF: A
+Reactive Force Field for Hydrocarbons.
+Journal of Physical Chemistry A 2001,
+105, 9396–9409.
+(43) Chenoweth, K.; Van Duin, A. C.; God-
+dard, W. A. ReaxFF reactive force field
+for molecular dynamics simulations of
+hydrocarbon oxidation. Journal of Phys-
+ical Chemistry A 2008, 112, 1040–1053.
+18
+(44) Weismiller, M. R.; Duin, A. C.; Lee, J.;
+Yetter, R. A. ReaxFF reactive force
+field development and applications for
+molecular dynamics simulations of am-
+monia borane dehydrogenation and com-
+bustion. Journal of Physical Chemistry A
+2010, 114, 5485–5492.
+(45) Paupitz, R.; Junkermeier, C. E.; van
+Duin, A. C.; Branicio, P. S. Fullerenes
+generated from porous structures. Phys-
+ical Chemistry Chemical Physics 2014,
+16, 25515–25522.
+(46) Liu, S.; Van Duin, A. C.; Van
+Duin, D. M.; Liu, B.; Edgar, J. H. Atom-
+istic Insights into Nucleation and For-
+mation of Hexagonal Boron Nitride on
+Nickel from First-Principles-Based Re-
+active Molecular Dynamics Simulations.
+ACS Nano 2017, 11, 3585–3596.
+(47) Rajan, A. G.; Strano, M. S.;
+Blankschtein, D. Ab Initio Molecular
+Dynamics and Lattice Dynamics-Based
+Force Field for Modeling Hexagonal
+Boron Nitride in Mechanical and Inter-
+facial Applications. Journal of Physical
+Chemistry Letters 2018, 9, 1584–1591.
+(48) Mortazavi, B.; Rémond, Y. Investigation
+of tensile response and thermal conduc-
+tivity of boron-nitride nanosheets using
+molecular dynamics simulations. Phys-
+ica E: Low-Dimensional Systems and
+Nanostructures 2012, 44, 1846–1852.
+(49) Liao, M.-L.; Lian, T.-W.; Ju, S.-P. Ten-
+sile and compressive behaviours of a
+boron nitride nanotube: Temperature
+effects. Materials Science Forum 2012,
+700, 125–128.
+(50) Krishnan, N. M. A.; Ghosh, D. Defect in-
+duced plasticity and failure mechanism of
+boron nitride nanotubes under tension.
+Journal of Applied Physics 2014, 116,
+044313.
+(51) Le, M. Q.; Nguyen, D. T. Atomistic sim-
+ulations of pristine and defective hexag-
+onal BN and SiC sheets under uniaxial
+tension. Materials Science and Engineer-
+ing A 2014, 615, 481–488.
+(52) Hu, S.; Lozada-Hidalgo, M.; Wang, F. C.;
+Mishchenko, A.; Schedin, F.; Nair, R. R.;
+Hill, E. W.; Boukhvalov, D. W.; Katsnel-
+son, M. I.; Dryfe, R. A. et al. Proton
+transport through one-atom-thick crys-
+tals. Nature 2014, 516, 227–230.
+(53) Tocci, G.; Joly, L.; Michaelides, A. Fric-
+tion of water on graphene and hexago-
+nal boron nitride from Ab initio meth-
+ods: Very different slippage despite very
+similar interface structures. Nano Letters
+2014, 14, 6872–6877.
+(54) Androulidakis, C.; Koukaras, E. N.;
+Poss, M.; Papagelis, K.; Galiotis, C.;
+Tawfick, S. Strained hexagonal boron ni-
+tride: Phonon shift and Grüneisen pa-
+rameter. Physical Review B 2018, 97,
+241414.
+(55) Simonnin, P.; Noetinger, B.; Nieto-
+Draghi, C.; Marry, V.; Rotenberg, B.
+Diffusion under Confinement: Hydrody-
+namic Finite-Size Effects in Simulation.
+Journal of Chemical Theory and Compu-
+tation 2017, 13, 2881–2889.
+(56) Los, J. H.; Katsnelson, M. I.;
+Yazyev, O. V.; Zakharchenko, K. V.;
+Fasolino, A. Scaling properties of flexible
+membranes from atomistic simulations:
+Application to graphene. Physical
+Review B - Condensed Matter and
+Materials Physics 2009, 80, 1–4.
+(57) Rupp, M.; Tkatchenko, A.; Müller, K. R.;
+Von Lilienfeld, O. A. Fast and accurate
+modeling of molecular atomization ener-
+gies with machine learning. Physical Re-
+view Letters 2012, 108, 058301.
+(58) Behler, J. Perspective : Machine learn-
+ing potentials for atomistic simulations.
+Journal of Chemical Physics 2016, 145,
+170901.
+19
+(59) Bartók, A. P.; Csányi, G.; Ker-
+mode, J. R.; De, S.; Bernstein, N.; Ceri-
+otti, M.; Bartók, A. P.; Poelking, C. Ma-
+chine learning unifies the modeling of ma-
+terials and molecules. Science Advances
+2017, 3, e1701816.
+(60) Botu, V.; Batra, R.; Chapman, J.; Ram-
+prasad, R. Machine learning force fields:
+Construction, validation, and outlook.
+Journal of Physical Chemistry C 2017,
+121, 511–522.
+(61) Behler, J.; Parrinello, M. General-
+ized neural-network representation of
+high-dimensional potential-energy sur-
+faces. Physical Review Letters 2007, 98,
+146401.
+(62) Bartók, A. P.; Payne, M. C.; Kondor, R.;
+Csányi, G. Gaussian Approximation Po-
+tentials : The Accuracy of Quantum Me-
+chanics , without the Electrons. Physical
+Review Letters 2010, 104, 136403.
+(63) Li, Z.; Kermode, J. R.; De Vita, A.
+Molecular Dynamics with On-the-
+Fly Machine Learning of Quantum-
+Mechanical Forces. Physical Review
+Letters 2015, 114, 096405.
+(64) Chmiela, S.; Tkatchenko, A.;
+Sauceda, H. E.; Poltavsky, I.;
+Schütt, K. T.; Müller, K. R. Machine
+learning of accurate energy-conserving
+molecular force fields. Science Advances
+2017, 3, e1603015.
+(65) Nguyen, T. T.; Székely, E.; Im-
+balzano, G.; Behler, J.; Csányi, G.; Ce-
+riotti, M.; Götz, A. W.; Paesani, F.
+Comparison of permutationally invariant
+polynomials, neural networks, and Gaus-
+sian approximation potentials in repre-
+senting water interactions through many-
+body expansions. Journal of Chemical
+Physics 2018, 148, 241725.
+(66) Bartók, A. P.; Csányi, G. Gaussian ap-
+proximation potentials: A brief tuto-
+rial introduction. International Journal
+of Quantum Chemistry 2015, 115, 1051–
+1057.
+(67) Rowe, P.; Csányi, G.; Alfè, D.;
+Michaelides, A. Development of a ma-
+chine learning potential for graphene.
+Physical Review B 2018, 97, 054303.
+(68) Deringer, V. L.; Csányi, G. Machine
+learning based interatomic potential for
+amorphous carbon. Physical Review B
+2017, 95, 094203.
+(69) Rowe, P.; Deringer, V. L.; Gas-
+parotto, P.; Csányi, G.; Michaelides, A.
+An Accurate and Transferable Machine
+Learning Potential for Carbon. Journal
+of Chemical Physics 2020, submitted,
+arXiv:1011.1669v3.
+(70) Szlachta, W. J.; Bartók, A. P.; Csányi, G.
+Accuracy and transferability of GAP
+models for tungsten. Physical Review B
+2014, 90, 104108.
+(71) Jinnouchi, R.; Lahnsteiner, J.; Kar-
+sai, F.; Kresse, G.; Bokdam, M. Phase
+Transitions of Hybrid Perovskites Simu-
+lated by Machine-Learning Force Fields
+Trained on the Fly with Bayesian Infer-
+ence. Physical Review Letters 2019, 122,
+225701.
+(72) De, S.; Bartók, A. P.; Csányi, G.; Ceri-
+otti, M. Comparing molecules and solids
+across structural and alchemical space.
+Physical Chemistry Chemical Physics
+2016, 18, 13754–13769.
+(73) Bartók, A. P.; Kondor, R.; Csányi, G.
+On representing chemical environments.
+Physical Review B - Condensed Matter
+and Materials Physics 2013, 87, 184115.
+(74) Kresse, G.; Hafner, J. Ab initio molecu-
+lar dynamics for liquid metals. Physical
+Review B 1993, 47, 558–561.
+(75) Kresse, G.; Hafner, J. Ab initio
+molecular-dynamics simulation of
+the liquid-metalamorphous- semiconduc-
+tor transition in germanium. Physical
+Review B 1994, 49, 14251–14269.
+20
+(76) Kresse, G.; Furthmüller, J. Efficient it-
+erative schemes for ab initio total-energy
+calculations using a plane-wave basis set.
+Physical Review B - Condensed Matter
+and Materials Physics 1996, 54, 11169–
+11186.
+(77) Kresse, G.; Furthmüller, J. Efficiency
+of ab-initio total energy calculations for
+metals and semiconductors using a plane-
+wave basis set. Computational Materials
+Science 1996, 6, 15–50.
+(78) Klimeš, J.; Bowler, D. R.;
+Michaelides, A. Van der Waals den-
+sity functionals applied to solids.
+Physical Review B - Condensed Matter
+and Materials Physics 2011, 83, 1–13.
+(79) Blöchl, P. E. Projector augmented-wave
+method. Physical Review B 1994, 50,
+17953–17979.
+(80) Kresse, G.; Joubert, D. From ultra-
+soft pseudopotentials to the projector
+augmented-wave method. Physical Re-
+view B - Condensed Matter and Mate-
+rials Physics 1999, 59, 1758–1775.
+(81) Klimeš, J.; Bowler, D. R.;
+Michaelides, A. Chemical accuracy
+for the van der Waals density functional.
+Journal of Physics Condensed Matter
+2010, 22, 022201.
+(82) Graziano, G.; Klimeš, J.; Fernandez-
+Alonso, F.; Michaelides, A. Improved de-
+scription of soft layered materials with
+van der Waals density functional theory.
+Journal of Physics: Condensed Matter
+2012, 24, 424216.
+(83) Ceriotti, M.; Tribello, G. A.; Par-
+rinello, M. Simplifying the representation
+of complex free-energy landscapes using
+sketch-map. Proceedings of the National
+Academy of Sciences 2011, 108, 13023–
+13028.
+(84) Tribello, G. A.; Ceriotti, M.; Par-
+rinello, M. Using sketch-map coordinates
+to analyze and bias molecular dynamics
+simulations. Proceedings of the National
+Academy of Sciences of the United States
+of America 2012, 109, 5196–5201.
+(85) Leven, I.; Azuri, I.; Kronik, L.; Hod, O.
+Inter-layer potential for hexagonal boron
+nitride. Journal of Chemical Physics
+2014, 140, 104106.
+(86) Leven, I.; Maaravi, T.; Azuri, I.; Kro-
+nik, L.; Hod, O. Interlayer Potential for
+Graphene/h-BN Heterostructures. Jour-
+nal of Chemical Theory and Computation
+2016, 12, 2896–2905.
+(87) Maaravi, T.; Leven, I.; Azuri, I.; Kro-
+nik, L.; Hod, O. Interlayer Potential for
+Homogeneous Graphene and Hexagonal
+Boron Nitride Systems: Reparametriza-
+tion for Many-Body Dispersion Effects.
+Journal of Physical Chemistry C 2017,
+121, 22826–22835.
+(88) Solozhenko, V. L.; Will, G.; Elf, F.
+Isothermal compression of hexagonal
+graphite-like boron nitride up to 12 GPa.
+Solid State Communications 1995, 96,
+1–3.
+(89) Cerda, E.; Mahadevan, L. Geometry and
+Physics of Wrinkling. Physical Review
+Letters 2003, 90, 074302.
+(90) Bosak, A.; Serrano, J.; Krisch, M.;
+Watanabe, K.; Taniguchi, T.; Kanda, H.
+Elasticity of hexagonal boron nitride: In-
+elastic x-ray scattering measurements.
+Physical Review B - Condensed Mat-
+ter and Materials Physics 2006, 73,
+041402(R).
+(91) Ohba, N.; Miwa, K.; Nagasako, N.; Fuku-
+moto, A. First-principles study on struc-
+tural, dielectric, and dynamical proper-
+ties for three BN polytypes. Physical Re-
+view B - Condensed Matter and Materi-
+als Physics 2001, 63, 115207.
+(92) Murnaghan, F. D. The Compressibility of
+Media Under Extreme Pressure. Proceed-
+ings of the National Academy of Sciences
+21
+of the United States of America 1944,
+30, 244–247.
+(93) Ma, M.; Tocci, G.; Michaelides, A.;
+Aeppli, G. Fast diffusion of water nan-
+odroplets on graphene. Nature Materials
+2016, 15, 66–71.
+(94) Alfè, D. PHON: A program to calcu-
+late phonons using the small displace-
+ment method. Computer Physics Com-
+munications 2009, 180, 2622–2633.
+(95) Gonze, X.; Charlier, J. C.; Allan, D. C.;
+Teter, M. P. Interatomic force constants
+from first principles: The case of α-
+quartz. Physical Review B 1994, 50,
+13035–13038.
+(96) Gonze, X.; Lee, C. Dynamical matri-
+ces, Born effective charges, dielectric per-
+mittivity tensors, and interatomic force
+constants from density-functional per-
+turbation theory. Physical Review B -
+Condensed Matter and Materials Physics
+1997, 55, 10355–10368.
+(97) Giannozzi, P.; de Gironcoli, S.;
+Pavone, P.; Baroni, S. Ab initio
+calculation of phonon dispersions in
+semiconductors. Physical Review B
+1991, 43, 7231–7242.
+(98) Baroni, S.; de Gironcoli, S.; Dal Corso, A.
+Phonons and related crystal proper-
+ties from density-functional perturbation
+theory. Reviews of Modern Physics 2001,
+73, 515 – 557.
+(99) Daniel, S.-P.; Hernández, E. Vibrational
+properties of single-wall nanotubes and
+monolayers of hexagonal BN. Physical
+Review B 2002, 66, 235415.
+(100) Wirtz, L.; Rubio, A.; De La Concha, R.;
+Loiseau, A. Ab initio calculations of the
+lattice dynamics of boron nitride nan-
+otubes. Physical Review B - Condensed
+Matter and Materials Physics 2003, 68,
+045425.
+(101) Sohier, T.; Gibertini, M.; Calandra, M.;
+Mauri, F.; Marzari, N. Breakdown of
+Optical Phonons’ Splitting in Two-
+Dimensional Materials. Nano Letters
+2017, 17, 3758–3763.
+(102) Giannozzi, P.; Baroni, S.; Bonini, N.;
+Calandra, M.; Car, R.; Cavazzoni, C.;
+Ceresoli, D.; Chiarotti, G. L.; Cococ-
+cioni, M.; Dabo, I. et al. QUANTUM
+ESPRESSO: A modular and open-source
+software project for quantum simulations
+of materials. Journal of Physics Con-
+densed Matter 2009, 21, 395502.
+(103) Giannozzi, P.; Andreussi, O.;
+Brumme, T.; Bunau, O.; Buongiorno
+Nardelli, M.; Calandra, M.; Car, R.;
+Cavazzoni, C.; Ceresoli, D.; Cococ-
+cioni, M. et al. Advanced capabilities
+for materials modelling with Quan-
+tum ESPRESSO. Journal of Physics
+Condensed Matter 2017, 29, 465901.
+(104) Togo, A.; Tanaka, I. First principles
+phonon calculations in materials science.
+Scripta Materialia 2015, 108, 1–5.
+(105) Geick, R.; Perry, C. H.; Rupprecht, G.
+Normal modes in hexagonal boron ni-
+tride. Physical Review 1966, 146, 543–
+547.
+(106) Nemanich, R. J.; Solin, S. A.; Mar-
+tin, R. M. Light scattering study of boron
+nitride microcrystals. Physical Review B
+1981, 23, 6348–6356.
+(107) Reich, S.; Ferrari, A. C.; Arenal, R.;
+Loiseau, A.; Bello, I.; Robertson, J. Res-
+onant Raman scattering in cubic and
+hexagonal boron nitride. Physical Re-
+view B - Condensed Matter and Mate-
+rials Physics 2005, 71, 205201.
+(108) Serrano, J.; Bosak, A.; Arenal, R.;
+Krisch, M.; Watanabe, K.; Taniguchi, T.;
+Kanda, H.; Rubio, A.; Wirtz, L. Vibra-
+tional Properties of Hexagonal Boron Ni-
+tride : Inelastic X-Ray Scattering and Ab
+Initio Calculations. Physical Review Let-
+ters 2007, 98, 095503.
+22
+(109) Zakharchenko, K. V.; Los, J. H.; Katsnel-
+son, M. I.; Fasolino, A. Atomistic simu-
+lations of structural and thermodynamic
+properties of bilayer graphene. Physical
+Review B - Condensed Matter and Mate-
+rials Physics 2010, 81, 235439.
+(110) Slotman, G. J.; Fasolino, A. Structure,
+stability and defects of single layer hexag-
+onal BN in comparison to graphene.
+Journal of Physics Condensed Matter
+2013, 25, 045009.
+(111) Katsnelson, M. I.; Fasolino, A. Graphene
+as a prototype crystalline membrane. Ac-
+counts of Chemical Research 2013, 46,
+97–105.
+(112) Xu, P.; Neek-Amal, M.; Barber, S. D.;
+Schoelz, J. K.; Ackerman, M. L.;
+Thibado, P. M.; Sadeghi, A.;
+Peeters, F. M. Unusual ultra-low-
+frequency fluctuations in freestanding
+graphene. Nature Communications
+2014, 5, 3720.
+(113) Nelson, D. R.; Peliti, L. Fluctuations in
+Membranes With Crystalline and Hex-
+atic Order. Journal de physique Paris
+1987, 48, 1085–1092.
+(114) Le Doussal, P.; Radzihovsky, L. Self-
+consistent theory of polymerized mem-
+branes. Physical Review Letters 1992,
+69, 1209–1212.
+(115) Nelson, D. R., Piran, T., Weinberg, S.,
+Eds. Statistical Mechanics of Membranes
+and Surfaces, 2nd ed.; World Scientific:
+Singapore, 2004.
+(116) Kownacki, J. P.; Mouhanna, D. Crum-
+pling transition and flat phase of poly-
+merized phantom membranes. Physi-
+cal Review E - Statistical, Nonlinear,
+and Soft Matter Physics 2009, 79,
+040101(R).
+(117) Thomas, S.; Ajith, K. M.; Chandra, S.;
+Valsakumar, M. C. Temperature depen-
+dent structural properties and bending
+rigidity of pristine and defective hexag-
+onal boron nitride. Journal of Physics
+Condensed Matter 2015, 27, 315302.
+(118) Thomas, S.; Ajith, K. M.; Valsaku-
+mar, M. C. Effect of ripples on the finite
+temperature elastic properties of hexago-
+nal boron nitride using strain-fluctuation
+method. Superlattices and Microstruc-
+tures 2017, 111, 360–372.
+(119) Plimpton, S. Fast Parallel Algorithms for
+Short-Range Molecular Dynamics. Jour-
+nal of Computational Physics 1995, 117,
+1–19.
+(120) Karssemeijer, L. J.; Fasolino, A. Phonons
+of graphene and graphitic materials
+derived from the empirical potential
+LCBOPII. Surface Science 2011, 605,
+1611–1615.
+(121) Wu, J.; Wang, B.; Wei, Y.; Yang, R.;
+Dresselhaus, M. Mechanics and mechan-
+ically tunable band gap in single-layer
+hexagonal boron-nitride. Materials Re-
+search Letters 2013, 1, 200–206.
+(122) Wei, Y.; Wang, B.; Wu, J.; Yang, R.;
+Dunn, M. L. Bending rigidity and Gaus-
+sian bending stiffness of single-layered
+graphene. Nano Letters 2013, 13, 26–30.
+(123) Zakharchenko, K. V.; Katsnelson, M. I.;
+Fasolino, A. Finite temperature lattice
+properties of graphene beyond the quasi-
+harmonic approximation. Physical Re-
+view Letters 2009, 102, 046808.
+(124) De Lima, A. L.; Müssnich, L. A.;
+Manhabosco, T. M.; Chacham, H.;
+Batista, R. J.; De Oliveira, A. B. Soliton
+instability and fold formation in later-
+ally compressed graphene. Nanotechnol-
+ogy 2015, 26, 045707.
+(125) Shankar, R.; Marchesini, S.; Petit, C.
+Enhanced Hydrolytic Stability of Porous
+Boron Nitride via the Control of Crys-
+tallinity, Porosity, and Chemical Compo-
+sition. Journal of Physical Chemistry C
+2019, 123, 4282–4290.
+23
+(126) Kroes, J. M.; Fasolino, A.; Katsnel-
+son, M. I. Density functional based simu-
+lations of proton permeation of graphene
+and hexagonal boron nitride. Physical
+Chemistry Chemical Physics 2017, 19,
+5813–5817.
+(127) Liang, T.; He, G.; Wu, X.; Ren, J.;
+Guo, H.; Kong, Y.; Iwai, H.; Fujita, D.;
+Gao, H.; Guo, H. et al. Permeation
+through graphene ripples. 2D Materials
+2017, 4, 025010.
+(128) Sun, P. Z.; Yang, Q.; Kuang, W. J.;
+Stebunov, Y. V.; Xiong, W. Q.;
+Yu, J.; Nair, R. R.; Katsnelson, M. I.;
+Yuan, S. J.; Grigorieva, I. V. et al. Limits
+on gas impermeability of graphene. Na-
+ture 2020, 579, 229–232.
+24
+Graphical TOC Entry
+25

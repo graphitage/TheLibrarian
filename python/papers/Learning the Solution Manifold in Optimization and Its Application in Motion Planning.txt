@@ -1,0 +1,1108 @@
+Learning the Solution Manifold in Optimization and
+Its Application in Motion Planning
+Takayuki Osa1,2
+1Kyushu Institute of Technology
+2RIKEN Center for Advanced Intelligence Project
+osa@brain.kyutech.ac.jp
+Abstract
+Optimization is an essential component for solving problems in wide-ranging fields.
+Ideally, the objective function should be designed such that the solution is unique
+and the optimization problem can be solved stably. However, the objective function
+used in a practical application is usually non-convex, and sometimes it even has
+an infinite set of solutions. To address this issue, we propose to learn the solution
+manifold in optimization. We train a model conditioned on the latent variable such
+that the model represents an infinite set of solutions. In our framework, we reduce
+this problem to density estimation by using importance sampling, and the latent
+representation of the solutions is learned by maximizing the variational lower bound.
+We apply the proposed algorithm to motion-planning problems, which involve the
+optimization of high-dimensional parameters. The experimental results indicate
+that the solution manifold can be learned with the proposed algorithm, and the
+trained model represents an infinite set of homotopic solutions for motion-planning
+problems.
+1 Introduction
+Optimization is an essential component for problem-solving in various fields, such as machine
+learning [3] and robotics [40]. The objective function, ideally, should be designed in such a way
+that the solution is unique and the optimization problem can be solved stably. If we can formulate
+our problem as convex optimization, we can leverage techniques established in previous studies [4].
+However, the objective functions used in practical applications are usually non-convex. For instance,
+various optimization methods has been leveraged in motion planning in robotics [22, 44, 38] wherein
+the objective function is known to be non-convex. Moreover, there often exist a set of solutions in
+motion-planning problems as indicated by [16, 32]. It is possible to specify the unique solution by
+posing additional constraints, but it is not practical for users who are not experts on optimization
+and/or robotics. For this reason, a generic objective function is often used in motion planning, which
+is applicable for various tasks but often has many solutions. However, existing methods are limited to
+generating a fixed number of solutions, and pose complications when used to generate a new “middle”
+solution out of the two obtained solutions.
+To address this issue, we propose to learn the solution manifold in optimization problems wherein the
+objective function has an infinite set of optimal points. Our main idea is to train a model conditioned on
+the latent variable such that the model represents an infinite set of solutions. We reduce the problem of
+learning the solution manifold to that of density estimation using the importance sampling technique.
+In this study, we refer to our algorithm as Learning Solution Manifold in Optimization (LSMO). The
+objective function with an infinite set of optimal points and how the LSMO captures them are shown
+in Figure 1. The model conditioned on the latent variable is trained by maximizing the variational
+lower bound as in a variational autoencoder (VAE) [23].
+Preprint. Under review.
+ar
+X
+iv
+:2
+00
+7.
+12
+39
+7v
+1 
+ [
+cs
+.R
+O
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+(a) Visualization of the objective
+function and solutions obtained
+with LSMO.
+(b) Samples drawn from the uni-
+form distribution.
+(c) The same samples in (b) with
+the scaling based on the impor-
+tance weight.
+Figure 1: Example of learning the solution manifold. (a) shows an objective function that has an
+infinite set of solutions. The warmer color represents the higher return in (a). Our method trains
+pθ(x|z) that outputs the samples indicated by red circles using different values of z. (b) shows
+samples drawn from a uniform distribution. In (c), the same samples as those in (b) are shown, but
+samples with higher importance are drawn as larger circles. We train pθ(x|z) with this importance
+weight.
+Our contribution is an algorithm to train the model that represents the distribution of optimal points
+in optimization. We evaluate LSMO for maximizing the test functions that have an infinite set of
+optimal points. We also apply LSMO to motion-planning tasks for a robotic manipulator, which
+involves hundreds of parameters to be optimized. Two trajectories are called homotopic when one
+can be continuously deformed into the other [16, 14]. We empirically show that LSMO can learn an
+infinite set of homotopic trajectories in motion-planning problems.
+2 Optimization via Inference with Importance Sampling
+Problem formulation We consider the problem of maximizing the objective function, which is
+formulated as
+x∗ = argmax
+x
+R(x), (1)
+where x ∈ X is a data point and R(x) : X 7→ R is the objective function. In this study, we are
+particularly interested in the problems where there exist multiple, and possibly an infinite number
+of solutions. For example, the objective function shown in Figure 1(a) has an infinite number of
+solutions. The goal of our study is to learn the solution manifold when optimizing such objective
+functions. Instead of finding a single solution, we aim to train a model that represents the distribution
+of optimal points pθ(x) parameterized with a vector θ given by
+pθ(x) =
+∫
+pθ(x|z)p(z)dz, (2)
+where z is the latent variable. We train the model pθ(x|z) by maximizing the surrogate objective
+function
+J(θ) = Ex∼pθ(x)[f
+(
+R(x)
+)
+], (3)
+where f(·) is monotonically increasing and f(x) ≥ 0 for any x ∈ R. Since f(·) is monotonically in-
+creasing, maximizing R(x) is equivalent to maximizing f(R(x)). Therefore, f(·) can be interpreted
+as a shaping function.
+Inference with importance sampling To address the problem formulated in the previous para-
+graph, we consider a distribution of the form
+ptarget(x) =
+f (R(x))
+Z
+, (4)
+where Z is a partition function. When ptarget(x) is followed, a sample with a higher score is drawn
+with a higher probability. Therefore, the modes of the density induced by ptarget(x) correspond to the
+2
+modes of R(x). Thus, we reduce the problem of finding points that maximize the objective function
+R(x) to that of estimating the density induced by ptarget(x), which is formulated as
+min
+θ
+DKL(p
+target(x)||pθ(x)), (5)
+where DKL(p∗(x)||pθ(x)) is the KL divergence. To solve this problem, we employ the importance
+sampling technique. We introduce the importance weight of the data point xi defined by
+W (xi) =
+ptarget(xi)
+pprop(xi)
+, (6)
+where pprop(x) is the proposal distribution. The KL divergenceDKL(p∗(x)||pθ(x)) can be rewritten
+as
+DKL(p
+target(x)||pθ(x)) =
+∫
+ptarget(x) log
+ptarget(x)
+pθ(x)
+dx =
+∫
+W (x)pprop(x) log
+W (x)pprop(x)
+pθ(x)
+dx.
+(7)
+Therefore, given a set of samples X = {xi}Ni=1 drawn from the proposal distribution, the minimizer
+of DKL(ptarget(x)||pθ(s, τ )) is given by the maximizer of the weighted log likelihood:
+L(θ) =
+∫
+W (x)pprop(x) log pθ(x)dx ≈
+1
+N
+N∑
+i=1
+W (xi) log pθ(xi). (8)
+Connection to the original problem Because f(x) is monotonically increasing and positive for
+any x, in a manner similar to the results shown by [6, 24], we can obtain
+log J(θ) = log
+∫
+pθ(x)f
+(
+R(x)
+)
+dx = log
+∫
+pprop(x)
+f
+(
+R(x)
+)
+pprop(x)
+pθ(x)dx
+≥
+∫
+pprop(x)
+f
+(
+R(x)
+)
+pprop(x)
+log pπ(x)dx = Z
+∫
+pprop(x)
+f
+(
+R(x)
+)
+pprop(x)Z
+log pθ(x)dx
+∝ L(θ). (9)
+Therefore, if we interpret f(·) as a shaping function, minimizing the KL divergence in (5) can be
+interpreted as maximization of the lower bound of the expected value of the shaped objective function.
+3 Learning the Solution Manifold with Importance Sampling
+To train the model pθ(x|z), we leverage the variational lower bound as in VAE [23]. The variational
+lower bound on the marginal likelihood of data point i is given by
+log pθ(xi) ≥ L(ψ,θ;xi) = −DKL (qψ(z|xi)||p(z)) + Ez∼q(z|xi) [log pθ(xi|z)] (10)
+This variational lower bound can be used to obtain the lower bound of the objective function in (8).
+Given a set of data points X = {xi}Ni=1, which are samples collected by a proposal distribution, we
+train the model by maximizing the following function:
+L(ψ,θ;X) =
+N∑
+i=1
+W (xi) (−DKL (qψ(z|xi)||p(z)) + log pθ(xi|zi)) (11)
+where zi is a sample drawn from the posterior distribution qψ(z|xi). From (9) and (10), we can see
+that the loss function in (11) is the lower bound of the surrogate objective function in (3). The form
+of our loss function in (11) is a simple combination of the return-weighted importance in (6). In
+practice, the partition function Z in (4) is an unknown constant and does not depend on θ. Therefore,
+we use W̃ (x) = f(R(x))
+pprop(x)
+instead of W (x) in our implementation.
+The above discussion indicates that we can leverage various techniques for learning latent representa-
+tions based on VAE, such as β-VAE [15] and joint VAE [9]. In our implementation, we used the loss
+function based on joint VAE proposed by Dupont [9], which is given by
+L̃(ψ,θ;X) =
+N∑
+i=1
+W̃ (xi)`(θ,ψ), (12)
+3
+Algorithm 1 Learning the solution manifold in optimization (LSMO)
+Input: objective function R(x), proposal distribution pprop
+1: Generate N synthetic samples {xi}Ni=1
+2: Evaluate the objective function R(xi) for i = 1, . . . , N .
+3: Compute the weight W (xi) for i = 1, . . . , N .
+4: Train the neural network by minimizing L̃(ψ,θ;X) in (12)
+5: (Optional) Update the proposal distribution and repeat 1-3
+Return: pθ(x|z)
+where `(θ,ψ) is given by
+`(θ,ψ) = log pθ(x|z)− γ
+∣∣DKL(qψ(z|x)||p(z))− Cz∣∣ , (13)
+Cz represents the information capacity, and γ is a coefficient. DKL
+(
+qψ(z|x)||p(z)
+)
+is the upper
+bound of the mutual information between z and x, and Dupont [9] empirically show that the
+scheduling Cz encourages the learning disentangled representations.
+The proposed algorithm for learning the manifold of solutions is summarized in Algorithm 1. After the
+first iteration, we can replace the proposal distribution with a distribution induced by injecting noise
+to the trained model pθ(x) =
+∫
+pθ(x|z)p(z)dz. The details of updating the proposal distribution
+are provided in the Appendix A.3.
+4 Application to Motion Planning for Robotic Manipulator
+We apply the LSMO algorithm to motion planning for a robotic manipulator. We introduce the
+formulation of motion planning problems and present how to adapt LSMO for motion planning.
+Problem Formulation We denote by qt ∈ RD the configuration of a robot manipulator with D
+degrees of freedom (DoFs) at time t. Given the start configuration q0 and the goal configuration qT ,
+the task is to plan a smooth and collision-free trajectory ξ = [q0, . . . , qT ] ∈ RD×T , which is given
+by a sequence of robot configurations. This problem can be formulated as an optimization problem
+ξ∗ = argmin
+ξ
+C(ξ) (14)
+where C(ξ) is the cost function that quantifies the quality of a trajectory ξ. In LSMO, we train the
+model pθ(ξ|z) to obtain a set of solutions.
+0 10 20 30 40 50
+Time step
+0.2
+0.0
+0.2
+Po
+si
+tio
+n
+Figure 2: Visualization of sam-
+ples drawn from βtraj(ξ)
+Proposal distribution To deal with the exploration of the high-
+dimensional space of trajectories, it is necessary to use a structured
+sampling strategy, which is suitable for trajectory optimization. We
+use the following distribution as a proposal distribution, which is
+adapted from [18]:
+βtraj(ξ) = N (ξ0, aR) (15)
+where a is a constant, ξ0 is an initial trajectory, and the covariance
+matrixR is given by the Moore-Penrose pseudo inverse of the matrix
+A defined as A = K>K and K is a finite difference matrix. We
+visualize the trajectories drawn from βtraj in (15) in the case where the initial trajectory ξ is a zero
+vector. As shown, the trajectories generated from βtraj start from zero and end with zero. This property
+of βtraj(ξ) is suitable for motion planning problems where the start and goal configurations are given.
+Projection onto the Constraint Solution Space Although LSMO can learn the manifold of the
+objective function, there is no guarantee that the output of pθ(ξ|z) satisfies the desired constraint.
+For this reason, we fine-tune the output of pθ(ξ|z) by using the covariant Hamiltonian optimization
+for motion planning (CHOMP) [44]. The update rule of CHOMP is given by:
+ξ∗ = argmin
+ξ
+{
+C(ξc) + g>(ξ − ξc) +
+η
+2
+‖ξ − ξc‖2M
+}
+, (16)
+4
+Algorithm 2 Motion Planning by Learning the Solution Manifold in Optimization
+Input: start configuration q0, goal configuration qT
+1: Initialize the trajectory, e.g., linear interpolation between q0 and qT
+2: Generate N synthetic samples {ξi}Ni=1 from βtraj(ξ) in (15)
+3: Evaluate the objective function C(ξi) and compute the weight W (ξi) for i = 1, . . . , N
+4: Train the neural network by minimizing L(θ,ψ) in (12)
+5: (Optional) Update the proposal distribution and repeat 1-5.
+6: Generate ξ with pθ(ξ|z) by specifying the value of z
+7: (Optional) Project ξ onto the constraint solution space, e.g., using CHOMP (16)
+Return: planned trajectory ξ
+where g = ∇C(ξ), ξc is the current plan of the trajectory, η is a regularization constant, and ‖ξ‖2M
+is the norm defined by a matrix M as ‖ξ‖2M = ξ
+>Mξ. The third term on RHS in (16) can be
+interpreted as the trust region, and this term encourages the preservation of the velocity profile of
+the motion when M = A. Using this update rule, we can project the output of pθ(x|z) onto the
+constraint solution space, while maintaining the velocity profile induced by the latent variable z.
+5 Related Work
+Multimodal optimization with black-box optimization methods Prior work such as [12, 8, 41,
+1] addressed multimodal optimization using black-box optimization methods, such as CMA-ES [13]
+and the cross-entropy method (CEM) [7]. For example, the study in [1] showed that control policies
+to achieve diverse behaviors can be learned by maximizing the objective function that encodes the
+diversity of solutions. Although these black-box optimization methods are applicable to a wide range
+of problems, the limitation of these methods is that they can learn only a finite set of solutions.
+Motion planning methods in robotics A popular class of motion planning methods is
+optimization-based methods, including CHOMP [44], TrajOpt [38], and GPMP [29]. These methods
+are designed to determine a single solution, although the objective function is usually non-convex.
+A recent study by [33] proposed a method, stochastic multimodal trajectory optimization (SMTO),
+which finds multiple solutions by learning discrete latent variables based on the objective function.
+However, SMTO is limited to learning a finite set of solutions. Sampling-based methods are also
+popular in motion planning for robotic systems. PRM [20, 21], RRT [25], and RRT* [19] are catego-
+rized as such sampling-based methods. Studies in [37, 16] discussed homotopy and the deformability
+of trajectories and proposed methods for compactly capturing the variety of trajectories inside a
+PRM. Recently, Orthey et al. [32] proposed a framework for finding multiple solutions using a
+sampling-based method. However, it is also limited to generate a finite number of solutions.
+Reinforcement learning and imitation learning Studies on imitation learning have proposed
+methods for modeling diverse behaviors by learning latent representations [26, 28, 39]. Likewise,
+in the field of reinforcement learning (RL), previous studies have proposed methods for learning
+the diverse behaviors [10]. Hierarchical RL methods [2, 11, 43, 34] often learn a hierarchical policy
+given by π(a|s) =
+∑
+o∈O π(o|s)π(a|s, o), where s, a and o denote the state, action, and option,
+respectively. Recent studies [30, 31, 36] investigated the goal-conditioned policies π(a|s, g), where
+g denotes the goal. These methods can be interpreted as an approach that models diverse behaviors
+with a policy conditioned on the latent variable. However, the problem setting is different from ours
+because our problem formulation does not involve the Markov decision process. The details of the
+difference in problem settings between our and RL studies are discussed in the Appendix C.
+6 Experiments
+6.1 Optimization of test objective functions
+To investigate the behavior of LSMO, we applied LSMO to maximize several test functions, which
+have an infinite set of optimal points. For visualization, we used the objective functions that take in
+a two-dimensional input. The details of the test functions are described in the Appendix A.2. The
+5
+(a) LSMO on Func. 1. (b) LSMO on Func. 2. (c) LSMO on Func. 3. (d) LSMO on Func. 4.
+(e) CEM on Func. 1. (f) CEM on Func. 3. (g) CEM on Func. 3. (h) CEM on Func. 4.
+Figure 3: Behavior of LSMO when optimizing the toy objective function. The warmer color represents
+a higher value of the objective function. In (a)-(d), the outputs of pθ(x|z) trained with LSMO are
+represented by red circles. The outputs of pθ(x|z) are generated by linearly changing the value of z
+in [−1.28, 1.28]. In (e)-(h), the centers of the Gaussian distributions are drawn as blue circles.
+Table 1: Values of the objective function for the obtained solutions (mean ± standard deviation)
+Func. 1 Func. 2 Func. 3 Func. 4
+LSMO 0.996± 9.9× 10−3 0.9996± 4.6× 10−4 0.973± 0.023 0.999± 0.0015
+CEM 1.00± 3.6× 10−6 1.00± 1.3× 10−6 1.00± 3.5× 10−6 1.00± 1.3× 10−5
+latent variable z is one-dimensional in this experiment. For simplicity, we designed the objective
+functions such that their maximum value was 1.0. As a baseline, we evaluated the CEM in which a
+mixture model of 20 Gaussian distributions was used as the sampling distribution [7, 5]. Quantitative
+results in this section are based on three runs with different random seeds, unless otherwise stated.
+Qualitative analysis Outputs of the model pθ(x|z) trained with LSMO and the solutions obtained
+by CEM are illustrated in Figure 3. The results show that the model pθ(x|z) outputs the samples in
+the region of optimal solutions of the objective function. Although CEM also finds multiple solutions
+for these objective functions, the number of solutions needs to be given and fixed. In addition, the
+similarity of the obtained solutions is unknown. On the contrary, the model trained with LSMO
+can represent an infinite set of solutions. Furthermore, the similarity of the value of z indicates the
+similarity of the solutions. When using LSMO, we can obtain various solutions by changing the value
+of z. However, there is no guarantee that the learned solutions will cover the entire region of optimal
+points. For example, although the objective function shown in Figure 3(a) has a set of solutions along
+a straight line, the manifold learned by LSMO does not cover the entire set of solutions.
+Score of solutions We need to be aware that the output of pθ(x|z) trained by LSMO does not
+always correspond to the optimal solution. The values of the objective function for the solutions
+obtained with LSMO and CEM are summarized in Table 1. Although CEM finds the approximately
+optimal solutions, the quality of the outputs of pθ(x|z) trained by LSMO have a larger variance. This
+property can also be observed in Figure 3. For example, the objective function shown in Figure 3(c)
+has a unique optimal solution, although the gradient is moderate in one direction. While CEM finds
+the optimal point for this objective function, LSMO learns the manifold along the direction in which
+the gradient of the objective function is moderate. This result is reasonable because the result of
+LSMO is inference, rather than exact optimization. Therefore, it may be necessary to fine-tune the
+obtained solution in practice, for example, using a gradient-based method.
+6.2 Motion Planning for a Robotic Manipulator
+To investigate the applicability of LSMO to the optimization of high-dimensional parameters, we
+evaluated LSMO on motion planning tasks. To deal with motion-planning tasks, LSMO is employed
+6
+(a) Variation of solutions obtained by LSMO for Task 1. The latent variable z is two-dimensional as z = [z0, z1]
+in this result. The top row shows the variation with different z0 and the second row shows the variation with
+different z0. Trajectories indicated by the blue square show the trajectory generated with z0 = z1 = 0.
+(b) Variation of solutions obtained by LSMO for Task 2. The latent variable z is one-dimensional in this result.
+(c) Variation of solutions obtained by LSMO for Task 3. The latent variable z is one-dimensional in this result.
+(d) SMTO on Task 1. (e) SMTO on Task 2. (f) SMTO on Task 3.
+Figure 4: Qualitative comparison of LSMO and SMTO. (a)-(c): Solutions generated by the model
+pθ(ξ|z) trained with LSMO with different values of z. The model pθ(ξ|z) represents an infinite set
+of solutions, and solutions can be continuously varied by changing the value of z. (d)-(f): Solutions
+obtained with SMTO. SMTO is limited to generating a finite number of solutions.
+in the manner described in Algorithm 2. We compared the SMTO algorithm, recently proposed
+in [33]. SMTO is an algorithm that finds multiple solutions for motion-planning problems. We
+visualized the planned motions using a simulator based on CoppeliaSim [35]. Quantitative results in
+this section are based on three runs with different random seeds, unless otherwise stated. Although
+LSMO is mainly evaluated in simulation, we also verified the applicability to a real robot system. For
+details of the real robot system, please refer to the Appendix B.7.
+Task setting The task is to train a model pθ(ξ|z) that generates a collision-free trajectory ξ to
+reach a given goal position from a start position. Three task settings are used in this experiment; the
+details of the task settings are provided in the Appendix B.4. A trajectory is represented by 50 time
+steps, and the manipulator has seven DoFs. Therefore, the dimension of the trajectory parameters
+is 350. For training pθ(ξ|z), we draw 20000 samples from βtraj(ξ). The details of the cost function
+C(ξ) and shaping function f(·) used in this experiment are described in the Appendix B.1.
+Qualitative comparison The outputs of the model pθ(ξ|z) trained with LSMO, which were
+not fine-tuned, are depicted in Figure 4(a)-(c) The model pθ(ξ|z) generates various collision-free
+7
+trajectories with given start and goal configurations. This result indicates that LSMO is applicable to
+the optimization of high-dimensional parameters. In addition, it is evident that a trajectory generated
+by pθ(ξ|z) can be continuously deformed into another, which indicates that the model trained with
+LSMO represents an infinite set of homotopic solutions. Figure 4 (a) also shows that, when learning
+the latent variable is two-dimensional, each dimension of the latent variable encodes a different type
+of variation on Task 1. However, the appropriate dimensionality of the latent variable depends on
+the tasks. A comparison of the performance when using the two-dimensional and one-dimensional
+latent variables is provided in the Appendix B.5. The number of solutions found by SMTO was 2-4
+on the three tasks, as shown in Figure 4(d)-(f). Although SMTO finds multiple solutions, the number
+of solutions are limited and the similarity of the solutions is not indicated. On the contrary, pθ(ξ|z)
+trained with LSMO can generate various solutions by changing the value of z. Since the value of z
+indicates the similarity of solutions, it is easy to generate a “middle” solution between solutions.
+6.3 Computation time
+We show the computation time for generating a trajectory on motion planning tasks in Table 3.
+We used a laptop with Intel R© Core-i7-8750H CPU and NVIDIA Geforce R© GTX 1070 GPU for
+the experiment. Although LSMO can generate a solution quickly after training the model pθ(ξ|z),
+the time required for training pθ(ξ|z) takes approximately 30 min for each task. The computation
+time for SMTO is the time required for generating four solutions as shown Figure 4. Although
+CHOMP generates only a single solution, we show the computation time as a baseline. To evaluate
+the computation time for CHOMP, we initialized the trajectory by sampling from the proposal
+distribution βtraj(ξ) in (15), and computed the average and the standard deviation from ten runs.
+Table 3 shows that the time required for fine-tuning of LSMO with CHOMP is substantially shorter
+than that for the motion planning with CHOMP starting from randomized initialization. This result
+indicates that the model trained with LSMO outputs a trajectory close to the optimal solutions.
+Scores of solutions The scores of the obtained solutions are summarized in Table 2. As a baseline,
+we also show the results when we run CHOMP with random initialization, although CHOMP can
+find only one local optima for each run. The reported scores of CHOMP are the average and standard
+deviation of ten runs. Although the values of the solutions obtained with SMTO are better than those
+obtained with LSMO, all the solutions obtained by LSMO without fine-tuning are collision-free and
+executable in a real robot. As generating a trajectory with the model pθ(ξ|z) is inference rather than
+optimization, it is natural that their scores are lower than the results of optimization-based methods.
+However, with quick fine-tuning, we can obtain solutions with comparable scores.
+Limitations of LSMO As reported in this section, a limitation of LSMO is that it requires fine-
+tuning to obtain the exact solution. However, we believe that this limitation is not difficult to
+overcome because the output of pθ(ξ|z) is reasonably close to an optimal point and can be quickly
+fine-tuned. Another limitation is that training pθ(ξ|z) is time-consuming compared with existing
+motion planners. However, once we train the model pθ(ξ|z), we can generate various solutions
+substantially faster than modifying the objective function and re-running a standard motion planning
+method. The time-consuming process of training pθ(ξ|z) with LSMO is drawing and evaluating
+samples, which are used for computing the loss function in (12). Although our implementation is not
+optimized, this sampling process can be parallelized for fast computation.
+6.4 Applicability to a real robotic system
+To verify the applicability of LSMO to a real robot system, we applied LSMO to motion planning for
+a real robotic system. In this experiment, we used COBOTTA produced by Denso Wave Inc., which
+has six DoFs. The network architecture was the same as in Table 6. After generating trajectories with
+50 time steps using pθ(ξ|z), the trajectories are interpolated with cubic spline in order to send it to
+Table 2: Values of the objective function for motion planning (higher is better.)
+Task 1 Task 2 Task 3
+LSMO w/o fine-tuning −2.95± 1.33 −2.24± 1.15 −3.24± 0.92
+LSMO w/ fine-tuning −1.89± 0.31 −1.66± 0.15 −2.02± 0.25
+SMTO −1.64± 0.09 −1.53± 0.176 −1.89± 0.04
+CHOMP w/ random init. −1.82± 0.26 −1.57± 0.39 −2.06± 0.41
+8
+Table 3: Computation time in motion planning tasks.
+Task 1 Task 2 Task 3
+Fine-tuning of LSMO with CHOMP 0.78± 0.51 [sec] 0.34± 0.20 [sec] 0.93± 0.21 [sec]
+SMTO 52.3± 0.37 [sec] 84.1± 29.5 [sec] 85.7.3± 29.3 [sec]
+CHOMP with randomized initialization 6.5± 14.2 [sec] 1.4± 0.76 [sec] 6.6± 13.6 [sec]
+Figure 5: Visualization of solution obtained by LSMO for the task with a real robot. The latent
+variable z is two-dimensional as z = [z0, z1] in this result. The top row shows the variation with
+different z0 and the second row shows the variation with different z1. Trajectories indicated by the
+blue square show the trajectory generated with z0 = z1 = 0.
+the robotic system. In this experiment, the time for training pθ(ξ|z) is about 30 min using the laptop
+used in the previous experiments.
+The task is to plan a trajectory to reach the goal configuration, while avoiding an obstacle. We show
+the results with the two-dimensional latent variable in Figure 5. In the case of the two-dimensional
+latent variable, each dimension of the latent variable encodes different variations of solutions; the
+channel z0 encodes the height of the end-effector, and the channel z1 encodes the orientation of the
+end-effector. The end-effector goes over the obstacle when z0 = −1.28, while the end-effector goes
+behind the obstacle when z0 = 1.28. When varying z1, the orientation of the end-effector changes,
+although the height of the end-effector does not change significantly.
+7 Discussion and Future Work
+We presented LSMO, which is an algorithm for learning the manifold of solutions in optimization.
+Our contribution is to shed light on the approach of training a model that represents an infinite set
+of solutions, while existing methods are often limited to generating a finite set of solutions. In our
+experiments, we show that a set of homotopic solutions can be obtained with LSMO on motion
+planning tasks, which involve hundreds of parameters. We believe that a framework for learning the
+solution manifold gives users an intuitive way to go through various solutions by changing the value
+of the latent variables. Our work focuses on learning the continuous latent variable in optimization.
+However, when separate sets of solutions exist, it will be necessary to learn the discrete latent variable
+in addition to the continuous latent variable. In such cases, learning the discrete latent variable in
+LSMO should be possible with the Gumbel-Softmax trick [17, 27]. We will investigate this direction
+in future work.
+9
+A Details of Toy Function Optimization Tasks
+A.1 Shaping function
+Given a set of samples drawn from a proposal distribution D = {xi}Ni=1, we used the shaping
+function given by
+f(R(x)) = exp
+(
+10
+(
+R(x)−Rmax
+)
+Rmax −Rmin
+)
+, (17)
+where Rmax = maxx∈D R(x) and Rmin = minx∈D R(x).
+A.2 Toy functions
+The definitions of the toy functions used in the experiment are given as follows. The figures plot the
+range x1 ∈ [0, 2] and x2 ∈ [0, 2]. The toy function 1 is given by
+R(x1, x2) = exp(−d) (18)
+where
+d =
+
+
+((x2 − 1.05)2 + (x1 − 0.5)2)0.5, if x1 < 0.5,
+|−0.3x1−x2+1.2|
+(0.09+1)2
+, if 0.5 < x1 < 1.5,
+((x2 − 0.75)2 + (x1 − 1.5)2)0.5, if x1 ≥ 1.5.
+(19)
+The toy function 2 is given by
+R(x1, x2) = exp(−d/10) (20)
+where
+d = |(x2 − 1.5)2 + (x1 + 1)2 − 2.5|. (21)
+The toy function 3 is given by
+R(x1, x2) = exp
+(
+− (d+ 0.2x2 + 0.14)
+)
+(22)
+where
+d =
+
+
+((x2 − 0.94)2 + (x1 − 0.7)2)0.5, if x1 < 0.7,
+|0.2x1−x2+0.8|
+(0.04+1)2
+, if 0.7 < x1 < 1.4,
+((x2 − 1.08)2 + (x1 − 1.4)2)0.5, if x1 ≥ 1.4.
+(23)
+The toy function 4 is given by
+R(x1, x2) = exp(−d/10) (24)
+where
+d = |(x2 − 1)2 + (x1 − 1)2 − 0.5|. (25)
+A.3 Proposal distribution
+In the result shown in Figure 3 in the main manuscript, we used a uniform distribution as the initial
+proposal distribution. In the second iteration, we used samples given by
+x̃ = x+ �, where x ∼ pθ(x) =
+∫
+pθ(x|z)p(z)dz, � ∼ U(−0.1, 0.1). (26)
+To analyze the effect of the proposal distribution, we show the results using a normal distribution,
+xi ∼ N (1.0, 0.5) for i = 1, 2, as the initial distribution. The values of the outputs of pθ(x|z) are
+summarized in Table 4 and Figure 6. When we evaluate the scores in Table 1 in the main manuscript
+and Table 4 in this supplementary, we linearly interpolate z in [−1.28, 1.28] and generate 200 samples
+from pθ(x|z). These values are chosen because P (z < −1.28) = 0.1 and P (z < 1.28) = 0.9 when
+p(z) = N (0, 1).
+As in other importance sampling methods, the quality of the results is dependent on the choice of the
+proposal distribution. For the optimization of the toy function 3, the use of the normal distribution
+resulted in better performance than did the uniform distribution. However, in other functions, the use
+of a uniform distribution outperformed the results of the normal distribution.
+10
+(a) Func. 1. (b) Func. 2. (c) Func. 3. (d) Func. 4.
+(e) Func. 1. (f) Func. 3. (g) Func. 3. (h) Func. 4.
+Figure 6: Behavior of LSMO when optimizing the toy objective function. The warmer color represents
+a higher value of the objective function. The outputs of pθ(x|z) trained with LSMO are shown as
+red circles. (a)-(d): Results using the uniform distribution as the initial proposal distribution. (e)-(h):
+Results using the normal distribution as the initial proposal distribution.
+Table 4: Values of the objective function for the obtained solutions (mean ± standard deviation.)
+Func. 1 Func. 2 Func. 3 Func. 4
+uniform 0.996± 9.9× 10−3 0.9996± 4.6× 10−4 0.973± 0.023 0.999± 0.0015
+normal 0.989± 0.023 0.9992± 6.6× 10−4 0.928± 0.0061 0.927± 0.004
+A.4 Network architecture and training parameters
+The detailed information on the network architecture and the training parameters for optimization of
+toy objective functions are summarized in Table 5.
+Table 5: Network architecture and training parameters for optimization of toy functions.
+Description Symbol Value
+Number of samples drawn from the proposal distribution N 20000
+Coefficient for the information capacity γ 0.1
+Learning rate 0.001
+Batch size 250
+Number of training epoch 350
+Number of units in hidden layers in qψ(ξ|z) (64, 64)
+Number of units in hidden layers in pθ(z|ξ) (64, 64)
+Activation function Relu, Relu
+optimizer Adam
+11
+B Details of Motion Planning Tasks
+B.1 Shaping function
+Given a set of samples drawn from a proposal distribution D = {xi}Ni=1, we used the shaping
+function given by
+f(R(x)) = exp
+(
+α
+(
+R(x)−Rmax
+)
+Rmax −Rmin
+)
+, (27)
+where Rmax = maxx∈D R(x) and Rmin = minx∈D R(x), a is a coefficient and a = 20 for learning
+the one-dimensional latent variable and a = 10 for learning the two-dimensional latent variable. For
+selecting the value of the hyperparameter α, we investigated the performance with α = {5, 10, 20, 50}.
+When selecting the value of the hyperparameter α, we observed a trade-off; if the value of α is low,
+the model pθ(ξ|z) tends to model diverse behaviors, but the variance of the quality of the generated
+trajectories is high. When the value of α is high, the variance of the quality is low, but the diversity of
+the modeled behavior is relatively limited. This effect of α is reasonable as the higher value of α
+leads to the sharper distribution of ptarget in (4) in the main text.
+B.2 Objective function
+In the motion planning tasks, the objective function is R(ξ) = −C(ξ), where C(ξ) is the objective
+function used in previous studies on trajectory optimization [44, 18] given by
+C(ξ) = cobs(ξ) + αcsmoothenss(ξ). (28)
+The first term in (28), cobs(ξ), is the penalty for collision with obstacles. Given a configuration q, we
+denote by xu(q) ∈ R3 the position of the bodypoint u in task space. cobs(ξ) is then given by
+cobs(ξ) =
+1
+2
+∑
+t
+∑
+u∈B
+c (xu(qt))
+∥∥∥∥ ddtxu(qt)
+∥∥∥∥ , (29)
+and B is a set of body points that comprise the robot body. The local collision cost function c(xu) is
+defined as
+c(xu) =
+
+
+0, if d(xu) > �,
+1
+2�
+(d(xu)− �)2, if 0 < d(xu) < �,
+−d(xu) + 12�, if d(xu) < 0,
+(30)
+where � is the constant that defines the margin from the obstacle, and d(xu) is the shortest distance
+in task space between the bodypoint u and obstacles. The second term in (28), csmoothenss(ξ), is the
+penalty on the acceleration defined as csmoothenss(ξ) =
+∑T
+t=1 ‖q̈t‖
+2
+.
+To make the computation efficient, the body of the robot manipulator and obstacles are approximated
+by a set of spheres.
+B.3 Network architecture and training parameters
+The detailed information on the network architecture and the training parameters for motion planning
+tasks are summarized in Table 6.
+B.4 Details on problem settings
+The task setting of Task 1 is shown in Figure 7(a). The blue sphere indicates the start position and the
+red sphere indicates the goal position. The goal is to plan a trajectory to reach the goal position for
+grasping a bag, while avoiding a lamp.
+The task setting of Task 2 is shown in Figure 7(b). The goal is to plan a trajectory for reaching the
+goal position indicated by the red sphere, while avoiding a table and a bag.
+The task setting of Task 3 is shown in Figure 12(a). The goal is to plan a trajectory for reaching the
+goal position indicated by the red sphere, while avoiding a table and a tennis bat.
+12
+Table 6: Network architecture and training parameters for motion planning tasks.
+Description Symbol Value
+Number of time steps in a trajectory T 50
+Number of samples drawn from the proposal distribution N 20000
+Coefficient for the information capacity γ 10
+Learning rate 0.001
+Batch size 250
+Number of training epoch 700
+Number of units in hidden layers in qψ(ξ|z) (300, 200)
+Number of units in hidden layers in pθ(z|ξ) (200, 300)
+Activation function Relu, Relu
+optimizer Adam
+(a) Problem setting of Task 1. (b) Problem setting of Task 2. (c) Problem setting of Task 3.
+Figure 7: Settings of motion planning tasks. Left: Start position. Right: goal position. The blue
+sphere indicates the start position and the red sphere indicates the goal position.
+When we evaluate the trajectories generated with LSMO, we linearly interpolate z in [−1.28, 1.28]
+and generate seven samples from pθ(x|z). As we run the experiment three times with different
+random seeds, we evaluated 21 samples in total and summarized the results in Table 2 in the main
+manuscript and Tables 7 and 3 in this supplementary.
+B.5 Effect of the dimensionality of the latent variable
+The appropriate dimensionality of the latent variable is dependent on tasks. We show the result of
+learning one-dimensional and two-dimensional latent variables on Tasks 1, 2, and 3 in this section.
+Although it is possible to iterate 1-4 in Algorithm 2 several times, we ran this procedure once to
+obtain the following results since we did not observe an improvement in the behavior after the second
+iteration.
+The values of the loss function and the KL divergence DKL
+(
+q(z|ξ)||p(z)
+)
+during training for Task 1
+are shown in Figure 8. The plots in Figure 8(b) indicate that the information encoded in the two
+channels was stably increased during the training when learning the two-dimensional latent variable.
+Figure 9 indicates that different variations of trajectories are encoded in the two channels. As
+0 200 400 600
+Epoch
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+To
+ta
+l l
+os
+s
+(a) Values of loss func-
+tion when z is two-
+dimensional.
+0 200 400 600
+Epoch
+0
+2
+4
+6
+8
+10
+KL
+z0
+z1
+(b) DKL
+(
+q(z|ξ)||p(z)
+)
+when z is two-
+dimensional.
+0 200 400 600
+Epoch
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+To
+ta
+l l
+os
+s
+(c) Values of the loss
+function when z is one-
+dimensional.
+0 200 400 600
+Epoch
+0
+1
+2
+3
+4
+5
+KL
+z
+(d) DKL
+(
+q(z|ξ)||p(z)
+)
+when z is one-
+dimensional.
+Figure 8: Loss function and the KL divergence during training for Task 1. (a) and (b): Training when
+z is two-dimensional. (c) and (d): Training when z is one-dimensional.
+13
+(a) The latent variable z is two-dimensional as z = [z0, z1] in this result. The top row shows the variation with
+different z0 and the second row shows the variation with different z1. Trajectories indicated by the blue square
+show the trajectory generated with z0 = z1 = 0.
+(b) The latent variable z is one-dimensional in this result.
+Figure 9: Visualization of solution obtained by LSMO on Task 1. Comparison of the results of the
+two-dimensional and one-dimensional latent variable.
+0 200 400 600
+Epoch
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+To
+ta
+l l
+os
+s
+(a) Values of loss func-
+tion when z is two-
+dimensional.
+0 200 400 600
+Epoch
+0
+2
+4
+6
+8
+10
+12
+14
+16
+KL
+z0
+z1
+(b) DKL
+(
+q(z|ξ)||p(z)
+)
+when z is two-
+dimensional.
+0 200 400 600
+Epoch
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+To
+ta
+l l
+os
+s
+(c) The values of the loss
+function.
+0 200 400 600
+Epoch
+0
+1
+2
+3
+4
+5
+KL
+z
+(d) DKL
+(
+q(z|ξ)||p(z)
+)
+.
+Figure 10: Loss function and KL divergence during training for Task 2. (a) and (b): Training when z
+is two-dimensional. (c) and (d): Training when z is one-dimensional.
+shown in the first row of Figure 9(a), varying the value of z0 leads to the change of the orientation
+of the end-effector while avoiding the obstacles. Meanwhile, varying the value of z1 leads to
+the variation of the positions for avoiding the obstacle; The end-effector goes over the obstacle if
+z1 = −1.28, and the end-effector goes behind the obstacle if z1 = 1.28. When learning the latent
+variable is one-dimensional, the variation of the trajectories is limited compared to the result with the
+two-dimensional latent variable.
+The values of the loss function and KL divergence DKL
+(
+q(z|ξ)||p(z)
+)
+during training for Task 2 is
+plotted in Figure 10. Figure 10 (b) indicates that channel z1 does not have much information compared
+with channel z0. If z0 = −1.28, the end-effector goes over the obstacles, and the end-effector goes
+under the obstacle if z0 = 1.28. Although the channel z1 also encodes the height of the end-effector,
+the visualization of the variation of outputs shown in Figure 11 indicates that variation of the channel
+z1 does not induce much variation in the generated trajectories. Therefore, the information encoded
+in two channels is entangled on Task 2, and the results indicate that learning the one-dimensional
+latent variable is sufficient for Task 2.
+14
+(a) The latent variable z is two-dimensional as z = [z0, z1] in this result. The top row shows the variation with
+different z0 and the second row shows the variation with different z1. Trajectories indicated by the blue square
+show the trajectory generated with z0 = z1 = 0.
+(b) The latent variable z is one-dimensional in this result.
+Figure 11: Visualization of solution obtained by LSMO on Task 2. Comparison of the results with
+the two-dimensional and one-dimensional latent variables.
+0 200 400 600
+Epoch
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+To
+ta
+l l
+os
+s
+(a) The values of the loss
+function when z is two-
+dimensional.
+0 200 400 600
+Epoch
+0.0
+2.5
+5.0
+7.5
+10.0
+12.5
+15.0
+17.5
+KL
+z0
+z1
+(b) DKL
+(
+q(z|ξ)||p(z)
+)
+when z is two-
+dimensional.
+0 200 400 600
+Epoch
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+To
+ta
+l l
+os
+s
+(c) The values of the loss
+function.
+0 200 400 600
+Epoch
+2
+4
+6
+8
+10
+12
+14
+16
+KL
+z
+(d) DKL
+(
+q(z|ξ)||p(z)
+)
+.
+Figure 12: The loss function and the KL divergence during the training for Task 3. (a) and (b) show
+the training when z is two-dimensional. (c) and (d) show the training when z is one-dimensional.
+The values of the loss function and KL divergence DKL
+(
+q(z|ξ)||p(z)
+)
+during training for Task 3 are
+plotted in Figure 12. Figure 12(b) indicates that the channels z1 encodes more significant information
+than the channel z0. From Figure 13(a), it is evident that the variation of z0 and z1 leads to different
+variations of the generated trajectories. When varying the value of z0, the height of the end-effector
+during the motion changes. Meanwhile, when varying the value of z1, positions for avoiding the
+obstacles change as shown in the second row of Figure 13(a); When z1 = −1.28, the end-effector
+passes the left-hand side of the obstacle, while the end-effector passes the right-hand side when
+z1 = 1.28. Therefore, the information is disentangled in these two channels.
+The scores of the trajectories obtained by the model with the 1d and 2d latent variables are summarized
+in Table 7. Scores are computed for trajectories generated without fine-tuning. When learning the
+two-dimensional latent variable, the variance of the score is much larger than that of the results
+obtained with the one-dimensional latent variable. This result indicates that the one-dimensional
+latent variable is sufficient to represent the distribution of optimal points on these motion-planning
+tasks.
+15
+(a) The latent variable z is two-dimensional as z = [z0, z1] in this result. The top row shows the variation with
+different z0 and the second row shows the variation with different z1. Trajectories indicated by the blue square
+show the trajectory generated with z0 = z1 = 0.
+(b) The latent variable z is one-dimensional in this result.
+Figure 13: Visualization of solution obtained by LSMO on Task 3. Comparison of the results of the
+two-dimensional and one-dimensional latent variables.
+Table 7: Comparison of scores between the one-dimensional and two-dimensional latent variables
+(higher is better).
+Task 1 Task 2 Task 3
+LSMO (1d) −2.95± 1.33 −2.24± 1.15 −3.24± 0.92
+LSMO (2d) −4.37± 2.44 −4.10± 3.00 −4.87± 2.48
+C Relation between the motion planning problems and RL problems
+The formulation of RL is based on the Markov decision process (MDP) [42], and the focus of RL
+is to learn a policy that maximizes the expected return in a stochastic environment. In addition, the
+learning agent is often an underactuated robot. In contrast, the target of the motion-planning problem
+addressed in this study is to obtain a trajectory that minimizes the cost function. In the context of
+motion planning, a trajectory is a sequence of robot configurations. The formulation of the motion-
+planning problem is based on the assumption that the robotic system is fully actuated and lower-level
+controllers are available. This assumption is valid in many industrial robotic systems, which are rigid
+and powerful enough to move quickly in a factory. For these reasons, trajectory optimization has been
+investigated for decades [22, 44, 38, 29]. Because of the difference in the formulation, the methods
+of solving RL problems and the motion-planning problems are fairly different. The challenge of
+trajectory optimization for the motion-planning problem involves dealing with a non-convex objective
+function that involves hundreds of parameters. Although previous studies addressed how to formulate
+the problem in a tractable manner, existing methods are designed to find a local-optima. To the best
+of our knowledge, our method is the first approach that captures a set of homotopic solutions for a
+motion-planning problem.
+References
+[1] S. Agrawal, S. Shen, and M. v. d. Panne. Diverse motions and character shapes for simulated
+skills. IEEE Transactions on Visualization and Computer Graphics, 20(10):1345–1355, 2014.
+[2] P. L. Bacon, J. Harb, and D. Precup. The option-critic architecture. In Proceedings of the AAAI
+Conference on Artificial Intelligence (AAAI), 2017.
+16
+[3] C. M. Bishop. Pattern recognition and machine learning. Springer, 2006.
+[4] S. Boyd and L. Vandenberghe. Convex Optimization. Cambridge University Press, 2004.
+[5] S. Porotsky & R. Y. Rubinstein D. P. Kroese. The cross-entropy method for continuous
+multi-extremal optimization. Methodology and Computing in Applied Probability, 8:383–407,
+2006.
+[6] P. Dayan and G. Hinton. Using expectation-maximization for reinforcement learning. Neural
+Computation, 9:271–278, 1997.
+[7] P. T. de Boer, D. P. Kroese, S. Mannor, and R. Y. Rubinstein. A tutorial on the cross-entropy
+method. Annals of Operations Research, 134:19–67, 2005.
+[8] K. Deb and A. Saha. Finding multiple solutions for multimodal optimization problems using
+a multi-objective evolutionary approach. In Proceedings of the 12th annual conference on
+Genetic and evolutionary computation, 2010.
+[9] E. Dupont. Learning disentangled joint continuous and discrete representations. In Advances in
+Neural Information Processing Systems 31 (NIPS 2018)), 2018.
+[10] B. Eysenbach, A. Gupta, J. Ibarz, and S. Levine. Diversity is all you need: Learning skills
+without a reward function. In Proceedings of the International Conference on Learning Repre-
+sentations (ICLR), 2019.
+[11] C. Florensa, Y. Duan, and P. Abbeel. Stochastic neural networks for hierarchical reinforcement
+learning. In Proceedings of the International Conference on Learning Representations (ICLR),
+2017.
+[12] D. E. Goldberg and J. Richardson. Genetic algorithms with sharing for multimodal function
+optimization. In Proceedings of the Second International Conference on Genetic Algorithms,
+1987.
+[13] N. Hansen and A. Ostermeier. Adapting arbitrary normal mutation distributions in evolu-
+tion strategies: The covariance matrix adaptation. In Proceedings of the IEEE International
+Conference on Evolutionary Computation, 1996.
+[14] A. Hatcher. Algebraic Topology. Cambridge University Press, 2002.
+[15] I. Higgins, L. Matthey, A. Pal, C. Burgess, X. Glorot, M. Botvinick, S. Mohamed, and A. Ler-
+chner. beta-vae: Learning basic visual concepts with a constrained variational framework. In
+Proceedings of the International Conference on Learning Representations (ICLR), 2016.
+[16] L. Jaillet and T. Simeon. Path deformation roadmaps: Compact graphs with useful cycles for
+motion planning. The International Journal of Robotics Research, 27(11–12):1175–1188, 2008.
+[17] E. Jang, S. Gu, and B. Poole. Categorical reparameterization with gumbel-softmax. In
+Proceedings of the International Conference on Learning Representations (ICLR), 2017.
+[18] M. Kalakrishnan, S. Chitta, E. Theodorou, P. Pastor, and S. Schaal. Stomp: Stochastic trajectory
+optimization for motion planning. In Proceedings of the IEEE International Conference on
+Robotics and Automation (ICRA), pages 4569–4574, May 2011. doi: 10.1109/ICRA.2011.
+5980280.
+[19] S. Karaman and E. Frazzoli. Sampling-based algorithms for optimal motion planning. Interna-
+tional Journal of Robotics Research, 2011.
+[20] L. E. Kavraki, P. Svestka, J. C. Latombe, and M. H. Overmars. Probabilistic roadmaps for
+path planning in high-dimensional conguration spaces. IEEE Transactions on Robotics and
+Automation, 12(4), 1996.
+[21] L. E. Kavraki, M. N. Kolountzakis, and J. C. Latombe. Analysis of probabilistic roadmaps for
+path planning. IEEE Transactions on Roborics and Automation, 1998.
+17
+[22] O. Khatib. Real-time obstacle avoidance for manipulators and mobile robots. International
+Journal of Robotics Research, 5(1):90–98, 1986.
+[23] D. P. Kingma and M. Welling. Auto-encoding variational bayes. In Proceedings of the
+International Conference on Learning Representations (ICLR), 2014.
+[24] J. Kober and J. Peters. Policy search for motor primitives in robotics. Machine Learning, 84:
+171–203, 2011.
+[25] S. M. LaValle and J. J. Kuffner. Randomized kinodynamic planning. International Journal of
+Robotics Research, 2001.
+[26] Y. Li, J. Song, and S. Ermon. Infogail: Interpretable imitation learning fromvisual demonstra-
+tions. In Advances in Neural Information Processing Systems (NIPS), 2017.
+[27] C. J. Maddison, A. Mnih, and Y. W. Teh. The concrete distribution: A continuous relaxation
+of discrete random variables. In Proceedings of the International Conference on Learning
+Representations (ICLR), 2017.
+[28] J. Merel, L. Hasenclever, A. Galashov, A. Ahuja, V. Pham, Y. W. Teh G. Wayne and, and
+N. Heess. Neural probabilistic motor primitives for humanoid control. In Proceedings of the
+International Conference on Learning Representations (ICLR), 2019.
+[29] M. Mukadam, J. Dong, X. Yan, F. Dellaert, and B. Boots. Continuous-time gaussian process
+motion planning via probabilistic inference. International Journal of Robotics Research, 2018.
+[30] O. Nachum, S. Gu, H. Lee, and S. Levine. Data-efficient hierarchical reinforcement learning.
+In Advances in Neural Information Processing Systems (NeurIPS), 2018.
+[31] O. Nachum, S. Gu, H. Lee, and S. Levine. Near optimal representation learning for hierar-
+chical reinforcement learning. In Proceedings of the International Conference on Learning
+Representations (ICLR), 2019.
+[32] A. Orthey, B. Frész, and M. Toussaint. Motion planning explorer: Visualizing localminima
+using a local-minima tree. IEEE Robotics and Automation Letters, 5(2):346–353, 2020.
+[33] T. Osa. Multimodal trajectory optimization for motion planning. The International Journal of
+Robotics Research, 2020.
+[34] T. Osa, V. Tangkaratt, and M. Sugiyama. Hierarchical reinforcement learning via advantage-
+weighted information maximization. In Proceedings of the International Conference on Learn-
+ing Representations (ICLR), 2019.
+[35] E. Rohmer, S. P. N. Singh, and M. Freese. V-REP: a versatile and scalable robot simulation
+framework. In Proceedings of IEEE/RSJ International Conference on Intelligent Robots and
+Systems (IROS), 2013.
+[36] T. Schaul, D. Horgan, K. Gregor, , and D. Silver. Universal value function approximators. In
+Proceedings of the InInternational Conference on Machine Learning (ICML), 2015.
+[37] E. Schmitzberger, J. L. Bouchet, M. Dufaut, D. Wolf, and R. Husson. Capture of homotopy
+classes with probabilistic road map. In IEEE/RSJ International Conference on Intelligent Robots
+and Systems (IROS), volume 3, pages 2317–2322 vol.3, 2002.
+[38] J. Schulman, Y. Duan, J. Ho, A. Lee, I. Awwal, H. Bradlow, J. Pan, S. Patil, K. Goldberg, and
+P. Abbeel. Motion planning with sequential convex optimization and convex collision checking.
+The International Journal of Robotics Research, 33(9):1251–1270, 2014.
+[39] M. Sharma, A. Sharma, N. Rhinehart, and K. M. Kitani. Directed-info gail: Learning hierarchi-
+cal policies from unsegmented demonstrations using directed information. In Proceedings of
+the International Conference on Learning Representations (ICLR), 2019.
+[40] B. Siciliano, L. Sciavicco, L. Villani, and G. Oriolo. Robotics Modelling, Planning and Control.
+Springer, 2009.
+18
+[41] C. Stoean, M. Preuss, R. Stoean, and D. Dumitrescu. Multimodal optimization by means of a
+topological speciesconservation algorithm. IEEE Transactions on EvolutionaryComputation,
+14(6):842–864, 2010.
+[42] R. S. Sutton and A. G. Barto. Reinforcement Learning: An Introduction. MIT Press, 1998.
+[43] A. S. Vezhnevets, S. Osindero, T. Schaul, N. Heess, M. Jaderberg, D. Silver, and K. Kavukcuoglu.
+FeUdal networks for hierarchical reinforcement learning. In Proceedings of the International
+Conference on Machine Learning (ICML), 2017.
+[44] M. Zucker, N. Ratliff, A. Dragan, M. Pivtoraiko, M. Klingensmith, C. Dellin, J. A. Bagnell,
+and S. Srinivasa. Chomp: Covariant hamiltonian optimization for motion planning. The
+International Journal of Robotics Research, 32:1164–1193, 2013.
+19
+	1 Introduction
+	2 Optimization via Inference with Importance Sampling
+	3 Learning the Solution Manifold with Importance Sampling
+	4 Application to Motion Planning for Robotic Manipulator
+	5 Related Work
+	6 Experiments
+	6.1 Optimization of test objective functions
+	6.2 Motion Planning for a Robotic Manipulator
+	6.3 Computation time
+	6.4 Applicability to a real robotic system
+	7 Discussion and Future Work
+	A Details of Toy Function Optimization Tasks
+	A.1 Shaping function
+	A.2 Toy functions
+	A.3 Proposal distribution
+	A.4 Network architecture and training parameters
+	B Details of Motion Planning Tasks
+	B.1 Shaping function
+	B.2 Objective function
+	B.3 Network architecture and training parameters
+	B.4 Details on problem settings
+	B.5 Effect of the dimensionality of the latent variable
+	C Relation between the motion planning problems and RL problems

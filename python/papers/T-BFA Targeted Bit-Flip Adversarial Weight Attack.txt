@@ -1,0 +1,904 @@
+T-BFA: Targeted Bit-Flip Adversarial Weight
+Attack
+Adnan Siraj Rakin1, Zhezhi He1, Jingtao Li 1, Fan Yao 2, Chaitali
+Chakrabarti 1 and Deliang Fan∗1
+1Department of Electrical,Computer and Energy Engineering, Arizona
+State University
+2Department of Electrical and Computer Engineering, University of
+Central Florida
+Abstract
+Deep Neural Network (DNN) attacks have mostly been conducted through ad-
+versarial input example generation. Recent work on adversarial attack of DNN
+weights, especially, Bit-Flip based adversarial weight Attack (BFA) has proved to
+be very powerful. BFA is an un-targeted attack that can classify all inputs into a
+random output class by flipping a very small number of weight bits stored in com-
+puter memory. This paper presents the first work on targeted adversarial weight
+attack for quantized DNN models. Specifically, we propose Targeted variants of
+BFA (T-BFA), which can intentionally mislead selected inputs to a target output
+class. The objective is achieved by identifying the weight bits that are highly asso-
+ciated with the classification of a targeted output through a novel class-dependant
+weight bit ranking algorithm. T-BFA performance has been successfully demon-
+strated on multiple network architectures for the image classification task. For
+example, by merely flipping 27 (out of 88 million) weight bits, T-BFA can mis-
+classify all the images in Ibex class into Proboscis Monkey class (i.e., 100% attack
+success rate) on ImageNet dataset, while maintaining 59.35% validation accuracy
+on ResNet-18.
+1 Introduction
+In recent years, deep neural networks (DNNs) have achieved tremendous success in
+a wide variety of applications, including image classification [1, 2], speech recogni-
+tion [3, 4] and machine translation [5, 6]. Unfortunately, DNN models are not secure
+and the vulnerability of DNN models has been exposed by [7, 8] in their works on
+adversarial input example generation.
+∗Corresponding Author: dfan@asu.edu
+1
+ar
+X
+iv
+:2
+00
+7.
+12
+33
+6v
+1 
+ [
+cs
+.L
+G
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+Recently, adversarial weight attacks have been added to the the security challenge
+of DNN models. Memory fault injection techniques, e.g., Laser Beam Attack [9] and
+Row-Hammer Attack (RHA) [10, 11], can inject faults into a computer main mem-
+ory (i.e., DRAM). In comparison to adversarial input attacks that require designing
+noise to be injected into each input separately, an adversarial weight attack requires
+modifying the model only once to achieve the desired attack output for the whole in-
+put set. As shown in Fig. 1, the DNN weights stored in the main memory can be
+modified by advanced memory bit attack algorithms [12, 13, 14] to degrade DNN per-
+formance. Further, advanced computer side-channel attacks [15, 16] have successfully
+demonstrated that a malicious attacker can extract DNN parameters and launch an ad-
+versarial weight attack. Several adversarial weight attacks have been proposed in recent
+years [13, 12, 14, 17]. Among them, the memory bit-flip based adversarial un-targeted
+weight attack in [14] is the strongest. It has been proven to degrade a fully-functional
+ResNet-18 test accuracy on the ImageNet dataset to 0.1% with only 13 bit-flips (out of
+93 million bits).
+1
+2
+3
+1
+2
+3
+Label  Output
+1
+2
+3
+1
+2
+3
+Label  Output
+1
+2
+3
+1
+2
+3
+Label  Output
+Don't Care
+Don't Care
+Type II: 1-to-1Type I: N-to-1 Type III:1-to-1 Stealthy
+Weights
+Batch 
+Norm and 
+Sensitive 
+Low Volume
+Insensitive 
+High Volume
+DRAM
+DNN
+Attacker
+RHA
+Malicious 
+Objective
+Figure 1: Demonstration of Row-Hammer Attack (RHA) on the identified vulnerable
+bits with three distinct types of targeted attack objective proposed in T-BFA.
+Existing un-targeted bit-flip based adversarial weight attacks reduce the overall pre-
+diction accuracy of a DNN model. Targeted attacks [18, 19] pose an even greater threat
+for the following reasons: First, it gives the attacker precise control on the malicious
+objective and behavior. Second, a carefully crafted targeted attack objective can cause
+a devastating effect on the DNN output. For example, for self-driving car applications,
+targeting a stop sign to be miss-classified to a high-speed limit sign while keeping the
+accuracy of all other signs intact can cause very serious damage.
+All the existing targeted attacks in the adversarial weight attack domain either fail
+to perform the attack effectively i.e., requiring a large number of weight modifica-
+tions [20], or are evaluated on a full-precision DNN [13, 12]. A DNN with full pre-
+cision weights is easier to attack; it can be made to malfunction by just flipping the
+exponent bits compared to quantized DNN weights which naturally noise resilient.
+However, weight quantization is becoming a must-optimization for optimal efficiency
+in most computing platforms, such as Google’s TPU [21].
+In this work, we propose Targeted Bit-Flip Attack (T-BFA), the first work on tar-
+geted adversarial weight attack of weight-quantized DNNs. We consider three vari-
+ants of T-BFA as shown in the right panel of Fig. 1: N-to-1 where inputs from N
+2
+source classes are mapped to 1 target class, 1-to-1 where inputs from 1 source class are
+mapped to 1 target class, and 1-to-1 (stealthy) where not only are inputs from 1 source
+class mapped to 1 target class but also the accuracy of the other class classifications
+are kept unchanged as much as possible. The 1-to-1 stealthy attack is particularly vi-
+cious since DNN users may not aware that an attacker has hijacked the network. The
+contributions of this work can be summarized as follows:
+• Our proposed T-BFA can break the noise resilience of a quantized DNN through N-
+to-1 (I), 1-to-1 (II), and 1-to-1 stealthy (III) adversarial weight attacks by flipping a
+very small number of weight bits stored in computer memory.
+• To achieve the desired targeted attack objective, we formulate three distinct loss
+functions associated with each type of attack. We propose a novel iterative searching
+algorithm that can successfully minimize these loss functions to locate vulnerable
+weight bits that are associated with a target class.
+• We evaluate T-BFA on a wide range of network architectures (e.g., ResNet, VGG
+and MobileNet-V2) for image classification using CIFAR-10 and ImageNet datasets.
+The experiments on ResNet-18 [22] using ImageNet dataset show that our proposed
+T-BFA can achieve 100% attack success rate in miss-classifying all images in the
+‘Ibex’ class into ‘Proboscis Monkey’ class with only 27 bit-flips while keeping the
+test accuracy for other class images at 59.35%.
+• Finally, we present an analysis of three T-BFA schemes on different DNN architec-
+tures with varying capacities and quantization levels. Such analysis provides key
+insights in deriving effective defense strategies against T-BFA attacks.
+2 Background and Related Work
+Bit-Flip Attack. The recent developments in memory fault injection attacks [10, 23]
+have made it feasible to conduct an adversarial weight attack for a DNN model running
+on a computer. Among them, a row-hammer attack [10] on Dynamic Random Access
+Memory (DRAM) is the most popular one since it can create a profile of memory bits
+stored inside the main memory (i.e., DRAM) and flip any bit of a given target address.
+The first few works that exploited row-hammer to attack DNN weights flipped the Most
+Significant Bits (MSB bits) of DNN parameters, such as the bias [12] or weight [13],
+and changed them to a significantly large value, thus degrading accuracy. However,
+those attacks were only evaluated on a model with full precision (i.e. floating point)
+parameters and failed in DNNs with quantized parameters.
+A major milestone in adversarial weight attack is the work in [14] which imple-
+mented a stronger version of a bit-flip attack on an 8-bit fixed-point quantized network.
+In this work [14], BFA searches for the weight bits iteratively to gradually decrease
+DNN accuracy. However, the BFA design in [14] is for an un-targeted attack. Even
+though it succeeds in hampering the overall test accuracy, it fails to degrade the accu-
+racy of a targeted class.
+3
+Targeted Attack. A targeted attack has more precise control on the miss-classification
+behavior and can cause higher calamity. It is a well-investigated technique in adversar-
+ial input attack domain [19, 18, 7]. Here the attacker finds additive noise that decreases
+the loss function w.r.t a false target label for each image separately. Another form of
+targeted attack is the Trojan attack [24, 25]. Inserting a Trojan requires modifying the
+weights through re-training of the network and the attacker’s access to the training facil-
+ity (e.g., supply chain). Even though recently developed targeted bit Trojan attack [26]
+can inject Trojans into DNN during run-time using only 84 bit-flips, it still requires the
+help of an input trigger. Apart from Trojan attacks, recent adversarial model parameter
+attacks can also perform a targeted attack without requiring a trigger [20, 12]. Again,
+some of them [20] require a larger value of L0 norm (i.e., 900) for weight perturbation.
+Also, these attacks [20, 12] have been evaluated on a full-precision model which has
+been reported in [13, 14] of being easier to attack.
+Threat Model. In this work, we follow the standard white-box attack threat model
+assumption similar to the previous bit-flip based adversarial weight attacks [14, 26].
+Our threat model assumes that the attacker has access to model weights, gradients
+and a portion of test data to perform the attack. Such an assumption is valid since
+previous works have demonstrated an attacker can effectively steal similar information
+(i.e., layer number, weight size, and parameters) through side-channel attacks [15, 16].
+Finally, we assume that the attacker is denied access to any form of training information
+(i.e., training dataset, hyper-parameters) to conduct the attack.
+3 Targeted Bit-Flip Adversarial Weight Attack
+3.1 Overview of proposed T-BFA Variants
+We propose Targeted Bit-Flip adversarial weight Attack (T-BFA) that results in mis-
+classification of inputs from their source category/categories (i.e., ground-truth) to the
+target category, via a small number of malicious bit-flips on the quantized weight-bits
+of pre-trained DNN models. As depicted in Fig. 1, we propose three types of T-BFA
+with varying input constraints (e.g., number of source categories to be considered),
+which are elaborated as follows:
+• Type-I: N-to-1 Attack. Given that the input data belongs to one of N -classes, the
+attack objective of this T-BFA variant is to force the entire dataset X = {Xi}Ni=1
+with all N classes (as source classes) to one adversary-selected target class. The
+objective function used in conventional model training is converted to the T-BFA
+malicious one (LHS and RHS in Eq. (1) respectively) and expressed as follows:
+min
+{W}
+EXL(f(x, {W}); t)
+T-BFA−−−→ min LN-to-1 = min
+{B}
+EXL(f(x, {B}); tq) (1)
+where {W} is the weight tensor set of the DNN model and {B} is its quantized
+counterpart (i.e., weight-bit tensor set). Given vectorized input x ∈ X, f(x, {W})
+computes the DNN inference output. L(·; ·) denote the cross-entropy loss between
+DNN inference output and labels. x and t are input data and its corresponding
+4
+ground-truth label. For this attack, the ground-truth label term of source category1
+t ∈ e(i), i ∈ {1, ..., N} is tampered to the selected q-indexed target category tq ∈
+e(q).
+• Type-II: 1-to-1 Attack. In this T-BFA variant, the adversary focuses on the mis-
+classification of input data Xp of single p-indexed source category into the q-indexed
+target category (p 6= q), without caring about the impact on the remaining categories
+Xi 6=p. It can be described as:
+min L1-to-1 = min
+{B}
+EXpL(f(xp, {B}); tq); xp ∈ Xp (2)
+• Type-III: 1-to-1 Stealthy Attack. In addition to the type-II 1-to-1 attack described
+above, the stealth version has two objectives: 1) All the input data from p-indexed
+category Xp are classified into q-indexed target category which is the same as Eq. (2);
+2) Maintaining correct predictions of the data excluded from source category Xj , j ∈
+{1, 2, .., N}\{p}. These two objectives can be achieved via the optimization of the
+two corresponding loss terms in the RHS of the following objective function:
+min L1-to-1(S) = min
+{B}
+EX
+(
+L(f(x, {B}); tq)·1x∈Xp+L(f(x, {B}); t)·1x∈Xj
+)
+(3)
+where 1condition returns 1 if the condition is true, 0 otherwise.
+In general, the three T-BFA variants mainly show the attack objective in terms of
+source and target categories. Another critical optimization constraint is using limited
+number of malicious bit-flips on weight bits to achieve the objectives in Eqs. (1) to (3).
+This could be viewed as a joint-optimization andrepresented by:
+min LT-BFA, LT-BFA ∈ {LN-to-1,L1-to-1,L1-to-1(S)}; s.t. min
+{B}
+Dhd({B̂}, {B}); (4)
+where Dhd is the Hamming-distance between the weight-bit tensors prior to ({B̂}) and
+after ({B}) the attack. Instead of applying Dhd as an additional loss term in Eqs. (1)
+to (3) to form single multi-objective function, we follow the optimization flow adopted
+by the un-targeted BFA [14], with several T-BFA-specific modifications; the details are
+given in the following subsection.
+3.2 Optimization of T-BFA Variants
+The optimization of T-BFA can be generally described as an iterative process, wherein
+each iteration, only single weight-bit is identified followed by the malicious bit-flip.
+In the k-th iteration of T-BFA optimization, the objective function in Eq. (4) can be
+rewritten as:
+min
+{Bk}
+LT-BFA; s.t. Dhd({B
+k}, {Bk−1}) = 1 (5)
+where the single bit-flip is highlighted by defining inter-iteration Hamming distance
+Dhd as 1. To minimize LT-BFA with single bit-flips per iteration, we inherit and modify
+1e(i) is the notation of one-hot code vector [0, . . . , 0, 1, 0, . . . , 0] with a 1 at position i.
+5
+the intra- and inter-layer bit search method proposed in the un-targeted BFA scheme [14].
+Given a DNN model with L layers (e.g., convolution layers), the intra-layer bit search
+is to identify one weight-bit per layer and traverse through all L layers, thus returning
+L weight-bit candidates. Then, the following inter-layer search finds one weight-bit
+out of L weight-bit candidates brought up by the intra-layer search. We describe the
+intra- and inter-layer search in iteration-k in the following paragraphs.
+Intra-layer Bit Search. For layer indexed by l, the intra-layer bit search is to identify
+weight-bit candidate w.r.t two criteria: 1) identifying the bit with the higest gradient;
+2) can be (possibly) flipped along the direction of bit-gradient2. These two criteria can
+be mathematically described as:
+argmax
+Mk
+l
+,bk
+l
+|∇Bk−1
+l
+LkT-BFA|; s.t. b
+k
+l = clamp
+(
+bk−1l − sign(∇bk−1
+l
+LkT-BFA)
+)
+, bkl 6= b
+k−1
+l
+(6)
+where Mkl is the mask that indicates the location of the identified bit within weight-bit
+tensor Bk−1l and its value b
+k
+l ∈ {0, 1}. clamp(·) is the clamping function with 0 and
+1 as lower and upper bound. The intra-layer bit search traverses through all the layers
+to generate the weight-bit candidate set, {Mkl }Ll=1. Meanwhile, for each weight-bit
+candidate in {Mkl }Ll=1, the corresponding T-BFA loss is profiled {L
+k
+T-BFA,l}
+L
+l=1 after the
+identified weight-bit has been flipped.
+Inter-layer Bit Search. Based on the intra-layer search outcomes (i.e., {Mkl }Ll=1),
+the inter-layer search performs straight-forward comparison to identify the weight-bit
+candidate with minimum profiled loss as the weight-bit to attack in iteration-k. This
+process can be expressed as follows:
+argmin {LkT-BFA,l}
+L
+l=1 (7)
+By applying above optimization method, we can successfully achieve the objective
+specified in Eq. (4).
+4 Experimental Setup
+Dataset configuration for attack. In this work, we evaluate our attacks on two vision
+datasets: CIFAR-10 [1] and ImageNet [27]. In Table 1, we provide an overview of data
+division to conduct each type of attack. To conduct an N-to-1 attack on CIFAR-10 and
+ImageNet, we randomly choose a test batch from the test dataset. However, to evaluate
+1-to-1 or 1-to-1(S) attack, we require a subset of source class (tp) test images. Since
+the CIFAR-10 dataset has 1k images in each class, we use 500 images to perform the
+attack and the remaining 500 images for evaluating the Attack Success Rate (ASR).
+Since the ImageNet dataset has only 50 images per class, we conduct the attack using
+25 images from the source class and use the remaining 25 images for evaluating ASR.
+2In the intra-layer search of un-targeted BFA [14], the weight-bit can be flipped along the opposite direc-
+tion of bit-gradient, as it performs maximization (instead of minimization used in this work).
+6
+Furthermore, for ImageNet, we always evaluate test accuracy on the whole test dataset
+of 50k images because the amount of test data used to perform the attack (e.g., 50)
+is negligible compared to 50k test images. The mean and standard deviation numbers
+are calculated over 5 trial runs for CIFAR-10 and 3 trial runs for ImageNet. Also, we
+terminate attacks when the ASR reaches higher than 99.99% or does not change for
+three successive iterations.
+Table 1: Test data splitting to conduct targeted attack from source class tp to target class
+tq. CIFAR-10 data has 10k test images with each class containing 1000 test images and
+the ImageNet dataset has 50k test samples with each class containing 50 images. Note:
+(tr) means images belong to any other class apart from the source class.
+Metrics
+# of Data to
+conduct attack
+# of Data to
+evaluate ASR
+# of Data to
+evaluate Test acc.
+# of Data to
+conduct attack
+# of Data to
+evaluate ASR
+# of Data to
+evaluate Test acc.
+Dataset CIFAR-10 ImageNet
+N-to-1 128 10k 10k 50 50k 50k
+1-to-1 500( tp ) 500(tp) 9k 25(tp) 25(tp) 50k
+1-to-1 (S) 500(tp)+500(tr) 500(tp) 8.5k 25(tp)+25 (tr) 25(tp) 50k
+Evaluation Metrics Two metrics are used in this work for attack evaluation: Post-
+attack accuracy, which is the inference accuracy on test subset, and Attack Success
+Rate (ASR) defined by the percentage of source class images correctly classified into
+target class via T-BFA.
+Table 2: N-to-1 Attack: number of bit-flips (mean±std) required to classify all the input
+images to a corresponding target class with 100% ASR. In each case, test accuracy
+drops to 10%.
+Class 0 1 2 3 4 5 6 7 8 9 Average
+ResNet-20 4.0 ± 0 4.6 ± 0.9 5.0 ± 2.2 6.2 ± 2.3 4.6 ± 0.9 5.2 ± 1.6 6.8 ± 1.9 4.4 ± 1.7 5 ± 2.2 4.8 ± 1.8 5.1
+VGG-11 3.0 ± 0.0 3.0 ± 0.0 3.0 ± 0.0 3.0 ± 0.0 2.8 ± 0.4 2.0 ± 0.0 3.0 ± 0.0 3.2 ± 0.4 3.0 ± 0.0 3.0 ± 0.0 3.0
+0 1 2 3 4 5 6 7 8 9
+Target Class Index
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+S
+ou
+rc
+e 
+C
+la
+ss
+ In
+de
+x
+91.9 57.3 47.8 30.8 40.8 57.7 65.2 42.8 42.8 50.4
+75.0 91.9 66.1 71.2 42.3 75.7 67.8 55.4 76.1 76.1
+30.7 25.9 91.9 39.4 41.7 39.4 30.4 39.4 26.3 27.3
+19.4 34.5 39.0 91.9 31.5 35.5 38.1 40.4 32.4 34.9
+42.6 30.5 48.2 39.1 91.9 37.0 46.6 48.4 37.8 40.6
+43.1 32.4 65.1 54.4 36.6 91.9 44.9 61.8 33.4 30.2
+69.7 48.5 68.2 70.0 63.4 68.9 91.9 44.1 44.5 53.6
+65.6 41.1 60.5 67.2 53.4 37.6 40.1 91.9 53.0 48.9
+74.6 42.7 49.0 36.4 36.1 52.1 38.0 38.2 91.9 65.1
+28.9 45.6 41.1 27.7 40.5 29.5 22.7 44.0 11.6 91.9
+Post-attack Test Accuracy (%)
+0 1 2 3 4 5 6 7 8 9
+Target Class Index
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+S
+ou
+rc
+e 
+C
+la
+ss
+ In
+de
+x
+0.0 1.2 3.0 2.0 1.6 1.2 1.0 1.8 2.2 1.8
+1.0 0.0 1.2 1.0 1.8 2.0 1.2 1.6 1.0 2.0
+3.8 4.0 0.0 2.2 3.0 2.6 3.2 2.2 2.6 3.2
+4.2 2.0 2.0 0.0 3.8 5.0 2.0 2.0 2.0 2.0
+2.0 3.8 2.0 2.4 0.0 2.8 2.2 3.0 3.2 2.8
+2.0 2.2 1.0 3.0 2.0 0.0 1.8 2.2 2.2 2.4
+1.0 1.8 1.0 1.0 2.2 2.0 0.0 2.0 1.8 1.6
+1.0 2.0 1.2 2.0 1.6 3.0 2.0 0.0 1.6 1.6
+4.6 4.4 4.4 6.0 4.6 5.2 7.4 4.6 0.0 6.0
+3.8 2.4 2.0 4.0 2.0 3.6 5.4 2.0 5.0 0.0
+Number of Bit-Flips
+15
+30
+45
+60
+75
+90
+0.0
+1.5
+3.0
+4.5
+6.0
+Figure 2: Type II: 1-to-1 attack on ResNet-20 between source class and target class.
+The left subplot shows post attack test accuracy and the right subplot shows average
+number of bit-flips required for the attack.
+7
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+S
+ou
+rc
+e 
+C
+la
+ss
+ In
+de
+x
+91.9 62.4 63.2 58.8 63.4 62.8 64.7 64.6 64.9 64.8
+75.0 91.9 73.7 71.2 73.0 75.6 75.0 74.6 76.1 88.3
+43.2 58.0 91.9 60.9 66.6 58.5 61.2 60.7 53.7 56.4
+47.1 59.6 61.0 91.9 61.2 73.2 62.9 63.8 56.6 60.1
+69.5 69.4 70.0 71.3 91.9 53.2 74.0 66.0 63.3 72.0
+48.3 50.8 57.3 81.9 66.8 91.9 54.2 64.4 60.8 53.2
+69.8 71.5 68.3 70.0 68.2 68.7 91.9 69.1 72.1 71.3
+65.6 61.2 62.8 67.3 61.9 71.5 58.3 91.9 64.0 65.1
+74.6 72.9 70.6 69.1 69.4 59.2 71.1 70.5 91.9 63.7
+65.2 78.2 80.5 54.7 80.8 46.4 31.3 82.4 70.1 91.9
+ResNet-20, Post-attack Test Accuracy (%)
+0.0 100.098.2 99.0 99.9 99.9 99.9 99.8 99.9 99.9
+100.0 0.0 99.3100.099.9100.099.8 99.8100.099.7
+99.7 97.6 0.0 99.0 98.8 99.0 98.5 98.1 98.4 97.1
+99.1 99.8 99.2 0.0 98.8 98.4 99.2 99.4 99.3 98.6
+98.8 97.2 99.6 99.5 0.0 98.8 98.8 97.6 99.1 97.3
+98.9 97.8100.099.2 99.3 0.0 98.3 98.8 98.7 97.2
+100.099.5100.0100.099.6100.0 0.0 99.2 99.8 99.7
+100.099.4 99.8100.099.6 98.4 99.0 0.0 99.3 99.3
+100.099.6 99.6 99.7 99.4100.099.8 99.2 0.0 99.2
+99.1 99.6 99.7 98.8 99.1 98.8 98.6 99.4 99.3 0.0
+ResNet-20, Attack Success Rate (%)
+0.0 1.0 19.0 5.6 4.0 3.0 2.2 3.2 2.0 1.8
+1.0 0.0 5.2 1.0 2.2 2.0 5.0 3.0 1.0 12.2
+26.0 7.6 0.0 3.6 10.0 6.4 4.2 5.0 10.0 10.2
+10.8 7.0 7.4 0.0 5.6 20.8 6.6 8.2 10.4 7.6
+7.8 11.0 9.6 4.6 0.0 24.6 4.0 19.2 5.8 7.0
+13.4 21.0 3.6 16.4 6.6 0.0 10.2 16.8 6.2 19.8
+1.0 5.8 1.0 1.0 9.2 2.0 0.0 4.4 2.4 3.6
+1.0 6.4 3.6 2.0 4.8 26.4 7.2 0.0 6.4 3.0
+1.0 5.4 3.6 6.8 4.8 1.6 2.4 7.2 0.0 17.8
+21.2 14.0 4.4 22.8 4.2 28.0 32.4 4.8 18.6 0.0
+ResNet-20, Number of Bit-Flips
+0 1 2 3 4 5 6 7 8 9
+Target Class Index
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+S
+ou
+rc
+e 
+C
+la
+ss
+ In
+de
+x
+91.7 88.8 89.7 75.1 89.7 75.5 87.8 85.5 60.1 80.4
+89.9 91.7 84.5 86.3 89.5 88.8 89.0 89.4 67.8 74.3
+85.9 84.1 91.7 70.9 83.2 79.3 86.7 84.3 86.5 86.6
+87.0 86.3 82.6 91.7 88.0 78.5 82.7 87.7 76.8 86.2
+86.2 88.4 84.9 80.8 91.7 85.7 49.9 79.2 88.3 87.6
+85.1 88.1 86.9 81.8 84.2 91.7 85.5 88.0 76.4 85.4
+71.9 88.1 90.2 88.0 81.2 68.8 91.7 84.7 88.5 78.8
+88.4 89.4 82.8 82.0 89.0 86.8 87.9 91.7 90.0 89.4
+90.3 89.8 66.3 84.8 81.2 78.9 48.3 89.4 91.7 89.5
+80.6 71.3 84.3 85.4 89.2 87.8 88.0 88.6 68.3 91.7
+VGG-11, Post-attack Test Accuracy (%)
+0 1 2 3 4 5 6 7 8 9
+Target Class Index
+0.0 96.8 97.4 99.4 97.7 98.6 97.4 97.8 98.2 98.4
+98.5 0.0 99.6 99.1 98.4 98.5 97.8 98.9 99.4 99.0
+94.3 95.7 0.0 98.8 96.7 97.3 93.5 94.2 95.6 96.2
+94.8 94.7 96.0 0.0 97.1 97.3 94.4 93.9 94.8 93.3
+98.0 96.8 98.9 99.7 0.0 98.2 97.6 97.7 96.2 97.0
+93.0 93.6 97.3 99.7 98.5 0.0 92.4 94.8 93.8 93.9
+98.6 97.2 97.6 98.7 97.7 99.4 0.0 99.0 97.6 97.3
+98.8 98.8 99.3 99.8 99.2 99.8 98.3 0.0 96.7 98.0
+98.7 98.6 99.2 98.3 98.6 98.3 99.0 98.4 0.0 98.2
+98.9 98.8 99.1 99.0 98.1 98.5 98.3 98.7 99.1 0.0
+VGG-11, Attack Success Rate (%)
+0 1 2 3 4 5 6 7 8 9
+Target Class Index
+0.0 6.2 20.6 3.4 6.8 3.2 6.8 4.2 13.6 3.6
+3.8 0.0 3.2 3.8 3.0 3.2 5.4 3.4 4.6 4.2
+6.0 11.2 0.0 4.2 3.6 5.4 6.6 11.0 15.2 4.2
+12.0 16.2 6.8 0.0 3.6 4.6 9.0 14.2 9.8 11.6
+4.4 5.6 4.2 3.2 0.0 6.8 5.2 9.4 8.8 6.2
+7.6 15.4 26.2 3.0 5.4 0.0 15.8 16.4 10.6 11.4
+3.6 5.8 11.0 5.8 10.6 3.2 0.0 3.2 8.8 4.6
+8.6 7.4 3.4 2.6 4.6 3.6 3.4 0.0 5.0 5.4
+5.6 4.6 3.8 4.4 4.0 3.0 4.0 4.0 0.0 5.2
+4.6 4.4 6.8 3.4 4.8 4.6 7.0 3.0 4.4 0.0
+VGG-11, Number of Bit-Flips
+45
+60
+75
+90
+0
+20
+40
+60
+80
+100
+0
+6
+12
+18
+24
+30
+56
+64
+72
+80
+88
+0
+20
+40
+60
+80
+100
+0
+5
+10
+15
+20
+25
+Figure 3: Type III: 1-to-1 (S) attack post attack test accuracy, attack success rate and
+avg. # of bit-flips for five rounds of attacks for both Resnet-20 and VGG-11 Networks.
+5 Results
+In this section, we present the experimental results of our T-BFA attack against all three
+versions of targeted attack on both CIFAR-10 and ImageNet datasets.
+5.1 CIFAR-10 Results
+N-to-1 Attack. For CIFAR-10, the proposed N-to-1 attack can successfully reach
+100% ASR for both VGG-11 and ResNet-20 architectures on each target class. As
+shown in Table 2, the range of average bit-flips required to achieve 100% ASR is be-
+tween 4 ∼ 6.8 and 2.8 ∼ 3 for ResNet-20 and VGG-11, respectively. So for the N-to-1
+attack, VGG-11 requires a consistently fewer number of bit-flips than ResNet-20 for
+all the CIFAR-10 classes.
+Take-Away 1. Our analysis of the N-to-1 attack shows that there is no particular target
+class that is easier or more difficult to attack. Thus we conclude that the input feature
+patterns play a small role in resisting the attack, while the network architecture plays a
+more important role.
+1-to-1 Attack. In this version of T-BFA, the attacker performs 1-to-1 miss-classification
+with fewer number of bit-flips (see Fig. 2) in comparison to the N-to-1 version (see Ta-
+ble 2). For most of the entries shown in Fig. 2, the 1-to-1 attack requires only 1-2
+bit-flips to achieve 100%ASR with a few exceptions. Overall, for all possible combi-
+nations of classes, T-BFA successfully achieves 100% 1-to-1 miss-classification with a
+range of 1 ∼ 7.4 bit-flips.
+8
+Take-Away 2. 1-to-1 attack requires, in general, less bit-flips compared to N-to-1
+attack. This is expected since mis-classifying all N classes are more difficult than mis-
+classifying just one class.
+1-to-1 Stealthy (S) Attack.
+Our evaluation of 8-bit quantized ResNet-20 and VGG-11 models show a 91.9%
+and 91.6% baseline CIFAR-10 test accuracy, respectively. As shown in Fig. 3, after
+the attack, the accuracy drops for both networks with ResNet-20 seeing a larger drop
+in accuracy. The average test accuracy after five rounds of attack is between 31.3 ∼
+88.3% for ResNet-20. On the other hand, VGG-11 maintains a better test accuracy
+with a range of 48.3 ∼ 90.1%.
+Our proposed T-BFA is effective in attacking ResNet-20 network by achieving ASR
+higher than 97% for all combinations of source and target classes. However, VGG-11
+shows slightly better resistance to the attack with an ASR range of 93-99% for different
+combinations. This is consistent with prior work which shows that dense networks
+(i.e., VGG-11, VGG-16) are resistant to both adversarial weight attack [26] and input
+attack [7]. While for both networks, some classes are more vulnerable to bit-flip attack
+than others, most source class and target class combinations require less than 10 bit-
+flips to conduct the 1-to-1 stealthy attack.
+Take-Away 3. A compact network, like ResNet-20 with 0.27M parameters, has less
+capacity to learn the dual objective function in 1-to-1 (S) attack through a small number
+of bit-flips in comparison to denser network, like VGG-11 with 132M parameters. As
+a result, the test accuracy drop for a compact network, like ResNet-20, is higher.
+Table 3: Performance of T-BFA variants on ImageNet (from Ibex class to Proboscis
+Monkey class). The original test accuracies of ResNet-18, ResNet-34 and MobileNet-
+V2 are 69.23%, 75.5% and 72.01%, respectively.
+Type
+Attack
+Success
+Rate (%)
+Test
+Accuracy
+(%)
+# of
+Bit-Flips
+Attack
+Success
+Rate (%)
+Test
+Accuracy
+(%)
+# of
+Bit-Flips
+Attack
+Success
+Rate (%)
+Test
+Accuracy
+(%)
+# of
+Bit-Flips
+N-to-1 99.78 ± 0.27 0.23 ± 0.18 32.6 ± 8.2 99.99 ± 0 0.1 ± 0 21 ± 4 100 ±0 0.1 ± 0 17.3 ± 3.29
+1-to-1 100 ± 0 32.13 ± 14.4 16.7 ± 1.24 100 ± 0 23.74 ± 1.71 9.33 ± 0.94 100 ± 0 1.19 ± 0.22 13 ±1.41
+1-to-1 (S) 100 ± 0 59.48 ± 2.9 27.3 ± 16.7 100 ± 0 58.33 ± 3.29 40.33 ± 30.32 98.67 ± 1.89 33.99 ± 4.93 45.33 ± 21.74
+ResNet-18 (# of parameters: 11M) ResNet-34 (# of parameters: 21M) MobileNet-V2 (# of parameters: 2.1M)
+5.2 ImageNet Results
+ImageNet dataset has a much larger number of output classes compared to CIFAR-10.
+We do not have the space to report all targeted attack results, thus we randomly pick
+one combination of target attack (Ibex class -¿ Proboscis Monkey class) to show our
+method’s efficiency. For N-to-1 attack, Table 3 shows that our method requires 32, 21
+and 17.3 bit-flips, on average, for ResNet-18, ResNet-34 and MobileNet-V2, respec-
+tively. Thus a more compact network is more vulnerable to an N-to-1 attack. Now
+for 1-to-1 (S) attack, a compact network e.g., MobileNet-V2 (with 2.1M parameters)
+fails to maintain a reasonable test accuracy (i.e., 33.9%), while larger networks such
+9
+as ResNet-18 and ResNet-34 help to maintain a reasonable test accuracy (i.e., ¿59%)
+while achieving 100% ASR.
+Take-Away 4. In the case of the ImageNet dataset, a large number of output classes
+increase the attack difficulty for T-BFA. However, consistent with CIFAR-10 obser-
+vations, it is easier to conduct a 1-to-1 (S) attack on a network with higher capacity
+due to its larger optimization space that helps achieve dual objectives of maintaining
+reasonable test accuracy as well as achieving very high ASR.
+Table 4: Comparison with Competing Methods We directly report the numbers from
+the respective papers for [12, 20]. For [26, 14] we run the attack on ResNet-20 8-bit
+quantized network.
+Method
+# of Images
+Attacked
+Attack
+Success
+Rate (%)
+Test Accuracy
+(%)
+# of
+Bit-Flips
+Model
+Precision
+Untargeted-BFA (I) [14] 10k - 10.27 28 8-bit
+Proposed N-to-1(I) 10k 100 10 4 8-bit
+SBA (II) [12] 100 100 60.0 1 full-precision
+Proposed 1-to-1 (II) 1000 100 10 3.2 8-bit
+TBT (III) [26] 10k 93.89 82.03 199 8-bit
+GDA (III) [12] 100 100 81.66 198 full-precision
+Fault Sneaking (III) [20] 16 100 76.4 >2565 full-precision
+Proposed 1-to-1 (s) III 1000 99.3 88.3 12.2 8-bit
+5.3 Comparison with Other Competing Methods
+Several existing targeted attacks [14, 26, 12, 20] in adversarial weight attack domain
+have a similar goal to our proposed targeted attack. For instance, both un-targeted
+progressive BFA and the proposed N-to-1 T-BFA attack try to achieve a test accuracy
+of 10 % after an attack.
+As shown in Table 4, the proposed N-to-1 targeted attack achieves the same ob-
+jective as [14] with 7× less number of bit-flips. Other stronger versions of previous
+targeted attacks such as GDA [12] and fault sneaking attacks [20] have shown supe-
+rior results (100% ASR) against a weaker threat model (i.e., full-precision model or
+attacking only 100 images). However, the proposed T-BFA 1-to-1 (s) outperforms both
+[12],[20] on a quantized network with 16× and 210× fewer number of bit-flips. In
+the family of Neural Trojan works [25, 24, 26], Targeted Bit Trojan (TBT) follows a
+more strict threat model and performs the attack with the least number of bit-flips. Our
+1-to-1 (s) proves to be much more effective than TBT; it achieves a higher test accuracy
+and higher ASR with 16× fewer bit-flips.
+10
+6 Discussion
+Effect of Network width and precision. We perform two ablation studies to analyze
+the effects of model compression and network capacity. In Table 5, we show the results
+of our attack for quantized networks with weights represented by 2,4,6,8 bits. The
+performance of N-to-1 and 1-to-1 attack is slightly weaker for a low bit-width network
+(e.g., 2-bit). This is expected since low bit-width networks are reported to be more
+resilient to small perturbations. The 2 bit-width network is also resilient to a 1-to-1
+(s) attack. A preliminary study of network width indicated that increasing network
+channel width (×2) helped recover the test accuracy from 64.0% to 89.01 % for 1-to-1
+(S) attack. Such observations motivated us to explore possible future defense methods
+against T-BFA:
+Table 5: Result of varying the quantization bit-width on ResNet-20. For this ablation
+study, we chose to attack from class 0 to class 9 only. TA is Test accuracy before the
+attack.
+Type
+Attack
+Success
+Rate (%)
+Test
+Accuracy
+(%)
+# of
+Bit-Flips
+Attack
+Success
+Rate (%)
+Test
+Accuracy
+(%)
+# of
+Bit-Flips
+8-Bit ( TA: 92.91%) 6-Bit ( TA: 92.41%)
+N-to-1 (I) 100 ± 0 10 ± 0 6.0 ± 2.2 100 ± 0 10 ± 0 6.2 ± 0.83
+1-to-1 (II) 100 ± 0 68.45 ± 0.08 2.2 ± 0 100 ± 0 68.45 ± 0.08 2 ± 0
+1-to-1 (S) (III) 99.7 ± 0 80.3 ± 0 4.4 ± 0.54 100 ± 0 68.53 ± 0.15 1.6 ± 0.54
+4-Bit (TA: 91.33%) 2-Bit (TA: 90.3%)
+N-to-1 (I) 100 ± 0 10 ± 0 4.4 ± 0.55 100 ± 0 10 ± 0 37.6 ± 0.9
+1-to-1 (II) 100 ± 0 11.54 ± 0.08 4 ± 0 100 ± 0 76.43 ± 3.43 17.6 ± 1.7
+1-to-1 (S) (III) 98.56 ± 0.7 12.79 ± 1.88 16.4 ± 9.36 97.87 ± 1.75 84.6 ± 0.91 19.6 ± 6.6
+Defense Strategy 1. A network with higher model capacity (e.g., ResNet-34 or in-
+creased width) or lower quantization bit-resolution (e.g., 2 bit), resists N-to-1 attack
+better. As a result, a possible defense strategy against the N-to-1 attack would be to
+increase model capacity, network width, or to decrease the quantization level.
+Defense Strategy 2. It is difficult to achieve dual objectives of ensuring both high
+ASR and test accuracy after a 1-to-1 (s) attack on a compact network (e.g., MobileNet-
+V2). Thus for 1-to-1 (s) attack, decreasing the network capacity will limit the attacker’s
+ability to hide the attack (by failing to maintain the test accuracy on other classes),
+thereby helping to detect this attack..
+Layer-wise analysis of bit-flips and critical weights. We observe that the most vul-
+nerable layer for the T-BFA attack is the last classification layer. In the case of 1-to-1
+(s) attack, 100 % of the bit-flips are in the last layer for both ResNet-20 and VGG-11
+models. For the N-to-1 attack, more than 90% bit-flips are in the last classification
+layer. Further, to miss-classify from one source class to another target class, we see
+that the attack always picks one particular weight in the last layer even after running
+11
+the attack with different test batches. We call this weight as critical weight in classify-
+ing images from source class tp to target class tq . In the following Table 6, we list the
+critical weights for classifying all the class 1 images to different classes on ResNet-20:
+Table 6: If the last layer weight matrix Wm×n is flattened to create a 1-D array of size
+1×mn, then T-BFA picks the weights with the following indices in the flattened 1-D
+array.
+Target Class 0 2 3 4 5 6 7 8 9
+Index value 41 169 233 297 325 425 489 553 625
+Connected output neuron 0 2 3 4 5 6 7 8 9
+This study leads to the question: Can we defend T-BFA by securing the critical
+weights in the last layer? To answer the question, we run a T-BFA attack by first secur-
+ing the critical weights which cannot be flipped. Then, for more aggressive protection,
+we even secure the entire last layer. This is motivated by prior work that secures the
+entire last layer in a protected enclave, such as Intel SGX [28], as an effective privacy
+protection method. Unfortunately, for both cases, all three versions of T-BFA still suc-
+ceed but requiring more number of bit flips. For example, for CIFAR10, to misclassify
+image from class 1 to class 2, if the critical weights are secured, then we require 2×
+more number of bit-flips. If the entire last layer is secured, we require 6×more number
+of bit-flips.
+Defense Strategy 3. We conclude that securing critical weights or even all weights
+of last layer helps improve the resistance to T-BFA, but cannot completely defend it.
+T-BFA could find an alternative path of attack, but with a higher number of bit-flips.
+7 Conclusion
+We propose three targeted adversarial weight attack schemes, i.e. N-to-1, 1-to-1 and 1-
+to-1(stealthy), that severely degrade the classification performance of quantized DNNs.
+Our T-BFA is based on a novel iterative class-dependant bit ranking algorithm. We
+demonstrate that a compact network is more vulnerable to a N-to-1 attack while a
+larger network is more susceptible to the stealthy version of T-BFA. Finally, we provide
+possible defense strategies to make DNNs more resilient to such aggressive adversarial
+weight noise attacks.
+References
+[1] Alex Krizhevsky, Vinod Nair, and Geoffrey Hinton. Cifar-10 (canadian institute
+for advanced research). URL http://www. cs. toronto. edu/kriz/cifar. html, 2010.
+1, 6
+12
+[2] Yanan Sun, Bing Xue, Mengjie Zhang, and Gary G Yen. Evolving deep convolu-
+tional neural networks for image classification. IEEE Transactions on Evolution-
+ary Computation, 2019. 1
+[3] Geoffrey Hinton, Li Deng, Dong Yu, George E Dahl, Abdel-rahman Mohamed,
+Navdeep Jaitly, Andrew Senior, Vincent Vanhoucke, Patrick Nguyen, Tara N
+Sainath, et al. Deep neural networks for acoustic modeling in speech recognition:
+The shared views of four research groups. IEEE Signal Processing Magazine,
+29(6):82–97, 2012. 1
+[4] Md Amaan Haque, Abhishek Verma, John Sahaya Rani Alex, and Nithya
+Venkatesan. Experimental evaluation of cnn architecture for speech recognition.
+In First International Conference on Sustainable Technologies for Computational
+Intelligence, pages 507–514. Springer, 2020. 1
+[5] Minh-Thang Luong, Michael Kayser, and Christopher D Manning. Deep neural
+language models for machine translation. In Proceedings of the Nineteenth Con-
+ference on Computational Natural Language Learning, pages 305–309, 2015. 1
+[6] Yonghe Lu, Xin Xiong, Weiting Zhang, Jiaxin Liu, and Ruijie Zhao. Research
+on classification and similarity of patent citation based on deep learning. Scien-
+tometrics, pages 1–27, 2020. 1
+[7] Aleksander Madry, Aleksandar Makelov, Ludwig Schmidt, Dimitris Tsipras, and
+Adrian Vladu. Towards deep learning models resistant to adversarial attacks. In
+International Conference on Learning Representations, 2018. 1, 4, 9
+[8] Ian J Goodfellow, Jonathon Shlens, and Christian Szegedy. Explaining and har-
+nessing adversarial examples. ICLR, 2015. 1
+[9] Cyril Roscian, Alexandre Sarafianos, Jean-Max Dutertre, and Assia Tria. Fault
+model analysis of laser-induced faults in sram memory cells. In 2013 Workshop
+on Fault Diagnosis and Tolerance in Cryptography, pages 89–98. IEEE, 2013. 2
+[10] Yoongu Kim, Ross Daly, Jeremie Kim, Chris Fallin, Ji Hye Lee, Donghyuk Lee,
+Chris Wilkerson, Konrad Lai, and Onur Mutlu. Flipping bits in memory without
+accessing them: An experimental study of dram disturbance errors. In ACM
+SIGARCH Computer Architecture News, volume 42, pages 361–372. IEEE Press,
+2014. 2, 3
+[11] Kaveh Razavi, Ben Gras, Erik Bosman, Bart Preneel, Cristiano Giuffrida, and
+Herbert Bos. Flip feng shui: Hammering a needle in the software stack. In 25th
+{USENIX} Security Symposium ({USENIX} Security 16), pages 1–18, 2016. 2
+[12] Yannan Liu, Lingxiao Wei, Bo Luo, and Qiang Xu. Fault injection attack on
+deep neural network. In 2017 IEEE/ACM International Conference on Computer-
+Aided Design (ICCAD), pages 131–138. IEEE, 2017. 2, 3, 4, 10
+13
+[13] Sanghyun Hong, Pietro Frigo, Yiğitcan Kaya, Cristiano Giuffrida, and Tudor
+Dumitras, . Terminal brain damage: Exposing the graceless degradation in deep
+neural networks under hardware fault attacks. In 28th {USENIX} Security Sym-
+posium ({USENIX} Security 19), pages 497–514, 2019. 2, 3, 4
+[14] Adnan Siraj Rakin, Zhezhi He, and Deliang Fan. Bit-flip attack: Crushing neural
+network with progressive bit search. In Proceedings of the IEEE International
+Conference on Computer Vision (ICCV), pages 1211–1220, 2019. 2, 3, 4, 5, 6, 10
+[15] Mengjia Yan, Christopher Fletcher, and Josep Torrellas. Cache telepathy:
+Leveraging shared resource attacks to learn dnn architectures. arXiv preprint
+arXiv:1808.04761, 2018. 2, 4
+[16] Yun Xiang, Zhuangzhi Chen, Zuohui Chen, Zebin Fang, Haiyang Hao, Jinyin
+Chen, Yi Liu, Zhefu Wu, Qi Xuan, and Xiaoniu Yang. Open dnn box by power
+side-channel attack. IEEE Transactions on Circuits and Systems II: Express
+Briefs, 2020. 2, 4
+[17] Fan Yao, Adnan Siraj Rakin, and Deliang Fan. Deephammer: Depleting the
+intelligence of deep neural networks through targeted chain of bit flips. arXiv
+preprint arXiv:2003.13746, 2020. 2
+[18] Pin-Yu Chen, Huan Zhang, Yash Sharma, Jinfeng Yi, and Cho-Jui Hsieh. Zoo:
+Zeroth order optimization based black-box attacks to deep neural networks with-
+out training substitute models. In Proceedings of the 10th ACM Workshop on
+Artificial Intelligence and Security, pages 15–26. ACM, 2017. 2, 4
+[19] Nicholas Carlini and David Wagner. Towards evaluating the robustness of neural
+networks. In Security and Privacy (SP), 2017 IEEE Symposium on, pages 39–57.
+IEEE, 2017. 2, 4
+[20] Pu Zhao, Siyue Wang, Cheng Gongye, Yanzhi Wang, Yunsi Fei, and Xue Lin.
+Fault sneaking attack: A stealthy framework for misleading deep neural net-
+works. In 2019 56th ACM/IEEE Design Automation Conference (DAC), pages
+1–6. IEEE, 2019. 2, 4, 10
+[21] Norman P Jouppi, Cliff Young, Nishant Patil, David Patterson, Gaurav Agrawal,
+Raminder Bajwa, Sarah Bates, Suresh Bhatia, Nan Boden, Al Borchers, et al.
+In-datacenter performance analysis of a tensor processing unit. In Proceedings of
+the 44th Annual International Symposium on Computer Architecture, pages 1–12,
+2017. 2
+[22] Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun. Deep residual learn-
+ing for image recognition. In Proceedings of the IEEE conference on computer
+vision and pattern recognition, pages 770–778, 2016. 3
+[23] Michel Agoyan, Jean-Max Dutertre, Amir-Pasha Mirbaha, David Naccache,
+Anne-Lise Ribotta, and Assia Tria. How to flip a bit? In 2010 IEEE 16th In-
+ternational On-Line Testing Symposium, pages 235–239. IEEE, 2010. 3
+14
+[24] Tianyu Gu, Kang Liu, Brendan Dolan-Gavitt, and Siddharth Garg. Badnets: Eval-
+uating backdooring attacks on deep neural networks. IEEE Access, 7:47230–
+47244, 2019. 4, 10
+[25] Yingqi Liu, Shiqing Ma, Yousra Aafer, Wen-Chuan Lee, Juan Zhai, Weihang
+Wang, and Xiangyu Zhang. Trojaning attack on neural networks. In 25nd Annual
+Network and Distributed System Security Symposium, NDSS 2018, San Diego,
+California, USA, February 18-221, 2018. The Internet Society, 2018. 4, 10
+[26] Adnan Siraj Rakin, Zhezhi He, and Deliang Fan. Tbt: Targeted neural network
+attack with bit trojan. Proceedings of the IEEE Conference on Computer Vision
+and Pattern Recognition, 2020. 4, 9, 10
+[27] Alex Krizhevsky, Ilya Sutskever, and Geoffrey E Hinton. Imagenet classifica-
+tion with deep convolutional neural networks. In Advances in neural information
+processing systems, pages 1097–1105, 2012. 6
+[28] Florian Tramer and Dan Boneh. Slalom: Fast, verifiable and private execution
+of neural networks in trusted hardware. In International Conference on Learning
+Representations, 2019. 12
+15

@@ -1,0 +1,771 @@
+2020-7-20
+Hyperparameter Selection for Offline
+Reinforcement Learning
+Tom Le Paine*,1, Cosmin Paduraru*,1, Andrea Michi1, Caglar Gulcehre1, Konrad Żołna1, Alexander Novikov1,
+Ziyu Wang2 and Nando de Freitas1
+*Equal contributions, 1DeepMind, 2Google
+Offline reinforcement learning (RL purely from logged data) is an important avenue for deploying RL tech-
+niques in real-world scenarios. However, existing hyperparameter selection methods for offline RL break
+the offline assumption by evaluating policies corresponding to each hyperparameter setting in the environ-
+ment. This online execution is often infeasible and hence undermines the main aim of offline RL. Therefore,
+in this work, we focus on offline hyperparameter selection, i.e. methods for choosing the best policy from a
+set of many policies trained using different hyperparameters, given only logged data. Through large-scale
+empirical evaluation we show that: 1) offline RL algorithms are not robust to hyperparameter choices, 2)
+factors such as the offline RL algorithm and method for estimating Q values can have a big impact on
+hyperparameter selection, and 3) when we control those factors carefully, we can reliably rank policies
+across hyperparameter choices, and therefore choose policies which are close to the best policy in the set.
+Overall, our results present an optimistic view that offline hyperparameter selection is within reach, even
+in challenging tasks with pixel observations, high dimensional action spaces, and long horizon.
+1. Introduction
+The desire to apply reinforcement learning methods to a broad range of real-world problems has prompted
+renewed interest in offline reinforcement learning (ORL), i.e. methods that can learn a policy from logged
+data (Fujimoto et al., 2018; Levine et al., 2020). These methods are useful when it is challenging, risky
+or expensive to have an arbitrary policy interact with an environment, for example for robotics (Cabi
+et al., 2019), self-driving cars, health care (Futoma et al., 2020), or dialogue (Jaques et al., 2019).
+Despite a range of impressive results, the quality of different ORL algorithms depends heavily on hyper-
+parameter choice. Of course, this is a known issue in machine learning in general and in reinforcement
+learning in particular (Henderson et al. (2018); see Section 5 for background). The standard way
+of performing hyperparameter selection in RL is to evaluate policies online by interacting with the
+environment. However, picking hyperparameters for offline RL methods requires offline methods, where
+direct interaction with the environment is not allowed (as pointed out, for instance, by Wu et al. (2019)).
+Therefore, we must devise offline statistics to rank policies produced by different hyperparameter settings.
+This paper presents a thorough empirical study of offline hyperparameter selection for offline RL. It
+contrasts different approaches for selecting the best out of N hyperparameter settings purely from logged
+data, as shown in Figure 1. In particular, this study:
+• Uses simple and scalable evaluation metrics to assess the merit of different approaches for offline
+RL hyperparameter selection.
+• Uses challenging domains which require high-dimensional action spaces, high dimensional obser-
+vation spaces, and long time horizons.
+• Focuses on common important hyperparameters: model architecture, optimizer parameters, and
+loss function.
+Corresponding author(s): tpaine@google.com, paduraru@google.com
+ar
+X
+iv
+:2
+00
+7.
+09
+05
+5v
+1 
+ [
+cs
+.L
+G
+] 
+ 1
+7 
+Ju
+l 
+20
+20
+Hyperparameter Selection for Offline Reinforcement Learning
+Figure 1 | Offline hyperparameter selection
+compared to offline policy evaluation. (A)
+In offline hyperparameter selection, we learn
+a set of N policies using offline RL with dif-
+ferent hyperparameters, and attempt to pick
+the best policy π ∗. For both learning and hy-
+perparameter selection, we have access to the
+same logged data, and not to online interac-
+tions with the environment. (B) Offline Policy
+Evaluation is a closely related problem where
+the goal is to estimate the value of a policy
+given data.
+Our experiments confirm that ORL algorithms are not ro-
+bust to hyperparameter choices, strengthening the case for
+developing reliable offline hyperparameter selection meth-
+ods. Additionally, through our experiments we identify
+three important choices that can affect how effective offline
+hyperparameter selection can be:
+• The choice of offline RL algorithm: We find that al-
+gorithms that encourage policies to stay close to the
+behavior policy are easier to evaluate and rank.
+• The choice of Q estimator: We find Q values estimated
+by the OPE algorithm we use, Fitted Q-Evaluation, to
+be more accurate than ORL estimates.
+• The choice of statistic for summarizing the quality of
+a policy: the average critic value of the initial states
+works better than alternatives.
+When combined, these result in a strong strategy for offline
+hyperparameter selection across several challenging tasks.
+2. Offline Hyperparameter Selection
+An essential goal of offline RL is to enable the application
+of reinforcement learning methods in real-world scenarios
+where only logged data can be used. Therefore, hyper-
+parameter selection for offline RL should follow the same
+assumption (see Figure 1).
+Figure 2 | Evaluating performance of offline
+hyperparameter selection. Each point repre-
+sents a policy in the set, plotted according to
+its actual value and estimated value. OPE aims
+to minimizing the error between the value and
+the estimate (moving points closer to the di-
+agonal). In contrast, in OHS it is sufficient to
+(i) rank the policies as measured by spearman
+rank correlation, or (ii) select a policy whose
+value is close to the value of the best policy
+(i.e. has low regret).
+Offline hyperparameter selection (OHS) is closely related to
+offline policy evaluation (OPE), which focuses on estimat-
+ing a value function based on offline data.1 There are two
+salient differences between OHS and OPE. First, in OHS
+there is a known relationship between the data and the
+policies which may be leveraged to simplify the problem,
+whereas in OPE this relationship is generally unknown. Sec-
+ond, in OHS we mainly care about picking the best policy
+(or close to the best) from a set, not precisely assessing the
+quality of a policy as OPE aims to do. As a result, OHS and
+OPE may focus on optimizing different performance metrics
+(see Figure 2).
+This paper is concerned with hyperparameter selection,
+which is subtly different from hyperparameter tuning. Hy-
+perparameter selection refers to picking the best out of a
+set of given policies that were trained with different hyper-
+parameters, whereas tuning includes both selection and a
+strategy for searching the hyperparameter space.
+1Offline policy evaluation is in turn very closely related to off-policy evaluation. Both estimate the value function of an
+evaluation policy using data produced by a different policy, typically called the behavior policy, but off-policy evaluation can be
+performed online. In this paper, since we are only concerned with the offline setting, they are equivalent and we use the same
+acronym (OPE) for both.
+2
+Hyperparameter Selection for Offline Reinforcement Learning
+We use standard RL nomenclature (Sutton and Barto, 1998). In short, the agent policy takes s as
+input states to generate actions a which yields rewards r that are discounted using γ . They all can be
+subscripted with a discrete timestep t ≥ 0 and batched. The policy πϕ and critic Qθ are parametrized by
+ϕ and θ , respectively.
+2.1. Offline Statistics for Policy Ranking
+As discussed in the Introduction, the challenge when performing offline hyperparameter selection is
+to rank several policies using statistics computed solely from offline data. We envision the following
+workflow to apply offline hyperparameter selection in practice:
+1. Train offline RL policies using several different hyperparameter settings.
+2. For each policy, compute scalar statistics summarizing the policy’s performance (without interacting
+with the environment).
+3. Pick the top k best policies according to the summary statistics to execute in the real environment.
+All of the statistics considered in this paper will be based on the estimated value functions (also referred
+to as "critic") for policies trained by offline RL methods with different hyperparameter settings. We can
+obtain these critics from one of two sources:
+• ORL We can simply use the critic learned during offline RL training for that hyperparameter
+setting. For methods which do not usually leverage a critic, we additionally train a critic which
+does not impact the training but can be used to obtain statistics - see Section 3.2 for a list of the
+ORL methods we use.
+• OPE We use Fitted Q Evaluation (FQE, see Section 3.3) to retrain a critic for the policy generated
+by the offline RL algorithm.
+We then compute scalar values for the purpose of ranking policies by calculating a statistic based on the
+critic Qθ and the dataset D. We do this in one of two ways:
+• V̂ (s0) We use an estimate of the expected value of the evaluation policy for the initial state
+distribution Es0∼D[Qθ (s0,πe (a)]. This is an estimate of what we care about, i.e. the value we
+would achieve by running the policy in the environment from initial states.
+• Soft OPC We use the soft off-policy classification (OPC) statistic proposed in Irpan et al. (2019).
+This statistic can be written asE(s,a)∼D,success [Qθ (s,a)]−E(s,a)∼D[Qθ (s,a)]. Here success indicates
+whether (s,a) is part of a successful trajectory, namely one whose return is above a certain threshold;
+we try different values for this threshold in our experiments and pick the best one.
+We also considered two additional statistics: the average Q across all states, which performed similarly
+but slightly worse than V̂ (s0), as well as the average TD error, which clearly underperformed the main
+statistics considered. We defer these additional statistics to Appendix B.
+2.2. Metrics for Evaluating Offline Hyperparameter Selection
+As discussed in the previous section, we are interested in selecting good hyperparameter settings based
+on summary statistics for the corresponding ORL policies. Therefore, we use the evaluation metrics that
+aim to capture how useful different statistics are for ranking multiple policies and selecting the best
+one(s).
+In order to compute the metrics, we first obtain a reliable estimate of the actual expected discounted
+return for each policy when starting in the environment’s initial state distribution, by running that policy
+in the actual environment. This estimate will be used as the ground truth, and will be referred to as the
+actual value. We then compute the following metrics:
+3
+Hyperparameter Selection for Offline Reinforcement Learning
+Figure 3 | Tasks considered. We consider tasks from three continuous control domains: 1) DM Control Suite
+involves low dimensional action spaces from features of the MDP state, 2) Manipulation playground involves low
+dimensional action spaces from proprioceptive features of a Jaco arm, as well as visual representation of the scene,
+3) DM Locomotion involves control of a high action space humanoid avatar, from visuals provided by an egocentric
+camera controlled by the policy.
+• Spearman’s rank correlation: First compute the rank values of the different policies according
+to both the summary statistics and the actual values. Spearman’s rank correlation is the Pearson
+correlation between the two sets of rank values.
+• Regret @ k: First compute the top-k set, i.e. the k policies with the highest summary statistic
+values. Regret @ k is the difference between the actual value of the best policy in the entire set,
+and the actual value of the best policy in the top-k set. This metric aims to answer the question "If
+we were able to run policies corresponding to k hyperparameter settings in the actual environment
+and get reliable estimates for their values that way, how far would the best in the set we picked be
+from the best of all hyperparameter settings considered?".
+• Absolute error: The absolute value of the difference between the statistic V̂ (s0) and the actual
+values. This does not measure ranking quality directly, but we include it here because zero absolute
+error would correspond to perfect ranking, and because it is a standard measure in the OPE
+literature.
+3. Experimental Setup
+In the previous section, we described offline hyperparameter selection, and the statistics and metrics we
+consider. In this section we describe additional elements of the experimental setup including the tasks,
+algorithms, and hyperparameters considered.
+3.1. Tasks
+Real-world problems are diverse, spanning a range of challenging properties. We want to verify offline
+hyperparameter selection for high dimentional action space, observation space, long time horizon
+problems, including hard exploration problems. To achieve this end, we use ten tasks spanning two
+domains included in RL Unplugged (Gulcehre et al., 2020), as well as one robotic manipulation domain
+(Wang et al., 2020). In Figure 3, we illustrate some of those tasks and below we describe them in detail.
+For additional details about the datasets we used see Appendix E.
+DM Control Suite A set of continuous control tasks introduced by (Tassa et al., 2018) implemented in
+MuJoCo (Todorov et al., 2012). We choose four tasks with various levels of difficulty from the subset
+4
+Hyperparameter Selection for Offline Reinforcement Learning
+included in Gulcehre et al. (2020). For all tasks in this domain we use a feature representation of the
+MDP state, including proprioceptive information such as joint positions and velocities.
+Manipulation tasks These tasks require continuous control of a Kinova Jaco robotic arm with 9 degrees
+of freedom (simulated in MuJoCo (Todorov et al., 2012)). The tasks include manipluation problems
+such as picking up a block and placing it in a box. We use joint velocity control (at 20HZ) of all 6
+arm joints and the 3 joints of the hand. The agent observes the proprioceptive features directly, but
+can only infer the objects on the table from pixel observations. Two camera views of size 64 × 64 are
+provided: one frontal camera covering the whole scene, and an in-hand camera for closeup of the objects.
+The episodes are of length 400 and the reward function is binary depending on whether the task is
+successfully executed.
+DM Locomotion A set of continuous control tasks which involve controlling a 56 degrees of freedom
+humanoid avatar, resulting in a large action spaces (Tassa et al., 2020). For all tasks, we learn directly
+from large observation spaces (i.e. 64x64 RGB images). These images are generated by an egocentric
+camera under the control of the policy. We focus on humanoid corridor and humanoid gaps, which are
+difficult tasks but do not require long-term memory.
+3.2. Offline RL Algorithms
+Our experiments select among policies produced using different hyperparameter settings for three offline
+reinforcement learning algorithms listed below.
+Behavior Cloning (BC; Pomerleau (1989)) BC’s policy objective attempts to match the actions from
+the behavior data. Standard behavior cloning does not train a value function, but we do train a value
+function alongside the policy to enable downstream policy evaluation. We note that the training procedure
+is agnostic to the critic trained.
+Critic Regularized Regression (CRR; Wang et al. (2020)) The policy objective of CRR attempts to
+match the actions from the behavior data, while also preferring actions with high value estimates. This
+encourages the policy to be close to the behavior policy for some, but not all states.
+Distributed Distributional Deep Deterministic Policy Gradient (D4PG; Barth-Maron et al. (2018))
+D4PG’s policy objective directly optimizes the critic. As a result, there is no regularization towards the
+behavior policy.
+Table 1 | Policy updates for considered algorithms.
+BC and CRR regress to actions logged in the data while
+D4PG relies on critic estimates.
+Algorithm Policy Update
+BC −∇ϕ logπϕ (at |st )
+CRR −∇ϕ logπϕ (at |st ) ·w∗
+D4PG ∇ϕQθ (st ,πϕ (st ))
+FQE None
+∗w reflects CRR weighting as in (Wang et al., 2020)
+By design, all the algorithms share the same value
+objective. However, they use the same value func-
+tion update, which is
+−∇θd(Qθ (st ,at ), rt+γEa∼πϕ (st+1)Qθ (st+1,a)), (1)
+where d is a divergence measure. As the value up-
+date is the same for all the algorithms, they are
+defined by their policy updates which are shown in
+Table 1.
+Since the only difference between the algorithms
+is the policy objective, we can isolate its effect on
+downstream policy evaluation.
+Finally, we want to reiterate that two of the algorithms, BC and CRR, encourage the policy to stay close
+to the behavior policy, whereas D4PG does not, allowing the policy to freely optimize against the critic.
+As shown in our experiments (see Section 4), this characteristic strongly influences the OHS accuracy.
+5
+Hyperparameter Selection for Offline Reinforcement Learning
+3.3. Offline Policy Evaluation Algorithms
+We re-evaluate the policies generated by the ORL algorithms described above using FQE.
+Algorithm 1 Fitted Q Evaluation
+Input: Dataset D, policy πe to evaluate
+For nupdates do
+Sample {si ,ai , ri , s ′i }
+batch_size
+i=1 from D
+Update critic according to Eq. 1
+Fitted Q Evaluation (FQE; Le et al. (2019))
+Our FQE algorithm employs the same value func-
+tion updates as the above ORL methods but keeps
+the policy fixed. Pseudocode for it can be found
+in Algorithm 1, and a simplified version of the
+code we use can be found in Appendix D.
+FQE was shown to work well in a recent suite of experiments on relatively simple problems (Voloshin
+et al., 2019). Using it allows us to interrogate how much re-evaluation with the same objective and
+dataset improves policy evaluation. In our experiments, we assume the offline RL algorithms and FQE
+have access to the same data.
+There are many possible OPE algorithms we could try, as discussed in Section 5. We focus on Fitted Q
+Evaluation due to its simplicity and scalability. Other OPE methods have to solve difficult estimation
+problems, such as learning a transition model from pixels or computing importance sampling corrections
+for continuous actions. Fitted Q Evaluation foregoes estimating these complex quantities by directly
+estimating the value function of the policy being evaluated.
+3.4. Hyperparameters and Other Implementation Details
+Table 2 | Hyperparameters considered. We
+consider parameters specific to the model ar-
+chitecture, the optimizer, and loss function.
+Hyperparameter Values
+Hidden size 64, 1024
+Num blocks 1, 5
+Learning rate 0.001, 0.00001
+Learner steps range(50k, 250k, 25k)
+Algorithms BC, CRR, D4PG
+Beta (for CRR) 0.1, 10
+For each task, we train policies using the hyperparame-
+ters described in Table 2, resulting in 256 policies per task
+(64 BC, 128 CRR, 64 D4PG). We considered hyperparam-
+eters that affect the model architecture (hidden size, num
+blocks2), the optimizer (learning rate and learner steps),
+and loss function (algorithm and loss term beta), since these
+are known to be important for many machine learning prob-
+lems. The search space in grid search grows rapidly with
+respect to the number of hyperparameters considered and
+unique hyperparameter settings. Thus, we tried to choose
+a small representative set that is reasonably broad in terms
+of performance. Our implementations are based on open-
+sourced D4PG implementation from Acme (Hoffman et al.,
+2020).
+Each policy comes with an associated criticQθ , which we use to calculate ORL statistics. In addition, we re-
+evaluate each policy and hyperparameter choice using FQE for each combination of the hyperparameters
+in Table 2, meaning that we run the FQE algorithm 256 times per task. We use these resulting critics to
+generate the OPE statistics. Finally, to obtain the actual value, we run each policy in the environment for
+100 episodes. In the experiments we compare the actual values to the ORL and OPE statistics.
+In this paper, we use distributional critics (Bellemare et al., 2017; Dabney et al., 2018) for all our
+algorithms, including FQE. This means that the value function Qθ in Eq. 1 is represented as a discrete
+distribution, and the discrepancy measure d is the cross-entropy between the two distributions, as in
+Barth-Maron et al. (2018) and Wang et al. (2020). In Appendix C we compare FQE estimates with and
+without a distributional critic and find they are similar.
+2The CRR paper (Wang et al., 2020) uses blocks composed of two linear layers followed by layer norm and residual
+connection, and we used the same architecture.
+6
+Hyperparameter Selection for Offline Reinforcement Learning
+Figure 4 | Value estimates vs actual values. Each point represents a policy trained using different hyperparameters
+including different algorithms (� BC, � CRR, � D4PG). (top) Value estimates from offline RL algorithms. Notice
+nearly all values are over-estimated (i.e. lay above the diagonal) to some degree. D4PG over-estimates the most,
+followed by CRR, then BC. (bottom) Value estimates from re-evaluating policies using offline policy evaluation,
+specifically FQE. Re-evaluation significantly reduces over-estimating in these domains, though D4PG deviates the
+most from the actual values.
+4. Results
+Our experiments confirm that hyperparameter choice does play an important role in the performance of
+the ORL algorithms we use on our set of tasks (see for example the range of actual values (x axis) on
+the graphs in Figure 4). The results presented in this section aim to shed light on the conditions under
+which the statistics in Section 2.1 rank these hyperparameter choices well.
+4.1. Overestimation
+Figure 5 | Distribution of over-estimation.
+Summary of the distribution of over-
+estimation for each algorithm (� BC, � CRR,
+� D4PG) and task domain. Re-evaluation
+by OPE (bottom plot) significantly reduces
+over-estimation across all domains and
+algorithms.
+In the top row of Figure 4 and 5 we compare the actual
+values against the ORL V̂ (s0) statistics. We show that, on
+all tasks, ORL’s V̂ (s0) overestimates the value. In extreme
+cases (e.g. humanoid environments; see Figure 4 (top)),
+according to the ORL statistics, D4PG deceptively looks to
+produce the best policy, while actually being the worst.
+We find a clear over-estimation trend – statistics tend to
+over-estimate the most on D4PG, followed by CRR, followed
+by BC. Again, we note that BC and CRR attempt to produce
+policies that are similar to the behavior policy, whereas
+D4PG does not. This maymake it easier to estimate the value
+of the policies they produce, given only the behavior data.
+In terms of task domains, statistics tend to over-estimate
+the most on DM Locomotion, followed by Manipulation
+Playground, followed by DM Control Suite.
+In the bottom row of Figure 4 and 5, we compare the actual
+values against the OPE V̂ (s0) statistics. We show that re-
+evaluation using FQE significantly reduces over-estimation
+across all algorithms and tasks. Unfortunately, the over-estimation trends described above remain.
+Specifically, for D4PG on DM Locomotion, the statistic still over-estimates significantly.
+Finally, the plots in Figure 4 suggest better performing policies overestimate less. This finding highlights
+the importance of reducing overestimation for offline RL to learn better policies.
+7
+Hyperparameter Selection for Offline Reinforcement Learning
+Figure 6 | Rank correlation within algorithm and across all algorithms. We compare the rank correlation
+between the actual value and two policy statistics: V̂ (s0) and Soft OPC (see additional statistics in Appendix B).
+We use both ORL and OPE critics. In general in terms of ranking, OPE V̂ (s0) performed best, followed by ORL
+V̂ (s0), followed by OPE Soft OPC, followed by ORL Soft OPC. Also note that CRR followed by FQE re-evaluation
+works best across all domains.
+Figure 7 | Regret@5 within algorithm and across all algorithms. We compare the normalized regret@5 between
+the actual value and various policy statistics from ORL and OPE critics (V̂ (s0), Soft OPC, additional statistics in
+Appendix B). We normalize by the value of the best policy. The black horizontal line indicates the regret associated
+with the policy of median value. The regret follows similar trends to rank correlation. Note especially that that BC
+and CRR have generally low regret across all tasks, usually much lower than the regret associated with picking the
+policy with median value, and often close to zero.
+4.2. Ranking Quality
+In Figure 6 we compute the rank correlation between the actual values and various statistics, broken
+down by ORL algorithm, and across all algorithms. The ORL V̂ (s0) statistic has better rank correlation
+for BC and CRR (algorithms that encourage the policy to stay close to the behavior policy) than for
+D4PG. The ORL V̂ (s0) statistic also performs better on environments which showed less overestimation
+8
+Hyperparameter Selection for Offline Reinforcement Learning
+like DM Control Suite, and worse on environments with more overestimation like DM Locomotion. For
+the hardest combination, D4PG on the DM Locomotion tasks, the rank correlation is quite low. Because
+D4PG is hard to rank in this setting, it is also hard to rank policies across all algorithms.
+The same general trends hold for the OPE V̂ (s0) statistic, but it has higher correlation than ORL V̂ (s0)
+across the board. Especially for BC and CRR on the DM Locomotion tasks. For BC and CRR, OPE V̂ (s0)
+rank correlation is above 0.9 for most tasks. But for D4PG and across all algorithms on DM Locomotion
+is still quite low.
+Similar trends for ORL and OPE V̂ (s0) statistics can be seen in the regret plots in Figure 7. BC and CRR
+have generally low regret across all tasks, usually much lower than the regret associated with picking the
+policy with median value, and often close to zero. Regret for D4PG is often low, and usually better than
+the median choice. For D4PG the regret for OPE V̂ (s0) tends to be lower than for ORL V̂ (s0).
+Figures 6 and 7 indicate that ranking based on V̂ (s0) is preferable to ranking based on the Soft OPC
+statistic in terms of both ranking correlation and regret. For instance, OPE V̂ (s0) has higher rank
+correlation than OPE Soft OPC for nearly all tasks. It is not clear why this is the case. One potential
+explanation is Soft OPC depends on the value estimates along unsuccessful trajectories. It is possible the
+learned policies deviate from the behavior policy greatly on these states, and the value estimates end up
+being poor, making the difference in value between successful vs unsuccessful states less meaningful.
+4.3. FQE Sensitivity to Its Own Hyperparameters
+Figure 8 | Rank correlation vs FQE learner steps.
+(� BC, � CRR, � D4PG) FQE is relatively stable
+to the number of learner steps. Though D4PG on
+cartpole_swingup eventually diverges.
+Our FQE implementation was based on an existing
+CRR implementation and we used its default hyper-
+parameters for all tasks (hidden size = 1024, num
+blocks = 4, learning rate = 0.0001, learner steps =
+250k). We did not perform an exhaustive investigation
+of FQE’s sensitivity to hyperparameters, but we did
+look into its sensitivity to the number of learner steps
+on the control suite. Figure 8 suggests that FQE is
+not very sensitive to the number of learner steps and,
+in general, does not seem to get worse as it runs for
+longer. Finding a good way to tune FQE hyperparam-
+eters remains an open problem for future research.
+5. Related Work
+Early examples of offline/batch RL include least-squares temporal difference methods (Bradtke and
+Barto, 1996; Lagoudakis and Parr, 2003) and fitted Q iteration (Ernst et al., 2005; Riedmiller, 2005).
+Recently, Agarwal et al. (2019), Fujimoto et al. (2019), Kumar et al. (2019) and Siegel et al. (2020)
+have proposed new offline-RL algorithms and shown that they outperform off-the-shelf off-policy RL
+methods. There have also been several new methods explicitly addressing the issues stemming from
+extrapolation error (Fujimoto et al., 2018). Imitation learning algorithms such as R2D3 (Paine et al.,
+2019) relate to the offline RL algorithms called growing-batch RL algorithms which grows the offline
+datasets with environment interactions. In this paper, we use Critic Regularized Regression (CRR; Wang
+et al. (2020)) as our main offline RL method; CRR uses the advantage function to select the best actions
+in the dataset for training behavior cloning.
+Hyperparameter tuning has been an essential tool for improving the performance of algorithms on
+many tasks and domains (Bergstra and Bengio, 2012; Jaderberg et al., 2017; Li et al., 2017; Snoek
+9
+Hyperparameter Selection for Offline Reinforcement Learning
+et al., 2012). Bergstra and Bengio (2012) have shown that a simple heuristic based on random search
+can improve the performance of the deep supervised learning models. Snoek et al. (2012) proposed a
+Bayesian optimization-based approach and showed that automatic hyperparameter tuning with different
+metrics can outperform grid and random search. Jaderberg et al. (2017) proposed a population-based
+evolutionary algorithm and showed promising results on challenging problems such asmachine translation
+and speech synthesis. Melis et al. (2017) showed that a carefully hyperparameter-tuned LSTM model
+can outperform much more complicated state of art language models.
+Offline hyperparameter tuning for offline RL has received relatively little attention. Farahmand and
+Szepesvári (2011) have proposed BerMin for offline model selection, and they investigated the conver-
+gence and other theoretical properties of it. Irpan et al. (2019) proposed Off-Policy Classification (OPC)
+and evaluate policies with rank correlation on goal-directed continuous control tasks. More recently,
+Gulcehre et al. (2020) and Fu et al. (2020) have proposed protocols for evaluating offline RL methods
+that involve evaluation on a separate set of tasks that are not available for hyperparameter tuning. This
+type of approach is useful for assessing how well offline RL methods can do without the ability to tune
+hyperparameters on the target domain.
+The early OPE methods relied on importance sampling (Precup, 2000; Precup et al., 2001). Importance
+sampling OPE methods can suffer from prohibitively large variance. One solution is to normalize the
+importance sampling corrections; another is to cap the maximum value of the importance sampling
+corrections (Munos et al., 2016). However, the dependence on the ratio of action-selection probabilities
+makes all these methods challenging to apply in continuous action spaces. More recently, marginal
+importance sampling methods have been developed that directly estimate the stationary state distribution
+ratio under the two policies (Liu et al., 2018; Nachum et al., 2019). The method proposed in Liu et al.
+(2018) require knowledge of the behavior policy. Subsequent works (e.g. Nachum et al. (2019); Uehara
+and Jiang (2019)) require optimization of bilinear minimax objectives that is potentially difficult without
+effective regularization.
+Another class of approaches to the OPE problem is model-based methods. These first estimate a transition
+model from the offline data, and then perform policy evaluation in the MDP defined by the transition
+model Mannor et al. (2004). The main issue with model-based OPE is that they can introduce a large
+amount of bias due to the true dynamics not being accurately captured by the learned model, which is
+often the case for pixel-based control. Moreover, OPE methods using doubly robust estimators combine
+both model-based and importance sampling based approaches (Dudík et al., 2011; Farajtabar et al.,
+2018; Jiang and Li, 2016; Thomas and Brunskill, 2016). However, doubly robust methods are unlikely
+to be helpful when neither IS nor MB methods perform well, as is likely to be the case in pixel-based
+continuous control domains.
+One approach to off-policy evaluation that avoids both importance sampling corrections and learning
+transition models is to only perform the policy evaluation step of a policy improvement algorithm. This
+can be done for instance by using the evaluation policy to select the action a′ in the value function
+Q(s ′,a′) used in most TD-style RL algorithms. Although this is a conceptually very simple approach, the
+earliest explicit reference to using it for OPE seems to be from Le et al. (2019), who refer to it as Fitted Q
+Evaluation (FQE). It can be seen as a special case of Retrace (Munos et al., 2016) with T = 0 and c = 1.
+A comprehensive empirical study of OPE methods was carried out in Voloshin et al. (2019). The study
+considered most of the aforementioned OPE methods and finds FQE to be surprisingly effective despite
+its simplicity. Compared to this work, Voloshin et al. (2019) examine simpler environments and datasets.
+The study also does not address model selection directly and mostly focuses on MSE as the evaluation
+metric. Farahmand and Szepesvári (2011) consider the problem of model selection for RL. Their method,
+however, resolves around the Bellman error which does not correlate well with policy performance in
+complicated domains (Irpan et al., 2019).
+10
+Hyperparameter Selection for Offline Reinforcement Learning
+6. Future Work
+This paper focuses on a single OPE method, FQE. We made this choice because FQE only estimates the
+value function, and we expected this would make it more likely to scale to the types of problems we
+are interested in. We look forward to seeing importance-sampling, model-based, or other OPE methods
+scale to these challenging problems.
+An important remaining challenge is how to choose hyperparameters for FQE. Although we do show
+that it is relatively robust to one (number of learner steps), in general this is an open problem. We do
+not investigate how to determine if you have sufficient data for reliable hyperparameter selection, or
+how the type of policy that generated the data affects the quality of the various approaches. Finally, our
+experiments are performed only in simulation, because it is difficult to get the ground-truth values for a
+large number of policies learned on robots or other physical systems.
+7. Conclusions
+We provide evidence that by carefully considering the choice of offline RL algorithm, Q estimator, and
+statistic, we can achieve a strong strategy for offline hyperparameter selection across challenging tasks.
+In particular, we find that using algorithms that encourage policies to stay close to the behavior policy
+such as CRR, re-estimating the Q value using FQE, and using V̂ (s0) as our ranking statistic is sufficient
+for performing offline hyperparameter selection in the tasks we considered. This is true even in the
+DM Locomotion tasks, which require control of a 56 degrees of freedom humanoid avatar from visuals
+provided by an egocentric camera.
+Acknowledgements
+We would like to thank Mohammad Norouzi, Misha Denil, George Tucker and Ofir Nachum for their
+helpful comments and suggestions.
+References
+R. Agarwal, D. Schuurmans, and M. Norouzi. An optimistic perspective on offline reinforcement learning.
+arXiv preprint arXiv:1907.04543, 2019.
+G. Barth-Maron, M. W. Hoffman, D. Budden, W. Dabney, D. Horgan, D. Tb, A. Muldal, N. Heess, and
+T. Lillicrap. Distributed distributional deterministic policy gradients. arXiv preprint arXiv:1804.08617,
+2018.
+M. G. Bellemare, W. Dabney, and R. Munos. A distributional perspective on reinforcement learning.
+CoRR, abs/1707.06887, 2017.
+J. Bergstra and Y. Bengio. Random search for hyper-parameter optimization. The Journal of Machine
+Learning Research, 13(1):281–305, 2012.
+S. Bradtke and A. Barto. Linear least-squares algorithms for temporal difference learning. Machine
+Learning, 22:33–57, 03 1996.
+S. Cabi, S. G. Colmenarejo, A. Novikov, K. Konyushkova, S. Reed, R. Jeong, K. Żołna, Y. Aytar, D. Budden,
+M. Vecerik, et al. A framework for data-driven robotics. arXiv preprint arXiv:1909.12200, 2019.
+W. Dabney, G. Ostrovski, D. Silver, and R. Munos. Implicit quantile networks for distributional reinforce-
+ment learning. In J. Dy and A. Krause, editors, Proceedings of the 35th International Conference on Machine
+11
+Hyperparameter Selection for Offline Reinforcement Learning
+Learning, volume 80 of Proceedings of Machine Learning Research, pages 1096–1105, Stockholmsmässan,
+Stockholm Sweden, 10–15 Jul 2018. PMLR.
+M. Dudík, J. Langford, and L. Li. Doubly robust policy evaluation and learning. CoRR, abs/1103.4601,
+2011.
+D. Ernst, P. Geurts, and L. Wehenkel. Tree-based batch mode reinforcement learning. Journal of Machine
+Learning Research, 6:503–556, 2005.
+A.-m. Farahmand and C. Szepesvári. Model selection in reinforcement learning. Machine learning, 85
+(3):299–332, 2011.
+M. Farajtabar, Y. Chow, and M. Ghavamzadeh. More robust doubly robust off-policy evaluation. CoRR,
+abs/1802.03493, 2018.
+J. Fu, A. Kumar, O. Nachum, G. Tucker, and S. Levine. D4rl: Datasets for deep data-driven reinforcement
+learning. arXiv preprint arXiv:2004.07219, 2020.
+S. Fujimoto, D. Meger, and D. Precup. Off-policy deep reinforcement learning without exploration. arXiv
+preprint arXiv:1812.02900, 2018.
+S. Fujimoto, D. Meger, and D. Precup. Off-policy deep reinforcement learning without exploration. In
+International Conference on Machine Learning, pages 2052–2062, 2019.
+J. Futoma, M. C. Hughes, and F. Doshi-Velez. Popcorn: Partially observed prediction constrained
+reinforcement learning. arXiv preprint arXiv:2001.04032, 2020.
+C. Gulcehre, Z. Wang, A. Novikov, T. L. Paine, S. G. Colmenarejo, K. Zolna, R. Agarwal, J. Merel,
+D. Mankowitz, C. Paduraru, G. Dulac-Arnold, J. Li, M. Norouzi, M. Hoffman, N. Ofir, T. George, N. Heess,
+and N. de Freitas. Rl unplugged: Benchmarks for offline reinforcement learning. arXiv preprint
+arXiv:2006.13888, 2020.
+P. Henderson, R. Islam, P. Bachman, J. Pineau, D. Precup, and D. Meger. Deep reinforcement learning
+that matters. In Thirty-Second AAAI Conference on Artificial Intelligence, 2018.
+M. Hoffman, B. Shahriari, J. Aslanides, G. Barth-Maron, F. Behbahani, T. Norman, A. Abdolmaleki,
+A. Cassirer, F. Yang, K. Baumli, S. Henderson, A. Novikov, S. G. Colmenarejo, S. Cabi, C. Gulcehre, T. L.
+Paine, A. Cowie, Z. Wang, B. Piot, and N. de Freitas. Acme: A research framework for distributed
+reinforcement learning. arXiv preprint arXiv:2006.00979, 2020.
+A. Irpan, K. Rao, K. Bousmalis, C. Harris, J. Ibarz, and S. Levine. Off-policy evaluation via off-policy
+classification. In Advances in Neural Information Processing Systems, pages 5437–5448, 2019.
+M. Jaderberg, V. Dalibard, S. Osindero, W. M. Czarnecki, J. Donahue, A. Razavi, O. Vinyals, T. Green,
+I. Dunning, K. Simonyan, et al. Population based training of neural networks. arXiv preprint
+arXiv:1711.09846, 2017.
+N. Jaques, A. Ghandeharioun, J. H. Shen, C. Ferguson, A. Lapedriza, N. Jones, S. Gu, and R. Picard. Way
+off-policy batch deep reinforcement learning of implicit human preferences in dialog. arXiv preprint
+arXiv:1907.00456, 2019.
+N. Jiang and L. Li. Doubly robust off-policy value evaluation for reinforcement learning. In M. F. Balcan
+and K. Q. Weinberger, editors, Proceedings of The 33rd International Conference on Machine Learning,
+volume 48 of Proceedings of Machine Learning Research, pages 652–661, 2016.
+A. Kumar, J. Fu, M. Soh, G. Tucker, and S. Levine. Stabilizing off-policy q-learning via bootstrapping
+error reduction. In Advances in Neural Information Processing Systems, pages 11761–11771, 2019.
+M. G. Lagoudakis and R. Parr. Least-squares policy iteration. Journal of Machine Learning Research, 4:
+1107–1149, 2003.
+12
+Hyperparameter Selection for Offline Reinforcement Learning
+H. Le, C. Voloshin, and Y. Yue. Batch policy learning under constraints. In K. Chaudhuri and R. Salakhut-
+dinov, editors, Proceedings of the 36th International Conference on Machine Learning, volume 97 of
+Proceedings of Machine Learning Research, pages 3703–3712, 2019.
+S. Levine, A. Kumar, G. Tucker, and J. Fu. Offline reinforcement learning: Tutorial, review, and
+perspectives on open problems. arXiv preprint arXiv:2005.01643, 2020.
+L. Li, K. Jamieson, G. DeSalvo, A. Rostamizadeh, and A. Talwalkar. Hyperband: A novel bandit-based
+approach to hyperparameter optimization. The Journal of Machine Learning Research, 18(1):6765–6816,
+2017.
+Q. Liu, L. Li, Z. Tang, and D. Zhou. Breaking the curse of horizon: Infinite-horizon off-policy estimation.
+In Advances in Neural Information Processing Systems. 2018.
+S. Mannor, D. Simester, P. Sun, and J. N. Tsitsiklis. Bias and variance in value function estimation. In
+Proceedings of the twenty-first international conference on Machine learning, page 72, 2004.
+G. Melis, C. Dyer, and P. Blunsom. On the state of the art of evaluation in neural language models. arXiv
+preprint arXiv:1707.05589, 2017.
+J. Merel, L. Hasenclever, A. Galashov, A. Ahuja, V. Pham, G. Wayne, Y. W. Teh, and N. Heess. Neural
+probabilistic motor primitives for humanoid control. arXiv preprint arXiv:1811.11711, 2018.
+R. Munos, T. Stepleton, A. Harutyunyan, and M. G. Bellemare. Safe and efficient off-policy reinforcement
+learning. arXiv preprint arXiv:1606.02647, 2016.
+O. Nachum, Y. Chow, B. Dai, and L. Li. Dualdice: Behavior-agnostic estimation of discounted stationary
+distribution corrections. In Advances in Neural Information Processing Systems. 2019.
+T. L. Paine, C. Gulcehre, B. Shahriari, M. Denil, M. Hoffman, H. Soyer, R. Tanburn, S. Kapturowski,
+N. Rabinowitz, D. Williams, et al. Making efficient use of demonstrations to solve hard exploration
+problems. arXiv preprint arXiv:1909.01387, 2019.
+D. A. Pomerleau. Alvinn: An autonomous land vehicle in a neural network. In Advances in neural
+information processing systems, pages 305–313, 1989.
+D. Precup. Eligibility traces for off-policy policy evaluation. Computer Science Department Faculty
+Publication Series, page 80, 2000.
+D. Precup, R. S. Sutton, and S. Dasgupta. Off-policy temporal-difference learning with function approxi-
+mation. In ICML, pages 417–424, 2001.
+M. Riedmiller. Neural fitted Q iteration – first experiences with a data efficient neural reinforcement
+learning method. In J. Gama, R. Camacho, P. B. Brazdil, A. M. Jorge, and L. Torgo, editors, European
+Conference on Machine Learning, pages 317–328, 2005.
+N. Siegel, J. T. Springenberg, F. Berkenkamp, A. Abdolmaleki, M. Neunert, T. Lampe, R. Hafner, N. Heess,
+and M. Riedmiller. Keep doing what worked: Behavior modelling priors for offline reinforcement learning.
+In International Conference on Learning Representations, 2020.
+J. Snoek, H. Larochelle, and R. P. Adams. Practical bayesian optimization of machine learning algorithms.
+In Advances in neural information processing systems, pages 2951–2959, 2012.
+R. S. Sutton and A. G. Barto. Reinforcement learning: An introduction. IEEE Trans. Neural Networks,
+1998.
+Y. Tassa, Y. Doron, A. Muldal, T. Erez, Y. Li, D. d. L. Casas, D. Budden, A. Abdolmaleki, J. Merel,
+A. Lefrancq, T. Lillicrap, and M. Riedmiller. Deepmind control suite. arXiv preprint arXiv:1801.00690,
+2018.
+Y. Tassa, S. Tunyasuvunakool, A. Muldal, Y. Doron, S. Liu, S. Bohez, J. Merel, T. Erez, T. Lillicrap, and
+13
+Hyperparameter Selection for Offline Reinforcement Learning
+N. Heess. dm_control: Software and tasks for continuous control. arXiv preprint arXiv:2006.12983,
+2020.
+P. Thomas and E. Brunskill. Data-efficient off-policy policy evaluation for reinforcement learning. In
+M. F. Balcan and K. Q. Weinberger, editors, Proceedings of The 33rd International Conference on Machine
+Learning, volume 48 of Proceedings of Machine Learning Research, pages 2139–2148, 2016.
+E. Todorov, T. Erez, and Y. Tassa. Mujoco: A physics engine for model-based control. In 2012 IEEE/RSJ
+International Conference on Intelligent Robots and Systems, 2012.
+M. Uehara and N. Jiang. Minimax weight and q-function learning for off-policy evaluation. arXiv preprint
+arXiv:1910.12809, 2019.
+M. Vecerik, T. Hester, J. Scholz, F. Wang, O. Pietquin, B. Piot, N. Heess, T. Rothörl, T. Lampe, and
+M. Riedmiller. Leveraging demonstrations for deep reinforcement learning on robotics problems with
+sparse rewards. arXiv preprint arXiv:1707.08817, 2017.
+C. Voloshin, H. M. Le, N. Jiang, and Y. Yue. Empirical study of off-policy policy evaluation for reinforcement
+learning. arXiv preprint arXiv:1911.06854, 2019.
+Z. Wang, A. Novikov, K. Żołna, J. T. Springenberg, S. Reed, B. Shahriari, N. Siegel, J. Merel, C. Gulcehre,
+N. Heess, and N. de Freitas. Critic regularized regression. arXiv preprint arXiv:2006.15134, 2020.
+Y. Wu, G. Tucker, and O. Nachum. Behavior regularized offline reinforcement learning. arXiv preprint
+arXiv:1911.11361, 2019.
+14
+Hyperparameter Selection for Offline Reinforcement Learning
+Appendix
+A. Absolute Error Results
+In the main paper we provide over-estimation results, summarized for each task domain. In this section
+we show the absolute error for each task individually.
+Figure 9 | Absolute Error. We compute the absolute error between the actual values and V(s0) statistics, using
+the ORL and OPE critics. We find two main error trends: first in terms of algorithms, statistics tend to have highest
+error on D4PG, followed by CRR, followed by BC. Second in terms of task domains, statistics tend to have highest
+error on DM Locomotion, followed by Manipulation Playground, followed by DM Control Suite. And OPE statistics
+have lower error and ORL statistics.
+15
+Hyperparameter Selection for Offline Reinforcement Learning
+B. Additional Ranking Results
+In addition to V̂ (s0) and Soft OPC, we also considered two additional offline statstics:
+• avg_q Use the expected value across all states in the dataset Es∼D[Qθ (s,π (s))]. This differs slightly
+from what we care about, it corresponds to running the policy from any state along a trajectory in
+the behavior data. Nevertheless this statistic performs similarly to V̂ (s0).
+• td_err Use the average temporal difference error across all (s,a,r,s’) tuples in dataset.
+E(s,a,r,s ′)∼D[r +γQθ (s ′,π (s ′))−Qθ (s,a)]. This statistic is more indicative of the quality of the critic
+than the quality of the policy, which may explain why it performs quite poorly for our purposes.
+Figure 10 | Rank correlation within algorithm and across all algorithms cont’d. We compare the rank correla-
+tion between the actual value and additional policy statistics from ORL and OPE critics (avg_q, td_err). In general,
+avg_q follows similar trends to V̂ (s0), but its slightly worse, and td_err performs quite poorly overall.
+Figure 11 | Regret@5 within algorithm and across all algorithms cont’d. We compare the normalized regret@5
+between the actual value and additional policy statistics from ORL and OPE critics (avg_q, td_err). The regret
+follows similar trends to rank correlation. In general, avg_q follows similar trends to V̂ (s0), but its slightly worse,
+and td_err performs quite poorly overall.
+16
+Hyperparameter Selection for Offline Reinforcement Learning
+C. Fitted Q Evaluation without Distributional Critic
+We aimed to keep the critic loss consistent for all experiments in the main paper. But some readers may
+be curious how FQE would perform without a distributional critic. We re-ran our FQE evaluation with
+and without a distributional critic on the DM Control Suite tasks.
+Figure 12 | Comparing FQE estimates with and without distributional critics. (� With, � Without) Overall
+estimates fall within a similar range. FQE with a distributional critic has a few outliers with high values that FQE
+without does not. On closer inspection we found these corresponded to experiments that were terminated early.
+17
+Hyperparameter Selection for Offline Reinforcement Learning
+D. Fitted Q Evaluation Code
+We wrote our FQE code using TensorFlow 2 and Acme (Hoffman et al., 2020). Listing 1 is a simplified
+version of the code we used.
+1 # Copyright 2020 DeepMind Technologies Limited.
+2 # SPDX -License -Identifier: Apache -2.0
+3
+4 discount = 0.99
+5 target_update_period = 100
+6
+7 num_steps = 0
+8
+9 for o_tm1 , a_tm1 , d_t , is_terminal , o_t in dataset:
+10 q_t = target_critic_network(o_t , policy_network(o_t))
+11
+12 # Operations that will be differentiated should be executed in
+13 # this context.
+14 with tf.GradientTape () as tape:
+15 q_tm1 = critic_network(o_tm1 , a_tm1)
+16
+17 # Use 0 discount at terminal states.
+18 curr_discount = 0.0 if is_terminal else discount
+19 critic_loss = losses.categorical(q_tm1 , r_t , curr_discount , q_t)
+20
+21 # Get trainable variables.
+22 variables = critic_network.trainable_variables
+23
+24 # Compute gradients.
+25 gradients = tape.gradient(critic_loss , variables)
+26
+27 # Apply gradients.
+28 optimizer.apply(gradients , variables)
+29
+30 # Update online -> target parameters if necessary.
+31 source_variables = critic_network.variables
+32 target_variables = target_critic_network.variables
+33 if num_steps % target_update_period == 0:
+34 for src , dest in zip(source_variables , target_variables):
+35 dest.assign(src)
+36 num_steps += 1
+Listing 1 | Simplified code for of Fitted Q Evaluation. The code is functional despite its simplicity.
+18
+Hyperparameter Selection for Offline Reinforcement Learning
+E. Dataset Details
+Table 3 | Dataset sizes in number of episodes.
+Task No. Episodes
+Cartpole Swingup 100
+Cheetah Run 2000
+Finger Turn Hard 2000
+Walker Walk 800
+Box 8000
+Stack Banana 8000
+Insertion 8000
+Slide 8000
+Humanoid Corridor 16000
+Humanoid Gaps 16000
+In this section, we provide details regarding the
+datasets used in this paper. For the sizes of all datasets
+used, please refer to Table 3.
+DM Control Suite We largely follow the procedures
+of generating data as described in Gulcehre et al.
+(2020). All datasets used in the DM control suite do-
+mains are generated by 3 independent runs of a D4PG
+agent. Episodes from the entire training run is saved
+to increase diversity. Unlike in Gulcehre et al. (2020),
+we do not further filter out successful episodes and the
+size of the datasets used in this paper is larger than
+that in Gulcehre et al. (2020).
+Manipulation tasks These datasets are the same as the robotics datasets used in Wang et al. (2020).
+The dataset for each task is generated from 3 independent runs of a D4PGfD agent3 where 100 human
+demonstrations are used for each task to assist with exploration. The dataset contains 8000 episodes
+from the entire training process and thus consists of both successful and unsuccessful episodes.
+DM Locomotion We largely adhere to the procedures of generating data as described in Gulcehre
+et al. (2020). For each task, three policies are trained following Merel et al. (2018). Episodes from the
+entire training runs are saved and sub-sampled to include both successful and failed episodes. Unlike
+in Gulcehre et al. (2020), we do not further filter out successful episodes and the size of the datasets
+used in this paper is larger than that in Gulcehre et al. (2020).
+3D4PGfD is similar to DDPGfD (Vecerik et al., 2017) but is augmented with distributional critics.
+19
+	1 Introduction
+	2 Offline Hyperparameter Selection
+	2.1 Offline Statistics for Policy Ranking
+	2.2 Metrics for Evaluating Offline Hyperparameter Selection
+	3 Experimental Setup
+	3.1 Tasks
+	3.2 Offline RL Algorithms
+	3.3 Offline Policy Evaluation Algorithms
+	3.4 Hyperparameters and Other Implementation Details
+	4 Results
+	4.1 Overestimation
+	4.2 Ranking Quality
+	4.3 FQE Sensitivity to Its Own Hyperparameters
+	5 Related Work
+	6 Future Work
+	7 Conclusions
+	A Absolute Error Results
+	B Additional Ranking Results
+	C Fitted Q Evaluation without Distributional Critic
+	D Fitted Q Evaluation Code
+	E Dataset Details

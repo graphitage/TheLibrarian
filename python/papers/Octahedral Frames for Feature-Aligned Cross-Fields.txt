@@ -1,0 +1,1318 @@
+Octahedral Frames for Feature-Aligned Cross-Fields
+PAUL ZHANG,Massachusetts Institute of Technology, USA
+JOSH VEKHTER, University of Texas at Austin, USA
+EDWARD CHIEN,Massachusetts Institute of Technology, USA
+DAVID BOMMES, University of Bern, Switzerland
+ETIENNE VOUGA, University of Texas at Austin, USA
+JUSTIN SOLOMON,Massachusetts Institute of Technology, USA
+Fig. 1. A variety of feature-aligned cross fields computed using our novel cross field formulation.
+We present a method for designing smooth cross fields on surfaces that auto-
+matically align to sharp features of an underlying geometry. Our approach
+introduces a novel class of energies based on a representation of cross fields
+in the spherical harmonic basis. We provide theoretical analysis of these
+energies in the smooth setting, showing that they penalize deviations from
+surface creases while otherwise promoting intrinsically smooth fields. We
+demonstrate the applicability of our method to quad-meshing and include
+an extensive benchmark comparing our fields to other automatic approaches
+for generating feature-aligned cross fields on triangle meshes.
+CCS Concepts: • Computing methodologies → Mesh models; Shape
+analysis.
+Additional Key Words and Phrases: discrete differential geometry, geometry
+processing, total variation, singularities, feature alignment
+Authors’ addresses: Paul Zhang, Massachusetts Institute of Technology, 77 Mas-
+sachusetts Avenue, Cambridge, MA, 02139, USA, pzpzpzp1@mit.edu; Josh Vekhter, Uni-
+versity of Texas at Austin, Austin, TX, 78712, USA, josh@cs.utexas.edu; Edward Chien,
+Massachusetts Institute of Technology, 77 Massachusetts Avenue, Cambridge, MA,
+02139, USA, eddchien@csail.mit.edu; David Bommes, University of Bern, Hochschul-
+strasse 6, Bern, 3012, Switzerland, david.bommes@inf.unibe.ch; Etienne Vouga, Univer-
+sity of Texas at Austin, Austin, TX, 78712, USA, evouga@cs.utexas.edu; Justin Solomon,
+Massachusetts Institute of Technology, 77 Massachusetts Avenue, Cambridge, MA,
+02139, USA, jsolomon@mit.edu.
+Permission to make digital or hard copies of part or all of this work for personal or
+classroom use is granted without fee provided that copies are not made or distributed
+for profit or commercial advantage and that copies bear this notice and the full citation
+on the first page. Copyrights for third-party components of this work must be honored.
+For all other uses, contact the owner/author(s).
+© 2020 Copyright held by the owner/author(s).
+0730-0301/2020/1-ART1
+https://doi.org/10.1145/3374209
+ACM Reference Format:
+Paul Zhang, Josh Vekhter, Edward Chien, David Bommes, Etienne Vouga,
+and Justin Solomon. 2020. Octahedral Frames for Feature-Aligned Cross-
+Fields. ACM Trans. Graph. 1, 1, Article 1 (January 2020), 13 pages. https:
+//doi.org/10.1145/3374209
+1 INTRODUCTION
+N -rotationally symmetric (RoSy) tangential vector fields over sur-
+faces are ubiquitous in computer graphics. 2-RoSy fields can be used
+to generate stripe patterns due to their ambivalence to rotation by
+π about the normal. 4-RoSy fields (cross fields) are heavily used in
+both surface parameterization and quadrilateral (quad) meshing,
+thanks to their symmetry with respect to rotations by
+π
+2
+about the
+surface normal.
+Depending on the application, n-RoSy field design algorithms
+must trade off between several desirable properties of the field.
+In almost all cases, n-RoSy fields are expected to be as smooth as
+possible. For surfaces with boundary, constraints on how the field
+aligns to the boundary are common, and for artistic applications,
+users may wish to prescribe a sparse set of streamlines that the field
+must follow. For meshing applications, alignment of n-RoSy fields
+to salient geometric features is also desirable as a means to identify
+or preserve mesh detail. Our focus will be on improving this latter
+aspect for the important case of 4-RoSy fields.
+There are two broad strategies for achieving feature alignment.
+The first is to optimize only for smoothness, under the assumption
+that a well-chosen functional for measuring cross-field smoothness
+will automatically penalize fields that fail to align to geometric fea-
+tures. The most commonly-used smoothness functionals (including
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+ar
+X
+iv
+:2
+00
+7.
+09
+74
+0v
+1 
+ [
+cs
+.G
+R
+] 
+ 1
+9 
+Ju
+l 
+20
+20
+1:2 • Paul Zhang, Josh Vekhter, Edward Chien, David Bommes, Etienne Vouga, and Justin Solomon
+Fig. 2. Two surfaces (the three-cylinder-intersection and wavy-box)
+whose maximal curvature directions (blue lines) contradict its feature curves
+(red lines).
+the Dirichlet energy and its variants) are intrinsic, and recover so-
+lutions that are unique only up to rotation [Knöppel et al. 2013].
+These are ambivalent to isometric deformations of the surface and
+ignore extrinsic features such as creased folds.
+An alternative strategy is to include energy terms that explicitly
+enforce alignment to an input guiding field of principal curvature
+directions during cross-field design [Brandt et al. 2018; Knöppel
+et al. 2013]. Drawbacks include the difficulty of robustly computing
+principal curvature directions on noisy meshes, the fact that forcing
+alignment to a guiding field based on local geometry may exclude
+cross-field designs that are globallymore optimal, andmore critically
+the fact that principal curvature directions are often different from
+features e.g. Figure 2.
+Our main observation is that neither of the above strategies
+adequately identify those features most important to generating
+high-quality quad meshes. Often the surface being modelled is con-
+structed from smooth patches that are joined along sharp extrin-
+sic feature curves where the normal direction is discontinuous or
+changes rapidly. On the one hand, such features are invisible to
+intrinsic smoothness functionals; on the other, the orientation of
+the feature curves often contradict that of nearby curvature lines.
+Consider the surfaces shown in Figure 2: Neither existing strategy
+will promote alignment to the features curves shown in red. Both
+of these shapes are developable away from a sparse set of cone
+singularities at the corners; the gaussian curvature is nearly zero at
+creased edges and curved facets, and so purely intrinsic approaches
+have no hope of aligning to the creases. Augmenting with a guid-
+ing field based on extrinsic curvature is counter-productive, as the
+curvature lines (blue) are not compatible with the surface’s more
+important crease features curves (red).
+We approach feature alignment in a new way, which detects and
+aligns cross fields to sharp features in a stable fashion. Our method
+is based on an extrinsic representation of cross fields using spher-
+ical harmonic (SH) basis functions. SH functions have been used
+successfully in volumetric octahedral field problems for hexahedral
+meshing [Huang et al. 2011; Ray et al. 2016; Solomon et al. 2017],
+and we argue that this representation is well-suited not only for
+computing octahedral fields in volumes but also for field compu-
+tation on surfaces. In particular, we apply an SH representation
+of octahedral frames, or frames of three orthogonal directions in
+R3, proposed by Huang et al. [2011]; when one of its directions is
+constrained to the surface normal, it exhibits the same symmetry as
+a two-dimensional cross. We use this fact to devise a class of cross
+field energies that promote intrinsic smoothness in smooth regions
+of the surface. Over sharp creases, however, our energy aligns the
+field to the crease direction, achieving automatic feature alignment
+without the need for explicit computation of extrinsic curvature
+directions or feature curves.
+Contributions. In this work, we
+• introduce spherical harmonic functions for the computation of
+surface cross fields;
+• propose a family of field smoothness energies whose optima are
+feature-aligned cross fields;
+• provide a theoretical analysis of the behavior of a few important
+members of this family; and
+• introduce cross fields with soft normal alignment for increased
+versatility/robustness.
+Our approach is able to extract feature-aligned fields with compara-
+ble levels of efficiency to those of purely intrinsic algorithms. We
+test our algorithm extensively on over 200 different meshes with
+results in both §6 and in supplementary materials. We leverage our
+algorithm to produce feature-aligned cross fields and demonstrate
+their usefulness for quad meshing.
+2 RELATED WORK
+The generation of tangential n-RoSy fields over surfaces has many
+applications in computer graphics ranging from surface BRDF mod-
+ification [Brandt et al. 2018] to meshing [Bommes et al. 2009; Jakob
+et al. 2015] to texture synthesis [Knöppel et al. 2015] and sketch-
+based modeling [Bessmeltsev and Solomon 2019; Iarussi et al. 2015].
+Surveys of n-RoSy field design methods are provided in [Vaxman
+et al. 2016] and [de Goes et al. 2015].
+2.1 Cross Field Design
+Cross fields (n = 4) have been especially well-studied since their
+π
+2
+-symmetry allows them to behave like local coordinate systems,
+resulting in intuitive seamless surface parameterizations.
+Methods to compute intrinsically-smooth cross fields with align-
+ment and singularity constraints were studied by Ray et al. [2008],
+Crane et al. [2010] and Knöppel et al. [2013]. More similar to our
+work, Jakob et al. [2015] instead formulate an extrinsic smoothness
+functional on cross fields, in an attempt to automatically align to
+surface features. Their method penalizes an extrinsic distance be-
+tween neighboring crosses that does not use a shared tangent space
+or connection. The resulting energy is non-convex but is minimized
+to local optimality, often resulting in more singularities than neces-
+sary. Huang and Ju [2016] analyze this extrinsic energy, and find
+that it can be decomposed into an energy expressed in terms of
+intrinsic twisting and alignment to extrinsic curvature directions.
+We perform a similar analysis of the energy we introduce in the
+supplemental documents.
+When using cross fields for quad mesh parameterization or pro-
+cessing, methods [Bommes et al. 2009; Brandt et al. 2018; Campen
+et al. 2016; Knöppel et al. 2013] often promote feature alignment
+by including a loss term penalizing disagreement with curvature
+directions. However, as we argue in the introduction and illustrate
+in Figure 2, alignment to curvature directions is often less important
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+Octahedral Frames for Feature-Aligned Cross-Fields • 1:3
+than alignment to sharp creases. Other parameterization methods
+such as [Bommes et al. 2013, 2009; Campen et al. 2015] allow feature
+alignment but just assume that such feature curves are provided as
+input.
+2.2 Octahedral Fields and Volumetric Representations
+The three-dimensional generalization of a cross field is an octahedral
+field. Octahedral fields are often used in volumetric problems like
+hexahedral meshing [Nieser et al. 2011]. A single octahedral frame
+consists of three mutually-orthogonal vectors and their negations.
+Huang et al. [2011] introduced a particularly convenient represen-
+tation of an octahedral frame as a rotation of the spherical function
+д(x ,y, z) : (x ,y, z) ∈ S2 7→ x4 + y4 + z4, encoded by coefficients in
+the spherical harmonic (SH) basis. Ray et al. [2016] used this repre-
+sentation to generate volumetric normal-aligned octahedral fields,
+and Solomon et al. [2017] combined the SH representation with
+the boundary element method to remove the need for a volumetric
+mesh. Both of these methods use normal-alignment constraints at
+the surface to enforce alignment of the octahedral frame with the
+volume’s boundary.
+While there is no canonical three-dimensional generalization of
+arbitrary n-RoSy fields, the spherical harmonic representation al-
+lows for frames thatmimic the symmetries of all platonic solids [Shen
+et al. 2016], including octahedral fields [Corman and Crane 2019;
+Liu et al. 2018; Solomon et al. 2017]. Algebraic characterization of
+the orbit of д(x ,y, z) under the space of rotations as a subset of all
+possible SH coefficients was presented by Palmer et al. [2019] and
+Chemin et al. [2018].
+3 PRELIMINARIES
+Since our formulation relies heavily on both the spherical harmonic
+representation of octahedral frames and vectorial total variation,
+we present a preliminary introduction to these topics.
+3.1 Spherical Harmonic (SH) Octahedral Frames
+e[v]−→
+−→
+ev ·L
+rotation of octahedral frame
+As introduced by Huang et al.
+[2011], the canonical axis-aligned
+octahedral frame can be repre-
+sented by spherical harmonics as
+a function д0 : S
+2 → R written
+as д0 =
+√
+5
+12
+Y44 +
+√
+7
+12
+Y40, where
+Ylm denotes the basis for real
+spherical harmonics. The function
+д0 can be understood as the scaled projection of x
+4 + y4 + z4 onto
+the fourth band (l = 4) of spherical harmonics. Written differently,
+we can encode д0 as a vector of coefficients in the full basis of
+fourth-band spherical harmonics Y
+4(−4), . . . ,Y44:
+f0 =
+[
+0, 0, 0, 0,
+√
+7
+12
+, 0, 0, 0,
+√
+5
+12
+]T
+.
+The space of octahedral frames can be described as all rotations
+of the canonical octahedral frame, that is, the orbit of f0 under the
+group of 3D rotations SO(3) [Palmer et al. 2019, Definition 3.5]. We
+write this via exponentiation of the Lie algebra elements: the set of
+octahedral frames is
+V =
+{
+f
+��� there exists v ∈ R3 with f = ev ·L f0} ,
+where v · L = vxLx + vyLy + vzLz and Lx ,Ly ,Lz are the angular
+momentum operators expressed in the basis of band-four spherical
+harmonics. In this basis, Lx ,Ly ,Lz are each 9 × 9 matrices. The an-
+gular momentum operators are explicitly written in supplementary
+materials, §4. In this description, v can be interpreted as an axis-
+angle representation of rotation, with corresponding rotation matrix
+e[v]. [v] denotes the skew-symmetric matrix that acts as [v]u = v×u.
+Accordingly, ev ·Lд0 encodes the octahedral frame whose directions
+are x̂ , ŷ, ẑ rotated by e[v], whereˆdenotes normalization (see inset
+above).
+++=
+SH frame as sum of three lobes
+Using such SH ro-
+tations, we can present
+an alternative inter-
+pretation of the octa-
+hedral frame f0 as the
+sum of three orthog-
+onal SH lobe-shaped
+functions. The z-aligned
+lobe is l = [0, 0, 0, 0,
+√
+7
+12
+, 0, 0, 0, 0] and is depicted in the inset. Lobes
+can be rotated in the same way that frames can i.e. by applying ev ·L .
+The canonical octahedral frame can therefore be equivalently ex-
+pressed as f0 = l + e
+π
+2
+Lx l + e
+π
+2
+Ly l .
+The space of octahedral frames that are aligned to a unit vector n̂
+can be described by the set{
+evn ·LeθLz f0
+��� θ ∈ S1} ,
+where vn is any axis-angle rotation taking ẑ to n̂, (e.g., the vector
+parallel to ẑ × n̂ and has magnitude equal to the angle from ẑ to n̂)
+and θ encodes an additional twist of the frame about n̂. The first
+rotation about ẑ can be written in explicit form [Huang et al. 2011]
+as
+eθLz f0 =
+[√
+5
+12
+cos 4θ , 0, 0, 0,
+√
+7
+12
+, 0, 0, 0,
+√
+5
+12
+sin 4θ
+]T
+.
+The above allows us to formulate the set of all octahedral frames д
+aligned to a given direction n̂ in terms of two constraints:
+∥ f ∥2 = 1, Wn f = u0 =
+[
+0, 0, 0,
+√
+7
+12
+, 0, 0, 0
+]T
+, (1)
+whereWn is the second through eighth rows of e
+−vn ·L
+. The linear
+constraint rotates the frame from normal alignment to ẑ alignment,
+and the norm constraint ensures that the first and last components
+are of the appropriate form.
+Lastly, we will make use of the projection operator πV : R
+9 → V
+onto the space of octahedral framesV , as defined in [Palmer et al.
+2019, §5.5].
+3.2 Vectorial Total Variation
+Wewill later make use of a total variation energy (amongst others) to
+analyze the behavior of our cross fields on creased surfaces. Here, we
+introduce total variation and vectorial total variation definitions in
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+1:4 • Paul Zhang, Josh Vekhter, Edward Chien, David Bommes, Etienne Vouga, and Justin Solomon
+Rn and provide intuition about their use. The extension to functions
+on a Riemannian manifold is straightforward, using the standard
+intrinsic gradient and divergence operators.
+The total variation of a differentiable scalar function h : Ω → R
+is TV [h] =
+∫
+Ω
+∥∇h∥2 dA where Ω ⊂ Rn [Ambrosio et al. 2000]. For
+non-differentiable h, the relevant definition is:
+TV [h] = sup
+ϕ∈C1c ,∀x ∥ϕ(x ) ∥2≤1
+(∫
+Ω
+h∇ · ϕ dA
+)
+,
+where C1c denotes differentiable, compactly-supported vector fields.
+For smooth h, equivalence to
+∫
+Ω
+∥∇h∥ follows from integration
+by parts and Stokes’s theorem. In this case, the maximizing ϕ is
+−∇h/∥∇h ∥. If h is the indicator function of a suitably regular (e.g.,
+non-fractal) subset A ⊂ Ω, then TV [h] is the perimeter of A.
+When h : Ω → Rm is vector-valued rather than scalar-valued,
+there are many different definitions for the vectorial total variation
+VTV [h] [Sapiro 1996]. We use one proposed by Di Zenzo [1986],
+which for differentiableh is given byVTV [h] =
+∫
+Ω
+∥∇h∥F dA, where
+∥ · ∥F is the Frobenius norm. More generally, we can take
+VTV [h] = sup
+ϕ∈C1c ,∀x ∥ϕ(x ) ∥F ≤1
+(
+m∑
+i=1
+∫
+Ω
+hi∇ · ϕi
+)
+, (2)
+where h = (h1,h2, . . . ,hm ), and ϕ = (ϕ1,ϕ2, . . .ϕm ) is a differen-
+tiable, compactly-supportedm-tuple of vector fields. This definition
+is not equivalent to a sum ofm independent scalar total variations:
+The constraint on ϕ introduces nontrivial coupling between the
+dimensions. This definition of total vectorial variation is considered
+in the case where Ω is a surface in R3 by Bresson and Chan [2008],
+but without specific analysis for discontinuous h.
+4 SPHERICAL HARMONIC OCTAHEDRAL FRAMES AS
+CROSS FIELDS
+We use normal-aligned octahedral fields to encode tangent cross
+fields on surfaces, with the goal of computing a smooth cross field
+on a surface aligned to sharp features. The SH representation will
+enable us to capture features even when they are purely extrinsic. To
+this end, our next task is to define a means of measuring smoothness
+by examining the gradient of a SH field along the surface.
+4.1 Derivatives of SH Octahedral Frames
+To calculate ∥∇f ∥2, we first express it in an appropriate local coor-
+dinate system that simplifies the formulas in coordinates and better
+reveals the structure. Following the notation in §3.1, an octahedral
+field f (r ) : Ω → V ⊂ R9 can be parameterized relative to a point
+r∗ by v(r ) : Ω → R3, where v(r ) is the axis-angle rotation from
+f (r∗) to f (r ). This implies that v(r∗) = [0, 0, 0]. Without loss of
+generality, we rotate the surface so that the normal of Ω at r∗ is
+ẑ. We can then compute the gradient ∇f at the point r∗ from the
+formula f (r ) = ev(r )·L f (r∗):
+∇f (r )|r ∗ =
+
+| | |
+Lx f (r∗) Ly f (r∗) Lz f (r∗)
+| | |
+
+
+| | |
+∇xv ∇yv ∇zv
+| | |
+r ∗ . (3)
+As the field f (r ) encodes an extrinsically embedded frame at each
+point, we take the gradient ∇ to be the component-wise derivative
+of the field’s nine scalar functions rather than a covariant or Lie
+derivative along the surface in order to capture the extrinsic geome-
+try of the surface. We use [Rossmann 2002, §1.2.5] and the fact that
+v(r∗) = [0, 0, 0] to derive Equation (3).
+By combining facts about the SH representation and standard
+results in differential geometry we show that the squared norm
+∥∇f (r )∥2 at r∗ can then be expressed in the following more intuitive
+way:
+Proposition 4.1. Let f (r ) : Ω → V ⊂ R9 be a normal-aligned
+octahedral field over a smooth surface Ω. Then at every point r∗ ∈ Ω,
+∥∇f ∥2F = k
+2
+1
++ k2
+2
++w , where k1 and k2 are the principal curvatures
+andw measures the intrinsic tangential twist of the octahedral field.
+Using mean and Gauss curvatures H and K , we can write ∥∇f ∥2F =
+2H2 − K +w .
+We leave the full proof of this formula to supplementary materials.
+Proposition 4.1 gives a more intuitive form for Equation (3) and
+relates the spherical harmonic representation of an octahedral frame
+to properties of the frame it represents. Most notably, the Dirichlet
+energy of the SH representation can be effectively decoupled into
+extrinsic dependence of ∥∇f ∥2F on the surface Ω and the intrinsic
+tangential twisting of the normal-aligned octahedral field f (r ). The
+values of H and K simply contribute a fixed quantity depending
+on Ω rather than the field. Therefore, the influence of f on ∥∇f ∥2F
+is just in w , the intrinsic twist of the cross field it represents. We
+stress that this behavior is quite different from the behavior of
+the component-wise derivative evaluated on vectors, as studied
+in [Huang and Ju 2016], where their smoothness energy promotes
+alignment to extrinsic curvature directions.
+4.2 Lp Smoothness Energy of SH Cross Fields
+Suppose we wish to measure smoothness of a normal-aligned octa-
+hedral field in the SH representation. We define the following class
+of convex smoothness energies using the Lp -norm of ∥∇f ∥F over
+the surface Ω for p ≥ 1:
+Ep (Ω, f ) =
+(∫
+Ω
+∥∇f ∥pF dA
+) 1
+p
+. (4)
+We now analyze the behavior of the Ep energy for cross fields in
+several select cases.
+4.2.1 Case p = 2: Dirichlet Energy. We begin with a common choice
+in geometry processing when smoothness is desirable: the Dirichlet
+energy E2. Given Proposition 4.1, we can write the Dirichlet energy
+as
+∫
+Ω
+2H2 − K +w . Since H and K are independent of the octahe-
+dral field f , they have no influence over the f that minimizes E2.
+Therefore on smooth Ω, we recover intrinsically smooth cross fields.
+Since the Dirichlet energy may diverge at singularities [Knöp-
+pel et al. 2013], this choice of energy has the theoretical drawback
+of diverging for all f in the neighborhood of creases which break
+octahedral symmetry. In the discretized setting, however, the behav-
+ior of E2 is dependent on mesh resolution and empirically leads to
+strong feature alignment as demonstrated in §6. It also leads to an
+easily-solved optimization problem described in §5.2.
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+Octahedral Frames for Feature-Aligned Cross-Fields • 1:5
+4.2.2 Case p = 1: Vectorial Total Variation. As noted in the previous
+section, the conventional means of measuring field smoothness fails
+to be well-defined for our field representation on creased surfaces.
+We show here that the E1 energy is not only finite across sharp
+edges and around singular points but also provides an intuitive
+measure of field quality that captures both smoothness and feature
+alignment. It is also known as the vectorial total variation.
+Consider a function f : Ω → R9 that is piecewise smooth on n
+closed patches Ωj intersecting in a finite-length curve network Γ =⋃s
+k=1 γk , where each γk is a C
+1
+curve. Equivalently Γ =
+⋃n
+j=1 ∂Ωj ,
+and the vectorial total variation can be decomposed into integrals
+over each patch and Γ.
+Proposition 4.2. For compact Ω and f as above,VTV [f ] is finite
+and given by the following equation:
+VTV [f ] =
+n∑
+j=1
+∫
+Ω̊j
+∥∇f ∥F dA +
+s∑
+k=1
+∫
+γk
+∥ f + − f −∥2 dL, (5)
+where f + and f − refer to the limiting values of f on either side of γk ,
+and Ω̊j denotes the interior of Ωj .
+The basic argument starts from Equation (2), splits it into integrals
+over the patches, applies integration by parts, and utilizes partitions
+of unity to construct a maximizing sequence of ϕ’s. The full argu-
+ment is contained in supplementary materials §2. An analogous
+result, which applies to arbitrary functions on Rn with bounded
+variation, is contained in [Ambrosio et al. 2000], with the addition
+of a third term representing the Cantor part of f . Since our f is
+piecewise smooth, however, we can safely ignore the Cantor part.
+The second term is often referred to as the jump part in the total
+variation literature.
+The formula (5) provides an intuitive description of the total
+variation of an octahedral field in the SH basis as a measure of
+intrinsic smoothness with extra jump terms. Letting f represent a
+normal-aligned octahedral field we obtain:
+VTV [f ] =
+n∑
+j=1
+∫
+Ω̊j
+√
+2H2 − K +w dA +
+s∑
+k=1
+∫
+γk
+f + − f −
+2
+dL
+(6)
+Generalizing to Creased Surfaces. While the above result is de-
+rived for smooth surfaces Ω and discontinuous f , we can further
+generalize the result to a surface Ω constructed from smooth open
+patches Ωj joined along a network of sharp creases Γ =
+⋃s
+k=1 γk .
+As there is neither a consistent metric nor a consistent tangent
+space on Ω across Γ, there is no well-defined choice of gradient. We
+therefore use equation (6) as the definition for E1 on such a creased
+surface. Since f is a normal-aligned octahedral field, it is necessarily
+discontinuous across creases, resulting in contributions to the jump
+term.
+The jump ∥ f + − f −∥2, where f + and f − represent octahedral
+frames aligned to different normal directions, is minimized if f +
+and f − are both aligned to the axis of rotation from one normal to
+the other. We formalize this property by Proposition 4.3
+Proposition 4.3. Let Ω+ and Ω− be smooth patches of a surface
+with normal directions n̂+ and n̂− that meet at a crease. Let ˆd denote
+the intersection of their tangent spaces at the crease. Let f +θ and f
+−
+ϕ
+be the octahedral frames on either side of the crease aligned to n̂+ and
+n̂− respectively. θ and ϕ denote their deviation from alignment to ˆd .
+The cost ∥ f +θ − f
+−
+ϕ ∥2 is minimized by θ = ϕ = 0.
+f −ϕ
+n̂−
+n̂+
+ˆd
+f +
+0ϕ
+Ω−
+Ω+
+Octahedral frames near crease
+Proof of this proposition is
+left to supplementary materi-
+als §3.
+The setup is depicted on the
+right, showing discontinuous
+normal directions n̂+ and n̂−
+as the left and right red ar-
+rows respectively. The crease
+direction
+ˆd is shown by the
+middle red arrow. We emphasize that this proposition implies (lo-
+cally) crease alignment always minimizes the VTV. We extensively
+test and show in supplemental materials that this crease alignment
+tends to globally hold on surfaces with complicated geometry and
+topology as well.
+4.2.3 General p ≥ 2. By Equation 4, and Proposition 4.1, Ep incen-
+tivizes intrinsic smoothness for allp on smooth domains. On creased
+domains, we have demonstrated (local) crease-alignment for the
+p = 1 case. For p ≥ 2, the value of Ep diverges for a creased surface.
+However, we find empirically that minimizing Ep (by recovering
+solutions to Equation 7) on a discretized surface leads to stronger
+feature alignment as p increases. This behavior may be explained by
+Proposition 4.3, which affects all edges regardless of p. The p simply
+exponentiates the energy across each edge before accumulating it
+into the total Ep . Local to a single edge, the energy-minimizing con-
+figuration is unaffected by p. Based on our experiments, we further
+conjecture that the sequence of fields obtained by minimizing E2
+on an increasingly dense discrete approximation of Ω converges
+to a feature-aligned cross field. This intrinsically smooth feature-
+alignment is empirically shown in Figure 8. We leave proof of this
+conjecture to future work.
+4.2.4 Relation to Polycube Surfaces. We achieve an additional prop-
+erty for all values of p through our use of SH octahedral frames.
+Consider the case of Ω being a cube: minimizers of Ep will have
+zero energy, despite the cube’s sharp corners, since the field’s oc-
+tahedral symmetry allows it to simultaneously align to all three
+creases at each corner. Effectively a surface with many angle-
+π
+2
+turns and cube-corners can have just as low of an energy as one
+with no creases at all. More generally, if Ω is a polycube surface,
+Ep (Ω, f ) = 0 by choosing f to be a facet aligned uniform frame
+field.
+5 OPTIMIZING FOR AN OCTAHEDRAL FRAME FIELD
+Our discussion above provides a new class of energies based on
+the SH representation of cross fields, which naturally promote both
+intrinsic smoothness and extrinsic crease alignment without the
+need for feature curve detection or reliance on potentially noisy
+local curvature estimates. For this reason, we propose solving the
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+1:6 • Paul Zhang, Josh Vekhter, Edward Chien, David Bommes, Etienne Vouga, and Justin Solomon
+following variational problem to find a cross field f ∗ over a surface:
+f ∗ = arg min
+f
+Ep (Ω, f )
+subject to Wn(x ) f (x) = u0.
+(7)
+Recall that the constraint encodes normal alignment of the frame
+field (see equation (1)). Some past algorithms have an extra | | f (x)| |2 =
+1 constraint which results in uniform-scale isotropic octahedral
+fields over Ω. This constraint makes the problem nonconvex, and
+causes the functional to diverge in the neighborhood of field singu-
+larities, which are unavoidable on generic surfaces by the Poincaré-
+Hopf Theorem. Accordingly, a relaxation is naturally required; we
+drop the constraint ∥ f (x)∥2 = 1, yielding a convex problem with
+globally-optimal solution. Dropping the ∥ f (x)∥2 = 1 constraint al-
+lows the frame’s two tangential components to scale independently
+from its normal component, resulting in anisotropic octahedral
+fields. We obtain octahedral fields with uniform-magnitude normal-
+lobes, and varying scale in the magnitude of the tangential cross
+field. This relaxation is similar in spirit to the one which appears
+in [Knöppel et al. 2013] , and has similar benefits, including auto-
+matic placement of singularities, and bounded-energy minimizers
+in the smooth limit (which is necessary in order for the field to be
+insensitive to the underlying mesh).
+5.1 Soft Normal Alignment
+It is sometimes beneficial to relax the normal alignment constraint,
+e.g., in cases where the mesh contains sliver triangles with unstable
+normal directions. In these cases, a smoother cross field can be
+obtained by deviating slightly from exact normal alignment. This
+relaxation changes the optimization problem from Equation (7) into
+the following:
+f ∗ = argmin
+f
+Ep (Ω, f )
+subject to ∥Wn(x ) f (x) − u0∥2 ≤ ϵ .
+(8)
+This problem imposes a point-wise normal alignment constraint
+with tolerance ϵ . When ϵ = 0, we recover the hard normal align-
+ment formulation (7). On the opposite side of the spectrum, as
+ϵ → ∥u0∥2 =
+√
+7
+12
+≈ 0.76, the solution to (8) approaches a constant
+octahedral field. This is the case where normal alignment has re-
+laxed so far that the octahedral frames are effectively unconstrained.
+Soft normal alignment: ϵ
+M
+a
+x
+i
+m
+u
+m
+d
+e
+v
+i
+a
+t
+i
+o
+n
+d
+e
+g
+r
+e
+e
+For values in
+between we per-
+form the follow-
+ing experiment
+to obtain a rough
+correspondence be-
+tween soft nor-
+mal alignment pa-
+rameter ϵ and
+maximum angle
+deviation fromnor-
+mal alignment: For each value of ϵ between 0 and .7 (at intervals of
+.05), we sample 100000 ϵ-perturbations of a ẑ−aligned frame, extract
+the frame they represent, and compute its maximum angle deviation
+from the ẑ-axis. Results are shown in the inset.
+We highlight that this parameter encodes a point-wise constraint
+uniformly applied over the mesh. As such its interpretation does not
+change with different meshes. Please see the supplemental materials
+for results on over 200 different meshes using a variety of values of
+ϵ .
+The benefit of soft normal alignment is demonstrated in Figure 5.
+Due to the influence of a sliver triangle in the buste mesh with
+unstable normal direction, the hard-normal-aligned cross field is
+forced to create a localized artifact. By using soft normal alignment,
+the sliver triangle’s unstable normal direction has less influence
+over the resulting cross field, therefore increasing the quality of the
+result. A similar benefit is demonstrated on the duck and armchair
+meshes shown in the supplementary materials.
+Additionally we test soft normal alignment on a cube-meshwith
+artificial noise added in Figure 7. With hard normal alignment the
+cross fields exhibit undesirable alignment to noise which increases
+with p. With soft-normal alignment, the cross fields show signifi-
+cantly decreased sensitivity to noise.
+5.2 Discretization
+Now we describe how to construct smooth cross-fields by numer-
+ically optimizing a discretization of Ep . We assume the surface Ω
+has been triangulated into a manifold mesh M = (V ,E, F ). Let nt
+be the normal direction of triangle t ∈ F . We represent a cross onM
+as a normally-aligned octahedral frame ft ∈ V ⊂ R9 per triangle.
+We use the shorthand f to denote the concatenation of all ft into a
+single 9|F | × 1 vector.V is a nv × 3 matrix of vertex positions, where
+nv is the number of vertices. E denotes the ne × 2 matrix of edges,
+where ne is the number of edges. The energy Ep can be discretized
+as
+Ep =
+(∑
+e ∈E
+we ∥ ft1 − ft2 ∥
+p
+2
+) 1
+p
+(9)
+where t1 and t2 are triangles adjacent to edge e , andwe are weights
+corresponding to the dual Laplacian. We usewe =
+∥e ∥
+∥e∗ ∥ , where ∥e∥
+is the length of edge e and ∥e∗∥ is the distance between barycenters
+of t1 and t2.
+For ϵ = 0, the normal alignment constraint is discretized by the
+linear constraintW f = u, whereW is a sparse block-diagonal matrix
+with a blockWnt for each triangle. It has dimensions 7|F | ×9|F |. The
+vector u is a repetition of u0 for each triangle, resulting in a 7|F | × 1
+vector. For ϵ > 0, the normal alignment constraint is discretized by
+a second-order cone constraint: ∥Wnt ft − u0∥2 ≤ ϵ per triangle.
+For the case p = 1 and a completely flat surface Ω, our discretiza-
+tion agrees with the standard discretization of total variation in
+image processing [Chambolle et al. 2010; Rudin et al. 1992].
+5.3 Meshes with Boundary
+When the mesh contains boundaries, we do not enforce any bound-
+ary conditions; in PDE parlance, this choice corresponds to “natural
+boundary conditions.” While it is tempting to expect the natural
+boundary conditions for p = 2 to imply zero Neumann boundary
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+Octahedral Frames for Feature-Aligned Cross-Fields • 1:7
+(a) hard normal-aligned
+streamlines
+(b) hard normal-aligned
+crosses
+(c) mesh normal direc-
+tions near sliver triangle
+(zoom × 1)
+(d) soft normal-aligned
+streamlines
+(e) soft normal-aligned
+crosses
+(f) mesh normal direc-
+tions near sliver triangle
+(zoom × 2)
+Fig. 5. Soft normal alignment increases quality of the cross field and de-
+creases the influence of mesh artifacts. The buste mesh is shown with
+p = ∞ and varying normal alignment: ϵ = 0 for the top figure and ϵ = 0.5
+on the bottom. (a) Hard normal aligned streamlines; (b) magnified crosses
+shows a small patch of diagonal crosses in an otherwise regular region; (c)
+magnified triangle normals visualized with sliver triangle 4611 shaded in
+blue; (d) soft normal aligned streamlines; (e) magnified crosses no longer
+shows diagonal artifacts; (f) extra-magnified triangle normals visualized
+with sliver triangle 4611 shaded in blue. While the normal direction of the
+region points diagonally up and right, the sliver triangle’s normal direction
+points almost completely to the right.
+conditions [Stein et al. 2018], the SH representation vector is com-
+plicated by being constrained to a spatially varying linear subspace.
+We simply allow the cross on the boundary to be that which mini-
+mizes total energy. If desired, one can enforce a constraint that the
+cross field on the boundary be aligned to the boundary through the
+method described in §5.4.
+(a) before (b) after
+Fig. 6. Octahedral fields obtained by minimizing E∞ on the hand mesh
+before and after adding manual direction. The manually-added streamline
+is shown by the inset black arrow. This constraint removes a singularity
+from the original octahedral field.
+5.4 Manual Guidance
+To support manual guidance of the octahedral frame field, we can
+prescribe alignment of the frame field to streamlines. Streamline con-
+straints combinedwith normal alignment result in a fully-determined
+frame. Therefore, prescribing streamlines is equivalent to prescrib-
+ing the value of ft on a subset of trianglesTp . Denote the prescribed
+octahedral frame on triangle t as Ft . We then add a new linear
+constraint that
+∀t ∈ Tp , ft = Ft . (10)
+This technique is demonstrated in Figure 6.
+5.5 Non-Triviality Constraint
+As a result of dropping the unit-norm constraint from Equation 7,
+we have no explicit guarantee that the tangential components of
+octahedral frames do not degenerate to zero. On a surface with a
+crease, however, the normal alignment constraint on one side of the
+crease imposes that the magnitude of the tangential component on
+the other side of the crease is close to one. As a result, we observe
+empirically that the vast majority of our octahedral frames do not
+degenerate.
+In the case that octahedral frames do degenerate significantly,
+their norms can be too small to project robustly. We locate these
+by using the octahedral projection from [Palmer et al. 2019] to
+measure the distance from ft to the octahedral variety V : d(ft ) =
+∥πV (ft )− ft ∥2, and thresholding by d(ft ) > .665. If such frames are
+found, we run the optimization again while holding non-degenerate
+frames to their projected values. In our experiments, just one round
+of re-solving results in 99.8% non-degenerate frames.
+5.6 Solving For an Octahedral Field
+In its most general form, our problem formulation consists of mini-
+mizing a mixed-norm objective, with both linear and second-order
+cone constraints. This results in a convex problem that we solve
+with Mosek 9 [ApS 2017]. The normal alignment constraint becomes[
+ϵ, (Wnt ft − u0)T
+]
+∈ L8, where L8 is the 8-dimensional Lorentz
+cone. Likewise, the energy is formulated using a single p-norm cone.
+Our code is written inMatlab with a mex interface to Mosek; it builds
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+1:8 • Paul Zhang, Josh Vekhter, Edward Chien, David Bommes, Etienne Vouga, and Justin Solomon
+p = 2, ϵ = 0 p = 3, ϵ = 0 p = 6, ϵ = 0 p = 8, ϵ = 0
+p = 2, ϵ = .2 p = 3, ϵ = .2 p = 6, ϵ = .2 p = 8, ϵ = .2
+p = 2, ϵ = .525 p = 3, ϵ = .525 p = 6, ϵ = .525 p = 8, ϵ = .525
+p = 2, ϵ = .55 p = 3, ϵ = .55 p = 6, ϵ = .55 p = 8, ϵ = .55
+Fig. 7. As ϵ increases or as p decreases, the cross fields become less sensitive
+to noise added to the cube-mesh.
+cross-platform. Since our problem is convex, any dependence on
+initialization would entirely be due to non-unique solutions, which
+we do not observe in practice. Furthermore, we use the interior
+point method, which does not accept manual initialization. In the
+specific case of ϵ = 0,p = 2, solving this optimization is equivalent
+to solving a linear system.
+6 RESULTS
+We begin with a comparison of the behavior of our energy for
+different values of p. This experiment is depicted in Figure 9. We ob-
+serve that our cross fields naturally align to features with increasing
+strength for higher p. In the case p = 1, our cross field is discontinu-
+ous over all creases, but while it is provably incentivized to align,
+it sometimes deviates due to the influence of neighboring creases,
+e.g. on the top surface of the fandisk. For p = 2, our cross fields
+achieve close alignment to the upper half of the shallow crease, as
+well as alignment on the top face where the p = 1 case failed. Finally
+for p = ∞ our fields align down the entirety of the shallow crease.
+While in theory, Ep for p ≥ 2 diverges on creases, we observe that
+its discretization yields empirically strong crease alignment. This
+may be due to application of Proposition 4.3 over all edges of the
+mesh. We show our fields for different discretizations of the same
+p
+=
+2
+p
+=
+3
+M
+e
+s
+h
+e
+s
+100 Triangles 400 Triangles 2K Triangles 4K Triangles
+Fig. 8. On this developable surface, our cross fields are intrinsically smooth
+in the limit of refinement, but exhibit some mesh sensitivity on coarse
+meshes, particularly for higher p values. They are crease-aligned for all
+resolutions. Note that the extrinsic curvature of the cylindrical bend has no
+effect on the cross fields at higher resolutions.
+geometry in Figure 10 and observe that in all cases, we achieve
+crease alignment.
+Supplementary Materials. In our supplementary document we
+perform an empirical study to evaluate the performance of our
+method. We evaluate our method on a number of models drawn
+from the Thingi10k [Zhou and Jacobson 2016] dataset, as well as a
+number of other commonly used benchmark models to demonstrate
+effective crease alignment on real-world models. We also compare
+our approach to several baseline methods ([Brandt et al. 2018; Jakob
+et al. 2015; Knöppel et al. 2013]), by generating fields on the models
+in the “Robust Field-Aligned Global Parametrization” dataset [Myles
+et al. 2014], taking care to sample the relevant parameter space for
+each formulation.While it is difficult to precisely quantify the quality
+of a vector field, we highlight a number of cases where our method
+recovers fields which more faithfully conform to mesh features than
+baseline methods on real-world models.
+Our runtimes are shown for a set of meshes with 240 to 76K ver-
+tices and 480 to 152K faces in Figure 13. Runtimes naturally increase
+with mesh size and appear to grow linearly with number of triangles
+in our mesh test set. Memory costs are incurred to store aWnt per
+triangle, a singleu0,we per edge, and ft per triangle. Hence, storage
+is linear in size of the mesh. More detailed information regarding
+parameter choices and runtimes is provided in the supplementary
+materials. Table 1 shows a summary of our runtimes in comparison
+to that of other methods. Our runtimes are on the same scale as
+[Knöppel et al. 2013] and to the bases setup step in [Brandt et al.
+2018].
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+Octahedral Frames for Feature-Aligned Cross-Fields • 1:9
+(a) Fandisk mesh (b) p = 1 (c) p = 2 (d) p = ∞
+Fig. 9. Cross fields generated by minimizing Ep for p = 1, 2, ∞ on the fandisk mesh. The shallow crease of the fandisk mesh is marked in red. Our cross
+fields naturally align to the shallow crease with increasing strength for higher p .
+Number of Bases Biharmonic Instant Globally Ours
+triangles setup solve meshes optimal
+3K 5 .005 .026 .85 2.8
+12K 24 .005 .053 20.46 15.058
+20K 44 .005 .080 21.913 25.895
+69K 170 .006 .141 62.733 135.09
+80K 181 .006 .222 71.15 112.3
+Table 1. Runtimes in seconds for computing cross-fields using different
+methods on meshes with a varying number of triangles. Methods listed are
+those of Brandt et al. [2018], Jakob et al. [2015], Knöppel et al. [2013], and
+our own. Runtimes for fields from [Brandt et al. 2018] are split into time
+needed for the setup of 500 bases eigenfields and the field computation
+separately because of drastically differing timescales.
+Comparison to Explicit Feature Curves. Next, we compare our
+feature-aligned cross fields to those produced with the help of
+explicitly-computed feature curves. We obtain feature curves on
+the 1904-triangle Moai mesh from [Gehre et al. 2016, Fig. 9]. We
+compute a cross field with additional hard constraints as described
+in §5.4 to enforce alignment to the precomputed feature curves. We
+compare the resulting field with and without explicit feature-curve
+alignment in Figure 11. While the feature curves help guide the
+cross field, just a few artifacts in the computed features drastically
+influence the resulting cross field to have more singularities and
+be less smooth without clear benefit. TheMoai is shown from an
+angle where these differences are most pronounced.
+Effect of Mesh Resolution on Crease-Alignment vs Extrinsic Curva-
+ture. In this experiment we test on a geometry where a sharp crease
+is mis-aligned to extrinsic curvature directions. We generate meshes
+of this geometry at varying resolution to see how crease-alignment
+interacts with extrinsic curvature. Results of this experiment are
+depicted in Figure 8. As mesh resolution increases our cross fields
+become crease-aligned and intrinsically smooth, agreeing with the
+theory. For very low mesh resolution, the cross fields are more
+sensitive to the underlying meshing pattern.
+(a) 1.3k (b) 5.4k (c) 21.8k (d) 11.6k (e) Multires
+Fig. 10. Cross fields generated by minimizing E2 on different meshings of
+the three-cylinder-intersection with number of faces indicated. Cross
+field (d) is computed on the multi-resolution mesh (e). Notice that we obtain
+the same feature-aligned cross field each time.
+Comparison to 3D Octahedral Fields. Due to similarity of frame
+representation, we compare our method to surface cross fields ob-
+tained by optimizing a volumetric octahedral field. Algorithms like
+those of [Huang et al. 2011; Ray et al. 2016] can generate surface
+cross fields by approximating the surface with the limiting behavior
+of a thin layer of tetrahedra or prism elements. However, prism
+elements are non-standard and both element types will be poorly
+conditioned without introducing further restrictions such as zero
+normal gradient to mimic a triangle mesh. We instead opt to com-
+pare with the Boundary Element Method (BEM) [Solomon et al.
+2017] which acts directly on surface triangle meshes. We use the
+2500 triangle fandiskmesh for this comparison. As observed earlier,
+our method has increasing feature alignment with increased values
+of p. In comparison, Figure 12 shows that the BEM field fully ignores
+the shallow crease of the fandisk, running through it at a 45◦ offset.
+Moreover, despite the fact that the BEM only needs boundary data
+as input, its runtime is close to 50 times slower than ours.
+Challenging Test Cases. We compare feature alignment of our
+cross fields with that of existing methods on several meshes illustra-
+tive examples in Figure 14. As pointed out in the introduction, a key
+advantage of our technique is that it recovers crease aligned fields
+on models whose maximal curvature directions disagree with their
+creases. This occurs naturally when models are specified by the
+intersections of developable patches, a very common primitive in
+CAD tools. We introduce two benchmark models for testing crease
+alignment when creases disagree with intrinsic notions of curvature.
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+1:10 • Paul Zhang, Josh Vekhter, Edward Chien, David Bommes, Etienne Vouga, and Justin Solomon
+(a) Moai and explicit
+feature curves(red
+edges)
+(b) Explicit Feature
+Curve Alignment:
+p = 2, ϵ = 0
+(c) Our method: p = 2,
+ϵ = 0
+Fig. 11. Comparison of our feature-aligned cross fields to those generated
+when adding additional explicit feature curve alignment constraints. Explicit
+feature curves were obtained from [Gehre et al. 2016, Fig. 9] Despite the
+extra cost of precomputing explicit feature curves, slight artifacts in the
+feature curves (most pronounced on the side) force the explicitly guided
+cross field to have lower quality.
+(a) Ours p = 2, ϵ = 0:
+3.9s
+(b) Ours p = ∞, ϵ = 0:
+3.5s
+(c) BEM: 161s
+Fig. 12. Cross field and runtime comparison of our method to a method
+optimizing volumetric octahedral frames [Solomon et al. 2017]. The fandisk
+used contains 2.5k triangles.
+The three-cylinder-intersection mesh is composed of 12 quadri-
+lateral patches where each patch is a subset of a cylinder and has
+maximal curvature directions making
+π
+4
+angles with its boundary
+creases. Thewavey-box example has the same creases as a standard
+cube, with the modification that each of its faces has a sine wave
+ripple running diagonally through it. These two cases are shown
+in Figure 2. The fandisk mesh is another example of a challenging
+case for feature-alignment due to its shallow crease with strong
+non-aligning neighboring creases which is representative of one
+way that such features arise in real-world models.
+Our cross fields on these test cases are shown in Figure 14. We
+observe proper feature alignment in our fields and while other
+methods can sometimes be tuned per model to achieve the same
+feature alignment, there is no choice of parameters that worked on
+all test cases. In particular:
+• fields from [Jakob et al. 2015] are distracted by extrinsic curvature
+on the three-cylinder-intersection and entirely pave over the
+shallow crease of the fandisk. Their results on wavey-box, and
+wedge are successfully aligned to the creases.;
+• fields from [Brandt et al. 2018] are challenging to tune with λ
+representing alignment to a guiding extrinsic curvature field.
+We show their method for the biharmonic energy (m = 2) as a
+point of contrast to Dirichlet energy. We choose two values of λ,
+λ = −.0001 for slight extrinsic curvature alignment, and λ = −.1
+Number of triangles
+T
+i
+m
+e
+i
+n
+s
+e
+c
+o
+n
+d
+s
+Fig. 13. Runtimes to compute cross fields over various mesh sizes.
+for stronger extrinsic curvature alignment. Their fields are unable
+to align to features of the three-cylinder-intersection in both
+cases, and specifically for λ = −.1 the field strongly aligns to
+noise on the flat upper face of the fandisk mesh. Their fields are
+successfully crease-aligned for the wedge mesh;
+• we compare against both the anti-holomorphic and Dirichlet
+energies of [Knöppel et al. 2013] with the curvature alignment
+parameter λ set to −0.1. This results in good alignment on the
+three-cylinder-intersection, but noisy or unaligned fields for
+the remaining test cases.
+In contrast, our method for p = 2 achieves feature alignment on
+all test cases without unnecessary discontinuities in the field over
+flat faces. We show additional results for over 200 different meshes
+with both smooth and creased geometries with varying values of p
+and ϵ in the supplementary materials. The fields are crease-aligned
+for all creased meshes and are otherwise intrinsically smooth. For
+comparison, we include fields from [Brandt et al. 2018] and [Knöppel
+et al. 2013] on a larger range of λ. We also include fields from
+[Brandt et al. 2018] form = 1 and fields from [Jakob et al. 2015] in
+supplementary materials.
+Quad Meshing. Feature alignment is especially important when
+using cross fields to guide high-fidelity quad meshing. We generate
+quad meshes using [Campen et al. 2015] to parameterize our cross
+fields. We compare against a standard quad meshing pipeline using
+cross fields from [Bommes et al. 2009] and [Campen et al. 2015] for
+parameterization.We also test against parameterization by [Campen
+et al. 2016], which introduces extra guidance to encourage extrinsic
+curvature alignment.
+For the fandisk mesh prior methods generate quad meshes that
+are influenced by the shallow crease, but do not manage to capture
+it sharply (see Figure 15). We observe that by placing singularities
+near the shallow crease of the fandisk, our quad meshes manage to
+align much more sharply. The quad mesh generated by minimizing
+E∞ aligns even better than for E2.
+We also compare quad meshes generated from our cross fields
+against the prior art on the anchor, spot, moomoo, and three-
+cylinder-intersection meshes. These results are shown in Fig-
+ure 16. We observe generally better alignment in the quad meshes
+generated from our method. By placing singularities on the cylindri-
+cal region of the anchor, our quad meshing manages to align better
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+Octahedral Frames for Feature-Aligned Cross-Fields • 1:11
+(a) Ours p = 2 (b) [Jakob et al. 2015] (c) [Brandt et al. 2018]
+λ = −.1 Biharmonic
+(d) [Brandt et al. 2018]
+λ = −.0001 Biharmonic
+(e) [Knöppel et al. 2013]
+λ = −.1 A-holomorphic
+(f) [Knöppel et al. 2013]
+λ = −.1 Dirichlet
+Fig. 14. Various cross field methods compared on several meshes with complex features and geometry. We test on the three-cylinder-intersection, wavey-box,
+wedge, and fandisk meshes and compare against the following works: [Brandt et al. 2018; Jakob et al. 2015; Knöppel et al. 2013] with various parameters. We
+use normal aligned octahedral fields generated by minimizing E2. We achieve crease-alignment on all test cases where other methods succeed sporadically.
+(a) E2 (b) E∞ (c) QGP (d) Curvature filter
+Fig. 15. Quad meshes of the fandisk mesh generated using cross fields from E2, E∞, MIQ + QGP [Campen et al. 2015], and MIQ + Curvature filter [Campen
+et al. 2016] respectively. Our methods achieve sharp alignment to the shallow crease with increased depth for higher p . Alternative methods are influenced by
+the crease only to a shallower extent.
+to its creases. On the spot mesh we see a straighter connection be-
+tween the ear and the head. For the three-cylinder-intersection,
+the quad mesh generated from our fields clearly align better. Since
+themoomoo is a relatively smooth mesh, we do not see particularly
+defining differences in quality.
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+1:12 • Paul Zhang, Josh Vekhter, Edward Chien, David Bommes, Etienne Vouga, and Justin Solomon
+(a) Anchor Mesh with E2 (b) Anchor Mesh with [Bommes et al.
+2009; Campen et al. 2015]
+(c) Spot Mesh with E2 (d) Spot Mesh with [Bommes et al.
+2009; Campen et al. 2015]
+(e) Moomoo Mesh with E2 (f) MoomooMesh with [Bommes et al.
+2009; Campen et al. 2015]
+(g) 3 Cylinder Intersection with E2 (h) 3 Cylinder Intersection with
+[Bommes et al. 2009; Campen et al.
+2015]
+Fig. 16. Quad meshes of the anchor, spot,moomoo, and three-cylinder-intersectionmeshes. We compare quad meshes generated using cross fields from
+our E2 energy with quad meshes generated through [Campen et al. 2015] and [Bommes et al. 2009]. Our methods achieve sharper feature alignment on the
+anchor, spot (on the ear), and three-cylinder-intersection meshes.
+7 DISCUSSION AND CONCLUSIONS
+Feature alignment is a desirable property in many geometry pro-
+cessing applications. In the context of cross fields and remeshing,
+we consider features to be creases where the surface changes non-
+smoothly. Quality of feature detection and alignment can signifi-
+cantly impact quality of the remeshing and the usefulness of the
+resulting cross fields. While significant effort has been put into ex-
+trinsic alignment of cross fields to curvature directions, they are
+not always appropriate substitutes for crease alignment. By specifi-
+cally targeting discontinuities of the surface we have created a new
+class of octahedral frame field energies parameterized by p ≥ 1 for
+computing crease-aligned cross fields on surfaces. The resulting
+fields are intrinsically smooth over smooth surfaces, and can be
+used for crease-aligned quad meshing. Moreover, alignment is fully
+automatic and does not rely on explicit extraction of feature curves,
+itself an open problem and active area of research.
+We find the behavior of Ep for p ≥ 2 over creases of a discretiza-
+tion to be an interesting point for further exploration since all practi-
+cal computations on surfaces are necessarily discrete andwe observe
+strong feature alignment, despite the problem being ill-posed in the
+smooth setting. Theoretical analysis of anisotropic normally-aligned
+octahedral frame fields combined with Proposition 4.3 may be able
+to explain this behavior. Since all edges of a mesh are creases of
+a piecewise linear domain, the behavior of geometry processing
+algorithms on creased domains merits further study.
+There are also further applications of soft-normal-aligned octahe-
+dral frame fields. While in this paper we fix ϵ as a single parameter
+per mesh, it could also be defined as a scalar field representing
+“trust” in the quality of a mesh. It would be interesting to explore a
+spatially-varying ϵ dependent on triangle quality or other metrics in
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.
+Octahedral Frames for Feature-Aligned Cross-Fields • 1:13
+the future. If we treat the mesh itself as variables, soft normal align-
+ment enables a surface flow towards meshes with lower cross-field
+energy. Our analysis can be further extended to SH representations
+of n-RoSy fields or even platonic solid symmetries [Shen et al. 2016].
+We also conjecture that with mild assumptions the solution to our
+problem is unique, but a proof is out of scope for this work; we leave
+exploration of these ideas to future work.
+Even without these extensions, our method provides a practical
+solution to a challenging problem. By using a new representation
+of cross fields we achieve crease-aligned cross fields on surfaces.
+ACKNOWLEDGMENTS
+The authors would like to thank Christopher Brandt for help obtain-
+ing comparison fields, Amir Vaxman for support with Directional
+and rendering, Michal Adamaszek for help debugging Mosek, and
+David Palmer for discussions and help with his code base. We thank
+Wenzel Jacob, Keenan Crane, and Qingnan Zhou for their open
+source code implementations. Finally, we thank Ryan Viertel for
+many valuable discussions and Panini Pals for the panini press.
+Paul Zhang acknowledges the generous support of the Depart-
+ment of Energy Computer Science Graduate Fellowship. Etienne
+Vouga acknowledges the generous support of Adobe, SideFX, and
+NSF IIS-1910274. David Bommes acknowledges the generous sup-
+port of the European Research Council (ERC) under the European
+Union’s Horizon 2020 research and innovation program (AlgoHex,
+grant agreement no. 853343). Justin Solomon acknowledges the gen-
+erous support of Army Research Office grant W911NF-12-R-0011,
+National Science Foundation grant IIS-1838071, Air Force Office of
+Scientific Research award FA9550-19-1-0319, and a gift from Adobe
+Systems. Any opinions, findings, and conclusions or recommenda-
+tions expressed in this material are those of the authors and do not
+necessarily reflect the views of these organizations.
+REFERENCES
+Luigi Ambrosio, Nicola Fusco, and Diego Pallara. 2000. Functions of bounded variation
+and free discontinuity problems. Clarendon Press, Oxford ; New York.
+MOSEK ApS. 2017. The MOSEK optimization toolbox for MATLAB manual. Version 8.1.
+http://docs.mosek.com/8.1/toolbox/index.html
+Mikhail Bessmeltsev and Justin Solomon. 2019. Vectorization of line drawings via
+polyvector fields. ACM Transactions on Graphics (TOG) 38, 1 (2019), 9.
+David Bommes, Marcel Campen, Hans-Christian Ebke, Pierre Alliez, and Leif Kobbelt.
+2013. Integer-Grid Maps for Reliable Quad Meshing. ACM Transactions on Graphics
+32, 4 (July 2013). https://hal.inria.fr/hal-00862648
+David Bommes, Henrik Zimmer, and Leif Kobbelt. 2009. Mixed-integer quadrangulation.
+ACM Transactions on Graphics 28, 3 (July 2009), 1. DOI:http://dx.doi.org/10.1145/
+1531326.1531383
+Christopher Brandt, Leonardo Scandolo, Elmar Eisemann, and Klaus Hildebrandt. 2018.
+Modeling n -Symmetry Vector Fields using Higher-Order Energies. ACM Transac-
+tions on Graphics 37, 2 (March 2018), 1–18. DOI:http://dx.doi.org/10.1145/3177750
+Xavier Bresson and Tony Chan. 2008. Fast dual minimization of the vectorial total
+variation norm and applications to color image processing. Inverse Problems and
+Imaging 2, 4 (Nov. 2008), 455–484. DOI:http://dx.doi.org/10.3934/ipi.2008.2.455
+Marcel Campen, David Bommes, and Leif Kobbelt. 2015. Quantized global parametriza-
+tion. ACM Transactions on Graphics 34, 6 (Oct. 2015), 1–12. DOI:http://dx.doi.org/
+10.1145/2816795.2818140
+Marcel Campen, Moritz Ibing, Hans-Christian Ebke, Denis Zorin, and Leif Kobbelt.
+2016. Scale-Invariant Directional Alignment of Surface Parametrizations. Computer
+Graphics Forum 35, 5 (Aug. 2016), 1–10. DOI:http://dx.doi.org/10.1111/cgf.12958
+Antonin Chambolle, Vicent Caselles, Matteo Novaga, Daniel Cremers, and Thomas
+Pock. 2010. An introduction to Total Variation for Image Analysis. 9 (2010). DOI:
+http://dx.doi.org/10.1515/9783110226157.263
+Alexandre Chemin, François Henrotte, Jean-François Remacle, and Jean Van Schaftin-
+gen. 2018. Representing three-dimensional cross fields using 4th order tensors. In
+2018. http://arxiv.org/abs/1808.03999 arXiv: 1808.03999.
+Etienne Corman and Keenan Crane. 2019. Symmetric Moving Frames. ACM Trans.
+Graph. 38, 4, Article Article 87 (July 2019), 16 pages. DOI:http://dx.doi.org/10.1145/
+3306346.3323029
+Keenan Crane, Mathieu Desbrun, and Peter Schröder. 2010. Trivial Connections on
+Discrete Surfaces. Computer Graphics Forum 29, 5 (Sept. 2010), 1525–1533. DOI:
+http://dx.doi.org/10.1111/j.1467-8659.2010.01761.x
+Fernando de Goes, Mathieu Desbrun, and Yiying Tong. 2015. Vector Field Processing
+on Triangle Meshes. In SIGGRAPH Asia 2015 Courses (SA ’15). ACM, New York, NY,
+USA, Article 17, 48 pages. DOI:http://dx.doi.org/10.1145/2818143.2818167
+Silvano Di Zenzo. 1986. A note on the gradient of a multi-image. Computer Vision,
+Graphics, and Image Processing 33, 1 (Jan. 1986), 116–125. DOI:http://dx.doi.org/10.
+1016/0734-189X(86)90223-9
+Anne Gehre, Isaak Lim, and Leif Kobbelt. 2016. Adapting Feature Curve Networks
+to a Prescribed Scale. Computer Graphics Forum 35, 2 (May 2016), 319–330. DOI:
+http://dx.doi.org/10.1111/cgf.12834
+Jin Huang, Yiying Tong, Hongyu Wei, and Hujun Bao. 2011. Boundary aligned smooth
+3D cross-frame field. In Proceedings of the 2011 SIGGRAPH Asia Conference on - SA ’11.
+ACM Press, Hong Kong, China, 1. DOI:http://dx.doi.org/10.1145/2024156.2024177
+Zhiyang Huang and Tao Ju. 2016. Extrinsically smooth direction fields. Computers &
+Graphics 58 (Aug. 2016), 109–117. DOI:http://dx.doi.org/10.1016/j.cag.2016.05.015
+Emmanuel Iarussi, David Bommes, and Adrien Bousseau. 2015. BendFields: Regularized
+Curvature Fields from Rough Concept Sketches. ACM Transactions on Graphics 34,
+3 (May 2015), 1–16. DOI:http://dx.doi.org/10.1145/2710026
+Wenzel Jakob, Marco Tarini, Daniele Panozzo, and Olga Sorkine-Hornung. 2015. Instant
+field-aligned meshes. ACM Transactions on Graphics 34, 6 (Oct. 2015), 1–15. DOI:
+http://dx.doi.org/10.1145/2816795.2818078
+Felix Knöppel, Keenan Crane, Ulrich Pinkall, and Peter Schröder. 2013. Globally optimal
+direction fields. ACM Transactions on Graphics 32, 4 (July 2013), 1. DOI:http:
+//dx.doi.org/10.1145/2461912.2462005
+Felix Knöppel, Keenan Crane, Ulrich Pinkall, and Peter Schröder. 2015. Stripe patterns
+on surfaces. ACM Transactions on Graphics 34, 4 (July 2015), 39:1–39:11. DOI:
+http://dx.doi.org/10.1145/2767000
+Heng Liu, Paul Zhang, Edward Chien, Justin Solomon, and David Bommes. 2018.
+Singularity-constrained octahedral fields for hexahedral meshing. ACM Transactions
+on Graphics 37, 4 (July 2018), 1–17. DOI:http://dx.doi.org/10.1145/3197517.3201344
+Ashish Myles, Nico Pietroni, and Denis Zorin. 2014. Robust Field-aligned Global
+Parametrization. ACM Trans. Graph. 33, 4, Article 135 (July 2014), 14 pages. DOI:
+http://dx.doi.org/10.1145/2601097.2601154
+M. Nieser, U. Reitebuch, and K. Polthier. 2011. CubeCover- Parameterization of 3D
+Volumes. Computer Graphics Forum 30, 5 (Aug. 2011), 1397–1406. DOI:http://dx.doi.
+org/10.1111/j.1467-8659.2011.02014.x
+David Palmer, David Bommes, and Justin Solomon. 2019. Algebraic Representations
+for Volumetric Frame Fields. arXiv:1908.05411 (2019).
+Nicolas Ray, Dmitry Sokolov, and Bruno Lévy. 2016. Practical 3D frame field generation.
+ACM Transactions on Graphics 35, 6 (Nov. 2016), 1–9. DOI:http://dx.doi.org/10.1145/
+2980179.2982408
+Nicolas Ray, Bruno Vallet, Wan Chiu Li, and Bruno Lévy. 2008. N-symmetry Direction
+Field Design. ACM Trans. Graph. 27, 2, Article 10 (May 2008), 13 pages. DOI:
+http://dx.doi.org/10.1145/1356682.1356683
+Wulf Rossmann. 2002. Lie groups: an introduction through linear groups. (2002).
+Leonid I. Rudin, Stanley Osher, and Emad Fatemi. 1992. Nonlinear total variation based
+noise removal algorithms. Physica D: Nonlinear Phenomena 60, 1-4 (Nov. 1992),
+259–268. DOI:http://dx.doi.org/10.1016/0167-2789(92)90242-F
+G. Sapiro. 1996. Vector-valued active contours. In Proceedings CVPR IEEE Computer
+Society Conference on Computer Vision and Pattern Recognition. IEEE, San Francisco,
+CA, USA, 680–685. DOI:http://dx.doi.org/10.1109/CVPR.1996.517146
+Zhongwei Shen, Xianzhong Fang, Xinguo Liu, Hujun Bao, and Jin Huang. 2016. Har-
+monic Functions for Rotational Symmetry Vector Fields. Computer Graphics Forum
+35, 7 (Oct. 2016), 507–516. DOI:http://dx.doi.org/10.1111/cgf.13047
+Justin Solomon, Amir Vaxman, and David Bommes. 2017. Boundary Element Octahedral
+Fields in Volumes. ACM Transactions on Graphics 36, 3 (May 2017), 1–16. DOI:
+http://dx.doi.org/10.1145/3065254
+Oded Stein, Eitan Grinspun,MaxWardetzky, and Alec Jacobson. 2018. Natural Boundary
+Conditions for Smoothing in Geometry Processing. ACM Trans. Graph. 37, 2, Article
+Article 23 (May 2018), 13 pages. DOI:http://dx.doi.org/10.1145/3186564
+Amir Vaxman, Marcel Campen, Olga Diamanti, Daniele Panozzo, David Bommes, Klaus
+Hildebrandt, and Mirela Ben-Chen. 2016. Directional Field Synthesis, Design, and
+Processing. (2016), 28.
+Qingnan Zhou and Alec Jacobson. 2016. Thingi10K: A Dataset of 10,000 3D-Printing
+Models. arXiv preprint arXiv:1605.04797 (2016).
+ACM Trans. Graph., Vol. 1, No. 1, Article 1. Publication date: January 2020.

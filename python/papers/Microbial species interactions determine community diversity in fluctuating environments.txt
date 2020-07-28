@@ -1,0 +1,2012 @@
+Microbial species interactions determine community diversity in
+fluctuating environments
+Shota Shibasaki1, Mauro Mobilia2, and Sara Mitri1
+1
+Department of Fundamental Microbiology, University of Lausanne, Switzerland
+2Department of Applied Mathematics, School of Mathematics, University of Leeds, United Kingdom
+E-mail addresses of all authors.
+SS: shota.shibasaki@unil.ch
+MM: M.Mobilia@leeds.ac.uk
+SM: sara.mitri@unil.ch
+Short running title: Microbial diversity under fluctuation
+Key words: competitive exclusion, environmental switching, demographic noise, chemostat, beta diversity,
+intermediate disturbance hypothesis
+Type of article: Letters
+Numbers of words: 150 words in abstract, and 4634 words in main text.
+Number of references: 49.
+Numbers of figures: 4, tables: 1, text box 0.
+Corresponding author: Sara Mitri: Quartier UNIL-Sorge, Batiment Biophore, Office 2414, CH-1015 Lau-
+sanne. Phone : 021 692 56 12. E-mail: sara.mitri@unil.ch.
+Statement of authorship: SS, MM and SM designed the study, SS performed simulations, analyzed data,
+and wrote the first draft, and all authors contributed to revisions.
+Data accessibility: The authors confirm that the simulation codes and data for this manuscript will be
+archived in Zendo and DOI of them will be included, should the manuscript be accepted.
+1
+ar
+X
+iv
+:2
+00
+7.
+12
+09
+0v
+1 
+ [
+q-
+bi
+o.
+P
+E
+] 
+ 2
+3 
+Ju
+l 
+20
+20
+Abstract
+Microorganisms often live in environments that fluctuate between mild and harsh conditions. Although
+such fluctuations are bound to cause local extinctions and affect species diversity, it is unknown how diversity
+changes at different fluctuation rates and how this relates to changes in species interactions. Here, we use
+a mathematical model describing the dynamics of resources, toxins, and microbial species in a chemostat
+where resource supplies switch. Over most of the explored parameter space, species competed, but the
+strength of competition peaked at either low, high or intermediate switching rates depending on the species’
+sensitivity to toxins. Importantly, however, the strength of competition in species pairs was a good predictor
+for how community diversity changed over the switching rate. In sum, predicting the effect of environmental
+switching on competition and community diversity is difficult, as species’ properties matter. This may
+explain contradicting results of earlier studies on the intermediate disturbance hypothesis.
+2
+1 Introduction
+Natural environments are not static: temperature, pH, or availability of resources change over time. Many
+studies in microbiology, ecology and evolution have focused on responses to fluctuations in resource abundance
+in the regime of feast and famine periods (Hengge-Aronis, 1993; Vasi et al., 1994; Srinivasan and Kjelleberg,
+1998; Xavier et al., 2005; Merritt and Kuehn, 2018; Himeoka and Mitarai, 2019). These models capture the
+dynamics within many natural ecosystems. For example, the gut microbiota of a host is exposed to fluctuating
+resources that depend on its host’s feeding rhythm, which may affect microbiota diversity (Cignarella et al.,
+2018; Li et al., 2017; Thaiss et al., 2014). In addition to their magnitude, environmental fluctuations can also
+differ in their time scales: for the gut microbiota, a host’s feeding rhythm may vary from hourly to daily, or
+even monthly if feeding depends on seasonal changes (Davenport et al., 2014; Smits et al., 2017).
+How fluctuations affect species diversity has been a highly contested topic in ecology. The intermediate
+disturbance hypothesis argues that intermediate intensity and frequency maximize species diversity (Connell,
+1978; Grime, 1973) because species with high competitive ability dominate at a low level of disturbance while
+species that adapted to the disturbance dominate at a high level of disturbance (Grime, 1977). This hypothesis is
+controversial (Fox, 2013) and other relationships between disturbance and species diversity have been reported
+both empirically and theoretically (Mackey and Currie, 2001; Miller et al., 2011). Theoretical studies also
+suggest that species interactions affect coexistence under fluctuating environments, resulting in changing species
+diversity. In competition-colonization models, for example, whether a species persists or not depends on other
+coexisting species, the disturbance and the focal species’ traits (Hastings, 1980; Kinzig et al., 1999). Indeed,
+species coexistence requires a positive invasion growth rate of each species – the ability to grow when rare
+(Barabás et al., 2018; Chesson and Huntly, 1997; Fox, 2013; Yi and Dean, 2013). Because environmental
+conditions, especially amounts of resources and toxins, affect the sign and/or magnitude of species interactions
+(Hoek et al., 2016; Piccardi et al., 2019; Zuñiga et al., 2019), environmental fluctuations are expected to affect
+species interactions and invasion growth rates, which in turn should affect community diversity. Recently,
+Rodŕıguez-Verdugo et al. (2019) used theory and experiments to show that the rate of environmental fluctuations
+affects the coexistence of two species when the environment switches between two carbon sources that promote
+either exploitation or competition between the species. However, it is unclear whether and how environmental
+fluctuations in amounts of – rather than types of – resources affect species coexistence and diversity. More
+generally, can one predict patterns of diversity under fluctuating environments in larger communities composed
+of more than two species? And how do these relate to changes in inter-species interactions?
+To shed light on these questions, we develop a mathematical model to investigate how the rate of environ-
+mental fluctuations affects species interactions and diversity. We start with a simple scenario with just two
+species in an environment that switches between scarce and abundant resource supplies. We focus on the faster
+grower and ask: (i) How often does this species go extinct due to the presence of a slower-growing competitor,
+and (ii) how does such extinction depend on the environmental switching rate and other properties of the envi-
+ronment? For most parameter values, the faster grower’s extinction probability increases because of competitive
+3
+exclusion by the slower grower. To our surprise, we found that the competitive effect of the slower on the faster
+grower peaked at different switching rates depending on environmental toxicity. Without knowing how different
+species respond to varying environmental conditions, it may then be difficult to predict how they behave when
+subject to environmental fluctuations. Second, to verify whether these findings generalize to and predict the
+dynamics of larger community dynamics, we simulated communities of up to 10 species and found a similar
+pattern: beta diversity was highest at different switching rates in different environments. Although various
+forms of relationship between the disturbance and diversity have been previously reported (Mackey and Currie,
+2001; Miller et al., 2011), our model successfully associates the strength of competition between two species
+with loss of beta diversity in a larger community under a fluctuating environment. In other words, to estimate
+how beta diversity changes over the environmental switching rate, it may be sufficient to analyze the sign and
+strength of interactions between two representative species under those same conditions.
+2 Model
+In this paper, we analyze how environmental switching rate ν affects species interactions and diversity in a
+chemostat model. For simplicity, we assume symmetric random switching (but see Taitelbaum et al. (2020)
+for asymmetric, random and periodic switching). This model combines two sources of noise: birth and death
+events occur randomly yielding demographic noise, while the environment randomly switches from being harsh
+to mild and vice versa and drives the population size (Wienand et al., 2017, 2018; West and Mobilia, 2020;
+Taitelbaum et al., 2020). When the environment becomes harsh (e.g., abundant toxins or scarce resources), the
+population shrinks and demographic noise can lead to extinction. As in previous work, a distinctive feature of
+this model is therefore the coupling of demographic and environmental noise: environmental switching changes
+the population size, which in turn modulates demographic fluctuations, which results in feedback loops. Here,
+we implement environmental switching by modeling time-varying resource and/or toxin supplies, as we are
+interested in how these environmental conditions mediate species interactions and diversity.
+Our model includes the dynamics of the amount ri of resource i (i = 1, . . . , N/2, where N is an even number)
+that allows all species to grow, the amount tj of toxic compound j (j = 1, . . . , N/2) that kills all species, and the
+abundance sk of species k (k = 1, . . . , N). When N = 2 species, we recapitulate the environmentally mediated
+species interactions shown in the model of Piccardi et al. (2019), where species affect each other positively in
+toxic environments, with increasing competition in more benign environments. The dynamics are modelled in
+terms of a multivariate continuous-time birth-and-death process (see Novozhilov et al. (2006); Allen (2010) for
+4
+example) defined by the following “birth” and “death” reactions:
+ri
+τ+ri−−→ ri + 1, (1a)
+ri
+τ−ri−−→ ri − 1, (1b)
+tj
+τ
++
+tj−−→ tj + 1, (1c)
+tj
+τ
+−
+tj−−→ tj − 1, (1d)
+sk
+τ+sk−−→ sk + 1, (1e)
+sk
+τ−sk−−→ sk − 1, (1f)
+occurring with transition rates:
+τ+ri = αRi (ξ) , (2a)
+τ−ri =
+N∑
+k=1
+µik
+Y rik
+ri
+ri +K
+r
+ik
+sk + αri, (2b)
+τ+tj = αTj (ξ) , (2c)
+τ−tj =
+N∑
+k=1
+δjk
+Y tjk
+tj
+tj +K
+t
+jk
+sk + αtj , (2d)
+τ+sk =
+N/2∑
+i=1
+µik
+ri
+ri +K
+r
+ik
+sk, (2e)
+τ−sk =
+N/2∑
+j=1
+δjk
+tj
+tj +K
+t
+jk
+sk + αsj , (2f)
+where α is the dilution rate of the chemostat, ξ = ±1 (see below) represents changing environmental conditions
+in terms of in-flowing resource and/or toxin concentration, Ri(ξ) (Tj(ξ)) is resource i’s (toxin j’s) supply under
+the environmental condition ξ, Y rik (Y
+t
+jk) is species k’s biomass yield for resource i (toxin j), µik is the maximum
+growth rate of species k by resource i, δjk is the maximum death rate of species k by toxin j (species k’s
+sensitivity to toxin j ), and Krik (K
+t
+jk) is the amount of resource i (toxin j) that gives the half-maximum growth
+(death) rate of species k. In this model, we assume that growth and death rates depend on the amounts of
+resource and toxin in Monod function forms, respectively, and that the effects are additive.
+Environmental switching changes resource and/or toxin supplies at rate ν according to
+ξ
+ν−→ −ξ, (3)
+where ξ ∈ {−1,+1} is a coloured dichotomous (telegraph) noise assumed to be symmetric and stationary (Bena,
+2006; Horsthemke and Lefever, 2006). Here, the mean of ξ(t) is therefore always zero and its finite correlation
+time is 1/ν. One can imagine three environmental switching scenarios, where either or both resource and toxin
+supplies change (Table 1). In the main text, we analyze only scenario 1, but see Appendix 4 for the remaining
+5
+scenarios. When environmental switching affects the resource supply Ri, it switches between abundant and
+scarce:
+Ri (ξ) =
+
+
+R+i ξ = 1 (abundant)
+R−i ξ = −1 (scarce)
+s.t. R+i > R
+−
+i > 0,∀i. (4)
+It is clear that (2a)-(4) define a multivariate birth-and-death process coupled with environmental switching. As
+environmental switching does not affect toxin supply in this scenario, the mean amount of toxins is supplied
+〈Tj〉, where 〈·〉 represents the mean of abundant and scarce supplies of a focal resource or toxin (e.g., 〈Tj〉 ≡(
+T+j + T
+−
+j
+)
+/2 such that T+j > T
+−
+j > 0,∀j).
+Note that when demographic noise is ignored, the sole source of randomness stems from the dichotomous
+Markov noise, which clearly results in the waiting time between two environmental switches to be exponen-
+tially distributed with a mean 1/ν (Bena, 2006). In the joint presence of demographic noise and environmental
+switching, see, e.g., (Hufton et al., 2016; West et al., 2018), the waiting time approximately follows the expo-
+nential distribution with mean 1/ν, with the larger the switching rate the shorter the sojourn in either of the
+environmental states.
+The master equation for this model is defined by combining the dynamics of amount of resources and toxins,
+abundances of species, and environmental switching (Eqs (1a) - (3)):
+Ṗ
+(
+~r,~t, ~s, ξ
+)
+=
+N/2∑
+i=1
+(
+E−ri − 1
+) {
+τ+riP
+(
+~r,~t, ~s, ξ
+)}
++
+N/2∑
+i=1
+(
+E+ri − 1
+) {
+τ−riP
+(
+~r,~t, ~s, ξ
+)}
++
+N/2∑
+j=1
+(
+E−tj − 1
+){
+τ+tjP
+(
+~r,~t, ~s, ξ
+)}
++
+N/2∑
+j=1
+(
+E+tj − 1
+){
+τ−tjP
+(
+~r,~t, ~s, ξ
+)}
++
+N∑
+k=1
+(
+E−sk − 1
+) {
+τ+skP
+(
+~r,~t, ~s, ξ
+)}
++
+N∑
+k=1
+(
+E+sk − 1
+) {
+τ−skP
+(
+~r,~t, ~s, ξ
+)}
++ ν
+{
+P
+(
+~r,~t, ~s,−ξ
+)
+− P
+(
+~r,~t, ~s, ξ
+)}
+(5)
+where P
+(
+~r,~t, ~s, ξ
+)
+represents the probability density of ~r = (ri), ~t = (tj), ~s = (sk), and ξ, the dot denotes the
+time derivative, and E±ri is a shift operator such that
+E±riP
+(
+~r,~t, ~s, ξ
+)
+= P
+(
+r1, . . . , ri ± 1, . . . , rN/2,~t, ~s, ξ
+)
+, (6)
+and E±tj and E
+±
+sk
+are the equivalent shift operators for tj and sk, respectively. The last line on the right-hand-
+6
+side of (5) accounts for the random switching reaction (3). The model given by Eq. (5) was implemented
+using the Gillespie algorithm (Gillespie, 1977) until, after a sufficiently large time Tend, the population size
+distribution converges to a quasi-stationary distribution (i.e., where distributions of species abundances appear
+to be stationary for a long time; the real equilibrium state corresponding to the extinction of all species being
+practically unobservable). For details on parameter values and the simulations, see Appendix 2. A schematic
+illustration of this model with N = 2 is summarized in Fig. 1.
+2.1 Evaluating species interactions
+We begin by analyzing interactions between two species (N = 2) where the sign and magnitude of species
+interactions can change. We used parameter values such that species 1 always outcompetes species 2 in a
+deterministic and fixed environment setting (i.e., species 1 grows faster than species 2, see Appendix 1 for analysis
+and Table S.1 for exact parameter values) to clarify the effects of demographic noise. Under demographic noise
+coupled with environmental switching, either of the two species or both species tend to go extinct. As a proxy
+for interactions, we focus on the net effect of species 2 on species 1, which is defined by the extinction probability
+of species 1 in mono-culture minus that in co-culture with species 2:
+∆P (s1(Tend) = 0) ≡ P (s1(Tend) = 0; s2(0) = 0)− P (s1(Tend) = 0; s2(0) > 0) . (7)
+If ∆P (s1(Tend) = 0) is < −0.01, we consider that species 2 increases the extinction probability of species 1
+(negative effect), whereas ∆P (s1(Tend) = 0) > 0.01 implies that species 2 has a positive effect on species 1. We
+ignore small values of |∆P (s1(Tend) = 0)|, as they are biologically meaningless and may be due to the finite
+number of simulations.
+In the analysis of species diversity (see below) with N = 2, we also analyzed the species interactions in 100
+pairs of species that differ in µik,K
+r
+ik, δjk, and K
+t
+jk in the presence of demographic noise and environmental
+switching. Since pairs of species may coexist depending on their parameter values in the diversity analysis,
+species 1 (or 2) is the one that has larger (or smaller) population size than the other in the absence of any noise.
+If both species go extinct in the absence of noise, species 1 is chosen randomly.
+2.2 Evaluating species diversity
+To explore how species diversity changes over switching rates, we ran simulations at different community sizes
+ranging from N = 2 to N = 10 and different mean toxin sensitivities, from δ̄ = 0.1 to δ̄ = 1. For each condition
+(one community size and one δ̄), we sampled 100 sets of parameters µik,K
+r
+ik, δjk, and K
+t
+jk, which represented
+100 meta-communities composed of N species whose differences were reflected in the parameter values. For
+each set of parameter values and each environmental switching rate, we ran 100 simulations. In other words,
+each meta-community had 100 independent communities with independent environmental switching.
+Because demographic noise and environmental switching affect species composition, at the end of each
+simulation run, we measured beta diversity (Jost, 2007; Chao et al., 2012) of each meta-community and species
+7
+richness (number of surviving species) for each community at a quasi-stationary state (Tend):
+1Dβ (Tend) ≡
+1Dγ (Tend)
+1Dα (Tend)
+, (8)
+with alpha and gamma diversities defined as below:
+1Dα (Tend) ≡ exp
+(
+−
+100∑
+l=1
+N∑
+k=1
+wlplk (Tend) ln pln (Tend)
+)
+, (9)
+1Dγ (Tend) ≡ exp
+(
+−
+N∑
+k=1
+p̄k ln p̄k (Tend)
+)
+. (10)
+wl is a weight for community l calculated by size of community l (sum of species abundances in community l
+relative to the sum of community sizes over l), plk is the relative abundance of species k in community l (i.e.,
+in community l, plk (Tend) = sk (Tend) /
+∑
+k sk (Tend)), and p̄k =
+∑
+l wlplk is the mean relative abundance of
+species k among communities l = 1, . . . , 100. If all species go extinct in community l, it does not affect alpha,
+beta and gamma diversities as wl = 0. If all species go extinct in all communities, beta diversity becomes
+1Dβ (Tend) = 1. For more detail, see Appendix 2.
+2.3 Statistical analysis
+Statistical analysis was performed with Python 3.7.6 and Scipy 1.4.1. For statistical tests of Spearman’s rank-
+order correlation, scipy.stats.spearmanr was used.
+3 Results
+3.1 Toxin sensitivity changes how switching rate affects species interactions
+Our aim is to investigate how species interactions and diversity change over the environmental switching rate.
+Rather than measuring interactions through the effect of each species on the other’s biomass, we focus on a fast-
+growing species (that we call species 1) and analyze how its extinction probability is affected by the presence of
+a second slower-growing species (species 2). Our reasoning here is that in the absence of noise, species 1 should
+always out-compete species 2, so measuring any deviation from this outcome allows us to quantify the effect
+of coupled demographic and environmental fluctuations. We explored how this proxy for species interactions
+was affected by different environmental switching rates as well as different toxin sensitivities, which we varied
+simultaneously for both species, such that the species were always equally sensitive to the toxin.
+When both species were highly sensitive to the toxin (large δ), species 2 has a positive effect on species 1. This
+occurs because species 2 also degrades the toxin, which outweighs the competition for nutrients (Piccardi et al.,
+2019). However, for most parameter values in Fig. 2A, species 2 has a negative effect on species 1 by increasing
+its extinction probability. We therefore focus on competitive interactions (i.e., ∆P (s1(Tend) = 0) < 0) for the
+remainder of the main part of the study and consider positive interactions in Appendix 5.
+8
+As we varied the switching rate, we observed that the strength of the competitive effect was highly de-
+pendent on the toxin sensitivity δ of the two species: monotonically increasing, monotonically decreasing, or
+non-monotonically changing with a minimum or maximum value at an intermediate switching rate (Fig. 2B).
+How our system behaves under the two extreme switching rates becomes clear if one considers what happens in
+the absence of environmental switching (Fig. S.3). At very low rate ν → 0, there are almost no switches: the
+environment remains either poor or rich in nutrient (probability 1/2) and microbes are as likely to experience
+either scarce or abundant resources from t = 0 until t = Tend. The outcome at this switching rate therefore
+corresponds to the mean outcome of those two environments. On the other hand, a very fast environmental
+switching rate (ν → ∞) corresponds to a scenario where the resource supply is at mean concentration (envi-
+ronmental noise self averages, see, e.g.,Wienand et al. (2017, 2018); West and Mobilia (2020); Taitelbaum et al.
+(2020)). How the strength of competition varies at an intermediate switching rate is, however, less intuitive.
+We explore this next.
+3.2 Competitive exclusion explains negative species interactions
+To better understand the unexpected changes in the effect of species 2 on species 1 (Fig. 2B), we analyse
+our proxy for species interactions in more detail. ∆P (s1(Tend) = 0) represents the difference between the
+probability of species 1 going extinct in mono-culture (P (s1(Tend) = 0; s2(0) = 0)) versus in co-culture with
+species 2 (P (s1(Tend) = 0; s2(0) > 0)) (Eq. 7). By decomposing the co-culture component into two probabilities
+depending on whether species 2 persists or not and rearranging the equation, we obtain:
+∆P (s1(Tend) = 0) =− P (s1(Tend) = 0, s2(Tend) > 0; s2(0) > 0)︸ ︷︷ ︸
+competitive exclusion
++
+
+ P (s1(Tend) = 0; s2(0) = 0)︸ ︷︷ ︸
+sp 1 goes extinct in mono-culture
+−P (s1(Tend) = 0, s2(Tend) = 0; s2(0) > 0)︸ ︷︷ ︸
+both species go extinct
+
+ .
+(11)
+The first line of Eq (11) represents the probability that species 2 excludes species 1 and survives (competitive
+exclusion), while the second line is species 1’s extinction probability in mono-culture minus the probability of
+both species going extinct.
+Fig. S.2 shows that the overall interaction strength is not affected much by the second line of Eq (11), and
+that the competitive exclusion probability explains the variation in species interaction strength in most cases
+(compare Fig. 2A and C). Intuitively, this is because under the environmental conditions where both species are
+likely to go extinct (i.e., small resource supplies and high toxin sensitivity), species 1 is also likely to go extinct
+in mono-culture, resulting in a small magnitude of the second line of Eq (11). For this reason, the competitive
+exclusion probability changes similarly to the effect of species 2 on species 1 over environmental switching rates
+and toxin sensitivities (Fig. 2C). In other words, we can assume that the second line of Eq (11) is negligible
+and focus instead on the competitive exclusion probability.
+9
+3.3 Competitive exclusion explains non-monotonic changes in species interactions
+Following the logic outlined above, we now use the competitive exclusion probability to investigate why the
+strength of negative interactions changes over the switching rate in various ways, depending on toxin sensitivity.
+In the absence of environmental switching, the competitive exclusion probability is uni-modal over toxin
+sensitivity δ, regardless of the resource supply (Fig. 3A). As a reminder, competitive exclusion implies the
+extinction of species 1 and the survival of species 2. Since toxin sensitivity is identical for both species, when
+toxin sensitivity is too high, both species are likely to go extinct (Fig. S.4), which does not count as competitive
+exclusion. Instead, competitive exclusion is most likely at lower toxin sensitivities whose value depends on the
+amount of resource supply: when more resources are supplied, the peak moves to a higher toxin sensitivity
+because species are more likely to survive (Fig. 3A). Hereafter, we refer to the toxin sensitivity that maximizes
+the competitive exclusion probability in the absence of environmental switching as the “critical toxin sensitivity”.
+This analysis clarifies what happens at the two extreme switching rates. At a very slow switching rate (ν →
+0), the environment remains for a long time with either scarce or abundant resources. Accordingly, competitive
+exclusion has two peaks over the toxin sensitivity (at δ = 0.1 and 0.8 in Figs. 2C and D) corresponding to
+the critical toxin sensitivities under the scarce and abundant resource supplies in Fig. 3A, respectively. On
+the other hand, at very fast switching rates (ν →∞), where resources remain at mean abundance, competitive
+exclusion has one peak (at δ = 0.4 in Figs. 2C and D) corresponding to the critical toxin sensitivity under the
+mean resource supply in Fig. 3A. In sum, the form of the competitive exclusion probability in Fig. 2C changes
+from bi-modal to uni-modal by increasing the switching rate.
+The non-monotonic change of competitive exclusion probability over the switching rate can happen at toxin
+sensitivities between the critical toxin sensitivities under scarce (or abundant) and mean resource supplies (Fig.
+2C). This phenomenon can be explained by considering that the landscape of competitive exclusion depicted in
+Fig. 2C contains two “mountain ranges”. The first “mountain range” includes two peaks corresponding to the
+critical toxin sensitivities under the scarce and mean resource supplies (δ = 0.1, 0.4, respectively). By increasing
+environmental switching from a very slow rate, the peak at δ = 0.1 converges to the peak at δ = 0.4 (Fig.
+2D). The second “mountain range” consists of the peak corresponding to the critical toxin sensitivity under the
+abundant resource supply (δ = 0.8). This peak vanishes by increasing the switching rate (Fig. 2D).
+At toxin sensitivities between critical values under scarce and mean resource supplies (δ = 0.2, 0.3), the
+competitive exclusion probability changes in a humped shape over the switching rate (species interactions change
+in a U shape, see Fig. 2B). This is because an intermediate switching rate has a peak of competitive exclusion
+probability belonging to the first mountain range. When the toxin sensitivity is δ = 0.6, the environmental
+switching rate also non-monotonically affects the competitive exclusion probability, but for a different reason.
+Toxin sensitivities between the critical values under mean and abundant resource supplies can have a “valley”
+over the switching rate: at such toxin sensitivities, competitive exclusion probability changes in a U shape over
+the switching rate (species interactions change in a humped shape, see Fig. 2B). At toxin sensitivities larger
+than the critical value under the abundant resource supply, competitive exclusion probability is very small and
+10
+does not change non-monotonically over the switching rate because both species frequently go extinct (Fig S.4).
+3.4 Non-monotonic changes in species interactions happen under different sce-
+narios of environmental differences
+We have shown that using a given set of parameters, the rugged landscape shown in Fig. 2C causes competition
+to either increase, decrease or vary non-monotonically across switching rates, depending on toxin sensitivity.
+We next explore the generality of this finding and ask whether it will hold under different scenarios. In the
+appendix, we explore scenarios where (i) switching occurs in toxin rather than resource supplies, where (ii) both
+resource and toxin supplies switch (Table 1, see Appendix 4), or where (iii) we change the amounts of scarce
+and abundant resource supplies (Appendix 5).
+In all these scenarios, the landscapes of competitive exclusion probability also contain two “mountain ranges”
+(Figs. S.5, S.7), leading, as before, to a variety of patterns as switching rates and toxin sensitivities change.
+In each scenario, the distances between the three critical toxin sensitivities (mild, mean and harsh, e.g. black
+arrow in Fig. 3A) change (see Table S.2). Do these distances predict the shape of the landscape and the
+probability of observing non-monotonic behavior? In Table S.2 and Fig. 3B we show that the distance between
+critical sensitivities under harsh and mean environments (i.e., very fast environmental switching) correlates
+positively with the likelihood of observing non-monotonic effects of the switching rate on competition (Fig.
+3B, black circles; Spearman’s ρ = 0.77, P-value: 0.043), but no significant correlation was found with the
+distance between the critical toxin sensitivities under the mean and mild, or the harsh and mild environments
+(Fig. 3B, grey diamonds and cross marks; Spearman’s ρ = −0.22, P-value: 0.64, and ρ = 0.42, P-value: 0.35,
+respectively). These differences can be explained by changes in the shape of the landscape (see subsection 3.3).
+In sum, we find non-monotonic behavior under many different scenarios, with no easily observable pattern for
+when they occur. Overall, this makes it challenging to predict how the strength of interspecific interactions will
+change over environmental switching rates.
+3.5 Beta diversity changes similarly to competitive exclusion
+In the previous sections, we have focused on interactions between two species and the conditions under which
+they may drive each other extinct. Ultimately, however, our interest is to predict how species diversity is affected
+by the environment in communities comprised of tens, hundreds or even thousands of species. In this section,
+we ask whether the same rules that we have uncovered between two species apply for larger communities of up
+to 10 species. Will the diversity of a community similarly depend on environmental switching rates and toxin
+sensitivities?
+We address this question by extending our model to simulate communities of between 2 and 10 species.
+Simulating larger communities with this model would be too computationally expensive. As our model includes
+stochastic environmental switching and demographic noise, we ran 10’000 simulations for each community size
+and for each of 5 different mean toxin sensitivities (here species in a community could differ in their toxin
+11
+sensitivity) ranging from δ̄ = 0.1 to δ̄ = 1 (see Methods). At the end of each simulation run, we measured the
+beta diversity and species richness (number of surviving species). These 10’000 (100 × 100) simulations were
+composed of 100 replicate runs for one of 100 randomly sampled sets of parameter values (see Methods).
+In two-species communities, beta diversity changes over the environmental switching rate similarly to the
+competitive exclusion probability for four out of five mean toxin sensitivities (columns A and B in Fig. 4): both
+monotonically decrease (mean toxin sensitivity δ̄ = 0.1 or 1.0), or non-monotonically change with maximum
+(δ̄ = 0.2) or minimum (δ̄ = 0.6) values at intermediate switching rates. At one mean toxin sensitivity δ̄ = 0.4,
+the patterns of competitive exclusion and beta diversity over the switching rate do not match. Our measure
+of final species richness (column C in Fig. 4) shows that at low switching rates and δ̄ = 0.4, both species can
+sometimes co-exist, which keeps beta-diversity high. Although two species can also coexist when δ̄ = 0.1 or 0.2,
+the probability of coexistence changes over the switching rate similarly to the competitive exclusion probability,
+leading to similar patterns in both measures.
+We next increase the number of species in community to 10 (Figs. S.10 and S.11) to see whether the same
+patterns of beta diversity are observed. The similarity remains in 10-species communities (columns D and E in
+Fig. 4). Although variation in species richness increases beta diversity, the inverse is not true: beta diversity
+can be large when species richness is likely to be one (see δ̄ = 0.4 and 0.6 at switching rate larger than 101 in
+fourth and fifth columns in Fig. 4). In such cases, different species fixate in each simulation by competitive
+exclusion. In sum, estimating the competitive exclusion probability in two species in a given environment is a
+good predictor for the beta diversity of larger communities under those same environmental conditions.
+4 Discussion
+Understanding how species diversity in microbial communities arises and is maintained is a central question
+in microbial ecology and evolution. Diversity is affected by biotic interactions between species, but also by
+abiotic properties of the environment, such as its harshness (availability of nutrients and/or toxicity), and how
+conditions fluctuate over time. Here we have used a mathematical model to explore the relationship between
+these three factors and how they affect the diversity of small communities.
+Our study is centred on two main findings. First, we show that the rate at which resource abundance
+fluctuates in the environment changes the strength of negative interactions (competition) – quantified as the
+ability of a slower-growing species to drive a fast-growing one extinct –, but that these changes depend strongly
+on how toxic the two species perceive their environment to be. As the switching rate increases, competition can
+be: monotonically increasing, monotonically decreasing, or changing non-monotonically (Fig. 2B), depending
+on the toxin sensitivity. These negative interactions mostly manifest as competitive exclusion, rather than the
+extinction of both species (Figs. 2C and S.2). By calculating the critical toxin sensitivities that maximize
+competitive exclusion in the absence of environmental switching, one can predict how the switching rate will
+affect the strength of competition at a given toxin sensitivity. Our second main finding is that studying changes
+in the probability of two species competitively excluding one another is a good indicator for how the beta
+12
+diversity of a community composed of up to 10 species will change with environmental switching (Fig. 4). In
+that sense, species interactions are closely associated with species diversity and each can be inferred from the
+other.
+This brings us to a hypothesis that has been debated at length in ecology: the intermediate disturbance
+hypothesis (IDH) (Connell, 1978; Grime, 1973), which states that “diversity of competing species is, or should
+be expected to be, maximized at intermediate frequencies and/or intensities of disturbance or environmental
+change” (Fox, 2013). Fox (2013) argues that the IDH is lacking in empirical and theoretical support, and should
+be abandoned. Although our model does not specifically model disturbances, fluctuations in resource supplies
+(and/or abundant toxin supplies) can here be regarded as disturbances, and we can thus offer additional evidence
+regarding the IDH. A variety of forms of diversity are reported over the frequency and intensity of disturbance
+(Mackey and Currie, 2001; Miller et al., 2011), which matches our observation of the patterns of beta diversity
+varying over environmental switching rates and toxin sensitivities. Indeed, in agreement with Mackey and Currie
+(2001) and Miller et al. (2011), an intermediate intensity or disturbance frequency does not always maximize
+beta diversity. Rather, our analysis shows that this occurs in a transition from a benign environment of low
+toxin sensitivity where a linear relationship exists to a harsh environment of high toxin sensitivity where the
+opposite linear relationship is observed. The hump-shape is then a consequence of a change in environmental
+conditions and not expected to apply generally.
+Of course, our model makes some simplifying assumptions and has some limitations. First, we used arbitrary
+time units, which in practice can be considered to be hours, corresponding to typical bacterial growth rates in
+relevant experiments (Novick and Szilard, 1950; Lin et al., 2002; Zhao and Lin, 2003). This implies that species
+interactions and beta diversity will vary when environmental switching ranges from hourly (ν = 100) to about
+once every four days (ν = 10−2) on average, which is shorter than in some experimental studies (Benneir and
+Lenski, 1999; Rodŕıguez-Verdugo et al., 2019; Chen and Zhang, 2020) but not impractical. That said, under this
+assumption, changing an hourly to a monthly scale, for example, would have different effects on ecological dy-
+namics. Second, the switching rate is assumed to be symmetric between abundant and scarce resources (and/or
+toxin supplies, see Appendix 4). One may include more than two environmental conditions or assume asymmet-
+ric environmental switching, as in work by Taitelbaum et al. (2020), who show that asymmetric switching can
+non-trivially change the effects of environmental switching. Third, our model focuses on competitive exclusion
+but other types of interactions can also affect diversity (Rodŕıguez-Verdugo et al., 2019). Positive interactions
+between pairs of species (e.g., cross-feeding), for example, might increase alpha and gamma diversities, because
+such interactions enable species to coexist (Sun et al., 2019). This could result in an increase in beta diversity
+because the extinction of one species by demographic noise, for example, increases its partner species’ extinction
+probability. Finally, our community analysis considers up to ten microbial species, which is orders of magnitude
+below the size of natural microbial communities, according to genomic sampling (Gans, 2005; Roesch et al.,
+2007). However, it may also be reasonable to assume that species live in structured environments where they
+cannot possibly interact with more than a handful of other genotypes (Tecon et al., 2019). This suggests that
+a 10-species community may already be biologically meaningful.
+13
+In conclusion, the time scale of environmental switching affects the strength of species interactions, resulting
+in changing beta diversity via competitive exclusion. In addition, how species interactions and beta diversity
+change over the environmental switching rate varies depending on how sensitive species are to environmental
+toxicity. This may be one mechanism by which the intermediate disturbance hypothesis does not always hold.
+The variety with which species interactions and beta diversity change over the switching rate means that it
+will be very difficult for a given scenario to predict how an ecosystem, such as the gut microbiome, will behave
+under environmental fluctuations. Nevertheless, the similarity between how competitive exclusion plays out
+between two species and beta diversity at the community level means that analysing how the former changes
+over switching rates (as in Rodŕıguez-Verdugo et al. (2019), for example) may be sufficient to predict the latter.
+More generally, our study, along with others (Mackey and Currie, 2001; Miller et al., 2011) show that predicting
+how the environment shapes diversity in ecology remains a challenging problem.
+Acknowledgement
+Please write your research grants etc. S.S. is funded by University of Lausanne and Nakajima foundation. S.M.
+is funded by European Research Council Starting Grant 715097 and the University of Lausanne. The authors
+declare no conflict of interest.
+14
+References
+Allen, L. J. S. An Introduction to Stochastic Processes with Applications to Biology. Chapman and
+Hall/CRC, New York, 2nd edition, 2010. ISBN 9780429184604. doi: 10.1201/b12537. URL https:
+//www.taylorfrancis.com/books/9781439894682.
+Barabás, G., D’Andrea, R., and Stump, S. M. Chesson’s coexistence theory. Ecological Monographs, 0(0):1–27,
+2018. ISSN 00129615. doi: 10.1002/ecm.1302. URL http://doi.wiley.com/10.1002/ecm.1302.
+Bena, I. Dichotomous Markov noise: Exact results for out-of-equilibrium systems. A review. International
+Journal of Modern Physics B, 20(20):2825–2888, 6 2006. ISSN 02179792. doi: 10.1142/S0217979206034881.
+URL http://arxiv.org/abs/cond-mat/0606116.
+Benneir, A. F. and Lenski, R. E. Experimental evolution and its role in evolutionary physiology. American
+Zoologist, 39(2):346–362, 1999. ISSN 00031569. doi: 10.1093/icb/39.2.346.
+Chao, A., Chiu, C. H., Hsieh, T. C., and Inouye, B. D. Proposing a resolution to debates on diversity partitioning.
+Ecology, 93(9):2037–2051, 9 2012. ISSN 00129658. doi: 10.1890/11-1817.1. URL http://doi.wiley.com/
+10.1890/11-1817.1.
+Chen, P. and Zhang, J. Antagonistic pleiotropy conceals molecular adaptations in changing environments.
+Nature Ecology & Evolution, 2 2020. ISSN 2397-334X. doi: 10.1038/s41559-020-1107-8. URL http://www.
+nature.com/articles/s41559-020-1107-8.
+Chesson, P. and Huntly, N. The roles of harsh and fluctuating conditions in the dynamics of ecological commu-
+nities. American Naturalist, 150(5):519–553, 1997. ISSN 00030147. doi: 10.1086/286080.
+Cignarella, F., Cantoni, C., Ghezzi, L., Salter, A., Dorsett, Y., Chen, L., Phillips, D., Weinstock, G. M., Fontana,
+L., Cross, A. H., Zhou, Y., and Piccio, L. Intermittent Fasting Confers Protection in CNS Autoimmunity by
+Altering the Gut Microbiota. Cell Metabolism, 27(6):1222–1235, 2018. ISSN 19327420. doi: 10.1016/j.cmet.
+2018.05.006. URL https://doi.org/10.1016/j.cmet.2018.05.006.
+Connell, J. H. Diversity in Tropical Rain Forests and Coral Reefs. Science, 199(4335):1302–1309, 1978.
+Davenport, E. R., Mizrahi-Man, O., Michelini, K., Barreiro, L. B., Ober, C., and Gilad, Y. Seasonal variation
+in human gut microbiome composition. PLoS ONE, 9(3), 2014. ISSN 19326203. doi: 10.1371/journal.pone.
+0090731.
+Fox, J. W. The intermediate disturbance hypothesis should be abandoned. Trends in Ecology & Evolution, 28
+(2):86–92, 2 2013. ISSN 01695347. doi: 10.1016/j.tree.2012.08.014. URL https://linkinghub.elsevier.
+com/retrieve/pii/S0169534712002091.
+Gans, J. Computational Improvements Reveal Great Bacterial Diversity and High Metal Toxicity in Soil.
+Science, 309(5739):1387–1390, 8 2005. ISSN 0036-8075. doi: 10.1126/science.1112665. URL https://www.
+sciencemag.org/lookup/doi/10.1126/science.1112665.
+15
+https://www.taylorfrancis.com/books/9781439894682
+https://www.taylorfrancis.com/books/9781439894682
+http://doi.wiley.com/10.1002/ecm.1302
+http://arxiv.org/abs/cond-mat/0606116
+http://doi.wiley.com/10.1890/11-1817.1
+http://doi.wiley.com/10.1890/11-1817.1
+http://www.nature.com/articles/s41559-020-1107-8
+http://www.nature.com/articles/s41559-020-1107-8
+https://doi.org/10.1016/j.cmet.2018.05.006
+https://linkinghub.elsevier.com/retrieve/pii/S0169534712002091
+https://linkinghub.elsevier.com/retrieve/pii/S0169534712002091
+https://www.sciencemag.org/lookup/doi/10.1126/science.1112665
+https://www.sciencemag.org/lookup/doi/10.1126/science.1112665
+Gillespie, D. T. Exact stochastic simulation of coupled chemical reactions. Journal of Physical Chemistry, 81
+(25):2340–2361, 1977. ISSN 00223654. doi: 10.1021/j100540a008.
+Grime, J. P. Competitive Exclusion in Herbaceous Vegetation. Nature, 242(5396):344–347, 3 1973. ISSN
+0028-0836. doi: 10.1038/242344a0. URL http://www.nature.com/doifinder/10.1038/242344a0.
+Grime, J. P. Evidence for the Existence of Three Primary Strategies in Plants and Its Relevance to Ecological
+and Evolutionary Theory. The American Naturalist, 111(982):1169–1194, 1977. ISSN 0003-0147. doi: 10.
+1086/283244.
+Hastings, A. Disturbance, coexistence, history, and competition for space. Theoretical Population Biology,
+18(3):363–373, 12 1980. ISSN 00405809. doi: 10.1016/0040-5809(80)90059-3. URL https://linkinghub.
+elsevier.com/retrieve/pii/0040580980900593.
+Hengge-Aronis, R. Survival of hunger and stress: The role of rpoS in early stationary phase gene regulation
+in E. coli. Cell, 72(2):165–168, 1 1993. ISSN 00928674. doi: 10.1016/0092-8674(93)90655-A. URL https:
+//linkinghub.elsevier.com/retrieve/pii/009286749390655A.
+Himeoka, Y. and Mitarai, N. Dynamics of bacterial populations under the feast-famine cycles. arXiv, pages
+1–39, 10 2019. URL http://arxiv.org/abs/1910.05673.
+Hoek, T. A., Axelrod, K., Biancalani, T., Yurtsev, E. A., Liu, J., and Gore, J. Resource Availability Modulates
+the Cooperative and Competitive Nature of a Microbial Cross-Feeding Mutualism. PLOS Biology, 14(8):
+e1002540, 8 2016. ISSN 1545-7885. doi: 10.1371/journal.pbio.1002540. URL http://dx.plos.org/10.
+1371/journal.pbio.1002540.
+Horsthemke, W. and Lefever, R. Noise-Induced Transitions, volume 15 of Springer Series in Synergetics.
+Springer Berlin Heidelberg, 2nd edition, 4 2006. ISBN 978-3-540-11359-1. doi: 10.1007/3-540-36852-3. URL
+http://link.springer.com/10.1007/3-540-36852-3.
+Hufton, P. G., Lin, Y. T., Galla, T., and McKane, A. J. Intrinsic noise in systems with switching environments.
+Physical Review E, 93(5):1–13, 2016. ISSN 24700053. doi: 10.1103/PhysRevE.93.052119.
+Jost, L. PARTITIONING DIVERSITY INTO INDEPENDENT ALPHA AND BETA COMPONENTS. Ecol-
+ogy, 88(10):2427–2439, 10 2007. ISSN 0012-9658. doi: 10.1890/06-1736.1. URL http://doi.wiley.com/10.
+1890/06-1736.1.
+Kinzig, A. P., Levin, S. A., Dushoff, J., and Pacala, S. Limiting similarity, species packing, and system stability
+for hierarchical competition-colonization models. American Naturalist, 153(4):371–383, 1999. ISSN 00030147.
+doi: 10.1086/303182.
+Li, G., Xie, C., Lu, S., Nichols, R. G., Tian, Y., Li, L., Patel, D., Ma, Y., Brocker, C. N., Yan, T., Krausz, K. W.,
+Xiang, R., Gavrilova, O., Patterson, A. D., and Gonzalez, F. J. Intermittent Fasting Promotes White Adipose
+16
+http://www.nature.com/doifinder/10.1038/242344a0
+https://linkinghub.elsevier.com/retrieve/pii/0040580980900593
+https://linkinghub.elsevier.com/retrieve/pii/0040580980900593
+https://linkinghub.elsevier.com/retrieve/pii/009286749390655A
+https://linkinghub.elsevier.com/retrieve/pii/009286749390655A
+http://arxiv.org/abs/1910.05673
+http://dx.plos.org/10.1371/journal.pbio.1002540
+http://dx.plos.org/10.1371/journal.pbio.1002540
+http://link.springer.com/10.1007/3-540-36852-3
+http://doi.wiley.com/10.1890/06-1736.1
+http://doi.wiley.com/10.1890/06-1736.1
+Browning and Decreases Obesity by Shaping the Gut Microbiota. Cell Metabolism, 26(4):672–685, 2017. ISSN
+19327420. doi: 10.1016/j.cmet.2017.08.019. URL http://dx.doi.org/10.1016/j.cmet.2017.08.019.
+Lin, Y. H., Bayrock, D. P., and Ingledew, W. M. Evaluation of Saccharomyces cerevisiae grown in a multistage
+chemostat environment under increasing levels of glucose. Biotechnology Letters, 24(6):449–453, 2002. doi:
+10.1023/A:1014501125355.
+Mackey, R. L. and Currie, D. J. The diversity-disturbance relationship: Is it generally strong and peaked?
+Ecology, 82(12):3479–3492, 2001. ISSN 00129658. doi: 10.1890/0012-9658(2001)082[3479:TDDRII]2.0.CO;2.
+Merritt, J. and Kuehn, S. Frequency- and Amplitude-Dependent Microbial Population Dynamics during Cycles
+of Feast and Famine. Physical Review Letters, 121(9):098101, 8 2018. ISSN 0031-9007. doi: 10.1103/
+PhysRevLett.121.098101. URL https://link.aps.org/doi/10.1103/PhysRevLett.121.098101.
+Miller, A. D., Roxburgh, S. H., and Shea, K. How frequency and intensity shape diversity-disturbance relation-
+ships. Proceedings of the National Academy of Sciences of the United States of America, 108(14):5643–5648,
+2011. ISSN 10916490. doi: 10.1073/pnas.1018594108.
+Novick, A. and Szilard, L. Experiments with the Chemostat on Spontaneous Mutations of Bacteria. Proceedings
+of the National Academy of Sciences, 36(12):708–719, 12 1950. ISSN 0027-8424. doi: 10.1073/pnas.36.12.708.
+URL http://www.pnas.org/cgi/doi/10.1073/pnas.36.12.708.
+Novozhilov, A. S., Karev, G. P., and Koonin, E. V. Biological applications of the theory of birth-and-death
+processes. Briefings in Bioinformatics, 7(1):70–85, 3 2006. ISSN 1467-5463. doi: 10.1093/bib/bbk006. URL
+https://academic.oup.com/bib/article/7/1/70/263777.
+Piccardi, P., Vessman, B., and Mitri, S. Toxicity drives facilitation between 4 bacterial species. Proceedings of the
+National Academy of Sciences, 116(32):15979–15984, 2019. ISSN 0027-8424. doi: 10.1073/pnas.1906172116.
+Rodŕıguez-Verdugo, A., Vulin, C., and Ackermann, M. The rate of environmental fluctuations shapes ecological
+dynamics in a two-species microbial system. Ecology Letters, 22(5):838–846, 5 2019. ISSN 1461-023X. doi:
+10.1111/ele.13241. URL http://doi.wiley.com/10.1111/ele.13241.
+Roesch, L. F., Fulthorpe, R. R., Riva, A., Casella, G., Hadwin, A. K., Kent, A. D., Daroub, S. H., Camargo,
+F. A., Farmerie, W. G., and Triplett, E. W. Pyrosequencing enumerates and contrasts soil microbial diversity.
+ISME Journal, 1(4):283–290, 2007. ISSN 17517362. doi: 10.1038/ismej.2007.53.
+Smits, S. A., Leach, J., Sonnenburg, E. D., Gonzalez, C. G., Lichtman, J. S., Reid, G., Knight, R., Manjurano,
+A., Changalucha, J., Elias, J. E., Dominguez-Bello, M. G., and Sonnenburg, J. L. Seasonal cycling in the gut
+microbiome of the Hadza hunter-gatherers of Tanzania. Science, 357(6353):802–805, 2017. ISSN 10959203.
+doi: 10.1126/science.aan4834.
+Srinivasan, S. and Kjelleberg, S. Cycles of famine and feast: The starvation and outgrowth strategies of a
+marine Vibrio. Journal of Biosciences, 23(4):501–511, 1998. ISSN 02505991. doi: 10.1007/BF02936144.
+17
+http://dx.doi.org/10.1016/j.cmet.2017.08.019
+https://link.aps.org/doi/10.1103/PhysRevLett.121.098101
+http://www.pnas.org/cgi/doi/10.1073/pnas.36.12.708
+https://academic.oup.com/bib/article/7/1/70/263777
+http://doi.wiley.com/10.1111/ele.13241
+Sun, Z., Koffel, T., Stump, S. M., Grimaud, G. M., and Klausmeier, C. A. Microbial cross-feeding promotes
+multiple stable states and species coexistence, but also susceptibility to cheaters. Journal of Theoretical
+Biology, 465:63–77, 2019. ISSN 00225193. doi: 10.1016/j.jtbi.2019.01.009. URL https://linkinghub.
+elsevier.com/retrieve/pii/S0022519319300104.
+Taitelbaum, A., West, R., Assaf, M., and Mobilia, M. Population Dynamics in a Changing Environment:
+Random versus Periodic Switching. Physical Review Letters, 2 2020. URL http://arxiv.org/abs/2002.
+10372.
+Tecon, R., Mitri, S., Ciccarese, D., Or, D., van der Meer, J. R., and Johnson, D. R. Bridging the Holistic-
+Reductionist Divide in Microbial Ecology. mSystems, 4(1):17–21, 2019. ISSN 2379-5077. doi: 10.1128/
+msystems.00265-18.
+Thaiss, C. A., Zeevi, D., Levy, M., Zilberman-Schapira, G., Suez, J., Tengeler, A. C., Abramson, L., Katz,
+M. N., Korem, T., Zmora, N., Kuperman, Y., Biton, I., Gilad, S., Harmelin, A., Shapiro, H., Halpern,
+Z., Segal, E., and Elinav, E. Transkingdom control of microbiota diurnal oscillations promotes metabolic
+homeostasis. Cell, 159(3):514–529, 2014. ISSN 10974172. doi: 10.1016/j.cell.2014.09.048. URL http:
+//dx.doi.org/10.1016/j.cell.2014.09.048.
+Vasi, F., Travisano, M., and Lenski, R. E. Long-term experimental evolution in Escherichia coli. II.Changes in
+life-history traits during adaptation to a seasonal environment. American Naturalist, 144(3):432–456, 1994.
+ISSN 00030147. doi: 10.1086/285685. URL https://www.jstor.org/stable/2462954.
+West, R. and Mobilia, M. Fixation properties of rock-paper-scissors games in fluctuating populations. Journal
+of Theoretical Biology, 491:110135, 4 2020. ISSN 00225193. doi: 10.1016/j.jtbi.2019.110135. URL http:
+//dx.doi.org/10.1016/j.jtbi.2019.110135.
+West, R., Mobilia, M., and Rucklidge, A. M. Survival behavior in the cyclic Lotka-Volterra model with a
+randomly switching reaction rate. Physical Review E, 97(2):022406, 2 2018. ISSN 2470-0045. doi: 10.1103/
+PhysRevE.97.022406. URL https://link.aps.org/doi/10.1103/PhysRevE.97.022406.
+Wienand, K., Frey, E., and Mobilia, M. Evolution of a Fluctuating Population in a Randomly Switching
+Environment. Physical Review Letters, 119(15):158301, 10 2017. ISSN 0031-9007. doi: 10.1103/PhysRevLett.
+119.158301. URL https://link.aps.org/doi/10.1103/PhysRevLett.119.158301.
+Wienand, K., Frey, E., and Mobilia, M. Eco-evolutionary dynamics of a population with randomly switching
+carrying capacity. Journal of the Royal Society Interface, 15(145):20180343, 8 2018. ISSN 17425662. doi:
+10.1098/rsif.2018.0343. URL https://royalsocietypublishing.org/doi/10.1098/rsif.2018.0343.
+Xavier, J. B., Picioreanu, C., and Van Loosdrecht, M. C. M. A framework for multidimensional modelling
+of activity and structure of multispecies biofilms. Environmental Microbiology, 7(8):1085–1103, 2005. ISSN
+14622912. doi: 10.1111/j.1462-2920.2005.00787.x.
+18
+https://linkinghub.elsevier.com/retrieve/pii/S0022519319300104
+https://linkinghub.elsevier.com/retrieve/pii/S0022519319300104
+http://arxiv.org/abs/2002.10372
+http://arxiv.org/abs/2002.10372
+http://dx.doi.org/10.1016/j.cell.2014.09.048
+http://dx.doi.org/10.1016/j.cell.2014.09.048
+https://www.jstor.org/stable/2462954
+http://dx.doi.org/10.1016/j.jtbi.2019.110135
+http://dx.doi.org/10.1016/j.jtbi.2019.110135
+https://link.aps.org/doi/10.1103/PhysRevE.97.022406
+https://link.aps.org/doi/10.1103/PhysRevLett.119.158301
+https://royalsocietypublishing.org/doi/10.1098/rsif.2018.0343
+Yi, X. and Dean, A. M. Bounded population sizes, fluctuating selection and the tempo and mode of coexistence.
+Proceedings of the National Academy of Sciences of the United States of America, 110(42):16945–16950, 2013.
+ISSN 00278424. doi: 10.1073/pnas.1309830110.
+Zhao, Y. and Lin, Y. H. Growth of Saccharomyces cerevisiae in a chemostat under high glucose conditions.
+Biotechnology Letters, 25(14):1151–1154, 2003. ISSN 01415492. doi: 10.1023/A:1024577414157.
+Zuñiga, C., Li, C.-T., Yu, G., Al-Bassam, M. M., Li, T., Jiang, L., Zaramela, L. S., Guarnieri, M., Betenbaugh,
+M. J., and Zengler, K. Environmental stimuli drive a transition from cooperation to competition in synthetic
+phototrophic communities. Nature Microbiology, 4(12):2184–2191, 12 2019. ISSN 2058-5276. doi: 10.1038/
+s41564-019-0567-6. URL http://www.nature.com/articles/s41564-019-0567-6.
+19
+http://www.nature.com/articles/s41564-019-0567-6
+T
+T
+T
+T
+T
+T
+abundant R1
++ scarce R1̄
+?
+T
+R R
+S1 S2
+R
+R
+R
+R
+R
+A B
+ν
+R
+Figure 1: Schematic illustration of the model
+A chemostat model with environmental switching. A: Interaction network when N = 2. A → B represents that A
+increases B while A ⊥ B represents that A decreases B. Two species compete for the same resource (R in a circle) but
+are killed by the same toxic compound (T in a triangle). As a proxy for species interactions, we follow the net effect of
+species 2 on species 1 (large arrow from species 2 to 1) – due to resource competition plus facilitation by detoxification
+– which can be environmentally mediated. B: An example of a chemostat model with environmental switching and
+N = 2. Environmental switching is realized by changing the media flowing into a chemostat. In this example, the
+current environmental condition is ξ = 1 (abundant resource supply R+1 ).
+20
+A B
+C D
+Figure 2: Species interaction strength changes differently over the switching rate
+A: The effect of species 2 on species 1’s extinction probability ∆P (s1(Tend) = 0) (Eq 7) changes over the switching rate
+ν and the toxin sensitivity δ = δ11 = δ21. In most of the parameter space, species 2 has a negative effect on species 1.
+B: Some illustrative examples from panel A plotted differently to show how ∆P changes over the switching rate at
+given toxin sensitivities. The difference in extinction probability can monotonically increase (δ = 0.1, green),
+monotonically decrease (δ = 0.4, red), or non-monotonically change with a minimum (δ = 0.2, purple) or a maximum
+(δ = 0.6, blue) value at an intermediate switching rate. C: Probability that species 2 persists but species 1 goes extinct
+(i.e., competitive exclusion) over switching rate and toxin sensitivity. D: competitive exclusion probabilities over the
+toxin sensitivity, when the environmental switching rate is slow (ν = 10−5), intermediate (ν = 10−1), or fast (ν = 103).
+21
+BA
+Figure 3: Competitive exclusion explains changes in species interactions
+Analysis on competitive exclusion predicts at which toxin sensitivity the species interaction can change
+non-monotonically. A: In the absence of environmental switching, the competitive exclusion probability (i.e.,
+probability that species 2 excludes species 1) is uni-modal over the switching rate. The toxin sensitivities giving the
+peak values (critical toxin sensitivities) depend on the resource supply: scarce R1 = R
+−
+1 (green), mean R1 = 〈R1〉 (red),
+or abundant R1 = R
++
+1 (blue). B: The number of times we observe non-monotonic species interactions across the
+explored parameter range changes with the distance between the two critical toxin sensitivities, depending on where
+distances are measured (between harsh and mean environments: dots, between mean and mild: environment diamonds,
+and between harsh and mild environments: crosses). These three distances were measured in each of the following
+seven scenarios: three different scenarios of environmental switching (Table 1 and Appendix 4) and four environmental
+switching scenario 1s with changing amounts of resource supplies (Appendix 5). The correlation is only significantly
+positive for the distance between scarce resource or abundant toxin supplies (i.e., harsh environments) and mean
+resource/toxin supplies (Spearman’s ρ = 0.77, P-value: 0.043). The distance corresponding to the scenario analyzed in
+the main text is shown by the black arrow in panel A, where scarce resources are considered to be a harsh environment
+(dot indicated by the arrow in panel B).
+22
+to
+xi
+n
+se
+ns
+iti
+vi
+ty
+0.
+1
+0.
+2
+0.
+4
+0.
+6
+1.
+0
+be
+ta
+ d
+iv
+.
+ric
+hn
+es
+s
+co
+m
+p.
+ e
+xc
+l.
+sp
+ec
+ie
+s 
+ric
+hn
+es
+s
+0
+1
+2
+be
+ta
+ d
+iv
+.
+ric
+hn
+es
+s
+ 3
+4
+5
+6
+7
+te
+n-
+sp
+ec
+ie
+s
+tw
+o-
+sp
+ec
+ie
+s
+A
+E
+D
+C
+B
+F
+ig
+u
+re
+4
+:
+C
+o
+m
+p
+a
+ri
+so
+n
+o
+f
+co
+m
+p
+et
+it
+iv
+e
+ex
+cl
+u
+si
+o
+n
+a
+n
+d
+b
+et
+a
+d
+iv
+er
+si
+ty
+Competitive exclusion probabilities (column A), beta diversities (column B), and species richness (column C) over the
+switching rate in two-species communities. Here, competitive exclusion refers the event where the slower-growing
+species excludes the faster-growing species. Columns D and E show the beta diversity and species richness in
+ten-species communities, respectively. In the plots of competitive exclusion probability and beta diversity, the black
+lines show the means and blue areas represent the probability distributions calculated from 10’000 simulations (100
+beta diversity and each of them from 100 replicate runs). Each color in the species richness plots represents the
+proportion of 10’000 runs where at the end of the run there were that number of species surviving. Each row represents
+the mean toxin sensitivity δ̄ of communities in those runs.
+23
+Table 1: Different scenarios of environmental switching
+Scenario Ri (ξ = 1) Ri (ξ = −1) Tj (ξ = 1) Tj (ξ = −1)
+1 R+i R
+−
+i 〈Tj〉 〈Tj〉
+2 〈Ri〉 〈Ri〉 T−j T
++
+j
+3 R+i R
+−
+i T
+−
+j T
++
+j
+24
+Supplementary information
+Appendix 1 Analysis excluding noise
+In this section, we analyse the equilibrium state of a two-species, one-resource, and one-toxin model, neglecting
+environmental switching and demographic noise. Although an equilibrium state cannot be analytically obtained,
+we shall see that there exists at most one stable and feasible (species abundance sk > 0) equilibrium state. By
+neglecting demographic noise and environmental switching from Eq (5) in the main text, the dynamics are
+governed by the following ordinary differential equations:
+ṙ1 = α (R1 − r1)−
+∑
+k=1,2
+µ1k
+Y r1k
+r1
+r1 +K
+r
+1k
+sk, (S.1a)
+ṫ1 = α (T1 − t1)−
+∑
+k=1,2
+δ1k
+Y t1k
+t1
+t1 +K
+t
+1k
+sk, (S.1b)
+ṡk =
+(
+µ1k
+r1
+r1 +K
+r
+1k
+− δ1k
+t1
+t1 +K
+t
+1k
+− α
+)
+sk, (S.1c)
+When only species k persists in the system, a feasible1 equilibrium state of Eqs (S.1a) -(S.1c), (r1, t1, sk) =
+(r∗1k, t
+∗
+1k, s
+∗
+k), should satisfy below:
+α (R1 − r∗1k) =
+µ1k
+Y r1k
+r∗1k
+r∗1k +K
+r
+1k
+s∗k, (S.2a)
+α (T1 − t∗1k) = δ1kY
+t
+1k
+t∗1k
+t∗1k +K
+t
+1k
+t∗k, (S.2b)
+µ1j
+r∗1k
+r∗1k +K
+r
+1k
+= δ1k
+t∗1k
+t∗1k +K
+t
+1k
++ α. (S.2c)
+By rearranging the first and second equations, we see that they represent quadratic functions of r∗1k and t
+∗
+1k:
+−r∗21k + {R1 −K
+r
+1k − µ1ks
+∗
+k/(αY
+r
+1k)} r
+∗
+1k +K
+r
+1kR1 = 0, (S.3)
+−t∗21k +
+{
+T1 −Kt1k − δ1ks
+∗
+k/(αY
+t
+1k)
+}
+t∗1k +K
+t
+1kT1 = 0. (S.4)
+Notice that Kr1kR1 and K
+t
+1kT1 are positive. This implies that the above equations always have a unique positive
+root. In other words, we can obtain unique solutions for r∗1k and t
+∗
+1k once we obtain s
+∗
+k.
+By substituting the positive roots of Eqs (S.3) and (S.4) into Eq (S.2c), we obtain the following equation
+whose positive root is s∗k:
+f(s) =
+1
+2α
+{
+(−µ1k + 2α+ δ1k) s+
+√
+Q1 (s)−
+√
+Q2 (s) + α
+(
+−Kr1kY
+r
+1k +K
+t
+1kY
+t
+1k − Y
+r
+1kR1 + Y
+t
+1kT1
+)}
+(S.5)
+1Here, feasibility means r∗
+1k
+, t∗
+1k
+, s∗
+k
+> 0
+1
+where Q1(s) and Q2(s) are quadratic functions of s:
+Q1 (s) = {µ1ks+ αY r1k (K
+r
+1k −R1)}
+2
++ 4αY r1kK
+r
+1kR1 > 0 (S.6a)
+Q2 (s) =
+{
+δ1ks+ αY
+t
+1k
+(
+Kt1k − T1
+)}2
++ 4αY t1kK
+t
+1kT1 > 0. (S.6b)
+Notice that f(s) always has a root s = 0 because
+f(0) =
+1
+2α
+{√
+Q1(0)−
+√
+Q2(0) + α
+(
+−Kr1kY
+r
+1k +K
+t
+1kY
+t
+1k − Y
+r
+1kR1 + Y
+t
+1kT1
+)}
+=
+1
+2α
+{
+αY r1k (K
+r
+1k +R1)− αY
+t
+1k
+(
+Kt1k + T1
+)
++ α
+(
+−Kr1kY
+r
+1k +K
+t
+1kY
+t
+1k − Y
+r
+1kT1 + Y
+t
+1kT1
+)}
+= 0. (S.7)
+Although Newton’s method numerically provides a root of f(s), this root depends on the initial value used in
+Newton’s method. In addition, as f(s) has root s = 0, Newton’s method may provide this root with various
+initial values, which does not always mean that f(s) does not have positive roots (i.e., s∗k). In other words, it
+is recommended to investigate how many positive roots f(s) has before using Newton’s method.
+To investigate the number of f(s)’s positive roots, it is useful to obtain df/ds:
+df
+ds
+=
+1
+2α
+{
+(−µ1k + 2α+ δ1k) +
+dQ1/ds
+2
+√
+Q1 (s)
+−
+dQ2/ds
+2
+√
+Q2 (s)
+}
+. (S.8)
+Although it is analytically difficult to obtain the solution(s) of df/ds, we can obtain the maximum number of
+positive roots of f(s) by analyzing the number of df/ds’s sign changes. Notice that dQ1/ds and dQ2/ds are
+linear functions of s:
+dQ1
+ds
+= 2µ1k {µ1ks+ αY r1k (K
+r
+1k −R1)} , (S.9a)
+dQ2
+ds
+= 2δ1k
+{
+δ1ks+ αY
+t
+1k
+(
+Kt1k − T1
+)}
+. (S.9b)
+In addition, Q1(s) and Q2(s) are always positive. Then, the second and third terms of Eq (S.8) change their
+sign at most once by increasing s. The maximum number of df/ds’s sign change is, therefore, two. This implies
+that the maximum number of positive roots of f(s) is also two. To obtain the exact number of positive roots
+of f(s), it is necessary to numerically calculate the root(s) of df/ds. Substituting the root(s) into Eq (S.5) and
+calculating the sign of f(s), it is possible to obtain the exact value of s∗k.
+Once we have obtained a feasible equilibrium state (r∗1k, s
+∗
+k, t
+∗
+1k), it is necessary to analyze the stability of
+this equilibrium state. Although the stability analysis requires the evaluation of the Jacobian matrix at each
+equilibrium state, we can see that there exists at most one feasible and stable equilibrium state without such
+2
+stability analysis. Notice that:
+ṡj ≶ 0
+⇔ µ1k
+r∗1k
+r∗1k +K
+r
+1k
+≶ δ1k
+t∗1k
+t∗1k +K
+t
+1k
++ α
+⇔ f (s) ≷ 0. (S.10)
+These inequalities implies that a stable equilibrium state satisfies the following inequality:
+df
+ds
+∣∣∣∣
+s=s∗
+k
+> 0. (S.11)
+Although there can exist at most two feasible equilibria, only one of them satisfies the above inequality (Fig.
+S.1). The number of feasible and stable equilibria is, therefore, one at most.
+Appendix 2 Details of simulations
+Appendix 2.1 Species interaction analysis
+Here, we summarize the details of the simulations and parameter values used for species interaction analysis in
+the main text. In the analysis of species interactions, we used the minimal model (N = 2): two species compete
+for one resource and absorb and are killed by one toxin. As the model represents a stochastic process in a
+continuous-time scale, the simulation is implemented by the Gillespie algorithm (Gillespie, 1977). In each run,
+the initial condition is either (r1(0), t1(0), s1(0), s2(0)) = (150, 100, 10, 0) or (150, 100, 10, 10), where species 2 is
+absent or present, respectively. The initial environmental condition is ξ = 1 with a probability of 0.5; otherwise
+ξ = −1. Each simulation continues until at time Tend = 200 when the distributions of species abundances
+converge to a quasi-stationary distribution and do not change for a long time. The extinction probability is
+estimated by running 105 simulations for each condition.
+Table S.1 summarizes the parameter values used in the species interaction analysis. In the main text, species
+2 is assumed to grow slower than species 1, meaning that species 2 goes extinct in the absence of demographic
+noise. For simplicity, we assumed that species 2’s parameter values are the same as those of species 1 except
+for the maximum growth rate.
+In the main text, to investigate how species 2’s effect on species 1 changes over the switching rate, we began
+by analyzing the difference in the extinction probability of species 1 in the presence/absence of species 2 as a
+proxy for species interactions, but then moved to using the competitive exclusion probability instead. Although
+Fig. 2A and C shows that these two measures give similar results, Fig. S.2 confirms this conclusion as the ratio
+of these two measures is around 1.
+3
+Appendix 2.2 Species diversity analysis
+In the community diversity analysis, we changed the number of species from N = 2 to N = 10. Some parameter
+values were not fixed in this analysis, and we sampled them from the following probability density functions:
+µik ∼ N
+(
+1, 0.12
+)
+, (S.12a)
+δjk ∼ Beta
+(
+100δ̄, 100
+(
+1− δ̄
+))
+, (S.12b)
+Krik,K
+t
+jk ∼ N
+(
+100, 102
+)
+. (S.12c)
+Here, each function is uni-modal with a mean of 1.0 for µik, δ̄ for δjk, and 100 for K
+r
+ik,K
+t
+jk. For µik,K
+r
+ik, and
+Ktjk, the mean values are the same as in Table S.1 and they are rarely negative due to the small variances. We
+sampled δjk from a beta distribution so that 0 ≤ δjk ≤ 1: δjk should be non-negative by definition and not be
+larger than 1 because a large δjk is likely to drive species k extinct. We systematically vary the value of the
+mean toxin sensitivity δ̄ to be δ̄ = 0.1, 0.2, 0.4, 0.6 or 0.99 in each set of simulations. We used δ̄ = 0.99 instead
+of δ̄ = 1.0 because the beta distribution did not generate different values of δjk with δ̄ = 1.0. For each number
+of species N (2, 4, 6, 8 or 10) and δ̄, 100 sets of parameter values are sampled. With each parameter set, we
+performed the simulation 100 times until Tend = 200 at each value of the environmental switching rate ν. Then,
+we calculated the species richness and beta diversity as described in the main text.
+In each run, initial resource amounts, species abundances, and toxin amounts are given by (ri(0), tj(0), sk(0)) =
+(150, 150, 10) for any i, j, k. As an environmental switching scenario, we chose scenario 1 (Table 1) with
+R+i = 200, R
+−
+i = 50, and 〈Tk〉 = 125 for any i and k. The initial environmental condition is ξ = 1 with
+probability of 0.5; otherwise ξ = −1.
+Appendix 3 Analysis in the absence of environmental switching
+The analysis with an environmental switching rate of 0 facilitates the understanding of the results in the two
+extreme switching rates (ν → 0 and ν →∞) in the main text. In this section, we analyze species 2’s effect on
+species 1 when the resource supply is fixed to be scarce, mean, or abundant.
+In the absence of environmental switching, resource supply and toxin sensitivity change species 2’s effect on
+species 1 (Fig. S.3): each resource supply has a unique maximum negative interaction, which is reached at a
+certain toxin sensitivity. These toxin sensitivities correspond to the peak sensitivities of competitive exclusion
+probabilities (Fig. 3A). Species 2’s effect on species 1 converges to zero when the toxin sensitivities exceed the
+peak sensitivities as competitive exclusion probabilities decrease (see section 3.3). This is because both species
+1 and species 2 go extinct at too high toxin sensitivity (Fig. S.4).
+Note that species 2 has a positive effect on species 1 when the resource supply is abundant and toxin
+sensitivity is 1.0. In this case, the benefits of absorbing toxic compounds by species 2 overcome the costs of
+competing for the resource. This is why in Fig. 2A, species 2 has a positive effect on species 1 when the
+switching rate is very small (ν ≤ 10−3) and the toxin sensitivity is 1.0.
+4
+Appendix 4 Alternative environmental switching scenarios
+In the main text, environmental switching affects only the resource supply (scenario 1) while the amount of
+toxin supply is fixed. Here, the results of other environmental switching scenarios are shown: In scenario
+2, environmental switching affects only the toxin supply, while both resource and toxin supplies change and
+correlate negatively in scenario 3 (see Table 1).
+In both scenarios 2 and 3, the difference in species 1’s extinction probability ∆P (s1(Tend) = 0) is very
+similar to the negative competitive exclusion probability when the sign of ∆P (s1(Tend) = 0) is negative (Fig.
+S.5). This once again confirms that we can use one measure or the other.
+In addition, in both scenarios, the probabilities of competitive exclusion are bi-modal across toxin sensitivities
+at very slow environmental switching ν = 10−5, but uni-modal at very fast environmental switching (ν = 103)
+(Fig. S.5C, D). As explained in the main text, when ν → 0, there are no switches and the environmental state
+is randomly allocated to harsh or mild conditions at t = 0 with the same probability (the mean of ξ is zero),
+yielding a bi-modal distribution at low switching rate. In the limit ν → ∞, there are so many switches that
+environmental noise averages out, i.e. ξ is replaced by its mean (that is zero). This results in a uni-modal
+distribution when ν � 1.
+Whether or not we observe non-monotonic effects of environmental switching differs in the two scenarios. In
+scenario 2, we do not observe any non-monotonic effects (Fig. S.5C). This is because the critical toxin sensitivity
+under abundant toxin supply (δ = 0.3) is close to that under mean toxin supply (δ = 0.4). In contrast, we
+do observe non-monotonic effects of environmental switching rate in scenario 3 (Fig. S.5D): when δ = 0.2,
+an intermediate switching rate (ν = 10−1) shows the minimum difference in extinction probability, and the
+maximum probability of competitive exclusion. Although in scenario 3 the same intermediate switching rate
+minimizes the probability of competitive exclusion at δ = 0.6, the same non-monotonic effect is not observed
+in the difference in extinction probabilities (Fig. S.5B). Note that the critical toxin sensitivities under the mild
+environments in scenarios 2 (scarce toxin supply) and 3 (abundant resource supply and scarce toxin supply)
+are slightly larger than 1.0 (Fig. S.6) and therefore not visible in Fig. S.5D. Table S.2 shows the critical toxin
+sensitivities in each scenario.
+Appendix 5 Effects of resource supply
+In this section, we again focus on environmental switching scenario 1 (changing only resource supply). We will
+see that the amount of resource supplies R1(ξ) changes the critical toxin sensitivities under scarce, mean, and
+abundant, resource supplies, affecting the likelihood of the non-monotonic effect of the environmental switching
+rate.
+By increasing the abundant or decreasing the scarce resource supply (Figs. S.7A and D, respectively), the
+distance between the critical toxin sensitivities under scarce and mean (or mean and abundant) resource supplies
+becomes larger (Table S.2). Conversely, decreasing abundant or increasing scarce resource supply (Figs. S.7B
+5
+and C, respectively), decreases the distance between the critical toxin sensitivities under scarce and mean (or
+mean and abundant) resource supplies (Table S.2). Once again, changes in competitive exclusion probability
+(S.7) match changes in species 2’s effect on species 1 (Fig. S.8).
+Analyzing competitive exclusion probability instead of the difference in extinction probability is valid only
+when the difference in extinction probability is negative: if it is positive, the second line in (11) cannot be
+ignored. The sign of the difference can, however, become positive at δ = 1.0. Indeed, when R+1 = 400 and
+δ = 1.0, species 2 has a positive effect on species 1 whose strength varies non-monotonically with the rate of
+environmental switching (S.9A). In this case, we analyze both (i) the competitive exclusion probability (the
+first line in Eq (11), Fig. S.9B) and (ii) the difference in species 1’s extinction probability in mono-culture and
+both species extinction in co-culture (the second line in Eq (11), Fig. S.9C). The effects of the environmental
+switching rate on (i) and (ii) are similar, leading to similar non-monotonic effects of species 2 on species 1. In
+sum, non-monotonic effects of environmental switching rates on species interactions can be observed whether
+these interactions are positive or negative. Although the main text explains why non-monotonic effects of
+environmental switching rates on species interactions happen when interactions are negative, it remains unclear
+why such non-monotonic changes happen when species interactions are positive.
+Appendix 6 Diversity in communities of increasing species number
+In the main text, we show the distributions of beta diversity and species richness in communities when the
+initial number of species N is two or ten. This section shows the results of intermediates values of N = 4, 6, 8.
+The number of initial species does not change how beta diversity changes over the environmental switching rate,
+except when the mean toxin sensitivity δ̄ = 0.4 (Fig. S.10). These results indicate that beta diversity and the
+probability of competitive exclusion change similarly over the switching rate when the initial number of species
+is larger than two.
+The initial number of species N in a community affects the maximum values of species richness (Fig. S.11).
+However, how the switching rate and the mean toxin sensitivity affect the distribution of species richness
+was consistent for different values of N . In particular, increasing the mean toxin sensitivity decreases species
+richness. The effects of the environmental switching rate also depend on the mean toxin sensitivity: at mean
+toxin sensitivity 1.0, species in all community sizes are more likely to go extinct as the switching rate increases,
+while the likelihood of all species going extinct consistently shows a humped shape at toxin sensitivity 0.4 or
+0.6.
+6
+Figure S.1: Feasible and stable equilibrium state
+An example of f(s) and equilibrium states. In this example, f(s) has three roots: s = 0, and two feasible equilibria.
+The blue arrows indicate that s decreases or increases when f(s) is positive or negative, respectively. As df/ds is
+negative at the smaller feasible equilibrium state, this equilibrium state is unstable. On the other hand, the larger
+feasible equilibrium has a positive df/ds. Note that the equilibrium state corresponding to s = 0 can be also stable.
+Parameter values are δ1k = 1.2, R1 = 200, T1 = 125 and as in Table S.1 otherwise.
+0.0 0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6
+-competitive exclusion/ P(s1(Tend) = 0)
+0
+3
+6
+9
+12
+15
+18
+fre
+qu
+en
+cy
+Figure S.2: Competitive exclusion probability relative to the difference in extinction probability of species 1 in
+the presence/absence of species 2
+A histogram of the ratio of the competitive exclusion probability and the difference in species 1’s extinction probabilities
+alone versus in the presence of species 1, showing the results of 81 sets of the environmental switching rate ν and the
+toxin sensitivity δ (9 values of ν = 10−5, . . . , 103 and 9 values of δ = 0.1, . . . , 0.9). For each set of the parameter values,
+105 simulations were run to calculate the competitive exclusion probability and the difference in species 1’s extinction
+probabilities in the presence/absence of species 2. In many of these 81 parameter sets, this ratio is close to 1, indicating
+that both measures yield similar results. As in the manuscript we focus on conditions leading to competition between
+the two species, we ignore toxin sensitivity δ = 1.0 where species 2’s effect on species 1 can be positive.
+7
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+scarce mean abundant
+Figure S.3: Species 2’s effect on species 1 in the absence of environmental switching
+Species 2’s effect on species 1 when the resource supply is fixed to be scarce (R−1 ), mean (〈R1〉), or abundant (R
++
+1 ).
+The toxin sensitivities that minimize species 2’s effect on species 1 correspond to the peak sensitivities in Fig. 3A.
+0.2 0.4 0.6 0.8 1.0
+toxin sensitivity
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+pr
+ob
+. o
+f b
+ot
+h 
+ex
+tin
+ct
+io
+n
+scarce
+mean
+abundant
+Figure S.4: Probability of both species going extinct in the absence of environmental switching
+Probabilities that both species 1 and species 2 go extinct when resource supply is fixed to be scarce (R−1 ), mean (〈R1〉),
+or abundant (R+1 ).
+8
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+A B
+C D
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+Figure S.5: Effects of the environmental switching rate in alternative scenarios
+Examples of the effect of switching rate in alternative scenarios. In the left column (A and C), toxin supply is
+switching (scenario 2), while both resource and toxin supplies switch and are negatively correlated (scenario 3) in the
+right column (B, D). A and B: difference between extinction probabilities in absence and presence of species 2. C and
+D: competitive exclusion probability. Parameter values: R+1 = 200, R
+−
+1 = 50, T
++
+1 = 200, and T
+−
+1 = 50.
+0.2 0.4 0.6 0.8 1.0 1.2 1.4 1.6 1.8 2.0
+toxin sensitivity
+0.04
+0.08
+0.12
+0.16
+pr
+ob
+. o
+f c
+om
+pe
+tit
+iv
+e 
+ex
+cl
+us
+io
+n scenario 2 scenario 3
+Figure S.6: Critical toxin sensitivities under mild environments
+The critical toxin sensitivities (i.e., toxin sensitivity that maximizes the competitive exclusion probability in the
+absence of environmental switching) under the mild environments (scenario 2 :scarce toxin supply T−1 = 50, and
+scenario 3: abundant resource supply R+1 = 200 and scarce toxin supply) are > 1.
+9
+A
+C
+B
+D
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+Figure S.7: Effects of resource supplies on competitive exclusion
+Top: abundant resource supply becomes twice (A) or half (B) of R+1 = 200, i.e. R
++
+1 = 400 in panel (A) and R
++
+1 = 100
+in panel (B). Bottom: scarce resource supply becomes twice (C) or half (D) of R−1 = 50, i.e. R
+−
+1 = 100 in panel (C) and
+R−1 = 25 in panel (D).
+10
+A
+C
+B
+D
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+to
+xi
+n 
+se
+ns
+iti
+vi
+ty
+Figure S.8: Effects of resource supplies on species interactions
+Similar to Fig. S.7 but showing species 2’s effect on species 1’s extinction probability. Top: abundant resource supply
+becomes twice (A) or half (B) of R+1 = 200, i.e. R
++
+1 = 400 in panel (A) and R
++
+1 = 100 in panel (B). Bottom: the scarce
+resource supply becomes twice (C) or half (D) of R−1 = 50, i.e. R
+−
+1 = 100 in panel (C) and R
+−
+1 = 25 in panel (D). We
+plotted toxin sensitivity from 0.1 to 2.0 in panel A to see non-monotonic positive species interactions (see also Fig.S.9 )
+A B C
+pr
+ob
+. o
+f c
+om
+pe
+tit
+iv
+e 
+ex
+cl
+us
+io
+n
+m
+on
+o 
+ –
+ b
+ot
+h 
+ex
+tin
+ct
+io
+n 
+pr
+ob
+.
+Figure S.9: Positive interaction strength varies non-monotonically with switching rate
+A: Difference in species 1’s extinction probability with positive sign at δ = 1.0 and R+1 = 400, showing a non-monotonic
+effect of the environmental switching rate. B: Probability of competitive exclusion. C: Difference between the
+probability of species 1 going extinct alone and both species going extinct. Parameter values are +s = 400, δ = 1.0.
+11
+to
+xi
+n
+se
+ns
+iti
+vi
+ty
+0.
+1
+0.
+2
+0.
+4
+0.
+6
+1.
+0
+fo
+ur
+-s
+pe
+ci
+es
+si
+x-
+sp
+ec
+ie
+s
+tw
+o-
+sp
+ec
+ie
+s
+be
+ta
+ d
+iv
+er
+si
+ty
+ei
+gh
+t-
+sp
+ec
+ie
+s
+te
+n-
+sp
+ec
+ie
+s
+F
+ig
+u
+re
+S
+.1
+0
+:
+B
+et
+a
+d
+iv
+er
+si
+ty
+w
+it
+h
+in
+cr
+ea
+si
+n
+g
+in
+it
+ia
+l
+n
+u
+m
+b
+er
+o
+f
+sp
+ec
+ie
+s
+in
+a
+co
+m
+m
+u
+n
+it
+y
+Beta diversities with increasing initial numbers of species N and mean toxin sensitivities δ̄. The black lines show the
+means and blue areas represent the probability distributions calculated by 10’000 simulations (100 beta diversity
+measurements using different parameter sets, each from 100 replicate runs).
+12
+to
+xi
+n
+se
+ns
+iti
+vi
+ty
+0.
+1
+0.
+2
+0.
+4
+0.
+6
+1.
+0
+fo
+ur
+-s
+pe
+ci
+es
+si
+x-
+sp
+ec
+ie
+s
+tw
+o-
+sp
+ec
+ie
+s
+sp
+ec
+ie
+s 
+ric
+hn
+es
+s
+sp
+ec
+ie
+s 
+ric
+hn
+es
+s
+0
+1
+2
+ei
+gh
+t-
+sp
+ec
+ie
+s
+te
+n-
+sp
+ec
+ie
+s
+ 3
+4
+5
+6
+7
+F
+ig
+u
+re
+S
+.1
+1
+:
+S
+p
+ec
+ie
+s
+ri
+ch
+n
+es
+s
+w
+it
+h
+in
+cr
+ea
+si
+n
+g
+in
+it
+ia
+l
+n
+u
+m
+b
+er
+o
+f
+sp
+ec
+ie
+s
+in
+a
+co
+m
+m
+u
+n
+it
+y
+Species richness with increasing initial numbers of species N and mean toxin sensitivities δ̄. Each bar plot represents
+results of 10’000 simulations.
+13
+Table S.1: List of fixed parameters in the interaction analysis
+Symbol Value Description
+α 0.1 dilution rate of the chemostat
+R±1 R
++
+1 = 200, R
+−
+1 = 50 abundant or scarce resource supply concentration
+T±1 T
++
+1 = 200, T
+−
+1 = 50 abundant or scarce toxin supply concentration
+Y r1k Y
+r
+1k = 1 for k = 1, 2 species k’s biomass yields of resource
+Y t1k Y
+t
+1k = 1 for k = 1, 2 species k’s biomass yields of toxin
+µ11 1.0 maximum growth rate of species 1 on resource 1
+µ12 0.91 maximum growth rate of species 2 on resource 1
+δ1k [0.1, . . . , 1.0] and δ = δ11 = δ12 sensitivity of species k to toxin 1.
+Kr1k 100 amount of resource 1 that gives half-max growth rate of species k
+Kt1k 100 amount of toxin 1 that gives half-max death rate of species k
+Table S.2: Summary of critical toxin sensitivities and number of times non-monotonicity is observed
+Switching scenario 1 2 3 1
+Amounts of supplies base line ∗ ↑ R+1 ↓ R
++
+1 ↑ R
+−
+1 ↓ R
+−
+1
+Critical toxin harsh 0.1 0.3 0.1 0.1 0.1 0.3 0.1
+sensitivities mean 0.4 0.4 0.4 0.9 0.2 0.5 0.3
+mild 0.8 1.1 1.3 1.2 0.3 0.8 0.8
+number of mean and harsh 2 0 2 7 0 1 3
+non-monotonic changes mean and mild 1 0 0 3 0 0 2
+observed between mild and harsh 3 0 2 10 0 1 4 †
+∗ For exact parameter values, see Table S.1.
+† At the critical toxin sensitivity corresponding to the mean environment (δ = 0.3), the species interaction
+non-monotonically changes over the switching rate: the frequency of non-monotonicity is 3 + 2− 1 = 4.
+14
+	1 Introduction
+	2 Model
+	2.1 Evaluating species interactions
+	2.2 Evaluating species diversity
+	2.3 Statistical analysis
+	3 Results
+	3.1 Toxin sensitivity changes how switching rate affects species interactions
+	3.2 Competitive exclusion explains negative species interactions
+	3.3 Competitive exclusion explains non-monotonic changes in species interactions
+	3.4 Non-monotonic changes in species interactions happen under different scenarios of environmental differences
+	3.5 Beta diversity changes similarly to competitive exclusion
+	4 Discussion
+	Appendix 1 Analysis excluding noise
+	Appendix 2 Details of simulations
+	Appendix 2.1 Species interaction analysis
+	Appendix 2.2 Species diversity analysis
+	Appendix 3 Analysis in the absence of environmental switching
+	Appendix 4 Alternative environmental switching scenarios
+	Appendix 5 Effects of resource supply
+	Appendix 6 Diversity in communities of increasing species number

@@ -1,0 +1,1299 @@
+CelebA-Spoof: Large-Scale Face Anti-Spoofing
+Dataset with Rich Annotations
+Yuanhan Zhang1 ,2 ?, ZhenFei Yin2 ?, Yidong Li1,
+Guojun Yin2, Junjie Yan2, Jing Shao2, and Ziwei Liu3
+1 Beijing Jiaotong University, Beijing, China
+2 SenseTime Group Limited
+3 The Chinese University of Hong Kong
+{18120454,yidongli}@bjtu.edu.cn
+4 {yinzhenfei,yinguojun,yanjunjie,shaojing}@sensetime.com
+5
+zwliu@ie.cuhk.edu.hk
+Abstract. As facial interaction systems are prevalently deployed, secu-
+rity and reliability of these systems become a critical issue, with substan-
+tial research efforts devoted. Among them, face anti-spoofing emerges as
+an important area, whose objective is to identify whether a presented
+face is live or spoof. Though promising progress has been achieved, ex-
+isting works still have difficulty in handling complex spoof attacks and
+generalizing to real-world scenarios. The main reason is that current
+face anti-spoofing datasets are limited in both quantity and diversity. To
+overcome these obstacles, we contribute a large-scale face anti-spoofing
+dataset, CelebA-Spoof, with the following appealing properties: 1)
+Quantity: CelebA-Spoof comprises of 625,537 pictures of 10,177 subjects,
+significantly larger than the existing datasets. 2) Diversity: The spoof
+images are captured from 8 scenes (2 environments * 4 illumination condi-
+tions) with more than 10 sensors. 3) Annotation Richness: CelebA-Spoof
+contains 10 spoof type annotations, as well as the 40 attribute annotations
+inherited from the original CelebA dataset. Equipped with CelebA-Spoof,
+we carefully benchmark existing methods in a unified multi-task frame-
+work, Auxiliary Information Embedding Network (AENet), and
+reveal several valuable observations. Our key insight is that, compared
+with the commonly-used binary supervision or mid-level geometric repre-
+sentations, rich semantic annotations as auxiliary tasks can greatly boost
+the performance and generalizability of face anti-spoofing across a wide
+range of spoof attacks. Through comprehensive studies, we show that
+CelebA-Spoof serves as an effective training data source. Models trained
+on CelebA-Spoof (without fine-tuning) exhibit state-of-the-art perfor-
+mance on standard benchmarks such as CASIA-MFSD. The datasets are
+available at https://github.com/Davidzhangyuanhan/CelebA-Spoof .
+Keywords: Face Anti-Spoofing, Large-Scale Dataset
+? equal contribution
+ar
+X
+iv
+:2
+00
+7.
+12
+34
+2v
+1 
+ [
+cs
+.C
+V
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+https://github.com/Davidzhangyuanhan/CelebA-Spoof
+2 Zhang et al.
+Outdoor
+Back Illumination
+Fig. 1. A quick glance of CelebA-Spoof face anti-spoofing dataset with its attributes.
+Hypothetical space of scenes are partitioned by attributes and Live/Spoof. In reality,
+this space is much higher dimensional and there are no clean boundaries between
+attributes presence and absence
+1 Introduction
+Face anti-spoofing is an important task in computer vision, which aims to facilitate
+facial interaction systems to determine whether a presented face is live or spoof.
+With the successful deployments in phone unlock, access control and e-wallet
+payment, facial interaction systems already become an integral part in the real
+world. However, there exists a vital threat to these face interaction systems.
+Imagine a scenario where an attacker with a photo or video of you can unlock
+your phone and even pay his bill using your e-wallet. To this end, face anti-
+spoofing has emerged as a crucial technique to protect our privacy and property
+from being illegally used by others.
+Most modern face anti-spoofing methods [10,19,36] are fueled by the avail-
+ability of face anti-spoofing datasets [23,4,37,29,5,34,39], as shown in Table 1.
+However, there are several limitations with the existing datasets: 1) Lack of
+Diversity. Existing datasets suffer from lacking sufficient subjects, sessions and
+input sensors (e.g. mostly less than 2000 subject, 4 sessions and 10 input sensors).
+2) Lack of Annotations. Existing datasets have only annotated the type of spoof
+type. Face anti-spoof community lacks a densely annotated dataset covering rich
+attributes, which can further help researchers to explore face anti-spoofing task
+with diverse attributes. 3) Performance Saturation. The classification perfor-
+mance on several face anti-spoofing datasets has already saturated, failing to
+evaluate the capability of existing and future algorithms. For example, the recall
+under FPR = 0.5% on SiW and Oulu-NPU datasets using vanilla ResNet-18 has
+already reached 100.0% and 99.0%, respectively.
+To address these shortcomings in existing face anti-spoofing dataset, in
+this work we propose a large-scale and densely annotated dataset, CelebA-
+Spoof. Besides the standard Spoof Type annotation, CelebA-Spoof also contains
+CelebA-Spoof 3
+annotations for Illumination Condition and Environment, which express more
+information in face anti-spoofing, compared to categorical label like Live/Spoof.
+Essentially, these dense annotations describe images by answering questions
+like “Is the people in the image Live or Spoof?”, “What kind of spoof type
+is this?”, “What kind of illumination condition is this?” and “What kind of
+environment in the background?”. Specifically, all live images in CelebA-Spoof
+are selected from CelebA [25], and all Spoof images are collected and annotated
+by skillful annotators. CelebA-Spoof has several appealing properties. 1) Large-
+Scale. CelebA-Spoof comprises of a total of 10177 subjects, 625537 images,
+which is the largest dataset in face anti-spoofing. 2) Diversity. For collecting
+images, we use more than 10 different input tensors, including phones, pads and
+personal computers (PC). Besides, we cover images in 8 different sessions. 3) Rich
+Annotations. Each image in CelebA-Spoof is defined with 43 different attributes:
+40 types of Face Attribute defined in CelebA [25] plus 3 attributes of face anti-
+spoofing, including: Spoof Type, Illumination Condition and Environment. With
+rich annotations, we can comprehensively investigate face anti-spoofing task from
+various perspectives.
+Equipped with CelebA-Spoof, we design a simple yet powerful network named
+Auxiliary information Embedding Network (AENet), and carefully benchmark
+existing methods within this unified multi-task framework. Several valuable
+observations are revealed: 1) We analyze the effectiveness of auxiliary geometric
+information for different spoof types and illustrate the sensitivity of geometric
+information to special illumination conditions. Geometric information includes
+depth map and reflection map. 2) We validate auxiliary semantic information,
+including face attribute and spoof type, plays an important role in improving
+classification performance. 3) We build three CelebA-Spoof benchmarks based on
+this two auxiliary information. Through extensive experiments, we demonstrate
+that our large-scale and densely annotated dataset serves as an effective data
+source in face anti-spoofing to achieve state-of-the-art performance. Furthermore,
+models trained with auxiliary semantic information exhibit great generalizability
+compared to other alternatives.
+In summary, the contributions of this work are three-fold:1) We contribute
+a large-scale face anti-spoofing dataset, CelebA-Spoof, with 625,537 images
+from 10,177 subjects, which includes 43 rich attributes on face, illumination,
+environment and spoof types. 2) Based on these rich attributes, we further propose
+a simple yet powerful multi-task framework, namely AENet. Through AENet,
+we conduct extensive experiments to explore the roles of semantic information
+and geometric information in face anti-spoofing. 3) To support comprehensive
+evaluation and diagnosis, we establish three versatile benchmarks to evaluate
+the performance and generalization ability of various methods under different
+carefully-designed protocols. With several valuable observations revealed, we
+demonstrate the effectiveness of CelebA-Spoof and its rich attributes which can
+significantly facilitate future research.
+4 Zhang et al.
+Table 1. The comparison of CelebA-Spoof with existing datasets of face anti-spoofing.
+Different illumination conditions and environments make up different sessions, (V
+means video, I means image; Ill. Illumination condition, Env. Environment; - means
+this information is not annotated)
+Dataset Year Modality #Subjects #Data(V/I) #Sensor
+#Semantic Attribute
+#Face Attribute Spoof type #Session (Ill.,Env.)
+Replay-Attack [5] 2012 RGB 50 1,200 (V) 2
+\
+1 Print, 2 Replay 1 (-.-)
+CASIA-MFSD [39] 2012 RGB 50 600 (V) 3 1 Print, 1 Replay 3 (-.-)
+3DMAD [9] 2014 RGB/Depth 14 255 (V) 2 1 3D mask 3 (-.-)
+MSU-MFSD [34] 2015 RGB 35 440 (V) 2 1 Print, 2 Replay 1 (-.-)
+Msspoof [14] 2015 RGB/IR 21 4,704 (I) 2 1 Print 7 (-.7)
+HKBU-MARs V2 [21] 2016 RGB 12 1,008 (V) 7 2 3D masks 6 (6.-)
+MSU-USSA [29] 2016 RGB 1,140 10,260 (I) 2 2 Print, 6 Replay 1 (-.-)
+Oulu-NPU [4] 2017 RGB 55 5,940 (V) 6 2 Print, 2 Replay 3 (-.-)
+SiW [23] 2018 RGB 165 4,620 (V) 2 2 Print, 4 Replay 4 (-.-)
+CASIA-SURF [37] 2018 RGB/IR/Depth 1,000 21,000 (V) 1 5 Paper Cut 1 (-.-)
+CSMAD [1] 2018 RGB/IR/Depth/LWIR 14 246 (V),17 (I) 1 1 silicone mask 4 (4.-)
+HKBU-MARs V1+ [20] 2018 RGB 12 180(v) 1 1 3D mask 1 (1.-)
+SiW-M [24] 2019 RGB 493 1,628 (V) 4
+1 Print, 1 Replay
+5 3D Mask, 3 Make Up, 3 Partial
+3 (-.-)
+CelebA-Spoof 2020 RGB 10,177 625,537 (I) >10 40
+3 Print, 3 Replay
+1 3D, 3 Paper Cut
+8 (4,2)
+2 Related Work
+Face Anti-Spoofing Datasets. Face anti-spoofing community mainly has
+three types of datasets. First, the multi-modal dataset: 3DMAD [9], Msspoof
+[6], CASIA-SURF [37] and CSMAD [1]. However, since widespread used mobile
+phones are not equipped with suitable modules, such datasets cannot be widely
+used in the real scene. Second is the single-modal dataset, such as Replay Attack
+[5], CASIA-MFSD [39], MSU-MFSD [34], MSU-USSA [29] and HKBU-MARS
+V2 [21]. But these datasets have been collected for more than three years. With
+the rapid development of electronic equipment, the acquisition equipment of
+these datasets is completely outdated and cannot meet the actual needs. SiW
+[23], Oulu-NPU [4] and HKBU-MAR V1+ [20] are relatively up-to-date. However,
+the limited number of subjects, spoof types, and environment (Only indoors) in
+these datasets does not guarantee for the generalization capability required in
+the real application. Third, SiW-M [24] is mainly used for Zero-Shot face anti-
+spoofing tasks. CelebA-Spoof datasets have 625537 pictures from 10177 subjects,
+8 scenes (2 environments * 4 illumination conditions) with rich annotations. The
+characteristic of Large-scale and diversity can further fill the gap between face
+anti-spoofing dataset and real scenes. with rich annotations we can better analyze
+face anti-spoofing task. All datasets mentioned above are listed in Table 1.
+Face Anti-Spoofing Methods. In recent years, face anti-spoofing algorithms
+have seen great progress. Most traditional algorithms focus on handcrafted fea-
+tures, such as LBP [5,26,27,35], HoG [26,35,30] and SURF [2]. Other works also
+focused on temporal features such as eye-blinking [28,32] and lips motion [17]. In
+order to improve the robustness to light changes, some researchers have paid at-
+tention to different color spaces, such as HSV [3], YCbcR [2] and Fourier spectrum
+[18]. With the development of the deep learning model, researchers have also be-
+gun to focus on Convolutional Neural Network based methods. [10,19] considered
+the face PAD problem as binary classification and perform good performance.
+The method of auxiliary supervision is also used to improve the performance of
+CelebA-Spoof 5
+binary classification supervision. Atoum et al. let the full convolutional network
+to learn the depth map and then assist the binary classification task. Liu et
+al. [20,22] proposed remote toplethysmography (rPPG signal)-based methods
+to foster the development of 3D face anti-spoofing. Liu et al. [23] proposed to
+leverage depth map combined with rPPG signal as the auxiliary supervision
+information. Kim et al. [16] proposed using depth map and reflection map as the
+Bipartite auxiliary supervision. Besides, Yang et al. [36] proposed to combine
+the spatial information with the temporal information in the video stream to
+improve the generalization of the model. Amin et al. [15] solved the problem of
+face anti-spoofing by decomposing a spoof photo into a Live photo and a Spoof
+noise pattern. These methods mentioned above are prone to over-fitting on the
+training data, the generalization performance is poor in real scenarios. In order to
+solve the poor generalization problem, Shao et al. [31] adopted transfer learning
+to further improve performance. Therefore, a more complex face anti-spoofing
+dataset with large-scale and diversity is necessary. From extensive experiments,
+CelebA-Spoof has been shown to significantly improve generalization of basic
+models, In addition, based on auxiliary semantic information method can further
+achieve better generalization.
+3 CelebA-Spoof Dataset
+Existing face anti-spoofing datasets cannot satisfy the requirements for real
+scenario applications. As shown in Table 1, most of them contain fewer than 200
+subjects and 5 sessions, meanwhile they are only captured indoor with fewer than
+10 types of input sensors. On the contrary, our proposed CelebA-Spoof dataset
+provides 625, 537 pictures and 10, 177 subjects, therefore offering a superior
+comprehensive dataset for the area of face anti-spoofing. Furthermore, each image
+is annotated with 43 attributes. This abundant information enrich the diversity
+and make face anti-spoofing more illustrative. To our best knowledge, our dataset
+surpasses all the existing datasets both in scale and diversity.
+In this section, we describe our CelebA-Spoof dataset and analyze it through
+a variety of informative statistics. The dataset is built based on CelebA [25],
+where all the live people in this dataset are from CelebA. We collect and annotate
+Spoof images of CelebA-Spoof.
+3.1 Dataset Construction
+Live Data. The live data are directly inherited from CelebA dataset [25]. CelebA
+is a well-known large-scale facial attribute dataset with more than eight million
+attribute labels. It covers face images with large pose variations and background
+clutters. We manually examine the images in CelebA and remove those “spoof”
+images, including posters, advertisements and cartoon portrait6.
+Spoof Instrument Selection. The source for spoof instruments is selected
+from the aforementioned live data. There are totally more than 202, 599 live
+6 There are 347 images of this kind. Examples are shown in the supplementary material.
+6 Zhang et al.
+Vertical Down Up Forward Backward Normal OutsideInside
+Angle Shape Input Sensor
+Collection Dimension
+PC Camera Tablet PhoneCorner
+Fig. 2. An illustration of the collection dimension in CelebA-Spoof. In detail, these
+three dimensions boost the diversity of the dataset
+Photo Poster A4
+Print
+Face
+Mask
+Upper Body
+Mask
+Paper Cut
+Region
+Mask
+PC Pad
+Replay
+Phone
+3D
+Mask Indoor Outdoor
+Normal Strong
+Indoor Outdoor
+Back
+Indoor Outdoor
+Dark
+Indoor Outdoor
+IlluminationCondition and EnvironmentSpoof Type(a) (b)
+Fig. 3. Representative examples of the semantic attributes (i.e. spoof type, illumination
+and environment) defined upon spoof images. In detail, (a) 4 macro-types and 11 micro-
+types of spoof type and (b) 4 illumination and 2 types of environmental conditions are
+defined
+images from 10, 177 subjects. Each subject has multiple images ranging from 5
+to 40. All subjects are covered in our spoof instrument production. In addition,
+to guarantee both the diversity and balance of spoof instruments, some subjects
+are filtered. Specifically, for one subject with more than k source images, we rank
+them according to the face size with the bounding box provided by CelebA and
+select Top-k source images. For those subjects with fewer than k source images,
+we directly adopt all of them. We set k = 20. As a result, 87, 926 source images
+are selected from 202, 599 for further spoof instruments manufacture.
+Spoof Data Collection. We hired 8 collectors to collect spoof data and another
+2 annotators to refine labeling for all data. To improve the generalization and
+diversity of the dataset, as shown in Figure 2, we define three collection dimensions
+with fine-grained quantities: 1) Five Angles - All spoof type need to traverse all
+five types of angles including “vertical”, “down”, “up”, “forward” and “backward”.
+The angle of inclination is between [−30◦, 30◦]. 2) Four Shapes - There are a
+total of four shapes, i.e. “normal”, “inside”, “outside” and “corner”. 3) Four
+Sensors - We collected 24 popular devices with four types, i.e. “PC”, “camera”,
+“tablet” and “phone”, as the input sensors7. These devices are equipped with
+different resolutions, ranging from 40 million to 12 million pixels. The number of
+input sensors is far more than the existing face anti-spoofing datasets as shown
+in Table 1.
+7 Detailed information can be found in the supplementary material.
+CelebA-Spoof 7
+Indoor
+77%
+Outdoor
+23%
+Male
+42% 
+Female
+58%
+Live 
+24%
+Spoof 
+76%
+Normal 
+59% 
+Strong
+19%
+Back 
+11%
+Dark 
+11% 
+0.01-0.1
+79% 
+>0.1
+9% 
+Others
+12%
+44923
+42270
+43437
+46154
+45363
+43719
+43760
+42903
+41549
+49074
+0 20000 40000
+Photo
+Poster
+A4
+Face Mask
+Upper Body Mask
+Region Mask
+PC
+Pad
+Phone
+3D Mask
+(a) (b) (c)
+Live/Spoof Face Size Gender Environment Illumination Condition
+Spoof Type
+Fig. 4. The statistical distribution of CelebA-Spoof dataset. (a) Overall live and spoof
+distribution as well as the face size statistic. (b) An exemplar of live attribute, i.e.
+“gender”. (c) Three types of spoof attributes
+3.2 Semantic Information Collection
+In recent decades, studies in attribute-based representations of objects, faces, and
+scenes have drawn large attention as a complement to categorical representations.
+However, rare works attempt to exploit semantic information in face anti-spoofing.
+Indeed, for face anti-spoofing, additional semantic information can characterize
+the target images by attributes rather than discriminated assignment into a single
+category, i.e. “live” or “spoof”.
+Semantic for Live - Face Attribute Sf. In our dataset, we directly adopt 40
+types of face attributes defined in CelebA [25] as “live” attributes. Attributes of
+“live” faces always refer to gender, hair color, expression and etc. These abundant
+semantic cues have shown their potential in providing more information for face
+identification. It is the first time to incorporate them into face anti-spoofing.
+Extensive studies can be found in Sec. 6.1.
+Semantic for Spoof - Spoof Type Ss, Illumination Si, and Environment
+Se. Differs to “live” face attributes, “spoof” images might be characterized by
+another bunch of properties or attributes as they are not only related to the face
+region. Indeed, the material of spoof type, illumination condition and environment
+where spoof images are captured can express more semantic information in “spoof”
+images, as shown in Figure 3. Note that the combination of illumination and
+environment forms the “session” defined in the existing face anti-spoofing dataset.
+As shown in Table 1, the combination of four illumination conditions and two
+environments forms 8 sessions. To our best knowledge, CelebA-Spoof is the first
+dataset covering spoof images in outdoor environment.
+3.3 Statistics on CelebA-Spoof Dataset
+The CelebA-Spoof dataset is constructed with a total of 625, 537 images. As
+shown in 4(a), the ratio of live and spoof is 1 : 3. Face size in all images is mainly
+between 0.01 million pixels to 0.1 million pixels. We split the CelebA-Spoof
+dataset into training, validation, and test sets with a ratio of 8 : 1 : 1. Note
+that all three sets are guaranteed to have no overlap on subjects, which means
+there is no case of a live image of one certain subject in the training set while its
+counterpart spoof image in the test set. The distribution of live images in three
+splits is the same as that defined in the CelebA dataset.
+8 Zhang et al.
+Input image
+(Spoof)
+CNN
+Phone
+Back
+Semantic
+Spoof
+Classification Geometric
+Big Nose Smile
+Live
+Input image
+(Live)
+C
+Ss
+S i
+S f
+Gd
+Gr
+Fig. 5. Auxiliary information Embedding Network (AENet). We use two Conv3×3 after
+CNN and upsample to size 14× 14 to learn the geometric information. Besides, we use
+three FC layers to learn the semantic information. The prediction score of Sf of spoof
+image should be very low and the prediction result of Ss and S i of live image should be
+“No illumination” and “No attack” which belongs to the first label in Ss and S i
+The semantic attribute statistics are shown in Figure 4(c). The portion of
+each type of attack is almost the same to guarantee a balanced distribution. It is
+easy to collect data under normal illumination in an indoor environment where
+most existing datasets adopt. Besides such easy cases, in CelebA-Spoof dataset,
+we also involve 12% dark, 11% back, and 19% strong illumination. Furthermore,
+both indoor and outdoor environments contain all illumination conditions.
+4 Auxiliary Information Embedding Network
+Equipped with CelebA-Spoof dataset, in this section, we design a simple yet
+effective network named Auxiliary information Embedding Network (AENet),
+as shown in Figure 5. In addition to the main binary classification branch
+(in green), we 1) Incorporate the semantic branch (in orange) to exploit the
+auxiliary capacity of rich annotated semantic attributes in the dataset, and
+2) Benchmark the existing geometric auxiliary information within this unified
+multi-task framework.
+AENetC,S . refers to the multi-task jointly learn auxiliary “semantic” attributes
+and binary “classification” labels. Such auxiliary semantic attributes defined
+in our dataset provide complement cues rather than discriminated assignment
+into a single category. The semantic attributes are learned via the backbone
+network followed by three FC layers. In detail, given a batch of n images, based
+on AENetC,S , we learn live/spoof class {Ck}nk=1 and semantic information, i.e.
+live face attributes {S fk}nk=1, spoof type {Ssk}nk=1 and illumination conditions
+CelebA-Spoof 9
+{S ik}nk=1 simultaneously8. The loss function of our AENetC,S is
+Lc,s = LC + λfLSf + λsLSs + λiLSi , (1)
+where LSf is binary cross entropy loss. LC , LSs and LSi are softmax cross entropy
+losses. We set the loss weights λf = 1, λs = 0.1 and λi = 0.01, λ values are
+empirically selected to balance the contribution of each loss.
+AENetC,G. Besides the semantic auxiliary information, some recent works claim
+some geometric cues such as reflection map and depth map can facilitate face
+anti-spoofing. As shown in Figure 5 (marked in blue), spoof images exhibit even
+and the flat surfaces which can be easily distinguished by the depth map. The
+reflection maps, on the other hand, may display reflection artifacts caused by
+reflected light from flat surface. However, rare works explore their pros and cons.
+AENetC,G also learn auxiliary geometric information in a multi-task fashion
+with live/spoof classification. Specifically, we concate a Conv 3× 3 after the
+backbone network and upsample to 14× 14 to output the geometric maps. We
+denote depth and reflection cues as Gd and Gr respectively. The loss function is
+defined as
+Lc,g = Lc + λdLGd + λrLGr , (2)
+where LGd and LGr are mean squared error losses. λd and λr are set to 0.1. In
+detail, refer to [16], the ground truth of the depth map of live image is generated
+by PRNet [11] and the ground truth of the reflection map of the spoof image is
+generated by the method in [38]. Besides, the ground truth of the depth map of
+the spoof image and the ground truth of the reflection map of the live images
+are zero.
+5 Experimental Settings
+Evaluation Metrics. Different metrics have been taken to evaluate previous
+methods that make the comparison inconsistent. To establish a comprehensive
+benchmark, we unify all the commonly used metrics (i.e. APCER, BPCER, ACER,
+EER, and HTER)9 [4,23,15,36] and add another two criteria (i.e. FPR@Recall and
+AUC). APCER and BPCER are used to evaluate the error rate of live and spoof
+image respectively. ACER is the average of the APCER and the BPCER. Besides,
+AUC can evaluate the overall classification performance, and FPR@Recall can
+expose detailed Recalls corresponding to some specific FPRs. The aforementioned
+metrics are employed on intra-dataset (CelebA-Spoof) evaluation, and for cross-
+dataset evaluation, HTER [12] is used extensively.
+Implementation Details. We initialize the backbone network10 with the pa-
+rameters pre-trained on ImageNet. The network takes face image as the input
+8 Note that we do not learn environments Se since we take face image as input where
+environment cues (i.e. indoor or outdoor) cannot provide more valuable information
+yet illumination influences much.
+9 Detailed definitions and formulations are listed in the supplementary material.
+10 For fair comparison, ResNet-18 is used in all experiments. We also take another
+heavier backbone, i.e. Xception, to enrich the benchmarks.
+10 Zhang et al.
+Table 2. Different settings in ablation study. For Baseline, we use softmax score of C
+for classification (a) For AENetS , we use the average softmax score of Sf, Ss and S i
+for classification. AENetSf , AENetSs and AENetSi refer to each single spoof semantic
+attribute respectively. Based on AENetC,S , w/o Sf, w/o Ss, w/o S i mean AENetC,S
+discards Sf, Ss and S i respectively. (b) For AENetGd , we use
+∥∥Gd∥∥
+2
+for classification.
+Based on AENetC,G , w/o Gd, w/o Gr mean AENetC,G discards Gd and Gr respectively
+(a) Baseline AENetS AENetSf AENetSs AENetS i
+AENetC,S
+w/o S f
+AENetC,S
+w/o Ss
+AENetC,S
+w/o S i
+AENetC,S (b) Baseline AENetGd
+AENetC,G
+w/o Gr
+AENetC,S
+w/o Gd
+AENetC,G
+Live/Spoof
+√ √ √ √ √
+Live/Spoof
+√ √ √ √
+Face Attribute
+√ √ √ √ √
+Reflection Map
+√ √
+Spoof Type
+√ √ √ √ √
+Illumination Conditions
+√ √ √ √ √
+Depth map
+√ √ √
+with a size of 224×224. The bounding box of faces are extracted by RetinaFace [8].
+We use color distortion for data augmentation. SGD optimizer is adopted for
+training. The learning rate is set to 0.005 for 50 epochs.
+6 Ablation Study on CelebA-Spoof
+Based on our rich annotations in CelebA-Spoof and the designed AENet, we
+conduct extensive experiments to analyze semantic information and geometric
+information. Several valuable observations have been revealed: 1) We validate
+that S f and Ss can facilitate live/spoof classification performance greatly. 2) We
+analyze the effectiveness of geometric information on different spoof types and
+find that depth information is particularly sensitive to dark illumination.
+6.1 Study of Semantic Information
+In this subsection, we explore the role of different semantic informations annotated
+in CelebA-Spoof on face anti-spoofing. Based on AENetC,S , we design eight
+different models in the Table 2(a). The key observations are:
+Binary Supervision is Indispensable. As shown in Table 3(a), Compared
+to baseline, AENetS which only leverages three semantic attributes to do the
+auxiliary job cannot surpass the performance of baseline. However, as shown in
+3(b), AENetC,S which jointly learns auxiliary semantic attributes and binary
+classification significantly improves the performance of baseline. Therefore we
+can infer that even such rich semantic information cannot fully replace live/spoof
+information. But live/spoof with semantic attributes as auxiliary information can
+be more effective. This is because the semantic attributes of an image cannot be
+included completely, and a better classification performance cannot be achieved
+only by relying on several annotated semantic attributes. However, semantic
+attributes can help the model pay more attention to cues in the image, thus
+improving the classification performance of the model.
+Semantic Attribute Matters. From Table 3(c), we study the impact of differ-
+ent individual semantic attributes on AENetC,S . As shown in this table, AENetC,S
+CelebA-Spoof 11
+Table 3. Semantic information study results in Sec. 6.1. (a) AENetS which only depends
+on semantic attributes for classification cannot surpass the performance of baseline. (b)
+AENetC,S which leverages all semantic attributes achieve the best result. Bolds are
+the best results; ↑ means bigger value is better; ↓ means smaller value is better
+Model
+Recall (%)↑
+AUC ↑ EER (%) ↓ APCER (%) ↓ BPCER (%) ↓ ACER (%) ↓
+FPR = 1% FPR = 0.5% FPR = 0.1%
+(a)
+Baseline 97.9 95.3 85.9 0.9984 1.6 6.1 1.6 3.8
+AENetS 98.0 96.0 80.4 0.9981 1.4 6.89 1.44 4.17
+(b) AENetC,S 98.8 97.4 90.0 0.9988 1.1 4.62 1.09 2.85
+(c)
+AENetC,S w/o S i 98.1 96.5 86.4 0.9982 1.3 4.62 1.35 2.99
+AENetC,S w/o Ss 98.2 96.5 89.4 0.9986 1.3 5.31 1.25 3.28
+AENetC,S w/o Sf 97.8 95.4 83.6 0.9979 1.3 5.19 1.37 3.28
+0
+0.7
+1.45
+0
+1.5
+3
+(a) (b)
+AENetC,SAENetC,Sw/oSsAENetC,Sw/oS i AENetC,Sw/oS f
+A
+P
+C
+E
+R
+Ss
+B
+P
+C
+E
+R
+Sf
+Fig. 6. Representative examples of dropping partial semantic attributes on AENetC,S
+performance. In detail, higher APCERSs and BPCERSf are worse results. (a) Spoof
+types where AENetC,S w/o Ss achieve the worst APCERSs . (b) Face attributes where
+AENetC,S w/o Sf achieve the worst BPCERSf
+w/o Ss achieves the worst APCER. Since APCER reflects the classification abil-
+ity of spoof images, it shows that compared to other semantic attributes, spoof
+types would significantly affect the performance of the spoof images classification
+of AENetC,S . Furthermore, we list detail information of AENetC,S in Figure
+6(a). As shown in this figure, AENetC,S without spoof types gets the 5 worst
+APCERSs out of 10 APCERSs and we show up these 5 values in this figure.
+Besides, in Table 3(b), AENetC,S w/o S f gets the highest BPCER. And we also
+obtain the BPCERSf of each face attribute. As shown in Figure 6(b), among 40
+face attributes, BPCERSf of AENetC,S w/o S f occupies 25 worst scores. Since
+BPCER reflects the classification ability of live images, it demonstrate S f plays
+an important role in the classification of live images.
+Qualitative Evaluation. Success and failure cases on live/spoof and semantic
+attributes predictions are shown in Figure 7. For live examples, the first example
+in Figure 7(a-i) with “glasses“ and “hat“ help AENetC,S to pay more attention
+to the clues of the live image and further improve the performance of prediction
+of live/spoof. Besides, the first example in Figure 7(a-ii). AENetC,S significantly
+improve the classification performance of live/spoof comparing to baseline. This
+is because spoof semantic attributes including “back illumination” and “phone”
+help AENetC,S recognize the distinct characteristics of spoof image. Note that
+the prediction of the second example in Figure 7(b-i) is mistaken.
+12 Zhang et al.
+Table 4. Geometric information study results in Sec. 6.2. (a) AENetGd which only
+depends on the depth map for classification performs worst than baseline. (b) AENetC,G
+which leverages all semantic attributes achieve the best result. Bolds are the best
+results; ↑ means bigger value is better; ↓ means smaller value is better
+Model
+Recall (%)↑
+AUC↑ EER (%)↓ APCER (%)↓ BPCER (%)↓ ACER (%)↓
+FPR = 1% FPR = 0.5% FPR = 0.1%
+(a)
+Baseline 97.9 95.3 85.9 0.9984 1.6 6.1 1.6 3.8
+AENetGd 97.8 96.2 87.0 0.9946 1.6 7.33 1.68 4.51
+(b) AENetC,G 98.4 96.8 86.7 0.9985 1.2 5.34 1.19 3.26
+(c)
+AENetC,G w/o Gd 98.3 96.1 87.7 0.9976 1.2 5.91 1.27 3.59
+AENetC,G w/o Gr 97.9 95.7 84.1 0.9973 1.3 5.71 1.38 3.55
+6.2 Study of Geometric Information
+Based on AENetC,} under different settings, we design four models as shown in
+Table 2(b) and use semantic attributes we annotated to analyze the usage of
+geometric information in face anti-spoofing task. The key observations are:
+Depth Maps are More Versatile. As shown in Table 4(a), geometric infor-
+mation is insufficient to be the unique supervision for live/spoof classification.
+However, it can boost the performance of the baseline when it serves as an
+auxiliary supervision. Besides, we study the impact of different individual geomet-
+ric information on AENetC,G performance. As shown in Figure 8(a), AENetC,G
+w/o Gd performs the best in spoof type: “replay” (macro definition), because
+the reflect artifacts appear frequently in these three spoof types. For “phone”,
+AENetC,G w/o Gd improves 56% comparing to the baseline. However AENetC,G
+w/o Gd gets worse result than baseline in spoof type: “print” (macro definition).
+Moreover, AENetC,G w/o Gr helps greatly to improve the classification perfor-
+mance of baseline in both “replay” and “print”(macro definition). Especially for
+“poster”, AENetC,G w/o Gr improves baseline by 81%. Therefore, the depth map
+can improve classification performance in most spoof types, but the function of
+the reflection map is mainly reflected in “replay”(macro definition).
+Sensitive to Illumination. As shown in Figure 8(a), in spoof type “print”(macro
+definition), the performance of the AENetC,G w/o Gr on “A4” is much worse than
+“poster” and “photo”, although they are both in “print” spoof type. The main
+reason for the large difference in performance among these three spoof types
+for AENetC,G w/o Gr is that the learning of the depth map is sensitive to dark
+illumination, as shown in Figure 8(b). When we calculate APCER under other
+illumination conditions: normal, strong and back, AENetC,G w/o Gr achieves
+almost the same results among “A4”, “poster” and “photo”.
+7 Benchmarks
+In order to facilitate future research in the community, we carefully build three
+different benchmarks to investigate face anti-spoofing algorithms. Specifically, for
+a comprehensive evaluation, besides ResNet-18, we also provide the corresponding
+CelebA-Spoof 13
+Spoof
+Normal Ill*
+Poster
+(a) (b)
+0.59
+0.94Spoof
+Live
+No PAI
+No Beard
+Lipstick
+Yong
+No Ill*
+0.75
+0.96
+0.69
+0.79
+0.54
+0.51
+Spoof
+No PAI
+Live
+No Ill*
+Straight Hair
+Earing
+0.99
+0.99
+0.99
+0.97
+0.44
+0.52
+0.51
+Spoof
+No PAI
+Live
+No Ill*
+Smile
+No Beard
+Hat
+0.95
+0.95
+0.95
+0.99
+0.99
+0.89
+0.66
+Spoof
+No PAI
+Live
+No Ill*
+No Beard
+Yong
+0.94
+0.93
+0.89
+0.76
+0.82
+0.82
+0.51Blond Hair
+Spoof
+Live
+Male
+Eyeglasses
+0.94
+0.99
+No PAI 0.99
+0.90
+0.75
+Hat 0.93
+0.77
+No Ill*
+0.09
+0.06
+0.13
+0.35
+0.1
+Spoof
+Smile
+0.97
+0.96
+0.91
+0.60
+0.06
+Spoof
+Spoof
+Phone
+Normal Ill*
+0.97
+0.97
+0.91
+0.42
+0.05
+Blond Hair
+No Beard
+Spoof
+Male
+No Beard
+Spoof
+Phone
+Normal Ill*
+0.96
+0.66
+0.51
+0.07
+0.85
+Lipstick 0.04 Lipstick 0.03
+0.04
+0.44
+LiveLiveLive
+Live
+Male
+5_o_Clock_Shadow
+Yong
+No PAI
+No Ill*
+0.77
+0.93
+0.96
+0.85
+0.93
+0.53
+0.38
+Spoof
+No Beard
+Smile
+Live
+Phone
+Back Ill*
+0.98
+0.99
+0.99
+0.58
+0.05
+0.05
+Spoof
+Attractive
+Brown hair
+Live
+Pad
+Normal Ill*
+0.98
+0.91
+0.75
+0.51
+0.05
+0.03
+Spoof
+Live
+Face Mask
+Strong Ill*
+0.99
+0.99
+0.60
+0.84
+0.01
+0.01
+Brown hair
+No Beard
+Wavy hair
+Live
+Spoof
+Big Nose
+Male
+Poster
+Normal Ill*
+0.99
+0.96
+0.67
+0.84
+0.31
+0.24
+0.49
+Live
+No Beard
+Spoof
+Bags under Eyes
+Smile
+PC
+Normal Ill*
+0.99
+0.92
+0.90
+0.51
+0.28
+0.44
+Live
+No PAI
+Male
+Sideburn
+Eyeglasses
+No Ill*
+0.79
+0.90
+0.76
+0.80
+0.75
+0.93
+Live
+No Beard
+No PAI
+No Ill*
+Attractive
+0.81
+0.98
+0.92
+0.82
+0.77
+0.94
+0.80
+Baseline
+Lipstick
+Mouth Open
+Lipstick
+Bangs Bags Under Eyes
+Hat Lipstick
+0.12
+i
+ii
+AENetC,S C
+Baseline
+AENetC,S C
+Ss
+S i
+S f
+Ss
+S i
+S f
+Fig. 7. Success and failure cases. The row(i) present the live image and row(ii) present
+the spoof image. For each image, the first row is the highest score of live/spoof prediction
+of baseline and others are the highest live/spoof and the highest semantic attributes
+predictions of AENetC,S . Blue indicates correctly predicted results and orange indicates
+the wrong results. In detail, we list the top three prediction scores of face attributes in
+the last three rows of each image
+results based on a heavier backbone, i.e. Xception. Detailed information of the
+results based on Xception are shown in the supplementary material.
+7.1 Intra-Dataset Benchmark
+Based on this benchmark, models are trained and evaluated on the whole train-
+ing set and testing set of CelebA-Spoof. This benchmark evaluates the overall
+capability of the classification models. According to different input data types,
+there are two kinds of face anti-spoof methods, i.e. “ video-driven methods” and
+“image-driven methods”. Since the data in CelebA-Spoof are image-based, we
+benchmark state-of-the-art “image-driven methods” in this subsection. As shown
+in Table 5, AENetC,S,G which combines geometric and semantic information has
+achieved the best results on CelebA-Spoof. Specifically, our approach outperforms
+the state-of-the-art by 38% with much fewer parameters.
+7.2 Cross-Domain Benchmark
+Since face anti-spoofing is an open-set problem, even though CelebA-Spoof is
+equipped with diverse images, it is impossible to cover all spoof types, environ-
+ments, sensors, etc. that exist in the real world. Inspired by [4,23], we carefully
+design two protocols for CelebA-Spoof based on real-world scenarios. In each
+protocol, we evaluate the performance of trained models under controlled domain
+14 Zhang et al.
+0
+1
+2
+A4 Poster Photo
+Print
+0
+3
+6
+PC Phone Tablet
+Replay
+0
+1
+2
+A4 Poster Photo
+Printw/o Dark Illumination
+(a) (b)
+A
+P
+C
+E
+R
+S
+s
+A
+P
+C
+E
+R
+Ss
+A
+P
+C
+E
+R
+S
+s
+AENetC,Gw/oGr AENetC,Gw/oGdBaseline
+Fig. 8. Representative examples of the effectiveness of geometric information. Higher
+APCERSs is worse. (a) AENetC,G w/o Gd perform the best in spoof type: “replay”(macro
+definition) and AENetC,G w/o Gr perform the best in spoof type: “print”(macro defini-
+tion). (b) The performance of AENetC,G w/o Gr improve largely on spoof type: “A4”,
+if we only calculate APCER under illumination conditions: “normal”, “strong” and
+“back”
+Table 5. Intro-dataset Benchmark results on CelebA-Spoof. AENetC,S,G achieved the
+best result. Bolds are the best results; ↑ means bigger value is better; ↓ means smaller
+value is better. * Model 2 defined in Auxiliary can be used as “image driven method”
+Model Backbone Parm. (MB)
+Recall (%)↑
+AUC↑ EER (%)↓ APCER (%)↓ BPCER (%)↓ ACER (%)↓
+FPR = 1% FPR = 0.5% FPR = 0.1%
+Auxiliary* [23] - 22.1 97.3 95.2 83.2 0.9972 1.2 5.71 1.41 3.56
+BASN [16] VGG16 569.7 98.9 97.8 90.9 0.9991 1.1 4.0 1.1 2.6
+AENetC,S,G ResNet-18 42.7 98.9 97.3 87.3 0.9989 0.9 2.29 0.96 1.63
+shifts. Specifically, we define two protocols. 1) Protocol 1 - Protocol 1 evaluates
+the cross-medium performance of various spoof types. This protocol includes
+3 macro types of spoof, where each covers 3 micro types of spoof. These three
+macro types of spoof are “print”, “repay” and “paper cut”. In detail, in each
+macro type of spoof, we choose 2 of their micro type of spoof for training, and
+the others for testing. Specifically, “A4”, “face mask” and “PC” are selected for
+testing. 2) Protocol 2 - Protocol 2 evaluates the effect of input sensor variations.
+According to imaging quality, we split input sensors into three groups: low-quality
+sensor, middle-quality sensor and high-quality sensor11. Since we need to test
+on three different kinds of sensor and the average performance of FPR-Recall
+is hard to measure, we do not include FPR-Recall in the evaluation metrics of
+protocol 2. Table 6 shows the performance under each protocol.
+7.3 Cross-Dataset Benchmark
+In this subsection, we perform cross-dataset testing on CelebA-Spoof and CASIA-
+MFSD dataset to further construct the cross-dataset benchmark. On the one
+hand, we offer a quantitative result to measure the quality of our dataset. On
+the other hand, we can evaluate the generalization ability of different methods
+according to this benchmark. The current largest face anti-spoofing dataset
+11 Please refer to supplementary for the detailed input sensors information.
+CelebA-Spoof 15
+Table 6. Cross-domain benchmark results of CelebA-Spoof. Bolds are the best results;
+↑ means bigger value is better; ↓ means smaller value is better
+Protocol Model
+Recall (%) ↑
+AUC↑ EER (%)↓ APCER (%)↓ BPCER (%)↓ ACER (%)↓
+FPR = 1% FPR = 0.5% FPR = 0.1%
+1
+Baseline 93.7 86.9 69.6 0.996 2.5 5.7 2.52 4.11
+AENetC,G 93.3 88.6 74.0 0.994 2.5 5.28 2.41 3.85
+AENetC,S 93.4 89.3 71.3 0.996 2.4 5.63 2.42 4.04
+AENetC,S,G 95.0 91.4 73.6 0.995 2.1 4.09 2.09 3.09
+2
+Baseline # # # 0.998 ±0.002 1.5±0.8 8.53±2.6 1.56±0.81 5.05±1.42
+AENetC,G # # # 0.995±0.003 1.6±4.5 8.95±1.07 1.67±0.9 5.31±0.95
+AENetC,S # # # 0.997±0.002 1.2±0.7 4.01±2.9 1.24±0.67 3.96±1.79
+AENetC,S,G # # # 0.998±0.002 1.3±0.7 4.94±3.42 1.24±0.73 3.09±2.08
+Table 7. Cross-dataset benchmark results. AENetC,S,G based on ResNet-18 achieves
+the best generalization performance. Bolds are the best results; ↑ means bigger value
+is better; ↓ means smaller value is better
+Model Training Testing HTER (%) ↓
+FAS-TD-SF [33] SiW CASIA-MFSD 39.4
+FAS-TD-SF [33] CASIA-SURF CASIA-MFSD 37.3
+AENetC,S,G SiW CASIA-MFSD 27.6
+Baseline CelebA-Spoof CASIA-MFSD 14.3
+AENetC,G CelebA-Spoof CASIA-MFSD 14.1
+AENetC,S CelebA-Spoof CASIA-MFSD 12.1
+AENetC,S,G CelebA-Spoof CASIA-MFSD 11.9
+CASIA-SURF [37] adopted FAS-TD-SF [33] (which is trained on SiW or CASIA-
+SURF and tested on CASIA-MFSD) to demonstrate the quality of CASIA-SURF.
+Following this setting, we first train AENetC,G , AENetC,S and AENetC,S,G based
+on CelebA-Spoof and then test them on CASIA-MFSD to evaluate the quality of
+CelebA-Spoof. As shown in Table 7, we can conclude that: 1) The diversity and
+large quantities of CelebA-Spoof drastically boosts the performance of vanilla
+model; a simple ResNet-18 achieves state-of-the-art cross-dataset performance.
+2) Comparing to geometric information, semantic information equips the model
+with better generalization ability.
+8 Conclusion
+In this paper, we construct a large-scale face anti-spoofing dataset, CelebA-
+Spoof, with 625,537 images from 10,177 subjects, which includes 43 rich at-
+tributes on face, illumination, environment and spoof types. We believe CelebA-
+Spoof would be a significant contribution to the community of face anti-spoofing.
+Based on these rich attributes, we further propose a simple yet powerful multi-task
+framework, namely AENet. Through AENet, we conduct extensive experiments
+to explore the roles of semantic information and geometric information in face
+anti-spoofing. To support comprehensive evaluation and diagnosis, we establish
+three versatile benchmarks to evaluate the performance and generalization ability
+of various methods under different carefully-designed protocols. With several
+valuable observations revealed, we demonstrate the effectiveness of CelebA-Spoof
+and its rich attributes which can significantly facilitate future research.
+16 Zhang et al.
+Acknowledgments
+This work is supported in part by SenseTime Group Limited, in part by Na-
+tional Science Foundation of China Grant No. U1934220 and 61790575, and the
+project Safety data acquisition equipment for industrial enterprises No.134. The
+corresponding author is Jing Shao.
+CelebA-Spoof 17
+References
+1. Bhattacharjee, S., Mohammadi, A., Marcel, S.: Spoofing deep face recognition with
+custom silicone masks. In: Proceedings of IEEE 9th International Conference on
+Biometrics: Theory, Applications, and Systems (BTAS) (2018) 4
+2. Boulkenafet, Z., Komulainen, J., Hadid, A.: Face antispoofing using speeded-up
+robust features and fisher vector encoding. IEEE Signal Processing Letters 24(2),
+141–145 (2016) 4
+3. Boulkenafet, Z., Komulainen, J., Hadid, A.: Face spoofing detection using colour
+texture analysis. TIFS 11(8), 1818–1830 (2016) 4
+4. Boulkenafet, Z., Komulainen, J., Li, L., Feng, X., Hadid, A.: Oulu-npu: A mobile
+face presentation attack database with real-world variations. In: FG. pp. 612–618.
+IEEE (2017) 2, 4, 9, 13, 20
+5. Chingovska, I., Anjos, A., Marcel, S.: On the effectiveness of local binary patterns
+in face anti-spoofing. In: BIOSIG. pp. 1–7. IEEE (2012) 2, 4
+6. Chingovska, I., Erdogmus, N., Anjos, A., Marcel, S.: Face recognition systems under
+spoofing attacks. In: Face Recognition Across the Imaging Spectrum, pp. 165–194.
+Springer (2016) 4
+7. Chollet, F.: Xception: Deep learning with depthwise separable convolutions. In:
+CVPR. pp. 1251–1258 (2017) 22
+8. Deng, J., Guo, J., Zhou, Y., Yu, J., Kotsia, I., Zafeiriou, S.: Retinaface: Single-stage
+dense face localisation in the wild. arXiv abs/1905.00641 (2019) 10
+9. Erdogmus, N., Marcel, S.: Spoofing 2d face recognition systems with 3d masks. In:
+BIOSIG. pp. 1–8. IEEE (2013) 4
+10. Feng, L., Po, L.M., Li, Y., Xu, X., Yuan, F., Cheung, T.C.H., Cheung, K.W.:
+Integration of image quality and motion cues for face anti-spoofing: A neural
+network approach. Journal of Visual Communication and Image Representation
+38, 451–460 (2016) 2, 4
+11. Feng, Y., Wu, F., Shao, X., Wang, Y., Zhou, X.: Joint 3d face reconstruction and
+dense alignment with position map regression network. In: ECCV. pp. 534–551
+(2018) 9
+12. de Freitas Pereira, T., Anjos, A., De Martino, J.M., Marcel, S.: Can face anti-
+spoofing countermeasures work in a real world scenario? In: ICB. pp. 1–8. IEEE
+(2013) 9, 20
+13. He, K., Zhang, X., Ren, S., Sun, J.: Deep residual learning for image recognition.
+In: CVPR. pp. 770–778 (2016) 22
+14. I.Chingovska, N.Erdogmus, A., S.Marcel: Face recognition systems under spoofing
+attacks. In: Bourlai, T. (ed.) Face Recognition Across the Imaging Spectrum.
+Springer (2015) 4
+15. Jourabloo, A., Liu, Y., Liu, X.: Face de-spoofing: Anti-spoofing via noise modeling.
+In: ECCV. pp. 290–306 (2018) 5, 9
+16. Kim, T., Kim, Y., Kim, I., Kim, D.: Basn: Enriching feature representation using
+bipartite auxiliary supervisions for face anti-spoofing. In: ICCV Workshops. pp. 0–0
+(2019) 5, 9, 14
+17. Kollreider, K., Fronthaler, H., Faraj, M.I., Bigun, J.: Real-time face detection and
+motion analysis with application in liveness assessment. TIFS 2(3), 548–558 (2007)
+4
+18. Li, J., Wang, Y., Tan, T., Jain, A.K.: Live face detection based on the analysis of
+fourier spectra. In: Biometric Technology for Human Identification. vol. 5404, pp.
+296–303. International Society for Optics and Photonics (2004) 4
+18 Zhang et al.
+19. Li, L., Feng, X., Boulkenafet, Z., Xia, Z., Li, M., Hadid, A.: An original face anti-
+spoofing approach using partial convolutional neural network. In: IPTA. pp. 1–6.
+IEEE (2016) 2, 4
+20. Liu, S.Q., Lan, X., Yuen, P.C.: Remote photoplethysmography correspondence
+feature for 3d mask face presentation attack detection. In: ECCV (September 2018)
+4, 5
+21. Liu, S., Yang, B., Yuen, P.C., Zhao, G.: A 3d mask face anti-spoofing database
+with real world variations. In: CVPR Workshops. pp. 1551–1557 (06 2016) 4
+22. Liu, S., Yuen, P.C., Zhang, S., Zhao, G.: 3d mask face anti-spoofing with remote
+photoplethysmography. In: ECCV. pp. 85–100. Springer (2016) 5
+23. Liu, Y., Jourabloo, A., Liu, X.: Learning deep models for face anti-spoofing: Binary
+or auxiliary supervision. In: CVPR. pp. 389–398 (2018) 2, 4, 5, 9, 13, 14
+24. Liu, Y., Stehouwer, J., Jourabloo, A., Liu, X.: Deep tree learning for zero-shot face
+anti-spoofing. In: CVPR. pp. 4680–4689 (2019) 4, 20
+25. Liu, Z., Luo, P., Wang, X., Tang, X.: Deep learning face attributes in the wild. In:
+ICCV (2015) 3, 5, 7, 19
+26. Määttä, J., Hadid, A., Pietikäinen, M.: Face spoofing detection from single images
+using texture and local shape analysis. IET biometrics 1(1), 3–10 (2012) 4
+27. Ojala, T., Pietikainen, M., Maenpaa, T.: Multiresolution gray-scale and rotation
+invariant texture classification with local binary patterns. TPAMI 24(7), 971–987
+(2002) 4
+28. Pan, G., Sun, L., Wu, Z., Lao, S.: Eyeblink-based anti-spoofing in face recognition
+from a generic webcamera. In: ICCV. pp. 1–8. IEEE (2007) 4
+29. Patel, K., Han, H., Jain, A.K.: Secure face unlock: Spoof detection on smartphones.
+TIFS 11(10), 2268–2283 (2016) 2, 4
+30. Schwartz, W.R., Rocha, A., Pedrini, H.: Face spoofing detection through partial
+least squares and low-level descriptors. In: 2011 International Joint Conference on
+Biometrics (IJCB). pp. 1–8. IEEE (2011) 4
+31. Shao, R., Lan, X., Li, J., Yuen, P.C.: Multi-adversarial discriminative deep domain
+generalization for face presentation attack detection. In: CVPR (2019) 5
+32. Sun, L., Pan, G., Wu, Z., Lao, S.: Blinking-based live face detection using conditional
+random fields. In: ICB. pp. 252–260. Springer (2007) 4
+33. Wang, Z., Zhao, C., Qin, Y., Zhou, Q., Qi, G., Wan, J., Lei, Z.: Exploiting temporal
+and depth information for multi-frame face anti-spoofing. arXiv (2018) 15
+34. Wen, D., Han, H., Jain, A.K.: Face spoof detection with image distortion analysis.
+TIFS 10(4), 746–761 (2015) 2, 4
+35. Yang, J., Lei, Z., Liao, S., Li, S.Z.: Face liveness detection with component dependent
+descriptor. In: ICB. pp. 1–6. IEEE (2013) 4
+36. Yang, X., Luo, W., Bao, L., Gao, Y., Gong, D., Zheng, S., Li, Z., Liu, W.: Face
+anti-spoofing: Model matters, so does data. In: CVPR. pp. 3507–3516 (2019) 2, 5, 9
+37. Zhang, S., Wang, X., Liu, A., Zhao, C., Wan, J., Escalera, S., Shi, H., Wang, Z.,
+Li, S.Z.: A dataset and benchmark for large-scale multi-modal face anti-spoofing.
+CVPR pp. 919–928 (2018) 2, 4, 15
+38. Zhang, X., Ng, R., Chen, Q.: Single image reflection separation with perceptual
+losses. In: ICCV. pp. 4786–4794 (2018) 9
+39. Zhang, Z., Yan, J., Liu, S., Lei, Z., Yi, D., Li, S.Z.: A face antispoofing database
+with diverse attacks. In: ICB. pp. 26–31. IEEE (2012) 2, 4
+CelebA-Spoof 19
+9 Appendix
+9.1 Detail Information of CelebA-Spoof Dataset
+Spoof Images in CelebA. As shown in Figure 9. In CelebA [25], there are
+347 “spoof” images, including poster, advertisements and portrait etc. For spoof
+instruments selection and live data collection on CelebA-Spoof, we manually
+examine these images and remove them.
+Table 8. Input sensor split in CelebA-Spoof, there are 24 different input sensors which
+are split into 3 groups based on image quality
+Sensor Dataset Pix. (MP) Release Sensor Dataset Pix. (MP) Release Sensor Dataset Pix. (MP) Release
+Low-Quality
+Sensor
+Honor V8 train test val 1200 2016
+Middle-Quality
+Sensor
+vivo X20 train test val 1200 2018
+High-Quality
+Sensor
+HUAWEI P30 train test val 4000 2019
+OPPO R9 train test val 1300 2016 Gionee S11 train test val 1300 2018
+HUAWEI MediaPad M5 train test 1200 2016 vivo Y85 train val 1600 2018
+Xiaomi Mi Note3 train test val 1200 2016 Hisense H11 train val 2000 2018
+Gionee S9 train test val 1300 2016 iphone XR train 1200 2018
+meizu 16S train test val 4800 2019Logitech C670i train 1200 2016
+OPPO A5 train 1300 2018
+ThinkPad T450 train 800 2016
+Moto X4 train test val 1200 2017 OPPO R17 train 1600 2018
+vivo NEX 3 train 6400 2019
+vivo X7 train test val 1200 2017 OPPO A3 train test val 1200 2019
+Dell 5289 train 800 2017 Xiaomi 8 train test val 1200 2019
+OPPO A73 train 1600 2017 vivo Y93 train test val 1300 2019
+Fig. 9. Representative examples of the “spoof ” images in CelebA
+Input Sensor Split. As shown in Table 8, according to imaging quality, we
+split 24 input sensors into 3 groups: low-quality sensor, middle-quality sensor
+and high-quality sensor. In detail, an input sensor is not necessarily used in the
+all training, verification and testing set, so we specify which dataset these input
+sensors would cover. Specifically, for cross-domain benchmark in CelebA-Spoof,
+only input sensors which are both used in training set and testing set are selected.
+20 Zhang et al.
+9.2 Experimental Details
+Formulations of Evaluation Metrics. To establish a comprehensive bench-
+mark, we unify 7 commonly used metrics (i.e. APCER, BPCER, ACER, EER,
+HTER, AUC and FPR@Recall). Besides AUC, EER and FPR@Recall which
+are the most common metrics of classification tasks, we list definitions and
+formulations of other metrics. 1) APCER, BPCER and ACER. Refer to [4,24],
+Attack Presentation Classification Error Rate (APCER) is used to evaluate
+the classification performance of models for spoof images. Bona Fide Presenta-
+tion Classification Error Rate (BPCER) is used to evaluate the classification
+performance of models for live images:
+APCERSs =
+1
+NSs
+NSs∑
+i=1
+(1−Resi) (3)
+APCER =
+1
+Nspf.
+Nspf.∑
+i=1
+(1−Resi) (4)
+BPCERSf =
+1
+NSf
+NSf∑
+i=1
+Resi (5)
+BPCER =
+1
+Nliv.
+Nliv.∑
+i=1
+Resi (6)
+ACER =
+(APCER+BPCER)
+2
+(7)
+where, NSs is the number of the spoof images of the given spoof type. NSs
+is the number of the live images of the given face attribute. Nliv. is the number
+of all live images. Resi takes the value 1 if the ith images is classified as an
+spoof image and 0 if classified as live image. APCERSs is computed separately
+for each micro-defined spoof type (e.g. “photo”, “A4”, “poster”) and APCER
+is the average of FAR and FRR, k is the number of micro-defined spoof type.
+Specifically, in CelebA-Spoof, we define BPCERSf which is computed separately
+for each face attribute. To summarize the overall performance of live images and
+spoof images, the Average Classification Error Rate (ACER) is used, which is
+the average of the APCER and the BPCER at the decision threshold defined by
+the Equal Error Rate (EER) on the testing set. 2) HTER. The aforementioned
+metrics are employed on intra-dataset (CelebA-Spoof) evaluation. For cross-
+dataset evaluation, HTER [12] is used extensively:
+HTER(D2) =
+FAR(τ(D1), (D2)) + FRR(τ(D1), (D2))
+2
+(8)
+where τ(Dn) is a threshold, Dn is the dataset, False Acceptance Rate (FAR) and
+False Rejection Rate (FRR) is the value in D2. In cross-dataset evaluation, the
+CelebA-Spoof 21
+Table 9. The mAP result of single-task and multi-task. There is huge space to improve
+the learning of S i in multi-task fashion. Bolds are the best results
+Attribute Model mAP (%)
+Ss AENetS
+s 45.7
+AENetC,S 46.2
+Sf
+AENetSf 68.5
+AENetC,S 70.5
+S i
+AENetSi 57.1
+AENetC,S 43.3
+Depthmap of Live Images Reflectionmap of Spoof Images
+Fig. 10. All live images have depth maps, but only the second and the third spoof
+image has reflection artifacts. Zoom in for better visualization
+value of τ(Dn) is estimated on the EER using the testing set of the dataset D1.
+In this equation, when D1 6= D2, we have the cross-dataset evaluation.
+The Limitations of Reflection Map. For ablation study of geometric infor-
+mation, we do not use reflection maps as unique binary supervision. This is
+because only parts of spoof images show reflect artifacts as shown in Figure 10.
+In this figure, only the second and the third spoof image shows reflect artifacts,
+the reflection map for other spoof images is zero. However, each live image has
+its corresponding depth map.
+Multi Task and Single Task. Besides ablation study of semantic information.
+We compare AENetSf , AENetSs and AENetSi with AENetC,S to explore whether
+multi-task learning can promote classification performance of these semantic
+information. In detail, as mentioned in model setting of Sec. Ablation Study
+on CelebA-Spoof. AENetSf , AENetSs and AENetSi are trained for classification
+of each semantic information. As shown in the Table 9. It shows that the
+mAP performance of S f and the Ss in AENetC,S is better than AENetSf and
+AENetSs . Specifically, these two semantic information are proven crucial to
+improve classification of live/spoof images in ablation study. Besides, the mAP
+performance of S i of AENetC,S is worse than AENetSi . This is because we set
+the λ = 0.01 of S i in the multi-task training but λ = 1 for all single task model.
+This small value let S i difficult to converge in multi task learning.
+22 Zhang et al.
+Table 10. Intro-dataset Benchmark results of CelebA-Spoof. AENetC,S,G achieved the
+best result. Bolds are the best results; ↑ means bigger value is better; ↓ means smaller
+value is better
+Model Parm. (MB)
+Recall (%)↑
+AUC↑ EER (%)↓ APCER (%)↓ BPCER (%)↓ ACER (%)↓
+FPR = 1% FPR = 0.5% FPR = 0.1%
+AENetC,G 79.9 98.3 97.2 91.4 0.9982 1.2 4.98 1.26 3.12
+AENetC,S 79.9 98.5 97.8 94.3 0.9980 1.3 4.22 1.21 2.71
+AENetC,S,G 79.9 99.2 98.4 94.2 0.9981 0.9 3.72 0.82 2.27
+Table 11. Cross-domain benchmark results of CelebA-Spoof. Bolds are the best results;
+↑ means bigger value is better; ↓ means smaller value is better
+Protocol Model
+Recall (%) ↑
+AUC↑ EER (%)↓ APCER (%)↓ BPCER (%)↓ ACER (%)↓
+FPR = 1% FPR = 0.5% FPR = 0.1%
+1
+Baseline 94.6 92.3 86.4 0.985 3.8 9.19 3.84 6.515
+AENetC,G 93.7 89.7 73.1 0.984 3.4 7.66 3.11 5.39
+AENetC,S 96.5 93.1 83.4 0.992 2.3 3.78 1.8 2.79
+AENetC,S,G 96.9 93.0 83.5 0.996 1.8 3.00 1.48 2.24
+2
+Baseline # # # 0.996±0.003 1.8±0.9 7.44±2.62 1.81±0.9 4.63±1.66
+AENetC,G # # # 0.994±0.006 1.7±0.6 9.16±1.97 1.56±1.68 5.36±1.23
+AENetC,S # # # 0.996±0.003 1.2±0.9 5.08±4.41 0.95±0.68 4.02±2.6
+AENetC,S,G # # # 0.997±0.003 1.3±1.2 4.77±4.12 1.23±1.06 3.00±2.9
+Table 12. Cross-dataset benchmark results of CelebA-Spoof. AENetC,S,G achieves the
+best generalization performance. Bolds are the best results; ↑ means bigger value is
+better; ↓ means smaller value is better
+Model Training Testing HTER (%) ↓
+Baseline CelebA-Spoof CASIA-MFSD 20.1
+AENetC,G CelebA-Spoof CASIA-MFSD 18.2
+AENetC,S CelebA-Spoof CASIA-MFSD 17.7
+AENetC,S,G CelebA-Spoof CASIA-MFSD 13.1
+9.3 Benchmark on Heavier Model
+In order to build a comprehensive benchmark, besides ResNet-18 [13], we also
+provide the corresponding results based on a heavier backbone, i.e. Xception [7].
+All the results on the following 3 benchmarks are based on Xception. Detail
+information about benchmark based on ResNet-18 is shown in paper. 1) Intra-
+Dataset Benchmark. As shown in Table 10, AENetC,S,G based on Xception achieve
+better performance comparing to AENetC,S,G based on ResNet-18, especially when
+FPR is smaller (i.e. FPR=0.5% and FPR=0.1%). This is because model with
+heavier parameters can achieve better robustness. 2) Cross-domain Benchmark. As
+shown in Table 11, AENetC,S,G based on Xception achieve the better performance
+than AENetC,S,G based on ResNet-18. And in protocol 1, comparing to baseline
+based on Xception. AENetC,S,G based on Xception outperforms baseline by 67.3%
+in APCER. 3) Cross-dataset Benchmark. As shown in Table 12. Performance
+of models based on Xception is worse than models based on ResNet-18. This is
+because models with heavier parameters tend to fit the training data.

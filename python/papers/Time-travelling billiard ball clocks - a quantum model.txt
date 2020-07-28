@@ -1,0 +1,2450 @@
+Time-travelling billiard ball clocks: a quantum model
+Lachlan Bishop,∗ Fabio Costa, and Timothy Ralph
+School of Mathematics and Physics, The University of Queensland, St Lucia, Queensland 4072, Australia
+(Dated: July 27, 2020)
+We present a novel quantum circuit formulation of the time-travelling billiard ball paradox. We
+show how the indeterministic histories of the paradox may be emulated via the incorporation of a
+vacuum state into the circuit’s Hilbert space. By employing a quantum clock state, we demonstrate
+how the multiple self-consistent trajectories of the billiard ball through the chronology-violating
+region can be distinguished. This technique enables us to rigorously probe the mechanisms of
+the two foremost quantum theories of time travel: Deutsch’s model (D-CTCs) and post-selected
+teleportation (P-CTCs). The results of this method when applied to our billiard ball paradox
+circuit prove to be nontrivial. These include observations such as how the suppression of the vacuum
+subspace forces a particle (clock) to be on the CTC (thereby constraining all trajectories through
+the circuit to interact with the CTC under both prescriptions), while the inclusion of a vacuum
+causes the P-CTCs and D-CTCs output states to become a superposition and mixture respectively
+of the CTC-interacting and CTC-noninteracting histories. We also demonstrate that under certain
+conditions the P-CTCs results agree with a conjecture made by Friedman et al. [Phys. Rev. D 42,
+1915 (1990)].
+I. INTRODUCTION
+Closed timelike curves (CTCs) form an interesting
+class of objects within the general theory of relativity
+as they present the possibility for an observer to travel
+back in time. Consequently, any physical system may
+be able to interact with its past-self, and so the poten-
+tial existence of CTCs within our own universe naturally
+evokes scientific investigation into time travel. The fore-
+most focus of such research is on questions regarding the
+nontrivial causal structure of CTC spacetimes and the
+consistency of the standard laws of physics.
+In some locally unobjectionable exact solutions to the
+Einstein field equations, CTCs naturally occur. How-
+ever, such spacetimes are often considered globally un-
+physical (like the classic swirling dust solutions of van
+Stockum [1] and Gödel [2]), and so the presence of inte-
+rior CTCs is usually considered to be an artefact of the
+theory. Despite this, it is believed that CTCs may be
+theoretically constructed in more globally physical space-
+times through the use of a traversable wormhole [3–5]. In
+essence, a wormhole is an exotic, theoretical topological
+object that connects two distant regions in space. In pop-
+ular culture, wormholes (either artificially constructed or
+naturally occurring) commonly provide a means of in-
+terstellar (or even intergalactic) transportation. They
+accomplish this by allowing spaceships to quickly tra-
+verse their short, tubiform interiors and emerge at distant
+locations far sooner than any alternative non-wormhole
+routes would allow. Alternatively, if two separate mo-
+ments in time were to be linked by wormhole instead
+of two separate locations, one would possess a time ma-
+chine [4, 6–9], i.e. a mechanism which can produce CTCs.
+Thus, wormholes are theoretically able to facilitate both
+∗ lachlan.bishop@uq.net.au
+long-distance space-travel and time travel. It is this basis
+on which this study, and many others, is established.
+The emergence of inconsistencies due to retrocausal
+action in the evolution of a physical system is an issue
+which is captured by the infamous grandfather paradox
+(detailed in [5]). This problem, which is perhaps the fore-
+most example of a time travel paradox, takes on many
+forms, all of which share the common characteristic of an-
+tichronological causation. The archetype of the paradox
+often features an observer who travels back in time and,
+through their actions (usually by interfering with the re-
+lationship between their young grandparents), prevents
+their own birth. Consequently, the observer is unable to
+travel back in time to preclude their existence, and the
+paradox is thus evident.
+Time travel paradoxes and the concept of retrocausal-
+ity lie at the foundation of the issues with CTCs. In
+particular, the inconsistencies associated with paradoxi-
+cal causal sequences have led to uncertainty regarding the
+pathology of CTCs and hence their research suitability.
+However, there is a distinct lack of evidence suggesting
+that the inconsistencies of CTC paradoxes are entirely
+inescapable. One may simply regard these problems as
+ill-posed, given that the initial conditions (existence and
+intervention intent of the observer) are influenced by the
+future occurrences (observer stopping their grandparents
+from meeting). To resolve this problem, we could sup-
+pose that there exists some fundamental characteristic of
+reality which forbids any future event from paradoxically
+altering the past.
+In particular, we could conjecture the existence an in-
+nate law by which the universe operates, called the prin-
+ciple of self-consistency [10], which prohibits paradoxical
+causal sequences from transpiring. Under this condition,
+a globally consistent solution of the local physical laws
+must exist. This means that, while a system is allowed to
+propagate into its own past, it must do so in a way that
+is consistent with its own original history. Any interac-
+ar
+X
+iv
+:2
+00
+7.
+12
+67
+7v
+1 
+ [
+qu
+an
+t-
+ph
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+mailto:lachlan.bishop@uq.net.au
+2
+tion that occurs must be compatible with the past, and
+causal sequences containing events solely of this nature
+are characterised as being self-consistent.
+One way to explore the compatibility between the laws
+of physics and CTCs is to determine whether the two
+can be consolidated without having unacceptable causal-
+ity violations manifest. This is typically accomplished
+by studying the evolution of simple systems in space-
+times containing CTCs, and one framework by which
+this is achieved involves the Cauchy problem for clas-
+sical fields in time machine spacetimes. In this prob-
+lem, one seeks to, amongst other things, prove or dis-
+prove the existence of the field solutions to the rele-
+vant time evolution equations of motion given generic
+initial data. By determining the nature of these solu-
+tions, one is able to formulate conclusive remarks re-
+garding the affinity of the union of (classical) field theory
+and CTCs. Interestingly, research into the Cauchy prob-
+lem in spacetimes with CTCs has yielded some perhaps
+unanticipated results given the seemingly restrictive re-
+quirement of self-consistency. Foremost are the findings
+[10–19], which show that globally consistent time evolu-
+tions for free relativistic classical scalar fields with generic
+initial data (posed before any regions with CTCs) exist
+and are generally unique in certain classes of nonglobally
+hyperbolic (including CTC) spacetimes. Consequently,
+at least in the context of noninteracting, classical scalar
+fields, CTCs appear to be robust and spacetimes con-
+taining them are not as pathological as one might have
+initially suspected.
+A. Time-travelling billiard balls
+For a spacetime with one or more chronology-violating
+sets (i.e. time machines), the past can be influenced by
+the future, provided that any changes which are made
+obey the self-consistency principle. The lack of such
+changes (i.e. self-interactions) in the Cauchy problem for
+noninteracting classical fields seems like a probable cause
+of its well-posedness on CTC spacetimes. Alternatively,
+a system that is able to self-interact (e.g. collide with
+its past/future self) is more likely to display unusual
+results—indeed, with an interacting field, uniqueness is
+thought to be lost as the strength of the interaction in-
+creases [14]. Therefore, in order to study this, models
+of interacting systems near CTCs were developed, and
+perhaps the most famous of these considers the elastic
+self-collision(s) of a time-travelling billiard ball. In this
+framework, a solid, elastic, spherical mass (the ‘billiard
+ball’) enters one mouth of a wormhole, exits the other
+at an earlier time (due to a time-shift having been in-
+duced between the wormhole’s two mouths), and then
+collides with its earlier (past) self. Depending on the ini-
+tial position and velocity of the ball, drastically distinct
+evolutions of the ball through the CTC-wormhole region
+can arise.
+Akin to that of grandfather paradox, some initial
+conditions produce paradoxical trajectories. Known as
+Polchinski’s paradox, any such contradictory evolution is
+characterised by causally inconsistent self-interaction(s).
+Typically, these scenarios involve the ball entering the
+time machine’s future mouth, subsequently exiting the
+past mouth, and then knocking its past self away, disal-
+lowing itself from ever reaching the wormhole in the first
+place.
+On the other hand, studies [8, 10, 20–24] involving
+time-travelling billiard balls have shown that, given the
+same initial data posed in the presence of CTCs, there
+can be multiple self-consistent solutions which satisfy the
+equations of motion. Fig. 1 illustrates a prominent ex-
+ample in which there are (at least) two distinct histories
+through which the billiard ball may evolve in a CTC-
+wormhole spacetime. This scenario is the foremost ex-
+ample of the billiard ball paradox, and will hereafter be
+referred to as such. Unlike in the case of the grandfa-
+ther paradox, the paradoxical issue here is not of self-
+inconsistent trajectories but is of the indeterminism in
+the self-consistent ones. This is to say that solutions al-
+ways exist because they self-adjust themselves (thereby
+providing consistency), but we now have a different issue,
+that of solution multiplicity. This new problem is an in-
+teresting one, as the existence of more than one solution
+to the equations of motion contrasts with the determin-
+ism typically associated with classical mechanics.
+It is natural to question whether the characteristic of
+L+L−
+(ti,xi)
+(tf ,xf)
+Evolution A
+x
+y
+(a)
+L+L−
+(ti,xi)
+(tf ,xf)
+Evolution B
+x
+y
+(b)
+FIG. 1. Two possible spatial trajectories of a classical billiard
+ball through CTC-wormhole spacetimes with the same initial
+data (i.e. position and velocity) in a two-dimensional slice of
+three-dimensional space. (a) depicts a chronology-respecting
+history (evolution A) while (b) shows a chronology-violating
+history (evolution B).
+3
+solution multiplicity is indeed merely an artefact of a clas-
+sical description and vanishes in a fully self-consistent
+quantum mechanical treatment, or whether it remains
+as a pathological aspect of CTCs and time travel under
+any physical description. In past work [10], it has been
+suggested that the indeterminism problem of the billiard
+ball paradox disappears in quantum theory. The rea-
+soning behind this is that, unlike classical mechanics, a
+quantum treatment provides one with ways of assigning
+solution probabilities, thereby replacing the classical the-
+ory’s multiplicity of solutions with a set of probabilities
+for the outcomes of all sets of measurements.
+For example, a quantum prescription based on the path
+integral/sum-over-histories formulation tells us that clas-
+sical trajectories coexist in a probabilistic sense. In a
+prominent paper by Friedman et al. [10], the authors dis-
+cuss such a prescription applied to the exact evolutions
+depicted in Fig. 1. When the ball begins in a nearly
+classical wave-packet, Friedman et al. postulate that a
+WKB approximation to their sum-over-histories method
+would find that the wave-packet emerges from the CTC-
+wormhole region having travelled along either evolution
+A or B with equal (i.e. 50%) probability. One interpre-
+tation of this is to say that the associated quantum bil-
+liard ball travels along both paths simultaneously through
+the time machine region, thus ameliorating the indeter-
+minism of classical mechanics. However, no calculation
+is provided in Ref. [10] or subsequent papers to sup-
+port their WKB approximation conjecture. Nonetheless,
+the pioneering semiclassical method proposed by Fried-
+man et al. motivates further study of this problem, as the
+interesting probabilistic result they postulated is simply
+inaccessible to classical mechanics.
+B. Quantum billiard ball paradox
+By its very nature, classical physics simply cannot
+make sense of solution multiplicity. Despite this, quan-
+tum treatments of specific instances of classical multi-
+plicity in time travel paradoxes have not actually been
+investigated in the literature. Prompted by this notable
+absence of such studies, in this paper we present a novel
+quantum model of the billiard ball paradox in which:
+(i) We consider a simplified (1+1)-dimensional version
+of the classical problem in which there are only two
+possible paths;
+(ii) We map this problem to a quantum circuit repre-
+sentation and allow the particles to be present or
+absent from particular paths; and
+(iii) We include internal degrees of freedom on the par-
+ticle that can operate as a clock and hence monitor
+the proper time along different paths.
+Our model is based upon two distinct mechanisms.
+The first of these allows the billiard ball to effectively
+function like a clock as a result of the incorporation of
+an internal degree of freedom into its quantum descrip-
+tion. Using this modification, we can measure the proper
+time of the distinct classical evolutions A and B, thus al-
+lowing us to determine which path the billiard ball took
+through the time machine region. The second mechanism
+is formed around the vacuum state. By considering such
+a state to represent the absence of a billiard ball, we can
+use it to allow the associated clock to either travel un-
+perturbed (if there is nothing, i.e. ‘vacuum’, in the CTC)
+or else be scattered into the CTC (if the billiard ball’s
+future self is trapped inside in the CTC).
+One of the open questions that we investigate here us-
+ing our model is whether a quantum description does
+indeed address the issue of evolution indeterminism. A
+problem with this question however is that there is no
+unique, well-defined way to treat the dynamics of physi-
+cal systems near CTCs quantum mechanically. In this
+work, our analysis of the model consists of two radi-
+cally different approaches, where one (Deutsch’s model,
+or D-CTCs) is based on the application of the self-
+consistency principle to the time-travelling system’s den-
+sity matrix, while the other (postselected teleportation,
+or P-CTCs) involves the path integral/sum-over-histories
+formulation.
+In our findings, we observe a multiplicity of solutions in
+the D-CTCs description, and we discuss how this arises
+naturally as a choice of entropy-dependent ‘initial state’
+in the CTC. We discuss how the classical form of these
+solutions supports the multiple universes interpretation
+typically associated with Deutsch’s model. Alternatively,
+in P-CTCs, only one quantum state is offered by the pre-
+scription as a solution to the paradox. Rather simply,
+the state takes the form of a pure superposition of the
+clock having evolved and not evolved on the CTC dur-
+ing its history through the time machine region (with
+the possible addition of a vacuum component depend-
+ing on the specification of the input state). A focus of
+these P-CTCs findings is how this superposition provides
+strong support for the semiclassical billiard ball conjec-
+ture of Friedman et al. in Ref. [10]. We also show how
+P-CTCs places constraints on initial data (where such
+restrictions depend on the future of the time-travelling
+state), thereby limiting the actions that one is able to
+perform in a P-CTCs universe.
+We begin with an introduction to the quantum me-
+chanical prescriptions of time travel (D-CTCs and P-
+CTCs) in Sec. II and follow this with a description of our
+quantum billiard ball paradox model in Sec. III (which
+includes a specification of our clock state in Sec. III A).
+General analytical results of the model along with visu-
+alisations of various quantities (using qubit clocks) are
+given in Sec. IV while discussions ensue in Sec. V. Con-
+cluding remarks are lastly made in Sec. VI.
+4
+II. QUANTUM MECHANICAL MODELS OF
+TIME TRAVEL
+Naturally, the advent of CTCs in the semiclassical gen-
+eral theory of relativity prompted study into quantum
+theories of time travel. In the absence of a complete
+quantum theory of gravity, reconciling CTCs with stan-
+dard quantum mechanics forms a compelling basis for
+research. Indeed, exploration into the interplay between
+quantum mechanics and CTCs, even in only a theoreti-
+cal manner, may provide insight into a yet unknown full
+theory of quantum gravity. In any case, research into
+this area has so far taken two main routes. The first, in
+which the principle of self-consistency is applied to the
+density matrix itself, gives the Deutsch model (D-CTCs).
+The second, which is equivalent to a path integral for-
+mulation, gives postselected teleportation (P-CTCs). Of
+course, alternative prescriptions of quantum time travel
+do exist [25–30], but none are as well-developed as either
+D-CTCs or P-CTCs and so they will not be discussed in
+this paper.
+A. The Deutsch model
+In 1991, David Deutsch [31] introduced a method
+of analysing the flow of information in a chronology-
+violating network. This prescription, now known as the
+Deutsch model or D-CTCs, consists of a quantum theory
+of computation applied to a CTC model where most of
+the geometry has been abstracted away. It is based on
+the requirement that time evolution of the local density
+operator (taken as a fundamental object) of a quantum
+system must be self-consistent.
+1. Deutsch’s resolution to time travel paradoxes
+One of the main results of Deutsch’s work on time
+travel is his proposal for the time evolution of quan-
+tum states through a quantum circuit representation of a
+chronology-violating network, with particular note as to
+how it resolves general time travel paradoxes (illustrated
+in Fig. 2) and indeterminism.
+The mathematical formulation of his self-consistent so-
+lution is provided by requiring that any given chronology-
+violating (CV) system enters the wormhole in the state
+θ ∈ HCV, and then emerges in the past in the same state
+despite having interacted with a chronology-respecting
+(CR) system in the (pure) state
+σ =
+∣∣ψ〉〈ψ∣∣ ∈ HCR (1)
+through a unitary U ∈ HCR ⊗ HCV. The joint den-
+sity operator entering the gate is simply the tensor prod-
+uct σ ⊗ θ ∈ HCR ⊗HCV so that the standard evolution
+through the unitary is given by
+EU [σ, θ] = U (σCR ⊗ θCV)U†. (2)
+σ
+U
+DU
+[
+σ, θ
+]
+θ TU
+[
+σ, θ
+]
+= θ
+FIG. 2. Quantum circuit formulation of a time-travelling
+quantum state. In this model, a (pure) system σ =
+∣∣ψ〉〈ψ∣∣
+interacts with state θ which is trapped on a CTC formed by
+a wormhole. The elastic collision described by the unitary
+U can scatter the system state into the future mouth of the
+wormhole. When this occurs, the system state evolves along
+the CTC and later emerges from the past mouth. From here,
+it becomes the second input of the elastic collision, and can
+subsequently be scattered into a detectable output state.
+One then traces out the CV and CR subsystems sepa-
+rately and denotes the resulting maps as
+TU
+[
+σ, θ
+]
+≡ trCR
+[
+U (σ ⊗ θ)U†
+]
+, (3a)
+DU
+[
+σ, θ
+]
+≡ trCV
+[
+U (σ ⊗ θ)U†
+]
+. (3b)
+Self-consistent solution(s) of the CTC state may then be
+identified as fixed point(s) of the CTC’s CV map (3a),
+which are expressible via
+θ = TU
+[
+σ, θ
+]
+= trCR
+[
+U (σ ⊗ θ)U†
+]
+. (4)
+This condition essentially codifies the requirement that
+the ‘younger’ CTC state (the right-hand side) exiting the
+gate is the same as the ‘older’ CTC state (the left-hand
+side) entering the gate. Once solutions to Eq. (4) are
+determined, the evolution of the system state σ through
+the interaction U in this Deutsch model is then simply
+given by Eq. (3b).
+The fact that the imposed self-consistency constraint
+in (4) is a fixed point condition means that the nonlin-
+earity introduced to the laws of quantum mechanics is
+distinct from that of other models. Furthermore, as the
+rigid matching requirement is for the density matrix as
+opposed to the individual states in a pure state decom-
+position, the Deutsch model intrinsically treats density
+matrices as ontic, ‘real’ objects rather than as epistemic
+state representations.
+2. Deutsch’s picture: The rule of maximum entropy
+Of crucial significance is the fact that the Deutsch pre-
+scription resolves time travel paradoxes without placing
+any constraints on the input system state. This is be-
+cause Deutsch proved that at least one consistent solu-
+tion of the map (4) exists for every unitary U and pure σ.
+It turns out however that some unitary interactions have
+a multiplicity of fixed points, which leads to nondeter-
+minism in the time evolution. To resolve this ambiguity,
+Deutsch argued that the ‘correct’ solution is the one with
+the most von Neumann entropy S, which is defined for
+an arbitrary state ρ as
+S(ρ) = −tr [ρ ln(ρ)] . (5)
+5
+θ(1) . . . θ(n−1) θ(n) . . . θ(∞−1)
+σ
+U
+σ
+U
+σ
+U
+DU
+[
+σ, θ
+]
+θ(0) θ(∞) = TU
+[
+σ, θ
+]
+FIG. 3. A quantum circuit formulation of the Ralph and Myers’s iterative method. In this model, the CTC-trapped state
+θ(n−1) enters the nth interaction U and exits in the state θ(n).
+When formulating this proposition, he appealed to ther-
+modynamics (the second law in particular), with his rea-
+soning being that the trapped CTC would tend towards
+a maximally entropic ‘equilibrium’ state. Given its lack
+of rigorous theoretical support however, Deutsch’s rule of
+maximum entropy is often considered to be an unsatis-
+factory approach to overcoming the problem of plurality
+in the CTC state solution.
+To overcome this uniqueness ambiguity with a more
+rigorous justification, Ralph and Myers introduced their
+equivalent circuit version [9, 32–34] of the D-CTC model.
+With contributions from Allen [26] and Dong et al. [35],
+one can conclude that using the normalised maximally
+mixed (identity) initial CTC ‘seed’ state
+θ(0) =
+1
+dim(HCV)
+1 (6)
+in an infinite number of consecutive iterations of the in-
+teraction, i.e.
+T∞U
+[
+σ, θ(0)
+]
+= lim
+K→∞
+1
+K + 1
+K∑
+k=0
+TkU
+[
+σ, θ(0)
+]
+(7)
+yields a state which is convergent to the stable solution
+with the most entropy. Here, TkU represents k consecutive
+applications of the interaction U . This entire process can
+be diagrammatically visualised as per Fig. 3.
+Together, the prescription of (6) along with the nor-
+malised infinite ‘loop’ map (7) then form a revised ver-
+sion of Deutsch’s maximum entropy rule, and it is con-
+sidered to be a more appealing condition because it is a
+consequence of the theory, unlike Deutsch’s original rule
+(which is essentially an educated conjecture).
+B. Postselected teleportation
+The other main prescription of the quantum mechan-
+ics of time travel, postselected teleportation (P-CTCs)
+[36, 37], also provides self-consistent resolutions to tem-
+poral paradoxes arising from time-travelling quantum
+states. The prescription, which is originally based on
+a path integral formulation of CTCs by Politzer [38], es-
+sentially consists of a quantum communication channel
+that is formed through quantum teleportation via posts-
+election (see Fig. 4).
+The CTC quantum channel is replaced with a maxi-
+mally entangled state
+∣∣φ〉 (e.g. a Bell state for qubits)
+and this allows for states to be transported between a
+σ
+U
+PU
+[
+σ
+]
+∣∣Φ〉 BS BM 〈Φ∣∣
+FIG. 4. A quantum circuit representation of the postselected
+teleportation model of a time-travelling quantum state. The
+circuit element BS denotes the preparation of a Bell (maxi-
+mally entangled) state
+∣∣φ〉 while BM is a Bell state measure-
+ment.
+sender and receiver through shared entanglement. Quan-
+tum teleportation further combined with postselection
+results in a quantum channel to the past. Time travel
+is then produced by entanglement between the forwards
+and backwards parts of the curve, and one thus obtains
+a possible theoretical description of quantum mechan-
+ics near CTCs. Note that the replacement of the CTC
+channel with the postselection of a maximally entangled
+state is equivalent to a path integral formulation in which
+the CTC state’s wave-function evolves in accordance with
+self-consistent ‘boundary conditions’ (initial and final co-
+ordinates are the same). This is why we say that P-CTCs
+has the distinguishing feature of being equivalent to the
+path integral formulation of quantum mechanics.
+In this prescription, the evolution σ → PU
+[
+σ
+]
+of the
+pure system input state is given by
+PU
+[
+σ
+]
+=
+WσW †
+tr [WσW †]
+∼
+W
+∣∣ψ〉√∣∣∣∣W ∣∣ψ〉∣∣∣∣ , (8)
+where the relation operator ∼ indicates the pure state
+form of the preceding density expression and W =
+trCV [U ] is the partial trace over the Hilbert space of the
+system in the CTC (with U being the unitary evolution
+that couples the CTC to the external system). The non-
+linearity in the time evolution indicates that the solutions
+are nonunitary, a feature shared by D-CTCs.
+C. Comparison
+Evidently, these two prescriptions are distinct, yet they
+each resolve time travel paradoxes in their own way. P-
+CTCs provide unique resolutions whereas D-CTCs re-
+quire an adjunct extension (i.e. the rule of maximum en-
+tropy [see section II A 2]) in order to mitigate the issue
+6
+of nonuniqueness. Since both are treatments of inter-
+acting quantum systems near CTCs however, we observe
+nonunitarity in the evolutions of CR systems in both,
+which in turn means that the output states are nonlinear
+functions of the input states. In the case of P-CTCs, the
+output states remain pure (if initially so) but become un-
+normalised (thereby requiring renormalisation), and such
+an effect jeopardises the usual probabilistic interpretation
+of quantum states. Oppositely, D-CTCs produce entropy
+through mixing of the input states. Additionally, another
+important difference between the two models is that for
+D-CTCs there is no restriction on the initial data, whilst
+with P-CTCs, the renormalisation leads to limits on the
+initial data as a function of the future.
+Nonlinearity is a highly nontrivial issue as its presence
+fundamentally changes the structure of the theory. This
+is because the standard proofs of many key theorems in
+quantum mechanics, which include the no-signalling, no-
+cloning, and indistinguishability of nonorthogonal states
+theorems, depend on its linearity. Therefore, given the
+nonlinearity and nonunitarity of D-CTCs and P-CTCs,
+it unsurprising that they have some very interesting ap-
+plications. Specifically, both D-CTCs [39] and P-CTCs
+[40] have uses in distinguishing nonorthogonal quantum
+states, while D-CTCs [41, 42] can clone arbitrary states
+and P-CTCs can both signal to the past [9, 43, 44] and
+delete arbitrary states. Consequences such as these, in
+addition to the possibility that either theory accurately
+describes time travel, undeniably motivates further study
+into D-CTCs and P-CTCs.
+III. MODEL
+The indeterminism observed in the billiard ball para-
+dox (Fig. 1) is an interesting feature common to time
+travel paradoxes in general. Classical problems which in-
+clude this feature form an interesting basis for research
+when treated quantum mechanically. This then form
+the motivation for our study, in which the evolution of
+a quantum clock through a circuit which emulates the
+self-consistent classical trajectories presented in Fig. 1 is
+explored. This makes for a novel model with which D-
+CTCs and P-CTCs can be further studied. Specifically,
+given the correspondence between P-CTCs and the path
+integral formulation, one detail that we are interested
+in verifying is if the semiclassical conjecture of Fried-
+man et al. in [10] (discussed in the introduction, Sec. I)
+agrees with our model’s P-CTCs prescription.
+A. Quantum clocks
+Classically, a billiard ball possesses no mechanism with
+which it can indicate the evolution it underwent through
+the CTC region. This is to say that there exists nothing
+in its final state which can tell us whether it did or did
+not interact with the CTC. To this end, in our quantum
+treatment, we introduce an internal degree of freedom
+to the billiard ball that, through its evolution, tells us
+how much time has passed (in its reference frame). In
+other words, we endow the billiard ball with a ‘clock’.
+For our purposes, this quantum modification serves to
+characterise the difference in proper time between evo-
+lutions A and B. Specifically, if this internal degree of
+freedom is observable in some manner (e.g. by looking at
+the ball’s ‘wristwatch’ upon its emergence from the CTC
+region) then, upon measurement, we can deduce which
+evolution the particle undertook. Such a modelling of an
+internal clock to track a quantum particle’s proper time
+was introduced in [45].
+For our analysis, we employ the N -level, pure,
+equiprobabilistic quantum clock state
+∣∣φ〉 = 1√
+N
+N∑
+n=1
+∣∣n〉, (9)
+where the number states {
+∣∣n〉}Nn=1, which obey orthonor-
+mality via the condition
+〈
+m
+∣∣n〉 = δ(n −m), collectively
+form a basis for the N -dimensional Hilbert space in which
+the clock resides. With this, let us define the clock Hamil-
+tonian as
+Hc =
+N∑
+n=1
+En
+∣∣n〉〈n∣∣ (10)
+where En is the energy of the nth eigenstate
+∣∣n〉. Time
+evolution of a state over the times t′ → t′′ is then gener-
+ated by the time evolution unitary, which in its standard
+form may be written
+R(t′′; t′) ≡ R(t′′ − t′) = e− iHc(t
+′′−t′)/~ . (11)
+Given this form, the evolution of an initial clock state∣∣φ(t)〉 (at time t) to a later state ∣∣φ(t + ∆t)〉 (at time
+t+ ∆t) is simply∣∣φ(t+ ∆t)〉 = R(∆t)∣∣φ(t)〉 = e− iHc∆t/~ ∣∣φ(t)〉. (12)
+Expanding (11) via a Taylor series and subsequently us-
+ing the Hamiltonian expansion (10) allows us to express
+an evolved state
+∣∣φ(t)〉 in terms of its constituent basis
+states {
+∣∣n〉}Nn=1 as
+∣∣φ(t)〉 = 1√
+N
+N∑
+n=1
+e− iEnt/~
+∣∣n〉. (13)
+The overlap between two states at different stages of time
+evolution is easily calculable as
+〈
+φ(t)
+∣∣φ(t+ ∆t)〉 = 1
+N
+N∑
+n=1
+e− iEn∆t/~, (14)
+which quantifies the distinguishability (i.e. coherence) be-
+tween the two clock states. Now, given our freedom of
+7
+choice in specifying the energies without losing generality
+or functionality of the clock, we may choose them to be
+equally spaced such that
+∆E = En − En−1. (15)
+Accordingly, the nth energy En can be expressed in terms
+of the ground state E1 and the spacing ∆E as
+En = E1 + (n− 1)∆E. (16)
+From this, we introduce the orthogonalisation time of our
+N -level clock, defined as
+t⊥ =
+2π~
+N∆E
+, (17)
+which represents the minimal time needed for a clock to
+evolve (under the now equally spaced Hamiltonian (10))
+into an orthogonal one. A system with finite t⊥ can be
+thought of as a clock which ‘ticks’ at a rate proportional
+to t−1⊥ . Using the form (17) and the energy level relation
+(16) allows us to write the clock overlap (14) as
+〈
+φ(t)
+∣∣φ(t+ ∆t)〉 = e− iE1∆t/~
+N
+N∑
+n=1
+exp
+[
+−2π i
+n− 1
+N
+∆t
+t⊥
+]
+.
+(18)
+A point to note is that our clocks, when composed of
+equally spaced energy eigenstates as imposed by (16), are
+dependent on only two parameters: the time t of their
+evolution and the energy E1 of their ground state
+∣∣1〉.
+Mathematically, this can be shown by using Eqs. (16)
+and (17) to express Eq. (13) as
+∣∣φ(t)〉 = e− iE1t/~√
+N
+N∑
+n=1
+exp
+[
+−2π i
+n− 1
+N
+t
+t⊥
+] ∣∣n〉. (19)
+In any case, by the series identity
+N∑
+n=1
+rn−1 =
+1− rN
+1− r
+, r 6= 1, (20)
+we may write Eq. (18) as
+〈
+φ(t)
+∣∣φ(t+ ∆t)〉 = e− iE1∆t/~
+N
+1− exp
+[
+−2π i ∆t
+t⊥
+]
+1− exp
+[
+−2π i 1
+N
+∆t
+t⊥
+] .
+(21)
+Evidently, in the case that the evolution time difference
+is equal to the orthogonalisation time, i.e. ∆t = t⊥, then
+from Eq. (21) it is easy to see that the clock overlap
+vanishes, i.e. 〈
+φ(t)
+∣∣φ(t+ ∆t)〉∣∣
+∆t=t⊥
+= 0. (22)
+The case of ∆t = t⊥ can thus be interpreted as when the
+clock’s ‘resolution’ exactly matches the time difference
+between the relevant states. This is the key mechanism
+with which one can investigate temporal differences be-
+tween the multiple trajectories (such as the two paths
+in the simple billiard ball paradox) that are generated
+via the indeterminism present in spacetimes containing
+CTCs.
+As a final point, note that the simple forms of the clock
+state and its associated Hamiltonian are only convenient
+choices—the results we obtain in this paper are com-
+pletely independent of them (provided the initial clock
+is not an energy eigenstate but is a superposition of dif-
+ferent energies). In particular, given that any quantum
+system can be decomposed into an orthogonal energy ba-
+sis, then our use of such a basis poses no restrictions on
+our findings. The use of uniform 1/
+√
+N weights in the
+initial state also merely provides simplicity compared to
+that of general amplitudes {cn}Nn=1. In the same vein,
+the fact that the energy levels are chosen to be equally
+spaced means that the orthogonalisation time is the same
+between orthogonal states. Nonequally spaced energies
+on the other hand would only prevent the simplification
+of the D-CTCs solutions. Indeed, the only consequential
+assumption that we make of our clock system is that it
+is finite-dimensional, which we justify by assuming that
+the clock states must belong in some set of bound states.
+B. Quantum circuit model of the billiard ball
+paradox
+The model which we study in this paper involves the
+evolution of the quantum clock state
+σ =
+∣∣φ〉〈φ∣∣, (23)
+along the classical trajectories illustrated in Fig. 1. For
+simplicity and rigour, we will work in (1 + 1) dimensions
+with a dynamical CTC-wormhole. This means that the
+mouths of the wormhole appear and disappear at exactly
+the right points in the spacetime to allow our clock to
+indeterministically self-interact within the CTC region
+given some arbitrary initial velocity. As a result, there
+is no need to constrain the paths of the clocks (i.e. with
+waveguides) or their initial velocity because the two dis-
+tinct histories of our model, depicted in Fig. 5, arise natu-
+rally as the only two paths through the spacetime. With
+this, we can represent the two evolutions of our clock
+in its reference frame through the CTC region as per
+Fig. 5, where we denote the proper travel time of the
+clock through the wormhole to be exactly ∆t.
+Given the trajectories of Fig. 5, it is easy to construct
+quantum circuit formulations for the clock states. Such
+circuits appear in Fig. 6. Here, the elastic self-collision
+of the clock between its past and future selves may be
+represented by the SWAP gate
+S =
+N∑
+i,j=1
+∣∣i〉〈j∣∣
+CR
+⊗
+∣∣j〉〈i∣∣
+CV
+. (24)
+8
+In effect, this exchange of the CV (trapped CTC)
+and CR (incoming system) quantum states mimics the
+momentum-exchange collision interaction between the
+billiard ball’s past and future selves. Next, in order to
+combine the two separate subcircuits of Fig. 6 into a sin-
+gle model, we introduce a vacuum state
+∣∣0〉 (orthonormal
+to the existing number states) into both the CR and CV
+Hilbert spaces. We mandate that the vacuum and clock
+cannot ‘collide’ with each other, and this effect will be
+introduced by modifying the SWAP gate to the form
+S̃ = 1̃CR ⊗
+∣∣0〉〈0∣∣
+CV
++
+∣∣0〉〈0∣∣
+CR
+⊗ 1̃CV
+−
+∣∣0〉〈0∣∣
+CR
+⊗
+∣∣0〉〈0∣∣
+CV
++ S (25)
+where 1̃ = 1+
+∣∣0〉〈0∣∣ is the identity matrix in a vacuum-
+inclusive Hilbert space. This altered SWAP simply ex-
+cludes the vacuum from swapping with the nonvacuous
+states. In this interpretation, the state
+∣∣0〉 represents
+the physical absence of a clock
+∣∣φ〉, hence the ‘vacuum’
+nomenclature. In the associated extended Hilbert space,
+we write the vacuum-inclusive time evolution unitary as
+R̃(t′′ − t′) =
+∣∣0〉〈0∣∣+R(t′′ − t′), (26)
+where for simplicity we assigned the vacuum with a van-
+ishing energy such that its time evolution phase coeffi-
+cient is unity. Next, the pure input clock state (9) is
+modified to include the vacuum,∣∣φ̃〉 = √Ω∣∣0〉+√1− Ω∣∣φ〉, 0 ≤ Ω ≤ 1, (27)
+which obeys the normalisation condition
+〈
+φ̃
+∣∣φ̃〉 = 1 and
+can be expressed in a density form as
+σ̃ =
+∣∣φ̃〉〈φ̃∣∣. (28)
+Given the results from the preliminary analyses of the
+circuits in the previous section, we can, without loss of
+generality, set for simplicity the inbound and outbound
+times both equal to zero, i.e.
+tin = tout = 0 (29)
+for all subsequent analysis. This means that a clock
+which does not interact with the CTC will not time evolve
+while one which does interact will time evolve (by the
+CTC ‘duration’ ∆t). With this in mind, we may depict
+our billiard ball paradox circuit model as per Fig. 7.
+With the altered SWAP gate (25), the vacuum-modified
+unitary corresponding to the circuit in Fig. 7 is simply
+Ũ =
+[
+1̃CR ⊗ R̃CV(∆t)
+]
+· S̃. (30)
+The effect of this vacuum model is to provide the clock
+state with the possibility of not interacting with the CTC
+if the trapped state is in the vacuum (hence the ‘vacuum’
+nomenclature, as the associated state represents the ab-
+sence of a clock). With this, the input state may either
+self-consistently interact with the CTC or it may pass
+straight through the circuit, thus allowing it to evolve
+through the circuit in the two paths of Fig. 1.
+L−
+L+
+�
+%
+�
+σ
+EA
+[
+σ
+]
+[0]
+[tin]
+[tin + tout]
+x
+t
+(a)
+L−
+L+
+�
+4
+" �
+σ
+EB
+[
+σ
+]
+[0]
+[tin][tin + ∆t]
+[tin + ∆t+ tout]
+x
+t
+(b)
+FIG. 5. Based on the simple billiard ball paradox in Fig. 1,
+these diagrams in 1 + 1 spacetime visualise the basic idea of
+the model under study in reference frame of the clock. (a)
+illustrates the history where the clock travels through the
+CTC-wormhole region with no interaction, while (b) shows
+the history of a clock which elastically interacts with itself.
+The times as measured by the clocks at specific points along
+the histories are given in brackets next to their analogue clock
+symbols. These clocks begin at time t = 0 and, due to their
+initial velocity, measure the proper times tA = tin + tout and
+tB = tin + ∆t+ tout = tA + ∆t for evolutions A and B respec-
+tively. This means that we denote the duration of the segment
+on the CTC in evolution B to be ∆t, while the inbound and
+outbound times to and from the wormhole axis (dashed line)
+are tin and tout respectively.
+σ R (tin + tout) EA
+[
+σ
+]
+θ R (∆t) θ
+(a)
+σ R (tin) R (tout) EB
+[
+σ
+]
+θ R (∆t) θ
+(b)
+FIG. 6. Quantum circuit models of the two trajectories under
+study. (a) depicts evolution A in Fig. 5a while (b) depicts
+evolution B in Fig. 5b.
+σ̃
+S̃
+E
+[
+σ̃
+]
+θ̃ R̃ (∆t) θ̃
+FIG. 7. The vacuum-based quantum circuit formulation of
+the billiard ball paradox (see Fig. 1) under study.
+9
+IV. RESULTS
+A. N-level general clocks
+Here we present the general analyses of the model using
+the N -level clocks introduced in Sec. III A.
+1. D-CTCs results
+With the unitary (30), CV fixed points present them-
+selves as solutions to the equation
+θ̃ =
+(
+1− |Ω|2
+) 〈
+0
+∣∣θ̃∣∣0〉∣∣0〉〈0∣∣+ |Ω|2 R̃θ̃R̃†
++
+(
+1− |Ω|2
+)(
+1−
+〈
+0
+∣∣θ̃∣∣0〉) R̃σ̃R̃†
++
+N∑
+i,j=1
+〈
+i
+∣∣σ̃∣∣j〉R̃[〈0∣∣θ̃∣∣i〉∣∣0〉〈j∣∣+ 〈j∣∣θ̃∣∣0〉∣∣i〉〈0∣∣]R̃†.
+(31)
+By direct substitution, one can verify that a solution ex-
+ists in the form
+TŨ [σ̃, θ̃](∆t,Ω, g) = g
+∣∣0〉〈0∣∣
++ (1− g)
+(1− Ω)
+Ω
+∞∑
+n=1
+Ωnσ(n)(∆t),
+(32)
+where σ(n)(∆t) is defined by the conventions
+Rn(t′′ − t′)
+∣∣φ〉 ≡ ∣∣φ(n)(t′′ − t′)〉, (33)∣∣φ(n)(t′′ − t′)〉〈φ(n)(t′′ − t′)∣∣ ≡ σ(n)(t′′ − t′). (34)
+On this result, firstly note the presence of the free param-
+eter 0 ≤ g ≤ 1, which indicates an infinite multiplicity
+in the set of solutions. Also observe how such solutions
+consist of the classical sum of the vacuum and an infi-
+nite series of clock states at different evolutionary times.
+This spectrum of clock CTC ‘windings’ are weighted by
+the input vacuum coefficient Ω such that, in the case of
+Ω < 1, higher-order windings have lesser probability to
+be trapped within the CTC.
+In terms of the equivalent circuit model, it is easy to
+analytically verify that these solutions correspond to the
+seed state
+θ̃(0)(g) = g
+∣∣0〉〈0∣∣+ (1− g)ρ, (35)
+i.e. an infinite number of applications of the unitary
+(30) to this CV state with the input CR state (27) con-
+verges to the solution (32). Here, ρ is an arbitrary nor-
+malised state existing in the clock subspace. In accor-
+dance with the revised Deutsch’s rule of maximum en-
+tropy (see Sec. II A 2), we choose the stable fixed point
+with maximal entropy given by the definition (5). In the
+equivalent circuit picture, this occurs to when the seed
+state is maximally mixed. Given that the fixed point is
+independent of ρ (its presence merely generates clocks
+within the CTC), we can choose ρ = 1
+N
+1 without loss of
+generality, and subsequently calculate the entropy to be
+S[θ̃(0)] = −g ln(g)− (1− g) ln
+(
+1− g
+N
+)
+. (36)
+This is maximised when
+∂S[θ̃(0)]
+∂g
+= 0 =⇒ g =
+1
+N + 1
+, (37)
+and the corresponding seed state is of course then simply
+θ̃(0)(g)
+∣∣∣
+g= 1
+N+1
+=
+1
+N + 1
+1̃, (38)
+as prescribed by the equivalent circuit method (6). In
+our subsequent analysis, we will retain the multiplicity
+parameter g in order to both simplify the notation and
+track its effect through the calculations.
+The D-CTCs output state corresponding to the fixed
+point (32) is found to be
+DŨ [σ̃, θ̃](∆t,Ω, g) = gσ̃ + (1− g)
+(1− Ω)
+Ω
+∞∑
+n=1
+Ωn
+[
+Ω
+∣∣0〉〈0∣∣+√Ω√1− Ωtr[Rn(∆t)]
+N
+∣∣0〉〈φ(n)(∆t)∣∣
++
+√
+Ω
+√
+1− Ω
+tr[R†n(∆t)]
+N
+∣∣φ(n)(∆t)〉〈0∣∣+ (1− Ω)σ(n)(∆t)
+]
+(39)
+where we used
+〈
+φ(0)
+∣∣φ(n)(∆t)〉 = tr[Rn(∆t)]
+N
+. (40)
+Let us now analyse these results. First, it is easy to
+analytically verify that the state populations are constant
+10
+with respect to ∆t, and in fact take the values
+〈
+k
+∣∣TŨ ∣∣k〉 =
+{
+g, k = 0,
+1
+N
+(1− g) , k > 0;
+(41)
+〈
+k
+∣∣DŨ ∣∣k〉 =
+{
+Ω, k = 0,
+1
+N
+(1− Ω) , k > 0.
+(42)
+These results tell us the parameter g directly controls the
+mixing between vacuous and nonvacuous levels for the
+CV trapped state while Ω has exactly the same effect on
+the CR output state.
+Next, we can compute the probabilities of measuring
+unevolved and orthogonal clocks in both D-CTCs states
+to be
+〈
+φ(0)
+∣∣TŨ ∣∣φ(0)〉 = (1− g) (1− Ω)Ω
+∞∑
+n=1
+Ωn
+tr[Rn(∆t)]tr[R†n(∆t)]
+N2
+, (43a)
+〈
+φ(t⊥)
+∣∣TŨ ∣∣φ(t⊥)〉 = (1− g) (1− Ω)Ω
+∞∑
+n=1
+Ωn
+tr[R†(t⊥)R
+n(∆t)]tr[R†n(∆t)R(t⊥)]
+N2
+; (43b)
+〈
+φ(0)
+∣∣DŨ ∣∣φ(0)〉 = g + (1− g) (1− Ω)2Ω
+∞∑
+n=1
+Ωn
+tr[Rn(∆t)]tr[R†n(∆t)]
+N2
+, (44a)
+〈
+φ(t⊥)
+∣∣DŨ ∣∣φ(t⊥)〉 = (1− g) (1− Ω)2Ω
+∞∑
+n=1
+Ωn
+tr[R†(t⊥)R
+n(∆t)]tr[R†n(∆t)R(t⊥)]
+N2
+, (44b)
+where we used the fact that
+0 =
+〈
+φ(0)
+∣∣φ(t⊥)〉 = tr[R(t⊥)]
+N
+. (45)
+These quantities tell us the relative likelihoods of detect-
+ing either type of clock trapped within the CTC or exiting
+the CTC region. From them, we deduce the relations〈
+φ(0)
+∣∣DŨ ∣∣φ(0)〉 = g + (1− Ω)〈φ(0)∣∣TŨ ∣∣φ(0)〉, (46)〈
+φ(t⊥)
+∣∣DŨ ∣∣φ(t⊥)〉 = (1− Ω)〈φ(t⊥)∣∣TŨ ∣∣φ(t⊥)〉, (47)
+with which we infer that the D-CTCs trapped and output
+state clock probabilities are related linearly with respect
+to ∆t.
+2. P-CTCs results
+According to P-CTCs, to find the output state we first
+must trace out the CV channel from the unitary (30),
+which yields
+W̃ ≡ trCV[Ũ ] = tr[R̃(∆t)]
+∣∣0〉〈0∣∣+ 1+R(∆t). (48)
+With this, the output in pure state form is simply
+PŨ
+[
+σ̃
+]
+(∆t,Ω) =
+W̃ σ̃W̃ †
+tr[W̃ σ̃W̃ †]
+∼
+1√
+|N |
+{
+√
+Ω tr[R̃(∆t)]
+∣∣0〉+√1− Ω[∣∣φ(0)〉+ ∣∣φ(∆t)〉]
+}
+(49)
+where the normalisation constant N is given by
+N = tr[W̃ σ̃W̃ †]
+= Ω tr[R̃(∆t)]tr[R̃†(∆t)]
++ (1− Ω)
+(
+2 +
+tr[R(∆t)] + tr[R†(∆t)]
+N
+)
+. (50)
+The corresponding state populations are
+〈
+k
+∣∣PŨ ∣∣k〉 = 1N ×
+{
+Ω tr[R̃(∆t)]tr[R̃†(∆t)], k = 0,
+(1− Ω) |1 +Rkk(∆t)|
+2
+, k > 0.
+(51)
+Unlike the D-CTCs populations in Eqs. (41) and (42),
+we observe that these expressions are not simply ∆t-
+independent constants in P-CTCs. Lastly, we can com-
+11
+pute the clock probabilities to be
+〈
+φ(0)
+∣∣PŨ ∣∣φ(0)〉 = 1N (1− Ω)
+∣∣∣∣1 + tr[R(∆t)]N
+∣∣∣∣2 ,
+(52a)〈
+φ(t⊥)
+∣∣PŨ ∣∣φ(t⊥)〉 = 1N (1− Ω)
+∣∣∣∣ tr[R†(t⊥)R(∆t)]N
+∣∣∣∣2 .
+(52b)
+B. 2-level qubit clocks
+To further comprehend the results of the previous sec-
+tion, we can employ numerical methods to generate visu-
+alisations of the various quantities. For simplicity, these
+plots can be produced by employing qubit (i.e. N = 2
+dimensions) quantum clock states,
+∣∣φ(0)〉 = 1√
+2
+(∣∣1〉+ ∣∣2〉) , (53)
+where
+∣∣1〉 and ∣∣2〉 are the ground and excited states re-
+spectively. By Eqs. (16) and (17), the associated clock
+gate may be written as
+R(∆t) = e− iE1∆t/~
+(∣∣1〉〈1∣∣+ e− iπ∆t/t⊥ ∣∣2〉〈2∣∣) , (54)
+so that the orthogonalisation time ∆t = t⊥ transforms
+the initial clock qubit (53) into the orthogonal state
+∣∣φ(t⊥)〉 = R(t⊥)∣∣φ(0)〉 = e− iE1t⊥/~√
+2
+(∣∣1〉− ∣∣2〉) . (55)
+Importantly, note that qubit clocks only have 2 mutually
+orthogonal states, which means that multiple loops of the
+CTC (such as those described the clock spectrums of 32
+and 39) cannot be captured by such clocks.
+The quantities of interest which we will visualise in-
+clude the energy level populations (of the
+∣∣0〉, ∣∣1〉 and∣∣2〉 states) and clock probabilities (both the unevolved∣∣φ(0)〉 and orthogonal ∣∣φ(t⊥)〉 clocks). From these di-
+agrams, we can discern the behaviours of the vacuum
+model in terms of both D-CTCs and P-CTCs. Note that
+all of our D-CTCs plots will use g = 1
+3
+in accordance
+with the rule of maximal entropy (37).
+1. D-CTCs qubit visualisations
+By employing qubit clocks, it is easy to plot the
+trapped (43) and output (44) probabilities, and such vi-
+sualisations appear respectively in Figs. 8 and 9. For
+both the CV and CR systems, these plots depicts the
+transition from constant probability profiles (Ω = 1) to
+curved ones (Ω < 1), where the trough and peak be-
+haviours become more pronounced as Ω → 0. For the
+0.0 0.5 1.0 1.5 2.0
+∆t/t
+0.0
+0.5
+1.0
+〈φ
+(0
+)|
+T
+Ũ
+|φ
+(0
+)〉
+0.0
+0.2
+0.4
+0.6
+0.8 1.0
+0.0 0.5 1.0 1.5 2.0
+∆t/t
+0.0
+0.5
+1.0
+〈φ
+(t
+)|
+T
+Ũ
+|φ
+(t
+)〉
+0.
+0
+0.
+2 0
+.4
+0.6
+0.8 1.0
+FIG. 8. D-CTCs CV clock probabilities for the vacuum model
+in the case of the CTC multiplicity parameter g is 1
+3
+(for which
+the CV state is maximally entropic). The lines correspond to
+varying values of
+√
+Ω.
+0.0 0.5 1.0 1.5 2.0
+∆t/t
+0.0
+0.5
+1.0
+〈φ
+(0
+)|
+D
+Ũ
+|φ
+(0
+)〉
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+0.0 0.5 1.0 1.5 2.0
+∆t/t
+0.0
+0.5
+1.0
+〈φ
+(t
+)|
+D
+Ũ
+|φ
+(t
+)〉
+0.
+0
+0.
+2
+0.4
+0.6
+0.8
+1.0
+FIG. 9. D-CTCs CR clock probabilities for the vacuum model
+in the case of g = 1
+3
+. The lines correspond to varying values
+of
+√
+Ω.
+12
+CV probabilities, an interesting feature is that while they
+are both exactly 1
+3
+(which corresponds to the maximally
+entropic selection of g for our qubit clocks) for Ω = 1, any
+infinitesimal variation of Ω below 1 results in the prob-
+abilities jumping discontinuously to assume their curved
+behaviours. This indicates that the spectrum of clocks
+at differing rotation (as per the series in Eq. (32)) mate-
+rialises inside the CTC as soon as Ω varies from 1.
+2. P-CTCs qubit visualisations
+Qubit plots, appearing in Fig. 10, serve to illustrate the
+behaviour of the P-CTCs populations (51) in terms of Ω
+and ∆t. Note the symmetry about the orthogonalisation
+time ∆t = t⊥ and that summation to 1 is preserved for
+all Ω and ∆t (as expected). Also note how as Ω → 1,
+the populations of the clock’s nonvacuous energy states
+0.0 0.5 1.0 1.5 2.0
+∆t/t
+0.0
+0.5
+1.0
+〈 0
+| P
+Ũ
+| 0
+〉
+0.0
+0.2
+0.4
+0.
+6
+0.8
+1.0
+0.0 0.5 1.0 1.5 2.0
+∆t/t
+0.0
+0.5
+1.0
+〈 1
+| P
+Ũ
+| 1
+〉
+0.0
+0.
+2
+0.
+4
+0.6
+0.8
+1.0
+0.0 0.5 1.0 1.5 2.0
+∆t/t
+0.0
+0.5
+1.0
+〈 2
+| P
+Ũ
+| 2
+〉
+0.0
+0.2
+0.4 0.6 0.
+8
+1.0
+FIG. 10. P-CTCs populations for the vacuum model. The
+lines correspond to varying values of
+√
+Ω.
+{
+∣∣n〉}Nn=1 go to zero while the vacuum population goes
+to 1. Additionally, the visualisations indicate how the
+clock’s collective level amplitudes skew towards the the
+ground state
+∣∣1〉 as ∆t→ t⊥ from either side.
+Next, the clock probabilities (52) are visualised in
+Fig. 11. Of interest is the fact that these probabilities
+behave in the same manner as the CR output from the
+D-CTCs analysis of Fig. 9 barring three relatively small
+differences. The first two of these differences is that the
+P-CTCs troughs (for the unevolved clock) and peaks (for
+the orthogonal clock) are both narrower and reach the
+same extrema (which occur at orthogonalisation). The
+third and perhaps most interesting difference is that the
+unevolved clock curves display a kind of behaviour in-
+version as Ω varies. Beginning initially with trough-like
+profiles at small Ω, the lines transition into symmetric
+peaks (albeit small) at large Ω (e.g.
+√
+Ω = 0.8), until
+they finally flatten out at Ω = 1.
+V. DISCUSSION
+Evidently, our quantum circuit model produces non-
+trivial results in terms of D-CTCs and P-CTCs. Here,
+we highlight some interesting features of the results, com-
+pare the two prescriptions, discuss the effects of the pa-
+rameters g, Ω and ∆t, and conclude with some general
+remarks.
+The form of the D-CTCs trapped state becomes intu-
+itive in the equivalent circuit picture. Provided the mul-
+0.0 0.5 1.0 1.5 2.0
+∆t/t
+0.0
+0.5
+1.0
+〈φ
+(0
+)|
+P
+Ũ
+|φ
+(0
+)〉
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+0.0 0.5 1.0 1.5 2.0
+∆t/t
+0.0
+0.5
+1.0
+〈φ
+(t
+)|
+P
+Ũ
+|φ
+(t
+)〉
+0.0
+0.
+2
+0.
+4
+0.6
+0.8 1.0
+FIG. 11. P-CTCs clock probabilities for the vacuum model.
+The lines correspond to varying values of
+√
+Ω.
+13
+tiplicity parameter satisfies g < 1, then the seed state is
+a mixture of the vacuum and clock energy levels. With
+this, in each iteration through the circuit (i.e. application
+of the unitary (30)), the nonvacuous portion of the CTC
+state (initially (1−g) 1
+N
+1) effectively ‘catches’ a unevolved
+clock from the input state into the CTC. Any existing
+nonvacuous states inside the CTC are then multiplied by
+the probability that the CR state is vacuous, i.e. Ω, which
+corresponds to the chance that the trapped clock(s) will
+be unable to leave the CTC. Lastly, everything inside
+the CTC time evolves, i.e. rotates by the time delay ∆t.
+After an infinite number of interations, we end up with
+the infinite spectrum of clocks (1− g)
+∑∞
+n=1 Ω
+nσ(n)(∆t),
+which after normalisation by (1−Ω)/Ω and the addition
+of the unchanged vacuum portion g
+∣∣0〉〈0∣∣, leaves us with
+our CV solution (32).
+The D-CTCs CR output state is then simple to inter-
+pret. The vacuous CV component allows for input CR
+clocks to pass through the circuit unaffected, while the
+spectrum of trapped clocks swaps with the input clock
+and combines with the input vacuum in the CR out-
+put. Note that if the tr[Rn(∆t)]/N and tr[R†n(∆t)]/N
+factors in the output (39) were unity, then the infi-
+nite series term would reduce to the vacuum-clock spec-
+trum
+∑∞
+n=1 Ω
+nσ̃(n)(∆t). This of course only occurs when
+∆t = mNt⊥ (m ∈ Z>0) however, which is the case where
+the spectrum disappears due to complete revolution of
+the clock.
+Conversely, the P-CTCs output (49) is, excluding the
+single pure vacuum state, a simple superposition of the
+unevolved and singly evolved clocks states. This is in
+stark contrast with the spectrum of higher-order wind-
+ings in D-CTCs associated with 0 < Ω < 1. It is only in
+the case that Ω = 0 where the D-CTCs output reduces
+to a classical mixture of the unevolved and singly evolved
+clock superposition, i.e.
+√
+g
+∣∣φ(0)〉±√1− g∣∣φ(∆t)〉.
+A. Effects of the various circuit parameters
+1. The effect of the multiplicity parameter g
+When solving the D-CTCs conditions (3) analytically
+for our vacuum model, a degree of freedom g inescapably
+arose in the solutions to the CV trapped state (32). It
+became apparent that this quantity emerged out of neces-
+sity as a way to characterise the circuit’s inherent multi-
+plicity of solutions. In particular, it was determined that
+g continuously parametrises the CV solutions, thereby
+meaning that the trapped state has an infinite set of
+solutions. As a consequence, the solution multiplicity
+characterised by g propagates through to the CR out-
+put states (39), yielding a solution set which is likewise
+dependent on g.
+The D-CTCs prescription of our circuit is then not
+extraordinary in that it exhibits solution multiplicity,
+a feature which is distinctive of Deutsch’s model itself.
+One then sets out to resolve the multiplicity in accor-
+dance with the model: finding the value of g where the
+CV trapped state is both maximally entropic and sta-
+ble. This is accomplished via the equivalent circuit model
+(see Sec. II A 2), wherein one begins with the maximally
+mixed seed state and evolves it through the circuit an
+infinite number of times. We observe that the value of
+g = 1/(N + 1) (where N is the number of clock energy
+levels) corresponds to our desired maximally entropic CV
+solution. More generally however, we notice that a seed
+state (35) consisting of skewed mixture (controlled by g)
+of the vacuum and nonvacuous energy levels converges
+to the g-dependent set of solutions originally computed.
+This is because the separate components in the end state
+fixed point are linear transformations of the input com-
+ponents of the seed state, which consequently means that
+the initial mixture of the seed state directly controls the
+form of the CV state. Of interest is the fact that level
+populations of the initial seed state correspond exactly to
+those of the CV state (41), which encapsulates the effect
+that g and therefore the multiplicity have on the trapped
+state.
+In terms of clocks and vacuum prescription of our cir-
+cuit, its behaviour with regards to g is both simple and
+intuitive. It is easy to see that the vacuous part of the CV
+mixture (32), accompanied by its probability g, directly
+controls the density of unevolved clock (corresponding to
+evolution A) in the CR output (39). This is physically
+intuitive as when the CTC is vacuous, incoming clocks
+are unable to interact with it (and consequently time
+evolve), leaving them unevolved. Conversely, the comple-
+ment probability 1− g governs the proportion of evolved
+clocks in the CV state mixture and therefore the likeli-
+hood of observing either the vacuum or an evolved clock
+in the CR output. In essence, the multiplicity parame-
+ter g stems from the initial mixture of the CV seed state
+and consequently sets the structure of the CV trapped
+and CR output states in terms of clocks (both unevolved
+and evolved) and the vacuum.
+2. The effect of the vacuum parameter Ω
+Unlike the multiplicity parameter g, the vacuum input
+amplitude
+√
+Ω influences the results of both D-CTCs and
+P-CTCs. In the former, its presence causes any nonva-
+cuous components of the CV state to loop around the
+CTC upon interaction with the CR state. However, in
+P-CTCs its effect is trivial in that, due to the necessary
+renormalisation, it merely controls the relative amplitude
+between the vacuum and clock levels in the output state.
+Consider the case where Ω = 0, corresponding to when
+the input state consists of only the clock (and no vac-
+uum). Here, the D-CTCs and P-CTCs states reduce to
+TŨ
+[
+σ̃, θ̃
+]∣∣∣
+Ω=0
+= g
+∣∣0〉〈0∣∣+ (1− g)σ(∆t), (56a)
+DŨ
+[
+σ̃, θ̃
+]∣∣∣
+Ω=0
+= gσ(0) + (1− g)σ(∆t); (56b)
+14
+PŨ
+[
+σ̃
+]∣∣
+Ω=0
+∼
+∣∣φ(0)〉+ ∣∣φ(∆t)〉√∣∣∣2 + tr[R(∆t)]+tr[R†(∆t)]N ∣∣∣
+. (57)
+Of importance is the fact that the D-CTCs states no
+longer contain clocks of rotation order higher than 1.
+This is due to the fact that by setting Ω = 0, we re-
+move the sole mechanism with which clock states cannot
+swap out of the CTC, thereby eliminating any eternally
+trapped clocks. As a consequence, the D-CTCs CV state
+becomes simply a classical mixture of the vacuum and
+the singly evolved clock, which has a direct interpreta-
+tion as describing a CTC either containing nothing or a
+clock respectively. These two classical alternatives then
+directly specify what occurs within the CTC region. In
+the former, where there is probability g that that there
+is no clock in the CTC, and so there is an equal probabil-
+ity of the external clock not interacting with the CTC.
+Hence, the output clock
+∣∣φ(0)〉 must have followed the
+classical evolution A. Alternatively, in the latter case,
+a clock was in the CTC with a complement probability
+1− g. This can only happen if the initial clock was scat-
+tered into it, which means that the evolved clock (which
+was kicked out by its younger self) takes on the form∣∣φ(∆t)〉 in accordance with the classical trajectory B.
+At the other extreme case, Ω = 1, all states in both
+quantum descriptions are purely vacuous, i.e.
+TŨ
+[
+σ̃, θ̃
+]∣∣∣
+Ω=1
+=
+∣∣0〉〈0∣∣, (58a)
+DŨ
+[
+σ̃, θ̃
+]∣∣∣
+Ω=1
+=
+∣∣0〉〈0∣∣; (58b)
+PŨ
+[
+σ̃
+]∣∣
+Ω=1
+=
+∣∣0〉〈0∣∣. (59)
+This is perhaps what might intuitively expect as when
+only the vacuum (Ω = 1) is used as input, all states in
+both prescriptions cannot be anything but vacuous.
+These two cases highlight an interesting feature of our
+model which is particularly apparent in D-CTCs. Here,
+the presence of the vacuum in the trapped state is of
+course independent of the input vacuum coefficient Ω.
+Since the vacuum is unable to be exchanged across the
+quantum channels given our modified SWAP gate, then its
+manifestation on the CV channel can only be caused by
+the extension of the CV channel’s Hilbert space (which
+initially consists of only the clock subspace) to include
+the vacuum subspace. This also occurs in P-CTCs in
+much the same way as, although we are unable to define
+a CTC state, the indeterministic interaction of the clock
+with the CTC that we observe is only possible if the CTC
+has a vacuous component.
+3. The effect of the CTC time delay ∆t
+The phase rotation of the CTC, denoted as ∆t and in-
+terpreted as the CTC’s time delay, yields which-way in-
+formation and thus distinguish the two classical histories
+of the billiard ball paradox. Its influences on the solu-
+tions are fairly intuitive and simple. To examine these
+effects further, we will look at a few important cases.
+Firstly, when ∆t = 0, one can interpret the CTC as
+having a vanishingly short length. As a result, the two
+histories of the billiard ball paradox become, at no fault
+of our clock, indistinguishable in the sense that the clock
+does not time evolve during its history through the cir-
+cuit. The associated states are therefore
+TŨ
+[
+σ̃, θ̃
+]∣∣∣
+∆t=0
+= g
+∣∣0〉〈0∣∣+ (1− g)σ(0), (60a)
+DŨ
+[
+σ̃, θ̃
+]∣∣∣
+∆t=0
+= σ̃(0); (60b)
+PŨ
+[
+σ̃
+]∣∣
+∆t=0
+∼
+(N + 1)
+√
+Ω
+∣∣0〉+ 2√1− Ω∣∣φ(0)〉√
+(N + 1)2Ω + 4(1− Ω)
+. (61)
+For the P-CTCs state, note the linear dependence of the
+vacuum component’s amplitude on the clock’s dimension
+N . This indicates that as the dimensions become more
+numerous, the probability of measuring a clock in the
+output becomes smaller, thereby amplifying the vacuum.
+Conversely, in the case of ∆t = t⊥, we can use the fact
+that R(t⊥) = 1 to write the solutions as
+TŨ
+[
+σ̃, θ̃
+]∣∣∣
+∆t=t⊥
+= g
+∣∣0〉〈0∣∣+ (1− g) 1− Ω
+1− ΩN
+1
+Ω
+N∑
+n=1
+Ωnσ(n)(t⊥), (62a)
+DŨ
+[
+σ̃, θ̃
+]∣∣∣
+∆t=t⊥
+= gσ̃(∆t) + (1− g)(1− Ω)
+[
+Ω
+1− Ω
+∣∣0〉〈0∣∣+ 1− Ω
+1− ΩN
+1
+Ω
+N∑
+n=1
+Ωnσ(n)(t⊥)
+]
+; (62b)
+PŨ
+[
+σ̃
+]∣∣
+∆t=t⊥
+∼
+√
+Ω
+∣∣0〉+√1− Ω [∣∣φ(0)〉+ ∣∣φ(t⊥)〉]√
+2− Ω
+. (63)
+15
+Here, the D-CTCs clock spectrum of the general ∆t case
+(32), which consists of (possibly) an infinite number of
+distinctly rotated clocks
+{
+Rn(∆t)
+∣∣φ〉}∞
+n=1
+, reduces to the
+spectrum of N orthogonal clocks
+{
+Rn(t⊥)
+∣∣φ〉}N
+n=1
+. In re-
+gards to the original billiard ball paradox, we associate
+the zeroth orthogonal state
+∣∣φ(0)〉 = R0(t⊥)∣∣φ〉 with
+evolution A, and the first orthogonal clock
+∣∣φ(t⊥)〉 =
+R1(t⊥)
+∣∣φ〉 with evolution B. The existence of higher-
+order rotations (i.e. clock windings of the CTC) in D-
+CTCs merely indicates the entrapment of these states
+inside the CTC by the external (CR) vacuum. These
+vanish when the input vacuum amplitude is extremised,
+i.e. Ω = 0 or Ω = 1.
+The importance of the time delay ∆t and its relation-
+ship with the orthogonalisation time t⊥ become apparent
+in a physical interpretation of the model. By construc-
+tion, our clocks have an intrinsic time between ‘ticks’
+which we denote t⊥. Our N -level clocks have N such
+ticks, or times that we are able to perfectly distinguish
+between via measurement. This is due to the fact that the
+only clock states which have vanishing mutual overlaps
+are those which form the mutually orthogonal clock set.
+The probabilistic interpretation of our model then leads
+us to conclude that any clock not in this set will exist
+in a superposition of orthogonal clocks (i.e. those which
+are in the set). For example, a clock which has evolved
+in a nonorthogonal manner possesses a time between two
+adjacent ticks and consequently would have a chance to
+be in either of the two tick states upon measurement.
+Cunning construction of the input clock, such that its
+orthogonalisation time exactly matches the CTC time de-
+lay, yields solutions which consist of clock states that are
+perfectly distinguishable. As such states correspond to
+the respective number of times the clock passed through
+the CTC, we are able to, due to the clock’s configuration,
+extract precise which-way information from the output
+states.
+4. Special case
+Here, we consider perhaps the most enlightening spe-
+cial case of our model. By mandating that we always
+send in a clock into the circuit (Ω = 0) whilst ensuring
+that the CTC’s time delay matches the clock’s orthog-
+onalisation time exactly (∆t = t⊥), the output states
+become
+TŨ
+[
+σ̃, θ̃
+]∣∣∣
+Ω=0
+∆t=t⊥
+= g
+∣∣0〉〈0∣∣+ (1− g)σ(t⊥), (64a)
+DŨ
+[
+σ̃, θ̃
+]∣∣∣
+Ω=0
+∆t=t⊥
+= gσ(0) + (1− g)σ(t⊥); (64b)
+PŨ
+[
+σ̃
+]∣∣
+Ω=0
+∆t=t⊥
+∼
+1
+√
+2
+[∣∣φ(0)〉+ ∣∣φ(t⊥)〉] . (65)
+Note that the D-CTCs CR output is a classical mixture
+of the evolved and unevolved clocks, while the P-CTCs
+output is an equiprobabilistic superposition of the very
+same clocks. In fact, given that the postselected telepor-
+tation model is equivalent to a path integral formulation,
+our circuit appears to have faithfully reproduced the orig-
+inal conjecture of Friedman et al. (concerning the WKB
+approximation of the billiard ball paradox) in Ref. [10].
+B. P-CTCs constraints on initial data
+One interesting general characteristic of P-CTCs is
+that it can pose constraints on initial conditions. Due
+to the renormalisation, such constraints depend on the
+future of the time-travelling state. Here, we explicitly
+demonstrate the restrictions associated with the P-CTCs
+description of our circuit.
+Given our N -level clock (9), there exists exactly N mu-
+tually orthogonal, equally spaced states {
+∣∣φ(n)(t⊥)〉}N−1n=0
+which it can assume. As a consequence, one may express
+the clock gate (11) in terms of the ground state energy
+E1 defined via (16) as
+R(t′′ − t′) = e− iE1(t
+′′−t′)/~
+×
+N∑
+k=1
+exp
+[
+−2π i
+k − 1
+N
+t′′ − t′
+t⊥
+] ∣∣k〉〈k∣∣.
+(66)
+From this, it is easy to conclude that
+RN (t⊥) = e
+− iNE1t⊥/~ 1, (67)
+which simply indicates that N orthogonal rotations of the
+clock brings it back to its initial state (up to the global
+phase e− iNE1t⊥/~). This therefore means that a clock∣∣φ〉 which orthogonalises m ∈ Z>0 times accumulates m
+such phases, i.e.
+RmN (t⊥)
+∣∣φ〉 = e− imNE1t⊥/~ ∣∣φ〉. (68)
+Judicious choice of our clock’s orthogonalisation time t⊥
+such that it is related to the CTC time delay ∆t by
+∆t = mNt⊥, m ∈ Z>0, (69)
+means that a clock which completes one journey on the
+CTC would orthogonally evolve m times. In such a case,
+the P-CTCs reduced operator (48) becomes
+W̃
+∣∣∣
+∆t=mNt⊥
+=
+(
+1 +N e− imNE1t⊥/~
+) ∣∣0〉〈0∣∣
++
+(
+1 + e− imNE1t⊥/~
+)
+1. (70)
+Additionally, if we construct our clock so that its ground
+state energy E1 satisfies
+E1 =
+π~
+mNt⊥
+(1 + 2p), p ∈ Z≥0, (71)
+16
+then the operator (70) further reduces to
+W̃ ′ = W̃
+∣∣∣ ∆t=mNt⊥
+E1=
+π~
+mNt⊥
+(1+2p)
+= (1−N)
+∣∣0〉〈0∣∣. (72)
+After renormalisation, the corresponding P-CTCs output
+is then of course simply the vacuum density, i.e.
+∣∣0〉〈0∣∣.
+But where did our clock go?
+To answer this question, we can use the entangled state
+∣∣ψ〉
+rec,CR
+=
+1
+√
+2
+[∣∣0〉
+rec
+⊗
+∣∣0〉
+CR
++
+∣∣φ(0)〉
+rec
+⊗
+∣∣φ(0)〉
+CR
+]
+(73)
+as input to our circuit. Here, the state existing in the
+first Hilbert space may be interpreted as a record of what
+we send into the second, CR channel. With this entan-
+glement, we find the P-CTCs unnormalised pure state
+output, corresponding to our circuit’s ordinary operator
+1̃rec ⊗ W̃CR from (48), to be
+(
+1̃rec ⊗ W̃CR
+) ∣∣ψ〉
+rec,CR
+∝
+√
+Ω tr[R̃(∆t)]
+∣∣0〉
+rec
+⊗
+∣∣0〉
+CR
++
+√
+1− Ω
+∣∣φ(0)〉
+rec
+⊗
+[∣∣φ(0)〉
+CR
++
+∣∣φ(∆t)〉
+CR
+]
+. (74)
+The persistence of the entanglement means that when the
+record indicates that we did not send in a clock, we will
+not observe a clock in the CR output. Conversely, when
+we definitely did send in a clock, we must observe a clock
+exiting the CTC region which is exactly what one would
+expect intuitively. However, under the conditions (69)
+and (71) which yield the operator (72), the entanglement
+of our input state (73) breaks,(
+1̃rec ⊗ W̃ ′CR
+) ∣∣ψ〉
+rec,CR
+∝
+∣∣0〉
+rec
+⊗
+∣∣0〉
+CR
+. (75)
+The mere presence of the interaction with the CTC in
+the future implies that the record channel will show that
+no clock was ever prepared, even though the initial state
+(73) included the possibility that a clock was there (which
+would show up in the record if the future interaction with
+the CTC was avoided.
+Given the path integral correspondence of P-CTCs,
+then the conditions (69) and (71) collectively form a case
+in which no clocks can evolve through the circuit due
+to destructive interference in the path integral. This is
+to say that P-CTCs suppress all evolutions of nonvacu-
+ous states as a result of the particular future evolution
+of clock states in our model, thereby posing constraints
+on the initial state. This issue highlights the well-known
+problem of antichronological and superluminal influence
+with P-CTCs [9, 43, 44]. In contrast, the initial data for
+D-CTCs is never affected by the presence or absence of
+the CTC in the future.
+C. Other remarks
+1. On the restricted set of classical trajectories
+Perhaps the most significant physical approximation
+(and limitation) in our model is that we insist on classi-
+cal trajectories (i.e. only the 2 of the simple billiard ball
+paradox in Fig. 1). It is possible, and even likely, that
+a model consisting of a less restrictive set of trajectories
+would possess significantly different and nontrivial solu-
+tions in terms of both D-CTCs and P-CTCs. Neverthe-
+less, the manifestation of higher-order CTC clock wind-
+ings in the D-CTCs solutions to our rather simple circuit
+is an interesting result, particularly given the absence of
+any explicit modelling of CTC multiple loop trajectories.
+2. On the initial trapped state
+In ordinary quantum mechanics, any mixed state can
+be purified in an enlarged Hilbert space through the use
+of an ancillary system. In the Deutsch model however,
+purification of the CTC bound state is not possible since
+it has to be in a proper mixture (i.e. it can not be a sub-
+system of a pure entangled state) [46]. The very power
+of the prescription lies in the fact that it allows for the
+information trapped within the CTC to exist in a mixed
+state, and it is this distinguishing feature which enables
+it to solve classically paradoxical problems.
+As a consequence, we might question where the mixed-
+ness in the trapped state comes from. One might argue
+that the interaction with the CR state is the source, but
+this requires a cause-effect understanding of the problem
+which is of course not possible for time travel paradoxes.
+The fact that we can describe the interaction narrative
+not as sequential history (with a beginning and end) but
+as a closed loop means that there is no beginning of the
+existence of the bound CTC state. From this, we can
+conclude that it is simply information trapped within a
+closed loop and therefore it simply exists uncaused.
+A motivating question now is how the trapped state
+comes into existence when it is, and always has been,
+isolated from the universe. Deutsch permits a time ma-
+chine created at an arbitrarily distant time in the past to
+interact with any system and resolve any paradox which
+it comes across in its future, which means that it must
+contain the necessary state trapped within itself to do
+17
+so. Given that it is able to interact with an arbitrar-
+ily large number of external systems in its entire history,
+then it potentially could possess an equivalent number
+of distinct trapped states. In the interpretation that our
+quantum clocks are formed by energy eigenstates, then
+the fact that the trapped state could contain clock(s) at
+any temporal evolution which exist in an arbitrarily large
+Hilbert space means that the ‘temperature’ of the time
+machines may potentially have no bound. Another prob-
+lem too is then how, at the creation of the time machine,
+its ‘temperature’ and any trapped states are initialised.
+An at least partial solution to this problem comes from
+the equivalent circuit picture, wherein we saw that an
+initial trapped state which is not a function of the input
+can evolve over many iterations into the correct trapped
+state.
+Another possible way to resolve this potentially dis-
+turbing problem is to reiterate the fact that the trapped
+state is inaccessible to everything except the state which
+would interact with the time machine in a paradoxical
+fashion. We are simply unable to observe (i.e. measure)
+the CTC state without changing it. In this sense, the CV
+channel acts like a parallel universe, and paradoxes are
+resolved by the trapped state ‘transforming’ into what-
+ever it needs to be. Given that the ‘temperature’ of the
+time machine is contributed to by its trapped state, then
+our own universe is completely unaffected by this state
+up to its paradox-resolving capabilities. One might then
+even take the viewpoint that we should not care what is
+bound within the time machine, or that the CTC channel
+connects to a parallel universe.
+Conversely, P-CTCs do not have problems regarding
+trapped states as one is unable to define such states
+in the prescription. In this regard, it might appear to
+be a more attractive theory, given all of the interpreta-
+tional and philosophical problems with D-CTCs and the
+trapped states. However, as discussed in the previous
+section (Sec. V B), the problem of superluminal influence
+(and the associated constraints on initial data) remains
+an issue for P-CTCs.
+VI. CONCLUSION
+In this paper, we presented a novel quantum circuit
+formulation of the billiard ball paradox. Our model is
+based on two important mechanisms. The first, which
+involves the incorporation of an internal degree of free-
+dom into the billiard ball, allows it to effectively function
+like a clock. In practice, this meant that we were able to
+measure the proper time of the distinct classical evolu-
+tions A and B, from which we could extract which-way
+information (distinguishability) regarding these trajecto-
+ries. The second mechanism is that of the vacuum state,
+which allowed the clock to either travel unperturbed (if
+there is nothing, i.e. vacuum, in the CTC) or be scattered
+into the CTC (if there is the external clock’s trapped fu-
+ture self already inside).
+We found that the D-CTC model reproduces the mul-
+tiplicity of solutions present in the classical case, and we
+discussed how this multiplicity can be naturally inter-
+preted in terms of a choice of ‘initial state’ (parametrised
+by g) in the D-CTC. On the other hand, the P-CTC
+model presents only one quantum state as a solution,
+which takes the form of a pure superposition of the clock
+having evolved and not evolved through the CTC (with
+the possible addition of a vacuum component if such a
+state was initially sent in with the clock). This therefore
+reproduces the intuition expressed by Friedman et al. in
+their seminal paper [10] (discussed in the latter part of
+the introduction and in Sec. V A 4).
+Our results demonstrated that when one prescribes the
+existence of a vacuum, the D-CTCs and P-CTCs output
+states become the aforementioned mixture and superpo-
+sition respectively of the histories which do and do not
+interact with the CTC. These outcomes thus support the
+notion that if the world operates in accordance with D-
+CTCs then the classical picture one gets works like mul-
+tiple universes, otherwise if it operates as per P-CTCs
+then there are constraints on the actions which one is
+able to perform.
+The framework of incorporating quantum clocks into
+classical particles that evolve along wholly classical tra-
+jectories allowed us to rigorously explore the billiard ball
+paradox. Purely using our clock methodology, were able
+to quantitatively examine the mechanisms of both D-
+CTCs and P-CTCs. Albeit simple, its ability to allow
+one to distinguish between multiple histories through a
+chronology violating region is a powerful function of the
+framework, and one could of course use it to very easily
+study other time travel paradoxes.
+ACKNOWLEDGMENTS
+We wish to thank Magdalena Zych for motivating dis-
+cussion. This research was supported by the Australian
+Research Council (ARC) under the Centre of Excellence
+for Quantum Computation and Communication Technol-
+ogy (Project No. CE170100012). F.C. acknowledges sup-
+port through an Australian Research Council Discovery
+Early Career Researcher Award (DE170100712). We ac-
+knowledge the traditional owners of the land on which
+the University of Queensland is situated, the Turrbal and
+Jagera people.
+18
+[1] W. J. van Stockum, Proceedings of the Royal Society of
+Edinburgh 57, 135 (1938).
+[2] K. Gödel, Reviews of Modern Physics 21, 447 (1949).
+[3] M. S. Morris and K. S. Thorne, American Journal of
+Physics 56, 395 (1988).
+[4] M. S. Morris, K. S. Thorne, and U. Yurtsever, Physical
+Review Letters 61, 1446 (1988).
+[5] M. Visser, Lorentzian Wormholes: From Einstein to
+Hawking (AIP Press, American Institute of Physics,
+1995).
+[6] I. D. Novikov, Zhurnal Eksperimentalnoi i Teoreticheskoi
+Fiziki 95, 769 (1989).
+[7] K. S. Thorne, Annals of the New York Academy of Sci-
+ences 631, 182 (1991).
+[8] A. Lossev and I. D. Novikov, Classical and Quantum
+Gravity 9, 2309 (1992).
+[9] T. C. Ralph and T. G. Downes, Contemporary Physics
+53, 1 (2012).
+[10] J. Friedman, M. S. Morris, I. D. Novikov, F. Echever-
+ria, G. Klinkhammer, K. S. Thorne, and U. Yurtsever,
+Physical Review D 42, 1915 (1990).
+[11] J. L. Friedman and M. S. Morris, Physical Review Letters
+66, 401 (1991).
+[12] J. L. Friedman and M. S. Morris, Communications in
+Mathematical Physics 186, 495 (1997).
+[13] A. Bachelot, Journal de Mathématiques Pures et Ap-
+pliquées 81, 35 (2002).
+[14] J. L. Friedman, in The Einstein Equations and the
+Large Scale Behavior of Gravitational Fields (Birkhäuser,
+Basel, 2004) pp. 331–346.
+[15] I. Y. Aref’eva, T. Ishiwatari, and I. V. Volovich, Theo-
+retical and Mathematical Physics 157, 1646 (2008).
+[16] I. V. Volovich, O. V. Groshev, N. A. Gusev, and E. A.
+Kuryanovich, Proceedings of the Steklov Institute of
+Mathematics 265, 262 (2009).
+[17] O. V. Groshev, Theoretical and Mathematical Physics
+164, 1202 (2010).
+[18] A. Bachelot, Journal de Mathématiques Pures et Ap-
+pliquées 96, 527 (2011).
+[19] D. M. A. Bullock, Reviews in Mathematical Physics 24,
+1250028 (2012).
+[20] F. Echeverria, G. Klinkhammer, and K. S. Thorne, Phys-
+ical Review D 44, 1077 (1991).
+[21] I. D. Novikov, Physical Review D 45, 1989 (1992).
+[22] E. V. Mikheeva and I. D. Novikov, Physical Review D
+47, 1432 (1993).
+[23] M. B. Mensky and I. D. Novikov, International Journal
+of Modern Physics D 05, 179 (1996).
+[24] J. Dolanský and P. Krtous, Physical Review D 82,
+124056 (2010).
+[25] D. M. Greenberger and K. Svozil, in Quo Vadis Quantum
+Mechanics? , The Frontiers Collection, edited by A. C.
+Elitzur, S. Dolev, and N. Kolenda (Springer, Berlin, Hei-
+delberg, 2005) pp. 63–71.
+[26] J.-M. A. Allen, Physical Review A 90, 042107 (2014).
+[27] M. Araújo, P. A. Guérin, and Ä. Baumeler, Physical Re-
+view A 96, 052315 (2017).
+[28] M. Czachor, Physics Letters A 383, 2704 (2019).
+[29] Ä. Baumeler, F. Costa, T. C. Ralph, S. Wolf, and
+M. Zych, Classical and Quantum Gravity 36, 224002
+(2019).
+[30] G. Tobar and F. Costa, arXiv:2001.02511 [gr-qc,
+physics:quant-ph] (2020).
+[31] D. Deutsch, Physical Review D 44, 3197 (1991).
+[32] T. C. Ralph and C. R. Myers, Physical Review A 82,
+062330 (2010).
+[33] T. C. Ralph and C. R. Myers, Physical Review A 84,
+056302 (2011).
+[34] J. L. Pienaar, C. R. Myers, and T. C. Ralph, Physical
+Review A 84, 062316 (2011).
+[35] X. Dong, H. Chen, and L. Zhou, arXiv:1711.06814
+[quant-ph] (2017).
+[36] S. Lloyd, L. Maccone, R. Garcia-Patron, V. Giovannetti,
+and Y. Shikano, Physical Review D 84, 025007 (2011).
+[37] S. Lloyd, L. Maccone, R. Garcia-Patron, V. Giovannetti,
+Y. Shikano, S. Pirandola, L. A. Rozema, A. Darabi,
+Y. Soudagar, L. K. Shalm, and A. M. Steinberg, Physical
+Review Letters 106, 040403 (2011).
+[38] H. D. Politzer, Physical Review D 49, 3981 (1994).
+[39] T. A. Brun, Physical Review Letters 102, 10.1103/Phys-
+RevLett.102.210402 (2009).
+[40] T. A. Brun and M. M. Wilde, Foundations of Physics 42,
+341 (2012).
+[41] D. Ahn, C. R. Myers, T. C. Ralph, and R. B. Mann,
+Physical Review A 88, 022332 (2013).
+[42] T. A. Brun, M. M. Wilde, and A. Winter, Physical Re-
+view Letters 111, 190401 (2013).
+[43] J. Bub and A. Stairs, Physical Review A 89, 022311
+(2014).
+[44] S. Ghosh, A. Adhikary, and G. Paul, arXiv:1708.03521
+[quant-ph] (2018).
+[45] M. Zych, F. Costa, I. Pikovski, and C. Brukner, Nature
+Communications 2, 505 (2011).
+[46] A. K. Pati, I. Chakrabarty, and P. Agrawal, Physical Re-
+view A 84, 062325 (2011).
+https://doi.org/10.1017/S0370164600013699
+https://doi.org/10.1017/S0370164600013699
+https://doi.org/10.1103/RevModPhys.21.447
+https://doi.org/10.1119/1.15620
+https://doi.org/10.1119/1.15620
+https://doi.org/10.1103/PhysRevLett.61.1446
+https://doi.org/10.1103/PhysRevLett.61.1446
+http://adsabs.harvard.edu/abs/1989ZhETF..95..769N
+http://adsabs.harvard.edu/abs/1989ZhETF..95..769N
+https://doi.org/10.1111/j.1749-6632.1991.tb52642.x
+https://doi.org/10.1111/j.1749-6632.1991.tb52642.x
+https://doi.org/10.1088/0264-9381/9/10/014
+https://doi.org/10.1088/0264-9381/9/10/014
+https://doi.org/10.1080/00107514.2011.640146
+https://doi.org/10.1080/00107514.2011.640146
+https://doi.org/10.1103/PhysRevD.42.1915
+https://doi.org/10.1103/PhysRevLett.66.401
+https://doi.org/10.1103/PhysRevLett.66.401
+https://doi.org/10.1007/s002200050118
+https://doi.org/10.1007/s002200050118
+https://doi.org/10.1016/S0021-7824(01)01229-6
+https://doi.org/10.1016/S0021-7824(01)01229-6
+https://doi.org/10.1007/978-3-0348-7953-8_9
+https://doi.org/10.1007/978-3-0348-7953-8_9
+https://doi.org/10.1007/s11232-008-0137-1
+https://doi.org/10.1007/s11232-008-0137-1
+https://doi.org/10.1134/S0081543809020242
+https://doi.org/10.1134/S0081543809020242
+https://doi.org/10.1007/s11232-010-0101-8
+https://doi.org/10.1007/s11232-010-0101-8
+https://doi.org/10.1016/j.matpur.2011.07.004
+https://doi.org/10.1016/j.matpur.2011.07.004
+https://doi.org/10.1142/S0129055X12500286
+https://doi.org/10.1142/S0129055X12500286
+https://doi.org/10.1103/PhysRevD.44.1077
+https://doi.org/10.1103/PhysRevD.44.1077
+https://doi.org/10.1103/PhysRevD.45.1989
+https://doi.org/10.1103/PhysRevD.47.1432
+https://doi.org/10.1103/PhysRevD.47.1432
+https://doi.org/10.1142/S0218271896000126
+https://doi.org/10.1142/S0218271896000126
+https://doi.org/10.1103/PhysRevD.82.124056
+https://doi.org/10.1103/PhysRevD.82.124056
+https://doi.org/10.1007/3-540-26669-0_4
+https://doi.org/10.1007/3-540-26669-0_4
+https://doi.org/10.1103/PhysRevA.90.042107
+https://doi.org/10.1103/PhysRevA.96.052315
+https://doi.org/10.1103/PhysRevA.96.052315
+https://doi.org/10.1016/j.physleta.2019.05.043
+https://doi.org/10.1088/1361-6382/ab4973
+https://doi.org/10.1088/1361-6382/ab4973
+http://arxiv.org/abs/2001.02511
+http://arxiv.org/abs/2001.02511
+https://doi.org/10.1103/PhysRevD.44.3197
+https://doi.org/10.1103/PhysRevA.82.062330
+https://doi.org/10.1103/PhysRevA.82.062330
+https://doi.org/10.1103/PhysRevA.84.056302
+https://doi.org/10.1103/PhysRevA.84.056302
+https://doi.org/10.1103/PhysRevA.84.062316
+https://doi.org/10.1103/PhysRevA.84.062316
+http://arxiv.org/abs/1711.06814
+http://arxiv.org/abs/1711.06814
+https://doi.org/10.1103/PhysRevD.84.025007
+https://doi.org/10.1103/PhysRevLett.106.040403
+https://doi.org/10.1103/PhysRevLett.106.040403
+https://doi.org/10.1103/PhysRevD.49.3981
+https://doi.org/10.1103/PhysRevLett.102.210402
+https://doi.org/10.1103/PhysRevLett.102.210402
+https://doi.org/10.1007/s10701-011-9601-0
+https://doi.org/10.1007/s10701-011-9601-0
+https://doi.org/10.1103/PhysRevA.88.022332
+https://doi.org/10.1103/PhysRevLett.111.190401
+https://doi.org/10.1103/PhysRevLett.111.190401
+https://doi.org/10.1103/PhysRevA.89.022311
+https://doi.org/10.1103/PhysRevA.89.022311
+http://arxiv.org/abs/1708.03521
+http://arxiv.org/abs/1708.03521
+https://doi.org/10.1038/ncomms1498
+https://doi.org/10.1038/ncomms1498
+https://doi.org/10.1103/PhysRevA.84.062325
+https://doi.org/10.1103/PhysRevA.84.062325
+	Time-travelling billiard ball clocks: a quantum model
+	Abstract
+	I Introduction
+	A Time-travelling billiard balls
+	B Quantum billiard ball paradox
+	II Quantum mechanical models of time travel
+	A The Deutsch model
+	1 Deutsch's resolution to time travel paradoxes
+	2 Deutsch's picture: The rule of maximum entropy
+	B Postselected teleportation
+	C Comparison
+	III Model
+	A Quantum clocks
+	B Quantum circuit model of the billiard ball paradox
+	IV Results
+	A N-level general clocks
+	1 D-CTCs results
+	2 P-CTCs results
+	B 2-level qubit clocks
+	1 D-CTCs qubit visualisations
+	2 P-CTCs qubit visualisations
+	V Discussion
+	A Effects of the various circuit parameters
+	1 The effect of the multiplicity parameter g
+	2 The effect of the vacuum parameter 
+	3 The effect of the CTC time delay t
+	4 Special case
+	B P-CTCs constraints on initial data
+	C Other remarks
+	1 On the restricted set of classical trajectories
+	2 On the initial trapped state
+	VI Conclusion
+	 Acknowledgments
+	 References

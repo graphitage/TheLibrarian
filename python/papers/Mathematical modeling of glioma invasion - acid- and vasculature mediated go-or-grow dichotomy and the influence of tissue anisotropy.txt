@@ -1,0 +1,2497 @@
+Mathematical modeling of glioma invasion: acid- and vasculature
+mediated go-or-grow dichotomy and the influence of tissue anisotropy
+Martina Conte∗1 and Christina Surulescu2
+1 BCAM - Basque Center for Applied Mathematics
+Alameda de Mazarredo, 14 - E-48009 Bilbao, Spain
+2 Technische Universität Kaiserslautern, Felix-Klein-Zentrum für Mathematik
+Paul-Ehrlich-Str. 31 - 67663 Kaiserslautern, Germany
+July 27, 2020
+Abstract
+Starting from kinetic transport equations and subcellular dynamics we deduce a multiscale model for
+glioma invasion relying on the go-or-grow dichotomy and the influence of vasculature, acidity, and brain
+tissue anisotropy. Numerical simulations are performed for this model with multiple taxis, in order to
+assess the solution behavior under several scenarios of taxis and growth for tumor and endothelial cells. An
+extension of the model to incorporate the macroscopic evolution of normal tissue and necrotic matter allows
+us to perform tumor grading.
+Keyworks – Multiscale modeling of glioma invasion, go-or-grow dichotomy and hypoxia-driven phenotypic
+switch, multiple taxis, necrosis-based tumor grading.
+1 Introduction
+Glioma is the most frequent type of primary brain tumor. It originates from glia cells and accounts for 78
+percent of malignant brain tumors, of which glioblastoma multiforme (GBM) is the most aggressive, being
+characterized by a fast, infiltrative spread and high proliferation. These features make it very difficult to treat,
+and go along with a poor survival prognosis [34,93].
+Like in most tumors, glioma development, growth, and invasion are influenced by a multitude of intrinsic
+and extrinsic factors. Among these, the phenotypic heterogeneity and the biological, physical, and chemical
+composition of the tumor microenvironment play a decisive role. Experiments with cultures of glioma cells
+suggest mutual exclusion of migratory and proliferative behavior, as reviewed e.g. in [7, 26, 94]; this is known
+as go-or-grow dichotomy [27,28]. Biological evidence indicates that migratory and proliferative processes share
+common signaling pathways, suggesting a unique intracellular mechanism that regulates both phenotypes [26].
+Hypoxia is a prominent trait of tumor microenvironment and glioma neoplasms are no exception. It has been
+suggested (see e.g. [44,94] and references therein) that it is putatively influencing the phenotypic switch between
+migrating and proliferating behavior - along with other regulating factors, like angiogenesis, ECM production
+and degradation, etc. Indeed, glioma cells have been observed to move away from highly hypoxic sites created,
+for instance, by the occlusion of a capillary and to form so-called pseudopalisade patterns, which are typical for
+glioblastoma [10,11,92]. They have garland-like shapes exhibiting central necrotic zones surrounded by stacks of
+tumor cells, most of which are actively migrating. As (tumor) cell proliferation is impaired at (too) low pH, this
+seems to endorse the antagonistic relationship between (transiently) migratory and proliferative phenotypes [68].
+While cancer cells are able to survive in relatively acidic regions by anaerobic glycolysis, which confers them an
+advantage against normal cells [35, 90], the large amounts of lactate and alanine they produce during this pro-
+cess can decrease the pH below critical levels. As a consequence, they initiate (re)vascularization by expressing
+pro-angiogenic factors, in order to provide adequate supply with blood-transported nutrients [32,89]. They can
+deter proliferation for migration towards more favorable areas [65,90], and the above mentioned pseudopalisade
+formation is just one aspect of this complex behavior.
+Previous models for glioma invasion have been proposed in (semi)discrete [9, 33, 53] or continuous frameworks.
+Most of the latter are purely macroscopic, describing the evolution of glioma cell density under the influence
+of surrounding tissue, chemical signals, and/or vasculature, see e.g. [37, 46, 56, 64, 86] and the review [3]; many
+∗Corresponding author: mconte@bcamath.org
+1
+ar
+X
+iv
+:2
+00
+7.
+12
+20
+4v
+1 
+ [
+q-
+bi
+o.
+T
+O
+] 
+ 2
+3 
+Ju
+l 
+20
+20
+of them are versions or extensions of a model proposed by Murray [69]. More recent continuous models leave
+behind the classical reaction-diffusion prototype and take into account advection bias of glioma cells in re-
+sponse to environmental cues. Some of these are directly set on the macroscopic scale and rely on balance of
+mass/flux/momentum [13, 42, 52], others are obtained by more detailed descriptions from lower scale dynam-
+ics, as proposed in [71] and further developed in [14, 16, 19–21, 45, 57, 85]. In particular, some of the latter
+have a multiscale character that is (partially) preserved during the upscaling process from kinetic transport
+equations (mesoscale) to reaction-diffusion-taxis PDEs (macroscale). As mentioned above, hypoxia is an es-
+sential factor in tumor evolution. Early mathematical models for cancer invasion and patterning under acidic
+conditions were introduced in [23, 66, 80]. Further PDE-based models, that characterize acid-mediated tumor
+development, directly related or applicable to pH-influenced glioma spread have been proposed and investigated
+e.g. in [64] and [22, 67, 81], respectively. Instead, for stochastic multiscale settings see e.g. [38, 39, 41] and [40]
+for a review also addressing further related models. Tumor heterogeneity has been usually modeled in the
+continuous setting by describing the dynamics of the correspondingly defined subpopulations of cells, e.g. hy-
+poxic/normoxic/necrotic [37,64,86] or moving/proliferating [21,25,45,67,74,82,96]. An indirect accounting for
+a go-grow-recede heterogeneity under the influence of intra- and extracellular acidity was proposed and analyzed
+in [39]; its numerical simulations were able to explain a large variety of invasion patterns.
+The models in [21, 45] started from a mesoscopic description of glioma density functions for migrating, respec-
+tively proliferating cells in interaction with the anisotropic brain tissue, whereby the latter took into account
+subcellular dynamics of receptor binding to tissue fibers on the microscale. The cells were able to switch between
+the two phenotypes, the corresponding rates being dependent on space and (in [45]) also on the doses of some
+chemotherapeutic agent administered in order to impair cell motility. In this note we extend those settings by
+including the dynamics of endothelial cells developing vasculature and of acidity, both being responsible for the
+phenotypic switch. The upscaling of the kinetic transport PDEs for glioma and endothelial cells leads in the
+parabolic limit to a system of reaction-advection-diffusion equations featuring several types of taxis, nonlinear
+myopic diffusion of glioma, and highly complicated couplings between the variables of the model, which has a
+multiscale character due to (some of) the taxis coefficients encoding information from the lower modeling levels.
+The subsequent content is organized as follows. Section 2 is concerned with the setup of the model on the
+subcellular and mesoscopic scales and with the deduction of the macroscopic PDEs. In Section 3 we concretize
+the coefficient functions in preparation for the numerical simulations to be performed in Section 4. In order to
+facilitate the evaluation of the tumor burden in relation to the necrotic and the normal tissue, Section 5 includes
+a model extension accounting for the dynamics of the latter. We conclude with a discussion of the results in
+Section 6. The Appendix contains the assessment of the model parameters and a nondimensionalization of the
+macroscopic PDEs.
+2 Modeling
+Relying on the go-or-grow dichotomy, we consider a tumor containing two mutually exclusive subpopulations
+of glioma cells, which are either migrating or proliferating. The respective states are transient, the tumor can
+change dynamically its composition, according to the signals received by the cells from their surroundings. From
+the huge variety of chemical and physical cues present in the extracellular space and influencing the development
+and spread of cancer [31] we focus here on the effects of acidity and cell-tissue interactions. Since acidification
+and angiogenesis are tightly interrelated and crucial for the tumor evolution, we also model vascularization, by
+way of endothelial cell dynamics. We develop a multiscale model upon starting from the subcellular level of
+interactions between cells, acidity, and tissue, setting up the corresponding kinetic transport equations (KTEs)
+for glioma cells of the two phenotypes and for endothelial cells, and performing a parabolic limit to deduce
+the macroscopic system of reaction-advection-diffusion PDEs for the involved quantities: total tumor burden
+(moving + proliferating cells), endothelial cells, and acidity (concentration of protons).
+2.1 Subcellular level
+On the microscopic scale, we describe the interaction of glioma cells with the extracellular space, more precisely
+with tissue fibers and protons. Cells exchange information with their environment through various transmem-
+brane entities, e.g. cell surface receptors and ion channels. We will use the former to account for cell-tissue
+interactions and both for the cell-proton exchange. Indeed, additionally to ion channels and membrane trans-
+porters which have been extensively studied in the context of intra- and extracellular pH regulation, there also
+exist proton-sensing receptors [43], e.g. the G protein-coupled receptors (GPCRs) involved among others in
+regulating the migration and proliferation of cells in tumor development and wound healing [47,91]. We ignore
+here all intricate details about the intracellular machinery activated by receptor binding and channel opening
+and closing. Instead, we see the events of occupying such transmembrane units as triggering the cellular pro-
+cesses leading to migration, proliferation, and phenotypic switch.
+2
+Considering such interactions between cells and soluble as well as unsoluble ligands follows the idea employed
+in [50, 51, 60] to build a micro-meso model for tumor invasion with chemo- and haptotaxis and revisited
+in [14, 16, 19–21, 45] for cell-tissue interactions, in [57] for cell-proton interactions leading to pseudopalisade
+patterns, or in [22] for a nonlocal micro-macro model with cell-tissue, cell-cell, and cell-protons interactions.
+The micro-macro framework proposed in [38, 39, 41] offers a related, yet different perspective on the interplay
+between intra- and extracellular acidity and tumor cells.
+We denote by y1(t) the amount of receptors bound to tissue fibers and by y2(t) that of transmembrane entities
+(ion channels, pH-sensing receptors) occupied by protons. The corresponding binding/occupying dynamics is
+characterized by simple mass action kinetics:
+R̄0 − (y1 + y2) +
+Q
+Q∗
+k
++
+1
+k
+−
+1
+y1
+R̄0 − (y1 + y2) +
+S
+Sc,0
+k
++
+2
+k
+−
+2
+y2.
+Here R̄0 is the total amount of receptors on a cell membrane, Q(x) denotes the macroscopic tissue density,
+depending on the position x ∈ Rn, Q∗(x) is the reference tissue density (corresponding to its carrying capac-
+ity), while S(t, x) is the macroscopic concentration of protons, and Sc,0(x) the reference proton concentration.
+Accordingly, we get the ODE system
+ẏ1 =
+k+1
+Q∗
+Q(x) (R̄0 − (y1 + y2))− k−1 y1
+ẏ2 =
+k+2
+Sc,0
+S(t, x) (R̄0 − (y1 + y2))− k−2 y2
+where k+1 and k
+−
+1 represent the attachment and detachment rates of cells to tissue, respectively, while k
++
+2 and
+k−2 are the corresponding rates in the process of proton binding. As in [22], we define y := y1 + y2 to be the
+total amount of transmembrane entities occupied by tissue or protons, which allows us to lump together the
+two ODEs, into
+ẏ =
+(
+k+1
+Q∗
+Q+
+k+2
+Sc,0
+S
+)
+R̄0 − y
+(
+k+1
+Q∗
+Q+
+k+2
+Sc,0
+S
+)
+− k−1 y1 − k
+−
+2 y2 .
+Assuming that k−1 = k
+−
+2 = k
+−, we get the microscopic equation for the subcellular dynamics
+ẏ =
+(
+k+1
+Q∗
+Q+
+k+2
+Sc,0
+S
+)
+(R̄0 − y)− k−y . (1)
+Since processes on this scale are much faster than those happening on the macroscopic time scale, they can
+be assumed to equilibrate rapidly and moreover, that on this scale we can ignore the time dependence of S.
+Rescaling y/R̄0  y will further simplify the notation. Then, the unique steady state of the above equation is
+given by:
+y∗ =
+k
++
+1
+Q∗
+Q+
+k
++
+2
+Sc,0
+S
+k
++
+1
+Q∗
+Q+
+k
++
+2
+Sc,0
+S + k−
+=: f̄ (Q,S) .
+The variable y can be seen as characterizing the ’internal’ cellular state. In the kinetic theory of active particles
+(see e.g. [5,6]) it is called ’activity variable’. In the sequel, we will consider the mesoscopic densities p(t, x, v, y)
+and r(t, x, y) of migrating and respectively non-moving (thus proliferating) glioma cells, hence both depending
+on such activity variable y. Thereby, v ∈ V ⊂ Rn is the cell velocity vector, with the space V to be closer
+explained in Subsection 2.2 below.
+Further, we assume that the glioma cells follow the tissue gradient, but move away from highly acidic areas.
+Therefore, we look at the path of a single cell starting at position x0 and moving to position x with velocity
+v in the (locally) time-invariant density fields Q and S, so that Q(x) = Q(x0 + vt), while S(x) = S(x0 − vt).
+Denoting by z := y∗ − y the deviation of y from its steady state, we have:
+ż =
+∂f̄
+∂Q
+v · ∇xQ−
+∂f̄
+∂S
+v · ∇xS − z
+(
+k+1
+Q∗
+Q+
+k+2
+Sc,0
+S + k−
+)
+,
+3
+with
+∂f̄
+∂Q
+=
+1
+Q∗
+k+1 k
+−(
+k
++
+1
+Q∗
+Q+
+k
++
+2
+Sc,0
+S + k−
+)2
+∂f̄
+∂S
+=
+1
+Sc,0
+k+2 k
+−(
+k
++
+1
+Q∗
+Q+
+k
++
+2
+Sc,0
+S + k−
+)2 ,
+thus the equation for z is given by:
+ż = −z
+(
+k+1
+Q∗
+Q+
+k+2
+Sc,0
+S + k−
+)
++
+k−(
+k
++
+1
+Q∗
+Q+
+k
++
+2
+Sc,0
+S + k−
+)2
+(
+k+1
+Q∗
+v · ∇xQ−
+k+2
+Sc,0
+v · ∇xS
+)
+=: G(z,Q, S) . (2)
+To simplify the writing, we denote B(Q,S) :=
+(
+k+1
+Q∗
+Q+
+k+2
+Sc,0
+S + k−
+)
+.
+2.2 Mesoscopic level
+We model the mesoscale behavior of glioma and endothelial cells with the aid of kinetic transport equations
+(KTEs) describing velocity-jump processes and taking into account the subcellular dynamics. Concretely, we
+consider the following cell density functions:
+• p(t, x, v, y) for moving glioma cells;
+• r(t, x, y) for non-moving, hence (in virtue of the go-or-grow dichotomy) proliferating glioma cells;
+• w(t, x, ϑ) for endothelial cells (ECs) forming capillaries,
+with the time and space variables t > 0 and x ∈ Rn, velocities v ∈ V = sSn−1 and ϑ ∈ Θ := σSn−1, and activity
+variable y ∈ Y = (0, 1). These choices mean that we assume for glioma and ECs constant speeds s > 0 and
+σ > 0, respectively, where Sn−1 denotes the unit sphere in Rn. As in [19–21,45], in the sequel we will work with
+the deviation z = y∗ − y ∈ Z ⊆ (y∗ − 1, y∗) rather then with y.
+The corresponding macroscopic cell densities are denoted by M(t, x), R(t, x) and W (t, x), respectively, and we
+use the notation N(t, x) := M(t, x) +R(t, x) for the space-time varying macroscopic total tumor burden.
+The kinetic transport equation for the motile glioma phenotype is given by:
+∂tp+∇x · (vp) + ∂z(G(z,Q, S)p) = Lp[λ(z)]p+ β(S)
+q
+ω
+r − α(w, S)p− lm(N)p , (3)
+where Lp[λ(z)]p denotes the turning operator, describing velocity changes. In particular, such changes are due
+to contact guidance: the cells have a tendency to align to the brain tissue anisotropy, mainly associated with
+white matter tracts. As in previous models of this type, Lp[λ]p is a Boltzmann-like integral operator of the
+form
+Lp[λ(z)]p = −λ(z)p+ λ(z)
+∫
+V
+K(x, v) p(v′) dv′ , (4)
+where λ(z) := λ0 − λ1z ≥ 0 is the cell turning rate depending on the microscopic variable z, while λ0 and
+λ1 are positive constants. The integral term describes the reorientation of cells from any previous velocity v
+′
+to a new velocity v upon interacting with the tissue fibers. This is controlled by the turning kernel K(x, v),
+which we assume to be independent on the incoming velocity v′. In particular, we consider that the dominating
+directional cue is given by the orientation of tissue fibers and take as e.g. in [19, 71] K(x, v) :=
+q(x,v̂)
+ω
+, where
+v̂ = v|v| and q(x, θ) with θ ∈ S
+n−1 is the orientational distribution of the fibers, normalized by ω = sn−1. It
+encodes the individual brain structure obtained by diffusion tensor imaging (DTI); concrete choices will be
+provided in Section 3. We assume the tissue to be undirected, hence q(x, θ) = q(x,−θ) for all x ∈ Rn. For later
+reference, we introduce the notations
+Eq(x) :=
+∫
+Sn−1
+θq(x, θ)dθ
+Vq(x) :=
+∫
+Sn−1
+(θ − Eq)⊗ (θ − Eq) q(x, θ)dθ
+for the mean fiber orientation and the variance-covariance matrix for the orientation distribution of tissue fibers,
+respectively. Notice that the above symmetry of q implies Eq = 0.
+4
+The term β(S)
+q
+ω
+r in (3) describes the phenotypic switch r → p; the rate β depends on S, since in a too acidic
+environment the cells are supposed to stop proliferation and migrate towards regions with higher pH (see Sec-
+tion 1). Therefore, we assume that β(S) is an increasing function of the proton concentration S and we require
+β(S) > 0, since there will always be some proliferating cells switching into a migratory regime 1.
+The terms α(w, S)p and lm(N)p model the phenotypic switch p → r due to environmental signals. Thus, the
+former term depends on the proton concentration S and on the mesoscopic EC density w and describes the
+adoption of a proliferative phenotype when there are enough oxygen and nutrient supply, while the acidity
+remains below a certain threshold. The latter term models the switch to proliferation caused by the glioma
+cell population being too crowded to allow effective migration (but still allowing some limited proliferation). In
+order not to complicate too much the model we do not explicitly account for cell recession or quiescence.
+The evolution of proliferating tumor cells is characterized by the integro-differential equation
+∂tr = (α(w, S) + lm(N))
+∫
+V
+p(t, x, v, z) dv + µ(W,N, S)
+∫
+Z
+χ(x, z, z′)
+Q(x)
+Q∗
+r(t, x, z′)dz′ − (β(S) + γ(S))r , (5)
+where, additionally to the already described switch terms, we model intrinsic proliferation and death. µ(W,N, S)∫
+Z
+χ(x, z, z′)
+Q(x)
+Q∗(x)
+r(z′)dz′ describes as in [20, 45] proliferation triggered by cell receptor binding to tissue. The
+proliferation rate µ(W,N, S) depends on the total macroscopic tumor density N , on the concentration of protons
+S, and on the vasculature. In the integral operator, the kernel χ(x, z, z′) characterizes the transition from state
+z′ to state z during such proliferation-initiating interaction at position x. No further conditions are required
+on χ, we only assume that the nonlinear proliferative operator is uniformly bounded in the L2-norm, which is
+reasonable, in view of space-limited cell division. The last term −γ(S)r describes acid-induced death of glioma
+cells when the pH value drops below a certain threshold.
+The KTE for ECs is given by:
+∂tw +∇x · (ϑw) = Lw[η]w + µW (W,Q)w , (6)
+where the turning operator Lw[η]w describes changes in the orientation of ECs. It is well-established (see
+e.g. [31]) that tumor cells produce angiogenic signals acting as chemoattractants for ECs. Less known is whether
+such signals are expressed by proliferating rather than moving cells or by both phenotypes. There is, however,
+evidence that hypoxia induces production of VEGF and other angiogenic cytokines (see e.g. [12, 78, 95] and
+references therein). Since cancer cells are highly glycolytic (which leads to acidification), and increased glucose
+metabolism is selected for in proliferating cells [61], we assume that pro-angiogenic signals are mainly produced
+by proliferating cells. With the aim of avoiding the introduction of a new variable for the concentration of such
+chemoattractants, we let the ECs be attracted by the proliferating glioma cells as main sources therewith. This
+translates into the following form of the turning operator acting on the right hand side in (6):
+Lw[η]w = −η(x, ϑ,R)w(t, x, ϑ) +
+∫
+Θ
+1
+|Θ|
+η(x, ϑ′, R)w(ϑ′)dϑ′ ,
+where for the turning kernel modeling ECs reorientations we simply took a uniform density function over the
+unit sphere Sn−1 and
+η(x, ϑ,R) = η0(x)e
+−a(R)DtR (7)
+represents the turning rate of ECs. It depends on the macroscopic density of proliferating tumor cells R and
+on the pathwise gradient DtR = ∂tR + ϑ · ∇R. The coefficient function a(R) is related to the interactions
+between ECs and proliferating glioma, more precisely ECs and pro-angiogenic signals produced by the latter.
+This can be described for instance via equilibrium of EC receptor binding. This way to include directional bias
+provides an alternative to that using a transport term with respect to the activity variable z in (3) and it has
+been introduced in [70] in the context of bacteria movement and recently used in [57] for a model for glioma
+pseudopalisade patterning. Under certain conditions, the relation between the two approaches was established
+rigorously for bacteria chemotaxis in [73] and investigated more formally for glioma repellent pH-taxis in [57].
+Finally, µW (W,Q)w is the proliferation term for ECs. Besides the total population of ECs irrespective of their
+orientation, µW is supposed to depend on the available macroscopic tissue Q. More details about the concrete
+choices of the coefficient functions involved in (3), (5), and (6) will be provided in Section 3.
+2.3 Parabolic scaling of the mesoscopic model
+The high dimensionality of the KTE system (3), (5), and (6) makes its numerical simulations too expensive.
+Moreover, clinicians are interested in the macroscopic evolution of the tumor along with its vascularization and
+1otherwise the tumor would stay confined, which is not the case for glioblastoma
+5
+acidity profile. Therefore, it is convenient to deduce effective equations for the macroscopic dynamics of ECs
+and total tumor burden N = R + M . The PDE for the proton concentration S is already macroscopic and
+does not need to be upscaled. We rescale the time and space variables as t → ε2t and x → εx. Moreover,
+the proliferation terms in (5) and (6) and the death term in (5) will be scaled by ε2 in order to account for
+the mitotic and apoptotic events taking place on a much larger time scale than migration and switching from
+moving to non-moving regimes. Hence, (3), (5), and (6) become:
+ε2∂tp+ ε∇x · (vp)− ∂z
+((
+zB(Q,S)−
+εk−
+B(Q,S)2
+(
+k+1
+Q∗
+v · ∇Q−
+k+2
+Sc,0
+v · ∇S
+)
+p
+)
+= Lp[λ(z)]p+ β(S)
+q
+ω
+r
+− α(w, S)p− lm(N)p (8)
+ε2∂tr = (α(w, S) + lm(N))
+∫
+V
+p(v) dv + ε2µ(W,N, S)
+∫
+Z
+χ(x, z, z′)
+Q(x)
+Q∗
+r(t, x, z′)dz′ − (β(S) + ε2γ(S))r , (9)
+ε2∂tw + ε∇x · (ϑw) = Lw[ηε]w + ε2µW (W,Q)w , (10)
+with
+ηε(x, ϑ,R) = η0(x) exp
+(
+− a(R)(ε2∂tR+ εϑ · ∇R)
+)
+. (11)
+As in [19–21], we define the following moments:
+m(t, x, v) =
+∫
+Z
+p(t, x, v, z)dz, R(t, x) =
+∫
+Z
+r(t, x, z)dz, mz(t, x, v) =
+∫
+Z
+zp(t, x, v, z)dz,
+Rz(t, x) =
+∫
+Z
+zr(t, x, z)dz, M(t, x) =
+∫
+V
+m(t, x, v)dv, W (t, x) =
+∫
+Θ
+w(t, x, ϑ)dϑ,
+Mz(t, x) =
+∫
+V
+mz(t, x, v)dv
+and neglect the higher order moments w.r.t. the variable z, in virtue of the subcellular dynamics being much
+faster than the events on the higher scales, hence z � 1. We assume the functions p and r to be compactly
+supported in the phase space Rn × V × Z and w to be compactly supported in Rn ×Θ.
+We first integrate equation (8) with respect to z, getting the following equation for m(t, x, v):
+ε2∂tm+ ε∇x · (vm) = −λ0
+(
+m−
+q
+ω
+M
+)
++ λ1
+(
+mz −
+q
+ω
+Mz
+)
++ β(S)
+q
+ω
+R− α(w, S)m− lm(N)m. (12)
+Integrating equation (9) with respect to z we get
+ε2∂tR(t, x) = (α(w, S) + lm(N))M(t, x)+ε
+2
+∫
+Z
+µ(W,N, S)
+∫
+Z
+χ(z, z′, x)r(z′)
+Q(x)
+Q∗
+dz′dz−
+(
+β(S) + ε2γ(S)
+)
+R(t, x) .
+Using the fact that χ(z, z′, x) is a probability kernel with respect to z, the previous equation for R(t, x) reduces
+to:
+ε2∂tR = (α(w, S) + lm(N))M + ε
+2µ(W,N, S)
+Q(x)
+Q∗
+R−
+(
+β(S) + ε2γ(S)
+)
+R . (13)
+Then, we multiply equation (8) by z and integrate it w.r.t. z, obtaining
+ε2∂tm
+z + ε∇x · (vmz)−
+∫
+Z
+z∂z
+[(
+zB(Q,S)−
+εk−
+B(Q,S)2
+(
+k+1
+Q∗
+v · ∇Q−
+k+2
+Sc,0
+v · ∇S
+))
+p(z)
+]
+dz
+=
+∫
+Z
+zLp[λ(z)]p(z)dz + β(S)
+q
+ω
+Rz − (α(w, S) + lm(N))mz .
+The calculation of the integral term on the left hand side leads to the following equation for mz(t, x, v):
+ε2∂tm
+z + ε∇x · (vmz) +B(Q,S)mz −
+εk−
+B(Q,S)2
+(
+k+1
+Q∗
+v · ∇Q−
+k+2
+Sc,0
+v · ∇S
+)
+m = −λ0mz + λ0
+q
+ω
+Mz + β(S)
+q
+ω
+Rz
+− (α(w, S) + lm(N))mz . (14)
+Applying the same procedure to equation (9) we obtain an equation for Rz(t, x):
+ε2∂tR
+z = (α(w, S) + lm(N))M
+z + ε2µ(W,N, S)
+Q(x)
+Q∗
+∫
+Z
+∫
+Z
+zχ(x, z, z′)r(z′)dz′dz −
+(
+β(S) + ε2γ(S)
+)
+Rz . (15)
+6
+We consider Hilbert expansions for the previously introduced moments:
+m(t, x, v) =
+∞∑
+k=0
+εkmk, R(t, x) =
+∞∑
+k=0
+εkRk, m
+z(t, x, v) =
+∞∑
+k=0
+εkmzk R
+z(t, x) =
+∞∑
+k=0
+εkRzk,
+M(t, x) =
+∞∑
+k=0
+εkMk, w(x, t, ϑ) =
+∞∑
+k=0
+εkwk, M
+z(t, x) =
+∞∑
+k=0
+εkMzk , W (x, t) =
+∞∑
+k=0
+εkWk .
+For the subsequent calculations it will be useful to Taylor-expand the coefficient functions involving any of w,
+W , R, M or N in the scaled equations (12)-(15) and (10):
+α(w, S) = α(w0, S) + ∂wα(w0, S) (w − w0) +
+1
+2
+∂2wwα(w0, S) (w − w0)
+2 +O(|w − w0|3),
+lm(N) = lm(N0) + l
+′
+m(N0) (N −N0) +
+1
+2
+l′′m(N0) (N −N0)
+2 +O(|N −N0|3),
+µ(W,N, S) = µ(W0, N0, S) + ∂Wµ(W0, N0, S)(W −W0) + ∂Nµ(W0, N0, S)(N −N0) +O(ε2),
+µW (W,Q) = µW (W0, Q) + ∂WµW (W0, Q)(W −W0) +O(|W −W0|2),
+ηε(x, ϑ,R) = η0(x)
+[
+1− εa(R)ϑ · ∇R+ ε2
+(
+− a(R)∂tR+
+1
+2
+(a(R))2(ϑ · ∇R)2
+)
++O(ε3)
+]
+,
+a(R) = a(R0) + a
+′(R0)(R−R0) +
+1
+2
+a′′(R0)(R−R0)2 +O(|R−R0|3).
+Then, equating the powers of ε in the scaled equations (12)-(15) and (10), we obtain:
+ε0 terms:
+0 = −λ0
+(
+m0 −
+q
+ω
+M0
+)
++ λ1
+(
+mz0 −
+q
+ω
+Mz0
+)
++ β(S)
+q
+ω
+R0 −
+(
+α(w0, S) + lm(N0)
+)
+m0, (16)
+0 =
+(
+α(w0, S) + lm(N0)
+)
+M0 − β(S)R0, (17)
+0 = −
+(
+B(Q,S) + λ0 + α(w0, S) + lm(N0)
+)
+mz0 + λ0
+q
+ω
+Mz0 + β(S)
+q
+ω
+Rz0, (18)
+0 =
+(
+α(w0, S) + lm(N0)
+)
+Mz0 − β(S)R
+z
+0, (19)
+0 = η0(x)(S
+σ
+nW0 − w0), (20)
+where Sσn :=
+1
+|Θ| =
+σ1−n
+|Sn−1| .
+ε1 terms:
+∇x · (vm0) = −λ0
+(
+m1 −
+q
+ω
+M1
+)
++ λ1
+(
+mz1 −
+q
+ω
+Mz1
+)
++ β(S)
+q
+ω
+R1 −
+(
+α(w0, S) + lm(N0)
+)
+m1
+−
+(
+∂wα(w0, S)w1 + l
+′
+m(N0)N1
+)
+m0, (21)
+0 =
+(
+α(w0, S) + lm(N0)
+)
+M1 +
+(
+∂wα(w0, S)w1 + l
+′
+m(N0)N1
+)
+M0 − β(S)R1, (22)
+∇x · (vmz0) = −B(Q,S)m
+z
+1 +
+k−
+B(Q,S)2
+(
+k+1
+Q∗
+v · ∇Q−
+k+2
+Sc,0
+v · ∇S
+)
+m0 − λ0
+(
+mz1 −
+q
+ω
+Mz1
+)
++
++ β(S)
+q
+ω
+Rz1 −
+(
+α(w0, S) + lm(N0)
+)
+mz1 −
+(
+∂wα(w0, S)w1 + l
+′
+m(N0)N1
+)
+mz0, (23)
+0 =
+(
+α(w0, S) + lm(N0)
+)
+Mz1 +
+(
+∂wα(w0, S)w1 + l
+′
+m(N0)N1
+)
+Mz0 − β(S)R
+z
+1, (24)
+∇x · (ϑw0) = η0(x)
+(
+SσnW1 − w1
+)
++ η0(x)a(R0)ϑ · ∇R0 w0 − Sσnη0(x)a(R0)
+∫
+Θ
+w0(ϑ
+′)ϑ′dϑ′ · ∇R0. (25)
+7
+ε2 terms:
+∂tm0 +∇x · (vm1) = −λ0
+(
+m2 −
+q
+ω
+M2
+)
++ λ1
+(
+mz2 −
+q
+ω
+Mz2
+)
++ β(S)
+q
+ω
+R2 −
+(
+α(w0, S) + lm(N0)
+)
+m2
+−
+(
+∂wα(w0, S)w1 + l
+′
+m(N0)N1
+)
+m1 −
+(
+∂wα(w0, S)w2 + l
+′
+m(N0)N2
+)
+m0
+−
+1
+2
+(
+∂2wwα(w0, S)w
+2
+1 + l
+′′
+m(N0)N
+2
+1
+)
+m0, (26)
+∂tR0 =
+(
+α(w0, S) + lm(N0)
+)
+M2 +
+(
+∂wα(w0, S)w1 + l
+′
+m(N0)N1
+)
+M1
++
+1
+2
+(
+∂2wwα(w0, S)w
+2
+1 + l
+′′
+m(N0)N
+2
+1
+)
+M0 +
+(
+∂wα(w0, S)w2 + l
+′
+m(N0)N2
+)
+M0
++ µ(W0, N0, S)
+Q(x)
+Q∗
+R0 − β(S)R2 − γ(S)R0, (27)
+∂tw0 +∇x · (ϑw1) = η0(x)
+[(
+a(R0)∂tR0 + a(R0)ϑ · ∇R1 + a′(R0)R1ϑ · ∇R0 −
+1
+2
+(a(R0)ϑ · ∇R0)2
+)
+w0
++ a(R0)ϑ · ∇R0 w1 − w2
+]
++ Sσnη0(x)
+[
+W2 − a(R0)
+∫
+Θ
+ϑ′w1(ϑ
+′)dϑ′ · ∇R0 − a(R0)∂tR0W0
+−
+∫
+Θ
+ϑ′w0(ϑ
+′)dϑ′ ·
+(
+a(R0)∇R1 + a′(R0)R1∇R0
+)
++
+1
+2
+∫
+Θ
+(a(R0)ϑ
+′ · ∇R0)2w0(ϑ′)dϑ′
+]
++ µW (W0, Q)w0
+= η0(x)
+[(
+a(R0)∂tR0 + a(R0)ϑ · ∇R1 + a′(R0)R1ϑ · ∇R0 −
+1
+2
+(a(R0)ϑ · ∇R0)2
+)
+w0
++ a(R0)ϑ · ∇R0 w1 − w2
+]
++ Sσnη0(x)
+[
+W2 − a(R0)
+∫
+Θ
+ϑ′w1(ϑ
+′)dϑ′ · ∇R0 − a(R0)∂tR0W0
++
+1
+2
+∫
+Θ
+(a(R0)ϑ
+′ · ∇R0)2w0(ϑ′)dϑ′
+]
++ µW (W0, Q)w0 , (28)
+due to (20).
+From (17) we get
+R0(t, x) =
+α(w0, S) + lm(N0)
+β(S)
+M0(t, x) (29)
+and from (19) we get
+Rz0(t, x) =
+α(w0, S) + lm(N0)
+β(S)
+Mz0 (t, x) . (30)
+Integrating (18) with respect to v, we have
+0 = −B(Q,S)Mz0 + β(S)R
+z
+0 − α(w0, S)M
+z
+0 − lm(N0)M
+z
+0 ,
+from which by using (30) we obtain
+Mz0 = 0 (31)
+Rz0 = 0 . (32)
+These, together with (18), lead to
+mz0 = 0 . (33)
+8
+From (16) and (18) we obtain:
+0 = −λ0m0 + λ0
+q
+ω
+M0 +
+(
+α(w0, S) + lm(N0)
+) q
+ω
+M0 −
+(
+α(w0, S)− lm(N0)
+)
+m0
+⇒ 0 =
+( q
+ω
+M0 −m0
+)(
+λ0 + α(w0, S) + lm(N0)
+)
+.
+Since (λ0 + α(w0, S) + lm(N0)) 6= 0 for any N0, S, w0, we obtain
+m0 =
+q
+ω
+M0 . (34)
+From equation (20) we see that
+w0 = S
+σ
+nW0, (35)
+thus w0 depends on the (constant) speed σ, but not on the direction θ ∈ Sn−1.
+Now, turning to the equations stemming from the ε1-terms, from (24) we get:
+Rz1(x, t) =
+α(w0, S) + lm(N0)
+β(S)
+Mz1 (x, t) . (36)
+Integrating (23) with respect to v, we have upon using (34) and (33):
+0 =−B(Q,S)Mz1 +
+k−
+B(Q,S)2
+M0s
+nEq ·
+(
+k+1
+Q∗
+∇Q−
+k+2
+Sc,0
+∇S
+)
++ β(S)Rz1 −
+(
+α(w0, S) + lm(N0)
+)
+Mz1 .
+Using the fact that the tissue is undirected, i.e. Eq = 0 and (36), the previous equation leads to:
+Mz1 = 0 (37)
+and whence
+Rz1 = 0 . (38)
+Now plugging these results into (23) we get
+0 = −B(Q,S)mz1 +
+k−
+B(Q,S)2
+(
+k+1
+Q∗
+v · ∇Q−
+k+2
+Sc,0
+v · ∇S
+)
+m0 − λ0mz1 −
+(
+α(w0, S) + lm(N0)
+)
+mz1
+⇒ mz1 [B(Q,S) + λ0 + α(w0, S) + lm(N0)] =
+k−
+B(Q,S)2
+(
+k+1
+Q∗
+v · ∇Q−
+k+2
+Sc,0
+v · ∇S
+)
+m0 .
+We denote
+F (Q,S) :=
+k−
+B(S,Q)2 [B(Q,S) + λ0 + α(w0, S) + lm(N0)]
+(39)
+and obtain therewith the following expression for mz1:
+mz1 = F (Q,S)
+(
+k+1
+Q∗
+v · ∇Q−
+k+2
+Sc,0
+v · ∇S
+)
+m0. (40)
+From equation (22) we have
+R1 =
+α(w0, S) + lm(N0)
+β(S)
+M1 +
+∂wα(w0, S)w1 + l
+′
+m(N0)N1
+β(S)
+M0. (41)
+Using (21) we derive
+∇x · (vm0) =− λ0
+(
+m1 −
+q
+ω
+M1
+)
++ λ1m
+z
+1 +
+(
+α(w0, S) + lm(N0)
+) q
+ω
+M1 +
+(
+∂wα(w0, S)w1 + l
+′
+m(N0)N1
+) q
+ω
+M0
+−
+(
+α(w0, S) + lm(N0)
+)
+m1 −
+(
+∂wα(w0, S)w1 + l
+′
+m(N0)N1
+)
+m0,
+9
+thus by (34)
+L̄m[λ0 + α(w0, S) + lm(N0)]m1 := −
+(
+λ0 + α(w0, S) + lm(N0)
+)
+m1 +
+(
+λ0 + α(w0, S) + lm(N0)
+) q
+ω
+M1
+= ∇x · (vm0)− λ1mz1 . (42)
+In order to get an explicit expression for m1, we would like to invert the operator L̄m[λ0+α(w0, S)+lm(N0)]. As
+e.g. in [19,71], we define it on the weighted L2-space L2q(V ), in which the measure dv is weighted by q(x, v̂)/ω.
+In particular, L2q(V ) can be decomposed as L
+2
+q(V ) =< q/ω > ⊕ < q/ω >⊥. Due to the properties of the chosen
+turning kernel, L̄m[λ0 + α(w0, S) + lm(N0)] is a compact Hilbert-Schmidt operator with kernel < q/ω >. We
+can therefore calculate its pseudo-inverse on < q/ω >⊥.
+Thus, to determine m1 from (42) we need to check the solvability condition∫
+V
+[∇x · (vm0)− λ1mz1] dv = 0 .
+This holds thanks to the above results and to the symmetry of q(x, v̂). Therefore, we obtain from (42) and (40)
+m1 = −
+1
+λ0 + α(w0, S) + lm(N0)
+[
+∇x · (vm0)− λ1F (Q,S)
+(
+k+1
+Q∗
+v · ∇Q−
+k+2
+Sc,0
+v · ∇S
+)
+m0
+]
+(43)
+and
+M1 = 0 . (44)
+On the other hand, (25) and (35) give:
+∇x · (ϑw0) = −η0(x)w1 + η0(x)a(R0)ϑ · ∇R0w0 + Sσnη0(x)W1 . (45)
+Likewise, we observe that the operator L̄w[η0]w1 := −η0(x)w1 + Sσnη0(x)W1 can be inverted, so that (45) leads
+to
+w1 = −
+1
+η0(x)
+∇x · (ϑw0) + w0a(R0)ϑ · ∇R0 (46)
+and
+W1 = 0 . (47)
+From (27) we derive the following expression for
+β(S)
+ω
+R2:
+β(S)
+ω
+R2 =
+1
+ω
+(
+α(w0, S) + lm(N0)
+)
+M2 +
+1
+2ω
+(
+∂2wwα(w0, S)w
+2
+1 + l
+′′
+m(N0)N
+2
+1
+)
+M0
++
+1
+ω
+(
+∂wα(w0, S)w2 + l
+′
+m(N0)N2
+)
+M0 +
+µ(W0, N0, S)
+ω
+Q(x)
+Q∗
+R0 −
+γ(S)
+ω
+R0 −
+1
+ω
+∂tR0 .
+(48)
+Plugging it into (26) we get:
+∂tm0 +∇x · (vm1) = −λ0
+(
+m2 −
+q
+ω
+M2
+)
++ λ1
+(
+mz2 −
+q
+ω
+Mz2
+)
++
+q
+ω
+(
+α(w0, S) + lm(N0)
+)
+M2
++
+q
+2ω
+(
+∂2wwα(w0, S)w
+2
+1 + l
+′′
+m(N0)N
+2
+1
+)
+M0 +
+q
+ω
+(
+∂wα(w0, S)w2 + l
+′
+m(N0)N2
+)
+M0
++
+q
+ω
+µ(W0, N0, S)
+Q(x)
+Q∗
+R0 −
+q
+ω
+γ(S)R0 −
+q
+ω
+∂tR0 −
+(
+α(w0, S) + lm(N0)
+)
+m2
+−
+(
+∂wα(w0, S)w1 + l
+′
+m(N0)N1
+)
+m1 −
+(
+∂wα(w0, S)w2 + l
+′
+m(N0)N2
+)
+m0
+−
+1
+2
+(
+∂2wwα(w0, S)w
+2
+1 + l
+′′
+m(N0)N
+2
+1
+)
+m0.
+(49)
+Integrating with respect to v we get
+∂tM0 +
+∫
+V
+∇x · (vm1)dv =
+1
+2
+(
+∂2wwα(w0, S)w
+2
+1 + l
+′′
+m(N0)N
+2
+1
+)
+M0 +
+(
+∂wα(w0, S)w2 + l
+′
+m(N0)N2
+)
+M0
++ µ(W0, N0, S)
+Q(x)
+Q∗
+R0 − γ(S)R0 − ∂tR0 −
+(
+∂wα(w0, S)w2 + l
+′
+m(N0)N2
+)
+M0
+−
+1
+2
+(
+∂2wwα(w0, S)w
+2
+1 + l
+′′
+m(N0)N
+2
+1
+)
+M0
+10
+⇒ ∂tM0 +
+∫
+V
+∇x · (vm1)dv = µ(W0, N0, S)
+Q(x)
+Q∗
+R0 − γ(S)R0 − ∂tR0, (50)
+where∫
+V
+∇x · (vm1)dv =
+∫
+V
+∇x ·
+[
+v
+(
+−
+1
+λ0 + α(w0, S) + lm(N0)
+(
+∇x · (vm0)− λ1F (Q,S)
+(
+k+1
+Q∗
+v · ∇Q−
+k+2
+Sc,0
+v · ∇S
+)
+m0
+))]
+dv
+= ∇x ·
+[∫
+V
+−
+1
+λ0 + α(w0, S) + lm(N0)
+v ⊗ v∇x
+( q
+ω
+M0
+)]
+dv
++∇x ·
+[
+λ1F (Q,S)
+ω(λ0 + α(w0, S) + lm(N0))
+∫
+V
+v ⊗ v q(x, v̂)dv
+(
+k+1
+Q∗
+∇Q−
+k+2
+Sc,0
+∇S
+)
+M0
+]
+.
+With the notation
+DT (x) :=
+1
+ω
+∫
+V
+v ⊗ v q(x, v̂)dv = s2
+∫
+Sn−1
+θ ⊗ θ q(θ, x)dθ = s2Vq(x) (51)
+and recalling that N0(t, x) = M0(t, x) +R0(t, x), i.e.,
+N0 =
+(
+1 +
+α(w0, S) + lm(N0)
+β(S)
+)
+M0 , (52)
+we obtain from (50) the following macroscopic equation for N0(t, x):
+∂tN0 −∇x ·
+[
+1
+λ0 + α(w0, S) + lm(N0)
+∇x ·
+( β(S)
+β(S) + α(w0, S) + lm(N0)
+DT (x)N0
+)]
++∇x ·
+
+ λ1F (Q,S)β(S)
+λ0 + α(w0, S) + lm(N0)
+DT (x)
+k
++
+1
+Q∗
+∇Q − k
++
+2
+Sc,0
+∇S
+β(S) + α(w0, S) + lm(N0)
+N0
+
+
+=
+α(w0, S) + lm(N0)
+α(w0, S) + lm(N0) + β(S)
+N0
+(
+µ(W0, N0, S)
+Q(x)
+Q∗
+− γ(S)
+)
+.
+(53)
+We denote
+ϕ(w0, N, S) :=
+β(S)
+β(S) + α(w0, S) + lm(N)
+(54)
+%(w0, N, S) := (λ0 + α(w0, S) + lm(N)). (55)
+Observe that, due to (20), these are, in fact, purely macroscopic quantities.
+Integrating (28) with respect to ϑ ∈ Θ gives
+∂tW0 +∇x ·
+∫
+Θ
+ϑw1dϑ = µW (W0, Q)W0,
+again due to (20). Recalling (46), this leads to the following macroscopic equation for the density W0 of
+endothelial cells:
+∂tW0 − ∇ ·
+(
+DEC∇W0
+)
++∇ ·
+(
+�a(R0)W0∇R0
+)
+= µW (W0, Q)W0, (56)
+where DEC(x) :=
+σ2
+nη0(x)
+In and �a(R0) :=
+σ2a(R0)
+n
+In = η0(x)a(R0)DEC(x).
+The two macroscopic equations obtained in (53) and (56) for the evolution of the tumor and ECs, respectively,
+are coupled with a PDE for proton concentration dynamics:
+∂tS = DS∆S + g(S,N0,W0, Q) , (57)
+with the concrete form of g(S,N0,W0, Q) given in (65).
+11
+In view of (29), (41), (44), and (47), the ε-correction terms for N and W can be left out and ignoring the higher
+order terms we get the following closed PDE system characterizing the macroscopic evolution of the tumor
+under the influence of tissue, vasculature, and acidity:
+
+∂tN −∇ ·
+[
+1
+%(W,N, S)
+∇ ·
+(
+ϕ(W,N, S)DT (x)N
+)]
++∇ ·
+[
+λ1
+F (Q,S)ϕ(W,N, S)
+%(W,N, S)
+DT (x)
+(
+k+1
+Q∗
+∇Q−
+k+2
+Sc,0
+∇S
+)
+N
+]
+= ϕ(W,N, S)
+α(W,S) + lm(N)
+β(S)
+N
+(
+µ(W,N, S)
+Q
+Q∗
+− γ(S)
+)
+,
+∂tW = ∇ ·
+(
+DEC∇W
+)
+−∇ ·
+(
+η0a(R)DECW∇R
+)
++ µW (W,Q)W,
+∂tS = DS∆S + g(S,N,W,Q),
+(58)
+with F (Q,S) given in (39), the tumor diffusion tensor DT from (51), and with the coefficients ϕ and ρ from
+(54) and (55), respectively, whereby we used w = W|Θ| , in virtue of (20). This system has to be supplemented
+with adequate initial conditions; its deduction has been carried out for x ∈ Rn. For the numerical simulations
+to be performed in Section 4, we will consider it to be set in a bounded, sufficiently regular domain Ω ⊂ Rn
+and endow it with no-flux boundary conditions.
+The next section is dedicated to specifying the remaining coefficients of the above macroscopic system.
+3 Assessment of coefficients
+To determine the tumor diffusion tensor DT (x) in (51) we need to provide a concrete form for the (mesoscopic)
+orientational distribution of tissue fibers q(x, θ). Several different choices are available in the literature, see
+e.g. [14, 71]. As in [45] we use the orientation distribution function (ODF):
+q(x, θ) =
+1
+4π|DW (x)|
+1
+2 (θT (DW (x))−1θ)
+3
+2
+,
+where DW (x) is the water diffusion tensor obtained from processing the (patient-specific) DTI data.
+We choose for the macroscopic tissue density Q(x) the expression proposed in [20]:
+Q(x) = 1−
+l3c(x)
+h3
+, (59)
+where h is the side length of one voxel of the DTI dataset and lc a characteristic length, estimated as
+lc(x) =
+√
+tr(DW (x))h2
+4l1
+with l1 being the leading eigenvalue of the diffusion tensor DW .
+For the rate α(w, S) describing the cell phenotypic switch p → r from migration to proliferation, we choose
+a combination of an increasing function of w and a decreasing function of S. As explained in Subsection 2.2,
+this rate is influenced by the availability of nutrient (provided by vasculature) for sustaining the processes
+involved in the cell cycle and by the pH of the environment; the dynamical balance of these factors decides the
+migratory/mitotic fate. Recalling (35), we set
+α(W,S) = α0
+SσnW/Wc,0
+Sσn + S
+σ
+nW/Wc,0
+1
+1 + S/Sc,0
+, (60)
+where Wc,0 and Sc,0 are reference values for EC density and proton concentration, respectively.
+The second rate of phenotypic switch p → r lm(N), describing the influence of a crowed environment on cell
+phenotype changes, is chosen as
+lm(N) = lm,0 (1 + tanh(N/Nc,0 −N∗/Nc,0)) , (61)
+where N∗ represents a threshold value for glioma density: when it is exceeded, the cells are not able to move
+anymore. The constant Nc,0 denotes a reference value for the density of (moving and proliferating) glioma cells.
+12
+The switching rate r → p given by the function β(S) controls the acidity-triggered motility enhancement of
+formerly proliferating cells. We set
+β(S) = β0 [ε+ (S/Sc,0 − ST,1/Sc,0)+] (62)
+with ε � 1 and (·)+ the positive part. ST,1 is the pH threshold which, when underrun, induces the cells to
+switch from a proliferative to a migrative phenotype.
+Although tumor cells can live in an environment with substantially lower pH than that for normal tissue [23,90],
+when it drops below a certain threshold (which in terms of proton concentration we denote by ST,2), the cancer
+cells become necrotic [24,90]. This suggests the following cell death coefficient γ(S):
+γ(S) = γ0(S/Sc,0 − ST,2/Sc,0)+ . (63)
+The growth rate µ(W,N, S) can be also defined in different ways and it should be motivated by biological
+evidence. As, for instance, in [20], we choose a logistic-like function to describe the growth self-limitation and
+a growth enhancement factor depending on the vascularization W , along with a growth-limiting one due to
+acidification, like that employed in (60):
+µ(W,N, S) = µN,0
+(
+1−
+N
+KN
+− ce
+Ne
+KNe
+)
+W
+Wc,0
+1
+1 + S/Sc,0
+. (64)
+Here, KN is the tumor carrying capacity and µN,0 is a constant. The term −ce NeKNe is related to the extension
+of the model described in Section 5. In particular, ce = 0 when we consider the evolution of system (58), while
+ce = 1 when the dynamics of healthy tissue and necrotic tissues (Ne) are included. KNe represents the carrying
+capacity for the necrotic component.
+Similarly, for the term µW (W,Q) describing proliferation of ECs we take
+µW (W,Q) = µW,0
+(
+1−
+W
+KW
+)
+Q
+Q∗
+,
+with KW and Q
+∗ the carrying capacities for ECs and healthy tissue, respectively.
+For the tactic sensitivity �a(R) = η0a(R)DEC of ECs towards (gradients of) proliferating glioma cells, we need
+to specify the function a(R) involved in the definition (7) of the EC turning rate. We choose
+a(R) = χa0
+KN
+(KN +R)2
+,
+which corresponds to the rate of change of the expression ζ(R) = R
+R+KN
+representing the equilibrium of the
+interactions between ECs and proliferating glioma cells R, scaled by a constant χa0 that is used to account for
+changes in the turning rate per unit of change in dζ/dt. Thereby, we assume that attachment and detachment
+of ECs and R-cells happen with the same rates.
+The reaction term in the PDE for acidity dynamics is chosen as
+g(S,N,W,Q) = gs
+N
+Nc,0
+− gd
+(
+W
+Wc,0
++
+Q
+Q∗
+)
+S, (65)
+hence it has a source term for the production of protons by the tumor, and a decay term, as the protons are
+buffered by healthy tissue and also uptaken by the capillary network.
+In Table 1 we report the range of the values for the constant parameters involved in system (58), as well as the
+references from which they were drawn. In order to simplify, we assume a constant coefficient η0 in the turning
+rate (7) for ECs. Further details on the estimation of the parameters and on the nondimensionalization of (58)
+are given in Appendix A and B.
+4 Numerical simulations
+We perform 2D simulations of the resulting macroscopic system of coupled advection-diffusion-reaction equations
+(58). For the initial conditions we take a Gaussian-like aggregate of tumor cells centered at (x0,N , y0,N ) =
+(−17, 5), situated in the left-upper part of the brain slice,
+R0(x, y) = e
+−
+((x−x0,N )2+(y−y0,N )2)
+8
+13
+Parameter Description Value (units) Source
+λ0 turning frequency in Lp[λ(z)] 0.001 (s−1) [79]
+λ1 turning frequency in Lp[λ(z)] 0.001 (s−1) [19,79]
+α0 phenotype switch rate p→ r 0.0001 (s−1) [54,72]
+β0 phenotype switch rate r → p 0.0002 (s−1) [54,72]
+lm,0 overcrowding switch rate p→ r 0.0005 (s−1) [54,72]
+N∗ optimal tumor density value for cell movement 0.75 ·KN [8, 74]
+s speed of tumor cells 0.0084 · 10−3 (mm· s−1) [18]
+k+1 attachment rate of tumor cells to tissue fibers 0.034 (s
+−1) [58]
+k+2 interaction rate between tumor cells and protons 0.01 (s
+−1) [58]
+k− detachment rate 0.01 (s−1) [58]
+µN,0 tumor proliferation rate 9.26 · 10−6 (s−1) [49]
+KN tumor carrying capacity ∼ 106 (cells ·mm−3) [1]
+γ0 acid-induced death rate for tumor cells 0.19 · 10−6 (s−1) [86]
+ST,1 proton concentration threshold for r → p 1.995 · 10−7 (M) [88,90]
+ST,2 proton concentration threshold for tumor cell death 3.98 · 10−7 (M) [88,90]
+η0 turning frequency of ECs in Lw[η] 0.001 (s−1) [87]
+χa0 duration between R-damped EC turnings 4.5 (d) [83,84]
+σ speed of ECs 0.0056 · 10−3 (mm· s−1) [17]
+KW carrying capacity for ECs ∼ 106 (cells ·mm−3) [2]
+µW,0 EC proliferation rate 0.58 · 10−6 (s−1) [4, 30]
+DS diffusion coefficient of protons 0.5 · 10−3 (mm2·s−1) [59]
+gs proton production rate 2.2 · 10−20 (M ·mm3 · (cells · s)−1) [62]
+gd proton removal rate 0.8 · 10−4 (s−1) [63]
+Table 1: Model parameters
+and a ring-like profile for the migrating tumor cells centered at the same location:
+M0(x, y) = 0.5 e
+−
+(√
+(x−x0,N )2+(y−y0,N )2−2
+)2
+.
+The initial distribution of the total tumor population is given by N0(x, y) = R0(x, y) +M0(x, y). For the ECs
+we consider x0,W = −6 and
+W0(x, y) = 0.5 e
+−
+(x−x0,W )
+2
+0.2 sin6
+(π
+8
+y
+)
+∀ y ∈ [−5, 15]
+reproducing the representative situation of three blood vessels close to the neoplastic region. Finally, for the
+acidity profile we consider a Gaussian distribution, centered at the same point as tumor cells (x0,S , y0,S) =
+(−17, 5), given by:
+S0(x, y) = 0.65 e
+−
+((x−x0,S)2+(y−y0,S)2)
+10 .
+The initial pH distribution is calculated considering that pH0 = − log10(S0). Figure 1 shows the plots for the
+initial conditions on the entire 2D brain slice, zooming then in the region Ω̄ = [−35, 5] × [−15, 25]. Figure 2
+shows the initial tissue density estimated with (59).
+The numerical simulations are performed with a self-developed code in Matlab (MathWorks Inc., Natick, MA).
+The computational domain is a horizontal brain slice reconstructed from the processing of an MRI scan. The
+macroscopic tensor DT (x) is precalculated using DTI data and the ODF for the fiber distribution function (see
+Section 3). The dataset was acquired at the Hospital Galdakao-Usansolo (Galdakao, Spain), and approved by
+its Ethics Committee: all the methods employed were in accordance to approved guidelines. A Galerkin finite
+element scheme for the spatial discretization of the equations for tumor cells, ECs, and proton concentration is
+14
+Figure 1: Initial conditions for Model (58).
+Figure 2: Healthy tissue density for Model (58).
+considered, together with an implicit Euler scheme for the time discretization. We present different simulations
+addressing several aspects.
+Firstly, we study the behavior of species involved in (58) for the parameters listed in Table 1. The corresponding
+simulation results are shown in Figure 3, where the five columns report the evolution of the whole tumor mass
+(N), the two subpopulations of proliferating (R) and migrating (M) tumor cells, the endothelial cells (W ), and
+pH (computed from S). The tumor spread, which seems to mainly depend on the choice of the parameters
+λ0 and s, as well as on the EC evolution, is rather slow, with a partial exchange between the two subpopula-
+tions of tumor cells in relation to pH at the core of the tumor mass. The tumor cells increasingly adopt the
+proliferating phenotype when they approach ECs, as they provide the necessary nutrient and oxygen supply to
+sustain glioma proliferation. On the other hand, ECs diffuse and grow, with a higher accumulation around the
+first of the three vessels situated in the upper part of the plots and where there is more healthy tissue available
+to sustain their proliferation. They clearly exhibit tactic behavior toward the (pro-angiogenic growth factors
+released by) proliferating tumor cells mainly located around the core of the neoplasm. In particular, the sub-
+plots for the evolution of ECs at later times (last two rows of Figure 3) show an increasing amount of high EC
+aggregates developing towards the tumor. This behavior can be associated with the phenomenon of microvas-
+cular hyperplasia and glomeruloid bodies. The latter are tumor-associated vascular structures that develop in
+the presence of high levels of VEGF and are important histopathological features of glioblastoma multiforme [77].
+In Figure 4 we show comparisons between simulations done upon varying the parameters λ0, referring to the
+turning rate of glioma cells, and the two speeds (s, σ) for tumor and endothelial cells, respectively, with the aim
+to illustrate how sensitive the model predictions are w.r.t. these parameters. The tumor and EC densities are
+plotted after 560 days of evolution for three different values of λ0 (expressed in s
+−1), i.e., 10−4, 10−3 and 10−2,
+and for four pairs (s, σ) of speed values (expressed in µm· h−1), i.e., (15, 20), (20, 15), (30, 20), and (30, 25).
+The simulations suggest that vascularization at the tumor site requires a sufficiently large glioma turning rate
+λ0 accompanied by relatively large EC speed σ. A too small λ0 effects the (biologically rather unrealistic) shift
+of tumor cells from their original location to the site of blood vessels, where they switch to the proliferative
+15
+Figure 3: Numerical simulation of Model (58) with parameters listed in Table 1.
+phenotype. The faster the glioma cells are, the more pronounced is this behavior, obviously dominated by
+migration during its first stage and subsequent proliferation. Increasing λ0 by one or two orders of magnitude
+leads to more realistic behaviors of tumor cells and ECs, with less sensitivity towards variations in λ0. Naturally,
+wide-spread hyperplasia and pronounced tumor invasion occur for higher cell speeds.
+In order to test the effect of the go-or-grow dichotomy on the evolution of cell populations involved in system
+(58), we compare that model with a setting in which the tumor cells migrate and proliferate without deterring
+one of these phenotypes for the other. In particular, we do not differentiate between proliferating and migrating
+cells and accordingly let the ECs be biased by the density gradient of the whole tumor. Using a scaling argument
+similar to the one described in Section 2.3, we get a system of three partial differential equations for tumor
+cells (N1), ECs (W1), and protons (S1), which is analogous to (58) with α0 = 0 and lm,0 = 0. This choice of
+parameters reduces the former coefficient functions to ϕ(w0, N, S) = 1 and %(w0, N, S) = λ0. We refer to this
+setting as Model NGG. Figure 5 shows the solution behavior for this new setting. The initial conditions for the
+three populations are the same as those shown in Figure 1. Comparing Figures 3 and 5 we observe that the
+go-or-growth model predicts -as expected- a slower tumor spread, with lower cell density, that, consequently,
+induces lower acidity concentrations in the environment, and the differences between the two settings becoming
+more accentuated with increasing time. Moreover, the taxis driving ECs towards the tumor mass is stronger
+for the case shown in Figure 5, and accumulations of ECs indicating microvascular hyperplasia are now earlier
+formed and become larger.
+To enable a direct assessment of the two settings we plot in Figure 6 the differences (at 400 and 560 days) between
+the (overall) densities of tumor and endothelial cells for the model with go-or-grow and its NGG counterpart
+(the quantities for the latter are marked by the index 1), as well as between the respective pH distributions, the
+latter illustrated on a larger domain Ω̃ = [−40, 10] × [−20, 30]. The described features concerning tumor/EC
+spread and aggregation along with acidity distribution can be clearly observed.
+16
+(", $)
+(30,25)
+(30,20)
+(20,15)
+(15,10)
++,10-.10-/10-0
+Figure 4: Comparison between the evolution of tumor (first row of each box) and endothelial cells (second row of each
+box) for three different values of λ0 (s
+−1): 10−4, 10−3 and 10−2, and four pairs (s, σ) of speed values (µm· h−1): (15, 20),
+(20, 15), (30, 20), and (30, 25). All values belong to the parameter ranges reported in Appendix A.
+5 Tissue degradation, necrosis, and tumor grading
+We extend the above model by considering the evolution of macroscopic tissue density Q and that of necrotic
+matter Ne, the latter including tissue as well as glioma cells degraded by hypoxia. The whole system consists
+17
+Figure 5: Numerical simulation of Model NGG, i.e., with simultaneously moving and proliferating cancer cells. The
+employed parameter values are listed in Table 1, except now α0 = 0 and lm,0 = 0.
+of equations (58) together with the following ODEs:
+
+∂tQ = −dQ(S)Q
+∂tNe = dQ(S)Q+ ϕ(w,N, S)
+α(w, S) + lm(N)
+β(S)
+γ(S)N,
+(66)
+where the coefficient dQ(S) models the pH-triggered tissue degradation occurring when a certain acidity thresh-
+old ST,Q is exceeded
+dQ(S) = d0,Q
+(
+S
+Sc,0
+−
+ST,Q
+Sc,0
+)
++
+.
+Thereby d0,Q > 0 denotes the tissue degradation rate and (·)+ means as usual the positive part. Details on the
+estimation of dQ,0 and ST,Q are given in Appendix A.
+Numerical simulations for the extended model (58), (66) are shown in Figure 8, corresponding to the initial con-
+ditions in Figure 7. Figure 9 illustrates the evolution of proliferating and migrating glioma cells. Although the
+qualitative behavior of glioma and endothelial cells is comparable with that shown in Figure 3, the degradation
+of tissue by environmental acidity affects both tumor and EC proliferation, as less healthy tissue is available to
+sustain growth. Therefore, the simulations show lower densities for both species and, particularly, tumor cell
+growth is affected by the reduction of vasculature and the depletion of healthy tissue, as clearly shown by the
+evolution of the proliferating tumor cells in Figure 9 (first row). Moreover, Figure 8 shows that lower tumor
+18
+Figure 6: Differences between the respective solution components of Model (58) and of Model NGG at 400 (upper row)
+and 560 (lower row) days.
+Figure 7: Initial conditions for the extended Model (58), (66).
+density effects less proton extrusion, i.e. higher pH.
+The above model extension enables us to perform necrosis-based tumor grading, which is essential for assessing
+patient survival and treatment planning. Other indicators of tumor aggressiveness are employed as well (e.g.
+histological patterns [92] or tumor size [75]), however, we focus here on grading by the amount of necrosis
+relative to the whole tumor volume, in view of [29,36], where the tumor volume by itself was found to have no
+influence on overall survival. Following [15], we define the time-dependent grade G(t) ∈ [0, 1] of the simulated
+tumor via:
+G(t) :=
+VNe(t)
+VNe(t) + VN (t)
+(67)
+where VNe(t) and VN (t) denote, respectively, the fractions of necrosis and living cell densities in the visible
+tumor volume. They are defined as the integrals of the densities Ne and N over the domain defined by the level
+19
+Figure 8: Numerical simulation of the extended Model (58), (66). Parameters are listed in Table 1 and the value of ECs
+speed is here set to σ = 0.0069 · 10−3 mm·s−1.
+sets of the tumor population for a detection threshold of 80% of the carrying capacity, which corresponds to the
+detection threshold for T1-Gd images [86]. We represent in Figure 10 the time evolution of G, guided by the
+percentage classification in [29], i.e., 0 < G < 25%: grade 1, 25% ≤ G < 50%: grade 2, and G ≥ 50: grade 3.
+The highest grade corresponds to the most aggressive tumor and the poorest survival prognosis. In particular,
+we compare the effect of four different scenarios on necrosis-based tumor grading: the grey curves therein refer
+to the extended model (58), (66)) involving vascularization, i.e. EC density W (solid line: go-or-grow, dotted
+line: Model NGG), while the red curves illustrate the evolution of G for the corresponding variants of the
+extended model without EC dynamics (i.e., without W ).
+Figure 10 provides rich information. On the one hand, it shows that assuming the go-or-grow dichotomy leads
+to slower progression of neoplasia, due to the cells deterring one phenotype for the other. Indeed, in the long
+run, the full go-or-grow model with vascularization predicts a slower advancement towards high tumor grades.
+When EC dynamics are accounted for, the differences between the model with or without go-or-grow are rather
+small; when W is, instead, not included, then such differences increase. The vascularization seems to have
+a significant impact: if we focus e.g., on Model NGG (dotted curves) we see that during the first simulated
+14-15 weeks the vascularization ensures a higher percentage of necrosis, after which the situation reverses, with
+differences becoming larger while time is advancing. The early phase (which is supposed to correspond to
+a lower tumor grade) might seem somehow paradoxical when thinking about blood capillaries buffering the
+acidity and reducing necrosis. It is, however, well-known that a tumor usually develops angiogenesis when it
+has reached a more advanced phase in its development and begun to get increasingly hypoxic, which leads to
+enhanced VEGF expression and capillary formation. The small amount of vessels prior to such stage is on the
+one side supporting the growth of tumor cells, while on the other side it is not able to buffer the ever increasing
+proton concentration triggered by the exuberant growth. Without a substantial enhancement of angiogenesis,
+the tumor will develop a larger necrotic component, thus receiving a higher grade. Therefore, omitting the
+dynamics of endothelial cells from the model might overestimate the tumor growth and spread, which for brain
+20
+Figure 9: Numerical simulation of the extended Model (58), (66). Here the evolution of the proliferating and of the
+migrating tumor cells is shown.
+Figure 10: Evolution of the grade function G(t) given in (67). Grey curves relate to the extended full model (i.e.,
+including dynamics of endothelial cells) in the case with go-or-grow (solid line, model (58), (66)) and without the
+migration-proliferation dichotomy (dotted line, Model NGG). The red curves refer, respectively, to the same model
+variants, but without vascularization. In both cases we set µN,0 = 5.79 · 10−6 s−1.
+tumors can have a significant therapeutic impact.
+6 Discussion
+To our knowledge this is the first continuous mathematical model with pH- and vasculature-induced phenotypic
+switch between moving and proliferating cells where the two cell types are seen as distinct tumor subpopulations
+evolving under mutual, direct and indirect interactions. As such, it can be seen as a further development of the
+models in [21,45]. This novel model not only includes on the macroscopic scale nonlinear, myopic self-diffusion
+and multiple taxis (haptotaxis, repellent pH-taxis) for one of the tactic populations (glioma cells), but also
+features taxis of the second population (ECs) towards only one part of the former: the ECs are following, in
+21
+fact, the gradient of proliferating glioma. Thereby, the chemorepellent is produced by the population (glioma
+cells) which tries to avoid it, but at the same time is degraded by the other tactic actor (ECs), which is, in
+turn, directionally biased by (a part of) the first one. This renders the repellent acidity taxis of glioma cells
+both direct and indirect. The extended model involving dynamics of tissue and necrotic matter involves, too,
+an indirect kind of haptotaxis, with yet more complex couplings. These features raise several highly interesting
+questions related to rigorous well-posedness and long term behavior of solutions. Among others, the simula-
+tions showed that for certain parameter combinations the solution can infer singularities. For a recent review
+of available models with multiple taxis we refer to [55].
+We used a multiscale approach starting from single cell dynamics for glioma interacting with (macroscopically
+represented) extracellular acidity and tissue, we wrote the corresponding kinetic transport equations for glioma
+and EC density distribution functions on the mesoscopic scale, and employed a parabolic scaling to deduce the
+population level behavior for the model variables: glioma density, acid concentration (or pH), EC density, and
+-for the extended model- densities of normal tissue and necrotic matter. Thereby, tumor cell migration is driven
+as in previous works, e.g, [19,21,71], by a myopic diffusion term involving a tumor diffusion tensor which takes
+into account the local tissue structure. Moreover, taxis terms carrying information from the microscopic scale
+direct glioma migration towards increasing tissue gradients and away from highly acidic regions. We consid-
+ered a heterogeneous tumor and used the go-or-grow dichotomy asserting that glioma cells can either move or
+proliferate, the respective behavior being transient and switching according to nutrient availability (supplied by
+vasculature), pH (determined by proton production and buffering), as well as crowded environments.
+The deduced macroscopic motion of ECs is characterized, too, by a combination of diffusion and drift terms. In
+order not to increase too much the number of solution components, we described rather indirectly the response
+of ECs to pro-angiogenic growth factors (e.g. VEGFs), upon biasing their tactic motion towards proliferating
+tumor cells. This was realized in an alternative manner to that by which taxis terms have been obtained for
+glioma cells.
+The extension of the model by taking into account the macroscopic evolution of healthy tissue and necrotic
+matter opened the way for necrosis-based tumor grading, which is highly relevant for diagnosis and therapy
+planning. A forthcoming work will be dedicated to several aspects of the latter issue.
+The validation of model predictions through comparison with adequate patient data would be a future task
+to address. Although the available technology is potentially able to provide a large amount of the needed
+quantitative information, the standard clinical imaging and therewith associated treatment does not provide
+such data sets, among others due to prohibitively high costs. With the advent of technological development
+and the advancement of personalized medicine, however, such data may become available in the near future.
+Acknowledgements
+The authors thank Prof. Juan Soler for the helpful discussions and his valuable advices on modelling issues. The
+authors also thank Dr. Marian Gomez Beldarrain from the Department of Neurology at the Galdakao-Usansolo
+Hospital (Galdakao, Spain) for the DTI data. MC acknowledges funding by the Basque Government through
+the BERC 2018- 2021 program and by the Spanish State Research Agency through BCAM Severo Ochoa
+excellence accreditation SEV-2017-0718. This project has received funding from the European Unions Horizon
+2020 research and innovation programme under the Marie Sk lodowska-Curie grant agreement No. 713673.
+The project that gave rise to these results received the support of a fellowship from la Caixa Foundation (ID
+100010434). The fellowship code is LCF/BQ/IN17/11620056. CS was supported by the Federal Ministry of
+Education and Research BMBF, project GlioMaTh 05M2016.
+A Parameter assessment
+A.1 Turning rates and diffusion related parameters: λ0, λ1, s, σ, η0, DS
+λ0, λ1: In [79] the authors presented experiments on the migratory behavior and turning frequency of metastatic
+cancer cells from rat mammary adenocarcinoma cell line, reporting values for λ0 in the range [0.01− 0.1] s−1.
+Considering the highly aligned brain structure which influences cell migration upon enhancing cell persistence
+in the favorable direction of motion, we assume a reduction of the turning likelihood and take the range
+[10−4 − 10−2] s−1 for the parameter λ0. The choice of λ1 is, unfortunately, rather imprecise, since we found no
+data or references. In [19] variations of this parameter by ±50% were tested in a similar context. As proposed
+there, we consider the same order of magnitude for λ0 and λ1.
+s: Different references are available for the tumor cell speed. In a recent work [18], four types of typical GBM
+cell lines were cultured in a microfabricated 3D model to study their in vitro behavior; according to that, we
+22
+consider for glioma cell speed the range [10.2− 30] µm · h−1. A further upper limit for this parameter can be
+found in [76], where a maximum speed of 54− 60µm · h−1 was reported for glioma cells.
+σ: For the average speed of ECs, in [17] the range σ ∈ [10 − 50] µm · h−1 was reported for individual cells in
+several culture conditions. In vivo, the registered mean speed for motile endocardial and endothelial cells is of
+approximately 20 µm · h−1.
+η0: In [87], the authors analyzed the statistical properties of the random streaming behavior for endothelial
+cell cultures. In particular, they estimated a needed time T = 5m to alter cell polarity and influence the cell
+turning. With this value, they obtained a cell speed estimation in the range of 2040µm · h−1 within monolayers,
+in agreement with their empirical data about cell speed in [10−30] µm · h−1. Following their results we consider
+η0 ∈ [0.0001− 0.003] s−1.
+DS : From [59], we get an estimation of the diffusion coefficient for different ions; an average value between
+[0.3 − 10] · 10−3 mm2·s−1 is reported. We test the model for different values of this parameter and we chose
+DS = 0.5 · 10−3 mm2· s−1. DS was rescaled in the simulations in order to account for the fast dynamics
+characterizing proton evolution.
+A.2 Phenotypic switch related parameters: α0, β0, lm,0, N
+∗, ST,1, ST,2, γ0
+α0, β0, lm,0: The estimation of reasonable ranges for the values of the phenotypic switch parameters α0 and
+β0 might be quite imprecise, since there are no specific data or references available. However, considering the
+experiment done in [54, 72], it is possible to define a wide range for the duration of the glioma cell cycle that
+translates into α0, β0 ∈ [0.09− 1] · 10−4 s−1. Analogous arguments apply for the rate lm,0, for which there are
+not estimations directly derived from biological data. For these reasons we test the model for several values of
+α0, β0, lm,0 with order of magnitude 10
+−4.
+N∗: Due to the lack of biological data, for the estimation of this parameter related to the total tumor density
+level that still allows cells movement, we choose it to be proportional to the estimated tumor carrying capacity,
+referring to the range [0.6− 0.9] ·KN proposed in [8, 74].
+ST,1, ST,2: Following the pH range [6.4 − 7.3] proposed in [88, 90] for the brain tumor microenvironment, we
+choose the thresholds values that determines the phenotypic switch from a proliferating to a migrating cells
+(ST,1) and the acid-mediated death of the resting cells (ST,2). We set ST,1 = 1.995 · 10−7 M (referring to a
+pH= 6.7), and ST,2 = 3.98 · 10−7 M (referring to a pH= 6.4).
+γ0: In [86], the authors assumed the cell necrosis rate to be proportional to their metabolic rate µN,0. In
+particular, this estimation appears reasonable, considering also our assumption in the parabolic scaling procedure
+about having similar time scales for birth and death. Therefore, we set γ0 = µN,0/50.
+A.3 Adhesion related parameters: k+1 , k
++
+2 , k
+−, χa0
+k+1 , k
++
+2 : For the estimation of the attachment rates between tumor cell and ECM or protons, we refer
+to [58]. In particular, for both the cell-ECM attachment rate and the cell-protons interaction rate, we set
+k+1 = k
++
+2 = 10
+4 (M s)−1. Then, assuming that the main ECM component is collagen, with a molecular weight of
+≈ 300kDa, and taking into account the reference value Q∗ (in Table 2), we deduce k+1 = 0.034 s
+−1. Analogously,
+considering the reference value for the protons concentration Sc,0 (in Table 2), we get k
++
+2 = 0.01 s
+−1.
+k−: For the estimation of the cells-ECM and cells-protons detachment rate, referring to [58], we set k− =
+0.01 s−1.
+χa0 : We estimate the parameter χa0 by considering the values reported in [84] and [83] for the chemotactic
+sensitivity. In particular, in [84] the authors analyzed the chemotactic coefficient of migrating endothelial cells
+in gradients of aFGF, measuring a maximum chemotactic response of 2600 cm2·(M s)−1 at a concentration of
+aFGF around 10−10 M. Instead, in the further work [83], the authors analyzed the changes of this parameter in
+response to cell speed and persistence time. Taking into account the above described range for the EC speed,
+we get χa0 ∈ [3.09− 4.5] d.
+A.4 Proliferation related parameters: µN,0, KN , µW,0, KW
+µN,0: For the estimation of glioma growth rate, we analyze the doubling times reported in [49] for several
+glioma cell lines. There, the authors reported a range of variably between 21.1h and 46h, which translated into
+µN,0 ∈ [0.42− 0.9] · 10−5 s−1.
+KN , KW : Considering that the mean diameter of a glioma cell is around [12− 14]µm [1], we estimate a value
+for the tumor carrying capacity of KN ∼ 106 cells ·mm−3. In the same way, considering a mean diameter for
+an endothelial cell of [10− 20]µm [2], we set KW ∼ 106 cells ·mm3.
+23
+µW,0: The doubling time of EC density has been estimated in several experiments to vary between the different
+phases of an endothelial colony growth until the formation of a monolayer. In [4, 30], the authors gave a range
+of variability for the value of the EC doubling time of [3− 13] d. This leads to µW,0 ∈ [0.62− 2.7] · 10−6 s−1.
+A.5 Production and consumption related parameters g0,N , g0,W , d0,Q, ST,Q
+gs: In [23], the authors estimated the rate of proton production due to tumor cell activity by fitting their
+equation for proton dynamics (analogous to our PDE (57)) to a converted form of the data in [62]. In particu-
+lar, in [62] pH measurements were taken at a variety of points within both the tumor and surrounding healthy
+tissue for four composite cases, giving a geometric mean for the production rate of 2.2·10−20 M · mm3 ·(s·cell)−1.
+gd: Following [23,63], for the rate of proton uptake by vasculature we consider the range of variability given by
+[0.66− 1.1] · 10−4 s−1. As for DS , proton production and consumption rates were rescaled in the simulations in
+order to account for the fast dynamics characterizing proton evolution.
+d0,Q: For the rate of tissue degradation due to the acidic environment, in [86] the authors proposed an esti-
+mation choosing the parameter such that 10% necrosis gives tissue a 50-day half-life. Starting from the value
+proposed in [86], we test a wider range of possible estimations, that translates into d0,Q ∈ [0.005− 0.07] d−1.
+ST,Q: In [88], tissue pH values in normal brain and in brain tumors were reported. Specifically, considering
+that these values vary depending on the type of brain tissue (i.e., gray matter, white matter, cerebellum), the
+minimum pH requires for the normal cell activity is in the range of [6.94 − 6.74]. For these reasons, we set
+ST,Q = 1.995 · 10−7 M (referring to a pH= 6.7).
+B Nondimensionalization
+To proceed with nondimensionalizing the system, we firstly observe that the variables N , W , and Ne involved in
+systems (58) and (66) are expressed in cells/mm3, Q in g/mm3, while the concentration of protons S is given in
+mol/liter (=:M). The reference values we use for the nondimensionalization are listed in Table 2. In particular,
+we rescale the tumor, EC, and necrotic matter (dead cells and tissue) densities with respect to their carrying
+capacities, i.e., Nc,0 = KN , Wc,0 = KW , and Ne,0 = KN , assuming a similar carrying capacity for tumor cells
+and necrosis.
+Parameter Description Value (units) Source
+T time 1 (d)
+L length 0.875 (mm)
+Nc,0 tumor cell density 10
+6 (cell·mm−3) this work
+Wc,0 EC density 10
+6 (cell·mm−3) this work
+Sc,0 Proton concentration 10
+−6 (M) [88]
+Q∗ healthy tissue density 10−3 (mg·mm−3) [48]
+Ne,0 density of necrotic matter 10
+6 (cell·mm−3) this work
+Table 2: Reference variables for the nondimensionalization.
+We nondimensionalize the partial differential equations introduced above as follows:
+t̃ =
+t
+T
+, x̃ =
+x
+L
+, Ñ =
+N
+KN
+, W̃ =
+W
+KW
+, S̃ =
+S
+Sc,0
+, Q̃ =
+Q
+Q∗
+, Ñe =
+Ne
+KN
+.
+The proper scaling of the parameters involved in the macroscopic setting then reads
+24
+α̃0 =
+α0
+λ0
+, l̃m,0 =
+lm,0
+λ0
+, Ñ∗ =
+N∗
+KN
+, β̃0 =
+β0
+λ0
+S̃T,j =
+ST,j
+Sc,0
+(j = 1, 2),
+k̃+1 =
+k+1
+λ0
+, k̃+2 =
+k+2
+λ0
+, k̃− =
+k−
+λ0
+, µ̃N,0 = µN,0 T, γ̃0 = γ0 T,
+λ̃1 =
+λ1
+λ0
+, D̃T =
+1
+λ0
+T
+L2
+DT , D̃EC =
+T
+L2
+DEC , µ̃W,0 = µW,0 T, χ̃a0 =
+χa0
+KN
+,
+D̃S =
+T
+L2
+DS , g̃s = gs
+T
+Sc,0
+, g̃d = gd T, d̃0,Q = d0,Q T, S̃T,Q =
+ST,Q
+Sc,0
+Dropping the tilde (”˜”) in the new variables and parameters, the differential equations in system (58) keep
+the same form, with the following rescaled functions:
+α̃(W̃ , S̃) = α̃0
+W̃
+1 + W̃
+1
+1 + S̃
+, l̃m(Ñ) = l̃m,0(1 + tanh(Ñ − Ñ∗)), ρ̃(W̃ , Ñ , S̃) = 1 + α̃(W̃ , S̃) + l̃m(Ñ),
+β̃(S̃) = β̃0(ε+ (S̃ − S̃T,1)+), ϕ̃(W̃ , Ñ , S̃) =
+β̃(S̃)
+β̃(S̃) + α̃(W̃ , S̃) + l̃m(Ñ)
+, ã(R̃) =
+χ̃a0
+(1 + R̃)2
+,
+µ̃(W̃ , Ñ , S̃) := µ̃N,0
+(
+1− Ñ − Ñe
+)
+W̃
+1
+1 + S̃
+, µ̃W (W̃ , Q̃) := µ̃W,0
+(
+1− W̃
+)
+Q̃, γ̃(S̃) = γ̃0(S̃ − S̃T,2)+.
+g̃(Ñ , S̃, W̃ , Q̃) = g̃sÑ − g̃g(W̃ + Q̃)S̃, B̃(Q̃, S̃) =
+(
+k̃+1 Q̃+ k̃
++
+2 S̃ + k̃
+−
+)
+,
+F̃ (Q̃, S̃) =
+k̃−
+B̃(S̃, Q̃)2
+[
+B̃(Q̃, S̃) + 1 + α̃(W̃ , S̃) + l̃m(Ñ)
+] .
+References
+[1] Estimation taken from. https://bionumbers.hms.harvard.edu/bionumber.aspx?s=n&v=0&id=108941.
+[2] Estimation taken from. http://www.lab.anhb.uwa.edu.au/mb140/MoreAbout/Endothel.htm.
+[3] J.C.L. Alfonso, K. Talkenberger, M. Seifert, B. Klink, A. Hawkins-Daarud, K.R. Swanson, H. Hatzikirou,
+and A. Deutsch. The biology and mathematical modelling of glioma invasion: a review. Journal of The
+Royal Society Interface, 14(136):20170490, November 2017.
+[4] K. Alhazzani, A. Alaseem, M. Algahtani, S. Dhandayuthapani, T. Venkatesan, and A. Rathinavelu. An-
+giogenesis in cancer treatment: 60 years swing between promising trials and disappointing tribulations.
+Anti-Angiogenesis Drug Discovery and Development: Volume 4, 4:34, 2019.
+[5] N. Bellomo. Modeling Complex Living Systems. Birkhäuser Boston, 2008.
+[6] N. Bellomo, A. Bellouquid, J. Nieto, and J. Soler. Complexity and mathematical tools toward the modelling
+of multicellular growing systems. Mathematical and Computer Modelling, 51(5-6):441–451, 2010.
+[7] M.E. Berens and A. Giese. “...those left behind.” Biology and oncology of invasive glioma cells. Neoplasia,
+1(3):208–219, 1999.
+[8] F. Billy, B. Ribba, O. Saut, H. Morre-Trouilhet, T. Colin, D. Bresch, J.-P. Boissel, E. Grenier, and J.-
+P. Flandrois. A pharmacologically based multiscale mathematical model of angiogenesis and its use in
+investigating the efficacy of a new cancer treatment strategy. Journal of Theoretical Biology, 260(4):545–
+562, 2009.
+[9] K. Böttger, H. Hatzikirou, A. Chauviere, and A. Deutsch. Investigation of the migration/proliferation
+dichotomy and its impact on avascular glioma invasion. Mathematical Modelling of Natural Phenomena,
+7:105–135, 2012.
+25
+[10] D.J. Brat, A.A. Castellano-Sanchez, S.B. Hunter, M. Pecot, C. Cohen, E.H. Hammond, S.N. Devi, B. Kaur,
+and E.G. Van Meir. Pseudopalisades in glioblastoma are hypoxic, express extracellular matrix proteases,
+and are formed by an actively migrating cell population. Cancer Research, 64(3):920–927, 2004.
+[11] D.J. Brat and E.G. Van Meir. Vaso-occlusive and prothrombotic mechanisms associated with tumor
+hypoxia, necrosis, and accelerated growth in glioblastoma. Laboratory Investigation, 84(4):397–405, 2004.
+[12] S. Chouaib, Y. Messai, S. Couve, B. Escudier, M. Hasmim, and M.Z. Noman. Hypoxia promotes tumor
+growth in linking angiogenesis to immune escape. Frontiers in Immunology, 3, 2012.
+[13] M.C. Colombo, C. Giverso, E. Faggiano, C. Boffano, F. Acerbi, and P. Ciarletta. Towards the personalized
+treatment of glioblastoma: Integrating patient-specific clinical data in a continuous mechanical model.
+PLoS ONE, 10(7):e0132887, 2015.
+[14] M. Conte, L. Gerardo-Giorda, and M. Groppi. Glioma invasion and its interplay with nervous tissue and
+therapy: A multiscale model. Journal of Theoretical Biology, 486:110088, 2020.
+[15] G. Corbin, C. Engwer, A. Klar, J. Nieto, J. Soler, C. Surulescu, and M. Wenske. Modeling glioma invasion
+with anisotropy- and hypoxia-triggered motility enhancement: from subcellular dynamics to macroscopic
+pdes with multiple taxis. arXiv:2006.12322.
+[16] G. Corbin, A. Hunt, A. Klar, F. Schneider, and C. Surulescu. Higher-order models for glioma invasion:
+From a two-scale description to effective equations for mass density and momentum. Mathematical Models
+and Methods in Applied Sciences, 28(09):1771–1800, 2018.
+[17] A. Czirok. Endothelial cell motility, coordination and pattern formation during vasculogenesis. Wiley
+Interdisciplinary Reviews: Systems Biology and Medicine, 5(5):587–602, 2013.
+[18] W. Diao, X. Tong, C. Yang, F. Zhang, C. Bao, H. Chen, L. Liu, M. Li, F. Ye, Q. Fan, et al. Behaviors of
+glioblastoma cells in in vitro microenvironments. Scientific reports, 9(1):1–9, 2019.
+[19] C. Engwer, T. Hillen, M. Knappitsch, and C. Surulescu. Glioma follow white matter tracts: a multiscale
+DTI-based model. Journal of Mathematical Biology, 71(3):551–582, 2014.
+[20] C. Engwer, A. Hunt, and C. Surulescu. Effective equations for anisotropic glioma spread with proliferation:
+a multiscale approach. IMA Journal of Mathematical Medicine and Biology, 33:435–459, 2016.
+[21] C. Engwer, M. Knappitsch, and C. Surulescu. A multiscale model for glioma spread including cell-tissue
+interactions and proliferation. Mathematical Biosciences and Engineering, 13(2):443–460, 2016.
+[22] C. Engwer, C. Stinner, and C. Surulescu. On a structured multiscale model for acid-mediated tumor
+invasion: The effects of adhesion and proliferation. Mathematical Models and Methods in Applied Sciences,
+27:1355–1390, 2017.
+[23] R.A. Gatenby and E.T. Gawlinski. A reaction-diffusion model of cancer invasion. Cancer Research,
+56(24):5745–5753, 1996.
+[24] R.A. Gatenby, E.T. Gawlinski, A.F. Gmitro, B. Kaylor, and R.J. Gillies. Acid-mediated tumor invasion:
+a multidisciplinary study. Cancer Research, 66(10):5216–5223, 2006.
+[25] P. Gerlee and S. Nelander. The impact of phenotypic switching on glioblastoma growth and invasion. PLoS
+Computational Biology, 8(6):e1002556, 2012.
+[26] A. Giese, R. Bjerkvig, M.E. Berens, and M. Westphal. Cost of migration: Invasion of malignant gliomas
+and implications for treatment. Journal of Clinical Oncology, 21(8):1624–1636, 2003.
+[27] A. Giese, L. Kluwe, Meissner H., Michael E., and M. Westphal. Migration of human glioma cells on myelin.
+Neurosurgery, 38:755–764, 1996.
+[28] A. Giese, M.A. Loo, N. Tran, D. Haskett, S.W. Coons, and M.E. Berens. Dichotomy of astrocytoma
+migration and proliferation. International Journal of Cancer, 67(2):275–282, 1996.
+[29] M.A. Hammoud, R. Sawaya, W. Shi, P.F. Thall, and N.E. Leeds. Prognostic significance of preoperative
+MRI scans in glioblastoma multiforme. Journal of Neuro-Oncology, 27(1):65–73, 1996.
+[30] D. Hanahan and J. Folkman. Patterns and emerging mechanisms of the angiogenic switch during tumori-
+genesis. Cell, 86(3):353–364, 1996.
+26
+[31] D. Hanahan and R.A. Weinberg. Hallmarks of cancer: the next generation. Cell, 144(5):646–674, 2011.
+[32] M.E. Hardee and D. Zagzag. Mechanisms of glioma-associated neovascularization. The American Journal
+of Pathology, 181(4):1126–1141, 2012.
+[33] H. Hatzikirou, D. Basanta, M. Simon, K. Schaller, and A. Deutsch. Go or grow: the key to the emergence
+of invasion in tumour progression? Mathematical Medicine and Biology, 29(1):49–65, 2010.
+[34] M.A. Hayat. Introduction. In M.A. Hayat (ed.), Tumors of the Central Nervous System, Volume 1, pages
+3–8. Springer Netherlands, 2011.
+[35] M.G. Vander Heiden, L.C. Cantley, and C.B. Thompson. Understanding the Warburg effect: The metabolic
+requirements of cell proliferation. Science, 324(5930):1029–1033, 2009.
+[36] C. Henker, T. Kriesen, Ä. Glass, B. Schneider, and J. Piek. Volumetric quantification of glioblastoma:
+experiences with different measurement techniques and impact on survival. Journal of Neuro-Oncology,
+135(2):391–402, 2017.
+[37] P. Hinow, P. Gerlee, L.J. McCawley, V. Quaranta, M. Ciobanu, S. Wang, J.M. Graham, B.P. Ayati,
+J. Claridge, K.R. Swanson, M. Loveless, and A.R.A. Anderson. A spatial model of tumor-host interaction:
+application of chemotherapy. Mathematical Biosciences and Engineering, 6(3):521–546, 2009.
+[38] S.A. Hiremath and C. Surulescu. A stochastic multiscale model for acid mediated cancer invasion. Nonlinear
+Analysis: Real World Applications, 22:176–205, 2015.
+[39] S.A. Hiremath and C. Surulescu. A stochastic model featuring acid-induced gaps during tumor progression.
+Nonlinearity, 29(3):851–914, 2016.
+[40] S.A. Hiremath and C. Surulescu. Mathematical models for acid-mediated tumor invasion: from determin-
+istic to stochastic approaches. In Multiscale models in mechano and tumor biology, volume 122 of Lecture
+Notes in Computational Science and Engineering, pages 45–71. Springer, Cham, 2017.
+[41] S.A. Hiremath, C. Surulescu, A. Zhigun, and S. Sonner. On a coupled SDE-PDE system modeling acid-
+mediated tumor invasion. Discrete & Continuous Dynamical Systems - Series B, 23(6):2339–2369, 2018.
+[42] C. Hogea, C. Davatzikos, and G. Biros. An image-driven parameter estimation problem for a reac-
+tion–diffusion glioma growth model with mass effects. Journal of Mathematical Biology, 56(6):793–825,
+2007.
+[43] P. Holzer. Acid-sensitive ion channels and receptors. In Sensory Nerves, pages 283–332. Springer Berlin
+Heidelberg, 2009.
+[44] E. Höring, P.N. Harter, J. Seznec, J. Schittenhelm, H.-J. Bühring, S. Bhattacharyya, E. von Hattingen,
+C. Zachskorn, M. Mittelbronn, and U. Naumann. The “go or grow” potential of gliomas is linked to the neu-
+ropeptide processing enzyme carboxypeptidase e and mediated by metabolic stress. Acta Neuropathologica,
+124(1):83–97, 2012.
+[45] A. Hunt and C. Surulescu. A multiscale modeling approach to glioma invasion with therapy. Vietnam
+Journal of Mathematics, 45(1-2):221–240, 2016.
+[46] S. Jbabdi, E. Mandonnet, H. Duffau, L. Capelle, K.R. Swanson, M. Pélégrini-Issac, R. Guillevin, and
+H. Benali. Simulation of anisotropic growth of low-grade gliomas using diffusion tensor imaging. Magnetic
+Resonance in Medicine, 54(3):616–624, 2005.
+[47] C.R. Justus, L. Dong, and L.V. Yang. Acidic tumor microenvironment and pH-sensing g protein-coupled
+receptors. Frontiers in Physiology, 4, 2013.
+[48] L.J. Kaufman, C.P. Brangwynne, K.E. Kasza, E. Filippidi, V.D. Gordon, T.S. Deisboeck, and D.A Weitz.
+Glioma expansion in collagen i matrices: analyzing collagen concentration-dependent growth and motility
+patterns. Biophysical journal, 89(1):635–650, 2005.
+[49] L.D. Ke, Y.-X. Shi, S.-A. Im, X. Chen, and W.K.A. Yung. The relevance of cell proliferation, vascular
+endothelial growth factor, and basic fibroblast growth factor production to angiogenesis and tumorigenicity
+in human glioma cell lines. Clinical Cancer Research, 6(6):2562–2572, 2000.
+[50] J. Kelkel and C. Surulescu. On some models for cancer cell migration through tissue networks. Mathematical
+Biosciences and Engineering, 8(2):575–589, 2011.
+27
+[51] J. Kelkel and C. Surulescu. A multiscale approach to cell migration in tissue networks. Mathematical
+Models and Methods in Applied Sciences, 22(03):1150017, March 2012.
+[52] Y. Kim, S. Lawler, M.O. Nowicki, E.A. Chiocca, and A. Friedman. A mathematical model for pattern
+formation of glioma cells outside the tumor spheroid core. Journal of Theoretical Biology, 260(3):359–371,
+2009.
+[53] Y. Kim and S. Roh. A hybrid model for cell proliferation and migration in glioblastoma. Discrete &
+Continuous Dynamical Systems - Series B, 18(4):969–1015, 2013.
+[54] L Ko, A Koestner, and W Wechsler. Characterization of cell cycle and biological parameters of trans-
+plantable glioma cell lines and clones. Acta neuropathologica, 51(2):107–111, 1980.
+[55] N. Kolbe, N. Sfakianakis, C. Stinner, C. Surulescu, and J. Lenz. Modeling multiple taxis: tumor invasion
+with phenotypic heterogeneity, haptotaxis, and unilateral interspecies repellence. arXiv:2005.01444v1.
+[56] E. Konukoglu, O. Clatz, P.-Y. Bondiau, H. Delingette, and N. Ayache. Extrapolating glioma invasion
+margin in brain magnetic resonance images: Suggesting new irradiation margins. Medical Image Analysis,
+14(2):111–125, 2010.
+[57] P. Kumar, J. Li, and C. Surulescu. Multiscale modeling of glioma pseudopalisades: contributions from the
+tumor microenvironment. arXiv:2007.05297.
+[58] D.A. Lauffenburger and J.L. Lindermann. Receptors. Models for binding, trafficing and signaling. Oxford
+University Press, 1993.
+[59] D.R. Lide (ed). CRC handbook of chemistry and physics, vol. 85. CRC Press, 2004.
+[60] T. Lorenz and C. Surulescu. On a class of multiscale cancer cell migration models: Well-posedness in less
+regular function spaces. Mathematical Models and Methods in Applied Sciences, 24(12):2383–2436, 2014.
+[61] S.Y. Lunt and M.G. Vander Heiden. Aerobic glycolysis: Meeting the metabolic requirements of cell prolif-
+eration. Annual Review of Cell and Developmental Biology, 27(1):441–464, 2011. PMID: 21985671.
+[62] G.R. Martin and R.K. Jain. Noninvasive measurement of interstitial ph profiles in normal and neoplastic
+tissue using fluorescence ratio imaging microscopy. Cancer Research, 54(21):5670–5674, 1994.
+[63] N.K. Martin, E.A. Gaffney, R.A. Gatenby, R.J. Gillies, I.F. Robey, and P.K. Maini. A mathematical model
+of tumour and blood pHe regulation: The buffering system. Mathematical Biosciences, 230(1):1–11, 2011.
+[64] A. Mart́ınez-González, G.F. Calvo, L.A. Pérez Romasanta, and V.M. Pérez-Garćıa. Hypoxic cell waves
+around necrotic cores in glioblastoma: A biomathematical model and its therapeutic implications. Bulletin
+of Mathematical Biology, 74(12):2875–2896, 2012.
+[65] R. Mart́ınez-Zaguilán, E.A. Seftor, R.E.B. Seftor, Y.-W. Chu, R.J. Gillies, and M.J.C. Hendrix. Acidic pH
+enhances the invasive behavior of human melanoma cells. Clinical & Experimental Metastasis, 14(2):176–
+186, 1996.
+[66] J.B. McGillen, E.A. Gaffney, N.K. Martin, and P.K. Maini. A general reaction–diffusion model of acidity
+in cancer invasion. Journal of Mathematical Biology, 68(5):1199–1224, 2013.
+[67] G. Meral, C. Stinner, and C. Surulescu. A multiscale model for acid-mediated tumor invasion: Therapy
+approaches. Journal of Coupled Systems and Multiscale Dynamics, 3(2):135–142, 2015.
+[68] R.E. Moellering, K.C. Black, C. Krishnamurty, B.K. Baggett, P. Stafford, M. Rain, R.A. Gatenby, and
+R.J. Gillies. Acid treatment of melanoma cells selects for invasive phenotypes. Clinical & Experimental
+Metastasis, 25(4):411–425, 2008.
+[69] J.D. Murray. Mathematical Biology. Springer Berlin Heidelberg, 1989.
+[70] H.G. Othmer and T. Hillen. The diffusion limit of transport equations II: Chemotaxis equations. SIAM
+Journal on Applied Mathematics, 62(4):1222–1250, 2002.
+[71] K.J. Painter and T. Hillen. Mathematical modelling of glioma growth: the use of diffusion tensor imaging
+(dti) data to predict the anisotropic pathways of cancer invasion. Journal of Theoretical Biology, 323:25–39,
+2013.
+28
+[72] G. Pennarun, C. Granotier, L.R. Gauthier, D. Gomez, F. Hoffschir, E. Mandine, J.-F. Riou, J.-L. Mergny,
+P. Mailliet, and F.D. Boussin. Apoptosis related to telomere instability and cell cycle alterations in human
+glioma cells treated by new highly selective g-quadruplex ligands. Oncogene, 24(18):2917–2928, 2005.
+[73] B. Perthame, M. Tang, and N. Vauchelet. Derivation of the bacterial run-and-tumble kinetic equation from
+a model with biochemical pathway. Journal of Mathematical Biology, 73(5):1161–1178, 2016.
+[74] K. Pham, A. Chauviere, H. Hatzikirou, X. Li, H.M. Byrne, V. Cristini, and J. Lowengrub. Density-
+dependent quiescence in glioma invasion: instability in a simple reaction–diffusion model for the migra-
+tion/proliferation dichotomy. Journal of Biological Dynamics, 6(sup1):54–71, 2012.
+[75] F. Pignatti, M. van den Bent, D. Curran, C. Debruyne, R. Sylvester, P. Therasse, D. Áfra, P. Cornu,
+M. Bolla, C. Vecht, and A.B.M.F. Karim. Prognostic factors for survival in adult patients with cerebral
+low-grade glioma. Journal of Clinical Oncology, 20(8):2076–2084, 2002.
+[76] S. Prag, E.A. Lepekhin, K. Kolkova, R. Hartmann-Petersen, A. Kawa, P.S. Walmod, V. Belman, H.C.
+Gallagher, V. Berezin, E. Bock, and N. Pedersen. Ncam regulates cell motility. Journal of Cell Science,
+115(2):283–292, 2002.
+[77] A.M. Rojiani and K. Dorovini-Zis. Glomeruloid vascular structures in glioblastoma multiforme: an im-
+munohistochemical and ultrastructural study. Journal of neurosurgery, 85(6):1078–1084, 1996.
+[78] G.L. Semenza. Defining the role of hypoxia-inducible factor 1 in cancer biology and therapeutics. Oncogene,
+29(5):625–634, 2009.
+[79] M. Sidani, D. Wessels, G. Mouneimne, M. Ghosh, S. Goswami, C. Sarmiento, W. Wang, S. Kuhl, M. El-
+Sibai, J-M. Backer, R. Eddy, D. Soll, and J. Condeelis. Cofilin determines the migration behavior and
+turning frequency of metastatic cancer cells. Journal of Cell Biology, 179(4):777–791, 2007.
+[80] K. Smallbone, R.A. Gatenby, and P.K. Maini. Mathematical modelling of tumour acidity. Journal of
+Theoretical Biology, 255(1):106–112, 2008.
+[81] C. Stinner, C. Surulescu, and G. Meral. A multiscale model for pH-tactic invasion with time-varying
+carrying capacities. IMA Journal of Applied Mathematics, 80:1300–1321, 2015.
+[82] C. Stinner, C. Surulescu, and A. Uatay. Global existence for a go-or-grow multiscale model for tumor
+invasion with therapy. Mathematical Models and Methods in Applied Sciences, 26:2163–2201, 2016.
+[83] C.L. Stokes and D.A. Lauffenburger. Analysis of the roles of microvessel endothelial cell random motility
+and chemotaxis in angiogenesis. Journal of Theoretical Biology, 152(3):377–403, 1991.
+[84] C.L. Stokes, M.A. Rupnick, S.K. Williams, and D.A. Lauffenburger. Chemotaxis of human microvessel
+endothelial cells in response to acidic fibroblast growth factor. Laboratory investigation; a journal of
+technical methods and pathology, 63(5):657668, 1990.
+[85] A. Swan, T. Hillen, J.C. Bowman, and A.D. Murtha. A patient-specific anisotropic diffusion model for
+brain tumour spread. Bulletin of Mathematical Biology, 80(5):1259–1291, 2017.
+[86] K.R. Swanson, R.C. Rockne, J. Claridge, M.A. Chaplain, E.C. Alvord, and A.R.A. Anderson. Quantifying
+the role of angiogenesis in malignant progression of gliomas: In silico modeling integrates imaging and
+histology. Cancer Research, 71(24):7366–7375, 2011.
+[87] A. Szab, R. nnep, E. Mhes, W. O. Twal, W. S. Argraves, Y. Cao, and A Czirk. Collective cell motion in
+endothelial monolayers. Physical Biology, 7(4):046007, 2010.
+[88] P. Vaupel, F. Kallinowski, and P. Okunieff. Blood flow, oxygen and nutrient supply, and metabolic mi-
+croenvironment of human tumors: A review. Cancer Research, 49(23):6449–6465, 1989.
+[89] Y.-L. Wang, J. Yao, A. Chakhoyan, C. Raymond, N. Salamon, L.M. Liau, P.L. Nghiemphu, A. Lai, W.B.
+Pope, N. Nguyen, M. Ji, T.F. Cloughesy, and B.M. Ellingson. Association between tumor acidity and hyper-
+vascularity in human gliomas using pH-weighted amine chemical exchange saturation transfer echo-planar
+imaging and dynamic susceptibility contrast perfusion MRI at 3t. American Journal of Neuroradiology,
+40(6):979–986, 2019.
+[90] B.A. Webb, M. Chimenti, M.P. Jacobson, and D.L. Barber. Dysregulated pH: a perfect storm for cancer
+progression. Nature Reviews Cancer, 11(9):671–677, 2011.
+29
+[91] K.T. Weiß, M. Fante, G. Köhl, J. Schreml, F. Haubner, M. Kreutz, S. Haverkampf, M. Berneburg, and
+S. Schreml. Proton-sensing g protein-coupled receptors as regulators of cell proliferation and migration
+during tumor growth and wound healing. Experimental Dermatology, 26(2):127–132, 2017.
+[92] F.J. Wippold, M. Lämmle, F. Anatelli, J. Lennerz, and A. Perry. Neuropathology for the neuroradiologist:
+Palisades and pseudopalisades. American Journal of Neuroradiology, 27(10):2037–2041, 2006.
+[93] M. Wrensch, Y. Minn, T. Chew, M. Bondy, and M.S. Berger. Epidemiology of primary brain tumors:
+Current concepts and review of the literature. Neuro-Oncology, 4(4):278–299, 2002.
+[94] Q. Xie, S. Mittal, and M. E. Berens. Targeting adaptive glioblastoma: an overview of proliferation and
+invasion. Neuro-Oncology, 16(12):1575–1584, 2014.
+[95] L. Xu, D. Fukumura, and R.K. Jain. Acidic extracellular pH induces vascular endothelial growth fac-
+tor (VEGF) in human glioblastoma cells via ERK1/2 MAPK signaling pathway. Journal of Biological
+Chemistry, 277(13):11368–11374, 2001.
+[96] A. Zhigun, C. Surulescu, and A. Hunt. A strongly degenerate diffusion-haptotaxis model of tumour invasion
+under the go-or-grow dichotomy hypothesis. Mathematical Methods in the Applied Sciences, 41:2403–2428,
+2018.
+30
+	1 Introduction
+	2 Modeling
+	2.1 Subcellular level
+	2.2 Mesoscopic level
+	2.3 Parabolic scaling of the mesoscopic model
+	3 Assessment of coefficients
+	4 Numerical simulations
+	5 Tissue degradation, necrosis, and tumor grading
+	6 Discussion
+	A Parameter assessment
+	A.1 Turning rates and diffusion related parameters: 0, 1, s, , 0, DS
+	A.2 Phenotypic switch related parameters: 0, 0, lm,0, N*, ST,1, ST,2, 0
+	A.3 Adhesion related parameters: k1+, k2+, k-, a0
+	A.4 Proliferation related parameters: N,0, KN, W,0, KW
+	A.5 Production and consumption related parameters g0,N, g0,W, d0,Q, ST,Q
+	B Nondimensionalization
+	References

@@ -1,0 +1,1102 @@
+Bumblebee field in a Topological Framework
+L.P. Colatto∗
+CEFET-RJ Campus Petrpolis, CEP24920-003 Rio de Janeiro, RJ, Brasil
+A.L.A. Penna†
+International Center for Condensed Matter Physics, CP 04513,
+CEP 70919-970, Universidade de Braśıli, DF, Brasil
+W.C. Santos‡
+Universidade de Braslia, Instituto de Fsica , 70910-900, Braslia, DF, Brasil
+(ΩDated: July 24, 2020)
+A vector field coming from spontaneous Lorentz violation mechanism, namely Bumblebee model
+is analysed in a topological framework in a (1 + 2)D Minkowski space-time. Taking a (1 + 2)D
+nonlinear Bumblebee vector matter field dynamics where we include topological like Chern-Simons
+type terms, a vector version of a soliton state, or vortex was found. The Nielsen-Olesen procedure was
+used in order to derive a Lorentz-violation vector parameter which characterizes, via Spontaneous
+Symmetry Breaking mechanism, the non-trivial vacuum. We verify the stability of the model as
+much as the magnetic vortex, and noticed that the soliton modes with polarized direction generated
+can be associated with local anisotropy of vacuum energy. The vortex equations of motion and
+the asymptotic behaviour is presented. We have obtained that the effect of the Lorentz symmetry
+violation expressed by the a time-like Bumblebee vector field vacuum could be shown as kind of
+pulse at a fixed point r0 in a limitless universe, or as a barrier at r0 which can represent a boundary
+in the universe, if the Bumblebee vector field vacuum has space-like characteristic. We also analyse
+the spectrum via propagators where we note that the topological mass contributes as well to the
+dynamical mass poles. We obtain that the Chern-Simons type terms, in fact, indicates the “speed”
+of the field to saturate the asymptotic limit and that the vortex core can not be dimension zero.
+I. INTRODUCTION
+According to the Standard Model, the spontaneous violation of symmetry and its consequences are well established.
+The existence of nontrivial vacuum expectation value directly modifies the properties of fields that couple to it and
+can indirectly modify them through interactions with other affected fields. The vacuum value 〈φ〉 of the Higgs field
+spontaneously breaks the SU(2)×U(1) gauge symmetry associated with the electro-weak force and generates masses
+for several particles, and separates the electromagnetic and weak forces. The W and Z bosons are the elementary
+particles that mediate the weak interaction, while the photon mediates the electromagnetic interaction. At energies
+much greater than 100 GeV all these particles behave in a similar manner. The Weinberg-Salam theory predicts that,
+at lower energies, this symmetry is broken so that the photon and the massive W and Z bosons emerge . As we
+are dealing with non-linear models, it is necessary to include soliton-type configuration in order to achieve a close to
+actual physical states, which stability is highly dependent on the topological characteristic of the boundary conditions
+[1, 2].
+On the other hand, some time ago, from the point of view of the vacuum at the Planck scale of the string theory,
+it was observed a possibility of a violation (or breaking) of Lorentz symmetry, similar to the idea of a spontaneous
+symmetry breaking (SSB) via mechanism of Higgs field. The spontaneous Lorentz Symmetry violation with aid of a
+vector field, called Bumblebee vector field, has been extensively studied from pioneer works of V. A. Kosteleck and S.
+Samuel [3] and consequently there was an increasing number of works on the theme of Lorentz symmetry violation via
+spontaneous symmetry breaking of a vector field [4–8]. Remarkably the Bumblebee field does not obey U(1) gauge
+symmetry, as a matter field, and acquires a non-zero vector vacuum expectation value inducing a spontaneous Lorentz
+symmetry violation.
+In fact studies were done on quantum gravity theories predicting the possibility of Lorentz symmetry violation via
+the Bumblebee field [3]. For instance, a Bumblebee field Bµ coupled to gravity, with generalized quadratic kinetic
+∗Electronic address: lcolatto@gmail.com
+†Electronic address: penna.andre@gmail.com
+‡Electronic address: wytler@fis.unb.br
+2
+terms involving up to second-order derivatives in Bµ, and with an Einstein-Hilbert term in Riemann space-time, is
+given by the Lagrangian density [6]:
+LB =
+√
+−g
+[
+1
+2κ
+(R− 2Λ) +
+1
+2κ
+ξBµBµRµν + ρB
+µBµR+
+σ
+2
+(∇µBν)(∇µBν) +
+τ
+2
+(∇µBµ)(∇νBν)+
+−
+1
+4
+BµνB
+µν − V (BµBµ)
+]
+, (1)
+where R is the curvature scalar, Rµν is the Ricci tensor, κ = 16πG and ξ, ρ, σ and τ are parameters. The Bumblebee
+field strength is defined as
+Bµν = ∇µBν −∇νBµ = ∂µBν − ∂νBµ. (2)
+The potential V providing a non-zero vacuum expectation value for vector field Bµ has the following function form
+V = −α2BµBµ − λ(BµBµ)2. (3)
+Then, the non-zero vacuum expectation value of the Bumblebee field is obtained by
+∂V
+∂Bµ
+= −α2Bµ − 2λ(BνBν)Bµ = 0 (4)
+Therefore it is solved when the field Bµ acquires a non-zero vacuum expectation value,
+〈Bµ〉 = bµ, (5)
+where bµ has constant magnitude but different orientation at different space-time points, and therefore the global
+Lorentz and translation symmetries are broken [5]. It is remarkable that the potential has a minimum with respect
+to its argument or is constrained to zero when
+BµBµ = ∓|b|2. (6)
+So, we state that the magnitude of the Bumblebee vector field is a time-like vector when we have +|b|2 and the
+Bumblebee vector field is a space-like vector when we have −|b|2.
+Indeed since the birth of quantum mechanics there has been a growing and continuing interest in the study of
+possible Lorentz violation effects and its possible origins as the non-commutative phenomena [9–20]. In the context
+of non-commutative quantum field theory, deformation terms appear due to a non-commutative spcetime algebra
+applied to quantum field theory what can include terms that violate Lorentz invariance due to the preferred direction
+of non-commutativity. So, a deformation parameter can be introduced in algebras reaching to quantum groups, which
+develop an interesting theoretical laboratory to extend the Lorentz symmetry framework [21]. Returning to Lorentz
+symmetry violation issue, Colladay and Kostelecký have observed the possibility to implement Lorentz violating
+extensions to the Standard Model that was extensively investigated as a reflection issue of the possible Planck scale
+original scenario [22, 23]. Remarkably many effects are conjectured to have a Lorentz symmetry violation origin,
+e.g., some astrophysical phenomena could be fitted by these extensions [24], and theoretical developments have been
+largely worked on Ref. [25–27].
+On the other hand, one important framework to study topological effects are present in (1 + 2)D models. Where
+these effects can be theoretically represented through the vacuum of a (1 + 2)D model with Chern-Simons photon
+coupling, what is called Carroll-Jackiw field model [28]. That work has presented a preferred space time direction
+dictated by the introduction of a constant four-vector bµ. Consequently, the photon circular polarization shows a non
+usual dispersion relation [29], while the linear polarized photons exhibit optical birefringence. Furthermore the four-
+vector induces anisotropic optical vacuum which could be detected through the observation of tiny Lorentz symmetry
+violation effects (bµb
+µ < 10−33eV ' 10−28cm−1) on space-time [30–33]. In a previous work, we suggest that LSB
+terms, with consequent anisotropic optical effects, could originate from a spontaneous symmetry breaking (SSB)
+mechanism on a matter vector field [34]. Taking this into account, the reduced planar surface model to (1 + 2)D may
+reveal the contribution of topological objects to such non-trivial optical vacuum effects. Our purpose in this work is
+to obtain stable (1 + 2)D vortex lines solutions, starting from interacting of Bumblebee matter vector field with the
+U(1) gauge vector field. We will discuss the contribution of the Chern-Simons-type terms to asymptotic behaviour of
+the Bumblebee matter field.
+The outline of the work is the following: In Sec. II we consider the Bumblebee matter vector field model and we
+discuss how it can arise vortices solutions. Sec. III is devoted to analyse the asymptotic physical solutions and the
+Bumblebee mass contribution to the vortex lines and the stability of the model. In Sec. IV we study of the mass
+poles through the propagators obtained and discuss the relations to the vacuum and asymptotic limit of the fields.
+Finally, in the Conclusion we discuss the results and give perspectives of new approaches to the subject
+3
+II. THE BUMBLEBEE FIELD VORTEX
+It is worth to remark that Bumblebee models are not gauge invariant [6, 8], for this reason we propose to assume
+that the Bumblebee field plays the role of a matter field in Minkowski space-time. Furthermore we add the condition
+that Bumblebee field can be electrically charged, i.e., we assume a charged complex Bumblebee vector field that
+maintain the global U(1) invariance. For our proposals we are going to take the parameters ξ, ρ and σ of the equation
+(1) to be null, as well as gµν = ηµν = diag(+−−) with
+√
+g = 1, so that the Lagrangian (1) is modified as follows,
+LB = −
+1
+2
+B∗µνB
+µν − (∂µBµ)∗(∂νBν) + α2B∗µB
+µ + λ(B∗µB
+µ)2. (7)
+Taking a previous work, [34], we use the charged matter vector field model and we assume it is living in a (1 + 2)D
+world, including global U(1) invariant terms, and topological Chern-Simons-type terms. It can be written as,
+L = −
+1
+2
+B∗µνB
+µν − (∂µBµ)∗(∂νBν) +m�µνκBµ∂νB∗κ +m�
+µνκB∗µ∂νBκ + α
+2B∗µB
+µ + λ(B∗µB
+µ)2, (8)
+where Bµ is a Bumblebee charged vector field and Bµν = ∂µBν − ∂νBµ is the Bumblebee field strength. The
+symmetry U(1) allows us to insert a topological massive Chern-Simons-type term that does not play a role in the
+vacuum achievement but will be important to the mass term definition in the asymptotic limit behaviour that will be
+made clear further ahead1. As we are treating Bµ as a matter field the global U(1) symmetry induces the presence of
+a dynamical longitudinal term in the Lagrangian (8). We can verify that this model gives rise to a SSB mechanism
+whose non-trivial vacuum [25, 26, 34] allows a particular soliton solution. Analogously to the usual scalar case we are
+going to assume asymptotic values on the boundary, namely S1 topological circle recalling the Nielsen-Olesen-type
+approach. Consequently, taking r and θ as the polar coordinates, we construct the following values for Bµ at r →∞,
+Bµ = bµe
+inθ and B∗µB
+µ = bµb
+µ = ±|b|2 (9)
+where bµ is a constant vector that is defined by a minimal value of the energy of the Lagrangian (8), as it also has
+been assumed in [3–8, 34]. The result is that the Lagrangian (8) allows a SSB on Bumblebee matter vector field Bµ
+in accordance with the equation (4), where we have,
+bµb
+µ =
+−α2
+2λ
+. (10)
+So, we can specify two directions in space-time for the above vector, bµ: time-like and space-like. The unitary vector
+uµ in the (1 + 2)D Minkowski space-time, has the property that uµu
+µ = ±1. We state that:
+• Time-like bµ, where we have bµbµ = +|b|2 > 0, and bµ has the same orientation of unitary vector uµ when
+α2 < 0 and uµu
+µ = +1. Thus, the bµ is given by,
+bµ =
+√
+−α2
+2λ
+uµ . (11)
+• Space-like bµ, where we have bµbµ = −|b|2 < 0, and bµ has the same orientation of unitary vector uµ when
+α2 > 0 and uµu
+µ = −1. Thus, the bµ must be given by,
+bµ =
+√
++α2
+2λ
+uµ , (12)
+where it should be noted that the magnitude bµb
+µ in the equation (10) is retrieved in both the cases.
+Another possibility to the bµ is to be a light-like vector, where bµb
+µ = 0. However, due to the equation (10), this
+possibility cancels the spontaneous symmetry breaking.
+Hence our particular non trivial choices for Bµ at infinity are there that can lead us to fixed and exact values for the
+degenerated vacua. Emphasizing that the important aspect of the SSB mechanism applied to the Bumblebee matter
+vector field is that it generates Lorentz-violation parameters spontaneously [34].
+1 The two Chern-Simons-type terms are indeed symmetric, we have written them to observe the global U(1)-symmetry explicitly.
+4
+The vortex lines structures can be derived from the non-trivial topology of the vacuum of the Bumblebee matter
+vector field. From the anisotropic vacuum in (1 + 2)D, the time-component (µ = 0) and the space-component (µ = i)
+are written as,
+B0 = b0e
+inθ, Bi = bie
+inθ , (13)
+where Bi assumes two components Br and Bθ in the polar plane as follows,
+Br = bre
+inθ, Bθ = bθe
+inθ (14)
+where b0 is a time component and bi (br and bθ) are space (radial and angular) vector components of the Lorentz-
+violating parameter bµ. Many recent discussions related to the existence of these parameters have been considered
+in Ref. [25, 26, 32]. In our case, the Bµ field generates a vortex whose stability is analysed starting from static
+configuration for the Hamiltonian functional density,
+Hs.c. = −(~∇B0)∗ · (~∇B0) + (~∇× ~B)∗ · (~∇× ~B) + (~∇ · ~B)∗ · (~∇ · ~B), (15)
+where we have also admitted a static configuration for the SSB potential,
+V (Bµ, B
+∗
+µ) = λ[b
+2 −B∗µB
+µ]2 = 0, (16)
+which results precisely in the expression (9) on the boundary. Let us now treat the system (15) in three dimensions,
+admitting a cylindrical or axial symmetry around the z-axis. Thus, the z-component of Bµ is assumed to be constant,
+and from (9) we have found that,
+~∇B0 =
+inb0
+r
+einθ θ̂, ~∇ · ~B =
+1
+r
+(br + inbθ)e
+inθ, ~∇× ~B =
+1
+r
+(bθ − inbr)einθ ẑ. (17)
+Hence substituting (17) with (15) we find that at r →∞ the Hamiltonian functional density is given by,
+Hs.c. =
+n2b20 + (n
+2 + 1)(b2r + b
+2
+θ)
+r2
+(18)
+and the energy of the vortex relative to the anisotropic vacuum parameters is,
+E =
+∫ ∞
+Hs.c.rdrdθ =
+[
+n2b20 + (n
+2 + 1)
+(
+b2r + b
+2
+θ
+)]
+ln |r|
+∣∣∣∞ (19)
+As the scalar case, we treat this logarithmic divergence by adding a gauge field Aµ in the model, so,
+DµBν = ∂µBν + ieAµBν . (20)
+We shall then assume the gauge choice A0 = 0, where A
+µ = ~A = Ar r̂ + Aθ θ̂ = 1
+e
+~∇(nθ), for very large r value. As is
+well known, we write it analytically in cylindrical symmetry, or
+Ar → 0 and −Aθ = Aθ,→ −
+n
+er
+(21)
+since we treat the covariant derivative (20) at infinity, the results is
+DµBν = 0. (22)
+Thus, the stability of this model requires a “vector electrodynamics” whose Lagrangian is defined by,
+L = −
+1
+4
+fµνf
+µν −
+1
+2
+B∗µνB
+µν − (DµBµ)∗(DνBν) +m�µνκB∗µ(DνBκ) +m�
+µνκBµ(DνBκ)
+∗+α2B∗µB
+µ+λ(B∗µB
+µ)2, (23)
+where Bµν = DµBν − DνBµ and fµν = ∂µAν − ∂νAµ. From the relations (21) which define a pure gauge, the
+Lagrangian model (23) assumes a finite energy configuration for its Hamiltonian functional density at infinity,
+Bµν → 0 and H → 0 (24)
+and the gauge field Aµ gives rise to a soliton magnetic flux or vortex,
+Φ =
+∮
+~A · d~l =
+2πn
+e
+, (25)
+which is analogous to the scalar field model and represents a magnetic flux quantization as in the London and
+Ginzburg-Landau equations to describe the type-II superconductors [1].
+5
+III. TOPOLOGICAL MASS AND THE BUMBLEBEE FIELD VORTEX
+Based on the Lagrangian (23), we now analyse the emergence of soliton kind solutions based on the Nielsen-Olesen
+work [35], namely vortices, with topological mass contribution of the Bumblebee field. In fact, it yields a vortex
+solution whose dynamical equation for Aµ is written as
+ie(B∗νB
+µν −BνBµν∗) + ie(Bµ∗∂νBν −Bµ∂νBν∗)− iem�µνκ(B∗νBκ −BκB
+∗
+ν)− 2e
+2Aµ(B∗νB
+ν) = ∂νf
+µν , (26)
+and the dynamical equation for Bµ is given by
+DµD
+µBν + 2m�νκλDκBλ = −
+[
+α2 + 2λ(B∗µB
+µ)
+]
+Bν . (27)
+We are seeking for vortex solutions in the system described by (26). In order to extract further information about
+the system we assume cylindrical coordinates in such way that
+Aµ = (0, 0, Aθ) = (0, 0, A(r)) and Bµ = βµ(r)e
+inθ, (28)
+where the asymptotic behaviours of βµ(r) are given by,
+lim
+r→∞
+βµ(r) = bµ lim
+r→0
+β(r) = 0 , (29)
+with µ = 0, r, θ which are, respectively, the time, r and θ cylindrical components of the Bumblebee field. So
+B∗µB
+µ = βµ(r)β
+µ(r) = β(r)2 in such way that at infinity β(r)2−→(β(r → ∞))2 = b2. In the Minkowski space
+(1 + 2)D we can observe that,
+β(r)2 = β0(r)
+2 − βr(r)2 − βθ(r)2 and so lim
+r→∞
+β(r)2 = b20 − b
+2
+r − b
+2
+θ = b
+2 . (30)
+|b| represents the parameter of Lorentz symmetry violation. Note that the magnitude of vector βµ(r) can have
+positive magnitude, time-like vector, or negative magnitude, a space-like vector. As the gauge field Aµ is a function
+that exclusively depends on the variable r the equations of motion (26) assumes, in the static configuration, the form:
+∂if
+µi = ie[B∗νB
+µν −Bν(Bµν)∗ + (Bµ)∗(∂νBν)−Bµ(∂νBν)∗]− 2e2AµB∗µB
+ν . (31)
+The assumption (28) implies to �µνκ(B∗νBκ −BκB∗ν) = 0, and the equation of motion (27) results in
+DiD
+iBµ + 2m�µκλDκBλ = −
+[
+α2 + 2λ(B∗νB
+ν)
+]
+Bµ . (32)
+Moreover the assumption (28) indicates that the only non null component of Aµ vector is Aθ, so the term ∂if
+θi
+reduces to ∂rf
+θr = ∂r(∂
+θAr − ∂rAθ) = ∂r(∇× ~A)k. The equation of motion (31) for gauge field A(r) can be written
+down as,
+r2
+d2A(r)
+dr
++ r
+dA(r)
+dr
++
+[
+2e2|β(r)|2r2 − 1
+]
+A(r) = 2en|β(r)|2r , (33)
+and the equation of motion (32) for Bumblebee field yields three equations,
+1
+r
+d
+dr
+[
+r
+dβ0(r)
+dr
+]
+−
+[(n
+r
+− eA(r)
+)2
++ α2 + 2λ|β(r)|2
+]
+β0(r) = 2m
+[
+dβθ(r)
+dr
+−
+(
+in
+r
++ ieA(r)
+)
+βr(r)
+]
+, (34)
+1
+r
+d
+dr
+[
+r
+dβr(r)
+dr
+]
+−
+[(n
+r
+− eA(r)
+)2
++ α2 + 2λ|β(r)|2
+]
+βr(r) = −2m
+[
+in
+r
++ ieA(r)
+]
+β0(r) , (35)
+1
+r
+d
+dr
+[
+r
+dβθ(r)
+dr
+]
+−
+[(n
+r
+− eA(r)
+)2
++ α2 + 2λ|β(r)|2
+]
+βθ(r) = 2m
+dβ0(r)
+dr
+. (36)
+Unfortunately, no exact solution can be obtained for these four equations. However, it is possible to establish some
+important approximate asymptotic solutions for the following cases below.
+6
+A. Vortex vacuum solution
+Taking the equation (33), one simple solution can be obtained by using the vacuum limit at large r condition
+β(r)2 = b2 constant as expressed in equation (30). We must introduce the conditions of time-like Bumblebee vector
+field magnitude, where b2 > 0 and space-like Bumblebee vector magnitude where b2 < 0. For b2 > 0, where b2 = +|b|
+it is straightforward to see that the equation (33) is
+r2
+d2A(r)
+dr
++ r
+dA(r)
+dr
++
+[
+2e2|b|2r2 − 1
+]
+A(r) = 2en|b|2r . (37)
+The above equation is slightly different from the usual vacuum solution of the Nielsen-Olesen scalar case [1, 35]. One
+can obtain the potential electromagnetic field A(r) and calculate the z-component magnetic field H(r) as,
+H(r) ≡
+1
+r
+d
+[
+rA(r)
+]
+dr
+. (38)
+We obtain the following solutions to the fields as functions on the Lorentz violation parameter |b|,
+A(r) =
+n
+er
++
+C
+e
+J1
+(√
+2|eb|r) −−−−→r →∞
+n
+er
++
+C
+e
+√
+1
+π
+√
+2|eb|r
+[
+sin(
+√
+2|eb|r)− cos(
+√
+2|eb|r)
+]
+, (39)
+H(r) = C
+√
+2 |b| J0
+(√
+2|eb|r) −−−−→r →∞ C
+√
+2 |b|
+√
+1
+π
+√
+2|eb|r
+[
+sin(
+√
+2|eb|r) + cos(
+√
+2|eb|r)
+]
+, (40)
+where J0
+(
+e|b|r) and J1
+(
+e|b|r) are the Bessel functions and C is a constant. Note that the fields A(r) and H(r) depend
+on the symmetry violation parameter |b|. Moreover, we observe that, in these conditions, the topological mass does
+not contribute to the electromagnetic potential vector and, consequently to the magnetic field.
+For b2 < 0, where we write b2 = −|b|, the equation (33) becomes,
+r2
+d2A(r)
+dr
++ r
+dA(r)
+dr
+−
+[
+2e2|b|2r2 + 1
+]
+A(r) = −2en|b|2r . (41)
+In this case, where the Bumblebee field is space-like vector, the electromagnetic potential vector and magnetic field
+are similar to the Nielsen-Olesen scalar case [1, 35], where we have,
+A(r) =
+n
+er
++
+C
+e
+K1
+(√
+2|eb|r) −−−−→r →∞
+n
+er
++
+C
+e
+√
+π
+2
+√
+2|eb|r
+e−
+√
+2|eb|r , (42)
+H(r) = C
+√
+2 |b|K0
+(√
+2|eb|r) −−−−→r →∞ C
+√
+2 |b|
+√
+π
+2
+√
+2|eb|r
+e−
+√
+2|eb|r , (43)
+where K0 and K1 are modified Bessel functions. Another possible solution is taking the magnitude of the Bumblebee
+vector field be zero or b2 = 0, but this solution is disregarded because |b| = 0 imposes the nullity of the spontaneous
+Lorentz violation.
+B. Vortex core solutions
+We are now looking for some approximate solution dealing with topological mass for the Bumblebee fields compo-
+nents β0(r), βr(r), βθ(r). To this goal it requires to focus on solutions in eqs. (34), (35) and (36) with topological
+mass at r <∞. It can be done by eliminating the factors
+[(
+n
+r
+− eA(r)
+)2
++ α2 + 2λ|β(r)|2
+]
+and
+(
+in
+r
++ ieA(r)
+)
+, so we
+obtain that
+1
+r
+d
+dr
+[
+r
+dβ0(r)
+dr
+]
+−
+βr
+rβ0
+d
+dr
+[
+r
+dβr(r)
+dr
+]
++ χ
+(
+β2r
+β0
+− β0
+)
+= 2m
+dβθ(r)
+dr
+, (44)
+with
+χ =
+2m
+βθ
+dβ0(r)
+dr
+−
+1
+rβθ
+d
+dr
+[
+r
+dβθ(r)
+dr
+]
+. (45)
+This equation exhibits the following conditions to the topological mass at r <∞ :
+7
+1. If simultaneous β0(r) = constant and βθ(r) = constant it cancels out the topological mass.
+2. If βr(r) = 0, it does not cancel the topological mass.
+3. If β0(r) or βθ(r) are not simultaneously constant it does not cancel the topological mass.
+So, based on the condition 3, we have two possibilities of the simplified equations (44).
+The first possibility is obtained if we consider βr(r) = 0 and β0(r) = b0 = constant. It results that
+d2βθ
+dr2
++
+(
+1
+r
+−
+2mβθ
+b0
+)
+dβθ
+dr
+= 0, (46)
+where the topological mass explicitly depends on the angular component of the Bumblebee field. Note that, despite
+the very simplified equation obtained, this equation is non linear (46) and has no exact solution. We can go to a step
+further, considering regions where 1
+r
+� 2mβθ
+b0
+, such that 1/r is negligible, which leads (46) to the equation:
+d
+dr
+(
+dβθ
+dr
+−
+m
+b0
+β2θ
+)
+= 0 . (47)
+The second possibility is obtained if we consider βr(r) = 0 and βθ(r) = bθ = constant, in this case we get the following
+equation
+d
+dr
+(
+dβ0
+dr
+−
+m
+bθ
+β20
+)
+= 0 , (48)
+where the topological mass explicitly depends on the time component of the Bumblebee field. We observe the
+similarity of the equations (47) and (48). Using the equation (47) as a guide and taking its analytical solution, we
+have
+(
+dβθ
+dr
+− m
+b0
+β2θ
+)
+= −c1, with c1 a positive constant 2, we get
+βθ = −
+√
+b0 c1
+m
+tanh
+[√
+m
+b0 c1
+(c1r + c2)
+]
+. (49)
+where c2 is another constant. Note that the vacuum condition r → ∞ is satisfied in such way that βθ →
+√
+b0 c1
+m
+=
+bθ = constant. So the norm of the Bumblebee field β
+µ(r) is given by
+|β(r)|2 = (β0(r))2 − (βr(r))2 − (βθ(r))2 = b20 −
+b0 c1
+m
+tanh2
+[√
+m
+b0 c1
+(c1r + c2)
+]
+, (50)
+that we express this solution in terms of the vacuum parameters, which results in
+|β(r)|2 = b20 − b
+2
+θ tanh
+2
+[
+bθ
+b0
+mr +
+c2
+bθ
+]
+. (51)
+Without loss of generality, we assume at the vacuum limit that b0 = qbθ, where q is a positive real number and
+c2/bθ = −mr0, so
+r0 = −
+1
+mbθ
+c2, (52)
+where r0 is a fixed position, such that eq. (51) can be rewritten as
+|β(r)|2 = b2θ
+{
+q2 − tanh2
+[
+m
+q
+(r − r0)
+]}
+. (53)
+2 We remark that the choice
+(
+dβθ
+dr
+− m
+b0
+β2
+θ
+)
+= +c1 implies that βθ becomes proportional to the tangent what makes this component to
+diverge.
+8
+FIG. 1: Bumblebee field time-like for q = 1.25. FIG. 2: Bumblebee field space-like for q = 0.5.
+At the vacuum limit and the asymptotic condition r →∞, we have that
+|β(r)|2 → b2 = b2θ(q
+2 − 1) = b20 − b
+2
+θ. (54)
+So if b0 > bθ the Bumblebee vector field at the vacuum limit it is a time-like vector, or |β(r)|2 = b2 > 0, and if bθ > b0
+then the Bumblebee vector field at the vacuum limit is a space-like vector with b2 < 0. Moreover β(r) modulates the
+magnetic field (43). Then if we take q2 = 1 + ζ where ζ > 0 concerning to Bumblebee time-like vector, and q2 = 1− ζ
+where 0 < ζ < 1 concerning to Bumblebee space-like vector, the equation (53) can be write as
+|β(r)|2 = b2θ
+{
+±ζ + sech2 [m(r − r0)]
+}
+, (55)
+which corresponds to a soliton behaviour close to r0 as shown in Fig.(1) for q = 1.25, in the time-like sector, and
+in Fig.(2) for q = 0.5 in the space-like sector. Moreover, note that this Bumblebee soliton explicitly depends on the
+topological mass m. We stress that the topological mass vanishes at r → ∞, and therefore there is no Bumblebee
+soliton solution at this asymptotic condition.
+In the core of the vortex, we obtain the vector potential A(r) through the equations (34), (35) and (36). Indeed,
+by taking the condition βr(r) = 0, we eliminate Eq.(35) and, consequently, we combine Eqs. (34) and (36), in such a
+way that
+d2βθ(r)
+dr2
++
+(
+1
+r
+− 2m
+)
+dβθ(r)
+dr
+=
+[(n
+r
+− eA(r)
+)2
++ α2 + 2λ|β(r)|2
+]
+(βθ + β0(r)) , (56)
+where βθ and |β(r)|2 are given, respectively, by (49) and (51). Thus, considering 1r < m, we find that,
+A(r) =
+n
+er
+−
+1
+e
+[
+m
+q
+( 2m
+q
+tanh[m(r − r0)] + 2m) sech2[m(r − r0)]
+q − tanh[m(r − r0)]
+− α2 − 2λb2θ
+(
+q2 − tanh2[m(r − r0)]
+)]1/2
+, (57)
+which is an estimative for the vector potential near to r0 in the vortex core, where we have considered q = b0/bθ with
+q 6= 1. Here one can obtain the magnetic field from potential vector A(r) employing Eq. (38).
+The behaviour of the potential vector A(r) in the vortex core of the time-like sector of the Bumblebee field is shown
+in the Fig. (3). Note that, as the topological mass m increases, A(r) becomes more localized, and the magnitude of
+the magnetic field H(r) increases, as it is shown in Fig.(4).
+The behaviour of the fields A(r) and H(r) in the vortex core of the Bumblebee field in the space-like sector are
+shown in the Fig. (5) and Fig. (6), respectively. In this case, the position r0 seems to be a limit for the propagation of
+the Bumblebee field, that is, the Bumblebee field is free to propagate in 0 < r < r0, however, at r0 limit the magnetic
+field diverges.
+Furthermore, we observe that the Bumblebee field becomes constant to r → ∞ and satisfies the relation (30),
+b2 = b20 − b2θ and A(r) →
+n
+er
+. To the asymptotic condition r → ∞ we get tanh[m(r − r0)] → 1, sech[m(r − r0)] → 0,
+and b2 = −α2/2λ, which leads eq. (57) to
+A(r) =
+n
+er
+−
+1
+e
+[
+−α2 − 2λ
+(
+b20 − b
+2
+θ
+)]1/2
+=
+n
+er
+. (58)
+As expected, it corresponds to a finite energy vortex. Although we remark that eq. (57) shows that the potential
+vector A(r) has a non-trivial behaviour in the vortex core, indeed it explicitly depends on the topological mass m,
+except for r →∞ vacuum limit.
+9
+FIG. 3: Potential vector at r0 for Bumblebee time-like
+with several values of topological mass m.
+We use q = 1.25, bθ = 1, e = 1, λ = 2, r0 = 10,
+and α2 = −2.25.
+FIG. 4: Magnetic field at r0 for Bumblebee time-like with sev-
+eral values of topological mass m. We use q = 0.5, bθ = 1, e = 1,
+r0 = 10, λ = 2, and α
+2 = 3.
+FIG. 5: Potential electromagnetic field near to r0 for
+Bumblebee space-like with several values of topological
+mass m.
+FIG. 6: Magnetic field near to r0 for Bumblebee space-like with
+several values of topological mass m.
+IV. THE SPECTRUM ANALYSIS AND THE ASYMPTOTIC LIMIT BEHAVIOUR
+Taking the Lagrangian (8), the propagators can be written down in three sectors, as
+Ωµν =
+∂µ∂ν
+2
+, Θµν = ηµν −
+∂µ∂ν
+2
+, Sµν = �µλν∂λ , (59)
+where Ω is the the longitudinal, Θ and S are the transversal sectors of the propagator remarking that S has topological
+origin. Thereby the invertible operator is Oµν = 2mSµν + (2 + α2)ηµν , and its inverse O−1 is
+(Oµν)−1 = −
+1
+(2 + α2)
+Ωµν +
+2 + α2
+(2 + α2)2 + 4m22
+Θµν −
+2m
+(2 + α2)2 + 4m22
+Sµν . (60)
+Converting to the momenta space, the B-field propagator can be written down as ,
+〈BµBν〉L(k) = −
+i
+k2 − α2
+(
+kµkν
+k2
+)
+, (61)
+〈BµBν〉T (k) =
+i
+(k2 − α2)2 − 4m2k2
+[(
+k2 − α2
+)(
+ηµν −
+kµkν
+k2
+)
++ 2mi�µλνkλ
+]
+, (62)
+10
+where we have separated in longitudinal (L) and transversal (T ) sectors. Observe that the longitudinal sector exhibits
+a simple pole k2 = α2, and if we saturate this sector with the conserved current it vanishes, thereby it has no dynamics
+and therefore we can throw it away. On the other hand the transversal sector can be re-written in such a way that,
+〈BµBν〉T (k) =
+i
+(k2 − ρ2+)(k2 − ρ2−)
+[
+(k2 − α2)(ηµν −
+kµkν
+k2
+) + 2mi�µλνkλ
+]
+, (63)
+where the massive poles are,
+ρ2± = α
+2 + 2m2 ± 2m
+√
+α2 +m2. (64)
+We note that the transversal sector poles represent the unique dynamic degrees of freedom of the model, and if we take
+m = 0 we get the usual Proca-type massive pole as expected. The important point here is that we can easily observe
+that the topological mass contributes to dynamic mass poles ρ2±. And to obtain such contribution we suggest a simple
+relation between usual mass and the topological mass terms, that is ε = α
+m
+, which means that usual mass term α is
+a multiple of the topological mass m term, and ε is a constant value. Note that α is a non-zero value considering the
+initial condition of the vacuum symmetry break given by potential Eq. (3). In this way we can substitute it in (64),
+giving ρ2± = C(ε)m
+2, where C(ε) is the constant expression C(ε) = ε2 + 2 ± 2(1 + ε2)1/2. We observe that for real
+values C(ε) is always positive. So, in spite that the Chern-Simons-type sector does not contribute to the vacuum, the
+topological mass term m2 yields the “speed” of the field to arrive at the asymptotic limit, and the size of the region
+where H, that is different from zero on the vortex core. So, in order to include a Chern-Simons-type contribution to
+the mass pole ρ we have to “deform” the topological mass m in the above C(ε) in such way that
+m2± → C(ε)m
+2 ≡ ρ2± (65)
+for C(ε) > 0, where we can rewrite the Bumblebee field as
+|β(r)| = bθ sech [m±(r − r0)] . (66)
+Then the Bumblebee solitons, or vortices, can have two positive modes (±) that depend on the mass deformation
+factor C(ε).
+V. CONCLUSION
+In this work we have analysed the contribution of the vacuum and the topological mass to the asymptotic behaviour
+of a Bumblebee field in (1 + 2)D. To this goal we have recalled the Bumblebee vector field originated from the string
+model which represents the Lorentz violation effect observed by Kostelecky and Samuel [3]. Based on these works
+and from the Maxwell-Chern-Simons[1, 38] we have constructed a model to obtain the topological elements of the
+Bumblebee model as long as the the vacuum Lorentz violation parameter.
+In spite of a non-exact and/or non-analytic solution of the differential equations which were derived from each
+component of the equation of motion, the topological characteristic of the asymptotic solutions [1, 2, 35] are obtained
+and are shown in the equations(33), (34) and (35), (36). The resulting topological objects can be interpreted as vortices
+[35], where each one of their components are shown to be a polarized soliton in the proper space-time direction. We
+have also shown that a possible origin for these vortices comes from the non-trivial vacuum of the Bumblebee field
+Bµ dynamics.
+In more details, we have obtained that the vortex originated from the Bumblebee field with polarized fixed direction
+bµ can be associated with a anisotropy of vacuum energy (53) that is localized at a fix point r0. This fixed point
+strongly depends on the inverse of product of the module of the Bumblebee field and the topological mass (52).
+Recalling the studies on Lorentz symmetry violation studies [22–27], there is an interesting similarity where the
+(local) Lorentz symmetry violation might induce a local space-time perturbation giving a dynamical anisotropic
+anomaly that is manifest by a vortex object. It suggests that the possible appearance of topological vortices at
+fixed point r0 in the limit of very high energy physics indicates that we have start off from a model where Lorentz
+violation terms participate in the dynamics. We have also obtained that if the Bumblebee field is a time-like vector
+the magnetic appears as a “pulse” centred in r0 in a limitless universe sketched in Fig.(4) , while if the Bumblebee
+field is a space-like vector the magnetic appears as a barrier limiting the universe sketched in Fig.(6). The last one
+observation is interesting because the Lorentz violation yields a kind of boundary to the dynamics which classically
+can be interpreted as a symmetry violation in a orthogonal direction. It remains to obtain the physics value of the
+r0, that can be determine in the quantum regime, which is the issue of a forthcoming work.
+11
+Furthermore, for the sake of completeness, we have analysed the role played by the topological Chern-Simons-type
+terms. Although they do not contribute to the non-trivial vacuum obtained, by means of a mass pole verification
+using propagators computation we observe that it can contribute with a positive two-mode-extension to the mass
+term, which indicates that its factor preserves the topological feature of the asymptotic limit of the field. It can
+characterize the size of the region where the “magnetic” field is non-zero, or core vortex, and the “speed” of the
+field to saturate the asymptotic limit. In the scope of the Quantum Field Theory it could be noted that topological
+vortices stem from a possible optical vacuum energy state or dynamical topological defect. Thus these objects might
+be present in models that due to the space structure have anisotropic (optical or not) effects.
+VI. ACKNOWLEDGEMENTS
+LPC would like to thank to Prof. J.A. Helayl-Neto for discussions and the kind hospitality at the CBPF.
+[1] L. H. Ryder, Quantum Field Theory, second edition, Cambridge University Press (1996);
+[2] S. Weinberg The Quantum Theory of Fields - Volume II: Modern Applications, Cambrigge University Press (1996).
+[3] V. A. Kosteleck, S. Samuel, Gravitational phenomenology in higher-dimensional theories and strings Phys. Rev. D 40, 1886
+(1989);
+V. A. Kosteleck, S. Samuel, Spontaneous breaking of Lorentz symmetry in string theory, Phys. Rev. D 39, 683 (1989);
+V. A. Kosteleck, S. Samuel, Phenomenological Gravitational Constraints on Strings and Higher-Dimensional Theories,
+Phys. Rev. Lett. 63, 224 (1989).
+[4] V. A. Kosteleck, Gravity, Lorentz violation, and the standard model, Phys. Rev. D 69, 105009 (2004).
+[5] R. Bluhm, A. Kostelecký Spontaneous Lorentz violation, Nambu-Goldstone modes, and gravity, Phys. Rev. D 71, 065008,
+(2005).
+[6] R. Bluhm, N. L. Gagne, R. Potting, A. Vrublevskis Constraints and stability in vector theories with spontaneous Lorentz
+violation, Phys. Rev. D 77, 125007, (2009).
+[7] O. Bertolami, J. Pramos, Vacuum solutions of a gravity model with vector-induced spontaneous Lorentz symmetry breaking,
+Phys. Rev. D 72, 044001 (2005).
+[8] C. A. Escobar, A. Mart́ın-Ruiz, Equivalence between Bumblebee models and electrodynamics in a nonlinear gauge, Phys.
+Rev. D 95, 095006, (2017).
+[9] H. S. Snyder, Quantized Space-Time, Phys. Rev. 71, 38 (1947).
+[10] C. N. Yang, On Quantized Space-Time, Phys. Rev. 72, 874 (1947).
+[11] M. R. Douglas, N. A. Nekrasov, Noncommutative field theory, Rev. Mod. Phys. 73, 977 (2001).
+[12] N. Seiberg, E. Witten, String theory and noncommutative geometry, J.H.E.P. 9909, 032 (1999).
+[13] R. Jackiw, Physical instances of noncommuting coordinates, Nucl. Phys. Proc. Suppl. 108, 30 (2002).
+[14] D. Bahns, S. Doplicher, K. Fredenhagen, G. Piacitelli, On the unitarity problem in space/time noncommutative theories,
+Phys. Lett. B533, 178 (2000).
+[15] J. L. Hewett, F. J. Petriello, T. G. Rizzo, Signals for Non-Commutative Interactions at Linear Colliders, Phys. Rev. D64,
+075012 (2001).
+[16] I. Mocioiu, M. Pospelov, R. Roiban, Limits on the Non-commutativity Scale, Phys. Lett. B489, 390 (2000).
+[17] C. E. Carlson, C. D. Carone, R. F. Lebed, Bounding Noncommutative QCD, Phys. Lett. B518, 201 (2001).
+[18] X. Calmet, Space-time symmetries of noncommutative spaces, Phys. Rev. D71, 085012 (2005).
+[19] G. Berrino, S. L. Cacciatori, A. Celi, L. Martucci, A. Vicini, Noncommutative electrodynamics, Phys. Rev. D67, 065021
+(2002).
+[20] V. O. Rivelles, Noncommutative Theories and Gravity, Proc. Sci. WC2004, 029 (2004).
+[21] G. Moultaka, M. Rausch de Traubenberg, A. Tanasa, Non-trivial extension of the Poincare algebra for antisymmetric gauge
+fields, 11th International Conference on Symmetry Methods in Physics (SYMPHYS-11), Prague, Czech Republic, 21-24
+Jun 2004, hep-th0407168;
+N. Mohammedi, G. Moultaka, M. Rausch de Traubenberg, Field Theoretic Realizations for Cubic Supersymmetry, Int. J.
+Mod. Phys. A19, 5585 (2004);
+M. Rausch de Traubenberg, M. J. Slupinski, Fractional supersymmetry and Fth-roots of representations, J. Math. Phys.
+41, 4556 (2000);
+M. Rausch de Traubenberg, M. J. Slupinski, Non-Trivial Extensions of the 3D-Poincaré Algebra and Fractional Supersym-
+metry for Anyons, Mod. Phys. Lett. A12, 3051 (1997);
+L. P. Colatto, J. L. Matheus-Valle, On q-Deformed Supersymmetric Classical Mechanical Models, J. Math. Phys. 37, 6121
+(1996).
+[22] D. Colladay, V. A. Kosteleck, CPT violation and the standard model, Phys. Rev. D55, 6760 (1997).
+[23] D. Colladay, V. A. Kosteleck, Lorentz-violating extension of the standard model, Phys. Rev. D58, 116002 (1998).
+12
+[24] G. Amelino-Camelia, The three perspectives on the quantum-gravity problem and their implications for the fate of Lorentz
+symmetry, gr-qc/0309054;
+O. Bertolami, R. Lehnert, R. Potting, A. Ribeiro, Cosmological acceleration, varying couplings, and Lorentz breaking, Phys.
+Rev. D69, 083513 (2004);
+O. Bertolami, Threshold Effects and Lorentz Symmetry, Lect. Notes Phys. 633, 96, arXiv:hep-ph/0301191, (2003);
+R. Lehnert, Threshold analyses and Lorentz violation, Phys. Rev. D68, 085003 (2003);
+V. A. Kostelecky, R. Lehnert, M. J. Perry, Spacetime-varying couplings and Lorentz violation, Phys. Rev. D68, 123511
+(2003);
+E. C. Vagenas, 2d Stringy Black Holes and Varying Constants, J.H.E.P 0307, 046 (2003);
+J. W. Moffat, Spontaneous Violation of Lorentz Invariance and Ultra-High Energy Cosmic Rays, Int. J. Mod. Phys. D12,
+1279 (2003);
+S. Das, G. Kunstatter, Varying Fine Structure Constant and Black Hole Physics, Class. Quant. Grav. 20, 2015 (2003);
+J. D. Barrow, Unusual Features of Varying Speed of Light Cosmologies, Phys. Lett. B564, 1 (2003);
+P. C. W. Davies, T. M. Davis, C. H. Lineweaver, Black holes constrain varying constants, Nature 418, 602 (2002);
+V. A. Kostelecky, R. Lehnert, Stability, causality, and Lorentz and CPT violation Phys. Rev. D63, 065008 (2001);
+K. Greisen, End to the Cosmic-Ray Spectrum?, Phys. Rev. Lett. 16, 748 (1966);
+G. T. Zatsepin, V. A. Kuzmin, Upper limit of the spectrum of cosmic rays, JETP Lett. 4, 78, Pisma Zh. Eksp. Teor. Fiz.
+4, 114 (1966).
+[25] A. A. Andrianov, R. Soldati, Lorentz Symmetry Breaking in Abelian Vector-Field Models with Wess-Zumino Interaction,
+Phys. Rev. D51, 5961 (1995).
+[26] A. A. Andrianov, R. Soldati, Patterns of Lorentz symmetry breaking in QED by CPT-odd interaction, Phys. Lett. B435,
+449 (1998).
+[27] I. V. Baryakhtar, B. A. Ivanov, Vector Field Dynamic Solitons, Phys. Lett. A98, 222(1983);
+[28] S. Carrol, G. Field, R. Jackiw, Limits on a Lorentz- and parity-violating modification of electrodynamics, Phys. Rev. D41,
+1231 (1999).
+[29] D. Hutsemékers, H. Lamy, Confirmation of the existence of coherent orientations of quasar polarization vectors on cosmo-
+logical scales, Astron. Astrophys. 367, 381 (2001);
+D. Hutsemékers, Evidence for very large-scale coherent orientations of quasar polarization vectors, Astron. Astrophys. 332,
+410 (1998);
+M. Goldhaber, V. Trimble, Limits on the chirality of interstellar and intergalactic space, J. Astrophys. Astron. 17, 17
+(1996).
+[30] H. B. Nielsen, I. Picek, On a possible subtraction for the Lorentz non-invariant model, Nucl. Phys. B211, 269(1983).
+[31] D. Harari, P. Sikivie, Effects of a Nambu-Goldstone boson on the polarization of radio galaxies and the cosmic microwave
+background, Phys. Lett. B289, 67(1992).
+[32] B. Nodland, V. A. Ralston, Indication of Anisotropy in Electromagnetic Propagation over Cosmological Distances, Phys.
+Rev. Lett. 78, 3043(1997);
+B. Nodland, V. A. Ralston, Nodland and Ralston Reply:, Phys. Rev. Lett. 79, 1958(1997).
+[33] A. P. Baeta Scarpelli, H. Belich, J. L. Boldo, J. A. Helayel-Neto, Aspects of causality and unitarity and comments on
+vortexlike configurations in an Abelian model with a Lorentz-breaking term, Phys.Rev. D67 085021 (2003);
+H. Belich, T. Costa-Soares, M. M. Ferreira, J. A. Helayel-Neto, M. T. D. Orlando, Lorentz-symmetry violation and elec-
+trically charged vortices in the planar regime, Int.J.Mod.Phys. A21 2415 (2006).
+[34] L. P. Colatto, A. L. A. Penna, W. C. Santos, Charged Tensor Matter Fields and Lorentz Symmetry Violation via Sponta-
+neous Symmetry Breaking, Eur. Phys. J. C36, 79 (2004);
+L. P. Colatto, A. L. A. Penna, A chargeless complex vector matter field in supersymmetric scenario, Adv. High Energy
+Phys. 2015 (2015), 986570.
+[35] H. B. Nielsen, P. Olesen, Vortex-line models for dual strings, Nuclear Physics B. 61: 45-61 (1973).
+[36] G. B. Arfken, H. J. Weber, F. E. Harris, Mathematical Methods for Physicists, 7th edition, Academic Press (2012);
+[37] S. Nettel, Wave Physics, Oscillations - Solitons - Chaos, fourth edition, Springer-Verlag Berlin Heidelberg (2009);
+G. B. Whitham, Linear and nonlinear waves, John Wiley & Sons (1999);
+A. C. Newell, Solitons in Mathematics and Physics, Society for Industrial and Applied Mathematics (1985);
+P. G. Drazin, R. S. Johnson Solitons: An Introduction, Cambridge University Press (1989).
+[38] L. P. Colatto, A. L. A. Penna, W. C. Santos, in preparation.

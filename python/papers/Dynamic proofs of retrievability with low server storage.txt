@@ -1,0 +1,1760 @@
+Dynamic proofs of retrievability with low server storage
+Dynamic proofs of retrievability with low server storage
+Gaspard Anthoine∗ Jean-Guillaume Dumas∗ Michael Hanling†
+Mélanie de Jonghe∗ Aude Maignan∗ Clément Pernet∗ Daniel S. Roche†
+Abstract
+Proofs of Retrievability (PoRs) are protocols which allow a client to store data remotely and to
+efficiently ensure, via audits, that the entirety of that data is still intact. A dynamic PoR system
+also supports efficient retrieval and update of any small portion of the data. We propose new, simple
+protocols for dynamic PoR that are designed for practical efficiency, trading decreased persistent storage
+for increased server computation, and show in fact that this tradeoff is inherent via a lower bound proof
+of time-space for any PoR scheme. Notably, ours is the first dynamic PoR which does not require any
+special encoding of the data stored on the server, meaning it can be trivially composed with any database
+service or with existing techniques for encryption or redundancy. Our implementation and deployment
+on Google Cloud Platform demonstrates our solution is scalable: for example, auditing a 1TB file takes
+16 minutes at a monetary cost of just $0.23 USD. We also present several further enhancements, reducing
+the amount of client storage, or the communication bandwidth, or allowing public verifiability, wherein
+any untrusted third party may conduct an audit.
+1 Introduction
+1.1 The need for integrity checks
+While various computing metrics have accelerated and slowed over the last half-century, one which undeniably
+continues to grow quickly is data storage. One recent study estimated the world’s storage capacity at 4.4ZB
+(4.4 · 1021), and growing at a rate of 40% per year [9]. Another study group estimates that by 2025, half of
+the world’s data will be stored remotely, and half of that will be in public cloud storage [31].
+As storage becomes more vast and more outsourced, users and organizations need ways to ensure the
+integrity of their data – that the service provider continues to store it, in its entirety, unmodified. Customers
+may currently rely on the reputations of large cloud companies like IBM Cloud or Amazon AWS, but even
+those can suffer data loss events [2, 20], and as the market continues to grow, new storage providers without
+such long-standing reputations need cost-effective ways to convince customers their data is intact.
+This need is especially acute for the growing set of decentralized storage networks (DSNs), such as Filecoin,
+Storj, SAFE Network, Sia, and PPIO, that act to connect users who need their data stored with providers
+(“miners”) who will be paid to store users’ data. In DSNs, integrity checks are useful at two levels: from the
+customer who may be wary of trusting blockchain-based networks, and within the network to ensure that
+storage nodes are actually providing their promised service. Furthermore, storage nodes whose sole aim is to
+earn cryptocurrency payment have a strong incentive to cheat, perhaps by deleting user data or thwarting
+audit mechanisms.
+∗Université Grenoble Alpes, Laboratoire Jean Kuntzmann, UMR CNRS 5224, Grenoble INP. 700 avenue centrale, IMAG-
+CS 40700, 38058 Grenoble, France. Gaspard.Anthoine@etu.univ-grenoble-alpes.fr, {Jean-Guillaume.Dumas,Aude.Maignan,
+Clement.Pernet}@univ-grenoble-alpes.fr, dejonghe.melanie63@gmail.com.
+†United States Naval Academy, Annapolis, Maryland, United States. mikehanling@gmail.com, roche@usna.edu
+1
+ar
+X
+iv
+:2
+00
+7.
+12
+55
+6v
+1 
+ [
+cs
+.C
+R
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+https://filecoin.io/
+https://storj.io/
+https://safenetwork.tech/
+https://sia.tech/
+https://www.pp.io/
+mailto:Gaspard.Anthoine@etu.univ-grenoble-alpes.fr
+mailto:Jean-Guillaume.Dumas@univ-grenoble-alpes.fr,Aude.Maignan@univ-grenoble-alpes.fr,Clement.Pernet@univ-grenoble-alpes.fr
+mailto:Jean-Guillaume.Dumas@univ-grenoble-alpes.fr,Aude.Maignan@univ-grenoble-alpes.fr,Clement.Pernet@univ-grenoble-alpes.fr
+mailto:dejonghe.melanie63@gmail.com
+mailto:mikehanling@gmail.com
+mailto:roche@usna.edu
+1.2 Existing solutions
+The research community has developed a wide array of solutions to the remote data integrity problem over
+the last 15 years. Here we merely summarize the main lines of work and highlight some shortcomings that
+this paper seeks to address; see Section 7 for a more complete discussion and comparison.
+Provable Data Possession (PDP). PDP audits [24, 16, 35, 37] are practically efficient methods to
+ensure that a large fraction of data has not been modified. They generally work by computing a small tag
+for each block of stored data, then randomly sampling a subset of data blocks and corresponding tags, and
+computing a check over that subset.
+Because a server that has lost or deleted a constant fraction of the file will likely be unable to pass an
+audit, PDPs are useful in detecting catastrophic or unintentional data loss. They are also quite efficient
+in practice. However, a server who deletes only a few blocks is still likely to pass an audit, so the security
+guarantees are not complete, and may be inadequate for critical data storage or possibly-malicious providers.
+Proof of Retrievability (PoR). PoR audits, starting with [5], have typically used techniques such as
+error-correcting codes, and more recently Oblivious RAM (ORAM), in order to obscure from the server
+where pieces of the file are stored [27, 13]. Early PoR schemes did not provide an efficient update mechanism
+to alter individual data blocks, but more recent dynamic schemes have overcome this shortcoming [34, 10].
+A successful PoR audit provides a strong guarantee of retrievability: if the server altered many blocks,
+this will be detected with high probability, whereas if only few blocks were altered or deleted, then the error
+correction means the file can still likely be recovered. Therefore, a single successful audit ensures with high
+probability that the entire file is still stored by the server.
+The downside of this stronger guarantee is that PoRs have typically used more sophisticated cryptographic
+tools than PDPs, and in all cases we know of require multiple times the original data size for persistent remote
+storage. This is problematic from a cost standpoint: if a PoR based on ORAM requires perhaps 10x storage
+on the cloud, this cost may easily overwhelm the savings cloud storage promises to provide.
+Proof of Replication (PoRep) and others. While our work mainly falls into the PoR/PDP setting, it
+also has applications to more recent and related notions of remote storage proofs.
+Proofs of space were originally proposed as an alternative to the computation-based puzzles in blockchains
+and anti-abuse mechanisms [4, 14], and require verifiable storage of a large amount of essentially-random
+data. These are not applicable to cloud storage, where the data must obviously not be random.
+A PoRep scheme (sometimes called Proof of Data Reliability) aims to combine the ideas of proof of space
+and PoR/PDP in order to prove that multiple copies of a data file are stored remotely. This is important
+as, for example, a client may pay for 3x redundant storage to prevent data loss, and wants to make sure
+that three actual copies are stored in distinct locations. Some PoRep schemes employ slow encodings and
+time-based audit checks; the idea is that a server does not have enough time to re-compute the encoding on
+demand when an audit is requested, or even to retrieve it from another server, and so must actually store
+the (redundantly) encoded file [3, 18, 38, 11]. The Filecoin network employs this type of verification. A
+different and promising approach, not based on timing assumptions, has recently been proposed by [12]. An
+important property of many recent PoRep schemes is public verifiability, that is, the ability for a third party
+(without secrets) to conduct an audit. This is crucial especially for distributed storage networks (DSNs).
+Most relevant for the current paper is that most of these schemes directly rely on an underlying PDP or
+PoR in order to verify encoded replica storage. For example, [12] states that their protocol directly inherits
+any security and efficiency properties of the underlying PDP or PoR.
+We also point out that, in contrast to our security model, many of these works are based on a rational
+actor model, where it is not in a participant’s financial interest to cheat, but a malicious user may break this
+guarantee, and furthermore that most existing PoRep schemes do not support dynamic updates to individual
+data blocks.
+2
+1.3 Our Contributions
+We present a new proof of retrievability which has the following advantages compared to existing PDPs and
+PoRs:
+Near-optimal persistent storage. The best existing PoR protocols that we could find require between
+2N and 10N bytes of cloud storage to support audits of an N -byte data file, making these schemes impractical
+in many settings. Our new PoR requires only N +O(N/ logN) persistent storage.
+Simple cryptographic building blocks. Our basic protocol relies only on small-integer arithmetic and
+a collision-resistant hash function, making it very efficient in practice. Indeed, we demonstrate in practice
+that 1TB of data can be audited in 16 minutes at a monetary cost of just 0.23 USD.
+Efficient partial retrievals and updates. That is, our scheme is a dynamic PoR, suitable to large
+applications where the user does not always wish to re-download the entire file.
+Provable retrievability from malicious servers. Similar to the best PoR protocols, our scheme
+supports data recovery (extraction) via rewinding audits. This means, in particular, that there is only a
+negligible chance that a server can pass a single audit and yet not recover the entirety of stored data.
+(Nearly) stateless clients. With the addition of a symmetric cipher, the client(s) in our protocol need
+only store a single decryption key and hash digest, which means multiple clients may easily share access
+(audit responsibility) on the same remote data store.
+Public verifiability. We show an extension to our protocol, based on the difficulty of discrete logarithms
+in some group, that allows any third party to conduct audits with no shared secret.
+Importantly, because our protocols store the data unencoded on the server, they can trivially be used
+within or around any existing encryption or duplication scheme, including most PoRep constructions. We
+can also efficiently support arbitrary server-side applications, such as databases or file systems with their
+own encoding needs.
+The main drawback of our schemes is that, compared to existing PoRs, they have a higher asymptotic
+complexity for server-side computation during audits, and (in some cases) higher communication bandwidth
+during audits as well. However, we also provide a time-space lower bound that proves any PoR scheme must
+make a tradeoff between persistent space and audit computation time.
+Furthermore, we demonstrate with a complete implementation and deployment on Google Compute
+Platform that the tradeoff we make is highly beneficial in cloud settings. Intuitively, a user must pay for the
+computational cost of audits only when they are actually happening, maybe a few times a day, whereas the
+extra cost of (say) 5x persistent storage must be paid all the time, whether the client is performing audits or
+not.
+1.4 Organization
+The rest of the paper is structured as follows:
+• Section 2 defines our security model, along the lines of most recent PoR works.
+• Section 3 contains our proof of an inherent time-space tradeoff in any PoR scheme.
+• Section 4 gives an overview and description of our basic protocol, with detailed algorithms and security
+proofs delayed until Section 6.
+• Section 5 discusses the results of our open-source implementation and deployment on Google Compute
+Platform.
+• Section 7 gives a detailed comparison with prior work.
+2 Security model
+We define a dynamic PoR scheme as consisting of the following five algorithms between a client C with state
+stC and a server S with state stS . Our definition is the same as given by [34], except that we follow [24] and
+include the Extract algorithm in the protocol explicitly.
+A subtle but important point to note is that, unlike the first four algorithms, Extract is not really
+intended to be used in practice. In typical usage, a cooperating and honest server will pass all audits, and
+3
+the normal Read algorithm would be used to retrieve any or all of the data file reliably. The purpose of
+Extract is mostly to prove that the data is recoverable by a series of random, successful audits, and hence
+that the server which has deleted even one block of data has negligible chance to pass a single audit.
+The client may use random coins for any algorithm; at a minimum, the Audit algorithm must be ran-
+domized in order to satisfy retrievability non-trivially.
+• (stC , stS) ← Init(1λ, b,M): On input of the security parameter λ and the database M , consisting of
+N bits arranged in blocks of b bits, outputs the client state stC and the server state stS .
+• {mi, reject} ← Read(i, stC , stS): On input of an index i ∈ 1..dN/be, the client state stC and the server
+state stS , outputs mi = M [i] or reject.
+• {(st′C , st
+′
+S), reject} ← Write(i, a, stC , stS): On input of an index i ∈ 1..dN/be, data a, the client state
+stC and the server state stS , outputs a new client state st
+′
+C and a new server state st
+′
+S , such that now
+M [i] = a, or reject.
+• {π, reject} ← Audit(stC , stS) : On input of the client state stC and the server state stS , outputs a
+succesful transcript π or reject.
+• M ← Extract(stC , π1, π2, . . . , πe): On input of independent Audit transcripts π1, . . . , πe, outputs the
+database M . The number of required transcripts e must be a polynomially-bounded function of N , b,
+and λ.
+2.1 Correctness
+A correct execution of the algorithms by honest client and server results in audits being accepted and reads
+to recover the last updated value of the database. More formally, correctness is:
+Definition 1 (Correctness). For any parameters λ,N, b, there exists a predicate IsValid such that, for any
+database M of N bits, IsValid(M, Init(1λ, b,M)). Furthermore, for any state such that IsValid(M, stC , stS)
+and any index i with 0 ≤ i < dN/be, we have
+• Read(i, stC , stS) = M [i];
+• IsValid(M ′, Write(i, a, stC , stS)), where M ′[i] = a and the remaining M ′[j] = M [j] for every j 6= i;
+• Audit(stC , stS) 6= reject;
+• For e audits Audit1, . . . , Audite with independent randomness, with probability 1− negl(λ):
+Extract(stC , Audit1(stC , stS), . . . , Audite(stC , stS))=M .
+Note that, even though C may use random coins in the algorithms, a correct PoR by this definition should
+have no chance of returning reject in any Read, Write or Audit with an honest client and server.
+2.2 Authenticity and attacker model
+The authenticity requirement stipulates that the client can always detect (except with negligible probability)
+if any message sent by the server deviates from honest behavior. We use the following game between an
+observer O, a potentially malicious server S̄ and an honest server S for the adaptive version of authenticity,
+with the same game as [34]:
+1. S̄ chooses an initial memory M . O runs Init and sends the initial memory layout stS to both S̄ and S.
+2. For a polynomial number of steps t = 1, 2, ..., poly(λ), S̄ picks an operation opt where operation opt is
+either Read, Write or Audit. O executes the operations with both S̄ and S.
+3. S̄ is said to win the game, if any message sent by S̄ differs from that of S and O did not output reject.
+Definition 2 (Authenticity). A PoR scheme satisfies adaptive authenticity, if no polynomial-time adversary
+S̄ has more than negligible probability in winning the above security game.
+2.3 Retrievability
+Intuitively, the retrievability requirement stipulates that whenever a malicious server can pass the audit test
+with high probability, the server must know the entire memory contents M . To model this, [10] use a black-
+box rewinding access: from the state of the server before any passed audit, there must exist an extractor
+4
+algorithm that can reconstruct the complete correct database. As in [34], we insist furthermore that the
+extractor does not use the complete server state, but only the transcripts from successful audits. In the
+following game, note that the observer O running the honest client algorithms may only update its state
+stC during Write algorithm, and hence the Audit algorithms are independently randomized from the client
+side, but we make no assumptions about the state of the adversary S̄.
+1. S̄ chooses an initial database M . O runs Init and sends the initial memory layout stS to S̄;
+2. For t = 1, 2, ..., poly(λ), the adversary S̄ adaptively chooses an operation opt where opt is either Read,
+Write or Audit. The observer executes the respective algorithms with S̄, updating stC and M according
+to the Write operations specified;
+3. The observer runs 2e Audit algorithms with S̄ and records the outputs π1, . . . , πe′ of those which did
+not return reject, where 0 ≤ e′ ≤ 2e.
+4. The adversary S̄ is said to with the game if e′ ≥ e and Extract(stC , π1, . . . , πe) 6= M .
+Definition 3 (Retrievability). A PoR scheme satisfies retrievability if no polynomial-time adversary S̄ has
+more than negligible probability in winning the above security game.
+3 Time-space tradeoff lower bound
+As we have seen, the state of the art in Proofs of Retrievability schemes consists of some approaches with a
+low audit cost but a high storage overhead (e.g., [24, 34, 10]) and some schemes with a low storage overhead
+but high computational cost for the server during audits (e.g., [5, 32, 33]).
+Before presenting our own constructions (which fall into the latter category) we prove that there is indeed
+an inherent tradeoff in any PoR scheme between the amount of extra storage and the cost of performing
+audits. By extra storage here we mean exactly the number of extra bits of persistent memory, on the client
+or server, beyond the bit-length of the original database being represented.
+Theorem 4 below shows that, for any PoR scheme with sub-linear audit cost, we have
+(extra storage size) ·
+audit cost
+log(audit cost)
+∈ Ω(data size).
+None of the previous schemes, nor those which we present, make this lower bound tight. Nonetheless,
+it demonstrates that a “best of all possible worlds” scheme with, say, O(
+√
+N) extra storage and O(logN)
+audit cost to store an arbitrary N -bit database, is impossible.
+The proof is by contradiction, presenting an attack on an arbitrary PoR scheme which does not satisfy
+the claimed time/space lower bound. Our attack consists of flipping k randomly-chosen bits of the storage.
+First we show that k is small enough so that the audit probably does not examine any of the flipped bits,
+and still passes. Next we see that k is large enough so that, for some choice of the N bits being represented,
+flipping k bits will, with high probability, make it impossible for any algorithm to correctly recover the
+original data. This is a contradiction, since the audit will pass even though the data is lost.
+Readers familiar with coding theory will notice that the second part of the proof is similar to Hamming’s
+bound for the minimal distance of a block code. Indeed, we can view the original N -bit data as a message,
+and the storage using s+ c extra bits of memory as an (N + s+ c)-bit codeword. A valid PoR scheme must
+be able to extract (decode) the original message from an (N + s+ c)-bit string, or else should fail any audit.
+Theorem 4 (Appendix A). Consider any Proof of Retrievability scheme which stores an arbitrary database
+of N bits, uses at most N + s bits of persistent memory on the server, c bits of persistent memory on the
+client, and requires at most t steps to perform an audit. Assuming s ≥ 0, then either t > N
+4
+, or
+(s+ c)
+t
+log2 t
+≥
+N
+12
+.
+5
+4 Retrievability via verifiable computing
+We first present a simple version of our PoR protocol. This version contains the main ideas of our approach,
+namely, using matrix-vector products during audits to prove retrievability. It also makes use of Merkle hash
+trees during reads and updates to ensure authenticity.
+This protocol uses only N + o(N) persistent server storage, which is an improvement to the O(N)
+persistent storage of existing PoR schemes, and is the main contribution of this work. The costs of our
+Read and Write algorithms are similar to existing work, but we incur an asymptotically higher cost for
+the Audit algorithm, namely O(
+√
+N) communication bandwidth and O(N) server computation time. We
+demonstrate in the next section that this tradeoff between persistent storage and Audit cost is favorable in
+cloud computing settings for realistic-size databases.
+Later, in Section 6, we give a more general protocol and prove it secure according to the PoR definition
+in Section 2. That generalized version shows how to achieve O(1) persistent client storage with the same
+costs, or alternatively to trade arbitrarily small communication bandwidth during Audits for increased client
+persistent storage and computation time.
+4.1 Overview
+A summary of our four algorithms is shown in Table 1, where dashed boxes are the classical, Merkle hash
+tree authenticated, remote read/write operations.
+Our idea is to use verifiable computing schemes as, e.g., proposed in [17]. Our choice for this is to treat
+the data as a square matrix of dimension roughly
+√
+N ×
+√
+N . This allows for the matrix multiplication
+verification described in [19] to be used as a computational method for the audit algorithm.
+Crucially, this does not require any additional metadata; the database M is stored as-is on disk, our
+algorithm merely treats the machine words of this unmodified data as a matrix stored in row-major order.
+Although the computational complexity for the Audit algorithm is asymptotically O(N) for the server, this
+entails only a single matrix-vector multiplication, in contrast to some prior work which requires expensive
+RSA computations [5].
+To ensure authenticity also during Read and Write operations, we combine this linear algebra idea above
+with a standard Merkle hash tree.
+4.2 Matrix based approach for audits
+The basic premise of our particular PoR is to treat the data, consisting of N bits organized in machine
+words, as a matrix M ∈ Rm×nq , where Rq is a suitable finite ring of size q. Crucially, the choice of ring Rq
+detailed below does not require any modification to the raw data itself; that is, any element of the matrix
+M can be retrieved in O(1) time. At a high level, our audit algorithm follows the matrix multiplication
+verification technique of [19].
+In the Init algorithm, the Client chooses a secret random control vector u ∈ Rmq and computes a second
+secret control vector v ∈ Rnq according to
+vᵀ = uᵀM. (1)
+Note that u is held constant for the duration of the storage. This does not compromise security because
+no message which depends on u is ever sent to the Server. In particular, this means that multiple clients
+could use different, independent, control vectors u as long as they have a way to synchronize Write operations
+(modifications of their shared database) over a secure channel.
+To perform an audit, the client chooses a random challenge vector x ∈ Rnq , and asks the server to compute
+a response vector y ∈ Rmq according to
+y = Mx (2)
+Upon receiving the response y, the client checks two dot products for equality, namely
+uᵀy
+?
+= vᵀx. (3)
+6
+Table 1: Client/server PoR protocol with low storage server
+Server Communications Client
+Init
+N = mn log2 q u
+$← Rmq
+vᵀ ← uᵀM.
+MTInit
+←− λ, b,M
+M, TM ←− −→ rM
+Stores M and TM Stores u,v, and rM
+Read
+M, TM −→
+MTVerifiedRead
+←− i, j, rM
+−→Mij
+Returns Mij
+Write
+M, TM −→
+MTVerifiedWrite
+←− i, j,M′ij , rM
+M′, T ′M ←− −→Mij , r
+′
+M
+v′i ← vi + (M
+′
+ij −Mij)uj
+Stores updated M′, T ′M Stores updated r
+′
+M,v
+′
+Audit
+x←− x $← Rnq
+y←Mx y−→ uᵀy ?= vᵀx
+The proof of retrievability will rely on the fact that observing several successful audits allows, with high
+probability, recovery of the matrix M, and therefore of the entire database.
+The audit algorithm’s cost is mostly in the server’s matrix-vector product. The client’s dot products are
+much cheaper in comparison. For instance if m = n are close to
+√
+N , the communication cost is bounded by
+O(
+√
+N) as each vector has about
+√
+N values. We trade this infrequent heavy computation for no additional
+persistent storage, justified by the significantly cheaper cost of computation versus storage space.
+A sketch of the security proofs is as follows; full proofs are provided along with our formal and general
+protocol in Section 6. The Client knows that the Server sent the correct value of y with high probability,
+because otherwise the Server must know something about the secret control vector u chosen randomly at
+initialization time. This is impossible since no data depending on u was ever sent to the Server. The
+retrievability property (Definition 3) is ensured from the fact that, after
+√
+N random successful audits, with
+high probability, the original data M is the unique solution to the matrix equation MX = Y, where X is
+the matrix of random challenge vectors in the audits and Y is the matrix of corresponding response vectors
+from the Server.
+Some similar ideas were used by [32] for checking integrity. However, their security relies on the difficulty
+of integer factorization. Implementation would therefore require many modular exponentiations at thousands
+of bits of precision. Our approach for audits is much simpler and independent of computational hardness
+assumptions.
+4.3 Merkle hash tree for updates
+While the audit operates on the data in word-size chunks as members of a finite ring Rq, retrieving data is
+done at the byte level with support for retrieving any range of bytes (that is legal with the size of the data).
+A Merkle hash tree with block size b is used here to ensure authenticity of individual Read operations. This
+is a binary tree, stored on the server, consisting of O(N/b) hashes, each of size 2λ for collision resistance.
+The Client stores only the root hash, and can perform, with high integrity assurance, any read or write
+operation on a range of k bytes in O(k + b + log(N/b)) communication and computation time. When the
+block size is large enough, the extra server storage is o(N); for example, b ≥ logN means the hash tree can
+be stored using O(Nλ/ logN) bits.
+7
+Merkle hash trees are a classical result, commonly used in practice, and we do not claim any novelty in
+our use here [28, 26]. To that end, we provide three algorithms to abstract the details of the Merkle hash
+tree, and give more details on a possible implementation in Appendix C.
+These are all two-party protocols between a Server and a Client, but without any requirement for secrecy.
+A vertical bar | in the inputs and/or outputs of an algorithm indicates Server input/output on the left, and
+Client input/output on the right. When only the Client has input/output, the bar is omitted for brevity.
+The MTVerifiedRead and MTVerifiedWrite algorithms may both fail to verify a hash, and if so, the
+Client outputs reject and aborts immediately. Our three Merkle tree algorithms are as follows.
+MTInit(1λ, b,M) 7→ (M,TM | rM ). The Client initializes database M for storage in size-b blocks. The
+entire database M is sent to the Server, who computes hashes and stores the resulting Merkle hash tree
+TM . The Client also computes this tree, but discards all hashes other than the root hash rM . The cost in
+communication and computation for both parties is bounded by O(|M |) = O(N).
+MTVerifiedRead(M,TM | range, rM ) 7→ Mrange. The Client sends a contiguous byte range to the
+server, i.e., a pair of indices within the size of M . This range determines which containing range of blocks
+are required, and sends back these block contents, along with left and right boundary paths in the hash tree
+TM . Specifically, the boundary paths include all left sibling hashes along the path from the first block to
+the root node, and all right sibling hashes along the path from the last block to the root; these are called
+the “uncles” in the hash tree. Using the returned blocks and hash tree values, the Client reconstructs the
+Merkle tree root, and compares with rM . If these do not match, the Client outputs reject and aborts.
+Otherwise, the requested range of bytes is extracted from the (now-verified) blocks and returned. The cost
+in communication and computation time for both parties is at most O(|range|+ b+ log(N/b)).
+MTVerifiedWrite(M,TM | range,M ′range, rM )
+7→ (M ′, T ′M |Mrange, r
+′
+M ).
+The Client wishes to update the data M ′range in the specified range, and receive the previous value of that
+range, Mrange, as well as an updated root hash rM . The algorithm begins as MTVerifiedRead with the
+Server sending all blocks to cover the range and corresponding left and right boundary hashes from TM . After
+the Client retrieves and verifies the old value Mrange with the old root hash rM , she updates the blocks with
+the new value M ′range and uses the same boundary hashes to compute the new root hash r
+′
+M . Separately,
+the Server updates the underlying database M ′ in the specified range, then recomputes all affected hashes
+in T ′M . The asymptotic cost is identical to that for the MTVerifiedRead algorithm.
+5 Experiments with Google cloud services
+As we have seen, compared to other dynamic PoR schemes, our protocol aims at achieving the high security
+guarantees of PoR, while trading near-minimal persistent server storage for increased audit computation
+time.
+In order to address the practicality of this tradeoff, we implemented and tested our PoR protocol using
+virtual machines and disks on the Google Cloud Platform service, a commercial competitor to Amazon Web
+Services, Microsoft Azure, and the like.
+Specifically, we address two primary questions:
+• What is the monetary cost and time required to perform our O(N) time audit on a large database?
+• How does the decreased cost of persistent storage trade-off with increase costs for computation during
+audits?
+Our experimental results are summarized in Tables 3 to 5. For a 1TB data file, the O(
+√
+N) communication
+cost of our audit entails less than 12MB of data transfer, and our implementation executes the O(N) audit
+for this 1TB data file in less than 16 minutes and for a monetary cost of less than $0.25 USD.
+By contrast, just the extra persistent storage required by other existing PoR schemes would cost at least
+$40 USD or as much as $200 USD per month, not including any computation costs for audits. These results
+lead to two tentative conclusions:
+• The communication and computation costs of our Audit algorithm are not prohibitive in practice
+despite their unfavorable asymptotics; and
+8
+• Our solution is the most cost-efficient PoR scheme available when few audits are performed per day.
+We also emphasize again that a key benefit to our PoR scheme is its composability with existing software,
+as the data file is left in-tact as a normal file on the Server’s filesystem.
+The remainder of this section gives the full details of our implementation and experimental setup. The
+source code is available via the following github repository: https://github.com/dsroche/la-por
+5.1 Parameter selection
+To balance the bandwidth (protocol communications) and the client computation costs, we chose to rep-
+resent M as a square matrix with dimensions m = n =
+√
+N/8, where the 8 comes from our choice of Rq
+corresponding to 64-bit words (see Section 5.2). The resulting asymptotic costs for these parameter choices
+are summarized in Table 2.
+Table 2: Proof of retrievability via square matrix verifiable computing
+Server Comm. Client
+Storage N + o(N) O(
+√
+N)
+C
+o
+m
+p
+u
+t. Init O(N) N O(N)
+Audit O(N) O(
+√
+N) O(
+√
+N)
+Read/Write O(log(N)) O(log(N)) O(log(N))
+5.2 Two Prime Calculations
+In order to leave the data file unmodified in persistent storage, while allowing constant-time random access
+to individual matrix elements, we break the data into word-sized (8 byte) blocks, and choose a finite ring
+Rq with q ≥ 264.
+One possibility would be to set q as a prime larger than 264, but this would entail costly multiple-
+precision computations for the modular arithmetic. Instead, we chose the ring Rq = Fp1 × Fp2 as the direct
+product of two finite fields, each of large prime order. When q = p1p2 ≥ 264, this ensures unique recovery
+of the database from images in Rq via Chinese remaindering, and also allows efficient computation without
+extended precision.
+In our implementation, we chose p1 = 2
+31 − 1 and p2 = 236 − 5. That p1 is a Mersenne prime makes
+computations with it particularly efficient, but a second Mersenne prime of similar size does not exist. For
+the actual arithmetic we used the low-level routines provided by the open-source high performance number
+theory library Flint [21].
+This two-prime setup is equivalent to storing two databases M1 and M2 in finite fields Fp1 and Fp2
+respectively, and so the formal security proof of Theorem 6 applies as long as the smaller prime p1 is larger
+than the column dimension n of the database matrix M (see Section 6 for more details). This means our
+implementation parameters satisfy the security proof requirements for sizes up to N = 144PB.
+5.3 Experimental Design
+Our implementation provides the Init, Read, Write, and Audit algorithms as described in the previous
+section, including the Merkle hash tree implementation for read/write integrity. As the cost of the first three
+of these are comparable to prior work, we focused our experiments on the Audit algorithm.
+We ran two sets of experiments, using virtual machines and disks on Google Cloud’s Compute Engine∗.
+The client machine was a basic f1-micro instance, 1 vCPU with 0.6GB memory. The server machine was
+an n1-standard-2, 2 vCPU with 7.5GB memory. In the second set of experiments, the 4/16 parallel VMs
+running MPI were all n1-standard-1 instances with 1 vCPU and 3.75GB memory. The client and server
+∗https://cloud.google.com/compute/docs/machine-types.
+9
+https://github.com/dsroche/la-por
+https://cloud.google.com/compute/docs/machine-types.
+processes communicated over TCP connection. The data itself was stored on an attached 1.2TB standard
+persistent disk. Test files of size 1GB, 10GB, 100GB, and 1TB were generated with random bytes from
+/dev/urandom. The server time in Table 3 measures CPU time only; all other times are “wall time” in
+actual seconds for operation completion.
+5.4 Audit compared to checksums
+For the first set of experiments, we wanted to address the question of how “heavy” the hidden constant in
+the O(N) is. For this, we compared the cost of performing a single audit, on databases of various sizes, to
+the cost of computing a cryptographic checksum of the entire database using MD5 or SHA256.
+Table 3: Run Time Test Results (seconds)
+Operation 1GB 10GB 100GB 1TB
+Init
+Server 0.81 47.38 483.16 5236.65
+Wall 11.17 102.49 1055.46 11437.00
+Audit
+Server 5.53 54.26 463.25 5510.80
+Wall 12.75 117.36 1080.66 11495.00
+MD5
+Server 2.46 23.92 251.31 2848.21
+Wall 8.91 88.47 914.91 9234.00
+SHA256
+Server 6.30 62.67 639.08 6428.22
+Wall 11.49 112.72 1553.74 11969.00
+In a sense, a cryptographic checksum is another means of integrity check that requires no extra storage,
+albeit without the malicious server protection that our PoR protocol provides. Therefore, having an audit
+cost which is comparable to that of a cryptographic checksum indicates the O(N) theoretical cost is not too
+heavy in practice.
+The experiment took place in 4 stages. First, each file was run through the initialization algorithm.
+Then, each file was run through the Audit algorithm. Third, an MD5 digest was calculated for each file.
+Finally, a SHA256 digest was computed for each file. A Merkle tree was also created over each file. Instead
+of scaling the block size to each file, a block size of 8KiB was chosen for practical performance. The results
+are organized into Table 3.
+Per operation, the timings report the CPU time from the server side, and the total wall time from the
+client side. The difference is due mostly to I/O overhead; even for the audit, the client-side work to compute
+the two dot products is minimal.
+There are two main conclusions to draw from the experiments. The first deals with our Audit algorithm
+following the theoretical bounds that were expected, and the second deals with how the run time compares
+to that of the hash functions.
+Because the server computation time for an audit is O(N), we expect the times to scale linearly, and our
+results support this. We also see that the running time is consistently between that of MD5 and SHA256
+checksums, both in wall time and CPU time. This justifies the fact that the O(N) time Audit algorithm,
+while more costly than other PoR and PDP schemes, is comparable to that of computing a cryptographic
+checksum.
+We were surprised by the large disparity between the Server Time and the Wall Time in these experiments,
+both for our own Audit algorithm and for the checksum comparisons. We determined that this disparity
+is mostly due to I/O within the cloud datacenter, caused by the CPU waiting for the reads to the external
+drive.
+10
+5.5 Parallel audits using MPI
+Our first round of experiments indicated that our Audit algorithm on the server was I/O bound, despite
+the favorable linear access pattern of the matrix-vector product computation. It seems that Google Cloud
+Platform throttles disk-to-VM I/O on a per-VM basis, so that even with many cores, the situation did not
+improve.
+However, we were able to achieve good parallel speedup when running the Audit algorithm over multiple
+VMs in parallel using MPI. In this setup, the server VM waits for a connection from a client, who requests
+an audit, which is in turn performed by some number of VMs running in parallel, after which the results
+are collected and returned to the client. The simplicity of our Audit algorithm makes it trivially paral-
+lelizable, where each parallel VM performs the matrix-vector product on a contiguous subset of rows of M,
+corresponding to a contiguous segment of the underlying file.
+Because the built-in MD5 and SHA256 checksum programs do not achieve any parallel speedup, we
+focused only on our Audit algorithm for this set of experiments using MPI. The results are reported in
+Table 4. Our parallel speedup is not quite linear, but was sufficient to gain a significant improvement in the
+audit time, to just under 16 minutes in the case of a 1TB file using 16 VMs.
+We also used these times to measure the total cost of running each audit in Google Cloud Platform,
+which features per-second billing of VMs and persistent disks, as reported in Table 4 as well. Note that
+the monetary cost for increasing parallel VMs is slightly decreasing for larger file sizes, indicating that even
+higher levels of parallelization may decrease the running time even further with no extra monetary cost.
+Table 4: Multiple Machine Parallelization Results
+VMs Metric 1GB 10GB 100GB 1TB
+1
+Audit (s) 12.75 117.36 1080.66 11495.00
+Speedup 1x 1x 1x 1x
+Cost $0.0004 $0.0031 $0.0285 $0.3033
+4
+Audit (s) 3.99 46.28 430.29 3512.33
+Speedup 3.19x 2.54x 2.51x 3.27x
+Cost $0.0003 $0.0037 $0.0341 $0.2781
+16
+Audit (s) 3.63 14.34 117.92 946.74
+Speedup 3.51x 8.18x 9.16x 12.14x
+Cost $0.0009 $0.0034 $0.0280 $0.2249
+5.6 Communication and client computation time
+Besides the O(N) complexity for server computation during an audit, the O(
+√
+N) cost of client computa-
+tion and communication bandwidth in our scheme is also asymptotically worse than existing PoR schemes.
+However, our experiments suggest that in practice these are not significant factors.
+The time it took the client to compute the two dot products to finish the audit never took more than
+0.12 seconds in any case tested. This indicates that even low-powered client machines should be able to run
+this Audit algorithm without issue.
+The time spent communicating the challenge and response vectors, x and y, becomes insignificant in
+comparison to the server computation as the size of the database increases. In the case of our experiments,
+Table 5 summarizes that communication time of both x and y remains under five seconds. The amount of
+data communicated is also given to confirm the square root scaling.
+Our experiments had both the client and server (with associated added VMs) co-located in the us-
+central1-a zone (listed geographically as Iowa), meaning that the communication is likely within the same
+physical datacenter. We hope to address this in future work with geographically diverse clients; however,
+11
+Table 5: Amount of Communication Per Audit with 16 VMs
+Metric 1GB 10GB 100GB 1TB
+Comm. (kB) 358 1131 3578 11314
+Time (s) 2.05 1.68 3.87 4.04
+the small amount of data being transferred indicates that this will still not have a significant affect on the
+overall audit time.
+Again, we emphasize that the main benefit of our approach is the vastly decreased persistent storage
+compared to existing PoR schemes. Including the Merkle tree with block size of 8KiB, the total storage
+overhead is only 1.0684x file size. Using Google Cloud with a 1TB database, the cost for a 1.069TB Standard
+Persistent Disk per month is $42.76. Running our Audit algorithm with 16 VMs every five hours would still
+be financially favorable compared to using a PoR scheme with just 2x storage overhead.
+6 Formalization and Security analysis
+In this section we present our PoR protocol in most general form, prove it satisfies the definitions of PoR
+correctness, authenticity, and retrievability, analyze its asymptotic performance and present a variant that
+also satisfies public verifiability.
+6.1 Additional improvements on the control vectors
+The control vectors u and v stored by the Client in the simplified protocol from Section 4 can be modified
+to increase security and decrease persistent storage or communications.
+6.1.1 Ensuring security assumptions via multiple checks
+In order to reach a target bound 2−λ on the probability of failure for the authenticity, it might be necessary
+to choose multiple independent u vectors during initialization and repeat the audit checks with each one.
+First, to ease independence considerations we forget the two prime ring and consider instead that tests are
+performed in Fq, a finite field of size q. Second, we model multiple vectors by inflating the vectors u and v
+to be blocks of t non-zero vectors instead; that is, matrices U and V with t rows each. To see how large
+t needs to be, consider the probability of the Client accepting an incorrect response during an audit. An
+incorrect answer z to the audit fails to be detected only if
+U · (z− y) = 0, (4)
+where y = Mx is the correct response which would be returned by an honest Server.
+If U is sampled uniformly at random among matrices in Ft×mq with non-zero rows, then since the Server
+never learns any information about U, audit fails only if the Server can guess a vector in the right nullspace
+of U. This happens with probability at most 1/qt.
+Achieving a probability bounded by 2−λ, requires to set t =
+⌈
+λ
+log2(q)
+⌉
+. In practice, reasonable values of
+λ = 128 and q > 264 mean that t ≤ 2 in this case.
+6.1.2 Random geometric progression
+Instead of using uniformly random vectors x and matrices U, one can impose a structure on them, in order
+to reduce the amount of randomness needed, and the cost of communicating or storing them. We propose
+to apply Kimbrel and Sinha’s modification of Freivalds’ check [25]: select a single random field element ρ
+and form xᵀ = [ρ, . . . , ρn], thus reducing the communication volume for an audit from m+ n to m+ 1 field
+elements.
+12
+Similarly, we can reduce the storage of U by sampling uniformly at random t distinct non-zero elements
+s1, . . . , st and forming
+U =
+[
+s1 ··· sm1
+...
+...
+st ··· smt
+]
+∈ Ft×mq . (5)
+This reduces the storage on the client side from mt+ n to only t+ n field elements.
+Then with a rectangular database and n > m, communications can be potentially lowered to any small
+target amount, at the cost of increased client storage and greater client computation during audits.
+This impacts the probability of failure of the authenticity for the audits. Consider an incorrect answer
+z to an audit as in (4). Then each element s1, . . . , st is a root of the degree-(m − 1) univariate polynomial
+whose coefficients are z − y. Because this polynomial has at most m − 1 distinct roots, the probability of
+the Client accepting an incorrect answer is at most(
+m−1
+t
+)(
+q
+t
+) ≤ (m
+q
+)t
+,
+which leads to setting t =
+⌈
+λ
+log2(q)−log2(m)
+⌉
+in order to bound this probability by 2−λ. Even if N = 1015 for
+1PB of storage, assuming m ≤ n, and again using λ = 128, gives t ≤ 4.
+6.1.3 Externalized storage
+Lastly, the client storage can be reduced to O(λ) by externalizing the storage of the block-vector V at the
+expense of increasing the volume of communication. Clearly V must be stored encrypted, as otherwise the
+server could answer any challenge without having to store the database. Any IND-CPA symmetric cipher
+works here, with care taken so that a separate IV is used for each column; this allows updates to a column
+of V during a Write operation without revealing anything about the updated values.
+We will simply assume that the client has access to an encryption function E and a decryption function
+D. In order to assess the authenticity of each communication of V from the Server to the client, we will use
+another Merkle-Hash tree certificate for it: the client will only need to keep the root of a Merkle-Tree built
+on the encryption of V.
+Since this modification reduces the client storage but increases the overall communication, both options
+(with or without it; extern=T or extern=F) should be considered, and we will state the algorithms for our
+protocol with a Strategy parameter, deciding whether or not to externalize the storage of V.
+Table 6: Proof of retrievability via rectangular verifiable computing with structured vectors
+(N = mn log2 q is the size of the database, λ is the security parameter, b > λ logN is the Merkle tree block size. Assume log2 q
+is a constant.)
+Server Communication Client
+Strategy extern=T extern=F extern=T extern=F
+Storage N +O(Nλ/b) O(λ) O (nλ)
+C
+o
+m
+p
+u
+t. Setup O(N) N + o(N) N O(N)
+Audit N O(m+ nλ) O(m) O(λ(m+ n))
+Read/Write O(b+ λ logN) O(b+ λ logN) O (b+ λ logN)
+6.2 Formal protocol descriptions
+Full definitions of the five algorithms, Init, Read, Write, Audit and Extract, as Algorithms 1 to 5, are
+given below, incorporating the improvements on control vector storage from the previous subsection. They
+include subcalls to the classical Merkle hash tree operations defined in Section 4.3.
+13
+Then, a summary of the asymptotic costs can be found in Table 6.
+Algorithm 1 Init(1λ,m, n, q, b,M, Strategy)
+Input: 1λ;m,n, q, b ∈ N; M ∈ Fm×nq
+Output: stS , stC
+1: t← dλ/(log2 q)e ∈ N;
+2: Client: s
+$← Ftq with non-zero distinct elements {Secrets}
+3: Client: Let U← [sji ]i=1...t,j=1...m ∈ F
+t×m
+q
+4: Client: V← UM ∈ Ft×nq {Secretly stored or externalized}
+5: Both: (M, TM | rM)←MTInit(1λ, b,M)
+6: if (Strategy = externalization) then
+7: Client: K
+$← K;
+8: Client: W← EK(V) ∈ Ct×nq ;
+9: Client: sends m,n, q,M,W to the Server;
+10: Both: (W, TW | rW)←MTInit(1λ, b,W)
+11: Server: stS ← (m,n, q,M, TM, Strategy,W, TW);
+12: Client: stC ← (m,n, q, t, s, rM, Strategy,K, rW);
+13: else
+14: Client: sends m,n, q,M to the Server;
+15: Server: stS ← (m,n, q,M, TM, Strategy);
+16: Client: stC ← (m,n, q, t, s, rM, Strategy,V);
+17: end if
+Algorithm 2 Read(stS , stC , i, j)
+Input: stS ,stC , i ∈ [1..m], j ∈ [1..n]
+Output: Mij or reject
+1: Both: Mij ←MTVerifiedRead(M, TM | (i, j), rM)
+2: Client: return Mij
+6.3 Security
+Before we begin the full security proof, we need the following technical lemma to prove that the Extract
+algorithm succeeds with high probability. The proof of this lemma is a straightforward application of Chernoff
+bounds.
+Lemma 5. Let λ, n ≥ 1 and suppose 2e balls are thrown independently and uniformly into q bins at random.
+If e = 2n+ 12λ and q ≥ 8e, then with probability at least exp(−λ), the number of non-empty bins is at least
+e+ n.
+Proof. Let B1, B2, . . . , B2e be random variables for the indices of bins that each ball goes into. Each is a
+uniform independent over the q bins.
+Let X1,2, X1,3, . . . , X2e−1,2e be
+(
+2e
+2
+)
+random variables for each pair of indices i, j with i 6= j, such that Xi,j
+equals 1 iff Bi = Bj . Each Xi,j is a therefore Bernoulli trial with E[Xi,j ] = 1q , and the sum X =
+∑
+i6=j Xi,j
+is the number of pairs of balls which go into the same bin.
+We will use a Chernoff bound on the probability that X is large. Note that the random variables Xi,j are
+not independent, but they are negatively correlated: when any Xi,j equals 1, it only decreases the conditional
+expectation of any other Xi′,j′ . Therefore, by convexity, we can treat the Xi,j ’s as independent in order to
+obtain an upper bound on the probability that X is large.
+14
+Algorithm 3 Write(stS , stC , i, j,M
+′
+ij , Strategy)
+Input: stS , stC , i ∈ [1..m], j ∈ [1..n],M′ij ∈ Fq
+Output: st′S , st
+′
+C or reject
+1: Both: (M′, T ′M |Mij , r
+′
+M)←MTVerifiedWrite(M, TM | (i, j),M
+′
+ij , rM)
+2: if (Strategy = externalization) then
+3: Both: W1..t,j ←MTVerifiedRead(W, TW | (1..t, j), rW)
+4: Client: V1..t,j ← DK(W1..t,j) ∈ Ftq;
+5: end if
+6: Client: Let U1..t,i ← [sik]k=1...t ∈ F
+t
+q
+7: Client: V′1..t,j ← V1..t,j + U1..t,i(M
+′
+ij −Mij) ∈ F
+t
+q;
+8: if (Strategy = externalization) then
+9: Client: W′1..t,j ← EK(V
+′
+1..t,j) ∈ C
+t
+q
+10: Both: (W′, T ′W |W1..t,j , r
+′
+W)←MTVerifiedWrite(W, TW | (1..t, j),W
+′
+1..t,j , rW)
+11: Server: Update st′S using M
+′, T ′M,W
+′, and T ′W
+12: Client: Update st′C using r
+′
+M and r
+′
+W
+13: else
+14: Server: Update st′S using M
+′ and T ′M
+15: Client: Update st′C using r
+′
+M and V
+′
+16: end if
+Observe that E[X] =
+(
+2e
+2
+)
+/q < e/4. A standard consequence of the Chernoff bound on sums of indepen-
+dent indicator variables tells us that Pr[X ≥ 2E[X]] ≤ exp(−E[X]/3); see for example [30, Theorem 4.1] or
+[22, Theorem 1].
+Substituting the bound on E[x] then tells us that Pr[X ≥ e/2] ≤ exp(−e/12) < exp(−λ). That is, with
+high probability, fewer than e/2 pair of balls share the same bin. If nk denotes the number of bins with k
+balls, the number of non-empty bins is
+q∑
+k=2
+nk + 2e−
+q∑
+k=2
+knk = 2e−
+q∑
+k=2
+(k − 1)nk
+≥ 2e−
+q∑
+k=2
+(
+k
+2
+)
+nk >
+3
+2
+e,
+which completes the proof.
+We now proceed to the main result of the paper.
+Theorem 6 (Appendix B). Let λ,m, n ∈ N, Fq a finite field satisfying q ≥ 16n+ 96λ be parameters for our
+PoR scheme. Then the protocol composed of:
+• the Init operations in Algorithm 1;
+• the Read operations in Algorithm 2;
+• the Write operations in Algorithm 3;
+• the Audit operations in Algorithm 4; and
+• the Extract operation in Algorithm 5 with e = 2n+ 12λ
+satisfies correctness, adaptive authenticity and retrievability as defined in Definitions 1 to 3.
+6.4 Public verifiability
+These algorithms can also be adapted to support public verifiability. There a first client (now called the
+Writer) is authorized to run the Init, Write, Read and Audit algorithms, while a second client (now called
+the Verifier) can only run the last two. The idea is to provide equality testing without deciphering. In a group
+15
+Algorithm 4 Audit(stS , stC , Strategy)
+Input: stS , stC
+Output: accept or reject
+1: Client: ρ
+$← Fq;
+2: Client: sends ρ to the Server;
+3: Let xᵀ ← [ρ1, ρ2, . . . , ρn]
+4: Server: y←Mx ∈ Fmq ; {M from stS}
+5: Server: sends y to Client;
+6: if (Strategy = externalization) then
+7: Both: W←MTVerifiedRead(W, TW | (1..t, 1..n), rW);
+8: Client: V← DK(W) ∈ Ft×nq
+9: end if
+10: Client: Let U← [sji ]i=1...t,j=1...m ∈ F
+t×m
+q
+11: if (Uy = Vx) then
+12: Client: return accept
+13: else
+14: Client: return reject
+15: end if
+Algorithm 5 Extract(stC , (x1,y1), . . . , (xe,ye))
+Input: stC and e ≥ 2n+ 12λ successful audit transcripts (xi,yi)
+Output: M or fail
+1: `1, . . . , `k ← indices of distinct challenge vectors x`i
+2: if k < n then
+3: return fail
+4: end if {Now X is Vandermonde with distinct points}
+5: Form matrix X← [x`1 | · · · |x`n ] ∈ Fn×nq
+6: Form matrix Y ← [y`1| · · · |y`n] ∈ Fm×nq
+7: Compute M← Y X−1
+8: return M
+where the discrete logarithm is hard this can be achieved while preserving security thanks to the additive
+homomorphic property of exponentiation. For instance on the Externalized strategy the modifications are:
+1. A group G of prime order p and generator g is build.
+2. Init, in Algorithm 1, is run identically, except for two modifications. First that W is ciphered in G:
+W ← EK(V) = gV. Second, that the Writer also publishes an encryption of U as: K ← gU over an
+authenticated channel.
+3. All the verifications of the Merkle tree root in Algorithms 2 to 4 remain unchanged, but the Writer
+must publish the new roots of the trees after each Write also over an authenticated and timestamped
+channel to the Verifier.
+4. Updates to the control vector, in Algorithm 3 are performed homomorphically, without deciphering
+W: the Writer computes in clear, ∆← (M′ij −Mij)U1..t,i, then updates W
+′
+1..t,j ←W1..t,j · g
+∆.
+5. The dotproduct verification, in Algorithm 4 is performed also homomorphically: Ky
+?
+= Wx.
+These modifications give rise to the following Theorem 7. This theorem and the associated security
+assumptions are formalized and proven in Appendix D.
+Theorem 7. Under LIP security in a group G of prime order p ≥ max{16n + 96λ,m22λ}, where discrete
+logarithms are hard to compute, our Protocol can be modified in order to not only satisfy correctness, adaptive
+authenticity and retrievability but also public verifiability.
+16
+7 Detailed state of the art
+PDP schemes, first introduced by [5] in 2007, originally only considered static data storage. The original
+scheme was later adapted to allow dynamic updates by [16] and has since seen numerous performance
+improvements. However, PDPs only guarantee (probabilistically) that a large fraction of the data was not
+altered; a single block deletion or alteration is likely to go undetected in an audit.
+PoR schemes, first introduced at the same CCS conference in 2007 by [24], provide a stronger guarantee
+of integrity: namely, that any small alteration to the data is likely to be detected. In this paper, we use the
+term PoR to refer to any scheme which provides this stronger level of recoverability guarantee.
+PoR and PDP are usually constructed as a collection of phases in order to initialize the data storage,
+to access it afterwards and to audit the server’s storage. Dynamic schemes also propose a modification of
+subsets of data, called write or update.
+Since 2007, different schemes have been proposed to serve different purposes such as data confidentiality,
+data integrity, or data availability, but also freshness and fairness. Storage efficiency, communication effi-
+ciency and reduction of disk I/O have improved with time. Some schemes are developed for static data (no
+update algorithm) , others extend their audit algorithm for public verification, still others require a finite
+number of Audits and Updates. For a complete taxonomy on recent PoR schemes, see [37] and references
+therein.
+For our purpose, we have identified two main storage outsourcing type of approaches: those which
+minimizes the storage overhead and those which minimize the client and server computation. For each
+approach, we specify in Table 7 which one meets various requirements such as whether or not they are
+dynamic, if they can answer an unbounded number of queries and what is the extra storage they require.
+Table 7: Attributes of some selected schemes
+PoR Number of Extra
+Protocol capable audits updates Storage
+Sebé [32] X ∞ 0 o(N)
+Ateniese et al. [5] X ∞ 0 o(N)
+Ateniese et al. [6] X O(1) O(1) o(N)
+Storj [36] X O(1) O(1) o(N)
+Juels et al. [24] X O(1) 0 O(N)
+Lavauzelle et al. [27] X ∞ 0 O(N)
+Stefanov et al. [35] X ∞ ∞ O(N)
+Cash et al. [10] X ∞ ∞ O(N)
+Shi et al. [34] X ∞ ∞ O(N)
+Here X ∞ ∞ o(N)
+7.1 Low storage overhead
+The schemes of Ateniese et al. [5] or Sebé et al. [32] are in the PDP model. Both of them have a storage
+overhead in o(N). They use the RSA protocol in order to construct homomorphic authenticators, so that a
+successful audit guaranties data possession on some selected blocks. When all the blocks are selected, the
+audit is deterministic but the computation cost is high. So in practice, [5] minimizes the file block accesses,
+the computation on the server, and the client-server communication. For one audit on at most f blocks,the
+S-PDP protocol of [5] gives the costs seen in Table 8. A robust auditing integrates S-PDP with a forward
+error-correcting codes to mitigate arbitrary small file corruption. Nevertheless, if the server passes one audit,
+it guarantees only that a portion of the data is correct.
+17
+Table 8: S-PDP on f blocks : The file M is composed of N/b blocks of bit-size b. The computation is made
+mod Q, where Q is the product of two large prime numbers.
+Server Communication Client
+Storage N +m O(1)
+C
+o
+m
+p
+u
+t. Setup N + f O(bf)
+Audit O(f) ← O(1) O(f)
+→ O(1)
+Later, Ateniese et al. [6] proposed a scheme secure under the random oracle model based on hash
+functions and symmetric keys. It has an efficient update algorithm but uses tokens which impose a limited
+number of audits or updates.
+Alternatively, verifiable computing can be used to go through the whole database with Merkel hash trees,
+as in [7, §6]. The latter proposition however comes with a large overhead in homomorphic computations and
+does not provide an Audit mechanism. Verifiable computing can provide an audit mechanism, as sketched
+in the following paper [17], but then it is not dynamic anymore.
+Storj [36] (version 2) is a very different approach also based on Merkel hash trees. It is a dynamic PoR
+protocol with bounded Audits and updates. The storage is encrypted and cut into m blocks of size b. For
+each block and for a selection of σ salts, a Merkel Hash tree with σ leaves is constructed. The efficiency of
+Storj is presented Table 9.
+Table 9: Storj-V2: The file M is composed of N/b blocks of bit-size b. σ is the number of salts.
+Server Communication Client
+Storage N+O(N
+b
+σ) O(N
+b
+σ)
+C
+o
+m
+p
+u
+t. Setup ← N+O(N
+b
+σ) O(N+N
+b
+σ)
+Audit O(N
+b
+σ) ← O(N
+b
+) O(N
+b
+log σ)
+→ O(N
+b
+log σ)
+Update O(σ) ← O(1)+b O(log σ)
+→ O(log σ)
+7.2 Fast audits but large extra storage
+PoR methods based on block erasure encoding are a class of methods which guarantee with a high probability
+that the client’s entire data can be retrieved. The idea is to check the authenticity of a number of erasure
+encoding blocks during the data recovery step but also during the audit algorithm. Those approaches will
+not detect a small amount of corrupted data. But the idea is that if there are very few corrupted blocks,
+they could be easily recovered via the error correcting code.
+Lavauzelle et al., [27] proposed a static PoR. The Init algorithm consists in encoding the file using a
+lifted q-ary Reed-Solomon code and encrypting it with a block-cipher. The Audit algorithm checks if one
+word of q blocks belongs to a set of Reed-Solomon code words. This algorithm has to succeed a sufficient
+number of times to ensure with a high probability that the file can be recovered. Its main drawback is that
+it requires an initialization quadratic in the database size. For a large data file of several terabytes this
+becomes intractable.
+In addition to a block erasure code, PoRSYS of Juels et al. [24] use block encryptions and sentinels in
+order to store static data with a cloud server. Shacham and Waters [33] use authenticators to improve the
+audit algorithm. A publicly verifiable scheme based on the Diffie-Hellman problem in bilinear groups is also
+proposed.
+Stefanov et al. [35] were the first to consider a dynamic PoR scheme. Later improvements by Cash et
+18
+al. or Shi et al. [10, 34] allow for dynamic updates and reduce the asymptotic complexity (see Table 10).
+However, these techniques rely on computationally-intensive tools, such as locally decodable codes and
+Oblivious RAM (ORAM), and incur at least a 1.5x, or as much as 10x, overhead on the size of remote
+storage.
+Recent variants include Proof of Data Replication or Proof of Data Reliability, where the error correction
+is performed by the server instead of the client [3, 38]. Some use a weaker, rational, attacker model [29, 11],
+and in all of them the client thus has to also be able to verify the redundancy; but we do not know of
+dynamic versions of these.
+Table 10: Shi et al. [34]: The file M is composed of N
+b
+blocks of bit-size b.
+Server Communication Client
+Storage O(N) O(b)
+C
+o
+m
+p
+u
+t. Setup ← N +O(N
+b
+) O(N logN)
+Audit O(b logN) O(b+ logN) O(b+ logN)
+Update O(b logN) O(b+ logN) O(logN)
+Table 11: Comparison of our low server storage protocol with that of Shi et al. [34].
+Shi Here Here
+et al. [34] extern=T extern=F
+Server extra-
+storage
+5N o(N) o(N)
+Server audit cost O(b logN) N+o(N) N+o(N)
+Communication O(b+ logN) O(
+√
+N) O(Nα)
+Client audit cost O(b+ logN) O(
+√
+N) O(N1−α)
+Client storage O(b) O(1) O(N1−α)
+Table 11 compares the additional server storage and audit costs between [34] and the two variants of our
+protocol: the first one saving on communication, and the second one, externalizing the storage of the secret
+audit matrix V . In the former case, an arbitrary parameter α can be used in the choice of the dimensions:
+m = Nα and n = N1−α/ log2(q). This balances between the communication cost O(N
+α) and the Client
+computation and storage O(N1−α).
+Note that efficient solutions to PoR for dynamic data do not consider the confidentiality of the file M ,
+but assume that the user can encrypt its data in a prior step if needed.
+References
+[1] Michel Abdalla, Fabrice Benhamouda, and Alain Passelègue. An algebraic framework for pseudorandom
+functions and applications to related-key security. In Rosario Gennaro and Matthew Robshaw, editors,
+Advances in Cryptology – CRYPTO 2015, pages 388–409, Berlin, Heidelberg, 2015. Springer Berlin
+Heidelberg. doi:10.1007/978-3-662-47989-6_19.
+[2] Lawrence Abrams. Amazon AWS Outage Shows Data in the Cloud is Not Always Safe. Bleeping
+Computer, September 2019.
+[3] Frederik Armknecht, Ludovic Barman, Jens-Matthias Bohli, and Ghassan O. Karame. Mirror: Enabling
+proofs of data replication and retrievability in the cloud. In 25th USENIX Security Symposium (USENIX
+Security 16), pages 1051–1068, Austin, TX, August 2016. USENIX Association. URL: https://www.
+usenix.org/conference/usenixsecurity16/technical-sessions/presentation/armknecht.
+19
+https://doi.org/10.1007/978-3-662-47989-6_19
+https://www.usenix.org/conference/usenixsecurity16/technical-sessions/presentation/armknecht
+https://www.usenix.org/conference/usenixsecurity16/technical-sessions/presentation/armknecht
+[4] Giuseppe Ateniese, Ilario Bonacina, Antonio Faonio, and Nicola Galesi. Proofs of Space: When Space
+Is of the Essence. In Security and Cryptography for Networks, pages 538–557. Springer, 2014.
+[5] Giuseppe Ateniese, Randal Burns, Reza Curtmola, Joseph Herring, Lea Kissner, Zachary Peterson, and
+Dawn Song. Provable data possession at untrusted stores. In Proceedings of the 14th ACM conference
+on Computer and communications security, pages 598–609. Acm, 2007.
+[6] Giuseppe Ateniese, Roberto Di Pietro, Luigi V Mancini, and Gene Tsudik. Scalable and efficient
+provable data possession. In Proceedings of the 4th international conference on Security and privacy in
+communication networks, page 9. ACM, 2008.
+[7] Siavosh Benabbas, Rosario Gennaro, and Yevgeniy Vahlis. Verifiable delegation of computation over
+large datasets. In Phillip Rogaway, editor, Advances in Cryptology – CRYPTO 2011, pages 111–131,
+Berlin, Heidelberg, 2011. Springer Berlin Heidelberg.
+[8] Guido Bertoni, Joan Daemen, Michaël Peeters, and Gilles Van Assche. Sakura: A flexible coding for tree
+hashing. In Ioana Boureanu, Philippe Owesarski, and Serge Vaudenay, editors, Applied Cryptography
+and Network Security, pages 217–234, Cham, 2014. Springer International Publishing.
+[9] Erik Cambria, Anupam Chattopadhyay, Eike Linn, Bappaditya Mandal, and Bebo White. Storages are
+not forever. Cognitive Computation, 9:646–658, 2017. doi:10.1007/s12559-017-9482-4.
+[10] David Cash, Alptekin Küpçü, and Daniel Wichs. Dynamic proofs of retrievability via oblivious RAM.
+J. Cryptol., 30(1):22–57, January 2017. doi:10.1007/s00145-015-9216-2.
+[11] Ethan Cecchetti, Ben Fisch, Ian Miers, and Ari Juels. Pies: Public incompressible encodings for
+decentralized storage. In Lorenzo Cavallaro, Johannes Kinder, XiaoFeng Wang, and Jonathan Katz,
+editors, Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security,
+CCS 2019, London, UK, November 11-15, 2019, pages 1351–1367. ACM, 2019. doi:10.1145/3319535.
+3354231.
+[12] Ivan Damg̊ard, Chaya Ganesh, and Claudio Orlandi. Proofs of replicated storage without timing as-
+sumptions. In Advances in Cryptology – CRYPTO 2019, pages 355–380. Springer, 2019.
+[13] Yevgeniy Dodis, Salil Vadhan, and Daniel Wichs. Proofs of retrievability via hardness amplification. In
+Theory of Cryptography, pages 109–127. Springer, 2009. doi:10.1007/978-3-642-00457-5_8.
+[14] Stefan Dziembowski, Sebastian Faust, Vladimir Kolmogorov, and Krzysztof Pietrzak. Proofs of space.
+In Advances in Cryptology – CRYPTO 2015, pages 585–605. Springer, 2015.
+[15] Kaoutar Elkhiyaoui, Melek Önen, Monir Azraoui, and Refik Molva. Efficient techniques for publicly
+verifiable delegation of computation. In Proceedings of the 11th ACM on Asia Conference on Computer
+and Communications Security, ASIA CCS ’16, pages 119–128, New York, NY, USA, 2016. ACM. doi:
+10.1145/2897845.2897910.
+[16] C. Chris Erway, Alptekin Küpçü, Charalampos Papamanthou, and Roberto Tamassia. Dynamic prov-
+able data possession. ACM Trans. Inf. Syst. Secur., 17(4):15:1–15:29, April 2015. doi:10.1145/
+2699909.
+[17] Dario Fiore and Rosario Gennaro. Publicly verifiable delegation of large polynomials and ma-
+trix computations, with applications. In Proceedings of the 2012 ACM Conference on Computer
+and Communications Security, CCS ’12, pages 501–512, New York, NY, USA, 2012. ACM. doi:
+10.1145/2382196.2382250.
+[18] Ben Fisch. PoReps: Proofs of Space on Useful Data. Technical Report 678, IACR Cryptology ePrint
+Archive, 2018. URL: http://eprint.iacr.org/2018/678.
+20
+https://doi.org/10.1007/s12559-017-9482-4
+https://doi.org/10.1007/s00145-015-9216-2
+https://doi.org/10.1145/3319535.3354231
+https://doi.org/10.1145/3319535.3354231
+https://doi.org/10.1007/978-3-642-00457-5_8
+https://doi.org/10.1145/2897845.2897910
+https://doi.org/10.1145/2897845.2897910
+https://doi.org/10.1145/2699909
+https://doi.org/10.1145/2699909
+https://doi.org/10.1145/2382196.2382250
+https://doi.org/10.1145/2382196.2382250
+http://eprint.iacr.org/2018/678
+[19] Rūsiņš Freivalds. Fast probabilistic algorithms. In J. Bečvář, editor, Mathematical Foundations of
+Computer Science 1979, volume 74 of Lecture Notes in Computer Science, pages 57–69, Olomouc,
+Czechoslovakia, September 1979. Springer-Verlag. doi:10.1007/3-540-09526-8_5.
+[20] Alissa Greenberg. Google Lost Data After Lightning Hit Its Data Center in Belgium. Time, August
+2015.
+[21] W. B. Hart. Fast Library for Number Theory: An Introduction. In Proceedings of the Third International
+Congress on Mathematical Software, ICMS’10, pages 88–91, Berlin, Heidelberg, 2010. Springer-Verlag.
+http://flintlib.org.
+[22] Nick Harvey. Chernoff bound, balls and bins, congestion minimization. Lecture 3 from CPSC 536N:
+Randomized Algorithms, 2015. URL: https://www.cs.ubc.ca/~nickhar/W15/Lecture3Notes.pdf.
+[23] Markus Jakobsson, Frank Thomson Leighton, Silvio Micali, and Michael Szydlo. Fractal merkle
+tree representation and traversal. In Marc Joye, editor, Topics in Cryptology - CT-RSA 2003, The
+Cryptographers’ Track at the RSA Conference 2003, San Francisco, CA, USA, April 13-17, 2003,
+Proceedings, volume 2612 of Lecture Notes in Computer Science, pages 314–326. Springer, 2003.
+doi:10.1007/3-540-36563-X\_21.
+[24] Ari Juels and Burton S Kaliski Jr. Pors: Proofs of retrievability for large files. In Proceedings of the
+14th ACM conference on Computer and communications security, pages 584–597. Acm, 2007.
+[25] Tracy Kimbrel and Rakesh Kumar Sinha. A probabilistic algorithm for verifying matrix products using
+O(n2) time and log2 n + O(1) random bits. Information Processing Letters, 45(2):107–110, February
+1993. URL: ftp://trout.cs.washington.edu/tr/1991/08/UW-CSE-91-08-06.pdf, doi:10.1016/
+0020-0190(93)90224-W.
+[26] B. Laurie, A. Langley, E. Kasper, and Google. Certificate Transparency. RFC 6962, IETF, June 2013.
+URL: https://tools.ietf.org/html/rfc6962.
+[27] Julien Lavauzelle and Françoise Levy dit Vehel. New proofs of retrievability using locally decod-
+able codes. In 2016 IEEE International Symposium on Information Theory (ISIT), pages 1809–
+1813, July 2016. URL: https://hal.archives-ouvertes.fr/hal-01413159/document, doi:10.
+1109/ISIT.2016.7541611.
+[28] Ralph C. Merkle. A digital signature based on a conventional encryption function. In Carl Pomerance,
+editor, Advances in Cryptology — CRYPTO ’87, pages 369–378, Berlin, Heidelberg, 1988. Springer
+Berlin Heidelberg.
+[29] Tal Moran and Ilan Orlov. Simple proofs of space-time and rational proofs of storage. In Alexandra
+Boldyreva and Daniele Micciancio, editors, Advances in Cryptology - CRYPTO 2019 - 39th Annual
+International Cryptology Conference, Santa Barbara, CA, USA, August 18-22, 2019, Proceedings, Part
+I, volume 11692 of Lecture Notes in Computer Science, pages 381–409. Springer, 2019. doi:10.1007/
+978-3-030-26948-7\_14.
+[30] Rajeev Motwani and Prabhakar Raghavan. Randomized Algorithms. Cambridge University Press, 1995.
+[31] David Reinsel, John Gantz, and John Rydning. The Digitization of the World from Edge to Core.
+Technical Report US44413318, ”International Data Corporation (IDC)”, 2018.
+[32] Francesc Sebé, Josep Domingo-Ferrer, Antoni Mart́ınez-Ballesté, Yves Deswarte, and Jean-Jacques
+Quisquater. Efficient remote data possession checking in critical information infrastructures. IEEE
+Transactions on Knowledge and Data Engineering, 20:1034–1038, 2008.
+[33] Hovav Shacham and Brent Waters. Compact proofs of retrievability. In International Conference on
+the Theory and Application of Cryptology and Information Security, pages 90–107. Springer, 2008.
+21
+https://doi.org/10.1007/3-540-09526-8_5
+http://flintlib.org
+https://www.cs.ubc.ca/~nickhar/W15/Lecture3Notes.pdf
+https://doi.org/10.1007/3-540-36563-X_21
+ftp://trout.cs.washington.edu/tr/1991/08/UW-CSE-91-08-06.pdf
+https://doi.org/10.1016/0020-0190(93)90224-W
+https://doi.org/10.1016/0020-0190(93)90224-W
+https://tools.ietf.org/html/rfc6962
+https://hal.archives-ouvertes.fr/hal-01413159/document
+https://doi.org/10.1109/ISIT.2016.7541611
+https://doi.org/10.1109/ISIT.2016.7541611
+https://doi.org/10.1007/978-3-030-26948-7_14
+https://doi.org/10.1007/978-3-030-26948-7_14
+[34] Elaine Shi, Emil Stefanov, and Charalampos Papamanthou. Practical dynamic proofs of retrievability.
+In Proceedings of the 2013 ACM SIGSAC Conference on Computer & Communications Security, CCS
+’13, pages 325–336, New York, NY, USA, 2013. ACM. URL: http://elaineshi.com/docs/por.pdf,
+doi:10.1145/2508859.2516669.
+[35] Emil Stefanov, Marten van Dijk, Ari Juels, and Alina Oprea. Iris: A scalable cloud file system with
+efficient integrity checks. In Proceedings of the 28th Annual Computer Security Applications Conference,
+pages 229–238. ACM, 2012.
+[36] Storj labs Inc. Storj: A decentralized cloud storage network framework. Technical Report v2, 2016.
+URL: https://storj.io/storjv2.pdf.
+[37] Choon Beng Tan, Mohd Hanafi Ahmad Hijazi, Yuto Lim, and Abdullah Gani. A survey on proof of
+retrievability for cloud data integrity and availability: Cloud storage state-of-the-art, issues, solutions
+and future trends. J. Network and Comp. Applications, 110:75–86, 2018.
+[38] Dimitrios Vasilopoulos, Melek Önen, and Refik Molva. PORTOS: Proof of data reliability for real-
+world distributed outsourced storage. In Proceedings of the 16th International Joint Conference on
+e-Business and Telecommunications - Volume 2: SECRYPT,, pages 173–186. INSTICC, SciTePress,
+2019. doi:10.5220/0007927301730186.
+A Lower bound proof
+Theorem 4 (Appendix A). Consider any Proof of Retrievability scheme which stores an arbitrary database
+of N bits, uses at most N + s bits of persistent memory on the server, c bits of persistent memory on the
+client, and requires at most t steps to perform an audit. Assuming s ≥ 0, then either t > N
+4
+, or
+(s+ c)
+t
+log2 t
+≥
+N
+12
+.
+Proof. First observe that N = 0 and t = 0 are both trivial cases: either the theorem is always true, or the
+PoR scheme is not correct. So we assume always that N ≥ 1 and t ≥ 1.
+By way of contradiction, suppose a valid PoR scheme exists with s ≥ 0, t ≤ N
+4
+, and
+(s+ c)
+t
+log2 t
+<
+N
+12
+. (6)
+Following the definitions in Section 2, we consider only the Audit and Extract algorithms. The Audit
+algorithm may be randomized and, by our assumption, examines at most t bits of the underlying memory.
+At any point in an honest run of the algorithm, the server stores a (N + s)-bit string stS , the client stores
+a c-bit string stC , and the client virtual memory in the language of [10] is the unique N -bit string M such
+that IsValid(stC , stS ,M).
+Define a map φ : {0, 1}N+s+c → {0, 1}N as follows. Given any pair (stC , stS) of length-N + s and length-
+c bit strings, run Extract(stC , Audit1(stC , stS), . . . , Audite(stC , stS)) repeatedly over all possible choices
+of randomness, and record the majority result. By Definition 1, we have that φ(stC , stS) = M whenever
+IsValid(stC , stS ,M).
+Observe that this map φ must be onto, and consider, for any N -bit data string M , the preimage φ−1(M),
+which is the set of client/server storage configurations (stC , stS) such that φ(stC , stS) = M . By a pigeon-hole
+argument, there must exist some string M0 such that
+#φ−1(M0) ≤
+2N+s+c
+2N
+= 2s+c. (7)
+Informally, M0 is the data which is most easily corrupted.
+22
+http://elaineshi.com/docs/por.pdf
+https://doi.org/10.1145/2508859.2516669
+https://storj.io/storjv2.pdf
+https://doi.org/10.5220/0007927301730186
+We now define an adversary S̄ for the game of Definition 3 as follows: On the first step, S̄ chooses M0
+as the initial database, and uses this in the Init algorithm to receive server state stS . Next, S̄ chooses k
+indices uniformly at random from the stS of (N + s) bits (where k is a parameter to be defined next), and
+flips those k bits in stS to obtain a corrupted state st
+′
+S . Finally, S̄ runs the honest Audit algorithm 2e times
+on step 3 of the security game, using this corrupted state st′S .
+What remains is to specify how many bits k the adversary should randomly flip, so that most of the
+2e runs of the Audit algorithm succeed, but the following call to Extract does not produce the original
+database M0.
+Let
+k =
+⌊
+N + s
+4t
+⌋
+. (8)
+From the assumptions that s ≥ 0 and t ≤ N
+4
+, we have that k ≥ 1.
+Let stC be the initial client state (which is unknown to S̄) in the attack above with initial database
+M0. From the correctness requirement (Definition 1) and the definition of t in our theorem, running
+Audit(stC , stS) must always succeed after examining at most t bits of stS . Therefore, if the k flipped
+bits in the corrupted server storage st′S are not among the (at most) t bits examined by the Audit algo-
+rithm, it will still pass. By the union bound, the probability that a single run of Audit(stC , st
+′
+S) passes is at
+least
+1− t
+k
+N + s
+≥
+3
+4
+.
+This means that the expected number of failures in running 2e audits is e
+2
+, so the Markov inequality tells us
+that the adversary S̄ successfully passes at least e audits (as required) with probability at least 1
+2
+.
+We want to examine the probability that φ(stC , st
+′
+S) 6= M0, and therefore that the final call to Extract
+in the security game does not produce M0 and the adversary wins with high probability. Because there are(
+N+s
+k
+)
+distinct ways to choose the k bits to form corrupted storage st′S , and from the upper bound of (7)
+above, the probability that φ(stC , st
+′
+S) 6= M0 is at least
+1−
+2s+c − 1(
+N+s
+k
+) . (9)
+Trivially, if s + c = 0, then this probability equals 1. Otherwise, from the original assumption (6), and
+because log2(4t)/(2t) ≤ 1 for all positive integers t, we have
+s+ c+ 2 ≤ 3(s+ c) <
+N log2 t
+4t
+≤
+(
+N
+4t
+− 1
+)
+log2(4t).
+Therefore (
+N + s
+k
+)
+≥
+(
+N + s
+k
+)k
+> (4t)
+N+s
+4t
+−1 ≥ 2s+c+2.
+Returning to the lower bound in (9), the probability that the final Extract does not return M0 is at
+least 3
+4
+. Combining with the first part of the proof, we see that, with probability at least 3
+8
+, the attacker
+succeeds: at least e runs of Audit(stC , st
+′
+S) pass, but the final run of Extract fails to produce the correct
+database M0.
+B Security proof
+Theorem 6 (Appendix B). Let λ,m, n ∈ N, Fq a finite field satisfying q ≥ 16n+ 96λ be parameters for our
+PoR scheme. Then the protocol composed of:
+• the Init operations in Algorithm 1;
+• the Read operations in Algorithm 2;
+• the Write operations in Algorithm 3;
+23
+• the Audit operations in Algorithm 4; and
+• the Extract operation in Algorithm 5 with e = 2n+ 12λ
+satisfies correctness, adaptive authenticity and retrievability as defined in Definitions 1 to 3.
+Proof. Correctness comes from the correctness of the Merkle hash tree algorithms, and from the fact that,
+when all parties are honest, Uy = UMx = Vx.
+For authenticity, first consider the secret control block vectors U and V. On the one hand, in the local
+storage strategy, U and V never travel and all the communications by the Client in all the algorithms are
+independent of these secrets. On the other hand, in the externalization strategy, U never travels and V
+is kept confidential by the IND-CPA symmetric encryption scheme with key K known only by the client.
+Therefore, from the point of view of the server, it is equivalent, in both strategies, to consider either that these
+secrets are computed during initialization as stated, or that they are only determined after the completion
+of any of the operations.
+Now suppose that the server sends an incorrect audit response z 6= Mx which the Client fails to reject,
+and let Let f ∈ Fq[X] be the polynomial with degree at most m − 1 whose coefficients are the entries of
+(z−Mx). Then from (4) and (5) in the prior discussion, each of the randomly-chosen values s1, . . . , st is a
+root of this polynomial f . Because f has at most m− 1 distinct roots, the chance that a single si is a root
+of f is at most (m− 1)/q, and therefore the probability that all f(s1) = · · · = f(st) = 0, is at most (m/q)t.
+From the choice of t = dλ/ log2(q/m)e, the chance that the Client fails to reject an incorrect audit
+response is at most 2−λ, which completes the proof of authenticity (Definition 2).
+For retrievability, we need to prove that Algorithm 5 succeeds with high probability on the last step
+of the security game from Definition 3. Because of the authenticity argument above, all successful audit
+transcripts are valid with probability 1 − negl(λ); that is, each y = Mx in the input to Algorithm 5.
+This Extract algorithm can find an invertible Vandermonde matrix X ∈ Fn×nq , and thereby recover M
+successfully, whenever at least n of the values ρ from challenge vectors x are distinct.
+Therefore the security game becomes essentially this: The experiment runs the honest Audit algorithm
+2e = 4n + 24λ times, each time choosing a value ρ for the challenge uniformly at random from Fq. The
+adversary must then select e of these audits to succeed, and the adversary wins the game by selecting e of
+the 2e random audit challenges which contain fewer than n distinct ρ values.
+This is equivalent to the balls-and-bins game of Lemma 5, which shows that the Extract algorithm
+succeeds with probability at least 1− exp(−λ) > 1− 2−λ for any selection of e out of 2e random audits.
+C Requirements for a Merkle hash tree implementation and overview
+of the formalized protocol with the externalization strategy
+Table 12 presents an overview of the fully formalized protocol. This is a merge of the algorithms in Section 6,
+for the Externalization strategy. Its correctness, authenticity and retrievability are proven in Theorem 6.
+It uses two Merkle hash trees, one for the database M and one for the externalized control vectors W. We
+here give more details on the functions required in Section 4.3 for the handling of the Merkle hash trees. A
+Merkle tree [28] is a tree where the value associated with a node is a one-way function of the values of the
+node’s children. We here consider only binary Merkle Hash trees.
+For our purpose, an implementation of such trees must provide the following algorithms:
+• T ←MTCreateTree(X) creates a Merkle hash tree from a database X.
+• r ←MTRootFromLeaves(X) computes the root of the Merkle hash tree of the whole database X.
+• (L1, L2) ←MTElementAndPath(index, range,X, T ) is an algorithm providing the client with the
+requested list L1 of contiguous leaf elements Xi=index,j∈range, together with
+the list L2 constituted by the blocks containing Xi=index,j∈range and by the corresponding lists of
+Merkle tree uncles.
+• r ← MTRootFromPath(index, range, L1, L2) computes the root of the Merkle hash tree from a
+list L1 of contiguous leaf elements and the associated blocks and path of uncles L2.
+24
+Table 12: Externalized PoR
+Server Communications Client
+Init
+DB with N bits M ∈ Fm×nq
+1λ,m,n,q,b←− rM ←MTRootFromLeaves(M)
+Stores M
+M←− t← dλ/ log2(q)e
+TM ←MTCreateTree(M) s
+$← St ⊆ Ftq
+Form U← [sji ]i=1...t,j=1...m ∈ F
+t×m
+q
+K
+$← K
+Stores W
+W←− V← UM, W← EK(V)
+TW ←MTCreateTree(W) rW ←MTRootFromLeaves(W)
+discard M,V,W
+Read
+i,j←−
+Mij (Mi,j , LM)←MTElementAndPath(i, j,M, TM)
+Mij ,LM−→ rM
+?
+= MTRootFromPath(i, j,Mij , LM)
+Write rM ←MTRootFromPath(i, j,M′ij , LM)
+M′ij
+(W1..t,j , LW)←MTElementAndPath(1..t, j,W, TW)
+W1..t,j ,LW−→ rW
+?
+= MTRootFromPath(1..t, j,W1..t,j , LW)
+V1..t,j ← DK(W1..t,j)
+V1..t,j ← V1..t,j + (M′ij −Mij)U1..t,i
+Mij ←M′i,j
+M′ij ,W
+′
+1..t,j←− W′1..t,j ← EK(V1..t,j)
+W1..t,j ←W′1..t,j rW ←MTRootFromPath(1..t, j,W′1..t,j , LW)
+Audit
+Form x← [r, r2, . . . , rn]ᵀ r←− r $← S ⊆ Fq
+y ←Mx y,W−→ rW
+?
+= MTRootFromLeaves(W)
+V← DK(W)
+Form x← [r, r2, . . . , rn]ᵀ
+Uy
+?
+= Vx
+The requirements are thus that:
+∀i, r,X,MTRootFromLeaves(X) =
+MTRootFromPath (i, r,
+MTElementAndPath(i, r,X,MTCreateTree(X)) ) (10)
+As mentioned in Section 4.3, we need to consider two formats which contain the same N bits of data:
+• A row-major matrix M ∈ Fm×nq where N = m × n × blog2qc. In this format, and for 1 ≤ i ≤ m and
+1 ≤ j ≤ n, Mij ∈M is named a slot.
+• The outsourced data can also be represented as a single continuous file F of dN/be equal sized blocks:
+B1, B2, . . . , BdN/be, of size b. This blocking is independent of that used for M .
+Then, let H be a hash function, {0, 1}∗ → {0, 1}2λ, for a security parameter λ ≥ 128, that is a hash
+function on more than 256 bits.
+For instance, for MTElementAndPath, the client wants to read the slot Mij . This corresponds to the
+block position k =
+⌈
+(i−1)n+j
+b
+⌉
+. She more precisely receives from the server Mij , the block Bk containing
+Mij and the set of hash tree uncles Lk corresponding to Bk. She can then check the root of the hash tree
+with Bk and Lk.
+Note that in practice, the algorithms for handling Merkle tree operations might need slightly more
+inputs (taken implicitly from the respective states of the Client and the Server) than those mentioned in
+Equation (10). In the following, whenever needed, these extra inputs will be added to the specification.
+25
+To be able to run this algorithm, the Server must therefore handle the Merkle hash tree associated to a
+database. This means having access to an algorithm creating the hash tree, and another algorithm to access
+the nodes. For these two tasks we use classical implementations:
+• More precisely, T ←MTCreateTree(X) computes all the nodes of the Merkle hash tree of the whole
+database X viewed as an array of blocks of size b. A possibility is then to use [23, Algorithm 1].
+• h ← MTNode(level, index, T ) provides access to the node numbered index at the required level of
+the tree. If all the nodes are stored by the Server this is just a labelling of all these nodes. Another
+possibility for the server is to have a time/memory trade-off as in [23, Algorithm 3]. The idea is to
+store only the root of subtrees and to recompute hashes within subtrees.
+For this, the server arranges hashes of the blocks as leafs in a binary hash tree of depth δ satisfying:
+δ =
+⌈
+log2
+(
+N
+b
+)⌉
+. (11)
+The nodes above the leafs are hashes of their two children.
+The size of this tree T is
+∑d
+i=1 2λ2
+i = 2λ(2δ+1−1) < 8λb = 8λN
+b
+. This size is negligible if 1024 ≤ 8λ� b.
+For instance the following choice for b gives an always negligible size: b = O (λ log(N)).
+Assuming the hash function is linear to compute, the cost of producing the tree is O(N). This additional
+algorithm also immediatly gives a possible implementation for the computation of the root: build the tree
+and output its root as in Algorithm 6.
+Algorithm 6 rX ←MTRootFromLeaves(X)
+Input: a data base X - System parameter: b -
+Output: the root of the Merkle Hash tree rX
+1: T ←MTCreateTree(X);
+2: return root of T .
+Now, to fetch a slot and compute the path of uncles, one just needs to have access to the tree nodes, as
+illustrated in Algorithm 7. The case of a range of contiguous slots is similar: consider just the uncles of the
+sub-tree linking all these contiguous blocks.
+Algorithm 7 (Xij , L)←MTElementAndPath(i, j,X, T )
+Input: i ∈ [1..m], j ∈ [1..n], X the database, T the Merkle hash tree - System parameter: n,m, b -
+Output: Xij and L the list constituted by the block containing Xij and by the corresponding list of Merkle
+tree hashes.
+1: k ←
+⌈
+(i−1)n+j
+b
+⌉
+; B ← k-th block of X; L← {B};
+2: for i = 1..depth(T ) do
+3: if k is odd then
+4: L← L ∪ {MTNode(i, k − 1, T )};
+5: else
+6: L← L ∪ {MTNode(i, k + 1, T )};
+7: end if
+8: k ← bk/2c;
+9: end for
+10: return (Xi,j , L)
+Finally, to check the correctness of a slot Xij , we need the block Bk and the list of δ uncles and to recom-
+pute the root, only from this list and the block. Therefore, a possible implementation of this recomputation
+is given in Algorithm 8, first with a single block. Here also the case of a range of contiguous slots is similar.
+26
+Algorithm 8 r ←MTRootFromPath(i, j,Xi,j , L)
+Input: i ∈ [1..m], j ∈ [1..n], a slot Xij , a list L constituted by the block Bk and the corresponding list of
+hashes - System parameter: n,m, b -
+Output: r the root of the Merkle Hash tree.
+1: B ← L[1]; `← (i− 1)n+ j mod b;
+2: B` ← Xi,j ; {Update with the new value}
+3: r ← H(B); k ←
+⌈
+(i−1)n+j
+b
+⌉
+.
+4: for i = 2..length(L) do
+5: if the (i− 1)th bit of k is 1 then
+6: r ← H(L[i], r);
+7: else
+8: r ← H(r, L[i])
+9: end if
+10: end for
+11: return r
+The idea is to consider L as the union of the list of uncles and the block itself as its first element. Then the
+new slot Xij to be considered replaces (for instance after a write operation) the old slot within the block Bk
+and the root is computed from this new block and the path of hashes.
+The cost to recompute the root is that of hashing one block, and then of computing δ additional hashes
+of two hashes, that is O(b+ δλ). The difficulty for an attacker to pass this integrity test is that of the second
+preimage of the hash function, see [8], e.g., for more details.
+From these, it is then easy to implement the API of Section 4.3: Table 13 propose an overview of the
+implementation of MTInit, MTVerifiedRead and MTVerifiedWrite.
+Table 13: Implementation of MTInit, MTVerifiedRead and MTVerifiedWrite.
+• MTInit(1λ, b,X) 7→ (rM |M,TM )
+Verifier rM ←MTRootFromLeaves(M)
+Comm. (M) ↓
+Server TM ←MTCreateTree(M)
+• MTVerifiedRead(i, j, rM |M,TM ) 7→Mi,j
+V. rM
+?
+= MTRootFromPath(Mi,j , i, j, LM )
+C. (i, j) ↓ (Mi,j , LM ) ↑
+S. MTElementAndPath(i, j,M, TM )→ (Mi,j , LM )
+• MTVerifiedWrite(i, j,M ′i,j , rM |M,TM )
+After MTVerifiedRead(i, j, rM |M,TM ):
+V. rM ←MTRootFromPath(M ′i,j , i, j, LM )
+C.
+(
+M ′i,j
+)
+↓
+S. updates M , TM
+27
+D Public verifiability proof
+Protocol 14 presents the modifications of Section 6.4 within the full description of the algorithms. There and
+in the following, gA, for a matrix A, denotes the exponentiation coefficient by coefficient. Similarly, WB, as
+in (gA)B, is actually WB = gAB, but this can be computed in the exponents if needed:(
+g[ a c ]
+)[ b d ]ᵀ
+= (ga)
+b
+(gc)
+d
+= gab+cd.
+Table 14: Publicly verifiable externalized PoR (server operations are those of Table 12)
+Comm. Client
+Init
+group G of order p and gen. g
+M ∈ Zm×np with N bits
+1λ,m,n,p,b←− rM ←MTRootFromLeaves(M)
+M←− t← dλ/ log2(p)e
+s
+$← St ⊆ Ztp
+Form U← [sji ]i=1...t,j=1...m ∈ Z
+t×m
+p
+W←− V← UM, W← gV
+rW ←MTRootFromLeaves(W)
+publish rM, rW and K = g
+U
+discard M,V,W
+public
+i,j←−
+Read
+Mij ,LM−→ rM
+?
+= MTRootFromPath(i, j,Mij , LM)
+Write
+W1..t,j ,LW−→ rM ←MTRootFromPath(i, j,M′ij , LM)
+M′ij
+rW
+?
+= MTRootFromPath(1..t, j,W1..t,j , LW)
+∆← (M′ij −Mij)U1..t,i
+M′ij ,W
+′
+1..t,j←− W′1..t,j ←W1..t,j · g
+∆
+rW ←MTRootFromPath(1..t, j,W′1..t,j , LW)
+publish rM and rW
+public
+r←− r $← S ⊆ Z∗p
+Audit
+y,W−→ rW
+?
+= MTRootFromLeaves(W)
+Form x← [r, r2, . . . , rn]ᵀ
+Ky
+?
+= Wx
+Under Linearly Independent Polynomial (LIP) Security [1, Theorem 3.1], Protocol 14 adds public verifi-
+ability to our dynamic proof of retrievability. Indeed, LIP security states that in a group G of prime order,
+the values (gP1(s), . . . , gPm(s)) are indistinguishable from a random tuple of the same size, when P1, . . . , Pm
+are linearly independent multivariate polynomials of bounded degree and s is the secret. Therefore, in our
+modified protocol, each row gUi =
+(
+gs
+j
+i
+)
+j=1..m
+is indistinguishable from a random tuple of size m since the
+polynomials Xj , j = 1..m are independent distinct commutative monomials. Then the idea is thus to reduce
+breaking the public verifiability to breaking a discrete logarithm. For this, the discrete logarithm to break
+will be put inside U.
+28
+Theorem 7. Under LIP security in a group G of prime order p ≥ max{16n + 96λ,m22λ}, where discrete
+logarithms are hard to compute, our Protocol can be modified in order to not only satisfy correctness, adaptive
+authenticity and retrievability but also public verifiability.
+Proof. In Table 14, Correctness is just to verify the dotproducts, but in the exponents: Ky = gUy = gUMx =
+Wx.
+Now for Authenticity: first, any incorrect W is detected by the Merkle hash tree verification. Second,
+with a correct W, any incorrect y is also detected with high probability, as shown next.
+Suppose that there exist an algorithm A(M,K,W, r) that can defeat the verification with a fake y, with
+probability �. That is the algorithm produces ȳ, with ȳ 6= y = Mx, such that we have the t equations:
+Ky = Wx = Kȳ. (12)
+We start with the case t = 1. Let A = ga be a DLOG problem.
+Then we follow the proof +of [15, Lemma 1] and simulate Init via the following inputs to the attacker:
+• r $← S ⊆ Z∗p and let x = [r, r2, . . . , rn]ᵀ;
+• Sample M $← Sm×n ⊆ Zm×np and U
+$← Sm ⊆ Zmp .
+• Randomly select also k ∈ 1..m and, then, compute K = gUAek , so that K = gU+aek , where ek is the
+k-th canonical vector of Zmp .
+• Under LIP security [1, Theorem 3.1], K is indistinguishable from the distribution of the protocol (gs
+j
+i ).
+• finally compute W = KM, thus also indistinguishable from the distribution of the protocol.
+To simulate any number of occurences of Write, it is then sufficient to randomly select M′ij . Then
+compute and send to the attacker: W′1..t,j ←W1..t,j ·K
+M′ij−Mij
+1..t,i .
+After that, the attacker answers with ȳ 6= y satisfying Equation (12). This is g(U+aek)ȳ = g(U+aek)Mx,
+equivalent to:
+(U + aek)(ȳ −Mx) ≡ 0 mod p. (13)
+Since ȳ 6= y mod p, then there is at least one index 1 ≤ j ≤ m such that ȳj 6= yj mod p. Since k is
+randomly chosen from 1..m, the probability that ȳk 6= yk mod p is at least 1/m. If this is the case then
+with z = ȳ− y, we have zk 6= 0 mod p and Uz+ azk ≡ 0 mod p, so that a ≡ −z−1k Uz mod p. This means
+that the discrete logarithm is broken with advantage ≥ �/m.
+Finally for any t ≥ 1 the proof is similar except that A is put in different columns for each of the t rows
+of U. Thus the probability to hit it becomes ≥ t/m and the advantage is ≥ t�/m ≥ �/m. This gives the
+requirement that p ≥ m22λ to sustain the best generic algorithms for DLOG.
+Retreivability comes from the fact that y and x are public values. Therefore this part of the proof is
+identical to that of Theorem 6.
+Remarks 8. • If a writer wants to verify, she does not need to use K, nor to store it. Just compute Uy
+directly, then check that gUy
+?
+= Wx.
+• Even if U is structured, K hides this structure and therefore requires a larger storage. But any Verifier
+can just fetch it and rW from the authenticated channel (for instance, electronically signed), as well
+as fetch W from the Server, and perform the verification on the fly. Optimal communications for the
+Verifier are then when m = O(
+√
+N) = n.
+• To save some constant factors in communications, sending W or any of its updates W′i,j is not manda-
+tory anymore: the Server can now recompute them directly from M and K.
+29
+	1 Introduction
+	1.1 The need for integrity checks
+	1.2 Existing solutions
+	1.3 Our Contributions
+	1.4 Organization
+	2 Security model
+	2.1 Correctness
+	2.2 Authenticity and attacker model
+	2.3 Retrievability
+	3 Time-space tradeoff lower bound
+	4 Retrievability via verifiable computing
+	4.1 Overview
+	4.2 Matrix based approach for audits
+	4.3 Merkle hash tree for updates
+	5 Experiments with Google cloud services
+	5.1 Parameter selection
+	5.2 Two Prime Calculations
+	5.3 Experimental Design
+	5.4 Audit compared to checksums
+	5.5 Parallel audits using MPI
+	5.6 Communication and client computation time
+	6 Formalization and Security analysis
+	6.1 Additional improvements on the control vectors
+	6.1.1 Ensuring security assumptions via multiple checks
+	6.1.2 Random geometric progression
+	6.1.3 Externalized storage
+	6.2 Formal protocol descriptions
+	6.3 Security
+	6.4 Public verifiability
+	7 Detailed state of the art
+	7.1 Low storage overhead
+	7.2 Fast audits but large extra storage
+	A Lower bound proof
+	B Security proof
+	C Requirements for a Merkle hash tree implementation and overview of the formalized protocol with the externalization strategy
+	D Public verifiability proof

@@ -1,0 +1,1978 @@
+ar
+X
+iv
+:2
+00
+7.
+12
+68
+3v
+1 
+ [
+co
+nd
+-m
+at
+.s
+ta
+t-
+m
+ec
+h]
+  2
+4 
+Ju
+l 
+20
+20
+Non-Equilibrium Steady State of the Lieb-Liniger model:
+exact treatment of the Tonks Girardeau limit
+Spyros Sotiriadis
+Department of Physics, Faculty of Mathematics and Physics, University of Ljubljana, Ljubljana, Slovenia
+Aiming at studying the emergence of Non-Equilibrium Steady States (NESS) in quantum inte-
+grable models by means of an exact analytical method, we focus on the Tonks-Girardeau or hard-core
+boson limit of the Lieb-Liniger model. We consider the abrupt expansion of a gas from one half to
+the entire confining box, a prototypical case of inhomogeneous quench, also known as “geometric
+quench”. Based on the exact calculation of quench overlaps, we develop an analytical method for
+the derivation of the NESS by rigorously treating the thermodynamic and large time and distance
+limit. Our method is based on complex analysis tools for the derivation of the asymptotics of the
+many-body wavefunction, does not make essential use of the effectively non-interacting character
+of the hard-core boson gas and is sufficiently robust for generalisation to the genuinely interacting
+case.
+http://arxiv.org/abs/2007.12683v1
+2
+CONTENTS
+I. Introduction 2
+II. Model and quench protocol 3
+III. Single particle problem 6
+IV. Tonks-Girardeau limit of the Lieb-Liniger model 10
+A. Initial state overlaps 11
+B. Eigenstate summation through multivariable version of Cauchy’s integral formula 12
+C. Multivariable Kinematical Pole Residue 14
+D. Asymptotics of the integral in the thermodynamic limit 15
+E. Asymptotics at large distances & times 16
+V. Discussion 17
+Acknowledgments 18
+References 18
+I. INTRODUCTION
+The derivation of macroscopic physical laws that govern non-equilibrium phenomena from the underlying micro-
+scopic particle interactions described by quantum physics is one of the fundamental open questions of statistical and
+mathematical physics. In this quest the problem of quantum transport between two halves of a system, initially at
+equilibrium with different thermodynamic parameters and then joined together, is of central interest. Mathematical
+physics studies [1–7] followed by an increasing number of theoretical physics works [8–16] supported by the develop-
+ment of powerful numerical techniques for the simulation of quantum dynamics [17–24] and experimental advances in
+the observation of quantum many-body dynamics [25–28] have kept the attention on this problem alive and growing
+for decades.
+In more general terms this physical protocol, more recently known also as “inhomogeneous quantum quench”, refers
+to the dynamics of an extended closed quantum system that is initially prepared in a macroscopically inhomogeneous
+state and let to evolve under a homogeneous Hamiltonian. A typical case of an inhomogeneous initial state is the
+one corresponding to the partitioning protocol, outlined above, where a system is initially split in two disconnected
+halves at thermal equilibrium and different temperature or particle density [8, 11, 12]. Other suitable choices include
+equilibrium (ground or thermal) states with a “local temperature” (or particle or energy density) profile varying from
+one value in the left half to a different one in the right, in either a smooth or a sharp way [29–31], or quantum gas
+expansion protocols, also called geometric quenches, in which a system of atoms expands from a smaller to a larger
+box [32].
+A first understanding of quantum transport following an inhomogeneous quench can be drawn from the study
+of non-interacting systems [3, 9, 10, 13, 14, 33–35]. For such systems it has been shown that a Non-Equilibrium
+Steady State (NESS) emerges at large times, which provides a complete description of the asymptotic values of local
+observables, like the particle density and current. However, while results for non-interacting systems have been
+rigorously derived and known for years, the study of the effects of interactions, which are obviously expected to
+play a significant role in transport, turned out to be a hard problem and progress was slow. A breakthrough came
+recently from the study of integrable interacting systems [36, 37], which are characterised by the presence of an infinite
+number of local conservation laws. It was postulated that a Generalised Hydrodynamics (GHD) theory, based upon
+an infinite set of continuity equations associated to the conservation laws, provides an exact description of the NESS
+in such systems. The predictions of this conjecture have been tested numerically with great success both in spin
+chains and in quantum gas models solvable by Bethe Ansatz [38–42] and have been verified even experimentally [43].
+Moreover it has paved the way for interesting extensions and applications [38–41, 44–52], as it essentially reduces the
+characterisation of macroscopic properties resulting from the complicated dynamics of quantum many-body systems
+to a relatively simple semiclassical description. At this point it is worth to recognise the important role played by
+integrability in understanding the physics of the quantum many-body problem in general, especially in the field of out-
+of-equilibrium dynamics [12, 53–60]. In contrast to non-interacting models and perturbative techniques that for many
+decades dominated any attempt to understand quantum statistical mechanics, in recent years integrable models have
+emerged as a powerful tool to unveil nontrivial and non-perturbative effects of interactions that are nowhere seen in
+3
+non-interacting models and cannot always be studied satisfactorily by non-interacting approximations or perturbative
+methods.
+A rigorous proof or at least a better understanding of the mathematical reasons that explain the emergence of
+GHD are highly desirable for many reasons. First, even though the perfect agreement with numerical simulations
+and experimental verification of its predictions leave little space for doubts on its validity, GHD is still a conjecture
+and a proof would enable us to identify possible exceptional special cases. Second, the study of diffusion and even
+more of deviations from standard diffusive behaviour, a subject of central interest in quantum transport physics, can
+be based on next-to-leading order asymptotics (beyond Euler scale) of the dynamics after inhomogeneous quenches
+and therefore it would benefit essentially from exact results that would be intermediate steps of a proof of GHD.
+Such results would be useful for the verification of important results on diffusion that have already been derived from
+extensions of GHD [61–64]. Third, proving GHD can be an important step towards solving the more general problem
+of quantum many-body dynamics in integrable systems (and possibly beyond). In particular, it could pave the way
+for rigorously proving the “Quench Action” method[56, 65], which is the basis of GHD, or even extending it in such a
+way that it can be used also for the study of intermediate dynamics.
+For these and many other reasons, several approaches to explain GHD have been developed. Most of these have
+focused on the derivation of a formula giving the expectation value of current operators in generalised Gibbs ensembles,
+on which GHD is crucially based [36, 66–69]. A general proof of this formula for quantum spin chains is now available
+based on algebraic Bethe Ansatz techniques [66, 68]. Another method could be based on form factor expansions
+[70–73] possibly by a suitable generalisation to the case of equilibrium states.
+Starting with the case of effectively non-interacting dynamics presented in this work, we aim to develop a different
+approach: based on an exact analytical derivation of the asymptotics of local observables after a partitioning quench,
+we wish to demonstrate the emergence of the NESS dependent on the distance over time (ray) ratio and to verify
+the GHD predictions for this protocol. For concreteness, we consider here the Lieb-Liniger model [74] in the Tonks-
+Girardeau (“free fermion”) limit [75, 76] and focus on one of the simplest instances of this type of quench: the expansion
+of a gas from one half to the entire confining box, a protocol that is also known as “geometric quench”. This protocol
+offers the significant technical advantage that the expansion of the initial state in the post-quench eigenstate basis
+is explicitly known for any value of the interaction [32]. In the Tonks-Girardeau limit the problem can be studied
+relatively easily using free fermion techniques [10]. Here we revisit this problem and solve it using a different method
+that does not exploit its effectively free character and reduction to the single particle problem. Our method is based on
+complex analysis techniques that are rather robust, in the sense that they are not too sensitive to model and protocol
+specific details, for which reason it is promising for generalisation to the far more interesting genuinely interacting
+case where GHD predictions are non-trivial.
+The paper is organised as follows. We first describe the mathematical problem: the model and quench protocol, as
+well as our objectives (sec. II). In an interlude serving as a warm-up example, we solve the single particle problem
+(sec. III), stressing the mathematical ideas that lead to the result and that will be later generalised to the many
+particle problem. Passing to the main part, we study the NESS for the Tonks-Girardeau gas expansion (sec. IV),
+avoiding use of free fermion techniques. Lastly, we discuss the main steps and essential ingredients of the method,
+evaluating the potential for generalisation to the genuinely interacting case (sec. V).
+II. MODEL AND QUENCH PROTOCOL
+The Lieb-Liniger model describes a one-dimensional Bose gas with point-like interactions. Its Hamiltonian is
+HLL =
+ˆ +L/2
+−L/2
+dx
+[
+−Ψ†(x)∂2xΨ(x) + cΨ†(x)Ψ†(x)Ψ(x)Ψ(x)
+]
+where c is the interaction strength and the particle mass has been set to m = 1/2. We assume periodic boundary
+conditions Ψ(+L/2) = Ψ(−L/2). The particle number and momentum operators are respectively
+N =
+ˆ +L/2
+−L/2
+dxΨ†(x)Ψ(x)
+P = −i
+ˆ +L/2
+−L/2
+dxΨ†(x)∂xΨ(x)
+The Lieb-Liniger model is integrable i.e. its eigenstates are given by the Bethe Ansatz for any value of the interaction
+c. In the Tonks-Girardeau or hard-core boson limit c → ∞ that we shall consider in this work, the Bethe states and
+Bethe equations simplify dramatically and the system becomes effectively equivalent to a system of free fermions.
+4
+This equivalence can be expressed also algebraically through a Jordan-Wigner-like transformation relating the boson
+operators Ψ to hard-core boson operators ΨHB , which anti-commute under exchange of their positions, except for
+coinciding positions. In terms of these operators the Hamiltonian becomes non-interacting
+HTG =
+ˆ +L/2
+−L/2
+dx
+[
+−Ψ†HB(x)∂
+2
+xΨHB(x)
+]
+The geometric quench problem we shall study is described as follows. We consider a gas of N particles, initially
+restricted in an interval of length L/2, let us say in the right half of the system. We assume that the system lies in
+an equilibrium state ρ̂0 of the (Lieb-Liniger or Tonks-Girardeau) Hamiltonian restricted in this interval with periodic
+boundary conditions Ψ(+L/2) = Ψ(0).
+We do not impose any further conditions on the initial state: it can be either the ground state |ΦGS,0〉, an excited
+state |Φ0(µ)〉, a thermal state e−βH0 or other diagonal ensemble of eigenstates, i.e. it is described by a density matrix
+of the form
+ρ̂0 = Z−10
+∑
+µ: BA0
+ρ0(µ)
+|Φ0(µ)〉〈Φ0(µ)|
+〈Φ0(µ)|Φ0(µ)〉
+where |Φ0(λ)〉 are eigenstates of H0 with rapidities λ satisfying Bethe equations corresponding to system size L/2
+(BA0) and
+Z0 ≡
+∑
+µ: BA0
+ρ0(µ)〈Φ0(µ)|Φ0(µ)〉
+so that ρ̂0 satisfies the normalisation condition
+Tr ρ̂0 =
+∑
+µ: BA0
+〈Φ0(µ)|ρ̂0|Φ0(µ)〉
+= Z−10
+∑
+µ: BA0
+ρ0(µ)〈Φ0(µ)|Φ0(µ)〉 = 1
+We then let the initial state evolve in time under the Hamiltonian H which is the same as H0 except that it is defined
+in an interval of length L, again with periodic boundary conditions Ψ(+L/2) = Ψ(−L/2).
+Our goal is to calculate the asymptotics of local observables Ô(x, t) in the thermodynamic limit where both N and
+L tend to infinity with fixed non-zero average density N/L = n and at large times t and distances x keeping the ratio
+x/t fixed. We do not impose constraints on the observables Ô: they may be single-point observables at position x
+or multi-point correlation functions at positions x+ r1, x+ r2, . . . , x+ rn at fixed separations ri. The order of limits
+we consider is first the thermodynamic limit and then the large time and distance limit. The quantity we wish to
+calculate is therefore
+lim
+x,t→∞
+x/t=ξ: fixed
+lim
+N,L→∞
+n: fixed
+〈
+Ô(x, t)
+〉
+= lim
+x,t→∞
+x/t=ξ: fixed
+lim
+N,L→∞
+n: fixed
+Tr
+{
+ρ̂0 e
++iHte−iPxÔe+iPxe−iHt
+}
+(1)
+where Ô ≡ Ô(0, 0).
+We wish to show that a Non-Equilibrium Steady State (NESS) emerges in this double limit and to provide a complete
+description of this state. This means that our first objective is to show that in the above limit the observable can be
+expressed as an expectation value in a statistical ensemble ρ̂NESS that is diagonal in the post-quench eigenstate basis,
+i.e. of the form
+ρ̂NESS = Z−1NESS
+∑
+λ: BA
+ρNESS(λ)
+|Φ(λ)〉〈Φ(λ)|
+〈Φ(λ)|Φ(λ)〉 (2)
+where |Φ(λ)〉 are the eigenstates of H with rapidities λ satisfying the Bethe equations corresponding to system size L
+(BA). The state ρ̂NESS will be different for each space-time ray, for which reason we will denote it as ρ̂NESS,ξ to show
+that it depends explicitly on the ratio ξ = x/t. Therefore what we wish to show is that
+lim
+x,t→∞
+x/t=ξ: fixed
+lim
+N,L→∞
+n: fixed
+〈
+Ô(x, t)
+〉
+= lim
+N,L→∞
+n: fixed
+Tr
+{
+ρ̂NESS,ξ Ô
+}
+(3)
+5
+where the expectation value is
+Tr
+{
+ρ̂NESS,ξ Ô
+}
+= Z−1
+NESS
+∑
+λ: BA
+ρNESS(λ; ξ)〈Φ(λ)|Ô|Φ(λ)〉
+The second objective is to determine this state in terms of the initial state and the space-time ratio ξ, i.e. to express
+ρNESS(λ; ξ) as a function of ρ0(λ) and ξ.
+Expanding in the pre- and post-quench eigenstate bases, we can write the time evolution of local observables in (1)
+as
+〈
+Ô(x, t)
+〉
+=
+= Z−10 Tr
+
+
+
+
+
+∑
+µ: BA0
+ρ0(µ)
+|Φ0(µ)〉〈Φ0(µ)|
+〈Φ0(µ)|Φ0(µ)〉
+
+
+
+
+∑
+λ,λ′: BA
+|Φ(λ′)〉〈Φ(λ′)|
+〈Φ(λ′)|Φ(λ′)〉
+e+iHte−iPxÔe+iPxe−iHt
+|Φ(λ)〉〈Φ(λ)|
+〈Φ(λ)|Φ(λ)〉
+
+
+
+
+
+= Z−10
+∑
+µ: BA0
+∑
+λ,λ′: BA
+ρ0(µ)e
++i[P (λ)−P (λ′)]x−i[E(λ)−E(λ′)]tM∗(λ
+′;µ)M(λ;µ)
+N0(µ)N (λ′)N (λ)
+〈Φ(λ′)|Ô|Φ(λ)〉 (4)
+where we defined the norms of post- and pre-quench eigenstates as
+N (λ) ≡ 〈Φ(λ)|Φ(λ)〉
+N0(λ) ≡ 〈Φ0(λ)|Φ0(λ)〉
+since in their standard form the Bethe Ansatz eigenstates are not automatically normalised, and their overlaps as
+M(λ;µ) ≡ 〈Φ(λ)|Φ0(µ)〉
+Since we expect that the result we wish to show is valid for a general local observable and a general initial state
+diagonal in the pre-quench basis, the proof should not generally rely on special properties of the matrix elements
+〈Φ(λ′)|Ô|Φ(λ)〉 or of the amplitudes ρ0(µ). Motivated by this observation, the strategy we shall pursue is to analyse
+the asymptotics of any pre-quench eigenstate time evolved under the post-quench Hamiltonian. More specifically, we
+shall consider the quantity
+e+iPx−iHt|Φ0(µ)〉 =
+∑
+λ: BA
+e+iP (λ)x−iE(λ)t
+|Φ(λ)〉〈Φ(λ)|
+〈Φ(λ)|Φ(λ)〉 |Φ0(µ)〉
+=
+∑
+λ: BA
+e+iP (λ)x−iE(λ)t
+M(λ;µ)
+N (λ) |Φ(λ)〉
+where we have introduced a resolution of the identity in the post-quench basis. What we aim to show is that, as long
+as coordinate space wave-functions are concerned, the following asymptotic relation holds
+lim
+x,t→∞
+x/t=ξ: fixed
+lim
+N,L→∞
+n: fixed
+e+iPx−iHt|Φ0(µ)〉 ∼ lim
+N→∞
+F(µ;x/t)e+iP (µ)x−iE(µ)t|Φ(µ)〉 (5)
+that is, any pre-quench eigenstate time-evolved by t and space-translated by x can be replaced in the thermodynamics
+limit by a post-quench eigenstate with the same rapidity distribution. The equivalence in the above equation is meant
+to hold asymptotically in the double limit, as long as the operator or state that acts from the left is local.
+If this equation holds then (4) gives
+lim
+x,t→∞
+x/t=ξ: fixed
+lim
+N,L→∞
+n: fixed
+〈
+Ô(x, t)
+〉
+= lim
+N,L→∞
+n: fixed
+Z−10
+∑
+µ: BA
+ρ0(µ)
+N0(µ)
+|F(µ;x/t)|2 〈Φ(µ)|Ô|Φ(µ)〉
+which is indeed of the form (3) with the NESS given by
+ρNESS(λ;x/t)
+ZNESS
+=
+ρ0(λ)
+Z0N0(λ)
+|F(λ;x/t)|2 (6)
+therefore our goal will have been achieved.
+6
+III. SINGLE PARTICLE PROBLEM
+Before we study the problem of derivation of the NESS in the Tonks-Girardeau limit of the Lieb-Liniger model, it is
+instructive to study the single particle problem first, which offers a pedagogic exposition of the necessary mathematical
+tools. The method presented here is essentially the same as that of [77] applied to a similar problem.
+We consider a particle in a box of length L/2, initially lying at one of the eigenstates |Φ0(q)〉 of the Hamiltonian
+H0 = −∂2x with periodic boundary conditions at the points x = 0 and L/2. At t = 0 we extend the length of the box
+from L/2 to L and let the initial state evolve under the Hamiltonian H = −∂2x with periodic boundary conditions at
+the points x = −L/2 and +L/2. Our strategy for the derivation of the NESS is based on the study of the asymptotics
+of the time evolved coordinate space wave-function of an arbitrary pre-quench eigenstate |Φ0(q)〉.
+The coordinate space wave-functions of pre-quench eigenstates are
+〈x|Φ0(q)〉 = eiqxΘ(x)
+with the quantised momenta q given by
+q = 2πn0/(L/2) = 4πn0/L, n0 ∈ Z (7)
+while the post-quench eigenstates are
+〈x|Φ(k)〉 = eikx
+with the quantised momenta k given by
+k = 2πn/L, n ∈ Z (8)
+The norms of pre-quench eigenstates N0(q) and of post-quench eigenstates N (k) are
+N0(q) = L/2
+N (k) = L
+respectively.
+We are interested in the asymptotic form of the wavefunction in the infinite length limit L → ∞ at large distance
+x and time t with fixed ratio ξ = x/t. More specifically, we will calculate the asymptotics of the quantity
+K(q; z;x, t) ≡ 〈z|e+iPx−iHt|Φ0(q)〉 (9)
+where P = −i∂x is the momentum operator, which generates space translations. Knowing K(q; z;x, t) we can derive
+the asymptotics of any local observable in any initial state that is diagonal in the pre-quench basis.
+Introducing a resolution of the identity in the post-quench basis we have
+e+iPx−iHt|Φ0(q)〉 =
+∑
+k=2πn/L
+n∈Z
+e+iP (k)x−iE(k)t
+|Φ(k)〉〈Φ(k)|
+〈Φ(k)|Φ(k)〉 |Φ0(q)〉
+=
+∑
+k=2πn/L
+n∈Z
+e+iP (k)x−iE(k)t
+M(k; q)
+N (k) |Φ(k)〉 (10)
+where
+M(k; q) ≡ 〈Φ(k)|Φ0(q)〉
+N (k) ≡ 〈Φ(k)|Φ(k)〉
+are the overlaps between pre- and post-quench eigenstates and the norm square of the latter respectively, and
+E(k) = k2 (11)
+P (k) = k (12)
+are the energy and momentum eigenvalues.
+7
+From the above we can easily calculate the overlaps between pre- and post-quench eigenstates
+M(k; q) =
+ˆ L/2
+0
+dx ei(q−k)x
+=
+i
+k − q
+(
+ei(q−k)L/2 − 1
+)
+Using the pre- and post-quench quantisation conditions (7) and (8), we find that the overlaps acquire a different form
+as functions of the momenta in the even and odd n sectors
+M(k; q) =
+{
+(L/2)δn,2n0 = (L/2)δk,q if n =
+kL
+2π
+is even
+−2i(L/2π)/(n− 2n0) = −2i/(k − q) if n is odd
+(13)
+This means that in the thermodynamic limit L → ∞ we should integrate separately in the two sectors. It is convenient
+to redefine the overlap M(k; q) as a function of an additional index s taking values +1 if n is even and −1 if it is odd.
+Note that the index s is itself a function of the discrete momentum variable k which is a solution of the quantisation
+conditions. But we could also see it as an independent discrete variable and consider k as a continuous variable, since
+s is the only information about the discreteness of the momentum that might be relevant in the thermodynamic limit.
+We therefore write
+M(k; q) =:
+{
+M+(k; q) if n = kL2π is even
+M−(k; q) if n is odd
+and from (13)
+Ms(k; q) =
+{
+(L/2)δk,q if s = +1
+−2i/(k − q) if s = −1
+Moreover in the odd sector M−(k; q) develops a pole at k = q, a value that is of course absent in the discrete set of
+k values for odd n. This implies that the corresponding sum cannot be directly expressed as an integral along the real
+k axis, but the correct prescription for how to avoid the pole must be specified. This can be done using a standard
+complex analysis trick, as explained below.
+Substituting (13) into (10) and evaluating the even sector sum we obtain
+K(q; z;x, t) =
+∑
+s=±
+∑
+k=2πns/L
+n±: even/odd
+e+iP (k)x−iE(k)t
+Ms(k; q)
+N (k) 〈z|Φ(k)〉 (14)
+=
+1
+2
+e+iP (q)x−iE(q)t〈z|Φ(q)〉+ 1
+L
+∑
+k=2πn/L
+n odd
+e+iP (k)x−iE(k)t
+(
+−2i
+k − q
+)
+〈z|Φ(k)〉 (15)
+In order to write the odd sector sum S− as an integral in the infinite system size limit L → ∞, we first introduce a
+function of k that has simple poles of residue 1/(2πi) at the points k = 2πn/L for all odd integers n = 2ℓ+ 1 so that
+we can write each term of the sum as an integral over k along a small circle Cℓ = C(2π(2ℓ + 1)/L, ǫ) around each of
+these points. The suitable function is
+F−(k) ≡ −
+L
+4π
+1
+eikL/2 + 1
+(16)
+and we obtain
+S− ≡
+1
+L
+∑
+k=2πn/L
+n odd
+e+iP (k)x−iE(k)t
+(
+−2i
+k − q
+)
+〈z|Φ(k)〉
+=
+1
+L
+∑
+k=2π(2ℓ+1)/L
+ℓ∈Z
+e+iP (k)x−iE(k)t
+(
+−2i
+k − q
+)
+〈z|Φ(k)〉
+= −
+∑
+ℓ∈Z
+˛
+Cℓ
+dk
+4π
+1
+eikL/2 + 1
+e+iP (k)x−iE(k)t
+(
+−2i
+k − q
+)
+〈z|Φ(k)〉
+8
+Next, using the analyticity of the integrand everywhere else on the real k axis except at k = q where it is singular, we
+merge the circles into another contour composed of two straight lines C± = R± iǫ running just above and just below
+the real k axis and a small circle Cp = C(q, ǫ) in order to subtract the contribution of the pole at k = q
+S− = −
+ˆ
+C−−C+−Cp
+dk
+4π
+1
+eikL/2 + 1
+e+iP (k)x−iE(k)t
+(
+−2i
+k − q
+)
+〈z|Φ(k)〉
+= −
+
+
++∞−iǫ
+ˆ
+−∞−iǫ
+−
++∞+iǫ
+ˆ
+−∞+iǫ
+
+
+dk
+4π
+1
+eikL/2 + 1
+e+iP (k)x−iE(k)t
+(
+−2i
+k − q
+)
+〈z|Φ(k)〉+
++ 2πi
+1
+4π
+1
+eiqL/2 + 1
+e+iP (q)x−iE(q)t〈z|Φ(q)〉 Res
+k=q
+(
+−2i
+k − q
+)
+We now evaluate the contribution of the pole at k = q, which is a simple pole due to the factor 1/(k − q) since
+the rest of the integrand is analytic at that point. The factor 1/
+(
+eiqL/2 + 1
+)
+equals 1/2 for any value of q because,
+by satisfying the pre-quench quantisation conditions, q is equal to 4πn0/L with n0 ∈ Z. Substituting into the last
+equation we obtain
+S− = −
+
+
++∞−iǫ
+ˆ
+−∞−iǫ
+−
++∞+iǫ
+ˆ
+−∞+iǫ
+
+
+dk
+4π
+1
+eikL/2 + 1
+e+iP (k)x−iE(k)t
+(
+−2i
+k − q
+)
+〈z|Φ(k)〉+
++
+1
+2
+e+iP (q)x−iE(q)t〈z|Φ(q)〉
+Lastly, we take the infinite system size limit L → ∞. We notice that
+lim
+L→∞
+1
+eikL/2 + 1
+=
+{
+1 if Im(k) > 0
+0 if Im(k) < 0
+Therefore the integral along the line below the real axis vanishes in this limit, while the remaining integral along the
+line above the real axis gives
+lim
+L→∞
+S− =
++∞+iǫ
+ˆ
+−∞+iǫ
+dk
+2π
+e+iP (k)x−iE(k)t
+(
+−i
+k − q
+)
+〈z|Φ(k)〉+
++
+1
+2
+e+iP (q)x−iE(q)t〈z|Φ(q)〉
+Substituting the final result into (14), we obtain
+lim
+L→∞
+K(q; z;x, t) = e+iP (q)x−iE(q)t〈z|Φ(q)〉+
++∞+iǫ
+ˆ
+−∞+iǫ
+dk
+2π
+e+iP (k)x−iE(k)t
+(
+−i
+k − q
+)
+〈z|Φ(k)〉 (17)
+Overall what we have achieved is to calculate the L → ∞ limit of the sum over all modes in K(q; z;x, t) as an
+expression involving an integral on a line parallel to the real axis with the precise prescription on how to avoid the
+momentum pole at k = q.
+Having taken the thermodynamic limit, we now proceed to derive the asymptotics at large x, t keeping the ratio
+x/t ≡ ξ fixed. We focus on the second term that involves the integral. The asymptotics of such integrals can be
+found easily using another complex analysis trick. Provided that the real part of the exponent of e+iP (k)x−iE(k)t =
+e+i(P (k)ξ−iE(k))t is negative for all k along the integration contour, the integral decays when x, t → ∞. If it is non-
+negative for part of the contour, then in order to calculate its asymptotics it is sufficient to deform the contour into
+the region of the complex plane where it becomes negative. In doing so we will have to take into account if the contour
+crosses any singularity of the integrand, in which case we will have to subtract its contribution. The wave-function
+〈z|Φ(k)〉, being a simple plane wave, is analytic in k, so the only singularity that may be crossed is the pole at k = q.
+The condition that the exponent has a negative real part gives
+Re [iP (k + iǫ)x− iE(k + iǫ)t] =
+Re [i (P (k) + iǫP ′(k))x− i (E(k) + iǫE′(k)) t] =
+(−P ′(k)ξ + E′(k)) ǫt < 0
+9
+where we made use of the analyticity of P (k) and E(k) on the real axis. We therefore find that for all k such that
+E′(k)
+P ′(k)
+< ξ
+(which in the present case means for 2k < ξ) we keep the original positive shift ǫ > 0 and the integral in this interval
+vanishes as x, t → ∞. On the other hand, in the interval where k satisfies the inequality
+E′(k)
+P ′(k)
+> ξ
+(i.e. for 2k > ξ in the present case) we should deform the contour from above the real axis to below so that ǫ < 0 and
+the condition is met. If the value k = q lies within the interval where the latter inequality holds, then the momentum
+pole at k = q is crossed during the deformation and its residue should be subtracted. As the deformed integral
+vanishes, the asymptotics is given precisely by the pole contribution. Note that in the above inequalities the quantity
+v(k) ≡ E
+′(k)
+P ′(k)
+=
+dE
+dP
+can be recognised as the group velocity of the free particle excitations as given by their dispersion relation.
+In the simple case where the group velocity v(k) is a monotonically increasing function of the momentum k (as in
+the present case where v(k) = 2k), the inequalities v(k) ≶ ξ reduce to k ≶ k∗(ξ) where the threshold value k∗(ξ) is
+given by the equation
+v(k∗(ξ)) = ξ
+whose solution in the present case is k∗(ξ) = ξ/2.
+Following the above observations, we write
++∞+iǫ
+ˆ
+−∞+iǫ
+dk
+2π
+e+iP (k)x−iE(k)t
+(
+−i
+k − q
+)
+〈z|Φ(k)〉
+=
++∞+iǫ
+ˆ
+−∞+iǫ
+dk
+2π
+Θ(ξ − v(k))e+iP (k)x−iE(k)t
+(
+−i
+k − q
+)
+〈z|Φ(k)〉
++
++∞−iǫ
+ˆ
+−∞−iǫ
+dk
+2π
+Θ(v(k)− ξ)e+iP (k)x−iE(k)t
+(
+−i
+k − q
+)
+〈z|Φ(k)〉
++
+k∗(ξ)−iǫ
+ˆ
+k∗(ξ)+iǫ
+dk
+2π
+e+iP (k)x−iE(k)t
+(
+−i
+k − q
+)
+〈z|Φ(k)〉
+− 2πi 1
+2π
+Θ(v(q)− ξ)e+iP (q)x−iE(q)t〈z|Φ(q)〉Res
+k=q
+(
+−i
+k − q
+)
+(18)
+Note that the integrals of the first and second line of (18) decay exponentially with x, t, while that of the third line
+decays algebraically and is the one that determines the scaling of decaying corrections to the asymptotics. Therefore
+we obtain
++∞+iǫ
+ˆ
+−∞+iǫ
+dk
+2π
+e+iP (k)x−iE(k)t
+(
+−i
+k − q
+)
+〈z|Φ(k)〉
+|x|,t→∞−→
+x/t=ξ fixed
+−Θ(v(q)− ξ)e+iP (q)x−iE(q)t〈z|Φ(q)〉
+Substituting our result into (17) we find the rather simple and elegant formula
+lim
+L→∞
+K(q; z;x, t) |x|,t→∞−→
+x/t=ξ fixed
+Θ(ξ − v(q))e+iP (q)x−iE(q)t〈z|Φ(q)〉
+10
+which can also be written as
+lim
+x,t→∞
+x/t=ξ: fixed
+lim
+L→∞
+e−iP (q)x+iE(q)tK(q; z;x, t) = Θ(ξ − v(q))〈z|Φ(q)〉
+which concludes our calculation.
+This formula directly leads to the conclusion that for a general initial state that is diagonal in the pre-quench basis
+and for a general local observable Ô, the large distance and time asymptotics in the thermodynamic limit is given by
+a NESS that is diagonal in the post-quench basis. Indeed we have
+lim
+x,t→∞
+x/t=ξ: fixed
+lim
+L→∞
+〈
+Ô(x, t)
+〉
+= lim
+x,t→∞
+x/t=ξ: fixed
+lim
+L→∞
+Tr
+{
+ρ̂0e
++iHte−iPxÔe+iPxe−iHt
+}
+= lim
+x,t→∞
+x/t=ξ: fixed
+lim
+L→∞
+Z−10
+∑
+q=2πn0/(L/2)
+n0∈Z
+ˆ +L/2
+−L/2
+dydy′ N−10 (q)ρ0(q)K∗(q; y′;x, t)K(q; y;x, t)〈y′|Ô|y〉
+= Z−10
+ˆ +∞
+−∞
+dq
+2π
+ρ0(q)Θ(ξ − v(q))
+ˆ +∞
+−∞
+dydy′ 〈Φ(q)|y′〉〈y′|Ô|y〉〈y|Φ(q)〉
+= Z−10
+ˆ +∞
+−∞
+dq
+2π
+ρ0(q)Θ(ξ − v(q))〈Φ(q)|Ô|Φ(q)〉
+from which we see that the NESS is described by the momentum distribution
+ρNESS(q; ξ) ∝ ρ0(q)Θ(ξ − v(q))
+Note that ρNESS(q; ξ) is space-time dependent through the ray parameter ξ = x/t, being equal to the initial
+momentum distribution ρ0(q) for all momenta q such that the corresponding group velocity is v(q) < ξ and to zero
+otherwise. This is what is expected on the basis of the simple semiclassical picture of ballistically moving quasiparticles:
+at any ray ξ the corresponding NESS is the result of the mixing of quasiparticles originating from either the left or the
+right half side with the corresponding momentum distribution i.e. ρNESS(q; ξ) ∝ ρ0L(q)Θ(v(q)−ξ)+ρ0R(q)Θ(ξ−v(q)).
+In the present case ρ0L(q) = 0 and ρ0R(q) = ρ0(q), since initially all particles are on the right side and the left side
+is empty. The latter formula which extends our result for the gas expansion to the more general case of gas mixing,
+can be derived straightforwardly following the same steps as above for a suitable initial state.
+IV. TONKS-GIRARDEAU LIMIT OF THE LIEB-LINIGER MODEL
+Having clearly explained the mathematical tools in the single case particle case, we can now proceed to the many
+particle problem. As already explained, in the Tonks-Girardeau limit the model is effectively equivalent to non-
+interacting fermions. Based on the exact mapping to free fermions, in principle the calculation of any observable
+reduces through Wick’s theorem to the calculation of the fermionic two-point correlation function 〈Ψ†F (x, t)ΨF (x +
+r, t)〉, i.e. essentially to the single-particle problem we have just solved, apart from complications arising from the
+non-trivial expression of bosonic observables in terms of hard-core boson or fermion operators. For the purpose of
+generalising our approach to the genuinely interacting case, however, we will perform the calculation without taking
+advantage of Wick’s theorem, confronting the mathematical challenges of the many-body problem.
+We start by writing the exact coordinate space eigenfunctions, which are
+〈z|Φ(λ)〉 = 1√
+N !
+det
+i,j
+[exp (iλjxi)]
+∏
+j>i
+sign(xj − xi) (19)
+where the rapidities λ in the system of length L are quantised following the equations
+exp (iλjL) = (−1)N−1 for all j = 1, 2, . . . , N (20)
+These are nothing but the Bethe equations, which in this limit reduce to the above decoupled form, and can be solved
+easily to give
+λj =
+{
+2π
+L
+nj for N odd
+2π
+L
+(
+nj +
+1
+2
+)
+for N even
+, nj ∈ Z (21)
+11
+Note that both the eigenfunctions and the rapidity eigenvalues take the same form as for a system of free fermions,
+apart from the odd-even selection rule on the values of the rapidities and the presence of the sign product in (19), which
+guarantees symmetry of the wavefunctions under exchange of the bosonic particles and accounts for the difference
+between hard-core bosons and fermions.
+The energy and momentum eigenvalues corresponding to an eigenstate with rapidities λ are respectively
+E(λ) =
+N
+∑
+i=1
+e(λi) =
+N
+∑
+i=1
+λ2i
+P (λ) =
+N
+∑
+i=1
+p(λi) =
+N
+∑
+i=1
+λi
+The quantisation conditions for the half system are
+exp (iµjL/2) = (−1)N−1 for all j = 1, 2, . . . , N (22)
+with solutions
+µj =
+{
+4π
+L
+nj for N odd
+4π
+L
+(
+nj +
+1
+2
+)
+for N even
+, nj ∈ Z
+As before, we will focus on the derivation of the asymptotics of pre-quench eigenstates |Φ0(µ)〉 time evolved under
+the Tonks-Girardeau Hamiltonian HTG and projected on a local basis. We therefore wish to calculate the asymptotics
+of the quantity
+K(µ; z;x, t) ≡ 〈z|e+iPx−iHt|Φ0(µ)〉 (23)
+Introducing a resolution of the identity in the post-quench basis we have
+e+iPx−iHt|Φ0(µ)〉 =
+∑
+λ: BA
+e+iP (λ)x−iE(λ)t
+|Φ(λ)〉〈Φ(λ)|
+〈Φ(λ)|Φ(λ)〉 |Φ0(µ)〉
+=
+∑
+λ: BA
+e+iP (λ)x−iE(λ)t
+M(λ;µ)
+N (λ) |Φ(λ)〉 (24)
+where the sum runs over all solutions of the Bethe equations for N particles in length L, and the eigenstate overlaps
+and norms are
+M(λ;µ) ≡ 〈Φ(λ)|Φ0(µ)〉
+N (λ) ≡ 〈Φ(λ)|Φ(λ)〉
+From (19) it is straightforward to calculate the norm N (λ)
+N (λ) = LN (25)
+A. Initial state overlaps
+The first problem we have to address is the calculation of the overlaps M(λ;µ). From the coordinate space form
+of the eigenstate wave-functions (19) we find
+M(λ;µ) =
+ˆ L/2
+0
+dx 〈Φ(λ)|x〉〈x|Φ0(µ)〉
+=
+1
+N !
+ˆ L/2
+0
+dx det
+i,j
+[exp (−iλjxi)] det
+k,ℓ
+[exp (iµℓxk)]
+
+
+∏
+j>i
+sign(xj − xi)
+
+
+2
+=
+1
+N !
+ˆ L/2
+0
+dx det
+i,j
+[exp (−iλjxi)] det
+k,ℓ
+[exp (iµℓxk)]
+12
+The last expression can be evaluated easily using the Andréief identity [78]
+ˆ N
+∏
+n=1
+dµ(xn) det
+i,j
+[fj (xi)] det
+k,ℓ
+[gℓ (xk)] = N ! det
+i,j
+[
+ˆ
+dµ(x) fi (x) gj (x)
+]
+(26)
+which reduces the multiple integral of the product of two determinants to the determinant of a matrix whose elements
+are single-variable integrals. Using this identity we find
+M(λ;µ) = det
+i,j
+[
+ˆ L/2
+0
+dx exp (i(µi − λj)x)
+]
+(27)
+The application of the Andréief identity for the calculation of eigenstate overlaps for this type of quench problems
+and the reduction to the single-particle expression is a property that is valid for any effectively non-interacting model
+as pointed out in [79], which studied the same problem in the spin-1/2 XX chain.
+Note that the integral appearing in the last expression is precisely the same as in the overlap of the single-particle
+problem (13)
+ˆ L/2
+0
+dx ei(µ−λ)x =
+i
+λ− µ
+(
+ei(µ−λ)L/2 − 1
+)
+In order to evaluate the thermodynamic limit later on, we would like to express the overlaps as continuous non-
+oscillatory functions of the rapidities λi, which can be done by eliminating L using the quantisation conditions. The
+quantised values of µ and λ as dictated by (22) and (20) are not generally the same as in the single-particle problem.
+If N is odd then µi and λj are integer multiples of 2π/(L/2) and 2π/L respectively, exactly as before (13). If however
+N is even then they are half-integer multiples, which means that they can never be equal to each other (the difference
+of two integers cannot be 1
+2
+). Let us focus on this case of even N . We find
+ˆ L/2
+0
+dx ei(µ−λ)x =
+1
+λ− µ ×
+{
+−1− i if n = λL
+2π
+− 1
+2
+is even
++1− i if n is odd
+(28)
+= − i + s
+λ− µ, with s = ±1 for n even/odd.
+We therefore need again to introduce an index sj to distinguish between even and odd sectors (sj = ±1) separately
+for each rapidity variable λj and redefine the overlaps as functions of both the rapidity vectors λ,µ and an additional
+vector of discrete indices s with each of the sj taking one of the two values depending on λj . We finally find that, for
+even N
+Ms(λ;µ) = det
+i,j
+[
+− i + sj
+λj − µi
+]
+(29)
+Considering the variables λ as continuous, we observe that, analogously to the single-particle case, the overlaps
+Ms(λ;µ) have simple poles when any of the rapidities λi tends to any of the µj i.e. they exhibit N -dimensional
+poles at λ → µ and at all permutations of components of µ. As in the single particle calculation, these poles are
+of “kinematical” type and reflect the fact that in the thermodynamic limit the complete set of particle momenta is
+conserved.
+B. Eigenstate summation through multivariable version of Cauchy’s integral formula
+The next step is to perform the summation over post-quench eigenstates. This can be done again rigorously using
+the same contour integral trick as in the single particle case, the only difference being that we now need a multivariable
+version of it. For odd N , the rapidities λj are integer multiples of 2π/L as in the previously studied single particle
+case, and we have already seen that the even sector should be treated differently from the the odd sector, due to
+the exceptional property that in the even sector the overlaps are simply proportional to a Kronecker delta. Let us
+therefore focus now on the case of even N , which is different. In this case we still have to disinguish between the two
+sectors, but the even sector is not exceptional and can be treated in the same way as the odd. As before, to pick
+the values of rapidities allowed by the quantisation conditions (20), we introduce a suitable function Fs(λ) that has
+13
+simple poles of residue 1/(2πi) when each of the λj is a half-integer multiple of 2π/L, and in addition distinguishes
+between odd and even integers through the corresponding index sj . More specifically, we choose
+Fs(λ) ≡
+(
+− L
+4π
+)N N
+∏
+i=1
+1
+isieiλiL/2 + 1
+for even N (30)
+We can easily verify that (30) considered as a function of λj has poles at 2π/L(nj+
+1
+2
+) with nj even or odd for sj = ±1
+respectively.
+We can now use a multivariable version of the residue theorem to express the multiple summation over allowed
+rapidities, as an integral over a continuous function of the λ’s. More specifically, given a function F (λ) = 1/
+∏N
+i=1 fi(λ)
+such that each of the fi(λ) has a simple zero at a single point λ = λ
+∗
+, then for any multi-dimensional contour
+C = C1 × C2 × · · · × CN encircling this point and any function g(λ) of the rapidities λ that is analytic inside the
+contour C, we have (see e.g. appendix A of [80])
+˛
+C
+dNλ
+(2πi)N
+F (λ)g(λ) =
+g(λ∗)
+det
+(
+∂fi
+∂λj
+)∣
+∣
+∣
+λ=λ∗
+(31)
+This can be generalised to the case of more than one zeroes, i.e. when the functions fi(λ) have simple zeroes at each
+one of a set of points {λ∗α}, in which case the right hand side of the above equation should be replaced by a sum
+over all these points with appropriate signs, determined by the direction of integration resulting from the contour
+deformation. If on the other hand the function g(λ) has additional poles inside the contour C, not coinciding with
+any of the points {λ∗α}, then the contours in the above formula should be modified to exclude these additional poles,
+or equivalently their residues must be subtracted off.
+Using this method, the sum over post-quench eigenstates can be written in integral form as follows
+∑
+λ: BA
+. . . =
+1
+N !
+∑
+s
+˛
+C
+dNλFs(λ) . . .
+where the contours Ci in each of the above integrals enclose the real rapidity axis where all allowed rapidities lie, i.e.
+should be chosen to consist of two straight lines one just above and one just below the real axis. However, because
+the overlaps Ms(λ;µ) have multi-dimensional poles at λ → µ and permutations, these points must be excluded by
+subtracting from each contour small circles around them or equivalently by subtracting the corresponding residues.
+The 1/N ! factor accounts for permutations of the order of the rapidities λ which correspond to identical Bethe states,
+and the sum over the discrete indices s accounts for all combinations of the even and odd sectors for each of the
+rapidities.
+We can therefore write (24) as
+e+iPx−iHt|Φ0(µ)〉 =
+∑
+λ: BA
+e+iP (λ)x−iE(λ)t
+M(λ;µ)
+N (λ) |Φ(λ)〉
+=
+1
+N !
+∑
+s
+˛
+C
+dNλFs(λ)e
++iP (λ)x−iE(λ)tMs(λ;µ)
+N (λ) |Φ(λ)〉 (32)
+Note that the poles at λ → µ and permutations are between those of Fs(λ) i.e. the rapidity combinations allowed by
+the full system’s Bethe equations, and do not coincide with any of them for even N . This is because, as mentioned
+above, the allowed rapidities λ and µ are half-integer multiples of 2π/L and 2π/(L/2) respectively, so they can never
+be equal to each other. Also note that all other constituents of the integrand in (32) i.e. the function e+iP (λ)x−iE(λ)t
+and the state |Φ(λ)〉 itself, are analytic functions for real rapidities and do not introduce any other singularities.
+Lastly, the dependence on the discrete multi-variable s is limited to Fs(λ) and Ms(λ;µ) only.
+At this step we can also evaluate the sum over the discrete indices s. By first absorbing the product in (30) and
+the sum over s into the determinant (29), using the properties
+N
+∏
+i=1
+fi det (Aij) = det (fiAij)
+and
+∑
+s
+det (Aij(sj)) = det
+(
+∑
+s
+Aij(s)
+)
+14
+we obtain
+∑
+s
+Fs(λ)Ms(λ;µ) =
+∑
+s
+(
+− L
+4π
+)N N
+∏
+j=1
+1
+isjeiλjL/2 + 1
+det
+i,j
+[
+− i + sj
+λj − µi
+]
+=
+(
+L
+4π
+)N
+det
+i,j
+[
+∑
+s
+1
+iseiλjL/2 + 1
+(
+i + s
+λj − µi
+)
+]
+=
+(
+L
+2π
+)N
+det
+i,j
+[
+1− e+iλjL/2
+1 + e+iλjL
+(
+i
+λj − µi
+)]
+and after substitution into (32)
+e+iPx−iHt|Φ0(µ)〉 =
+1
+N !
+˛
+C
+dNλ
+(2π)N
+e+iP (λ)x−iE(λ)t
+N
+∏
+j=1
+1− e+iλjL/2
+1 + e+iλjL
+det
+i,j
+[
+i
+λj − µi
+]
+|Φ(λ)〉 (33)
+Note that in the last formula the function Fs(λ) appears to be replaced by a function with poles at the eigenvalues
+of both the even and odd sector eigenstates, which might suggest that the splitting into these two sectors is not
+that relevant in the end. However, the expression that we would obtain if we followed all earlier steps except for the
+splitting would be different and incorrect, even though still characterised by the same pole structure.
+C. Multivariable Kinematical Pole Residue
+Before we analyse the asymptotics of our contour integral formula in the thermodynamic and large space and time
+limit, let us focus on the multi-dimensional kinematical pole at λ → µ and calculate its residue. As anticipated based
+on the single particle calculation, this pole gives the only non-vanishing contribution of the contour integral in the
+above double limit.
+Starting from (29), the residue of the overlap Ms(λ;µ) at λ → µ (and at any permutation µπ of µ) can be easily
+evaluated by expanding the determinant as a sum over permutations and noticing that exactly one of them and only
+that contributes a non-vanishing residue. Explicitly, we obtain
+Res
+λ=µ
+Ms(λ;µ) =
+∑
+all perm. π
+(−1)[π]Res
+λ=µ
+N
+∏
+j=1
+(
+− i + sj
+λj − µπi
+)
+= (−1)N
+N
+∏
+j=1
+(i + sj) (34)
+The residue at λ = µπ is the same for all permutations π, except for a sign which is equal to the signature of the
+permutation.
+Moreover the value of the function Fs(λ) at λ = µ and permutations can be obtained taking into account that the
+rapidities µ satisfy the half system Bethe equations (22) for even N
+Fs(µπ) =
+(
+− L
+4π
+)N N
+∏
+i=1
+1
+isie
+iµπiL/2 + 1
+=
+(
+− L
+4π
+)N N
+∏
+i=1
+1
+isi(−1)N−1 + 1
+=
+(
+− L
+4π
+)N N
+∏
+i=1
+1
+−isi + 1
+(35)
+Notice that there is no oscillating phase left in the last expression. By combining (34) and (35) we obtain
+Res
+λ=µ
+Fs(µ)Ms(λ;µ) =
+(
+L
+4π
+)N N
+∏
+i=1
+i + si
+−isi + 1
+= iN
+(
+L
+4π
+)N
+(36)
+15
+Notice that this expression is independent of s, therefore the corresponding discrete index sum becomes trivial. From
+the above we conclude that the contribution of the kinematical poles to the multiple contour integral (32) is given by
+the simple result
+1
+N !
+∑
+s
+Res
+λ=µ
+Fs(λ)e
++iP (λ)x−iE(λ)tMs(λ;µ)
+N (λ) |Φ(λ)〉 = e
++iP (µ)x−iE(µ)t|Φ(µ)〉
+where the N ! multiplicity of the poles has been taken into account.
+D. Asymptotics of the integral in the thermodynamic limit
+We are now ready to calculate the asymptotic form of the contour integral representation (32) in the thermodynamic
+limit. As expected, this step will result in an N -dimensional line integral in the positive direction, with a specific
+prescription on how to pass around the kinematical poles. As we have seen in the single particle case, this prescription
+is going to be crucial at the next step, which is the derivation of the asymptotics in the large x, t limit.
+Starting from (32), we split each of the contours composing the multi-dimensional contour in C into their three
+parts: the straight line R− iǫ below the real axis in the positive direction (C−), the straight line R+ iǫ above the real
+axis in the negative direction (C+) and the circles C(µi, ǫ) centred at each of the points µi with a small radius ǫ in
+the negative direction (collectively denoted as Cp), where in all cases ǫ > 0. With this decomposition of the contours,
+expanding the integral we obtain a sum of 3N cross-terms, that is the sum of all possible combinations of integrals of
+the N rapidity variables along the three different parts of the contour. We will now show that in the thermodynamic
+limit, only 2N terms survive, specifically those of the above terms that do not involve any integral along the first
+contour part C− = R − iǫ. To see why this is true, we simply have to examine the behaviour of the function Fs(λ)
+when at least one of the rapidities lies along C− in the limit L → ∞: we find that this limit results in an exponentially
+decaying factor that suppresses all such terms, while all others remain finite and even simplify.
+Indeed, let us consider Fs(λ) given by (30) as a function of one of the rapidities, λi. Firstly, we notice that
+lim
+L→∞
+1
+isieiλiL/2 + 1
+=
+{
+1 if Im(λi) > 0
+0 if Im(λi) < 0
+independently of the value of si. Actually it is much more useful to analyse the asymptotics towards these limits,
+which are exponentially decaying functions of L in both cases
+1
+isieiλiL/2 + 1
+∼L→∞
+{
+1 +O(e−ǫL/2) if λi ∈ R+ iǫ
+O(e−ǫL/2) if λi ∈ R− iǫ
+If λi ∈ R the limit is generally indeterminate and depends on the value of λi, but when it is equal to one of the µi’s we
+have already seen in (35) that it tends to the finite value 1/(−isi+1) independently of L. From these observations, we
+immediately see that in the limit L → ∞ the function Fs(λ) has a finite value plus O(e−ǫL/2) corrections if all of the
+rapidities λ are either on C− or at one of the points µj (i.e. at the kinematical poles), while it decays as O(e−ǫnL/2)
+if n out of the N rapidities λ are on C+. Moreover, the surviving 2
+N terms can be recast in the simpler form
+e+iPx−iHt|Φ0(µ)〉 =
+1
+N !
+(
+L
+2
+)N
+∑
+s
+N
+∏
+i=1
+
+
++∞+iǫ
+ˆ
+−∞+iǫ
+dλi
+2π
++
+1
+1− isi
+˛
+Cp
+dλi
+2π
+
+ e+iP (λ)x−iE(λ)t
+Ms(λ;µ)
+N (λ) |Φ(λ)〉+O(e
+−ǫL/2)
+(37)
+Note that we have used the minus signs (−1)N to reverse the integration direction in both C+ and Cp, so that we
+now have line integrals along R + iǫ running in the positive direction and circular integrals around the poles also in
+the positive direction.
+Obviously, we would arrive at an equivalent but more explicit formula if we started from the simplified version (33)
+and applied the same analysis. Explicitly, using the asymptotics
+1− e+iλjL/2
+1 + e+iλjL
+∼L→∞
+{
+1 +O(e−ǫL/2) if λi ∈ R+ iǫ
+O(e−ǫL/2) if λi ∈ R− iǫ
+we obtain the final result
+e+iPx−iHt|Φ0(µ)〉 =
+1
+N !
+ˆ
+C′
+dNλ
+(2π)N
+e+iP (λ)x−iE(λ)t det
+i,j
+[
+i
+λj − µi
+]
+|Φ(λ)〉+O(e−ǫL/2) (38)
+16
+where for brevity we denote the integration measure as
+ˆ
+C′
+dNλ
+(2π)N
+≡
+N
+∏
+i=1
+
+
++∞+iǫ
+ˆ
+−∞+iǫ
++
+˛
+Cp
+
+
+dλi
+2π
+and used also that (−1)N = 1 for even N .
+It is important that we do not simply derive the limit L → ∞, but also the exact asymptotics, i.e. the exponential
+bound on corrections to this limit. This is crucial for taking the thermodynamic limit N,L → ∞ at fixed density
+n = N/L as it allows us to show that the two sides of (38) have the same thermodynamic limit, even without ever
+taking N → ∞ explicitly, which would result in the multiple rapidity integral turning into the less practical form of
+a functional integral. In other words, we have shown that the thermodynamic limit of e+iPx−iHt|Φ0(µ)〉 reduces to
+lim
+N,L→∞
+n: fixed
+e+iPx−iHt|Φ0(µ)〉 = lim
+N→∞
+1
+N !
+ˆ
+C′
+dNλ
+(2π)N
+e+iP (λ)x−iE(λ)t det
+i,j
+[
+i
+λj − µi
+]
+|Φ(λ)〉 (39)
+which is one of our main results. Not only is this limit simpler than the original, but also the functional form of the
+integrand has been greatly simplified. In particular the awkward dependence on L of the original expression, which
+was most responsible for the highly oscillatory behaviour of the integrand, has been completely eliminated. Lastly
+let us remark that, as can be easily verified, the multi-dimensional residues at the kinematical poles are equal to the
+values derived in the previous step.
+E. Asymptotics at large distances & times
+Our last step is the derivation of the asymptotics at large distances and times. At this point it is convenient to apply
+the projection to the local basis 〈z|, which has been implicitly assumed from the beginning, and use the coordinate
+space wavefunction of the Bethe states (19). The last result (39) now reads
+lim
+N,L→∞
+n: fixed
+〈z|e+iPx−iHt|Φ0(µ)〉 = lim
+N→∞
+1
+N !
+ˆ
+C′
+dNλ
+(2π)N
+e+iP (λ)x−iE(λ)t det
+i,j
+[
+i
+λj − µi
+]
+〈z|Φ(λ)〉
+= lim
+N→∞
+1
+N !
+∏
+j>i
+sign(zj − zi)
+ˆ
+C′
+dNλ
+(2π)N
+e+iP (λ)x−iE(λ)t det
+i,j
+[
+i
+λj − µi
+]
+det
+k,l
+[exp (iλkzl)]
+Of course we can immediately see that, using the Andréief identity (26), the last expression gives
+lim
+N,L→∞
+n: fixed
+〈z|e+iPx−iHt|Φ0(µ)〉 = lim
+N→∞
+∏
+j>i
+sign(zj − zi) det
+i,j
+ˆ
+C′
+dλ
+2π
+e+ip(λ)x−ie(λ)t
+i
+λ− µi
+eiλzj
+which reduces the problem to precisely the single particle problem. Therefore the asymptotic analysis is exactly the
+same as before, giving
+lim
+x,t→∞
+x/t=ξ: fixed
+lim
+N,L→∞
+n: fixed
+e−iP (µ)x+iE(µ)t〈z|e+iPx−iHt|Φ0(µ)〉 = lim
+N→∞
+N
+∏
+i=1
+Θ(ξ − v(µi))〈z|Φ(µ)〉 (40)
+Alternatively, if we do not want to rely on the Andréief identity, we can repeat the steps of the asymptotic analysis
+for the multivariate case. First of all, considering each integral separately it is clear that the real part of the exponent
+of the exponential function switches sign at the point λ∗(ξ) that is the solution of the equation
+v(λ∗) = ξ (41)
+where
+v(λ) ≡ E
+′(λ)
+P ′(λ)
+is the group velocity. Therefore in order to handle the x, t → ∞ limit, we deform the integration contours so that
+they always lie in the region where the real part of the exponent is negative, taking into account the contribution
+17
+of the kinematical pole if it is eventually crossed due to the deformation. Explicitly, the contour of the line integral
+becomes
++∞+iǫ
+ˆ
+−∞+iǫ
+dλ
+2π
+=
+
+
+
+λ∗(ξ)+iǫ
+ˆ
+−∞+iǫ
++
+λ∗(ξ)−iǫ
+ˆ
+λ∗(ξ)+iǫ
++
++∞−iǫ
+ˆ
+λ∗(ξ)−iǫ
+
+
+
+dλ
+2π
+−
+˛
+Cp
+dλ
+2π
+Θ(v(λ) − ξ)
+and combined with the earlier contribution of the circular integral around the pole
+
+
++∞+iǫ
+ˆ
+−∞+iǫ
++
+˛
+Cp
+
+
+dλ
+2π
+=
+
+
+
+λ∗(ξ)+iǫ
+ˆ
+−∞+iǫ
++
+λ∗(ξ)−iǫ
+ˆ
+λ∗(ξ)+iǫ
++
++∞−iǫ
+ˆ
+λ∗(ξ)−iǫ
+
+
+
+dλ
+2π
++
+˛
+Cp
+dλ
+2π
+Θ(ξ − v(λ))
+We therefore split the contour C′ into two parts: the stair-like contour C′′λ∗(ξ) ≡ (−∞ + iǫ, λ∗(ξ) + iǫ] ∪ [λ∗(ξ) +
+iǫ, λ∗(ξ)− iǫ]∪ [λ∗(ξ)− iǫ,+∞− iǫ, ) and the usual circular contour around the pole Cp now coming with a conditional
+measure Θ(λ∗(ξ) − λ) = Θ(ξ − v(λ)). With this decomposition of the contours, expanding the multiple integral we
+obtain a sum of 2N cross-terms, that are all possible combinations of integrals of the N rapidity variables along the
+two different parts of the contour. If the threshold value λ∗(ξ) is chosen as the solution of (41), then all terms involving
+at least one integral along C′′
+λ∗(ξ)
+decay in the large distance and time limit, since the integrand decays exponentially
+(line integrals parallel to the real axis) or at most algebraically (short line integral perpendicular to the real axis).
+Therefore the only surviving contribution comes from the cross-term that contains only circular integrals around the
+kinematical pole as factors, which is equal to the corresponding pole residue calculated earlier. In this way we find
+again our final result (40).
+Obviously it is only choosing the appropriate value for λ∗ that guarantees that the asymptotics in the combined
+limit is given by the single cross-term corresponding to the multidimensional kinematical pole contribution. If λ∗ is
+chosen correctly then the next to leading order corrections must decay. As in the previous section where we evaluated
+the thermodynamic limit, these corrections come from all cross-terms between (N − 1) factors corresponding to pole
+residues and one factor corresponding to a line integral along the stair-shaped contour C′′
+λ∗(ξ)
+N
+∑
+j=1
+e
++i
+∑
+i(6=j)
+p(µi)x−e(µi)t
+∏
+i( 6=j)
+Θ(λ∗(ξ) − µi)
+ˆ
+C′′
+λ∗(ξ)
+dλ
+2π
+e+ip(λ)x−ie(λ)t〈z|Φ(µ1, . . . , µi−1, λ, µi+1, . . . , µN )〉
+Therefore the condition for λ∗ can be phrased differently as the condition for which the above expression vanishes
+in the combined limit. The λ-independent coefficients of this sum that appear before the integral are oscillatory but
+non-decaying. Since the coordinate space wavefunction 〈z|Φ〉 essentially is a determinant, i.e. a sum of products of
+factors of which only one is λ dependent, for each of these terms the integral can be performed independently from
+the others terms. As a consequence, the asymptotics of the integral is the same for each of these terms and the same
+as above, therefore the threshold value is indeed given by (41).
+Eq. (40) is our final result for the asymptotics of K(µ; z;x, t) in the combined limit, which as explained in sec.
+II establishes the emergence of the NESS and provides a complete characterisation of it in terms of initial state
+information.
+V. DISCUSSION
+In this work we have developed a new analytical method for the derivation of asymptotics of local observables
+after a geometric quench, a special but representative type of inhomogenerous quench, focusing for the moment on
+the non-interacting case. From the detailed calculation presented here, we can draw certain conclusions that are
+instructive on how to proceed to the more interesting and highly non-trivial interacting case.
+First of all, the derivation of the asymptotics does not rely significantly on special characteristics of the initial state
+or the observable considered. The only necessary information about these that we used is that the initial state is
+diagonal in the pre-quench basis and the observables are local. This suggests that our strategy of considering the
+asymptotics of each pre-quench eigenstate after time evolution under the post-quench Hamiltonian and projection
+onto the local basis should be suitable for the interacting case as well.
+Our method was mainly based on analyticity properties of the pre- and post-quench eigenstate overlaps, especially
+on the kinematical poles at equal momenta. Their presence is a direct consequence of the step-like form of the initial
+18
+state inhomogeneity as reflected in momentum space and it is a characteristic feature of any inhomogeneous quench of
+this type (including “domain wall” states and smooth step-like initial density or temperature profiles). The necessity
+for decomposition of the post-quench eigenstates into parity sectors is also a general characteristic of such quenches
+related to the fact that the initial state is not symmetric under space reflections. We therefore see that the only
+relevant information about the initial state, beyond these general features, is the residue of the kinematical poles,
+which is much less information than the full functional form of the overlaps and can even be inferred from general
+thermodynamic properties in the two halves of the system.
+Whereas the effectively non-interacting character of the system can be exploited to reduce the problem to a single
+particle quantum mechanics problem from which any observable can in principle be derived using Wick’s theorem, we
+have shown that the mathematical steps used in the single particle problem can be extended and applied successfully
+also in the many particle case. The main point where we have taken advantage of the non-interacting character of
+the problem was in the calculation of the initial state overlaps by means of the Andréief identity, which undoubtedly
+is the crucial starting point of the method. However, as already mentioned in the introduction, for the geometric
+quench protocol these overlaps are explicitly known for any value of the interaction by other means.
+On the other hand, in the non-interacting case, summing over the quantised momentum eigenvalues in order to
+perform the expansion in the post-quench basis was done relatively easily as these are explicitly known and simply
+equidistant. This is no longer true in the interacting case, where the quantisation conditions are given by the
+complicated set of Bethe equations. However, the complex analysis method for writing the sum over eigenstates as a
+contour integral, completely circumvents the problem of explicit knowledge of the eigenvalues, therefore it is equally
+suitable for the analysis of the general case.
+These observations are good indications that our method can be generalised to the genuinely interacting case, which
+will be the subject of subsequent work.
+ACKNOWLEDGMENTS
+I would like to thank Alessandro Giuliani for useful discussions. This work was supported by the Slovenian Research
+Agency (ARRS) under grant QTE (N1-0109) and by the ERC Advanced Grant OMNES (694544).
+[1] S. Tasaki, Nonequilibrium stationary states of noninteracting electrons in a one-dimensional lattice, Chaos, Solitons &
+Fractals 12(14-15), 2657 (2001), doi:10.1016/s0960-0779(01)00080-7.
+[2] T. G. Ho and H. Araki, Asymptotic Time Evolution of a Partitioned Infinite Two-sided Isotropic XY-chain, vol. 228, pp.
+191–204, Nauka, MAIK "Nauka/Inteperiodika" (2000).
+[3] D. Ruelle, Natural Nonequilibrium States in Quantum Statistical Mechanics, Journal of Statistical Physics 98(1/2), 57
+(2000), doi:10.1023/a:1018618704438.
+[4] V. Jakšić and C.-A. Pillet, Journal of Statistical Physics 108(5/6), 787 (2002), doi:10.1023/a:1019818909696.
+[5] Y. Ogata, Nonequilibrium properties in the transverse XX chain, Physical Review E 66(1), 016135 (2002), doi:
+10.1103/physreve.66.016135.
+[6] W. H. Aschbacher and C.-A. Pillet, Journal of Statistical Physics 112(5/6), 1153 (2003), doi:10.1023/a:1024619726273.
+[7] H. Spohn and J. L. Lebowitz, Stationary non-equilibrium states of infinite harmonic systems, Communications in Mathe-
+matical Physics 54(2), 97 (1977), doi:10.1007/bf01614132.
+[8] D. Bernard and B. Doyon, Energy flow in non-equilibrium conformal field theory, Journal of Physics A: Mathematical and
+Theoretical 45(36), 362001 (2012), doi:10.1088/1751-8113/45/36/362001.
+[9] A. De Luca, J. Viti, D. Bernard and B. Doyon, Nonequilibrium thermal transport in the quantum Ising chain, Physical
+Review B 88(13), 134301 (2013), doi:10.1103/physrevb.88.134301.
+[10] M. Collura and D. Karevski, Quantum quench from a thermal tensor state: Boundary effects and generalized Gibbs
+ensemble, Physical Review B 89(21), 214308 (2014), doi:10.1103/physrevb.89.214308.
+[11] D. Bernard and B. Doyon, Non-Equilibrium Steady States in Conformal Field Theory, Annales Henri Poincaré 16(1), 113
+(2014), doi:10.1007/s00023-014-0314-8.
+[12] D. Bernard and B. Doyon, Conformal field theory out of equilibrium: a review, Journal of Statistical Mechanics: Theory
+and Experiment 2016(6), 064005 (2016), doi:10.1088/1742-5468/2016/06/064005.
+[13] J. Viti, J.-M. Stéphan, J. Dubail and M. Haque, Inhomogeneous quenches in a free fermionic chain: Exact results, EPL
+(Europhysics Letters) 115(4), 40011 (2016), doi:10.1209/0295-5075/115/40011.
+[14] M. Kormos, Inhomogeneous quenches in the transverse field Ising chain: scaling and front dynamics, SciPost Physics 3(3),
+020 (2017), doi:10.21468/scipostphys.3.3.020.
+[15] J.-M. Stéphan, Return probability after a quench from a domain wall initial state in the spin-1/2 XXZ chain, Journal of
+Statistical Mechanics: Theory and Experiment 2017(10), 103108 (2017), doi:10.1088/1742-5468/aa8c19.
+[16] P. Moosavi, Inhomogeneous conformal field theory out of equilibrium, arXiv:1912.04821 (2019).
+http://dx.doi.org/10.1016/s0960-0779(01)00080-7
+http://dx.doi.org/10.1023/a:1018618704438
+http://dx.doi.org/10.1023/a:1019818909696
+http://dx.doi.org/10.1103/physreve.66.016135
+http://dx.doi.org/10.1103/physreve.66.016135
+http://dx.doi.org/10.1023/a:1024619726273
+http://dx.doi.org/10.1007/bf01614132
+http://dx.doi.org/10.1088/1751-8113/45/36/362001
+http://dx.doi.org/10.1103/physrevb.88.134301
+http://dx.doi.org/10.1103/physrevb.89.214308
+http://dx.doi.org/10.1007/s00023-014-0314-8
+http://dx.doi.org/10.1088/1742-5468/2016/06/064005
+http://dx.doi.org/10.1209/0295-5075/115/40011
+http://dx.doi.org/10.21468/scipostphys.3.3.020
+http://dx.doi.org/10.1088/1742-5468/aa8c19
+19
+[17] D. Gobert, C. Kollath, U. Schollwöck and G. Schütz, Real-time dynamics in spin-1/2 chains with adaptive time-dependent
+density matrix renormalization group, Physical Review E 71(3) (2005), doi:10.1103/physreve.71.036102.
+[18] S. Langer, F. Heidrich-Meisner, J. Gemmer, I. P. McCulloch and U. Schollwöck, Real-time study of diffusive and ballistic
+transport in spin-1/2 chains using the adaptive time-dependent density matrix renormalization group method, Physical
+Review B 79(21) (2009), doi:10.1103/physrevb.79.214409.
+[19] S. Langer, M. Heyl, I. P. McCulloch and F. Heidrich-Meisner, Real-time energy dynamics in spin-1/2 Heisenberg chains,
+Physical Review B 84(20) (2011), doi:10.1103/physrevb.84.205115.
+[20] C. J. Bolech, F. Heidrich-Meisner, S. Langer, I. P. McCulloch, G. Orso and M. Rigol, Long-Time Behavior of the Momentum
+Distribution During the Sudden Expansion of a Spin-Imbalanced Fermi Gas in One Dimension, Physical Review Letters
+109(11) (2012), doi:10.1103/physrevlett.109.110602.
+[21] C. Karrasch, T. Prosen and F. Heidrich-Meisner, Proposal for measuring the finite-temperature Drude weight of integrable
+systems, Physical Review B 95(6) (2017), doi:10.1103/physrevb.95.060406.
+[22] L. Vidmar, D. Iyer and M. Rigol, Emergent Eigenstate Solution to Quantum Dynamics Far from Equilibrium, Physical
+Review X 7(2), 021012 (2017), doi:10.1103/physrevx.7.021012.
+[23] M. Ljubotina, M. Žnidarič and T. Prosen, Spin diffusion from an inhomogeneous quench in an integrable system, Nature
+Communications 8, 16117 (2017), doi:10.1038/ncomms16117.
+[24] G. Misguich, K. Mallick and P. L. Krapivsky, Dynamics of the spin-1/2 Heisenberg chain initialized in a domain-wall
+state, Physical Review B 96(19), 195151 (2017), doi:10.1103/physrevb.96.195151.
+[25] T. Kinoshita, T. Wenger and D. S. Weiss, A quantum Newton’s cradle, Nature 440(7086), 900 (2006), doi:
+10.1038/nature04693.
+[26] S. Trotzky, Y.-A. Chen, A. Flesch, I. P. McCulloch, U. Schollwöck, J. Eisert and I. Bloch, Probing the relaxation to-
+wards equilibrium in an isolated strongly correlated one-dimensional Bose gas, Nature Physics 8(4), 325 (2012), doi:
+10.1038/nphys2232.
+[27] J. P. Ronzheimer, M. Schreiber, S. Braun, S. S. Hodgman, S. Langer, I. P. McCulloch, F. Heidrich-Meisner, I. Bloch and
+U. Schneider, Expansion Dynamics of Interacting Bosons in Homogeneous Lattices in One and Two Dimensions, Physical
+Review Letters 110(20) (2013), doi:10.1103/physrevlett.110.205301.
+[28] L. Vidmar, J. P. Ronzheimer, M. Schreiber, S. Braun, S. S. Hodgman, S. Langer, F. Heidrich-Meisner, I. Bloch and
+U. Schneider, Dynamical Quasicondensation of Hard-Core Bosons at Finite Momenta, Physical Review Letters 115(17),
+175301 (2015), doi:10.1103/physrevlett.115.175301.
+[29] S. Sotiriadis and J. Cardy, Inhomogeneous quantum quenches, Journal of Statistical Mechanics: Theory and Experiment
+2008(11), P11003 (2008), doi:10.1088/1742-5468/2008/11/p11003.
+[30] E. Langmann, J. L. Lebowitz, V. Mastropietro and P. Moosavi, Time evolution of the Luttinger model with nonuniform
+temperature profile, Physical Review B 95(23) (2017), doi:10.1103/physrevb.95.235142.
+[31] K. Gawędzki, E. Langmann and P. Moosavi, Finite-Time Universality in Nonequilibrium CFT, Journal of Statistical
+Physics 172(2), 353 (2018), doi:10.1007/s10955-018-2025-x.
+[32] J. Mossel, G. Palacios and J.-S. Caux, Geometric quenches in quantum integrable systems, Journal of Statistical Mechanics:
+Theory and Experiment 2010(09), L09001 (2010), doi:10.1088/1742-5468/2010/09/l09001.
+[33] J. L. Lancaster, Nonequilibrium current-carrying steady states in the anisotropic XY spin chain, Physical Review E 93(5),
+052136 (2016), doi:10.1103/physreve.93.052136.
+[34] J. Dubail, P. Calabrese and J.-M. Stéphan, Emergence of curved light-cones in a class of inhomogeneous Luttinger liquids,
+SciPost Physics 3(3), 019 (2017), doi:10.21468/scipostphys.3.3.019.
+[35] P. Moosavi, Emergence of generalized hydrodynamics in the non-local Luttinger model, arXiv:2003.10993 (2020).
+[36] O. A. Castro-Alvaredo, B. Doyon and T. Yoshimura, Emergent Hydrodynamics in Integrable Quantum Systems Out of
+Equilibrium, Physical Review X 6(4), 041065 (2016), doi:10.1103/physrevx.6.041065.
+[37] B. Bertini, M. Collura, J. De Nardis and M. Fagotti, Transport in Out-of-Equilibrium XXZ Chains: Exact Profiles of
+Charges and Currents, Physical Review Letters 117(20), 207201 (2016), doi:10.1103/physrevlett.117.207201.
+[38] Lorenzo Piroli and Jacopo De Nardis and Mario Collura and Bruno Bertini and Maurizio Fagotti, Transport in out-
+of-equilibrium XXZ chains: Nonballistic behavior and correlation functions, Physical Review B 96(11), 115124 (2017),
+doi:10.1103/physrevb.96.115124.
+[39] M. Collura, A. De Luca and J. Viti, Analytic solution of the domain-wall nonequilibrium stationary state, Physical Review
+B 97(8) (2018), doi:10.1103/physrevb.97.081111.
+[40] B. Doyon, J. Dubail, R. Konik and T. Yoshimura, Large-Scale Description of Interacting One-Dimensional Bose Gases:
+Generalized Hydrodynamics Supersedes Conventional Hydrodynamics, Physical Review Letters 119(19) (2017), doi:
+10.1103/physrevlett.119.195301.
+[41] B. Doyon, T. Yoshimura and J.-S. Caux, Soliton Gases and Generalized Hydrodynamics, Physical Review Letters 120(4)
+(2018), doi:10.1103/physrevlett.120.045301.
+[42] J.-S. Caux, B. Doyon, J. Dubail, R. Konik and T. Yoshimura, Hydrodynamics of the interacting bose gas in the quantum
+newton cradle setup, SciPost Physics 6(6) (2019), doi:10.21468/scipostphys.6.6.070.
+[43] M. Schemmer, I. Bouchoule, B. Doyon and J. Dubail, Generalized hydrodynamics on an atom chip, Physical Review
+Letters 122(9) (2019), doi:10.1103/physrevlett.122.090601.
+[44] V. B. Bulchandani, R. Vasseur, C. Karrasch and J. E. Moore, Bethe-Boltzmann hydrodynamics and spin transport in the
+XXZ chain, Physical Review B 97(4) (2018), doi:10.1103/physrevb.97.045407.
+[45] V. B. Bulchandani, R. Vasseur, C. Karrasch and J. E. Moore, Solvable Hydrodynamics of Quantum Integrable Systems,
+Physical Review Letters 119(22) (2017), doi:10.1103/physrevlett.119.220604.
+http://dx.doi.org/10.1103/physreve.71.036102
+http://dx.doi.org/10.1103/physrevb.79.214409
+http://dx.doi.org/10.1103/physrevb.84.205115
+http://dx.doi.org/10.1103/physrevlett.109.110602
+http://dx.doi.org/10.1103/physrevb.95.060406
+http://dx.doi.org/10.1103/physrevx.7.021012
+http://dx.doi.org/10.1038/ncomms16117
+http://dx.doi.org/10.1103/physrevb.96.195151
+http://dx.doi.org/10.1038/nature04693
+http://dx.doi.org/10.1038/nature04693
+http://dx.doi.org/10.1038/nphys2232
+http://dx.doi.org/10.1038/nphys2232
+http://dx.doi.org/10.1103/physrevlett.110.205301
+http://dx.doi.org/10.1103/physrevlett.115.175301
+http://dx.doi.org/10.1088/1742-5468/2008/11/p11003
+http://dx.doi.org/10.1103/physrevb.95.235142
+http://dx.doi.org/10.1007/s10955-018-2025-x
+http://dx.doi.org/10.1088/1742-5468/2010/09/l09001
+http://dx.doi.org/10.1103/physreve.93.052136
+http://dx.doi.org/10.21468/scipostphys.3.3.019
+http://dx.doi.org/10.1103/physrevx.6.041065
+http://dx.doi.org/10.1103/physrevlett.117.207201
+http://dx.doi.org/10.1103/physrevb.96.115124
+http://dx.doi.org/10.1103/physrevb.97.081111
+http://dx.doi.org/10.1103/physrevlett.119.195301
+http://dx.doi.org/10.1103/physrevlett.119.195301
+http://dx.doi.org/10.1103/physrevlett.120.045301
+http://dx.doi.org/10.21468/scipostphys.6.6.070
+http://dx.doi.org/10.1103/physrevlett.122.090601
+http://dx.doi.org/10.1103/physrevb.97.045407
+http://dx.doi.org/10.1103/physrevlett.119.220604
+20
+[46] V. B. Bulchandani, On classical integrability of the hydrodynamics of quantum integrable systems, Journal of Physics A:
+Mathematical and Theoretical 50(43), 435203 (2017), doi:10.1088/1751-8121/aa8c62.
+[47] B. Doyon and H. Spohn, Drude Weight for the Lieb-Liniger Bose Gas, SciPost Physics 3(6) (2017), doi:
+10.21468/scipostphys.3.6.039.
+[48] B. Doyon, H. Spohn and T. Yoshimura, A geometric viewpoint on generalized hydrodynamics, Nuclear Physics B 926, 570
+(2018), doi:10.1016/j.nuclphysb.2017.12.002.
+[49] B. Doyon and H. Spohn, Dynamics of hard rods with initial domain wall state, Journal of Statistical Mechanics: Theory
+and Experiment 2017(7), 073210 (2017), doi:10.1088/1742-5468/aa7abf.
+[50] P. Ruggiero, P. Calabrese, B. Doyon and J. Dubail, Quantum generalized hydrodynamics, Physical Review Letters 124(14)
+(2020), doi:10.1103/physrevlett.124.140603.
+[51] A. Bastianello, A. D. Luca, B. Doyon and J. D. Nardis, Thermalisation of a trapped one-dimensional Bose gas via diffusion
+(2020), https://arxiv.org/abs/2007.04861.
+[52] D.-L. Vu, Cumulants of conserved charges in GGE and cumulants of total transport in GHD: exact summation of matrix ele-
+ments?, Journal of Statistical Mechanics: Theory and Experiment 2020(2), 023103 (2020), doi:10.1088/1742-5468/ab6846.
+[53] F. H. L. Essler and M. Fagotti, Quench dynamics and relaxation in isolated integrable quantum spin chains, Journal of
+Statistical Mechanics: Theory and Experiment 2016(6), 064002 (2016), doi:10.1088/1742-5468/2016/06/064002.
+[54] P. Calabrese and J. Cardy, Quantum quenches in 1+1 dimensional conformal field theories, Journal of Statistical Mechanics:
+Theory and Experiment 2016(6), 064003 (2016), doi:10.1088/1742-5468/2016/06/064003.
+[55] M. A. Cazalilla and M.-C. Chung, Quantum quenches in the Luttinger model and its close relatives, Journal of Statistical
+Mechanics: Theory and Experiment 2016(6), 064004 (2016), doi:10.1088/1742-5468/2016/06/064004.
+[56] J.-S. Caux, The Quench Action, Journal of Statistical Mechanics: Theory and Experiment 2016(6), 064006 (2016),
+doi:10.1088/1742-5468/2016/06/064006.
+[57] L. Vidmar and M. Rigol, Generalized Gibbs ensemble in integrable lattice models, Journal of Statistical Mechanics: Theory
+and Experiment 2016(6), 064007 (2016), doi:10.1088/1742-5468/2016/06/064007.
+[58] E. Ilievski, M. Medenjak, T. Prosen and L. Zadnik, Quasilocal charges in integrable lattice systems, Journal of Statistical
+Mechanics: Theory and Experiment 2016(6), 064008 (2016), doi:10.1088/1742-5468/2016/06/064008.
+[59] T. Langen, T. Gasenzer and J. Schmiedmayer, Prethermalization and universal dynamics in near-integrable quan-
+tum systems, Journal of Statistical Mechanics: Theory and Experiment 2016(6), 064009 (2016), doi:10.1088/1742-
+5468/2016/06/064009.
+[60] R. Vasseur and J. E. Moore, Nonequilibrium quantum dynamics and transport: from integrability to many-body localization,
+Journal of Statistical Mechanics: Theory and Experiment 2016(6), 064010 (2016), doi:10.1088/1742-5468/2016/06/064010.
+[61] J. D. Nardis, D. Bernard and B. Doyon, Hydrodynamic diffusion in integrable systems, Physical Review Letters 121(16)
+(2018), doi:10.1103/physrevlett.121.160603.
+[62] J. D. Nardis, D. Bernard and B. Doyon, Diffusion in generalized hydrodynamics and quasiparticle scattering, SciPost
+Physics 6(4) (2019), doi:10.21468/scipostphys.6.4.049.
+[63] J. D. Nardis, M. Medenjak, C. Karrasch and E. Ilievski, Anomalous spin diffusion in one-dimensional antiferromagnets,
+Physical Review Letters 123(18) (2019), doi:10.1103/physrevlett.123.186601.
+[64] E. Ilievski, J. D. Nardis, M. Medenjak and T. Prosen, Superdiffusion in one-dimensional quantum lattice models, Physical
+Review Letters 121(23) (2018), doi:10.1103/physrevlett.121.230602.
+[65] J.-S. Caux and F. H. L. Essler, Time Evolution of Local Observables After Quenching to an Integrable Model, Physical
+Review Letters 110(25) (2013), doi:10.1103/physrevlett.110.257203.
+[66] M. Borsi, B. Pozsgay and L. Pristyák, Current operators in bethe ansatz and generalized hydrodynamics: An exact quantum-
+classical correspondence, Physical Review X 10(1) (2020), doi:10.1103/physrevx.10.011054.
+[67] B. Pozsgay, Current operators in integrable spin chains: lessons from long range deformations, SciPost Physics 8(2) (2020),
+doi:10.21468/scipostphys.8.2.016.
+[68] B. Pozsgay, Algebraic construction of current operators in integrable spin chains (2020), https://arxiv.org/abs/2005.06242.
+[69] T. Yoshimura and H. Spohn, Collision rate ansatz for quantum integrable systems (2020),
+https://arxiv.org/abs/2004.07113.
+[70] A. C. Cubero and M. Panfil, Thermodynamic bootstrap program for integrable QFT’s: form factors and correlation functions
+at finite energy density, Journal of High Energy Physics 2019(1) (2019), doi:10.1007/jhep01(2019)104.
+[71] A. C. Cubero and M. Panfil, Generalized hydrodynamics regime from the thermodynamic bootstrap program, SciPost
+Physics 8(1) (2020), doi:10.21468/scipostphys.8.1.004.
+[72] A. C. Cubero, How generalized hydrodynamics time evolution arises from a form factor expansion (2020),
+https://arxiv.org/abs/2001.03065.
+[73] E. Granet, M. Fagotti and F. H. L. Essler, Finite temperature and quench dynamics in the Transverse Field Ising Model
+from form factor expansions (2020), https://arxiv.org/abs/2003.09014.
+[74] E. H. Lieb and W. Liniger, Exact analysis of an interacting bose gas. i. the general solution and the ground state, Physical
+Review 130(4), 1605 (1963), doi:10.1103/physrev.130.1605.
+[75] L. Tonks, The complete equation of state of one, two and three-dimensional gases of hard elastic spheres, Physical Review
+50(10), 955 (1936), doi:10.1103/physrev.50.955.
+[76] M. Girardeau, Relationship between systems of impenetrable bosons and fermions in one dimension, Journal of Mathe-
+matical Physics 1(6), 516 (1960), doi:10.1063/1.1703687.
+[77] M. Ljubotina, S. Sotiriadis and T. Prosen, Non-equilibrium quantum transport in presence of a defect: the non-interacting
+case, SciPost Physics 6(1) (2019), doi:10.21468/scipostphys.6.1.004.
+http://dx.doi.org/10.1088/1751-8121/aa8c62
+http://dx.doi.org/10.21468/scipostphys.3.6.039
+http://dx.doi.org/10.21468/scipostphys.3.6.039
+http://dx.doi.org/10.1016/j.nuclphysb.2017.12.002
+http://dx.doi.org/10.1088/1742-5468/aa7abf
+http://dx.doi.org/10.1103/physrevlett.124.140603
+http://dx.doi.org/10.1088/1742-5468/ab6846
+http://dx.doi.org/10.1088/1742-5468/2016/06/064002
+http://dx.doi.org/10.1088/1742-5468/2016/06/064003
+http://dx.doi.org/10.1088/1742-5468/2016/06/064004
+http://dx.doi.org/10.1088/1742-5468/2016/06/064006
+http://dx.doi.org/10.1088/1742-5468/2016/06/064007
+http://dx.doi.org/10.1088/1742-5468/2016/06/064008
+http://dx.doi.org/10.1088/1742-5468/2016/06/064009
+http://dx.doi.org/10.1088/1742-5468/2016/06/064009
+http://dx.doi.org/10.1088/1742-5468/2016/06/064010
+http://dx.doi.org/10.1103/physrevlett.121.160603
+http://dx.doi.org/10.21468/scipostphys.6.4.049
+http://dx.doi.org/10.1103/physrevlett.123.186601
+http://dx.doi.org/10.1103/physrevlett.121.230602
+http://dx.doi.org/10.1103/physrevlett.110.257203
+http://dx.doi.org/10.1103/physrevx.10.011054
+http://dx.doi.org/10.21468/scipostphys.8.2.016
+http://dx.doi.org/10.1007/jhep01(2019)104
+http://dx.doi.org/10.21468/scipostphys.8.1.004
+http://dx.doi.org/10.1103/physrev.130.1605
+http://dx.doi.org/10.1103/physrev.50.955
+http://dx.doi.org/10.1063/1.1703687
+http://dx.doi.org/10.21468/scipostphys.6.1.004
+21
+[78] C. Andréief, Note sur une relation entre les integrales definies des products des fonctions, Mem. Soc. Sci. Bordeaux 3(2),
+1 (1883).
+[79] A. D. Luca, G. Martelloni and J. Viti, Stationary states in a free fermionic chain from the quench action method, Physical
+Review A 91(2) (2015), doi:10.1103/physreva.91.021603.
+[80] B. Pozsgay and G. Takács, Form factor expansion for thermal correlators, Journal of Statistical Mechanics: Theory and
+Experiment 2010(11), P11012 (2010), doi:10.1088/1742-5468/2010/11/p11012.
+http://dx.doi.org/10.1103/physreva.91.021603
+http://dx.doi.org/10.1088/1742-5468/2010/11/p11012

@@ -1,0 +1,5053 @@
+Cross-validation Confidence Intervals for Test Error
+Pierre Bayle∗
+Princeton University
+pbayle@princeton.edu
+Alexandre Bayle∗
+Harvard University
+alexandre bayle@g.harvard.edu
+Lucas Janson
+Harvard University
+ljanson@fas.harvard.edu
+Lester Mackey
+Microsoft Research New England
+lmackey@microsoft.com
+Abstract
+This work develops central limit theorems for cross-validation and consistent esti-
+mators of its asymptotic variance under weak stability conditions on the learning
+algorithm. Together, these results provide practical, asymptotically-exact confi-
+dence intervals for k-fold test error and valid, powerful hypothesis tests of whether
+one learning algorithm has smaller k-fold test error than another. These results are
+also the first of their kind for the popular choice of leave-one-out cross-validation.
+In our real-data experiments with diverse learning algorithms, the resulting inter-
+vals and tests outperform the most popular alternative methods from the literature.
+1 Introduction
+Cross-validation (CV) [48, 25] is a de facto standard for estimating the test error of a prediction
+rule. By partitioning a dataset into k equal-sized validation sets, fitting a prediction rule with each
+validation set held out, evaluating each prediction rule on its corresponding held-out set, and aver-
+aging the k error estimates, CV produces an unbiased estimate of the test error with lower variance
+than a single train-validation split could provide. However, these properties alone are insufficient
+for high-stakes applications in which the uncertainty of an error estimate impacts decision-making.
+In predictive cancer prognosis and mortality prediction for instance, scientists and clinicians rely on
+test error confidence intervals based on CV and other repeated sample splitting estimators to avoid
+spurious findings and improve reproducibility [41, 44]. Unfortunately, the confidence intervals most
+often used have no correctness guarantees and can be severely misleading [29]. The difficulty comes
+from the dependence across the k averaged error estimates: if the estimates were independent, one
+could derive an asymptotically exact confidence interval for test error using a standard central limit
+theorem. However, the error estimates are seldom independent, due to the overlap amongst training
+sets and between different training and validation sets. Thus, new tools are needed to develop valid,
+informative confidence intervals based on CV.
+The same uncertainty considerations are relevant when comparing two machine learning methods:
+before selecting a prediction rule for deployment, one would like to be confident that its test error
+is better than a baseline or an available alternative. The standard practice amongst both method
+developers and consumers is to conduct a formal hypothesis test for a difference in test error between
+two prediction rules [21, 37, 42, 13, 18]. Unfortunately, the most popular tests from the literature
+like the cross-validated t-test of [21], the repeated train-validation t-test of [42], and the 5 × 2 CV
+test of [21] have no correctness guarantees and hence can produce misleading conclusions. The
+difficulty parallels that of the confidence interval setting: standard tests assume independence and
+do not appropriately account for the dependencies across CV error estimates. Therefore, new tools
+are also needed to develop valid, powerful tests for test error improvement based on CV.
+Our contributions To meet these needs, we characterize the asymptotic distribution of CV error
+and develop consistent estimates of its variance under weak stability conditions on the learning al-
+∗Equal contribution
+ar
+X
+iv
+:2
+00
+7.
+12
+67
+1v
+1 
+ [
+st
+at
+.M
+L
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+gorithm. Together, these results provide practical, asymptotically-exact confidence intervals for test
+error as well as valid and powerful hypothesis tests of whether one learning algorithm has smaller
+test error than another. In more detail, we prove in Section 2 that k-fold CV error is asymptotically
+normal around its test error under an abstract asymptotic linearity condition. We then give in Sec-
+tion 3 two different stability conditions that hold for large classes of learning algorithms and losses
+and individually imply the asymptotic linearity condition. In Section 4, we propose two estimators
+of the asymptotic variance of CV and prove them to be consistent under similar stability conditions;
+our second estimator accommodates any choice of k and appears to be the first consistent variance
+estimator for leave-one-out CV. To validate our theory in Section 5, we apply our intervals and tests
+to a diverse collection of classification and regression methods on particle physics and flight delay
+data and observe consistent improvements in width and power over the most popular alternative
+methods from the literature.
+1.1 Related work
+Despite the ubiquity of CV, we are only aware of three prior efforts to characterize the precise distri-
+bution of cross-validation error. The cross-validation CLT of Dudoit and van der Laan [22] requires
+considerably stronger assumptions than our own and is not paired with the consistent estimate of
+variance needed to construct a valid confidence interval or test. LeDell et al. [35] derive both a CLT
+and a consistent estimate of variance for CV, but these apply only to the area under the ROC curve
+(AUC) performance measure. Finally, in very recent work, Austern and Zhou [5] derive a CLT and a
+consistent estimate of variance for CV under more stringent assumptions than our own. We compare
+our results with each of these works in detail in Section 3.3. We note also that another work [36]
+aims to test the difference in test error between two learning algorithms using cross-validation but
+only proves the validity of their procedure for a single train-validation split rather than for CV.
+Many other works have studied the problem of bounding or estimating the variance of the cross-
+validation error [11, 42, 9, 38, 30, 33, 16, 2, 3], but none have established the consistency of their
+variance estimators. Among these, Kale et al. [30], Kumar et al. [33], Celisse and Guedj [16] intro-
+duce relevant notions of algorithmic stability to which we link our results in Section 3.1.
+1.2 Notation
+Let
+d→, p→, and L
+q
+→ for q > 0, denote convergence in distribution, in probability, and in Lq norm
+(i.e., Xn
+Lq→ X ⇔ E[|Xn − X|q] → 0), respectively. For each m,n ∈ N with m ≤ n, we
+define the set [n] , {1, . . . , n} and the vector m :n , (m, . . . , n). When considering independent
+random elements (X,Y ), we use EX and VarX to indicate expectation and variance only over X ,
+respectively; that is, EX [f(X,Y )] = E[f(X,Y ) | Y ] and VarX(f(X,Y )) = Var(f(X,Y ) | Y )
+for any measurable function f . We will refer to the Euclidean norm of a vector as the `2 norm in the
+context of `2 regularization.
+2 A Central Limit Theorem for Cross-validation
+In this section, we present a new central limit theorem for k-fold cross-validation. Throughout, any
+asymptotic statement will take n → ∞, and while we allow the number of folds kn to depend on
+the sample size n (e.g., kn = n for leave-one-out cross-validation), we will write k in place of kn to
+simplify our notation. We will also present our main results assuming that k evenly divides n, but
+we address the indivisible setting in the appendix.
+Hereafter, we will refer to a sequence (Zi)i≥1 of random datapoints taking values in a set Z . No-
+tably, (Zi)i≥1 need not be independent or identically distributed. We let Z1:n designate the first n
+points, and, for any vectorB of indices in [n], we let ZB denote the subvector of Z1:n corresponding
+to ordered indices in B. We will also refer to train-validation splits (B,B′). These are vectors of
+indices in [n] representing the ordered points assigned to the training set and validation set.2 As is
+typical in CV, we will assume that B and B′ partition [n], so that every datapoint is either in the
+training or validation set.
+2We keep track of index order to support asymmetric learning algorithms like stochastic gradient descent.
+2
+Given a scalar loss function hn(Zi, ZB) and a set of k train-validation splits {(Bj , B′j)}
+k
+j=1 with
+validation indices {B′j}
+k
+j=1 partitioning [n] into k folds, we will use the k-fold cross-validation error
+R̂n ,
+1
+n
+∑k
+j=1
+∑
+i∈B′
+j
+hn(Zi, ZBj )
+to draw inferences about the k-fold test error
+Rn ,
+1
+n
+∑k
+j=1
+∑
+i∈B′
+j
+E[hn(Zi, ZBj ) | ZBj ]. (2.1)
+A prototypical example of hn is squared error or 0-1 loss,
+hn(Zi, ZB) = (Yi − f̂(Xi;ZB))2 or hn(Zi, ZB) = 1
+[
+Yi 6= f̂(Xi;ZB)
+]
+,
+composed with an algorithm for fitting a prediction rule f̂(·;ZB) to training data ZB and predicting
+the response value of a test point Zi = (Xi, Yi).3 In this setting, the k-fold test error is a standard
+inferential target [11, 22, 30, 33, 5] and represents the average test error of the k prediction rules
+f̂(·;ZBj ). When comparing the performance of two algorithms in Sections 4 and 5, we will choose
+hn to be the difference between the losses of two prediction rules.
+2.1 Asymptotic linearity of cross-validation
+The key to our central limit theorem is establishing that the k-fold CV error asymptotically behaves
+like the k-fold test error plus an average of functions applied to single datapoints. The following
+proposition provides a convenient characterization of this asymptotic linearity property.
+Proposition 1 (Asymptotic linearity of k-fold CV). For any sequence of datapoints (Zi)i≥1,
+√
+n
+σn
+(
+R̂n −Rn
+)
+− 1
+σn
+√
+n
+∑n
+i=1
+(
+h̄n(Zi)− E
+[
+h̄n(Zi)
+]) p→ (resp. Lq→) 0
+for a function h̄n with σ2n ,
+1
+n
+Var(
+∑n
+i=1 h̄n(Zi)) if and only if
+1
+σn
+√
+n
+∑k
+j=1
+∑
+i∈B′
+j
+(
+hn
+(
+Zi, ZBj
+)
+− E
+[
+hn
+(
+Zi, ZBj
+)
+| ZBj
+]
+(2.2)
+−
+(
+h̄n(Zi)− E
+[
+h̄n(Zi)
+])) p→ (resp. Lq→) 0,
+where the parenthetical convergence indicates that the same statement holds when both conver-
+gences in probability are replaced with convergences in Lq for the same q > 0.
+Typically, one will choose h̄n(z) = E[hn(z, Z1:n(1−1/k))] in Proposition 1. With this choice, we
+see that the difference of differences in (2.2) is small whenever hn(Zi, ZBj ) is close to either its ex-
+pectation given Zi or its expectation given ZBj , but it need not be close to both. As the asymptotic
+linearity condition (2.2) is still quite abstract, we devote all of Section 3 to establishing sufficient
+conditions for (2.2) that are interpretable, broadly applicable, and simple to verify. Proposition 1
+follows from a more general asymptotic linearity characterization for repeated sample-splitting es-
+timators proved in Appendix A.
+2.2 From asymptotic linearity to asymptotic normality
+So far, we have assumed nothing about the dependencies amongst the datapoints Zi. If we addition-
+ally assume that the datapoints are i.i.d., the average 1
+σn
+√
+n
+∑n
+i=1
+(
+h̄n(Zi)− E
+[
+h̄n(Zi)
+])
+converges
+to a standard normal under a mild integrability condition, and we obtain the following central limit
+theorem for CV.
+Theorem 1 (Asymptotic normality of k-fold CV with i.i.d. data). Under the notation of Proposi-
+tion 1, suppose that the datapoints (Zi)i≥1 are i.i.d. copies of a random element Z0 and that the
+sequence of (h̄n(Z0) − E[h̄n(Z0)])2/σ2n with σ2n = Var(h̄n(Z0)) is uniformly integrable. If the
+asymptotic linearity condition (2.2) holds in probability then
+√
+n
+σn
+(R̂n −Rn)
+d→ N (0, 1).
+3For randomized learning algorithms (such as random forests or stochastic gradient descent), all statements
+in this paper should be treated as holding conditional on the external source of randomness.
+3
+Theorem 1 is a special case of a more general result, proved in Appendix B, that applies when the
+datapoints are independent but not necessarily identically distributed. A simple sufficient condition
+for the required uniform integrability is that supn E[|(h̄n(Z0) − E[h̄n(Z0)])/σn|α] < ∞ for some
+α > 2. This holds, for example, whenever h̄n(Z0) has uniformly bounded α moments (e.g., the 0-1
+loss has all moments uniformly bounded) and does not converge to a degenerate distribution. We
+now turn our attention to the asymptotic linearity condition.
+3 Sufficient Conditions for Asymptotic Linearity
+In this section, we detail practical sufficient conditions for ensuring the asymptotic linearity condi-
+tion (2.2).
+3.1 Asymptotic linearity from loss stability
+Our first result relates the asymptotic linearity of CV to a specific notion of algorithmic stability,
+termed loss stability.
+Definition 1 (Mean-square stability and loss stability). For m > 0, let Z0 and Z ′0, Z1, . . . , Zm be
+i.i.d. test and training points with Z\i1:m representing Z1:m with Zi replaced by Z
+′
+0. For any function
+h : Z × Zm → R, the mean-square stability [30] is defined as
+γms(h) ,
+1
+m
+∑m
+i=1 E[(h(Z0, Z1:m)− h(Z0, Z
+\i
+1:m))
+2] (3.1)
+and the loss stability [33] as γloss(h) , γms(h′), where
+h′(Z0, Z1:m) , h(Z0, Z1:m)− E[h(Z0, Z1:m) | Z1:m].
+Kumar et al. [33] introduced loss stability to bound the variance of CV in terms of the variance of
+a single hold-out set estimate. Here we show that a suitable decay in loss stability is also sufficient
+for L2 asymptotic linearity.
+Theorem 2 (Asymptotic linearity from loss stability). Under the notation of Proposition 1 and
+Definition 1, suppose that the datapoints (Zi)i≥1 are i.i.d. copies of a random element Z0. Then
+Var( 1√
+n
+∑k
+j=1
+∑
+i∈B′
+j
+(h′n(Zi, ZBj )− E[h′n(Zi, ZBj ) | Zi])) ≤
+3
+2
+n
+(
+1− 1
+k
+)
+γloss(hn). (3.2)
+Hence the L2 asymptotic linearity condition (2.2) holds with h̄n(z) = E[hn(z, Z1:n(1−1/k))] if the
+loss stability satisfies γloss(hn) = o(σ2n/n).
+The proof of Theorem 2 is given in Appendix C. Recall that in a typical learning context, we have
+hn(Z0, Z1:m) = `(Y0, f̂(X0;Z1:m)) for a fixed loss `, a learned prediction rule f̂(·;Z1:m), a test
+point Z0 = (X0, Y0), and m = n(1− 1/k). When f̂(·;Z1:m) converges to an imperfect prediction
+rule, we will commonly have σ2n = Var(E[hn(Z0, Z1:m) | Z0]) = Ω(1) so that γloss(hn) = o(1/n)
+loss stability is sufficient. However, Theorem 2 also accommodates the cases of non-convergent
+f̂(·;Z1:m) and of f̂(·;Z1:m) converging to a perfect prediction rule, so that σ2n = o(1).
+Many learning algorithms are known to enjoy decaying loss stability [14, 24, 28, 16, 4], in part
+because loss stability is upper-bounded by a variety of algorithmic stability notions studied in the
+literature. For example, stochastic gradient descent on convex and non-convex objectives [28] and
+the empirical risk minimization of a strongly convex and Lipschitz objective both have O(1/n)
+uniform stability [14], and O(1/n) uniform stability implies a loss stability of O(1/n2) = o(1/n)
+by [30, Lemma 1] and [33, Lemma 2]. Moreover, ensemble methods like bagging and subbagging
+preserve the stability of various base algorithms and in some cases even improve it [24]. More
+generally, for any loss function, loss stability is upper-bounded by mean-square stability [30] and all
+Lq stabilities [16] for q ≥ 2. For bounded loss functions such as the 0-1 loss, loss stability is also
+weaker than hypothesis stability (also called L1 stability) [19, 31], weak-hypothesis stability [20],
+and weak-L1 stability [34].
+3.2 Asymptotic linearity from conditional variance convergence
+We can also guarantee asymptotic linearity under weaker moment conditions than Theorem 2 at the
+expense of stronger requirements on the number of folds k.
+4
+Theorem 3 (Asymptotic linearity from conditional variance convergence). Under the notation of
+Proposition 1, suppose that the datapoints (Zi)i≥1 are i.i.d. copies of a random element Z0. If a
+function h̄n satisfies
+max(kq/2, k1−q/2)E
+[(
+1
+σ2n
+VarZ0
+(
+hn(Z0, Z1:n(1−1/k))− h̄n(Z0)
+))q/2]
+→ 0 (3.3)
+for some q ∈ (0, 2], then h̄n satisfies the Lq asymptotic linearity condition (2.2). If a function h̄n
+satisfies
+E
+[
+min
+(
+k,
+√
+k
+σn
+√
+VarZ0
+(
+hn(Z0, Z1:n(1−1/k))− h̄n(Z0)
+))]
+→ 0. (3.4)
+then h̄n satisfies the in-probability asymptotic linearity condition (2.2).
+Remark 1. When k = O(1), as in 10-fold CV, (3.4) holds if and only if
+1
+σn
+√
+VarZ0
+(
+hn(Z0, Z1:n(1−1/k))− h̄n(Z0)
+) p→ 0.
+Theorem 3 follows from a more general statement proved in Appendix D. When k is bounded,
+as in 10-fold CV, the conditions of Theorem 3 are considerably weaker than those of Theorem 2
+(see Appendix E), granting asymptotic linearity whenever the conditional variance converges in
+probability rather than in L2. Indeed in Appendix G, we detail a simple learning problem in which
+the loss stability is infinite but Theorems 1 and 3 together provide a valid CLT with convergent
+variance σ2n.
+3.3 Comparison with prior work
+Our sufficient conditions for asymptotic normality are significantly less restrictive and more broadly
+applicable than the three prior distributional characterizations of CV error [22, 35, 5]. In particular,
+the CLT of Dudoit and van der Laan [22, Thm. 3] assumes a bounded loss function, excludes the
+popular case of leave-one-out cross-validation, and requires the prediction rule to be loss-consistent
+for a risk-minimizing prediction rule. Similarly, the CLT of LeDell et al. [35, Thm. 4.1] applies only
+to AUC loss, requires the prediction rule to be loss-consistent for a deterministic prediction rule, and
+requires a bounded number of folds.
+Moreover, in our notation, the recent CLT of Austern and Zhou [5, Thm. 1] restricts focus to learning
+algorithms that treat all training points symmetrically, assumes that its variance parameter
+σ̃2n , E[Var(hn(Z0, Z1:m) | Z1:m)] (3.5)
+converges to a non-zero limit, requires mean-square stability γms(hn) = o(1/n), and places a
+o(1/n2) constraint on the second-order mean-square stability
+E[((hn(Z0, Z1:m)− hn(Z0, Z
+\1
+1:m))− (hn(Z0, Z
+\2
+1:m)− hn(Z0, Z
+\1,2
+1:m )))
+2] = o(1/n2), (3.6)
+where Z\1,21:m represents Z1:m with Z1, Z2 replaced by i.i.d. copies Z
+′
+1, Z
+′
+2. Kumar et al. [33]
+showed that the mean-square stability is always an upper bound for the loss stability required
+by our Theorem 2, and in Appendices F and G we exhibit two simple learning tasks in which
+γloss(hn) = O(1/n
+2) but γms(hn) = ∞. Furthermore, when k is constant, as in 10-fold CV, our
+conditional variance assumptions in Section 3.2 are weaker still and hold even for algorithms with
+infinite loss stability (see Appendix G). In addition, our results allow for asymmetric learning al-
+gorithms (like stochastic gradient descent), accommodate growing, vanishing, and non-convergent
+variance parameters σ2n, and do not require the second-order mean-square stability condition (3.6).
+Finally, we note that the asymptotic variance parameter σ2n appearing in Theorem 1 is never larger
+and sometimes smaller than the variance parameter σ̃2n in [5, Thm. 1].
+Proposition 2 (Variance comparison). Let σ2n = Var(E[hn(Z0, Z1:m) | Z0]) be the variance ap-
+pearing in Theorem 1, with the choice h̄n(z) = E[hn(z, Z1:m)], and σ̃2n = E[Var(hn(Z0, Z1:m) |
+Z1:m)] be the variance parameter of [5, Eq. (15)] for m = n(1− 1/k). Then
+σ2n ≤ σ̃2n ≤ σ2n +
+m
+2
+γloss(hn),
+and the first inequality is strict whenever h(Z0, Z1:m)− E[h(Z0, Z1:m) | Z1:m] depends on Z1:m.
+5
+The proof of Proposition 2 can be found in Appendix H. In Appendix G, we present a simple learning
+task for which our central limit theorem provably holds with σ2n converging to a non-zero constant,
+but the central limit theorem in [5, Eq. (15)] is inapplicable because the variance parameter σ̃2n is
+infinite.
+4 Confidence Intervals and Tests for k-fold Test Error
+A primary application of our central limit theorems is the construction of asymptotically-exact con-
+fidence intervals (CIs) for the unknown k-fold test error. For example, under the assumptions and
+notation of Theorem 1, any sample statistic σ̂2n satisfying relative error consistency, σ̂
+2
+n/σ
+2
+n
+p→ 1,
+gives rise to an asymptotically-exact (1− α)-confidence interval,
+Cα = R̂n ± q1−α/2σ̂n/
+√
+n satisfying limn→∞ P(Rn ∈ Cα) = 1− α, (4.1)
+where q1−α/2 is the (1− α/2)-quantile of a standard normal distribution.
+A second, related application of our central limit theorems is testing whether, given a dataset Z1:n,
+a k-fold partition {B′j}
+k
+j=1, and two algorithms A1, A2 for fitting prediction rules, A2 has larger
+k-fold test error than A1. In this circumstance, we may define
+hn(Z0, ZB) = `(Y0, f̂1(X0;ZB))− `(Y0, f̂2(X0;ZB))
+to be the difference of the loss functions of two prediction rules trained on ZB and tested on Z0 =
+(X0, Y0). Our aim is to test whether A1 improves upon A2 on the fold partition, that is to test the
+null H0 : Rn ≥ 0 against the alternative hypothesis H1 : Rn < 0. Under the assumptions and
+notation of Theorem 1, an asymptotically-exact level-α test is given by4
+REJECT H0 ⇔ R̂n < qασ̂n/
+√
+n (4.2)
+where qα is the α-quantile of a standard normal distribution and σ̂2n is any variance estimator satisfy-
+ing relative error consistency, σ̂2n/σ
+2
+n
+p→ 1. Fortunately, our next theorem describes how to compute
+such a consistent estimate of σ2n under weak conditions.
+Theorem 4 (Consistent within-fold estimate of asymptotic variance). Under the notation of Theo-
+rem 1 with m = n(1 − 1/k), h̄n(z) = E[hn(z, Z1:m)], and k < n, define the within-fold variance
+estimator
+σ̂2n,in ,
+1
+k
+∑k
+j=1
+1
+(n/k)−1
+∑
+i∈B′
+j
+(
+hn(Zi, ZBj )−
+k
+n
+∑
+i′∈B′
+j
+hn(Zi′ , ZBj )
+)2
+.
+Suppose (Zi)i≥1 are i.i.d. copies of a random element Z0. Then σ̂2n,in/σ
+2
+n
+L1→ 1 whenever
+γloss(hn) = o(σ
+2
+n/n) and the sequence of (h̄n(Z0) − E[h̄n(Z0)])2/σ2n is uniformly integrable.
+Moreover, σ̂2n,in/σ
+2
+n
+L2→ 1 whenever E[((h̄n(Z0)−E[h̄n(Z0)])/σn)4] = o(n) and the fourth-moment
+loss stability γ4(h′n) ,
+1
+m
+∑m
+i=1 E[(h
+′
+n(Z0, Z1:m)− h′n(Z0, Z
+\i
+1:m))
+4] = o(σ4n/n
+2). Here, Z\i1:m de-
+notes Z1:m with Zi replaced by an identically distributed copy independent of Z0:m.
+Theorem 4 follows from explicit error bounds proved in Appendix I. A first notable take-away is
+that the same two conditions—loss stability γloss(hn) = o(σ2n/n) and uniform integrability of the
+sequence of (h̄n(Z0)−E[h̄n(Z0)])2/σ2n—grant both a central-limit theorem for CV (by Theorems 1
+and 2) and an L1-consistent estimate of σ2n (by Theorem 4). Moreover, the L
+2-consistency bound
+of Appendix I can be viewed as a strengthening of the consistency result of [5, Prop. 1] which
+analyzes the same variance estimator under more stringent assumptions. In our notation, to establish
+L2 consistency, [5, Prop. 1] additionally requires hn symmetric in its training points, convergence
+of the variance parameter σ̃2n (3.5) to a non-zero constant, control over a fourth-moment analogue
+of mean-square stability γ4(hn) = o(σ4n/n
+2) instead of the smaller fourth-moment loss stability
+γ4(h
+′
+n), and the more restrictive fourth-moment condition E[(hn(Z0, Z1:m)/σn)
+4] = O(1).5 By
+Proposition 2, their assumptions further imply that σ2n converges to a non-zero constant. In contrast,
+4The test (4.2) is equivalent to rejecting when the one-sided interval (−∞, R̂n − qασ̂n/
+√
+n ] excludes 0.
+5The result [5, Prop. 1] also assumes a fourth moment second-order stability condition similar to (3.6), but
+this appears to not be used in the proof.
+6
+Theorem 4 accommodates growing, vanishing, and non-convergent variance parameters σ2n and a
+wider variety of learning procedures and losses.
+Since Theorem 4 necessarily excludes the case of leave-one-out CV (k = n), we propose a second
+estimator with consistency guarantees for any k and only slightly stronger stability conditions than
+Theorem 4 when k = Ω(n). Notably, Austern and Zhou [5] do not provide a consistent variance
+estimator for k = n, and Dudoit and van der Laan [22] do not establish the consistency of any
+variance estimator.
+Theorem 5 (Consistent all-pairs estimate of asymptotic variance). Under the notation of Theorem 1
+with m = n(1− 1/k), and h̄n(z) = E[hn(z, Z1:m)], define the all-pairs variance estimator
+σ̂2n,out ,
+1
+k
+∑k
+j=1
+k
+n
+∑
+i∈B′
+j
+(
+hn(Zi, ZBj )− R̂n
+)2
+.
+If (Zi)i≥1 are i.i.d. copies of a random element Z0, then σ̂2n,out/σ
+2
+n
+L1→ 1 whenever γloss(hn) =
+o(σ2n/n), γms(hn) = o(kσ
+2
+n/n), and the sequence of (h̄n(Z0) − E[h̄n(Z0)])2/σ2n is uniformly
+integrable.
+Theorem 5 follows from an explicit error bound proved in Appendix J and compared with the L1-
+consistency result of Theorem 4 differs only in the added requirement γms(hn) = o(kσ2n/n). This
+mean-square stability condition is especially mild when k = Ω(n) (as in the case of leave-one-out
+CV) and ensures that two training sets differing in only n/k points produce prediction rules with
+comparable test losses.
+Importantly, both σ̂2n,in and σ̂
+2
+n,out can be computed inO(n) time using just the individual datapoint
+losses hn(Zi, ZBj ) outputted by a run of k-fold cross-validation. Moreover, when hn is binary, as
+in the case of 0-1 loss, one can compute σ̂2n,out = R̂n(1 − R̂n) in O(1) time given access to the
+overall cross-validation error R̂n and σ̂2n,in =
+1
+k
+∑k
+j=1
+(n/k)
+(n/k)−1 R̂n,j(1 − R̂n,j) in O(k) time given
+access to the k average fold errors R̂n,j ,
+k
+n
+∑
+i∈B′
+j
+hn(Zi, ZBj ).
+5 Numerical Experiments
+In this section, we compare our test error confidence intervals (4.1) and tests for algorithm improve-
+ment (4.2) with the most popular alternatives from the literature: the hold-out test described in [5,
+Eq. (17)] based on a single train-validation split, the cross-validated t-test of [21], the repeated train-
+validation t-test of [42] (with and without correction), and the 5 × 2-fold CV test of [21].6 These
+procedures are commonly used and admit both two-sided CIs and one-sided tests, but, unlike our
+proposals, none except the hold-out method are known to be valid. We use 90-10 train-validation
+splits for all tests save 5× 2-fold CV and report our results using σ̂2n,out (as σ̂2n,in results are nearly
+identical).
+Evaluating the quality of CIs and tests requires knowledge of the target test error.7 In each experi-
+ment, we use points subsampled from a large real dataset to form a surrogate ground-truth estimate
+of the test error. Then, we evaluate the CIs and tests constructed from 500 training sets of sample
+sizes n ranging from 700 to 11, 000 subsampled from the same dataset. Each mean width estimate
+is displayed with a ± 2 standard error confidence band. The surrounding confidence bands for the
+coverage, size, and power estimates are 95% Wilson intervals [50], which are known to provide
+more accurate coverage for binomial proportions than a ± 2 standard error interval [15]. We use
+the Higgs dataset of [6, 7] to study the classification error of random forest, neural network, and
+`2-penalized logistic regression classifiers and the Kaggle FlightDelays dataset of [1] to study the
+mean-squared regression error of random forest, neural network, and ridge regression. In each case,
+we focus on stable settings of these learning algorithms with sufficiently strong `2 regularization for
+6We exclude McNemar’s test [39] and the difference-of-proportions test which Dietterich [21] found to
+be less powerful than 5 × 2-fold CV and the conservative Z-test which Nadeau and Bengio [42] found less
+powerful and more expensive than corrected repeated train-validation splitting.
+7Generalizing the notion of k-fold test error (2.1), we define the target test error for each testing procedure
+to be the average test error of the learned prediction rules; see Appendix K.2 for more details.
+7
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+103 104
+Sample size n (log scale)
+0.02
+0.04
+0.06
+0.08
+0.10
+0.12
+0.14
+0.16
+W
+id
+th
+103 104
+Sample size n (log scale)
+0.20
+0.40
+0.60
+0.80
+1.00
+1.20
+1.40
+1.60
+1.80
+W
+id
+th
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+Figure 1: Test error coverage (top) and width (bottom) of 95% confidence intervals (see Section 5.1).
+Left: `2-regularized logistic regression classifier. Right: Random forest regression.
+the neural network, logistic, and ridge learners and small depths for the random forest trees. Com-
+plete experimental details are available in Appendix K.1, and code replicating all experiments can
+be found at https://github.com/alexandre-bayle/cvci.
+5.1 Confidence intervals for test error
+In Appendix L.1, we compare the coverage and width of each procedure’s 95% CI for each of
+the described algorithms, datasets, and training set sizes. Two representative examples—logistic
+regression classification and random forest regression—are displayed in Fig. 1. While the repeated
+train-validation CI significantly undercovers in all cases, all remaining CIs have coverage near the
+95% target, even for the smallest training set size of n = 700. The hold-out CI, while valid, is
+substantially wider and less informative than the other intervals as it is based on only a single train-
+validation split. Meanwhile, our CLT-based CI delivers the smallest width8 (and hence greatest
+precision) for both learning tasks and every dataset size.
+5.2 Testing for improved algorithm performance
+For convenience, let us write Err(A1) < Err(A2) to signify that the test error of A1 is smaller than
+that of A2. In Appendix L.2, for each testing procedure, dataset, and pair of algorithms (A1,A2),
+we display the size and power of level α = 0.05 one-sided tests (4.2) of H1 : Err(A1) < Err(A2).
+In each case, we report size estimates for experiments with at least 25 replications under the null
+and power estimates for experiments with at least 25 replications under the alternative. Here, for
+representative algorithm pairs, we identify the algorithm A1 that more often has smaller test error
+across our simulations and display both the power of the level α = 0.05 test of H1 : Err(A1) <
+Err(A2) and the size of the level α = 0.05 test of H1 : Err(A2) < Err(A1). Fig. 2 displays these
+results for (A1,A2) = (`2-regularized logistic regression, neural network) classification on the left
+and (A1,A2) = (random forest, ridge) regression on the right. The sizes of all testing procedures are
+below the nominal level of 0.05, and our test is consistently the most powerful for both classification
+and regression. The hold-out test, while also valid, is significantly less powerful due to its reliance
+on a single train-validation split.
+8All widths in Fig. 1 are displayed with ±2 standard error bars, but some are too small to be visible.
+8
+https://github.com/alexandre-bayle/cvci
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+Figure 2: Size when testing H1 : Err(A1) < Err(A2) (top) and power when testing H1 : Err(A2) <
+Err(A1) (bottom) of level-0.05 tests for improved test error (see Section 5.2). Left: A1 = `2-
+regularized logistic regression, A2 = neural network classification. Right: A1 = random forest,
+A2 = ridge regression.
+5.3 The importance of stability
+To illustrate the impact of algorithmic instability on testing procedures, we additionally compare a
+less stable neural network (with substantially reduced `2 regularization strength) and a less stable
+random forest regressor (with larger-depth trees). In Fig. 12 in Appendix L.3, we observe that the
+size of every test save the hold-out test rises above the nominal level. In the case of our test, the cause
+of this size violation is clear. Fig. 14a in Appendix L.3 demonstrates that the variance of
+√
+n
+σn
+(R̂n −
+Rn) in Theorem 1 is much larger than 1 for this experiment, and Theorem 2 implies this can only
+occur when the loss stability γloss(hn) is large. Meanwhile, the variance of the same quantity is
+close to 1 for the original stable settings of the neural network and random forest regressors. We
+suspect that instability is also the cause of the other tests’ size violations; however, it is difficult to
+be certain, as these alternative tests have no correctness guarantees.
+Interestingly, the same destabilized algorithms produce high-quality confidence intervals and rela-
+tively stable hn in the context of single algorithm assessment (see Figs. 13 and 14b in Appendix L.3),
+as the variance parameter σ2n = Var(h̄n(Z0)) is significantly larger for single algorithms. This find-
+ing highlights an important feature of our results: it suffices for the loss stability to be negligible
+relative to the noise level σ2n/n.
+5.4 Leave-one-out cross-validation
+Leave-one-out cross-validation (LOOCV) is often viewed as prohibitive for large datasets, due to the
+expense of refitting a prediction rule n times. However, for ridge regression, a well-known shortcut
+based on the Sherman–Morrison–Woodbury formula allows one to carry out LOOCV exactly in the
+time required to fit a small number of base ridge regressions (see Appendix K.3 for a derivation of
+this result). Moreover, recent work shows that, for many learning procedures, LOOCV estimates can
+be efficiently approximated with only O(1/n2) error [8, 27, 32, 49] (see also [45, 47, 26] for related
+guarantees). The O(1/n2) precision of these inexpensive approximations coupled with the LOOCV
+consistency of σ̂2n,out (see Theorem 5) allows us to efficiently construct asymptotically-valid CIs
+and tests for LOOCV, even when n is large. As a simple demonstration, we construct 95% CIs for
+ridge regression test error based on our LOOCV CLT and compare their coverage and width with
+9
+those of the procedures described in Section 5.1. In Fig. 3, we see that, like the 10-fold CV CLT
+intervals, the LOOCV intervals provide coverage near the nominal level and widths smaller than
+the popular alternatives from the literature; in fact, the 10-fold CV CLT curves are obscured by the
+nearly identical LOOCV CLT curves. Complete experimental details can be found in Appendix K.3.
+103 104
+Sample size n (log scale)
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+103 104
+Sample size n (log scale)
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+1.6
+1.8
+W
+id
+th
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+LOOCV CLT (Ours)
+Figure 3: Test error coverage (left) and width (right) of 95% confidence intervals for ridge regres-
+sion, including leave-one-out CV intervals (see Section 5.4). The CV CLT curves are obscured by
+the nearly identical LOOCV CLT curves.
+6 Conclusion and Future Work
+Our central limit theorems and consistent variance estimators provide new, valid tools for testing
+algorithm improvement and generating test error intervals under algorithmic stability. An important
+open question is whether practical valid tests and intervals are also available when our stability
+conditions are violated. Another promising direction for future work is developing analogous tools
+for the expected test error E[Rn] instead of the k-fold test error Rn; Austern and Zhou [5] provide
+significant progress in this direction, but more work, particularly on variance estimation, is needed.
+Acknowledgments
+We would like to thank Jianqing Fan, Mykhaylo Shkolnikov, Miklos Racz, and Morgane Austern
+for helpful discussions.
+References
+[1] (2015). FlightDelays dataset. https://www.kaggle.com/usdot/flight-delays.
+[2] Abou-Moustafa, K. and Szepesvári, C. (2019a). An exponential tail bound for Lq stable learning
+rules. In Garivier, A. and Kale, S., editors, Proceedings of the 30th International Conference on
+Algorithmic Learning Theory, volume 98 of Proceedings of Machine Learning Research, pages
+31–63, Chicago, Illinois. PMLR.
+[3] Abou-Moustafa, K. and Szepesvári, C. (2019b). An exponential tail bound for the deleted
+estimate. In Proceedings of the Thirty-Third AAAI Conference on Artificial Intelligence, pages
+42–50.
+[4] Arsov, N., Pavlovski, M., and Kocarev, L. (2019). Stability of decision trees and logistic regres-
+sion. arXiv preprint arXiv:1903.00816v1.
+[5] Austern, M. and Zhou, W. (2020). Asymptotics of Cross-Validation. arXiv preprint
+arXiv:2001.11111v2.
+[6] Baldi, P., Sadowski, P., and Whiteson, D. (2014a). Searching for exotic particles in high-energy
+physics with deep learning. Nature Communications, 5.
+[7] Baldi, P., Sadowski, P., and Whiteson, D. (2014b). Higgs dataset. https://archive.ics.
+uci.edu/ml/datasets/HIGGS.
+10
+https://www.kaggle.com/usdot/flight-delays
+https://archive.ics.uci.edu/ml/datasets/HIGGS
+https://archive.ics.uci.edu/ml/datasets/HIGGS
+[8] Beirami, A., Razaviyayn, M., Shahrampour, S., and Tarokh, V. (2017). On optimal generaliz-
+ability in parametric learning. In Proceedings of the 31st International Conference on Neural
+Information Processing Systems, NIPS17, pages 3455–3465, Red Hook, NY, USA. Curran Asso-
+ciates Inc.
+[9] Bengio, Y. and Grandvalet, Y. (2004). No unbiased estimator of the variance of k-fold cross
+validation. Journal of Machine Learning Research, 5:1089–1105.
+[10] Billingsley, P. (1995). Probability and Measure, Third Edition.
+[11] Blum, A., Kalai, A., and Langford, J. (1999). Beating the hold-out: Bounds for k-fold and
+progressive cross-validation. In Proc. COLT, pages 203–208.
+[12] Boucheron, S., Bousquet, O., Lugosi, G., and Massart, P. (2005). Moment inequalities for
+functions of independent random variables. Annals of Probability, 33(2):514–560.
+[13] Bouckaert, R. R. and Frank, E. (2004). Evaluating the replicability of significance tests for
+comparing learning algorithms. In In PAKDD, pages 3–12. Springer.
+[14] Bousquet, O. and Elisseeff, A. (2002). Stability and generalization. Journal of Machine Learn-
+ing Research, 2:499–526.
+[15] Brown, L. D., Cai, T. T., and DasGupta, A. (2001). Interval estimation for a binomial propor-
+tion. Statistical Science, 16(2):101–133.
+[16] Celisse, A. and Guedj, B. (2016). Stability revisited: new generalisation bounds for the Leave-
+one-Out. arXiv preprint arXiv:1608.06412v1.
+[17] Chen, T. and Guestrin, C. (2016). Xgboost: A scalable tree boosting system. In Proceedings
+of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining,
+KDD 16, pages 785–794, New York, NY, USA. Association for Computing Machinery.
+[18] Demšar, J. (2006). Statistical comparisons of classifiers over multiple data sets. Journal of
+Machine Learning Research, 7:1–30.
+[19] Devroye, L. and Wagner, T. (1979a). Distribution-free inequalities for the deleted and holdout
+error estimates. IEEE Transactions on Information Theory, 25(2):202–207.
+[20] Devroye, L. and Wagner, T. (1979b). Distribution-free performance bounds for potential func-
+tion rules. IEEE Transactions on Information Theory, 25(5):601–604.
+[21] Dietterich, T. G. (1998). Approximate statistical tests for comparing supervised classification
+learning algorithms. Neural Computation, 10(7):1895–1923.
+[22] Dudoit, S. and van der Laan, M. J. (2005). Asymptotics of cross-validated risk estimation in
+estimator selection and performance assessment. Statistical Methodology, 2(2):131–154.
+[23] Durrett, R. (2019). Probability: Theory and Examples, Version 5.
+[24] Elisseeff, A., Evgeniou, T., and Pontil, M. (2005). Stability of randomized learning algorithms.
+Journal of Machine Learning Research, 6:55–79.
+[25] Geisser, S. (1975). The predictive sample reuse method with applications. Journal of the
+American Statistical Association, 70(350):320–328.
+[26] Ghosh, S., Stephenson, W. T., Nguyen, T. D., Deshpande, S. K., and Broderick, T. (2020).
+Approximate Cross-Validation for Structured Models. arXiv preprint arXiv:2006.12669v1.
+[27] Giordano, R., Stephenson, W., Liu, R., Jordan, M., and Broderick, T. (2019). A swiss army
+infinitesimal jackknife. In Chaudhuri, K. and Sugiyama, M., editors, Proceedings of Machine
+Learning Research, volume 89 of Proceedings of Machine Learning Research, pages 1139–1147.
+PMLR.
+[28] Hardt, M., Recht, B., and Singer, Y. (2016). Train faster, generalize better: Stability of stochas-
+tic gradient descent. In Proceedings of the 33rd International Conference on Machine Learning
+- Volume 48, ICML16, pages 1225–1234. JMLR.org.
+11
+[29] Jiang, W., Varma, S., and Simon, R. (2008). Calculating Confidence Intervals for Prediction
+Error in Microarray Classification Using Resampling. Statistical Applications in Genetics and
+Molecular Biology, 7(1).
+[30] Kale, S., Kumar, R., and Vassilvitskii, S. (2011). Cross-validation and mean-square stability. In
+Proceedings of the Second Symposium on Innovations in Computer Science (ICS2011). Citeseer.
+[31] Kearns, M. and Ron, D. (1999). Algorithmic stability and sanity-check bounds for leave-one-
+out cross-validation. Neural Computation, 11(6):1427–1453.
+[32] Koh, P. W., Ang, K.-S., Teo, H. H. K., and Liang, P. (2019). On the Accuracy of Influence
+Functions for Measuring Group Effects. In Proceedings of the 32nd International Conference on
+Neural Information Processing Systems, NIPS19, pages 5254–5264.
+[33] Kumar, R., Lokshtanov, D., Vassilvitskii, S., and Vattani, A. (2013). Near-optimal bounds
+for cross-validation via loss stability. In International Conference on Machine Learning, pages
+27–35.
+[34] Kutin, S. and Niyogi, P. (2002). Almost-everywhere algorithmic stability and generalization
+error. In Proceedings of the Eighteenth Conference on Uncertainty in Artificial Intelligence,
+UAI02, pages 275–282, San Francisco, CA, USA. Morgan Kaufmann Publishers Inc.
+[35] LeDell, E., Petersen, M., and van der Laan, M. (2015). Computationally efficient confidence
+intervals for cross-validated area under the roc curve estimates. Electronic Journal of Statistics,
+9(1):1583–1607.
+[36] Lei, J. (2019). Cross-validation with confidence. Journal of the American Statistical Associa-
+tion, pages 1–20.
+[37] Lim, T.-S., Loh, W.-Y., and Shih, Y.-S. (2000). A comparison of prediction accuracy, com-
+plexity, and training time of thirty-three old and new classification algorithms. Mach. Learn.,
+40(3):203228.
+[38] Markatou, M., Tian, H., Biswas, S., and Hripcsak, G. (2005). Analysis of variance of cross-
+validation estimators of the generalization error. Journal of Machine Learning Research, 6:1127–
+1168.
+[39] McNemar, Q. (1947). Note on the sampling error of the difference between correlated propor-
+tions or percentages. Psychometrika, 12:153–157.
+[40] Meyer, P.-A. (1966). Probability and Potentials. Blaisdell Publishing Co, N.Y.
+[41] Michiels, S., Koscielny, S., and Hill, C. (2005). Prediction of cancer outcome with microarrays:
+a multiple random validation strategy. The Lancet, 365(9458):488–492.
+[42] Nadeau, C. and Bengio, Y. (2003). Inference for the generalization error. Machine Learning,
+52(3):239–281.
+[43] Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., Blondel, M.,
+Prettenhofer, P., Weiss, R., Dubourg, V., Vanderplas, J., Passos, A., Cournapeau, D., Brucher,
+M., Perrot, M., and Duchesnay, E. (2011). Scikit-learn: Machine learning in Python. Journal of
+Machine Learning Research, 12:2825–2830.
+[44] Pirracchio, R., Petersen, M. L., Carone, M., Rigon, M. R., Chevret, S., and van der Laan,
+M. J. (2015). Mortality prediction in intensive care units with the Super ICU Learner Algorithm
+(SICULA): a population-based study. The Lancet Respiratory Medicine, 3(1):42–52.
+[45] Rad, K. R. and Maleki, A. (2020). A scalable estimate of the out-of-sample prediction error
+via approximate leave-one-out cross-validation. Journal of the Royal Statistical Society: Series
+B (Statistical Methodology).
+[46] Steele, J. M. (1986). An Efron-Stein inequality for nonsymmetric statistics. Annals of Statis-
+tics, 14(2):753–758.
+12
+[47] Stephenson, W. and Broderick, T. (2020). Approximate cross-validation in high dimensions
+with guarantees. In Chiappa, S. and Calandra, R., editors, Proceedings of the Twenty Third
+International Conference on Artificial Intelligence and Statistics, volume 108 of Proceedings of
+Machine Learning Research, pages 2424–2434, Online. PMLR.
+[48] Stone, M. (1974). Cross-validatory choice and assessment of statistical predictions. Journal of
+the Royal Statistical Society. Series B (Methodological), 36(2):111–147.
+[49] Wilson, A., Kasy, M., and Mackey, L. (2020). Approximate cross-validation: Guarantees for
+model assessment and selection. In Chiappa, S. and Calandra, R., editors, Proceedings of the
+Twenty Third International Conference on Artificial Intelligence and Statistics, volume 108 of
+Proceedings of Machine Learning Research, pages 4530–4540, Online. PMLR.
+[50] Wilson, E. B. (1927). Probable inference, the law of succession, and statistical inference.
+Journal of the American Statistical Association, 22(158):209–212.
+13
+A Proof of Proposition 1: Asymptotic linearity of k-fold CV
+We first prove a general asymptotic linearity result for repeated sample-splitting estimators. Given
+a collection An = {(Bj , B′j)}j∈[J] of index vector pairs such that for any pair (Bj , B
+′
+j) in An, Bj
+and B′j are disjoint, and a scalar loss function ρn,j(ZB′j , ZBj ), define the cross-validation error as
+R̂n =
+1
+J
+∑J
+j=1 ρn,j(ZB′j , ZBj )
+and the multi-fold test error
+Rn =
+1
+J
+∑J
+j=1 E[ρn,j(ZB′j , ZBj ) | ZBj ].
+Note that similarly to the number of folds k in cross-validation, J can depend on the sample size n,
+but we write J in place of Jn to simplify our notation.
+Proposition 3 (Asymptotic linearity of CV). For any sequence of datapoints (Zi)i≥1,
+√
+n
+σn
+(
+R̂n −Rn
+)
+−
+√
+n
+σnJ
+∑J
+j=1(ρ̄n,j(ZB′j )− E[ρ̄n,j(ZB′j )])
+p→
+(
+resp.
+Lq→
+)
+0
+for functions ρ̄n,1, . . . , ρ̄n,J with σ2n ,
+1
+J
+Var(
+∑J
+j=1 ρ̄n,j(ZB′j )) if and only if
+√
+n
+σnJ
+∑J
+j=1
+(
+ρn,j(ZB′
+j
+, ZBj )− E
+[
+ρn,j(ZB′
+j
+, ZBj ) | ZBj
+]
+−
+(
+ρ̄n,j(ZB′
+j
+)− E
+[
+ρ̄n,j(ZB′
+j
+)
+]))
+p→
+(
+resp.
+Lq→
+)
+0
+where the parenthetical convergence indicates that the same statement holds when both conver-
+gences in probability are replaced with convergences in Lq for the same q > 0.
+Proof For each (Bj , B′j) ∈ An, let
+Lj = ρn,j(ZB′
+j
+, ZBj )− E[ρn,j(ZB′j , ZBj ) | ZBj ]−
+(
+ρ̄n,j(ZB′
+j
+)− E[ρ̄n,j(ZB′
+j
+)]
+)
+.
+Then
+√
+n
+σn
+(
+R̂n −Rn
+)
+=
+√
+n
+σnJ
+∑J
+j=1(ρn,j(ZB′j , ZBj )− E[ρn,j(ZB′j , ZBj ) | ZBj ])
+=
+√
+n
+σnJ
+∑J
+j=1 Lj +
+√
+n
+σnJ
+∑J
+j=1(ρ̄n,j(ZB′j )− E[ρ̄n,j(ZB′j )]).
+The result now follows from the assumption that
+√
+n
+σnJ
+∑J
+j=1 Lj
+p→
+(
+resp.
+Lq→
+)
+0.
+Proposition 1 now follows directly from Proposition 3 with the choices:
+• An = {(B`, i) : ` ∈ [k], i ∈ B′`},
+• for all j ∈ [J ], ρn,j(Zi, ZB`) = hn(Zi, ZB`) and ρ̄n,j(Zi) = h̄n(Zi) for the associated
+` ∈ [k] and i ∈ B′`.
+Note that for these choices, we have J = |An| =
+∑k
+`=1 |B
+′
+`| = n.
+B Proof of Theorem 1: Asymptotic normality of k-fold CV with i.i.d. data
+Theorem 1 follows from the next more general result, which establishes the asymptotic normality of
+k-fold CV with independent (not necessarily identically distributed) data.
+Theorem 6 (Asymptotic normality of k-fold CV with independent data). Under the notation
+of Proposition 1, suppose that the datapoints (Zi)i≥1 are independent. If the triangular array(
+h̄n(Zi)− E
+[
+h̄n(Zi)
+])
+n,i
+satisfies Lindeberg’s condition,
+∀ε > 0, 1
+nσ2n
+∑n
+i=1 E
+[(
+h̄n(Zi)− E
+[
+h̄n(Zi)
+])2
+1
+[
+|h̄n(Zi)− E
+[
+h̄n(Zi)
+]
+| > εσn
+√
+n
+]]
+→ 0, (B.1)
+14
+then
+1
+σn
+√
+n
+∑n
+i=1
+(
+h̄n(Zi)− E
+[
+h̄n(Zi)
+]) d→ N (0, 1).
+Additionally, if (2.2) holds in probability, then
+√
+n
+σn
+(
+R̂n −Rn
+)
+d→ N (0, 1).
+Proof By independence of the datapoints (Zi)i≥1, (h̄n(Zi))n,i are independent, and
+nσ2n = Var(
+∑n
+i=1 h̄n(Zi)). Under Lindeberg’s condition, we get the first convergence result
+thanks to Lindeberg’s Central Limit Theorem (see [10, Thm. 27.2]). Additionally, if assumption
+(2.2) holds, we apply Proposition 1 and Slutsky’s theorem to get the second convergence result.
+If the (Zi)i≥1 are i.i.d., then σ2n =
+1
+n
+Var(
+∑n
+i=1 h̄n(Zi)) = Var(h̄n(Z0)), and Lindeberg’s condition
+(B.1) reduces to
+∀ε > 0, 1
+σ2n
+E
+[(
+h̄n(Z0)− E
+[
+h̄n(Z0)
+])2
+1
+[
+|h̄n(Z0)− E
+[
+h̄n(Z0)
+]
+| > εσn
+√
+n
+]]
+→ 0.
+We will show that this follows from the assumed uniform integrability of the sequence Xn =
+(h̄n(Z0)− E[h̄n(Z0)])2/σ2n. Indeed, for any ε > 0 and all n,
+E[Xn1
+[
+Xn > nε
+2
+]
+] ≤ supm E[Xm1
+[
+Xm > nε
+2
+]
+]→ 0,
+as n → ∞ by the uniform integrability of the sequence of Xn. Theorem 1 therefore follows from
+Theorem 6.
+C Proof of Theorem 2: Asymptotic linearity from loss stability
+Theorem 2 will follow from the following more general result.
+Theorem 7 (Asymptotic linearity from loss stability). Under the notation of Appendix A, with
+{(Bj , B′j)}j∈[J] a collection of disjoint index vector pairs where (B
+′
+j)j∈[J] is a pairwise disjoint
+family, and ρn,j(ZB′
+j
+, ZBj ) ,
+1
+|B′
+j
+|
+∑
+i∈B′
+j
+hn,j(Zi, ZBj ), suppose that the datapoints (Zi)i≥1 are
+i.i.d. copies of a random element Z0. Define ρ′n,j(ZB′j , ZBj ) , ρn,j(Zi, ZBj )− E[ρn,j(Zi, ZBj ) |
+ZBj ] and ρ
+′′
+n,j(ZB′j , ZBj ) , ρ
+′
+n,j(Zi, ZBj )− E[ρ
+′
+n,j(Zi, ZBj ) | Zi]. Then
+E[( 1
+J
+∑J
+j=1 ρ
+′′
+n,j(ZB′j , ZBj ))
+2] ≤ 1
+J2
+(∑
+j 6=j′
+√
+γloss(hn,j)γloss(hn,j′)
++
+∑J
+j=1
+1
+|B′
+j
+|
+1
+2
+|Bj |γloss(hn,j)
+)
+. (C.1)
+Proof
+Define h′n,j and h
+′′
+n,j as:
+h′n,j(Zi, ZBj ) , hn,j(Zi, ZBj )− E[hn,j(Zi, ZBj ) | ZBj ],
+h′′n,j(Zi, ZBj ) , h
+′
+n,j(Zi, ZBj )− E[h
+′
+n,j(Zi, ZBj ) | Zi].
+Therefore, we have ρ′n,j(ZB′j , ZBj ) =
+1
+|B′
+j
+|
+∑
+i∈B′
+j
+h′n,j(Zi, ZBj ) and ρ
+′′
+n,j(ZB′j , ZBj ) =
+1
+|B′
+j
+|
+∑
+i∈B′
+j
+h′′n,j(Zi, ZBj ).
+Thus
+( 1
+J
+∑J
+j=1 ρ
+′′
+n,j(ZB′j , ZBj ))
+2 = 1
+J2
+∑J
+j,j′=1 ρ
+′′
+n,j(ZB′j , ZBj )ρ
+′′
+n,j′(ZB′j′
+, ZBj′ )
+= 1
+J2
+∑J
+j,j′=1
+1
+|B′
+j
+|
+1
+|B′
+j′
+|
+∑
+i∈B′
+j
+∑
+i′∈B′
+j′
+h′′n,j(Zi, ZBj )h
+′′
+n,j′(Zi′ , ZBj′ ).
+In what follows, Z\iBj′ is ZBj′ with Zi replaced by Z
+′
+0, an i.i.d. copy of Z0, independent of (Zi)i≥1.
+Note that if i /∈ Bj′ , Z
+\i
+Bj′
+is just ZBj′ . We similarly define Z
+\i′
+Bj
+.
+15
+If j 6= j′, we have EZi [
+∑
+i∈B′
+j
+∑
+i′∈B′
+j′
+h′′n,j(Zi, ZBj )h
+′′
+n,j′(Zi′ , Z
+\i
+Bj′
+)] = 0, because (i)
+h′′n,j(Zi, ZBj ) and h
+′′
+n,j′(Zi′ , Z
+\i
+Bj′
+) are conditionally independent given everything but Zi, and (ii)
+EZi [h
+′′
+n,j(Zi, ZBj )] = 0.
+Similarly, if j 6= j′,
+EZi′ [
+∑
+i∈B′
+j
+∑
+i′∈B′
+j′
+h′′n,j(Zi, Z
+\i′
+Bj
+)h′′n,j′(Zi′ , ZBj′ )] = 0,
+EZi′ [
+∑
+i∈B′
+j
+∑
+i′∈B′
+j′
+h′′n,j(Zi, Z
+\i′
+Bj
+)h′′n,j′(Zi′ , Z
+\i
+Bj′
+)] = 0.
+Therefore, if j 6= j′,
+E[ 1|B′
+j
+|
+1
+|B′
+j′
+|
+∑
+i∈B′
+j
+∑
+i′∈B′
+j′
+h′′n,j(Zi, ZBj )h
+′′
+n,j′(Zi′ , ZBj′ )]
+= E[ 1|B′
+j
+|
+1
+|B′
+j′
+|
+∑
+i∈B′
+j
+∑
+i′∈B′
+j′
+(
+(h′′n,j(Zi, ZBj )− h
+′′
+n,j(Zi, Z
+\i′
+Bj
+))
+× (h′′n,j′(Zi′ , ZBj′ )− h
+′′
+n,j′(Zi′ , Z
+\i
+Bj′
+))
+)
+]
+= 1|B′
+j
+|
+1
+|B′
+j′
+|
+∑
+i∈B′
+j
+∑
+i′∈B′
+j′
+E
+[(
+(h′′n,j(Zi, ZBj )− h
+′′
+n,j(Zi, Z
+\i′
+Bj
+))
+× (h′′n,j′(Zi′ , ZBj′ )− h
+′′
+n,j′(Zi′ , Z
+\i
+Bj′
+))
+)]
+≤ 1|B′
+j
+|
+1
+|B′
+j′
+|
+∑
+i∈B′
+j
+∑
+i′∈B′
+j′
+√
+E
+[
+(h′′n,j(Zi, ZBj )− h
+′′
+n,j(Zi, Z
+\i′
+Bj
+))2
+]
+×
+√
+E
+[
+(h′′n,j′(Zi′ , ZBj′ )− h
+′′
+n,j′(Zi′ , Z
+\i
+Bj′
+))2
+]
+≤
+(
+1
+|B′
+j
+|
+1
+|B′
+j′
+|
+∑
+i∈B′
+j
+∑
+i′∈B′
+j′
+E
+[
+(h′′n,j(Zi, ZBj )− h
+′′
+n,j(Zi, Z
+\i′
+Bj
+))2
+]
+× E
+[
+(h′′n,j′(Zi′ , ZBj′ )− h
+′′
+n,j′(Zi′ , Z
+\i
+Bj′
+))2
+])1/2
+=
+(
+1
+|B′
+j
+|
+1
+|B′
+j′
+|
+∑
+i∈B′
+j
+∑
+i′∈B′
+j′
+E
+[
+(h′′n,j(Z0, ZBj )− h
+′′
+n,j(Z0, Z
+\i′
+Bj
+))2
+]
+× E
+[
+(h′′n,j′(Z0, ZBj′ )− h
+′′
+n,j′(Z0, Z
+\i
+Bj′
+))2
+])1/2
+=
+(
+1
+|B′
+j′
+|
+∑
+i′∈B′
+j′
+E
+[
+(h′′n,j(Z0, ZBj )− h
+′′
+n,j(Z0, Z
+\i′
+Bj
+))2
+])1/2
+×
+(
+1
+|B′
+j
+|
+∑
+i∈B′
+j
+E
+[
+(h′′n,j′(Z0, ZBj′ )− h
+′′
+n,j′(Z0, Z
+\i
+Bj′
+))2
+])1/2
+=
+√
+γms(h
+′′
+n,j)γms(h
+′′
+n,j′) =
+√
+γms(h
+′
+n,j)γms(h
+′
+n,j′) =
+√
+γloss(hn,j)γloss(hn,j′),
+where we have applied Cauchy–Schwarz inequality and Jensen’s inequality, used that the datapoints
+are i.i.d. copies of Z0 and applied the definitions of mean-square stability and loss stability.
+If j = j′ and i 6= i′, then EZi [h′′n,j(Zi, ZBj )h
+′′
+n,j(Zi′ , ZBj )] = 0.
+If j = j′ and i = i′, then E[h′′n,j(Zi, ZBj )
+2] = E[Var(h′n,j(Zi, ZBj ) | Zi)].
+We now state a conditional application of a version of the Efron–Stein inequality due to Steele [46].
+Lemma 1 (Conditional Efron–Stein inequality). Suppose that, given W , the random vectors X1:m
+and X ′1:m are conditionally independent and identically distributed and that the components of
+X1:m are conditionally independent given W . Then, for any suitably measurable function f
+1
+2
+E[(f(X1:m,W )− f(X ′1:m,W ))2 |W ] = Var(f(X1:m,W ) |W )
+≤ 1
+2
+∑m
+i=1 E[(f(X1:m,W )− f(X
+\i
+1:m,W ))
+2 |W ]
+where, for each i ∈ [m], X\i1:m represents X1:m with Xi replaced with X
+′
+i .
+16
+Using Lemma 1, we get E[Var(h′n,j(Zi, ZBj ) | Zi)] ≤
+1
+2
+|Bj |γms(h′n,j) =
+1
+2
+|Bj |γloss(hn,j).
+Combining everything, we get
+E[( 1
+J
+∑J
+j=1 ρ
+′′
+n,j(ZB′j , ZBj ))
+2] ≤ 1
+J2
+(∑
+j 6=j′
+√
+γloss(hn,j)γloss(hn,j′)
++
+∑J
+j=1
+1
+|B′
+j
+|
+1
+2
+|Bj |γloss(hn,j)
+)
+.
+In the case of k-fold cross-validation with equal-sized folds and i.i.d. data, the left-hand side of
+(C.1) becomes
+Var
+(
+1
+n
+∑k
+j=1
+∑
+i∈B′
+j
+(h′n(Zi, ZBj )− E
+[
+h′n(Zi, ZBj ) | Zi
+]
+)
+)
+,
+and its right-hand side simplifies to
+1
+k2
+(
+k(k − 1)
+√
+γloss(hn)2 + k
+k
+n
+1
+2
+n(1− 1
+k
+)γloss(hn)
+)
+= 3
+2
+(1− 1
+k
+)γloss(hn).
+Hence,
+1
+n
+Var
+(
+1√
+n
+∑k
+j=1
+∑
+i∈B′
+j
+(h′n(Zi, ZBj )− E
+[
+h′n(Zi, ZBj ) | Zi
+]
+)
+)
+≤ 3
+2
+(
+1− 1
+k
+)
+γloss(hn).
+We then note that the asymptotic linearity condition (2.2) in L2-norm with the choice h̄n(z) =
+E
+[
+hn(z, Z1:n(1−1/k))
+]
+can be written as
+1
+σn
+√
+n
+∑k
+j=1
+∑
+i∈B′
+j
+(h′n(Zi, ZBj )− E
+[
+h′n(Zi, ZBj ) | Zi
+]
+)
+L2→ 0,
+which is implied by (3.2) when γloss(hn) = o(σ2n/n). Therefore, Theorem 2 follows from Theo-
+rem 7.
+D Proof of Theorem 3: Asymptotic linearity from conditional variance
+convergence
+Theorem 3 will follow from the following more general statement.
+Theorem 8 (Asymptotic linearity from conditional variance convergence). Under the notation of
+Proposition 1, suppose that the datapoints (Zi)i≥1 are i.i.d. copies of a random element Z0. If a
+function h̄n satisfies
+max(kq−1, 1)
+∑k
+j=1 E
+[(
+|B′j |
+nσ2n
+VarZ0
+(
+hn(Z0, ZBj )− h̄n(Z0)
+))q/2]
+→ 0
+for some q ∈ (0, 2], then h̄n satisfies the Lq asymptotic linearity condition (2.2). If a function h̄n
+satisfies
+∑k
+j=1 E
+[
+min
+(
+1,
+√
+|B′
+j
+|
+σn
+√
+n
+√
+VarZ0
+(
+hn(Z0, ZBj )− h̄n(Z0)
+))]
+→ 0,
+then h̄n satisfies the in-probability asymptotic linearity condition (2.2).
+Proof In the notation of Proposition 1, for each j ∈ [k], let
+Lj =
+1
+|B′
+j
+|
+∑
+i∈B′
+j
+(hn
+(
+Zi, ZBj
+)
+− h̄n(Zi))− EZ0 [hn
+(
+Z0, ZBj
+)
+− h̄n(Z0)].
+17
+We first note that for any non-decreasing concave ψ satisfying the triangle inequality, we have
+E
+[
+ψ
+(∣∣∣∣∣ 1σn√n∑kj=1 |B′j |Lj
+∣∣∣∣∣
+)]
+≤ E
+[
+ψ
+(
+1
+σn
+√
+n
+∑k
+j=1 |B
+′
+j ||Lj |
+)]
+≤
+∑k
+j=1 E
+[
+ψ
+(
+1
+σn
+√
+n
+|B′j ||Lj |
+)]
+=
+∑k
+j=1 E
+[
+EZB′
+j
+[
+ψ
+(
+1
+σn
+√
+n
+|B′j ||Lj |
+)]]
+≤
+∑k
+j=1 E
+[
+ψ
+(
+1
+σn
+√
+n
+|B′j |EZB′
+j
+[|Lj |]
+)]
+≤
+∑k
+j=1 E
+[
+ψ
+(
+1
+σn
+√
+n
+|B′j |
+√
+VarZB′
+j
+(Lj)
+)]
+=
+∑k
+j=1 E
+[
+ψ
+(√
+|B′
+j
+|
+σn
+√
+n
+√
+VarZ0
+(
+hn(Z0, ZBj )− h̄n(Z0)
+))]
+,
+where we have applied the triangle inequality twice, the tower property once, and Jensen’s inequality
+twice. The advertised Lq result for q ∈ (0, 1] now follows by taking ψ(x) = xq , and the in-
+probability result follows by taking ψ(x) = min(1, x) and invoking the following lemma.
+Lemma 2. For any sequence of random variables (Xn)n≥1,Xn
+p→ 0 if and only if E[ψ(|Xn|)]→ 0,
+where ψ(x) = min(1, x).
+Proof If Xn
+p→ 0, then as Xn
+d→ 0 and ψ is bounded and continuous for nonnegative x,
+E[ψ(|Xn|)] → 0. Now suppose E[ψ(|Xn|)] → 0. Since ψ is nonnegative and non-decreasing
+for nonnegative x, we have P(|Xn| > �) ≤ E[ψ(|Xn|)]/ψ(�) → 0 for every � > 0 by Markov’s
+inequality. Hence, Xn
+p→ 0.
+Now fix any q ∈ (1, 2], and note that as x 7→ xq is non-decreasing and convex on the nonnegative
+reals, we have
+E
+[∣∣∣∣∣ 1σn√n∑kj=1 |B′j |Lj
+∣∣∣∣∣
+q]
+≤ E
+[(
+k
+k
+∑k
+j=1
+1
+σn
+√
+n
+|B′j ||Lj |
+)q]
+≤ k
+q
+k
+∑k
+j=1 E
+[(
+1
+σn
+√
+n
+|B′j ||Lj |
+)q]
+= kq−1E
+
+∑k
+j=1 EZB′
+j
+
+( 1
+nσ2n
+|B′j |
+2|Lj |2
+)q/2
+
+
+≤ kq−1E
+
+∑k
+j=1
+(
+|B′j |
+2
+nσ2n
+VarZB′
+j
+(Lj)
+)q/2
+= kq−1E
+
+∑k
+j=1
+(
+|B′j |
+nσ2n
+VarZ0
+(
+hn(Z0, ZBj )− h̄n(Z0)
+))q/2,
+where we have applied the triangle inequality, Jensen’s inequality using the convexity of x 7→ xq ,
+the tower property, and Jensen’s inequality using the concavity of x 7→ xq/2. Hence, the Lq result
+for q ∈ (1, 2] follows from our convergence assumption.
+Theorem 3 then follows from Theorem 8 by replacing |B′j | with
+n
+k
+and ZBj with Z1:n(1−1/k) since
+folds are equal-sized and the Zi’s are i.i.d.
+18
+E Conditional Variance Convergence from Loss Stability
+We show that the quantity appearing in (3.3) is controlled by the loss stability, for any q ∈ (0, 2].
+Note however that (3.3) can be satisfied even in a case where the loss stability is infinite (see Ap-
+pendix G).
+Proposition 4 (Conditional variance convergence from loss stability). Suppose that k divides n
+evenly. Under the notation of Theorem 3 with h̄n(z) = E[hn(z, Z1:n(1−1/k))],
+E
+[(
+1
+σ2n
+VarZ0
+(
+hn(Z0, Z1:n(1−1/k))− h̄n(Z0)
+))q/2]
+≤
+(
+1
+σ2n
+1
+2
+n(1− 1/k)γloss(hn)
+)q/2
+,
+for any q ∈ (0, 2]. Consequently, the condition (3.3) is verified whenever γloss(hn) =
+o
+(
+σ2n
+n(1−1/k)max(k,k(2/q)−1)
+)
+.
+Remark 2. If k = O(1), this loss stability assumption simplifies to γloss(hn) = o(σ2n/n) for any
+q ∈ (0, 2].
+Proof Write m = n(1− 1/k). Then
+VarZ0(hn(Z0, Z1:m)− E[hn(Z0, Z1:m) | Z0]) = VarZ0(h′n(Z0, Z1:m)− E[h′n(Z0, Z1:m) | Z0]),
+since the difference hn(Z0, Z1:m)−h′n(Z0, Z1:m) = E[hn(Z0, Z1:m) | Z1:m] is a Z1:m-measurable
+function. For 0 < q ≤ 2, using Jensen’s inequality,
+E
+[
+(VarZ0(h
+′
+n(Z0, Z1:m)− E[h′n(Z0, Z1:m) | Z0]))
+q/2
+]
+≤ E[VarZ0(h′n(Z0, Z1:m)− E[h′n(Z0, Z1:m) | Z0])]
+q/2
+.
+We can bound it using loss stability.
+VarZ0(h
+′
+n(Z0, Z1:m)− E[h′n(Z0, Z1:m) | Z0])
+= EZ0
+[(
+(h′n(Z0, Z1:m)− E[h′n(Z0, Z1:m) | Z0])
+− (E[h′n(Z0, Z1:m) | Z1:m]− E[h′n(Z0, Z1:m)])
+)2]
+= E[(h′n(Z0, Z1:m)− E[h′n(Z0, Z1:m) | Z0])2 | Z1:m],
+so that
+E[VarZ0(h
+′
+n(Z0, Z1:m)− E[h′n(Z0, Z1:m) | Z0])] = E[(h′n(Z0, Z1:m)− E
+[
+h′n(Z0, Z1:m) | Z0])2
+]
+= E[Var(h′n(Z0, Z1:m) | Z0)]
+≤ 1
+2
+mγloss(hn),
+where the last inequality comes from Lemma 1. Consequently,
+E
+[(
+1
+σ2n
+VarZ0(hn(Z0, Z1:m)− E[hn(Z0, Z1:m) | Z0])
+)q/2]
+≤
+(
+1
+σ2n
+1
+2
+mγloss(hn)
+)q/2
+.
+F Excess Loss of Sample Mean: o(σ
+2
+n
+n
+) loss stability, constant σ2n ∈ (0,∞),
+infinite mean-square stability
+Here we present a very simple learning task in which (i) the CLT conditions of Theorems 1 and 2
+hold and (ii) mean-square stability (3.1) is infinite.
+Example 1 (Excess loss of sample mean: o(σ
+2
+n
+n
+) loss stability, constant σ2n ∈ (0,∞), infinite
+mean-square stability). Suppose (Zi)i≥1 are independent and identically distributed copies of a
+random element Z0 with E[Z0] = 0 and E[Z20 ] <∞. Consider k-fold cross-validation of the excess
+loss of the sample mean relative to a constant prediction rule:
+hn(z,D) = (z − f̂(D))2 − (z − a)2 where f̂(D) , 1|D|
+∑
+Z0∈D Z0 and a 6= 0.
+19
+The variance parameter of Theorem 1 σ2n = Var(h̄n(Z0)) = 4a
+2Var(Z0) when h̄n(z) =
+E[hn(z, Z1:n(1−1/k))], and the loss stability γloss(hn) =
+8Var(Z0)
+2
+n2(1−1/k)2 = o(σ
+2
+n/n). Consequently
+Theorem 2 implies asymptotic linearity. The uniform integrability condition of Theorem 1 also
+holds. Together, these results imply that the CLT of Theorem 1 is applicable. However, whenever Z0
+does not have a fourth moment, the mean-square stability (3.1) is infinite.
+Proof Introduce the shorthand m = n(1 − 1/k), fix any D with |D| = m, and suppose DZ
+′
+0 is
+formed by swapping Z ′0 for an independent point Z
+′′
+0 in D. For any z we have
+(z − f̂(D))2 − (z − f̂(DZ
+′
+0))2 = (f̂(D)− f̂(DZ
+′
+0))(2z − f̂(D)− f̂(DZ
+′
+0))
+= 1
+m
+(Z ′′0 − Z ′0)(2z − f̂(D)− f̂(DZ
+′
+0))
+= 1
+m
+(Z ′′0 − Z ′0)(2z −
+1
+m
+(Z ′′0 + Z
+′
+0)− 2(f̂(D)−
+1
+m
+Z ′′0 ))
+= 2
+m
+(Z ′′0 − Z ′0)(z − (f̂(D)−
+1
+m
+Z ′′0 ))−
+1
+m2
+(Z ′′20 − Z ′20 ).
+Hence, the mean-square stability equals
+E[((Z0 − f̂(D))2 − (Z0 − f̂(DZ
+′
+0))2)2]
+= 1
+m4
+E[(Z ′′20 − Z ′20 )2] +
+4
+m2
+E[(Z ′′0 − Z ′0)2]E[(Z0 − (f̂(D)−
+1
+m
+Z ′′0 ))
+2]
+− 4
+m3
+E[(Z ′′0 − Z ′0)(Z ′′20 − Z ′20 )]E[Z0 − (f̂(D)−
+1
+m
+Z ′′0 )]
+= 1
+m4
+E[(Z ′′20 − Z ′20 )2] +
+4
+m2
+E[(Z ′′0 − Z ′0)2]E[(Z0 − (f̂(D)−
+1
+m
+Z ′′0 ))
+2]
+≥ 2
+m4
+Var(Z20 )
+since E[Z0] = 0, and Z0, Z ′0, Z
+′′
+0 , f̂(D)−
+1
+m
+Z ′′0 are mutually independent.
+Moreover, the loss stability equals
+E[((Z0 − f̂(D))2 − (Z0 − f̂(DZ
+′
+0))2 − EZ0 [(Z0 − f̂(D))2 − (Z0 − f̂(DZ
+′
+0))2])2]
+= 4
+m2
+E[(Z ′′0 − Z ′0)2]E[(Z0 − E[Z0])2] =
+8
+m2
+Var(Z0)
+2.
+Finally, for any z, E[(z − f̂(D))2 − (z − a)2] = 1
+m
+Var(Z0) + 2za − a2. Consequently, for
+h̄n(Z0) = E[hn(Z0,D) | Z0], we get the following equalities:
+σ2n = Var(h̄n(Z0)) = 4a
+2Var(Z0), and
+(h̄n(Z0)− E[h̄n(Z0)])2/σ2n = Z20/Var(Z0).
+The distribution of Z20/Var(Z0) does not depend on n and is integrable, so the sequence of
+(h̄n(Z0)− E[h̄n(Z0)])2/σ2n is uniformly integrable.
+G Loss of Surrogate Mean: constant σ2n ∈ (0,∞), infinite σ̃2n, vanishing
+conditional variance
+The following example details a simple task in which (i) the CLT conditions of Theorem 1 and
+Theorem 3 hold and (ii) mean-square stability, σ̃2n, and loss stability are infinite.
+Example 2 (Loss of surrogate mean: constant σ2n ∈ (0,∞), infinite σ̃2n, vanishing conditional
+variance). Suppose (Zi)i≥1 are independent and identically distributed copies of a random element
+Z0 = (X0, Y0) with Zi = (Xi, Yi) and E[X0] = E[Y0]. Consider k-fold cross-validation of the
+following prediction rule under squared error loss:
+hn((x, y),D) = (y − f̂(D))2 where f̂(D) , 1|D|
+∑
+(X0,Y0)∈DX0.
+The loss stability γloss(hn) =
+8Var(X0)Var(Y0)
+n2(1−1/k)2 , and the variance parameter of Theorem 1
+σ2n = Var(h̄n(Z0)) = Var((Y0 − E[Y0])2), (G.1)
+20
+when h̄n(z) = E[hn(z, Z1:n(1−1/k))]. Hence, if E[X20 ],E[Y
+4
+0 ] < ∞, then γloss(hn) = o(σ2n/n)
+and Theorem 2 implies asymptotic linearity. The uniform integrability condition of Theorem 1 also
+holds. Together, these results imply that the CLT of Theorem 1 is applicable.
+If X0 has no fourth moment, then the mean-square stability (3.1) is infinite.
+If X0 has no second moment, then the loss stability and the [5, Theorem 1] variance parameter
+σ̃2n = E[Var(hn(Z0, Z1:n(1−1/k)) | Z1:n(1−1/k))] = Var((Y0 − E[Y0])2) +
+8Var(X0)Var(Y0)
+n(1−1/k) .
+are infinite. However,
+√
+kE
+[√
+1
+σ2n
+VarZ0
+(
+hn(Z0, Z1:n(1−1/k))− h̄n(Z0)
+)]
+= 2
+√
+k
+√
+Var(Y0)
+Var((Y0−E[Y0])2)
+E[|f̂(Z1:n(1−1/k))− E[X0]|].
+Hence, if E[Y 40 ] < ∞ and k = O(1), L1 asymptotic linearity follows from Theorem 3, the uniform
+integrability condition of Theorem 1 still holds, and the CLT of Theorem 1 holds with the finite
+variance parameter (G.1).
+Proof Without loss of generality, we will assume E[X0] = E[Y0] = 0; the formulas in the general
+case are obtained by replacing X0 with X0 − E[X0] and similarly for Y0. Introduce the shorthand
+m = n(1 − 1/k), fix any D with |D| = m, and suppose DZ
+′
+0 is formed by swapping Z ′0 for an
+independent point Z ′′0 in D. For any z = (x, y) we have
+(y − f̂(D))2 − (y − f̂(DZ
+′
+0))2 = (f̂(D)− f̂(DZ
+′
+0))(2y − f̂(D)− f̂(DZ
+′
+0))
+= 1
+m
+(X ′′0 −X ′0)(2y − f̂(D)− f̂(DZ
+′
+0))
+= 1
+m
+(X ′′0 −X ′0)(2y −
+1
+m
+(X ′′0 +X
+′
+0)− 2(f̂(D)−
+1
+m
+X ′′0 ))
+= 2
+m
+(X ′′0 −X ′0)(y − (f̂(D)−
+1
+m
+X ′′0 ))−
+1
+m2
+(X ′′20 −X ′20 ).
+Hence, the mean-square stability equals
+E[((Y0 − f̂(D))2 − (Y0 − f̂(DZ
+′
+0))2)2]
+= 1
+m4
+E[(X ′′20 −X ′20 )2] +
+4
+m2
+E[(X ′′0 −X ′0)2]E[(Y0 − (f̂(D)−
+1
+m
+X ′′0 ))
+2]
+− 4
+m3
+E[(X ′′0 −X ′0)(X ′′20 −X ′20 )]E[Y0 − (f̂(D)−
+1
+m
+X ′′0 )]
+= 1
+m4
+E[(X ′′20 −X ′20 )2] +
+4
+m2
+E[(X ′′0 −X ′0)2]E[(Y0 − (f̂(D)−
+1
+m
+X ′′0 ))
+2]
+≥ 2
+m4
+Var((X0 − E[X0])2)
+since E[Y0] = 0, and Z0, Z ′0, Z
+′′
+0 , f̂(D)−
+1
+m
+X ′′0 are mutually independent.
+Moreover, the loss stability equals
+E[((Y0 − f̂(D))2 − (Y0 − f̂(DZ
+′
+0))2 − EY [(Y0 − f̂(D))2 − (Y0 − f̂(DZ
+′
+0))2])2]
+= 4
+m2
+E[(X ′′0 −X ′0)2]E[(Y0 − E[Y0])2] =
+8
+m2
+Var(X0)Var(Y0).
+Next note that, for any y, y′,
+E[(y − f̂(D))2 − (y′ − f̂(D))2] = (y − y′)(y + y′ − 2E[f̂(D)])
+= (y2 − y′2)− 2(y − y′)E[f̂(D)] = y2 − y′2
+since E[X0] = 0. Therefore, Var(E[hn(Z0,D) | Z0]) = 12E[(Y
+2
+0 − Y ′20 )2] = Var(Y 20 ).
+For any y, E[(y − f̂(D))2] = y2 + E[f̂(D)2] since E[X0] = 0. Consequently, for h̄n(Z0) =
+E[hn(Z0,D) | Z0], we get the following equalities:
+σ2n = Var(h̄n(Z0)) = Var(Y
+2
+0 ), and
+(h̄n(Z0)− E[h̄n(Z0)])2/σ2n = (Y 20 − E[Y 20 ])2/Var(Y 20 ).
+21
+The distribution of (Y 20 −E[Y 20 ])2/Var(Y 20 ) does not depend on n and is integrable, so the sequence
+of (h̄n(Z0)− E[h̄n(Z0)])2/σ2n is uniformly integrable.
+Since
+(y − f̂(D))2 − (y′ − f̂(D))2 = (y2 − y′2)− 2(y − y′)f̂(D)
+we can compute the variance parameter of [5],
+σ̃2n = E[Var(hn(Z0,D) | D)] = E[(hn(Z0,D)− E[hn(Z0,D)|D])2]
+= 1
+2
+E[(hn(Z0,D)− hn(Z ′0,D))2]
+= 1
+2
+E((Y 20 − Y ′20 )2] + 4E[(Y0 − Y ′0)2]E[f̂(D)2]− E[(y2 − y′2)(y − y′)]E[f̂(D)]
+= Var(Y 20 ) + 8Var(Y0)
+1
+m
+Var(X0),
+since E[f̂(D)] = 0 and f̂(D), Y0, Y ′0 are mutually independent.
+Finally, let’s compute
+√
+kE
+[√
+1
+σ2n
+VarZ0
+(
+hn(Z0,D)− h̄n(Z0)
+)]
+.
+For any y, y′,
+((y − f̂(D))2 − E[(y − f̂(D))2])− ((y′ − f̂(D))2 − E[(y′ − f̂(D))2])
+= (y2 − y′2)− 2(y − y′)f̂(D)− (y2 − y′2)
+= −2(y − y′)f̂(D),
+so that VarZ0
+(
+hn(Z0,D)− h̄n(Z0)
+)
+= 1
+2
+E[(−2(Y0 − Y ′0)f̂(D))2 | D] = 4Var(Y0)(f̂(D))2.
+Then
+√
+kE
+[√
+1
+σ2n
+VarZ0
+(
+hn(Z0,D)− h̄n(Z0)
+)]
+= 2
+√
+k
+√
+Var(Y0)
+Var(Y 20 )
+E[|f̂(D)|]. (G.2)
+If E[|X0|] < ∞, the family of empirical averages { 1m
+∑m
+i=1Xi : m ≥ 1} is uniformly integrable
+and the weak law of large numbers implies that f̂(D) converges to 0 in probability. Hence,
+f̂(D) L
+1
+→ 0. The quantity (G.2) then goes to zero when k = O(1).
+H Proof of Proposition 2: Variance comparison
+Proposition 2 will follow from the following more general result.
+Proposition 5. Fix any j ∈ [k], and define σ2n,j , Var(E[hn(Z0, ZBj ) | Z0]) and σ̃
+2
+n,j ,
+E[Var(hn(Z0, ZBj ) | ZBj )]. Then
+σ2n,j ≤ σ̃
+2
+n,j ≤ σ
+2
+n,j +
+|Bj |
+2
+γloss(hn),
+where the first inequality is strict whenever h′n(Z0, ZBj ) = hn(Z0, ZBj ) − E[hn(Z0, ZBj ) | ZBj ]
+depends on ZBj .
+Proof For all j ∈ [k], we can rewrite both variance parameters.
+σ̃2n,j = E[Var(hn(Z0, ZBj ) | ZBj )]
+= E[(hn(Z0, ZBj )− E[hn(Z0, ZBj ) | ZBj ])2]
+= E[h′n(Z0, ZBj )
+2] = Var(h′n(Z0, ZBj )).
+σ2n,j = Var(E[hn(Z0, ZBj ) | Z0])
+= E[(E[hn(Z0, ZBj ) | Z0]− E[hn(Z0, ZBj )])2]
+= E[E[h′n(Z0, ZBj ) | Z0]2] = Var(E[h′n(Z0, ZBj ) | Z0])
+= Var(h′n(Z0, ZBj ))− E[Var(h′n(Z0, ZBj ) | Z0)]
+= σ̃2n,j − E[Var(h
+′
+n(Z0, ZBj ) | Z0)] ≤ σ̃2n,j ,
+22
+where the final inequality is strict whenever E[Var(h′n(Z0, ZBj ) | Z0)] is non-zero.
+Since every non-constant variable has either infinite or strictly positive variance,
+E[Var(h′n(Z0, ZBj ) | Z0)] = 0 ⇔ h′n(Z0, ZBj ) = E[h′n(Z0, ZBj ) | Z0], that is, if and
+only if h′n(Z0, ZBj ) = hn(Z0, ZBj )− E[hn(Z0, ZBj ) | ZBj ] is independent of ZBj .
+Finally, we know from Lemma 1 that the difference σ̃2n,j − σ
+2
+n,j = E[Var(h
+′
+n(Z0, ZBj ) | Z0)] ≤
+1
+2
+|Bj |γloss(hn).
+Proposition 2 then follows from Proposition 5 since the Zi’s are i.i.d. and, when k divides n, the
+only possible size for Bj is n(1− 1/k).
+I Proof of Theorem 4: Consistent within-fold estimate of asymptotic
+variance
+We will prove the following more detailed statement from which Theorem 4 will follow.
+Theorem 9 (Consistent within-fold estimate of asymptotic variance). Suppose that k ≤ n/2
+and that k divides n evenly. Under the notation of Theorem 1 with m = n(1 − 1/k),
+h̄n(z) = E[hn(z, Z1:m)], h′n(Z0, Z1:m) = hn(Z0, Z1:m) − E[hn(Z0, Z1:m) | Z1:m] and h̄′n(z) =
+E[h′n(z, Z1:m)], define the within-fold variance estimate
+σ̂2n,in ,
+1
+k
+∑k
+j=1
+1
+(n/k)−1
+∑
+i∈B′
+j
+(
+hn(Zi, ZBj )−
+k
+n
+∑
+i′∈B′
+j
+hn(Zi′ , ZBj )
+)2
+.
+If (Zi)i≥1 are i.i.d. copies of a random element Z0, then
+E[|σ̂2n,in − σ
+2
+n|] ≤
+2n2
+n−kγloss(hn) + 2
+√
+2n2
+n−kγloss(hn)σ
+2
+n +
+√
+1
+n
+E[h̄′n(Z0)4] +
+3k−n
+n(n−k)σ
+4
+n
+and there exists an absolute constant C specified in the proof such that
+E[(σ̂2n,in − σ
+2
+n)
+2] ≤ 4 Cn
+4
+(n−k)2 γ4(h
+′
+n) + 8
+√
+Cn4
+(n−k)2 γ4(h
+′
+n)(
+1
+n
+E[h̄′n(Z0)4] +
+3k−n
+n(n−k)σ
+4
+n + σ
+4
+n)
++ 2( 1
+n
+E[h̄′n(Z0)
+4] + 3k−n
+n(n−k)σ
+4
+n) (I.1)
+where γ4(h′n) ,
+1
+m
+∑m
+i=1 E[(h
+′
+n(Z0, Z1:m) − h′n(Z0, Z
+\i
+1:m))
+4]. Here, Z\i1:m denotes Z1:m with Zi
+replaced by an i.i.d. copy independent of Z0:m.
+Moreover,
+E[|σ̂2n,in − σ
+2
+n|] ≤
+2n2
+n−kγloss(hn) + 2
+√
+2n2
+n−kγloss(hn)σ
+2
+n +
+√
+2
+n(n/k−1)σ
+4
+n + o(σ
+2
+n) (I.2)
+whenever the sequence of (h̄n(Z0)− E[h̄n(Z0)])2/σ2n is uniformly integrable.
+Proof
+Eliminating training set randomness We begin by approximating our variance estimate
+σ̂2n,in =
+1
+k
+∑k
+j=1
+1
+(n/k)−1
+∑
+i∈B′
+j
+(
+hn(Zi, ZBj )−
+k
+n
+∑
+i′∈B′
+j
+hn(Zi′ , ZBj )
+)2
+= 1
+k
+∑k
+j=1
+1
+(n/k)−1
+∑
+i∈B′
+j
+(
+h′n(Zi, ZBj )−
+k
+n
+∑
+i′∈B′
+j
+h′n(Zi′ , ZBj )
+)2
+by a quantity eliminating training set randomness in each summand,
+σ̂2n,in,approx ,
+1
+k
+∑k
+j=1
+1
+(n/k)−1
+∑
+i∈B′
+j
+(
+h̄′n(Zi)−
+k
+n
+∑
+i′∈B′
+j
+h̄′n(Zi′)
+)2
+,
+where h̄′n(z) = E[h
+′
+n(z, Z1:m)]. Note that h̄
+′
+n(Z0) has expectation 0.
+By Cauchy–Schwarz, we have
+|σ̂2n,in − σ̂
+2
+n,in,approx| ≤ ∆ + 2
+√
+∆σ̂n,in,approx
+23
+for the error term
+∆ , 1
+k
+∑k
+j=1
+1
+(n/k)−1
+∑
+i∈B′
+j
+(
+h′n(Zi, ZBj )− h̄′n(Zi) +
+k
+n
+∑
+i′∈B′
+j
+h̄′n(Zi′)−
+k
+n
+∑
+i′∈B′
+j
+h′n(Zi′ , ZBj )
+)2
+≤ 2 1
+k
+∑k
+j=1
+1
+(n/k)−1
+∑
+i∈B′
+j
+(h′n(Zi, ZBj )− h̄′n(Zi))2
++ 2 1
+k
+∑k
+j=1
+1
+(n/k)−1
+∑
+i∈B′
+j
+(
+k
+n
+∑
+i′∈B′
+j
+(h̄′n(Zi′)− h′n(Zi′ , ZBj ))
+)2
+≤ 2
+n−k
+∑k
+j=1
+∑
+i∈B′
+j
+(h′n(Zi, ZBj )− h̄′n(Zi))2
++ 2 1
+k
+∑k
+j=1
+1
+(n/k)−1
+∑
+i∈B′
+j
+k
+n
+∑
+i′∈B′
+j
+(h̄′n(Zi′)− h′n(Zi′ , ZBj ))2
+= 4
+n−k
+∑k
+j=1
+∑
+i∈B′
+j
+(h′n(Zi, ZBj )− h̄′n(Zi))2 (I.3)
+where we have used Jensen’s inequality twice.
+Thus,
+∆2 ≤ 16n
+2
+(n−k)2
+1
+n
+∑k
+j=1
+∑
+i∈B′
+j
+(h′n(Zi, ZBj )− h̄′n(Zi))4
+= 16n
+(n−k)2
+∑k
+j=1
+∑
+i∈B′
+j
+(h′n(Zi, ZBj )− h̄′n(Zi))4 (I.4)
+by Jensen’s inequality.
+Controlling the error ∆ We will first control the error term ∆. By the bound (I.3) and the
+conditional Efron–Stein inequality (Lemma 1), we have
+E[∆] ≤ 4
+n−k
+∑k
+j=1
+∑
+i∈B′
+j
+E[(h′n(Zi, ZBj )− h̄′n(Zi))2]
+= 4
+n−k
+∑k
+j=1
+∑
+i∈B′
+j
+E[(h′n(Zi, ZBj )− E[h′n(Zi, ZBj ) | Zi])2]
+= 4
+n−k
+∑k
+j=1
+∑
+i∈B′
+j
+E[E[(h′n(Zi, ZBj )− E[h′n(Zi, ZBj ) | Zi])2 | Zi]]
+= 4
+n−k
+∑k
+j=1
+∑
+i∈B′
+j
+E[Var(h′n(Zi, ZBj ) | Zi)]
+≤ 2
+n−k
+∑k
+j=1
+∑
+i∈B′
+j
+mγms(h
+′
+n)
+≤ 2n
+2
+n−kγms(h
+′
+n) =
+2n2
+n−kγloss(hn). (I.5)
+Controlling ∆2 In the following, for any j ∈ [k] and i′ ∈ Bj , Z
+\i′
+Bj
+is ZBj with Zi′ replaced by
+Z0. By the bound (I.4) and Boucheron et al. [12, Thm. 2], and by noting that x4 = x4+ + x
+4
+− where
+x+ = max(x, 0) and x− = max(−x, 0), we have
+E[∆2] ≤ 16n
+(n−k)2
+∑k
+j=1
+∑
+i∈B′
+j
+E[(h′n(Zi, ZBj )− h̄′n(Zi))4]
+= 16n
+(n−k)2
+∑k
+j=1
+∑
+i∈B′
+j
+E[E[(h′n(Zi, ZBj )− E[h′n(Zi, ZBj ) | Zi])4 | Zi]]
+= 16n
+(n−k)2
+∑k
+j=1
+∑
+i∈B′
+j
+(
+E[E[(h′n(Zi, ZBj )− E[h′n(Zi, ZBj ) | Zi])4+ | Zi]]
++ E[E[(h′n(Zi, ZBj )− E[h′n(Zi, ZBj ) | Zi])4− | Zi]]
+)
+≤ 16n
+(n−k)2 (1−
+1
+4
+)24( 8
+7
+)216
+∑k
+j=1
+∑
+i∈B′
+j
+(
+E[(E[
+∑
+i′∈Bj (h
+′
+n(Zi, ZBj )− h′n(Zi, Z
+\i′
+Bj
+))2+ | ZBj ])2]
++ E[(E[
+∑
+i′∈Bj (h
+′
+n(Zi, ZBj )− h′n(Zi, Z
+\i′
+Bj
+))2− | ZBj ])2]
+)
+≤ 16n
+(n−k)2
+2304
+49
+∑k
+j=1
+∑
+i∈B′
+j
+(
+E[(
+∑
+i′∈Bj (h
+′
+n(Zi, ZBj )− h′n(Zi, Z
+\i′
+Bj
+))2+)
+2]
++ E[(
+∑
+i′∈Bj (h
+′
+n(Zi, ZBj )− h′n(Zi, Z
+\i′
+Bj
+))2−)
+2]
+)
+≤ 36864n
+49(n−k)2m
+∑k
+j=1
+∑
+i∈B′
+j
+(∑
+i′∈Bj E[(h
+′
+n(Zi, ZBj )− h′n(Zi, Z
+\i′
+Bj
+))4+]
++
+∑
+i′∈Bj E[(h
+′
+n(Zi, ZBj )− h′n(Zi, Z
+\i′
+Bj
+))4−]
+)
+24
+= 36864n
+49(n−k)2m
+∑k
+j=1
+∑
+i∈B′
+j
+∑
+i′∈Bj E[(h
+′
+n(Zi, ZBj )− h′n(Zi, Z
+\i′
+Bj
+))4]
+≤ 36864n
+4
+49(n−k)2 γ4(h
+′
+n) =
+Cn4
+(n−k)2 γ4(h
+′
+n) (I.6)
+where γ4(h′n) =
+1
+m
+∑m
+i=1 E[(h
+′
+n(Z0, Z1:m)− h′n(Z0, Z
+\i
+1:m))
+4] and C = 36864/49.
+Controlling the error σ̂2n,in,approx − σ
+2
+n To control the error σ̂
+2
+n,in,approx − σ
+2
+n, we first rewrite
+σ̂2n,in,approx as
+σ̂2n,in,approx =
+1
+k
+∑k
+j=1
+1
+(n/k)−1
+∑
+i∈B′
+j
+(
+h̄′n(Zi)−
+k
+n
+∑
+i′∈B′
+j
+h̄′n(Zi′)
+)2
+= 1
+k
+∑k
+j=1
+n
+n−k
+k
+n
+∑
+i∈B′
+j
+(
+h̄′n(Zi)−
+k
+n
+∑
+i′∈B′
+j
+h̄′n(Zi′)
+)2
+= n
+n−k
+1
+k
+∑k
+j=1
+(
+k
+n
+∑
+i∈B′
+j
+h̄′n(Zi)
+2 −
+(
+k
+n
+∑
+i∈B′
+j
+h̄′n(Zi)
+)2)
+= n
+n−k
+1
+n
+∑k
+j=1
+∑
+i∈B′
+j
+h̄′n(Zi)
+2 − n
+n−k
+1
+k
+∑k
+j=1
+(
+k
+n
+∑
+i∈B′
+j
+h̄′n(Zi)
+)2
+.
+We rewrite it once again to find
+σ̂2n,in,approx =
+1
+n
+∑k
+j=1
+∑
+i∈B′
+j
+h̄′n(Zi)
+2 − 1
+k
+∑k
+j=1Wj
+= 1
+n
+∑n
+i=1 h̄
+′
+n(Zi)
+2 − 1
+k
+∑k
+j=1Wj (I.7)
+where
+Wj ,
+1
+(n/k2 )
+∑
+i,i′∈B′j
+i<i′
+h̄′n(Zi)h̄
+′
+n(Zi′).
+Since (Wj)j∈[k] are i.i.d. with mean 0 and for i1 < i
+′
+1 and i2 < i
+′
+2
+E[h̄′n(Zi1)h̄
+′
+n(Zi′1)h̄
+′
+n(Zi2)h̄
+′
+n(Zi′2)] = 0
+whenever i1 6= i2 or i′1 6= i′2, we have
+E[( 1
+k
+∑k
+j=1Wj)
+2] = 1
+k
+Var(W1) =
+1
+k
+1
+(n/k2 )
+2
+∑
+i,i′∈B′j
+i<i′
+E[h̄′n(Zi)
+2h̄′n(Zi′)
+2]
+= 1
+k
+1
+(n/k2 )
+2
+∑
+i,i′∈B′j
+i<i′
+E[h̄′n(Zi)
+2]E[h̄′n(Zi′)
+2]
+= 1
+k
+1
+(n/k2 )
+2
+∑
+i,i′∈B′j
+i<i′
+σ4n =
+1
+k
+1
+(n/k2 )
+σ4n =
+2
+n(n/k−1)σ
+4
+n (I.8)
+by noticing that E[h̄′n(Z0)
+2] = Var(h̄′n(Z0)) = Var(h̄n(Z0)) = σ
+2
+n.
+Moreover, by the independence of our datapoints, we have
+E[h̄′n(Zi1)
+2h̄′n(Zi2)h̄
+′
+n(Zi′2)] = 0
+for all i1, i2, i′2 ∈ [n] such that i2 < i′2, and thus
+E[(σ̂2n,in,approx − σ
+2
+n)
+2] = Var(σ̂2n,in,approx)
+= Var( 1
+n
+∑n
+i=1 h̄
+′
+n(Zi)
+2) + E[( 1
+k
+∑k
+j=1Wj)
+2]
+= 1
+n
+Var(h̄′n(Z0)
+2) + 2
+n(n/k−1)σ
+4
+n
+= 1
+n
+E[h̄′n(Z0)
+4] + 3k−n
+n(n−k)σ
+4
+n. (I.9)
+Putting the pieces together We have
+E[
+√
+∆σ̂n,in,approx] ≤
+√
+E[∆]E[σ̂2n,in,approx] ≤
+√
+2n2
+n−kγloss(hn)σ
+2
+n
+by Cauchy–Schwarz and the bound (I.5).
+25
+We also have
+E[∆σ̂2n,in,approx] ≤
+√
+E[∆2]E[σ̂4n,in,approx]
+=
+√
+E[∆2](Var(σ̂2n,in,approx) + E[σ̂
+2
+n,in,approx]
+2)
+≤
+√
+Cn4
+(n−k)2 γ4(h
+′
+n)(
+1
+n
+E[h̄′n(Z0)4] +
+3k−n
+n(n−k)σ
+4
+n + σ
+4
+n)
+by Cauchy-Schwarz, (I.6) and (I.9).
+Assembling our results with the triangle inequality and Cauchy–Schwarz for the L1 bound and with
+Jensen’s inequality for the L2 bound, we find that
+E[|σ̂2n,in − σ
+2
+n|] ≤ E[|σ̂2n,in − σ̂
+2
+n,in,approx|] + E[|σ̂
+2
+n,in,approx − σ
+2
+n|]
+≤ E[∆] + 2E[
+√
+∆σ̂n,in,approx] +
+√
+E[(σ̂2n,in,approx − σ2n)2]
+≤ 2n
+2
+n−kγloss(hn) + 2
+√
+2n2
+n−kγloss(hn)σ
+2
+n +
+√
+1
+n
+E[h̄′n(Z0)4] +
+3k−n
+n(n−k)σ
+4
+n
+and
+E[(σ̂2n,in − σ
+2
+n)
+2] ≤ 2E[(σ̂2n,in − σ̂
+2
+n,in,approx)
+2] + 2E[(σ̂2n,in,approx − σ
+2
+n)
+2]
+≤ 4E[∆2] + 8E[∆σ̂2n,in,approx] + 2E[(σ̂
+2
+n,in,approx − σ
+2
+n)
+2]
+≤ 4 Cn
+4
+(n−k)2 γ4(h
+′
+n) + 8
+√
+Cn4
+(n−k)2 γ4(h
+′
+n)(
+1
+n
+E[h̄′n(Z0)4] +
+3k−n
+n(n−k)σ
+4
+n + σ
+4
+n)
++ 2( 1
+n
+E[h̄′n(Z0)
+4] + 3k−n
+n(n−k)σ
+4
+n)
+as advertised.
+In order to get the bound
+E[|σ̂2n,in − σ
+2
+n|] ≤
+2n2
+n−kγloss(hn) + 2
+√
+2n2
+n−kγloss(hn)σ
+2
+n +
+√
+2
+n(n/k−1)σ
+4
+n + o(σ
+2
+n)
+whenever the sequence of (h̄n(Z0) − E[h̄n(Z0)])2/σ2n is uniformly integrable, i.e., the sequence
+of h̄′n(Z0)
+2/σ2n is uniformly integrable, we need to argue that
+1
+n
+∑n
+i=1 h̄
+′
+n(Zi)
+2/σ2n
+L1→ 1. Indeed,
+thanks to (I.7) and (I.8), this will lead to E[|σ̂2n,in,approx − σ
+2
+n|] ≤
+√
+2
+n(n/k−1)σ
+4
+n + o(σ
+2
+n).
+To this end, we show that for any triangular i.i.d. array (Xn,i)n,i such that (Xn,1)n≥1 is uni-
+formly integrable, then the two conditions in the weak law of large numbers for triangular ar-
+rays of [23, Thm. 2.2.11] (stated below) are satisfied. We will also show that for such (Xn,i)n,i,
+(Sn ,
+1
+n
+∑n
+i=1Xn,i)n≥1 is uniformly integrable. Together, these results will imply L
+1 conver-
+gence. We will then choose Xn,i = h̄′n(Zi)
+2/σ2n to get the desired result in our specific case.
+Theorem 10 (Weak law for triangular arrays [23, Thm. 2.2.11]). For each n, let Xn,i, 1 ≤ i ≤ n,
+be independent. Let bn > 0 with bn → ∞, and let X̄n,i = Xn,i1[|Xn,i| ≤ bn]. Suppose that as
+n→∞
+1. ∑n
+i=1 P(|Xn,i| > bn)→ 0, (I.10)
+and
+2.
+b−2n
+∑n
+i=1 E[X̄
+2
+n,i]→ 0. (I.11)
+If we let Sn =
+∑n
+i=1Xn,i and an =
+∑n
+i=1 E[X̄n,i], then (Sn − an)/bn
+p→ 0.
+To prove our result, we specify the case of interest bn = n. First, nP(|Xn,1| > n) ≤
+E[|Xn,1|1[|Xn,1| > n]] ≤ supm≥1 E[|Xm,1|1[|Xm,1| > n]]→ 0 as n→∞, because (Xn,1)n≥1 is
+uniformly integrable. Thus the first condition (I.10) holds.
+26
+Note that we then get E[Xn,11[|Xn,1| ≤ n]] → 1 as n → ∞, for our choice Xn,i = h̄′n(Zi)2/σ2n
+which satisfies E[Xn,i] = 1.
+To verify the second condition (I.11), we will show that n−1E[X2n,11[Xn,1 ≤ n]]→ 0. To this end,
+we need the following lemma, which gives a useful formulation of uniform integrability.
+Lemma 3 (De la Vallée Poussin Theorem [40, Thm. 22]). If (Xn)n≥1 is uniformly integrable,
+then there exists a nonnegative increasing function G such that G(t)/t → ∞ as t → ∞ and
+supn E[G(Xn)] <∞.
+With such a function G, fix any T such that G(t)/t ≥ 1 for all t ≥ T , so that t/G(t) ≤ 1 for all
+t ≥ T . Using [23, Lem. 2.2.13] for the first equality, we can write
+1
+n
+E[X2n,11[Xn,1 ≤ n]] =
+2
+n
+∫∞
+0
+yP(Xn,11[Xn,1 ≤ n] > y)dy
+≤ 2
+n
+∫ n
+0
+yP(Xn,1 > y)dy
+= 2
+n
+(
+∫ T
+0
+yP(Xn,1 > y)dy +
+∫ n
+T
+yP(Xn,1 > y)dy)
+≤ T
+2
+n
++ 2
+n
+∫ n
+T
+yP(Xn,1 > y)dy)
+≤ T
+2
+n
++ E[G(Xn,1)] 2n
+∫ n
+T
+y/G(y)dy
+= T
+2
+n
++ o(1),
+where the penultimate line follows from Markov’s inequality and the last line comes from the fol-
+lowing lemma since supy≥T y/G(y) ≤ 1 and y/G(y)→ 0.
+Lemma 4. If f(y)→ 0 as y →∞ and supy≥T |f(y)| ≤M , then
+1
+n
+∫ n
+T
+f(y)dy → 0.
+Proof Let fn(z) = f(nz)1[z > T/n], and note that, for any z ≥ 0, fn(z)→ 0 as n→∞. Then
+1
+n
+∫ n
+T
+f(y)dy =
+∫ 1
+0
+1[z > T/n]f(nz)dz
+=
+∫ 1
+0
+fn(z)dz
+→ 0
+by the bounded convergence theorem.
+Consequently, the second condition (I.11) holds.
+Moreover, (Sn ,
+1
+n
+∑n
+i=1Xn,i)n≥1 is uniformly integrable whenever (Xn,i)n,i is a triangular i.i.d.
+array such that (Xn,1)n≥1 is uniformly integrable for the following reasons:
+1. supn E[|Sn|] ≤ supn E[|Xn,1|] < ∞ by triangle inequality and because (Xn,1)n≥1 is
+uniformly integrable.
+2. For any ε > 0, let δ > 0 such that for any event A satisfying P(A) ≤ δ,
+supn E[|Xn,1|1[A]] ≤ ε. Such δ exists because (Xn,1)n≥1 is uniformly integrable. Then
+supn E[|Sn|1[A]] ≤ ε by triangle inequality.
+The combination of convergence in probability and uniform integrability implies convergence in L1.
+As a result, 1
+n
+∑n
+i=1 h̄
+′
+n(Zi)
+2/σ2n
+L1→ 1 as long as the sequence of (h̄n(Z0) − E[h̄n(Z0)])2/σ2n =
+h̄′n(Z0)
+2/σ2n is uniformly integrable.
+Therefore, E[|σ̂2n,in,approx/σ
+2
+n − 1|] ≤
+√
+2
+n(n/k−1) + o(1), and we get the result advertised.
+If k ≤ n/2, which is the case here since k < n and k divides n, then 2
+n(n/k−1) → 0 and
+3k−n
+n(n−k) → 0.
+Therefore, by (I.2), we have (σ̂2n,in − σ
+2
+n)/σ
+2
+n
+L1→ 0, i.e. σ̂2n,in/σ
+2
+n
+L1→ 1, whenever the sequence of
+(h̄n(Z0) − E[h̄n(Z0)])2/σ2n is uniformly integrable and γloss(hn) = o(
+n−k
+n2
+σ2n), or equivalently
+γloss(hn) = o(σ
+2
+n/n) since k ≤ n/2, and, by (I.1), we have (σ̂2n,in−σ
+2
+n)/σ
+2
+n
+L2→ 0, i.e. σ̂2n,in/σ
+2
+n
+L2→
+1, whenever E[h̄′n(Z0)
+4] = E[(h̄n(Z0) − E[h̄n(Z0)])4] = o(nσ4n) and γ4(h′n) = o(
+(n−k)2
+n4
+σ4n), or
+equivalently γ4(h′n) = o(σ
+4
+n/n
+2) since k ≤ n/2.
+Theorem 4 thus follows from Theorem 9.
+27
+Strengthening of the consistency result of [5, Prop. 1] We provide more details about the
+comparison of our L2-consistency result with [5, Prop. 1]. We have γ4(h′n) ≤ 16γ4(hn) and
+E[(h̄n(Z0) − E[h̄n(Z0)])4] ≤ 16E[hn(Z0, Z1:m)4] by Jensen’s inequality. Moreover, if σ̃2n con-
+verges to a non-zero constant, since γloss(hn) ≤ γms(hn) ≤
+√
+γ4(hn), then γloss(hn) = o(σ2n/n)
+whenever γ4(hn) = o(σ4n/n
+2) and thus σ2n converges to the same non-zero constant as σ̃
+2
+n does by
+Proposition 2.
+J Proof of Theorem 5: Consistent all-pairs estimate of asymptotic variance
+We will prove the following more detailed statement from which Theorem 5 will follow.
+Theorem 11 (Consistent all-pairs estimate of asymptotic variance). Suppose that k divides n evenly.
+Under the notation of Theorem 1 with m = n(1− 1/k), h̄n(z) = E[hn(z, Z1:m)], h′n(Z0, Z1:m) =
+hn(Z0, Z1:m)−E[hn(Z0, Z1:m) | Z1:m] and h̄′n(z) = E[h′n(z, Z1:m)], define the all-pairs variance
+estimate
+σ̂2n,out ,
+1
+k
+∑k
+j=1
+k
+n
+∑
+i∈B′
+j
+(
+hn(Zi, ZBj )− R̂n
+)2
+.
+If (Zi)i≥1 are i.i.d. copies of a random element Z0 and σ̃2n = E[h
+′
+n(Z0, Z1:m)
+2], then
+E[|σ̂2n,out − σ2n|] ≤ (1 +
+n
+k
+)γms(hn) + 2
+√
+2(1 + n
+k
+)γms(hn)σ̃2n +mγloss(hn)
++ 2
+√
+mγloss(hn)(1− 1n )σ
+2
+n +
+√
+1
+n
+(E[h̄′n(Z0)4]− σ4n) +
+1
+n
+σ2n.
+Moreover,
+E[|σ̂2n,out − σ2n|] ≤ (1 +
+n
+k
+)γms(hn) + 2
+√
+2(1 + n
+k
+)γms(hn)σ̃2n +mγloss(hn)
++ 2
+√
+mγloss(hn)(1− 1n )σ
+2
+n +
+1
+n
+σ2n + o(σ
+2
+n). (J.1)
+whenever the sequence of (h̄n(Z0)− E[h̄n(Z0)])2/σ2n is uniformly integrable.
+Proof
+A common training set for each validation point pair We begin by approximating our variance
+estimate
+σ̂2n,out =
+1
+n
+∑k
+j=1
+∑
+i∈B′
+j
+(
+hn(Zi, ZBj )− R̂n
+)2
+= 1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+1
+2
+(hn(Zi, ZBj )− hn(Zi′ , ZBj′ ))
+2
+by a quantity that employs the same training set for each pair of validation points Z(i,i′),
+σ̂2n,out,approx,1 ,
+1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+1
+2
+(hn(Zi, Z
+\i′
+Bj
+)− hn(Zi′ , Z
+\i′
+Bj
+))2
+= 1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+1
+2
+(h′n(Zi, Z
+\i′
+Bj
+)− h′n(Zi′ , Z
+\i′
+Bj
+))2.
+Here, for any j ∈ [k] and i′ ∈ [n], Z\i
+′
+Bj
+is ZBj with Zi′ replaced by Z0. By Cauchy–Schwarz, we
+have
+|σ̂2n,out − σ̂2n,out,approx,1| ≤ ∆1 + 2
+√
+∆1σ̂n,out,approx,1
+for the error term
+∆1 ,
+1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+1
+2
+(hn(Zi, ZBj )− hn(Zi, Z
+\i′
+Bj
+) + hn(Zi′ , Z
+\i′
+Bj
+)− hn(Zi′ , ZBj′ ))
+2
+≤ 1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+(hn(Zi, ZBj )− hn(Zi, Z
+\i′
+Bj
+))2
++ 1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+(hn(Zi′ , Z
+\i′
+Bj
+)− hn(Zi′ , ZBj′ ))
+2, (J.2)
+where we have used Jensen’s inequality in the final display.
+28
+Controlling the error ∆1 We will first control the error term ∆1. Note that, for Bj′ 6= Bj ,
+|Bj′\(Bj′ ∩ Bj)| = nk . Hence, by the bound (J.2) and the conditional Efron-Stein inequality
+(Lemma 1), we have
+E[∆1] ≤ γms(hn) + 1n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+E[(hn(Zi′ , Z
+\i′
+Bj
+)− hn(Zi′ , ZBj′ ))
+2]
+≤ γms(hn) + nk γms(hn) = (1 +
+n
+k
+)γms(hn). (J.3)
+Eliminating training set randomness We then approximate σ̂2n,out,approx,1 by a quantity elimi-
+nating training set randomness in each summand,
+σ̂2n,out,approx,2 ,
+1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+1
+2
+(h̄′n(Zi)− h̄′n(Zi′))2
+where h̄′n(z) = E[h
+′
+n(z, Z1:m)]. Note that h̄
+′
+n(Z0) has expectation 0.
+By Cauchy–Schwarz, we have
+|σ̂2n,out,approx,1 − σ̂2n,out,approx,2| ≤ ∆2 + 2
+√
+∆2σ̂n,out,approx,2
+for the error term
+∆2 ,
+1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+1
+2
+(h′n(Zi, Z
+\i′
+Bj
+)− h̄′n(Zi) + h̄′n(Zi′)− h′n(Zi′ , Z
+\i′
+Bj
+))2
+≤ 1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+(h′n(Zi, Z
+\i′
+Bj
+)− h̄′n(Zi))2
++ 1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+(h̄′n(Zi′)− h′n(Zi′ , Z
+\i′
+Bj
+))2, (J.4)
+where we have used Jensen’s inequality in the final display.
+Controlling the error ∆2 We will control the error term ∆2. By the bound (J.4) and the condi-
+tional Efron-Stein inequality (Lemma 1), we have
+E[∆2] ≤ 2m2 γms(h
+′
+n) = mγloss(hn). (J.5)
+Controlling the error σ̂2n,out,approx,2 − σ2n To control the error σ̂2n,out,approx,2 − σ2n, we first
+rewrite σ̂2n,out,approx,2 as
+σ̂2n,out,approx,2 =
+1
+n2
+∑k
+j,j′=1
+∑
+i∈B′
+j
+,i′∈B′
+j′
+1
+2
+(h̄′n(Zi)− h̄′n(Zi′))2
+= 1
+n2
+∑n
+i,i′=1
+1
+2
+(h̄′n(Zi)− h̄′n(Zi′))2
+= 1
+n
+∑n
+i=1
+(
+h̄′n(Zi)−
+1
+n
+∑n
+i′=1 h̄
+′
+n(Zi′)
+)2
+= 1
+n
+∑n
+i=1 h̄
+′
+n(Zi)
+2 −
+(
+1
+n
+∑n
+i=1 h̄
+′
+n(Zi)
+)2
+. (J.6)
+Since E[h̄′n(Zi)h̄
+′
+n(Zi′)] = 0 for all i, i
+′ ∈ [n] with i 6= i′ due to independence, we have
+E[
+(
+1
+n
+∑n
+i=1 h̄
+′
+n(Zi)
+)2
+] = 1
+n
+E[h̄′n(Z0)
+2] = 1
+n
+σ2n. (J.7)
+Furthermore,
+E[( 1
+n
+∑n
+i=1 h̄
+′
+n(Zi)
+2 − σ2n)2] = Var(
+1
+n
+∑n
+i=1 h̄
+′
+n(Zi)
+2) = 1
+n
+Var(h̄′n(Z0)
+2) = 1
+n
+(E[h̄′n(Z0)
+4]− σ4n)
+by independence. Hence,
+E[|σ̂2n,out,approx,2 − σ2n|] ≤
+√
+1
+n
+(E[h̄′n(Z0)4]− σ4n) +
+1
+n
+σ2n.
+Putting the pieces together Since each
+1
+2
+(h′n(Zi, Z
+\i′
+Bj
+)− h′n(Zi′ , Z
+\i′
+Bj
+))2 ≤ h′n(Zi, Z
+\i′
+Bj
+)2 + h′n(Zi′ , Z
+\i′
+Bj
+)2,
+we have
+E[σ̂2n,out,approx,1] ≤ 2E[h′n(Z0, Z1:m)2] = 2σ̃2n
+29
+and hence
+E[
+√
+∆1σ̂n,out,approx,1] ≤
+√
+E[∆1]E[σ̂2n,out,approx,1] ≤
+√
+2(1 + n
+k
+)γms(hn)σ̃2n
+by Cauchy–Schwarz and the bound (J.3).
+Moreover, E[σ̂2n,out,approx,2] = (1−
+1
+n
+)σ2n, hence
+E[
+√
+∆2σ̂n,out,approx,2] ≤
+√
+E[∆2]E[σ̂2n,out,approx,2] ≤
+√
+mγloss(hn)(1− 1n )σ
+2
+n
+by Cauchy–Schwarz and the bound (J.5).
+Assembling our results with the triangle inequality, we find that
+E[|σ̂2n,out − σ2n|] ≤ E[|σ̂2n,out − σ̂2n,out,approx,1|] + E[|σ̂2n,out,approx,1 − σ̂2n,out,approx,2|]
++ E[|σ̂2n,out,approx,2 − σ2n|]
+≤ E[∆1] + 2E[
+√
+∆1σ̂n,out,approx,1]
++ E[∆2] + 2E[
+√
+∆2σ̂n,out,approx,2]
++
+√
+1
+n
+(E[h̄′n(Z0)4]− σ4n) +
+1
+n
+σ2n
+≤ (1 + n
+k
+)γms(hn) + 2
+√
+2(1 + n
+k
+)γms(hn)σ̃2n
++mγloss(hn) + 2
+√
+mγloss(hn)(1− 1n )σ
+2
+n
++
+√
+1
+n
+(E[h̄′n(Z0)4]− σ4n) +
+1
+n
+σ2n
+as advertised.
+We showed in the proof of Theorem 9 that 1
+n
+∑n
+i=1 h̄
+′
+n(Zi)
+2/σ2n
+L1→ 1 whenever the sequence of
+(h̄n(Z0) − E[h̄n(Z0)])2/σ2n = h̄′n(Z0)2/σ2n is uniformly integrable. Thus, with (J.6) and (J.7), we
+get E[|σ̂2n,out,approx,2/σ2n − 1|] ≤ 1/n+ o(1), and the final bound advertised
+E[|σ̂2n,out − σ2n|] ≤ (1 +
+n
+k
+)γms(hn) + 2
+√
+2(1 + n
+k
+)γms(hn)σ̃2n
++mγloss(hn) + 2
+√
+mγloss(hn)(1− 1n )σ
+2
+n
++ 1
+n
+σ2n + o(σ
+2
+n).
+By the bound (J.1), (σ̂2n,out − σ2n)/σ2n
+L1→ 0, i.e. σ̂2n,out/σ2n
+L1→ 1, if the sequence of (h̄n(Z0) −
+E[h̄n(Z0)])2/σ2n is uniformly integrable, γloss(hn) = o(σ
+2
+n/n) and γms(hn) = o(min(
+kσ2n
+n
+,
+k σ4n
+n σ̃2n
+)).
+By noticing that σ̃2n/σ
+2
+n → 1 when γloss(hn) = o(σ2n/n) thanks to Proposition 2, the last condition
+becomes γms(hn) = o(kσ2n/n). Therefore, Theorem 5 follows from Theorem 11.
+K Experimental Setup Details
+Here, we provide more details about the experimental setup of Section 5.
+K.1 General experimental setup details
+Learning algorithms and hyperparameters To illustrate the performance of our confidence
+intervals and tests in practice, we carry out our experiments with a diverse collection of pop-
+ular learning algorithms. For classification, we use the xgboost XGBRFClassifier with
+n estimators=100, subsample=0.5 and max depth=1, the scikit-learn MLPClassifier
+neural network with hidden layer sizes=(8,4,) defining the architecture and alpha=1e2,
+and the scikit-learn `2-penalized LogisticRegression with solver='lbfgs' and
+C=1e-3. For regression, we use the xgboost XGBRFRegressor with n estimators=100,
+30
+subsample=0.5 and max depth=1, the scikit-learn MLPRegressor neural network with
+hidden layer sizes=(8,4,) defining the architecture and alpha=1e2, and the scikit-learn
+Ridge regressor with alpha=1e6. The random forest max depth hyperparameter and neural net-
+work, logistic, and ridge `2 regularization strengths were selected to ensure the stability of each
+algorithm. All remaining hyperparameters are set to their defaults, and we set random seeds for
+all algorithms’ random states for reproducibility. We use scikit-learn [43] version 0.22.1 and
+xgboost [17] version 1.0.2.
+Training set sample sizes n For both datasets, we work with the following training set sample
+sizes n: 700, 1,000, 1,500, 2,300, 3,400, 5,000, 7,500, 11,000. Up to some rounding, this corre-
+sponds to a geometric sequence with growth rate 50%.
+Details on the Higgs dataset The target variable has value either 0 or 1 and there are 28 features.
+We initially shuffle the rows of the dataset uniformly at random and then, starting at the 5,000,001-th
+instance, we take 500 consecutive chunks of the largest sample size, that is 11,000. For each n, we
+take the first n instances of these 500 chunks to play the role of our 500 independent replications
+of size n. The features are standardized during training in the following way: for each iteration of
+k-fold CV (k = 10 here), we rescale the validation fold and the remaining folds, used as training,
+with the mean and standard deviation of the training data. The features for the training folds then
+have mean 0 and variance 1.
+Details on the FlightsDelay dataset To avoid the temporal dependence issues inherent to time
+series datasets, we treat the complete FlightsDelay dataset as the population and thus process
+it differently from the Higgs dataset. For this dataset, we predict the signed log transform (y 7→
+sign(y) log(1 + |y|); this addressed the very heavy tails of y on its original scale) of the delay at
+arrival using 4 features: the scheduled time of the journey from the origin airport to the destination
+airport (taxi included), the distance between the two airports, the scheduled time of departure in
+minutes (converted from a time to a number between 0 and 1,439) and the airline operating the
+plane (that we one-hot encode). We drop the instances that have missing values for at least one of
+these variables. Then, we perform 500 times the sampling with replacement of 11,000 points, that
+is the largest sample size. For each n, we take the first n instances of these 500 chunks to play the
+role of our 500 independent replications of size n. The features are standardized during training in
+the same way we do for the Higgs dataset.
+Computing target test errors We form a surrogate ground-truth estimate of the target test errors
+using the first 5,000,000 instances for the classification dataset and the whole data for the regression
+dataset. As an illustration, for our method where the target test error is the k-fold test error Rn =
+1
+n
+∑10
+j=1
+∑
+i∈B′
+j
+E[hn(Zi, ZBj ) | ZBj ] =
+1
+k
+∑10
+j=1 E[hn(Z0, ZBj ) | ZBj ], we use these instances
+to compute the k conditional expectations by a Monte Carlo approximation. Practically, for each
+training set ZB , we compute the average loss on these instances of the fitted prediction rule learned
+on ZB . Then, we evaluate the CIs and tests constructed from the 500 training sets of varying sizes
+n sampled from the datasets.
+Random seeds Seeds are set in the code to ensure reproducibility. They are used for the initial ran-
+dom shuffling of the datasets, the sampling with replacement for the regression dataset, the random
+partitioning of samples in each replication, and the randomized algorithms.
+K.2 List of procedures
+In our numerical experiments, we compare our procedures with the most popular alternatives from
+the literature. For each procedure, we give its target test error Rn, the estimator R̂n of this target,
+the variance estimator σ̂2n, the two-sided CI used in Section 5.1, and the one-sided test used in
+Section 5.2.
+In the following, qα is the α-quantile of a standard normal distribution and tν,α is the α-quantile of
+a t distribution with ν degrees of freedom.
+31
+1. Our 10-fold CV CLT-based test, with σ̂n being either σ̂n,in (Theorem 4) or σ̂n,out (Theorem 5).
+The curve with σ̂n,in is not displayed in our plots since the results are almost identical to those
+for σ̂n,out and the curves are overlapping.
+• Target test error: Rn =
+1
+10
+∑10
+j=1 E[hn(Z0, ZBj ) | ZBj ].
+• Estimator: R̂n =
+1
+n
+∑10
+j=1
+∑
+i∈B′
+j
+hn(Zi, ZBj ).
+• Variance estimator: σ̂2n, either σ̂
+2
+n,in or σ̂
+2
+n,out.
+• Two-sided (1− α)-CI: R̂n ± q1−α/2σ̂n/
+√
+n.
+• One-sided test: REJECT H0 ⇔ R̂n < qασ̂n/
+√
+n.
+2. Hold-out test described, for instance, in Austern and Zhou [5, Eq. (17)].
+• Target test error: Rn = E[hn(Z0, ZS) | ZS ], where S is a subset of size bn(1− 1/10)c of
+[n]. Since we already have a partition for our 10-fold CV, we can use the first fold B1 for
+S.
+• Estimator: R̂n =
+1
+|Sc|
+∑
+i∈Sc hn(Zi, ZS).
+• Variance estimator: σ̂2n =
+1
+|Sc|
+∑
+i∈Sc(hn(Zi, ZS)− R̂n)
+2.
+• Two-sided (1− α)-CI: R̂n ± q1−α/2σ̂n
+√
+10/
+√
+n.
+• One-sided test: REJECT H0 ⇔ R̂n < qασ̂n
+√
+10/
+√
+n.
+3. Cross-validated t-test of Dietterich [21], 10 folds.
+• Target test error: Rn =
+1
+10
+∑10
+j=1 E[hn(Z0, ZBj ) | ZBj ].
+• Estimator: R̂n =
+1
+n
+∑10
+j=1
+∑
+i∈B′
+j
+hn(Zi, ZBj ).
+• Variance estimator: σ̂2n =
+1
+10−1
+∑10
+j=1(pj − R̂n)
+2, where pj ,
+1
+|B′
+j
+|
+∑
+i∈B′
+j
+hn(Zi, ZBj ).
+• Two-sided (1− α)-CI: R̂n ± t10−1,1−α/2σ̂n/
+√
+10.
+• One-sided test: REJECT H0 ⇔ R̂n < t10−1,ασ̂n/
+√
+10.
+4. Repeated train-validation t-test of Nadeau and Bengio [42], 10 repetitions of 90-10 train-
+validation splits.
+• Target test error: Rn =
+1
+10
+∑10
+j=1 E[hn(Z0, ZSj ) | ZSj ], where for any j ∈ [10], Sj is a
+subset of size bn(1− 1/10)c of [n], and these 10 subsets are chosen independently.
+• Estimator: R̂n =
+1
+10
+∑10
+j=1 pj , where pj ,
+1
+|Sc
+j
+|
+∑
+i∈Sc
+j
+hn(Zi, ZSj ).
+• Variance estimator: σ̂2n =
+1
+10−1
+∑10
+j=1(pj − R̂n)
+2.
+• Two-sided (1− α)-CI: R̂n ± t10−1,1−α/2σ̂n/
+√
+10.
+• One-sided test: REJECT H0 ⇔ R̂n < t10−1,ασ̂n/
+√
+10.
+5. Corrected repeated train-validation t-test of Nadeau and Bengio [42], 10 repetitions of 90-10
+train-validation splits.
+• Target test error: Rn =
+1
+10
+∑10
+j=1 E[hn(Z0, ZSj ) | ZSj ], where for any j ∈ [10], Sj is the
+same as in the previous procedure.
+• Estimator: R̂n =
+1
+10
+∑10
+j=1 pj , where pj is the same as in the previous procedure.
+• Variance estimator: σ̂2n = (
+1
+10
++ 0.1
+1−0.1 )
+10
+10−1
+∑10
+j=1(pj − R̂n)
+2.
+• Two-sided (1− α)-CI: R̂n ± t10−1,1−α/2σ̂n/
+√
+10.
+• One-sided test: REJECT H0 ⇔ R̂n < t10−1,ασ̂n/
+√
+10.
+6. 5× 2-fold CV test of Dietterich [21].
+• Target test error: Rn =
+1
+5
+∑5
+j=1
+1
+2
+(E[hn(Z0, ZB1,j ) | ZB1,j ] + E[hn(Z0, ZB2,j ) | ZB2,j ]),
+where for any j ∈ [5], {Bc1,j , B
+c
+2,j} is a partition of [n] into 2 folds of size n/2, and these
+5 partitions are chosen independently.
+• Estimator: R̂n =
+1
+|Bc1,1|
+∑
+i∈Bc1,1
+hn(Zi, ZB1,1).
+32
+• Variance estimator: σ̂2n =
+1
+5
+∑5
+j=1 s
+2
+j , where s
+2
+j , (p1,j − p̄j)
+2 + (p2,j − p̄j)2 with p̄j ,
+(p1,j + p2,j)/2 and pk,j ,
+1
+|Bc
+k,j
+|
+∑
+i∈Bc
+k,j
+hn(Zi, ZBk,j ) for k ∈ [2], j ∈ [5].
+• Two-sided (1− α)-CI: R̂n ± t5,1−α/2σ̂n.
+• One-sided test: REJECT H0 ⇔ R̂n < t5,ασ̂n.
+K.3 Leave-one-out cross-validation
+As a simple demonstration of our LOOCV CLT-based procedure, explained in Section 5.4, we follow
+the ridge regression experimental setup described in Appendix K.1 except that we do not standardize
+the features. In our LOOCV CLT-based procedure, the quantities of interest are the following.
+• Target test error: Rn =
+1
+n
+∑n
+i=1 E[hn(Z0, Z{i}c) | Z{i}c ].
+• Estimator: R̂n =
+1
+n
+∑n
+i=1 hn(Zi, Z{i}c) computed thanks to the Sherman–Morrison–
+Woodbury formula for ridge regression, or approximate LOOCV estimator for other al-
+gorithms.
+• Variance estimator: σ̂2n,out with k = n folds.
+• Two-sided (1− α)-CI: R̂n ± q1−α/2σ̂n,out/
+√
+n.
+• One-sided test: REJECT H0 ⇔ R̂n < qασ̂n,out/
+√
+n.
+We explain here how the Sherman–Morrison–Woodbury formula can be used to efficiently compute
+the individual losses hn(Zi, Z{i}c), and therefore R̂n as well as σ̂n,out, and the loss on the instances
+used to form a surrogate ground-truth estimate of the target error Rn. Let X ∈ Rn×p be the matrix
+of predictors, whose i-th row is x>i , and Y ∈ R
+n be the target variable. The weight vector estimate
+ŵ minimizes minw∈Rp ‖Y −Xw‖22 + λ‖w‖22, and is given by the closed-form formula
+ŵ = (X>X + λIp)
+−1X>Y.
+We precomputeM , (X>X+λIp)−1 and v , X>Y , that satisfy ŵ = Mv. Suppose that we have
+an additional set with covariate matrix X̃ and target variable Ỹ , representing the instances used to
+form a surrogate ground-truth estimate of Rn. We also precompute q , X̃ŵ and A , X̃M .
+For the datapoint i, let X(−i) denote X without its i-th row and Y (−i) denote Y without its i-
+th element. Let Mi , (X(−i)
+>
+X(−i) + λIp)
+−1, vi , X(−i)
+>
+Y (−i) and wi , Mivi. We can
+efficiently compute Mi from M based on the Sherman–Morrison–Woodbury formula.
+Mi = (X
+(−i)>X(−i) + λIp)
+−1
+= (X>X − xix>i + λIp)
+−1
+= M −Mxix>i M/(−1 + hi),
+where hi , x>i Mxi.
+We can compute vi from v, with vi = X(−i)
+>
+Y (−i) = v − xiyi.
+Therefore, wi = Mivi = (M −Mxix>i M(−1 +hi)
+−1)(v−xiyi) = ŵ+Mxi(〈ŵ, xi〉− yi)/(1−
+hi) can be computed without fitting any additional prediction rule. Then hn(Zi, Z{i}c) = (yi −
+〈wi, xi〉)2, and we use them to compute R̂n and σ̂n,out. To make predictions for the covariate
+matrix X̃ , we efficiently compute X̃wi as
+X̃wi = X̃ŵ + X̃Mxi(〈ŵ, xi〉 − yi)/(1− hi)
+= q +Axi(〈ŵ, xi〉 − yi)/(1− hi),
+and 1
+N
+‖Ỹ − X̃wi‖22 is an estimate of E[hn(Z0, Z{i}c) | Z{i}c ], where N is the size of the whole
+dataset. An estimate of Rn is then
+1
+n
+∑n
+i=1
+1
+N
+‖Ỹ − X̃wi‖22.
+33
+L Additional Experimental Results
+This section reports the additional results of the experiments described in Section 5.
+L.1 Additional confidence interval results
+The remaining results of the experiments described in Section 5.1 are provided in Figs. 4 and 5. We
+remind that each mean width estimate is displayed with a± 2 standard error confidence band, while
+the confidence band surrounding each coverage estimate is a 95% Wilson interval. For all 6 learning
+tasks, all procedures except the repeated train-validation t interval provide near-nominal coverage,
+and our CV CLT intervals provide the smallest widths.
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+0.02
+0.04
+0.06
+0.08
+0.10
+0.12
+0.14
+0.16
+W
+id
+th
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+0.02
+0.04
+0.06
+0.08
+0.10
+0.12
+0.14
+0.16
+W
+id
+th
+103 104
+Sample size n (log scale)
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+103 104
+Sample size n (log scale)
+0.02
+0.04
+0.06
+0.08
+0.10
+0.12
+0.14
+0.16
+W
+id
+th
+Figure 4: Test error coverage (left) and width (right) of 95% confidence intervals (see Section 5.1).
+Top: `2-regularized logistic regression classifier. Middle: Random forest classifier. Bottom: Neu-
+ral network classifier.
+L.2 Additional testing results
+The remaining results of the testing experiments described in Section 5.2 are provided in Figs. 6
+to 11. In contrast to Section 5.2, where we identified the algorithm A1 that more often has
+smaller test error across our simulations and displayed the power of the level α = 0.05 test of
+H1 : Err(A1) < Err(A2) and the size of the level α = 0.05 test of H1 : Err(A2) < Err(A1), here
+we plot the size and power of the H1 : Err(A1) < Err(A2) test in the left column of each figure and
+the size and power of the H1 : Err(A2) < Err(A1) test in the right column. We remind the reader
+that the confidence band surrounding each power or size estimate is a 95% Wilson interval and that
+we added caps to the error bars to help distinguish superimposed error bars. We also remind the
+34
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+1.6
+1.8
+W
+id
+th
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+1.6
+1.8
+W
+id
+th
+103 104
+Sample size n (log scale)
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+103 104
+Sample size n (log scale)
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+1.6
+1.8
+W
+id
+th
+Figure 5: Test error coverage (left) and width (right) of 95% confidence intervals (see Section 5.1).
+Top: Random forest regression. Middle: Ridge regression. Bottom: Neural network regression.
+reader that for all procedures we only display points based on at least 25 replications under the null
+for size plots and at least 25 replications under the alternative for power plots.
+L.3 Importance of stability
+In this section, we provide the figures (Figs. 12 to 14) and experimental details supporting the im-
+portance of stability experiment of Section 5.3. Compared to the chosen hyperparameters described
+in Appendix K, for this example, we used the default value of max depth for XGBRFRegressor,
+that is 6, and the default value of alpha for MLPRegressor, that is 1e-4. For Figs. 14a and 14b,
+we obtain an estimate of σ2n = Var(h̄n(Z0)) by computing a Monte Carlo approximation of
+h̄n(Z0) = E[hn(Z0, Z1:m) | Z0] for each of 10,000 Z0 values and then reporting the empirical
+variance of these 10,000 approximated values. For each value of Z0 we employ the Monte Carlo
+approximation of
+h̄n(Z0) ≈
+1
+500
+500∑
+`=1
+1
+k
+k∑
+j=1
+hn(Z0, Z
+(`)
+Bj
+)
+where (Z(`)1:n)
+500
+`=1 are the 500 datasets of size n described in Appendix K.
+35
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+Figure 6: Size (top) and power (bottom) of level-0.05 tests for improved test error (see Section 5.2).
+Left: TestingH1: neural network improves upon `2-regularized logistic regression classifier. Right:
+Testing H1: `2-regularized logistic regression classifier improves upon neural network.
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+Figure 7: Size (top) and power (bottom) of level-0.05 tests for improved test error (see Section 5.2).
+Left: Testing H1: `2-regularized logistic regression classifier improves upon random forest. Right:
+Testing H1: random forest improves upon `2-regularized logistic regression classifier.
+36
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+Figure 8: Size (top) and power (bottom) of level-0.05 tests for improved test error (see Section 5.2).
+Left: Testing H1: neural network classifier improves upon random forest. Right: Testing H1:
+random forest classifier improves upon neural network.
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+Figure 9: Size (top) and power (bottom) of level-0.05 tests for improved test error (see Section 5.2).
+Left: TestingH1: ridge regression improves upon random forest. Right: TestingH1: random forest
+improves upon ridge regression.
+37
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+0.12
+0.14
+Si
+ze
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+0.12
+0.14
+Si
+ze
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+Figure 10: Size (top) and power (bottom) of level-0.05 tests for improved test error (see Section 5.2).
+Left: Testing H1: neural network improves upon ridge regression. Right: Testing H1: ridge regres-
+sion improves upon neural network.
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+Si
+ze
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+103 104
+Sample size n (log scale)
+0.00
+0.20
+0.40
+0.60
+0.80
+1.00
+Po
+w
+er
+Figure 11: Size (top) and power (bottom) of level-0.05 tests for improved test error (see Section 5.2).
+Left: Testing H1: neural network regression improves upon random forest. Right: Testing H1:
+random forest regression improves upon neural network.
+38
+103 104
+Sample size n (log scale)
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+Si
+ze
+103 104
+Sample size n (log scale)
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Po
+w
+er
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+Figure 12: Impact of instability on size (left) and power (right) of level-0.05 tests for improved test
+error (see Section 5.3). Testing H1: less stable neural network regression improves upon less stable
+random forest.
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+0.80
+0.85
+0.90
+0.95
+1.00
+Co
+ve
+ra
+ge
+ p
+ro
+ba
+bi
+lit
+y
+103 104
+Sample size n (log scale)
+0.20
+0.40
+0.60
+0.80
+1.00
+1.20
+1.40
+1.60
+1.80
+W
+id
+th
+103 104
+Sample size n (log scale)
+0.20
+0.40
+0.60
+0.80
+1.00
+1.20
+1.40
+1.60
+1.80
+W
+id
+th
+CV CLT (Ours)
+Hold-out CLT
+CV t
+Rep. train-val t
+Corr. rep. train-val t
+5x2 CV
+Figure 13: Impact of instability on test error coverage (top) and width (bottom) of 95% confidence
+intervals (see Section 5.3). Left: Less stable neural network regression. Right: Less stable random
+forest regression.
+39
+103 104
+Sample size n (log scale)
+1
+2
+3
+4
+5
+6
+7
+8
+Va
+ria
+nc
+e 
+of
+ 
+n
+(R
+n
+R
+n
+)/
+n
+Stabilized
+Destabilized
+(a) Algorithm comparison
+103 104
+Sample size n (log scale)
+1
+2
+3
+4
+5
+6
+7
+8
+Va
+ria
+nc
+e 
+of
+ 
+n
+(R
+n
+R
+n
+)/
+n
+NN - Stabilized
+RF - Stabilized
+NN - Destabilized
+RF - Destabilized
+(b) Single algorithm assessment
+Figure 14: Impact of instability on variance of
+√
+n
+σn
+(R̂n − Rn) (see Section 5.3). Left:
+hn(Z0, ZB) = (Y0 − f̂1(X0;ZB))2 − (Y0 − f̂2(X0;ZB))2 for neural network and random for-
+est prediction rules, f̂1 and f̂2. As predicted in Theorems 1 and 2, the variance is close to 1 when
+hn is stable, but the variance can be much larger when hn is unstable. Right: hn(Z0, ZB) =
+(Y0 − f̂(X0;ZB))2 for neural network or random forest prediction rule, f̂ . The same destabilized
+algorithms produce relatively stable hn in the context of single algorithm assessment, as the variance
+parameter σ2n = Var(h̄n(Z0)) is larger.
+40
+	1 Introduction
+	1.1 Related work
+	1.2 Notation
+	2 A Central Limit Theorem for Cross-validation
+	2.1 Asymptotic linearity of cross-validation
+	2.2 From asymptotic linearity to asymptotic normality
+	3 Sufficient Conditions for Asymptotic Linearity
+	3.1 Asymptotic linearity from loss stability
+	3.2 Asymptotic linearity from conditional variance convergence
+	3.3 Comparison with prior work
+	4  Confidence Intervals and Tests for k-fold Test Error 
+	5 Numerical Experiments
+	5.1 Confidence intervals for test error
+	5.2 Testing for improved algorithm performance
+	5.3 The importance of stability
+	5.4 Leave-one-out cross-validation
+	6 Conclusion and Future Work
+	A Proof of cv-asymp-linear: Asymptotic linearity of k-fold CV
+	B Proof of iid-cv-normal: Asymptotic normality of k-fold CV with i.i.d. data
+	C Proof of asymp-from-lstability: Asymptotic linearity from loss stability
+	D Proof of asymp-from-cond-var: Asymptotic linearity from conditional variance convergence
+	E Conditional Variance Convergence from Loss Stability 
+	F Excess Loss of Sample Mean: o(n2n) loss stability, constant n2(0,), infinite mean-square stability
+	G Loss of Surrogate Mean: constant n2(0,), infinite n2, vanishing conditional variance
+	H Proof of var-comp: Variance comparison
+	I Proof of consistent-variance-est-in: Consistent within-fold estimate of asymptotic variance
+	J Proof of consistent-variance-est-out: Consistent all-pairs estimate of asymptotic variance
+	K Experimental Setup Details
+	K.1 General experimental setup details
+	K.2 List of procedures
+	K.3 Leave-one-out cross-validation
+	L Additional Experimental Results
+	L.1 Additional confidence interval results
+	L.2 Additional testing results
+	L.3 Importance of stability

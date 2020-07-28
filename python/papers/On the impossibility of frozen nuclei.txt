@@ -1,0 +1,3065 @@
+On the impossibility of frozen nuclei
+On the impossibility
+of frozen nuclei
+THOMAS GROHMANN
+� Institut für Chemie und Biochemie, Freie Universität Berlin
+R thomas.grohmann[fu-berlin.de
+@ Second, edited and slightly modified version; July 23, 2020
+Many molecular “quantum” theories, like “quantum chemistry”, conceal that they are actually
+quantum-classical approaches—they treat one set of molecular degrees of freedom classically
+while the remaining degrees of freedom follow the laws of quantum mechanics. We show that the
+prominent “frozen-nuclei approximation”, which is often used inmolecular control communities, is
+a further example for such theory reduction: It treats the nuclei of the molecule as classical particles.
+Here, we demonstrate that the ignorance about the quantum nature of nuclei has far-reaching
+consequences for the theoretical description ofmolecules. We analyse the symmetry of oriented and
+aligned rigid molecules with feasible permutations of identical nuclei and show: The presumption
+of fixed nuclei corresponds to a localized state that is impossible to create if the existence of stable
+nuclear spin isomers is a justifiable assumption for the controlled molecule. The results of studies
+on molecules containing identical nuclei have to be re-evaluated and properly anti-symmetrised,
+because for such molecules the premise of frozen nuclei is inherently wrong: Molecular wave
+functions have to obey the spin-statistics theorem twice.
+1. Frozen nuclei in molecular control
+It seems as if the laser control of molecular processes is a story of success. Steering
+molecular motions with laser pulses on pico-, femto-, and attosecond time-scales does not
+only allow for many interesting applications, such as the control of molecular orientation
+and alignment,
+# 1–4
+the control of charge-transfer,
+#5,6
+or the design of molecular switches
+andmolecular rotors.
+# 7–9
+It also puts some long-standingdebates in the theory of chemistry
+back into spotlight: Can we measure orbitals and what, if anything, do they actually
+mean?
+# 10–21
+Do molecules have a structure, and if so, can we measure it?
+#22–34
+How
+do electrons move during chemical reactions?
+#35,36
+And what follows from all of this
+for our understanding of chemistry? Addressing such questions is not only relevant for
+developing theories of chemistry and physics to a sophisticated level. It also helps us to
+better understand the complicated relationship of chemistry and quantum theory.
+# 11,23,37,38
+Attosecond scientists in particular have focussed on giving new answers to these fun-
+damental questions. In numerous studies, they claim to have measured what standard
+July 23, 2020 Page 1 of 38
+ar
+X
+iv
+:2
+00
+7.
+11
+14
+6v
+1 
+ [
+ph
+ys
+ic
+s.
+ch
+em
+-p
+h]
+  2
+2 
+Ju
+l 
+20
+20
+Grohmann On the impossibility of frozen nuclei
+interpretations of quantum theory conclude is impossible to observe: Orbitals and molec-
+ular structures can be seen in time-resolved experiments for many different systems,
+attosecond scientists have repeatedly reported.
+#5,6,35,39–45
+Critical comments on such
+measurements are rare,
+# 10,12,14–20,46
+and they usually address only the problem that any
+exact electronic wave function cannot be decomposed into (anti-symmetrised) products
+of one-electron wave functions: Because the “orbital approximation” is incorrect at any
+level of theory, there is nothing to observe in accurate experiments.
+# 10–12,16,19
+Moreover,
+wave functions cannot be measured directly, the popular Copenhagen interpretation of
+quantum theory dictates to us.
+#47
+How, then, can we image one-electron wave functions
+at all?
+# 14,48
+In this paper, we lengthen the list of arguments why some results of attosecond research
+should lead sceptics to reasonable doubt. We focus, however, on a different aspect: the
+classical treatment of the nuclei. Here, we argue that the “frozen-nuclei approximation”,
+which is widely employed by atto-scientists,
+#5,6,35,39–45
+is physically incorrect formolecules
+with identical nuclei. Because it is an inherently quantum-classical theory, treating the
+nuclei as classical objects by fixing them in space,
+#23,29
+the frozen-nuclei approximation
+not only violates the indistinguishability of identical particles. It also cannot account for
+the consequences that follow from the symmetry properties of nuclear wave functions:
+Localised rotational states are unphysical representations of molecules that exist in form
+of nuclear spin isomers.
+The basis for our critique is the following argument: The frozen-nuclei approximation
+(implicitly) relies on a two-step mechanism. Before manipulating electrons or internal
+nuclear motions, some form of external interaction, for example an electromagnetic
+field, creates narrowly localised rotational states of the molecule. In the limit of infinite
+nuclear masses, common models assume, such states converge to a classical configuration
+with fixed nuclear coordinates,
+#23,29
+which then are used in simulations of attosecond
+experiments.
+#5,6,35,41–45
+Yet, localised rotational states are unphysical if the rotational
+motion can be described in terms of permutations of identical nuclei. Either these states
+cannot exist because they directly violate the spin-statistics theorem; or they cannot be
+created because they represent coherent superpositions of states belonging to different
+nuclear spin isomers of the molecule. Hence, as long as the existence of stable nuclear
+spin isomers of the studied molecule is a legitimate assumption—which is usually the
+case
+#49
+—localised states are physically forbidden, and the frozen-nuclei approximation
+fails.
+To unfold our critique, we begin with a systematic symmetry analysis of the two-step
+model that is the underlying assumption of the frozen-nuclei approximation by discussing
+the MS groups of rigid molecules
+#50–55
+in electromagnetic fields. This analysis allows
+us to draw some general conclusions on the existence of nuclear spin isomers for rigid
+molecules, which eventually let us define the conditions for the (non-)existence of localised
+states. Our inference that localised rotational states, if at all, cannot be created on the
+time-scale of molecular control experiments leads us to the conclusion that the results of
+recent theoretical and experimental studies on molecular control have to be modified to be
+consistent with quantum theories. In particular, we call attention to the fact that adequate
+electronic wave functions must be (anti-)symmetrised twice: with respect to the exchange
+of electrons and with respect to the exchange of identical nuclei.
+Page 2 of 38 July 23, 2020
+Symmetry and two-step mechanisms
+Figure 1
+Cartoon of the two-step mechanism,
+which is often employed in molecular
+control communities. Step I: The mol-
+ecule is aligned or oriented by an ex-
+ternal interaction, for example created
+by an electromagnetic field E
+1
+. Step
+II: The molecular motion of interest is
+manipulated by a second laser pulse
+E
+2
+.
+2. Symmetry and two-step mechanisms
+One of the most prominent assumptions in studies on the control of molecular processes
+is the two-step model. Within this model, scientists posit that it is possible to align or
+orient the molecule they want to study along one or more of its principal axes, before the
+molecular process they are actually interested in ismanipulated; see Fig. 1 for an illustration.
+The need for such model is perfectly obvious: To successfully excite molecular motions
+with light selectively, no matter if electronic or nuclear, the polarisation of the external
+field relative to the molecular frame is often decisive. Therefore, to effectively control the
+motion of interest, we must be able to define the polarisation angle of the external field
+relative to the molecule. Simulations employing the frozen-nuclei approximation assume
+that step I in Fig. 1 is perfectly realised.
+In experiments on molecular control, however, molecules are typically in delocalised
+rotational eigenstates before they interact with any laser pulse. Thus, the field E
+1
+in Fig. 1
+must be able to create localised rotational states by superimposing delocalised rotational
+eigenstates of the molecule, which, in turn, allow for approximating the nuclear spatial
+distribution by classical coordinates. The rotational control with electromagnetic fields is
+one method that offers a route to such localised states by precisely steering the orientation
+or the alignment of molecules: The orientation of (cold) molecules can be effectively
+controlled with static electromagnetic fields by creating “field-dressed” eigenstates;
+# 1,4
+employing off-resonant, femtosecond, picosecond, or nanosecond laser pulses, alignment
+of molecules is achieved by exciting rotational wave packets that are well localised along
+at least one of the principal axes.
+#2,4
+Yet, as we argue in Section 3, localised rotational states are unphysical for molecules with
+identical nuclei. Basic to understanding why the frozen-nuclei approximation fails to
+describe molecules with identical nuclei is a symmetry analysis of the potential that is
+created by the electromagnetic fields aligning or orienting the molecule. In particular,
+the structure of the MS group
+#50–53
+of the confined molecules is of central importance
+for our argument. Therefore, we show in the following that, for any rigid molecule in
+an electromagnetic field, the permutation subgroup of its MS groups, G
+psms
+, can be
+decomposed into cyclic subgroups. Due to this partition of G
+psms
+, we are not only able to
+conveniently analyse the rotational motions of a molecule in terms of symmetry. By using
+the permutation subgroup of the MS group, we can also derive general conditions for the
+existence of nuclear spin isomers of rigid molecules. We close this Section by pointing
+July 23, 2020 Page 3 of 38
+Grohmann On the impossibility of frozen nuclei
+Figure 2
+The potential created by a linearly polarized orienting electric field, see Eq. 2, along θ for one field strength
+|E |. Due to the symmetry-breaking effect of the field, the aligned configuration 1 (θ � 0, i.e. eZ and ez ≡ ea are
+parallel) and the anti-aligned configuration 2 (θ � π, i.e. eZ and ez ≡ ea are anti-parallel) of iodobenzene
+are energetically inequivalent. If the molecule belongs to the MS groups Cn(M) or Cnv(M) with n ≥ 2, the
+configurations 1 and 2 are not unique. For iodobenzene, there exist a second oriented version 1
+′
+, which
+belongs to the same configuration in θ, but which corresponds to χ
+1
+′ � χ
+1
++ π. The configurations 1 and 1′
+are interconverted by the permutation (26)(35), representing the exchange (of groups) of identical nuclei. We
+neither show the hydrogen atoms nor the iodine of iodobenzene, because each of them is rigidly attached to
+exactly one carbon atom.
+out why the theory of MS groups actually suggests that localised states are a reasonable
+description of confined molecules, which might explain the popularity of the frozen-nuclei
+approximation among theoreticians of molecular control.
+A Confining molecules in space with electromagnetic fields
+A group of techniques that has become widespread during the last three decades is the
+control ofmolecularmotionswith electromagnetic fields. Two current standard approaches
+are standing to reason to realise the presumptions of the two-step model: the orientation of
+polar molecules with static electric fields,
+# 1,4
+and the alignment of polarizable molecules
+with off-resonant, moderately intense laser pulses.
+#2–4,56
+Using these techniques, the
+electromagnetic field confines the molecule along its main molecular axis by exciting
+superpositions of field-free rotational eigenstates.
+For the approach using static electric fields to work, the molecule needs to be polar,
+# 1,4 i.e.
+it must have a permanent dipole moment µ. Here, the field-matter Hamiltonian Hor in the
+quantum-classical dipole approximation writes
+# 1,4
+Eq.1 Hor � −µ·E .
+and reduces to
+Eq.2 Hor ≡ Vor � −µz · |E |· cos θ
+in case the electric field E is linearly polarized. In Eq. 2, the Euler angle θ characterizes the
+orientation of the molecule-fixed ez-axis with respect to the space-fixed eZ-axis.
+Because the Hamiltonian in Eq. 1 and Eq. 2, respectively, is time-independent, the field
+creates a potential Vor that causes the orientation of the molecule. We can quantify its
+Page 4 of 38 July 23, 2020
+Symmetry and two-step mechanisms
+effect by solving the time-independent Schrödinger equation
+# 1
+Eq.3
+(
+H
+rot
++V
+or
+)
+Φpen(θ, φ, χ) � EpenΦpen(θ, φ, χ)
+with Hrot being the rotational Hamiltonian of a rigid molecule. As a result, we obtain
+the pendular energies Epen and the pendular states Φpen as a function of the Euler angels
+θ, φ, χ. At least for low pendular energies, pendular states are highly confined in θ,# 1
+and it is thus possible to orient the polar molecule along the space-fixed eZ-axis. In Fig. 2,
+we show the potential for orienting iodobenzene
+#57
+as an example.
+If the molecule does not have a permanent dipole moment, it is still possible to confine it
+in space such that the premises of the two-step model are approximately true. Properly
+designed, off-resonant, moderately strong laser pulse with envelope � are capable of
+creating alignment of molecules in space.
+#2–4,56
+If the central frequency of the pulse is
+far detuned from any molecular transition and the optical cycles are much faster than a
+typical (classical) rotation period of the molecule, the relevant field-matter Hamiltonian
+Halg reduces to#2,3,58
+Eq.4 Halg � −
+1
+4
+�†(t)· α· �(t) .
+As Eq. 4 shows, the field interacts with the dynamic polarizability α of the molecule, and
+the only relevant part of the laser field is the envelope �(t).
+In case of a laser pulse linearly polarised in the space-fixed eZ-direction, or a laser pulse
+circularly polarised in the space-fixed (eX , eY)-plane, Eq. 4 reduces to#59
+Eq.5 Halg � a
+�2(t)
+4
+(
+αzx cos2 θ + αyx sin2 θ sin2 χ
+)
+.
+In Eq. 5, a � 1/2 for a circularly polarised field, and a � −1 for a linearly polarised
+field, respectively; the Euler angle θ specifies the angle between the principal axis ez
+corresponding to the largest or smallest moment of inertia and the polarisation axis of the
+field; the Euler angle χ defines the angle between the section line of the eX eY-plane and
+ex ey-plane and the molecule-fixed ey-axis; and the quantities
+αzx ≡ αzz − αxxEq.5a
+αyx ≡ αy y − αxxEq.5b
+are the generalized, molecule-fixed polarisability anisotropies of the molecule. Hence,
+for this approach to work, the molecule under investigation must have non-vanishing
+polarisability anisotropies. Solving the time-dependent Schrödinger
+Eq.6 i~
+∂
+∂t
+Ψ rot(θ, φ, χ, t) �
+(
+H
+rot
++ H
+alg
+)
+Ψ rot(θ, φ, χ, t)
+makes it possible to study the effect of the interaction Eq. 5 on the rotational motions of
+the molecule.
+If the duration of the aligning laser pulse is much longer than a typical (classical) period of
+rotation, we can consider the envelope of the field to be constant over the time-scale of
+rotations. This, in turn, allows us to use the adiabatic theorem of quantum mechanics to
+solve Eq. 6. Then, the time-dependent envelope �(t) in Eq. 5 can be replaced by the peak
+field strength �
+0
+of the laser pulse, thus making all Hamiltonians in Eq. 6 time-independent.
+The field-free rotational states then adiabatically evolve into pendular states Φpen, similar
+July 23, 2020 Page 5 of 38
+Grohmann On the impossibility of frozen nuclei
+Figure 3
+The adiabatic potential created by a linear polarised (solid blue and brown lines) and circular polarised
+(dotted blue and brown lines) aligning laser field, see Eq. 5 and Eq. 7, as a function of θ for two different
+field strengths |� |. If the strength of the laser field becomes sufficiently high, tunnelling between the aligned
+version 1 (θ � 0, i.e. eZ and ez ≡ ec are parallel) and the anti-aligned version 2 (θ � π, i.e. eZ and ez ≡ ec
+are anti-parallel) of benzene occurs on time-scales much longer than typical experiments on molecular
+alignment (right picture). Then, (low lying) pendular energies (black solid line and dashed orange line) are
+structurally degenerate. If the barrier is low, tunnelling splittings become observable (left picture). We
+donot show the hydrogen atoms of benzene, because eachof them is rigidly attached to exactly one carbon atom.
+to the case of orienting molecules with static fields.
+# 1,56
+Pendular states in the context of
+alignment are the solution of the time-independent Schrödinger equation Eq. 3 withVor
+being replaced by
+Eq.7 Valg ≡ a
+|�
+0
+|2
+4
+(
+αzx cos2 θ + αyx sin2 θ sin2 χ
+)
+.
+Consequently, the eigenstates of the “field-dressed” Hamiltonian Hrot + Valg can fully
+describe the alignment that is assumed to be perfectly realised within the two-step model.
+Figure 3 shows the potential Eq. 7 for benzene for two different field strengths.
+It is an interesting feature of non-resonant laser pulses that this method of molecular
+alignment can be applied to polar and non-polar molecules alike. Due to the rapid
+oscillations of the laser field compared to the rotational motions, the interaction term
+including the permanent dipole moment of the molecule is on average zero. Hence,
+the effective interaction between laser pulse and molecule is the same, no matter if the
+molecule possesses a permanent dipole moment or not. In this sense, the method of non-
+resonant laser pulses is more general than the approach of orienting molecules with static
+electromagnetic fields. As we see in the following, however, there are subtle differences in
+terms of symmetry, leading to different limitations of the frozen-nuclei approximation.
+B MS groups and properties of rigid molecules
+To understand why the frozen-nuclei approximation needs to be discarded for molecules
+with identical nuclei, analysing the symmetry of the rotational Hamilton Hrot dressed
+with the potentials Eq. 2 and Eq. 7, respectively, is crucial. A systematic and consistent
+approach to the symmetry of molecules is offered by the theory of molecular symmetry
+(MS) groups.
+#50–53,60
+The MS group is the set of all “feasible” permutations P and
+Page 6 of 38 July 23, 2020
+Symmetry and two-step mechanisms
+permutation-inversions P∗ of identical nuclei,#52 i.e. those P and P∗ that interconvert
+versions of the molecule that are not separated by insuperable energy barriers;
+#53,60
+see
+in particular Ref. 53 for a systematic introduction to the theory of MS groups.
+The field-free Hamiltonian in the electromagnetic approximation is invariant in the MS
+group, so is the Hamiltonian Hrot.#53,60 Including the field-matter interactions Eq. 1 and
+Eq. 4, however, might break some symmetries of the field-free molecule.
+#53,55,61
+From
+group theoretical considerations,
+#55,60–65
+it follows that Halg has to be invariant in the
+MS group, too, while for Hor only permutations P of identical nuclei remain symmetry
+operations. Thus, for both types of interactions, the set of all feasible permutations P is a
+symmetry group of the molecule in the electromagnetic field. This symmetry group is
+called the permutation subgroup of the MS group, G
+psms
+.
+#55,62–64
+For rigid molecules, which are often studied in attosecond research, a general analysis of
+the MS group and its permutation subgroup is possible. The MS group of a rigid molecule
+is always isomorphic to the molecular point group of its equilibrium structure;
+#50,51,53,66
+the “quantum effects” due to large amplitude contortions are negligible on the time-scale
+of the experimental technique that is used to characterize the molecule.
+#53
+Due to this
+isomorphism, we are able to associate a classical structure to a molecule,
+#23,26,67
+which
+is defined by the nuclear coordinates at the global minimum of the Born-Oppenheimer
+potential energy surface. With the help of the irreducible representations of its (E)MS group,
+we are able to uniquely classify any state of a molecule by symmetry labels.
+#53,60,61,68–70
+In molecular control simulations, the rotations of a molecule are often treated within the
+rigid rotor model.
+#53,60,61,69,70
+Here, each type of rigid rotor can only belong to a specific
+class of MS groups, be it a linear rotor, a symmetric top, a asymmetric top, or a spherical
+top. Spherical tops, for instance, have to belong to MS groups that are isomorphic to point
+groups containing rotations that are generated by at least two different C
+3
+axes.
+#53,60
+Two examples for such groups are T
+d
+(M) or O
+h
+(M). Using the results of representation
+theory,
+#53,71–73
+we are able to deduce that spherical tops neither have a permanent dipole
+moment, nor non-vanishing polarizability anisotropies. Thus, both types of interactions,
+Eq. 1 and Eq. 4, are not capable of confining spherical tops. Consequently, spherical tops
+are not relevant for our discussion.
+All other types of rigid rotors, however, can have non-zero polarizability anisotropies or
+permanent dipole moments, and we can identify the type of rotor and non-vanishing
+molecular properties by knowing the MS group of the molecule. For our discussion, the
+following symmetry properties of rigid rotors are relevant:
+#53,60
+Symmetric tops Two of the three principal moments of inertia and moments of polar-
+izability are identical. One distinguishes oblate symmetric tops with
+I
+a
+� I
+b
+< I
+c
+from prolate symmetric tops with I
+a
+< I
+b
+� I
+c
+. A necessary
+condition for a rigid molecule to be a symmetric top is that among the
+symmetry elements generating the operations of its point group is exactly
+one C
+n
+with n ≥ 3. Hence, molecules are symmetric tops if they belong to
+the groups C
+n
+(M), S
+n
+(M), D
+n
+(M), C
+nh
+(M), C
+nv
+(M), D
+nh
+(M) and D
+nd
+(M)
+with n ≥ 3. Moreover, all molecules with symmetry group D
+2d
+(M) are
+symmetric tops as well. For any symmetric top, the second term on the
+July 23, 2020 Page 7 of 38
+Grohmann On the impossibility of frozen nuclei
+right hand side of Eq. 5 and Eq. 7 vanishes, because the two principal
+moments of the polarizability αxx and αy y are identical. Furthermore,
+only if the symmetric top belongs to the groups C
+n
+(M) or C
+nv
+(M), it has
+a non-vanishing permanent dipole moment. For these molecules, an
+interaction of the type Eq. 1 is capable of confining them.
+Asymmetric tops All three moments of inertia and principal polarizabilities are different
+from each other. A necessary condition for a rigid molecule to be an
+asymmetric top is that among the symmetry elements generating the
+operations of its point group are only C
+2
+axes or no symmetry axis.
+Consequently, molecules that belong to the groups C
+1
+(M), C
+s
+(M), C
+i
+(M),
+C
+2
+(M), D
+2
+(M), C
+2h
+(M), C
+2v
+(M), and D
+2h
+(M) are asymmetric tops. For
+this type of molecule, none of the terms on the right hand side of Eq. 5
+and Eq. 7 is zero because of molecular symmetry. If the asymmetric top
+belongs to the MS groups C
+1
+(M), C
+s
+(M), C
+2
+(M) or C
+2v
+(M), it also has
+a non-zero permanent dipole moment, and orienting the molecule is
+possible by using an interaction like Eq. 1. Molecules with symmetry
+C
+1
+(M), C
+i
+(M), or C
+s
+(M) are irrelevant for our discussion, because they do
+not contain permutations of identical nuclei except the identity.
+#50,51,53
+Linear molecules Two of the three principal moments of inertia and polarizability are
+identical, but I
+a
+� I
+b
+� I
+c
+. Hence, the rotation about the bond axis cannot
+be excited without the molecule being destroyed. Linear molecules either
+belong to the (E)MS groups C∞v(M) or D∞h(M). The Hamiltonian for the
+field-matter interaction in Eq. 5 and Eq. 7 is the same as for a symmetric
+top. For our discussion, only molecules with feasible permutations of
+identical nuclei are relevant; they necessarily belong to D∞h(M) with
+permutational subgroup C
+2
+(M).#53 These type of molecules do not have
+a permanent dipole moment. Moreover, it is legitimate to consider linear
+molecules as a special case of symmetric top molecules, as the following
+discussion shows.
+Summarizing, the different types of rigid rotors can be sub-classified according to their MS
+group. This allows us to make some general conclusions about the possibility of applying
+the frozen-nuclei approximation, as we show in the following: If the MS group contains
+pure permutations that are different from the identity, the frozen-nuclei approximation is
+physically wrong and needs to be discarded.
+C Confinement and symmetry: symmetric tops
+Central to our argument is the structure of theMSgroupof themolecule that ismanipulated.
+In particular, it is imperative that, first, we are able to decompose the MS group into
+its permutation subgroup, G
+psms
+, and one other subgroup of order 2; and second, we
+can write G
+psms
+as product of cyclic subgroups. As we show in Section 3, the general
+structure of MS groups for rigid molecules has strong implications for the validity of the
+frozen-nuclei approximation. Yet, some of the results we present in the following are not
+only valid for rigid molecules but for molecules in general, as Section X, Subsection B
+points out.
+Page 8 of 38 July 23, 2020
+Symmetry and two-step mechanisms
+Figure 4
+Four classical configurations of the
+nuclear frame of benzene, two cor-
+responding to the aligned potential-
+dressed version (upper row: 1,1
+′
+)
+and two representing the anti-
+aligned potential-dressed version
+(lower row: 2, 2
+′′
+) of benzene. All
+configurations can be generated out
+of version 1 by permuting identi-
+cal nuclei. We do not show the hy-
+drogen nuclei; (12...)means carbon
+nucleus 1 with hydrogen nucleus
+1 is replaced by carbon nucleus 2
+with hydrogen nucleus 2, and so on.
+Applying the frozen-nuclei approxi-
+mation is equivalent to choosing one
+of all possible configurations.
+(a) An illustrative example: aligning benzene Let us consider symmetric top molecules first,
+using the alignment of benzene as an example. Here, the potential created by the
+aligning laser pulse is only dependent on θ; see Eq. 5 for αxx � αy y and Fig. 3 for a
+graphical illustration. As the potential has two equivalent minima with identical energy,
+two “potential-dressed versions” of benzene exist, one corresponding to the aligned
+configuration (θ � 0, i.e. eZ and ez ≡ ec are parallel) of benzene and one belonging to its
+anti-aligned version (θ � π, i.e. eZ and ez ≡ ec are anti-parallel).
+In the field-free theory of MS groups, different versions of molecules are defined as distinct
+ways of labelling the identical nuclei of a rigid structure that cannot be mapped onto each
+other by a rigid rotation. Recently, we have shown that the potential-dressed versions can
+be understood similarly if we take into account that, in the presence of a electromagnetic
+field, the isotropy of space is broken.
+#65
+If the external potential that is created by the
+field has minima that are interconverted by permutations, permutation-inversions and/or
+elements of the spatial rotation group K spa, they belong to different physical situations
+that are separated by potential barriers. This justifies to call them different—potential-
+dressed—versions of the molecule. As for the versions of molecules in the field-free theory
+of MS groups, certain presumptions have to be justified to define them properly.
+#65,74
+For symmetric tops, however, to each potential-dressed version there exist more physically
+equivalent nuclear configurations than just the two that Fig. 3 shows. As Fig. 4 illustrates,
+the two potential-dressed versions are not unique: The permutation (123456), for example,
+changes version to 1 to 1
+′
+, for which the configuration in θ is the same, but χ is changed to
+χ + π/3. SinceValg is independent of χ, configurations with primes are not separated by
+potential barriers, and the pulse cannot control the motion in χ. Yet, to each primed and
+non-primed configuration belongs a different set of rotational coordinates, which represent
+different classical nuclear configurations of the molecule. Applying the frozen-nuclei
+July 23, 2020 Page 9 of 38
+Grohmann On the impossibility of frozen nuclei
+approximation, and thus fixing all nuclear coordinates, is identical to single out one of
+these configurations.
+Using the MS group D
+6h
+(M) of benzene allows for a systematic analysis of all equivalent
+configurations. This group decomposes according to
+Eq.8 D
+6h
+(M) � D
+6
+(M) ⊗ {E, E∗} � D
+6
+(M) ⊗ C
+s
+(M) ,
+where C
+s
+(M) is isomorphic to the point group C
+s
+; see also Section X, Subsection B for more
+explanations on the relation of point group operations and operations of the MS group.
+The group
+Eq.9 Gpsms[D
+6h
+(M)] � D
+6
+(M)
+defines the permutation subgroup of D
+6h
+(M); it contains all feasible permutations of
+identical nuclei and, for benzene in its equilibrium structure, it is isomorphic to the point
+group D
+6
+.
+#53
+For our later deliberations, it is interesting to note that
+Eq.10 D
+6
+(M) � C
+6
+(M) o C⊥
+2
+(M)
+with o defining the semi-direct product of the groups C
+6
+(M) and C⊥
+2
+(M). Both C
+6
+(M) and
+C
+⊥
+2
+(M) are cyclic and their presentations can be written as# 75
+C
+6
+(M) �
+〈
+1 � (123456)
+�� 16 � E〉Eq.10a
+C
+⊥
+2
+(M) �
+〈
+1⊥ � (23)(56)
+�� 12⊥ � E〉 .Eq.10b
+The irreducible representations of D
+6h
+(M), C
+6
+(M), and C⊥
+2
+(M) are all known and tabulated
+in the literature.
+#53,76
+For rigid molecules, any operation of the MS group, Oms, can be formally expressed as#53
+Eq.11 Oms � Req· Opg· p..i jk..
+In Eq. 11, Req is an equivalent rotation, solely acting on the rotational degrees of freedom;
+Opg is an operation of the molecular point group, only affecting the internal nuclear coor-
+dinates of a molecule; and p..i jk.. means a relabelling of the spin variables ..., Σi , Σ j , Σk , ...
+of the identical nuclei alone.
+#50,51,53
+If the molecule is non-rigid, Eq. 11 needs to be
+extended.
+#52,53,77
+In Section X, Subsection A, we comment briefly on the rules of how to
+map Oms on the familiar point group operations Opg. Rigid molecules are special in so far
+as each one of the operations Oms can be mapped exactly on one operation of the point
+group, Opg, and vice versa.#50,51,53
+To understand why the frozen-nuclei approximation is physically wrong, only the equiva-
+lent rotations in Eq. 11 are relevant. For the elements of the permutational subgroup, G
+psms
+,
+of a rigid molecule, each of the permutations can be mapped on a different equivalent
+rotation.
+#50,51
+Principally, two different types of rotations exist, Rπα and R
+β
+z . Their meaning
+is the following: Rβz is a rotation through β radians about the molecule-fixed ez-axis; Rπα
+is a rotation through π radians about an axis in the ex ey-plane making an angle α with
+the ex-axis.#53 Both types of equivalent rotations change the set of Euler angles (θ, φ, χ)
+according to
+#53
+Rπα : (θ, φ, χ) → (π − θ, φ + π, 2π − 2α − χ)Eq.12a
+Rβz : (θ, φ, χ) → (θ, φ, χ + β) .Eq.12b
+Page 10 of 38 July 23, 2020
+Symmetry and two-step mechanisms
+Figure 5
+Geometrical realisations of the MS groups of rigid
+molecules. Left column: The groups Cn(M) are
+generated by cyclic permutations reflecting the
+rotation about the main principal axis ez . If we
+allow for inversions, we obtain the groups C
+nh
+(M).
+If we allow for permutation-inversions that cor-
+respond to reflections at planes including the
+main principal axis, we arrive at Cnv(M). If we
+allow for operations that can be mapped on ro-
+tations perpendicular to the main principal axis,
+we obtain the groups Dn(M) (without inversions)
+and D
+nh
+(M) (with inversions). Right column: The
+group S
+2n
+(M) is generated by the simultaneous
+cyclic permutation-inversion representing the im-
+proper rotation of the corners of two staggered
+regular polygons about the main principal axis ez .
+If we further allow for permutations that can be
+mapped on rotations perpendicular to the main
+principal axis, we obtain the groups D
+nd
+(M). The
+labels 1 ... n represent identical nuclei or identical
+groups of nuclei.
+Hence, each of the permutations in Eq. 10a and Eq. 10b changes the rotational configuration
+of the molecule in the laser field according to Eq. 12a, or Eq. 12b. The operations of the
+group C
+6
+(M) correspond to rotations Rβz about the molecule-fixed ez axis. Considering
+(123456), for example, Req � Rπ/3z . Hence, the operations of C6(M) do not change the
+potential-dressed version 1 or 2, but their superscript; say 2
+′ → 2′′ if we choose again
+(123456) as an example. The operations of C⊥
+2
+(M), however, change the potential-dressed
+version of benzene, because for (14)(23)(56), Req � Rπ
+π/2; see Fig. 4 for an illustration.
+If we write out the direct product, Eq. 10, it turns out that twelve different configurations
+of benzene exist.
+#53
+Six of them correspond to the aligned version of benzene, 1, . . . , 1′′′′′,
+and six of them belong to the anti-aligned version of benzene, 2, . . . , 2′′′′′. If scientists apply
+the frozen-nuclei approximation, they choose only one of these twelve configurations for
+their theoretical description. This would not be much of a problem if a localised state,
+being well defined at one of the twelve equivalent configurations, could be prepared by
+some form of interaction. Yet, as Section 3 shows, such state cannot exist.
+(b) Generalizations: polarizable symmetric tops The results for benzene can be generalized
+to any rigid symmetric top if we take into account the general structure of point groups.
+Using the results from literature,
+#53,54
+we can divide the MS groups of molecules into
+three types:
+Type-I MS groups that contain only permutations.
+Type-IIa MS groups that contain permutation-inversions and can be written as
+Eq.13a G
+ms
+II
+a
+� G
+pdms ⊗ {E, E∗} .
+Type-IIb MS groups that contain permutation-inversions and for which
+Eq.13b G
+ms
+II
+b
+, Gpdms ⊗ {E, E∗} .
+July 23, 2020 Page 11 of 38
+Grohmann On the impossibility of frozen nuclei
+See also Section X, Subsection B for more information on this typology of MS groups.
+MS groups that are isomorphic to the point groups C
+n
+and D
+n
+are MS groups of type-
+I.#53,54 Because they only contain permutations, the permutational subgroup Gpsms is the
+improper subgroup of the MS group; they are identical. One presentation of the MS group
+C
+n
+(M) is# 75
+Eq.14 C
+n
+(M) �
+〈
+1 � (1, 2, ..., n)
+�� 1n � E〉 ,
+and it can be understood as the group of simultaneous cyclic permutations of the corners
+1, 2, ..., n of a regular n-sided polygon; see Fig. 5 for an illustration.# 75 The group D
+n
+(M)
+writes
+Eq.15 D
+n
+(M) � C
+n
+(M) o C⊥
+2
+(M) ,
+whereas the presentation of C
+n
+(M) shows Eq. 14 and C⊥
+2
+(M) can be written as
+C
+⊥
+2
+(M) �
+〈
+1⊥ � (2, n)(3, n − 1)...(n/2, n/2 + 2)
+�� 1n⊥ � E〉 if n is evenEq.16a
+C
+⊥
+2
+(M) �
+〈
+1⊥ � (2, n)(3, n − 1)...(n+1/2, n+1/2 + 1)
+�� 1n⊥ � E〉 if n is odd.Eq.16b
+The labels in Eq. 16a and Eq. 16b have the same meaning as in the case of C
+n
+(M); they
+enumerate the corners 1, 2, ..., n of a regular n-sided polygon; see also Fig. 5.# 75
+By convention, it is the ez-axis about which the molecule rotates if the permutations
+(1, 2, ..., n) from Eq. 14 are applied to the (set of) identical nuclei 1, 2, ... n.#53,71,72,76,78
+For symmetric tops, the choice of the main principal axis is unique; by definition, there
+exists only one principal axis that reflects the permutations (1, 2, ..., n) with n ≥ 3.#53
+Consequently, the operations (1, 2, ..., n) do not change the orientation of themolecule-fixed
+ez-axis, and hence, the orientation of the molecule with respect to space-fixed eZ-axis. If
+applied k-times, they do change, however, the configuration in χ according to#53
+Eq.17 χ→ χ +
+2π
+n
+k .
+As Eq. 17 shows, the operations of C
+n
+(M) rotate one primed classical configuration to a
+different primed configuration, but they do not change the potential-dressed version from
+1 to 2 or from 2 to 1. By contrast, in case the molecule belongs to the MS group D
+n
+(M), the
+operations from Eq. 16a and Eq. 16b do change the potential-dressed version from 1 to 2 or
+the other way around. Consequently, for molecules with C
+n
+(M)-symmetry the operations
+of the permutation subgroup G
+psms
+only change the configuration in χ, while formolecules
+with D
+n
+(M)-symmetry the operations of Gpsms change the configuration in χ and in θ. In
+both cases, classical molecular structures are interconverted by the permutation of (groups
+of) identical nuclei.
+Lets turn to the case of symmetric top molecules with a MS group of type-IIa . In this
+category fall the groups C
+nh
+(M) and D
+nh
+(M), because they can be written as#54,76
+C
+nh
+(M) � C
+n
+(M) ⊗ {E, E∗}Eq.18a
+D
+nh
+(M) � D
+n
+(M) ⊗ {E, E∗} .Eq.18b
+Here, the groups C
+n
+(M) and D
+n
+(M) are identical to the permutation subgroups of C
+nh
+(M)
+and D
+nh
+(M), respectively. Consequently, considering the permutation subgroup Gpsms
+Page 12 of 38 July 23, 2020
+Symmetry and two-step mechanisms
+of the MS group only, the same conclusion as for molecules with MS groups C
+n
+(M) and
+D
+n
+(M) apply to molecules with C
+nh
+(M) and D
+nh
+(M) symmetry, respectively.
+The structure of the groups S
+n
+(M), C
+nv
+(M) and D
+nd
+(M) is more difficult. They belong
+to MS groups of type-IIb and cannot be written as a direct product of their permutation
+subgroup and the inversion group, like Eq. 13a. Yet, these groups decompose according
+to
+#54,76
+C
+nv
+(M) � C
+n
+(M) o C⊥
+s
+(M)Eq.19a
+D
+nd
+(M) � D
+n
+(M) o C⊥
+s
+(M)Eq.19b
+S
+2n
+(M) � C
+n
+(M) o C
+i
+(M) if n is odd.Eq.19c
+In all cases, Eq. 19a, Eq. 19b and Eq. 19c, the permutation subgroups are, again, isomorphic
+to the groups C
+n
+(M) or D
+n
+(M). MS groups that are isomorphic to the improper rotation
+groups S
+2n
+(M)with even n are exceptional: They can be written neither as a direct nor a
+semi-direct product of their permutation subgroup and one other subgroup of order two.
+Since these groups are cyclic, however, their permutation subgroups are necessarily cyclic
+as well; they are isomorphic to C
+n
+(M). As we show in Section 3, this is the only argument
+we need to prove that the frozen-nuclei approximation is physically incorrect.
+The groups C
+⊥
+s
+(M) and C
+i
+(M) in Eq. 19a, Eq. 19b, and Eq. 19c are both of order two, and
+they contain besides the identity only one permutation-inversion. For the groups D
+nd
+(M)
+and C
+nv
+(M), one presentation of C⊥
+s
+(M) is
+Eq.20 C⊥
+s
+(M) �
+〈
+1⊥
+�� 12⊥ � E〉 ,
+where the generator 1⊥ is
+1⊥ �(2, n)(3, n − 1)...(n/2, n/2 + 2)(n + 1, 2n)(n + 2, 2v − 1)...(3n/2, 3n/2 + 1)∗Eq.21a
+if n is even, and
+1⊥ �(2, n)(3, n − 1)...(n+1/2, n+3/2)(n + 2, 2n)(n + 3, 2n − 1)...(3n+1/2, 3n+3/2)∗Eq.21b
+if n is odd. The presentation of the group C
+i
+(M)with generator 1i in Eq. 19c is
+C
+i
+(M) �
+〈
+1i � (1, n + 1)(2, n + 2)(3, n + 3)...(n, 2n)∗
+�� 12i � E〉Eq.22a
+with n necessarily being odd;
+#54,75,76
+see also Fig. 5.
+Hence, as in case of the groups C
+nh
+(M) and D
+nh
+(M), the only groups that are relevant for
+our discussion are C
+n
+(M) and D
+n
+(M), and considering the permutation subgroup only,
+the results for molecules with MS groups S
+n
+(M), C
+nv
+(M) and D
+nd
+(M) are the same as for
+molecules with C
+nh
+(M), D
+nh
+(M), C
+n
+(M), and D
+n
+(M) symmetry, respectively. While the
+operations of C
+n
+(M), c.f. Eq. 14, interconvert classical nuclear configurations that belong to
+different values of χ, the operations of the group C⊥(M), see Eq. 16a and Eq. 16b, transform
+different potential-dressed versions into one another.
+As pointed out in Subsection C of this Section, in terms of their alignment symmetric top
+molecules are very similar to linear molecules. Not only the potential, Eq. 7, is identical
+for both type of rotors; see Fig. 3. The structure of the permutation subgroup of their
+MS groups are identical, too. Setting n � 1 in Eq. 15, only the group C
+⊥
+2
+(M) remains as a
+symmetry group. Yet, this group is identical to the permutation subgroup of the D∞,h(M),
+July 23, 2020 Page 13 of 38
+Grohmann On the impossibility of frozen nuclei
+Figure 6
+Three classical configurations of NF
+3
+with MS group
+C
+3v
+(M). They are interconverted by applying the
+permutation (123) to the three fluorine nuclei. Each
+configuration can be mimicked by a localised state.
+which is the MS group of a linear molecule with two identical ends. Hence, the operation
+(12) of this group changes the potential-dressed version of the linear molecule from 1
+to 2 and vice versa. The difference between symmetric tops and linear molecules is that
+for linear molecules only the two potential-dressed versions exists; there are no primed
+configurations for linear molecules. All other deliberations, however, are the same for both
+types of rigid rotors.
+(c) Generalizations: polar symmetric tops – and beyond A discussion of orienting polar symmet-
+ric tops leads to analogues results. For being able to orient molecules with an interaction
+of such as Eq. 1, the manipulated molecules must have a permanent dipole moment. As
+standard text books report,
+#53,71–73
+this is only possible if the molecule belongs to the
+MS groups C
+n
+(M) or C
+nv
+(M), see Eq. 14, Eq. 19a, Eq. 20, Eq. 21a, and Eq. 21b for their
+presentations. Further, only the set of permutations of identical nuclei—and thus, only
+G
+psms
+—remains a symmetry group of the system “molecule in electromagnetic field”,
+because the HamiltonianHor is no longer invariant under permutation-inversions P∗.#53,55
+The difference in energy for the aligned and anti-alignedmolecule that Fig. 2 shows reflects
+the loss in symmetry. Thus, there is only one potential-dressed version for polar symmetric
+tops; configuration 1 and 2 in Fig. 2 are no longer energetically equivalent.
+Yet, there exist n − 1 primed configurations corresponding to the minimum of Vad in
+Eq. 2 that are transformed into each other by permuting (groups of) identical nuclei. Let
+us consider nitrogen trifluoride, NF
+3
+, with MS group C
+3v
+(M), which is an example for
+a symmetric top with permanent dipole moment; see also Fig. 6. Even in its oriented
+configuration with θ � 0, there exist two more energetically configurations with
+χ
+1
+′ � χ
+1
++
+2
+3
+πEq.23a
+χ
+1
+′′ � χ
+1
++
+4
+3
+π .Eq.23b
+Both also belong to the potential minimum at θ � 0, and they are interconverted by
+the permutations (123) and (132). In general, the number of permutationally equivalent
+configurations with θ � 0 is identical to the order of C
+n
+.
+Page 14 of 38 July 23, 2020
+Symmetry and two-step mechanisms
+Figure 7
+Contour plot of the adiabatic potential for
+the alignment of an asymmetric top. De-
+pending on the symmetry, the four different
+minima at (θ � 0, χ � 0), (θ � π, χ � 0),
+(θ � 0, χ � π), and (θ � π, χ � π), belong
+to four different potential-dressed versions
+of the molecule; see Fig. 8 for the example of
+tetrafluoroethylene. If the barriers between
+the minima are sufficiently low, observable
+tunnelling among the different versions oc-
+curs.
+Since theHamiltonian Eq. 2 is identical for symmetric andasymmetric tops, the same results
+apply to molecules with C
+2v
+(M) and C
+2
+(M) symmetry. Hence, for orienting asymmetric
+tops, we arrive at the same conclusion: The potential-dressed version associated with the
+minimum of the potential Eq. 1 is not unique. Two configurations in χ exist, which both
+belong to the minimum at θ � 0. Figure 2 illustrates this result for iodobenzene with MS
+group C
+2v
+(M).
+Thus, for a dipole-type interaction such as Eq. 1, distinguishing the type of rotor is not
+necessary. The result is the same for all of them: As long as they posit a permutational
+symmetry with respect to the exchange of identical nuclei, the minimum of the potential
+Eq. 1 cannot be identified with one classical nuclear configuration alone. There exists at
+least one more classical arrangement of the nuclei that also corresponds to this minimum
+and that results from the exchange (of groups) of identical nuclei.
+D Confinement and symmetry: asymmetric tops
+Asymmetric tops have, in general, a lower symmetry than symmetric tops. The asymmetric
+tops that we are interested in have MS groups D
+2h
+(M), D
+2
+(M), C
+2h
+(M), C
+2v
+(M), or C
+2
+(M)
+only. This lower symmetry changes the potential for the alignment, as Eq. 5 and Fig. 7
+show: If an asymmetric top is subject to a linearly-polarised laser pulse, the potential
+created by the field has four equivalent minima, each being distinguished by different
+classical configurations (θ, χ). In particular, primed versions of the molecule are now
+separated by potential barriers, too.
+(a) Another illustrative example: tetrafluoroethylene This ismaybe best seen by example. Figure 7
+shows a contourplot of the potential for aligning an asymmetric top. For tetrafluoroethylene,
+the four equivalent minima correspond to four different potential-dressed versions, which
+are all separated by potential barriers created by the laser field. Depending on the barrier
+height, which is proportional to the field strength, tunnelling between these four versions
+might not be observed on the time-scale of the experiment.
+July 23, 2020 Page 15 of 38
+Grohmann On the impossibility of frozen nuclei
+Figure 8
+Illustration of the operations of the MS group D
+2
+(M), applied to
+tetrafluoroethylene C
+2
+F
+4
+. The operations (12)(34), (14)(23)(56),
+and (13)(24)(56) transform the potential-dressed version 1 into
+the three potential-dressed versions 1
+′
+, 2, and 2
+′
+, respectively.
+Hence, each of these permutations corresponds to a different
+equivalent rotation. Moreover, each potential-dressed version
+can be represented by a state being localised in the particular
+minimum.
+Analysing the potential with the MS group shows that the four configurations are inter-
+changed by the elements of the permutational subgroup of the MS group of tetrafluo-
+roethylene. The MS group for tetrafluoroethylene, C
+2
+F
+4
+, in the electronic ground state is
+the same as for ethylene, which is D
+2h
+(M). This group can be written as
+Eq.24 D
+2h
+(M) � Gpsms ⊗ {E, E∗}
+with
+Eq.24a Gpsms � D
+2
+(M) � {E, (12)(34), (13)(24)(56), (14)(23)(56)} ;
+see Fig. 8 for the meaning of the permutations. Due to its structure, see Eq. 24, the MS
+group of tetrafluoroethylene belongs to the MS groups of type-IIa . Moreover, the group
+D
+2
+(M) decomposes according to#54
+Eq.25 D
+2
+(M) � C
+2
+(M) ⊗ C⊥
+2
+(M) � {E, (12)(34)} ⊗ {(13)(24)(56), (14)(23)(56)} ,
+where both subgroups, C
+2
+(M) and C⊥
+2
+, are cyclic.
+Figure 8 illustrates how the elements of D
+2
+(M) transform the potential-dressed version
+1 into the other three potential-dressed versions 1
+′
+, 2, and 2
+′
+, respectively. Hence, each
+permutation from D
+2
+(M) belongs to a different equivalent rotation of the molecule. As in
+case of symmetric tops, applying the frozen-nuclei approximation is the same as choosing
+one of the four potential-dressed versions for describing the molecule. The difference
+between the two types of rotors is that between primed and non-primed versions a potential
+barrier exists, which might hinder the rotation about the molecule-fixed ez-axis.
+(b) Generalizations: polarizable asymmetric tops For molecules with MS group D
+2
+(M), C
+2h
+(M),
+C
+2v
+(M) or C
+2
+(M) similar conclusions hold. If the molecule belongs to D
+2
+(M), the results
+are the same as for molecules with D
+2h
+(M) symmetry. Because only permutations matter
+for our argument, and both D
+2h
+(M) and D
+2
+(M) have identical permutation subgroups, for
+molecules with D
+2
+(M) symmetry, too, there exist four potential-dressed versions that are
+interconverted by the operations of G
+psms
+.
+Page 16 of 38 July 23, 2020
+Symmetry and two-step mechanisms
+In case of molecules with MS group C
+2h
+(M), C
+2v
+(M), or C
+2
+(M), the argument is less strict.
+All groups have the same abstract permutation subgroup, namely
+Eq.26 Gpsms[C
+2h
+(M)] � Gpsms[C
+2v
+(M)] � C
+2
+(M) � {E, (12)} ,
+where
+Eq.27 C
+2h
+(M) � C
+2v
+(M) � C
+2
+(M) ⊗ {E, E∗} .
+If the main principal axis is the ez-axis, the operation (12) interchanges version 1 and 1′
+as well as version 2 and 2
+′
+; see Fig. 7. Going from minimum 1 to minimum 2, however,
+cannot be described in terms of permuting identical nuclei, although the minima 1 and
+2 are systematically degenerate. The reason for that is the rigid-rotor approximation,
+according to which all asymmetric tops belong to the symmetry group D
+2
+.
+#53
+Hence, even
+though the symmetry of the molecules is lower, the rigid rotor approximation imposes
+the symmetry group D
+2
+, and the minima on the potential that is created by the field are
+the same as for a molecule with D
+2
+(M) or D
+2h
+(M) symmetry. Yet, also for molecules with
+C
+2h
+(M), C
+2v
+(M), or C
+2
+(M) applying the frozen-nuclei approximation is still equivalent to
+choosing one out of two potential-dressed versions of the molecule.
+E Why the frozen-nuclei argument works: localised states
+Studies on molecular control employing the two-step approach commonly use low-
+dimensional models, which assume that the molecule is perfectly oriented along one of its
+principal axes; see Fig. 1.
+#64
+The argument theoreticians use for eliminating most of the
+nuclear degrees of freedom in their models is that these motions can either be adiabatically
+separated from the manipulated degrees of freedom, or they can be considered as frozen
+on the time-scale of the studied process; see Refs. 64 and 79 for an elaborated discussion.
+In particular, they assume that it is legitimate to consider the molecule as being trapped
+in one potential minimum if only the strength of the external field is high enough. To
+calculate the time-evolution of the studied system, it is therefore sufficient to consider only
+the nuclear coordinates at one of the equivalent minima of the external potential.
+A rationale for this argument gives the theory of MS groups, which is based on quantum
+tunnelling theory and the concept of structural degeneracy.
+#53
+If the potential barriers
+between the n
+ver
+minima representing n
+ver
+structurally degenerate versions of the molecule
+is sufficiently large, the (low-lying) nuclear spectrum contains only sets of n
+ver
+quasi-
+degenerate energy eigenvalues. Hence, if the energy splittings within these sets are so
+small that they cannot be resolved in the experiment that is used to study the molecule, we
+can limit our theoretical considerations to the vicinity of only one of the n
+ver
+minima.
+#60
+Then, all permutations and permutation-inversions interconverting the n
+ver
+versions are
+useless for understanding the molecular spectrum and for characterizing electronic wave
+functions, as they lead to redundant selection rules. Consequently, it is sufficient to only
+consider the set of “feasible” nuclear permutations and permutation-inversions rather than
+the full nuclear permutation inversion group for analysing the molecular spectrum.
+#53,60
+Quantum dynamicists, however, not only care for energies, but they also study the time-
+evolution of molecular wave packets evolving on the potential energy surface. Thus,
+they have to modify the argument:
+# 79,80
+Because the tunnelling times between different
+versions are much longer than the process we are interested in, we can form particular
+July 23, 2020 Page 17 of 38
+Grohmann On the impossibility of frozen nuclei
+linear combinations of eigenstates such that they are localised in one of the n
+ver
+structurally
+degenerate minima. Hence, it is sufficient to only consider wave functions that are localised
+in the vicinity of one minimum, and when describing the time-evolution of molecular
+states, we can then use a local Schrödinger equation that contains a truncated potential
+only.
+Both arguments are, at least implicitly, the starting point of quantum chemical and
+spectroscopic studies on the one hand, and the description of the quantum and classical
+dynamics of molecules on the other hand.
+#80
+But they also apply if molecules are subject
+to a strong external potential: If the potential barriers created by the external interaction are
+sufficiently high, energy splittings due to tunnelling between different potential-dressed
+versions of the molecule cannot be resolved. Hence, it is legitimate to consider only
+one minimum of the potential when calculating the spectrum of the molecule in the
+potential; see Fig. 3 and Fig. 7 for the aligning potentials of a symmetric and asymmetric
+top, respectively. Likewise, we can describe the quantum dynamics of the system in terms
+of states that are localised in one minimum, being linear combinations of wave functions
+belonging to quasi-degenerate energies.
+Thus, if this assumption is right, it seems to be only a small approximation to replace the
+localised nuclear wave packet by a single “frozen” nuclear configuration. If the potential
+barriers are insuperable, and the process we want to describe is fast compared to the
+hindered rotational motion of the nuclei, this configuration will not change much on the
+relevant time-scale. Hence, the frozen-nuclei approximation appears to be reasonable
+as long as the rotational motion of the nuclei is slow compared to the time-scale of the
+studied phenomenon.
+This reasoning, however, is wrong. To begin with, our discussion in this Section shows that
+freezing the nuclei was only valid if all classical configurations in the rotational coordinates
+are separated by insuperable barriers. Thus, for symmetric tops, aligning or orienting the
+molecule would be not sufficient to apply the frozen-nuclei approximation. All primed
+configurations of symmetric top molecules are not separated by barriers at all, see Fig. 3 for
+the example of benzene, and there are no reasonable grounds for assuming that choosing
+one primed configuration is legitimate; see in particular the discussion in Subsection C of
+this Section.
+Yet, there are more problems with this rationale, even if it was possible to separate each
+classical configuration by insuperable barriers created by some sort of external interaction.
+In particular, the localised rotational states on which low-dimensional models are relying
+cannot be realised. As we show in Subsection C and Subsection D of this Section, in many
+cases going from one structurally degenerate minimum of the external potential to another
+is equivalent to permuting identical nuclei. Under these circumstances, however, localised
+states are unphysical. Because they are linear combinations of eigenstates belonging
+to different nuclear spin isomers, they cannot be formed by an external interaction on
+reasonable time-scales, as we show in the following.
+Page 18 of 38 July 23, 2020
+Symmetry and two-step mechanisms
+3. Frozen nuclei and localised states
+Recently, we have extended the list of shortcomings molecular dynamics simulations
+entail. For internal molecular motions that can be described in terms of permutations of
+identical nuclei, such as torsions and pseudo-rotations, molecular dynamics simulations
+are inherently wrong. They (implicitly) presuppose that a localised wave packet is an
+adequate description of the quantum motion the simulations are supposed to mimic. For
+cyclic contortional motions, however, such states are unphysical.
+# 79
+In the following, we show that for the frozen-nuclei approximation identical conclusions
+hold. It implicitly assumes that localised states are physical representations of quantum
+systems, but for molecules with identical nuclei such states represent superpositions of
+(eigen-)states belonging to different nuclear spin isomers. Thus, if the nuclear spin isomer
+hypotheses is legitimate, localised states must be discarded as physical descriptions of the
+molecule—and hence, the frozen-nuclei approximation.
+It turns out that these similarities are not a coincidence: both concepts, molecular dynamics
+and the frozen-nuclei approximation, are based on a theory reduction rather than an
+approximation. By limiting the motion of nuclei to trajectories with or without zero
+momentum, they treat the nuclei as classical particles, and they therefore cannot account
+for effects that are inherently quantum mechanical.
+A A definition of nuclear spin isomers of molecules
+According to the spin-statistics theorem, any molecular wave function Φmol must be either
+symmetric (ζmol � +1) or anti-symmetric (ζmol � −1) if two or more identical nuclei are
+permuted, where the character ζmol depends on the spin of the permuted nuclei and
+the order of the permutation. Consequently, molecular wave functions must transform
+according to an irreducible, one-dimensional, and real molecular representation Γmol
+in the complete nuclear permutation group, G
+cnp
+.
+#53
+Since not all permutations cause
+observable tunnelling splittings, however, classifying molecular wave functions according
+to the permutation subgroup of the MS group, G
+psms
+, is sufficient.
+#52,53,77
+For most molecular systems known so far, writing any molecular eigenstate Φmol as
+Eq.28 Φmol � Φrcve·Φnu.sp ,
+is an excellent approximation.
+#49,53,81–83
+In Eq. 28, Φrcve denote the eigenfunctions for the
+rotational-contorsional-vibrational-electronic motions of the molecule, and Φnu.sp are the
+wave functions describing its nuclear spins.
+The nuclear spin isomer hypotheses combines the assumption Eq. 28 and the spin-statistics
+theorem: If nuclear spin conversion effects are negligible, molecules exist in form of nuclear
+spin isomers,
+#49,82
+which are determined by the equation
+#53,84
+Eq.29 Γmol ⊆ Γrcve ⊗ Γnu.sp .
+Consequently, different nuclear spin isomers of amolecule are characterized by unique com-
+binations of the irreducible representations Γrcve and Γnu.sp in the permutation subgroup
+of the MS group.
+# 79,84
+July 23, 2020 Page 19 of 38
+Grohmann On the impossibility of frozen nuclei
+In experiments on rotational control, it is furthermore reasonable to assume that (i) the
+rotations separate adiabatically from the remaining motions of the molecule;
+# 1,3,79
+and (ii)
+any external laser field does not manipulate the quantum states of the other motions.
+# 1,3,79
+Under these conditions, we can formally average over the electronic and vibrational
+coordinates and replace Φmol by the model wave functions# 79
+Eq.30 Φmod � Φrot(θ, φ, χ)·Φnu.sp(Σ) .
+In Eq. 30,Φrot are the rotational (eigen-)functions, which are dependent on the Euler angles
+θ, φ, χ, andΦnu.sp denote the nuclear spin eigenstates as a function of the collective nuclear
+spin variable Σ. If the assumptions (i) and (ii) are both acceptable, the wave functions
+describing the rotational motion are, or can be expanded into the eigenfunctions of a
+symmetric top.
+#53
+Both the rotational and the nuclear spin functions in Eq. 30 individually
+form a basis for the irreducible representations of the permutation subgroup of the MS
+group.
+#53,60
+Using the adiabatic ansatz of separated molecular time-scales and focussing on the
+rotational motion of the nuclei, Eq. 29 reduces to
+# 79
+Eq.31 Γmod ⊆ Γrot ⊗ Γnu.sp .
+In Eq. 31, Γmod, Γrot, and Γnu.sp are spanned by the (symmetry-adapted) wave functions
+Φmod, Φrot, and Φnu.sp, respectively. As in the general case, Eq. 29, the irreducible
+representation Γmod in Eq. 31 is fixed and dictated by the spin-statistics theorem. Hence,
+the nuclear spin isomers of the rotating nuclear frame are unambiguously defined by a
+combination of rotational and nuclear spin symmetries, which we denote as Γrot[Γnu.sp]
+hereafter.
+B On localised rotational states in external potentials
+To generalize our earlier results for cyclic, one-dimensional, contortional motions of
+non-rigid molecules
+# 79
+to the rotations of rigid molecules, we distinguish two cases: (i)
+the permutation subgroup of the MS group of the rigid molecule is cyclic; and (ii) the
+permutation subgroup of the MS group can be decomposed into cyclic groups. In both
+cases the results are the same: (partially) localised states are superpositions of states
+belonging to different irreducible representations of cyclic subgroups of the permutation
+subgroup of the MS group.
+(a) The permutation subgroup of the MS group is cyclic In the simplest case, Gpsms is identical to
+the group
+Eq.32 C
+n
+(M) �
+〈
+1 � (12 . . . n)
+�� 1n � E〉 ,
+where 1 denotes the generator of C
+n
+(M); E is the identity; and n gives the number of
+(groups of) identical nuclei that are permuted as the molecule rotates. Because C
+n
+(M)
+is cyclic, the irreducible representations Γ of this group are all one-dimensional.# 73 As
+Section 2, Subsection C and Subsection D show, G
+psms
+has exactly this structure if the rigid
+molecule belongs to the MS groups C
+nh
+(M), C
+nv
+(M), C
+n
+(M), or S
+2n
+(M).
+Let us consider NF
+3
+as an example. In the electronic ground state, this molecule belongs to
+theMSgroupC
+3v
+(M)withpermutation subgroupC
+3
+(M).#60 Hence, n � 3 in Eq. 32 andone
+generator of this group is (123); see Fig. 6 for an illustration. In case themolecule is oriented,
+Page 20 of 38 July 23, 2020
+Frozen nuclei and localised states
+three localised states exist; they belong to the same field-dressed version, but to different
+classical configurations (θ
+1
+, χ
+1
+), (θ
+1
+′ � θ
+1
+, χ
+1
+′ � χ
+1
++ 2π/3), and (θ
+1
+′′ � θ
+1
+, χ
+1
+′′ � χ
+1
++ 4π/3).
+Applying the frozen-nuclei approximation is equivalent to choosing one of the three. The
+permutation (123) interconverts the three configurations; see Fig. 6. Thus, applied to a
+state Φloc
+1
+localised at (θ
+1
+, χ
+1
+), the operation (123) generates a state Φloc
+2
+that is localised at
+χ
+1
++ 2π/3, while (123)(123) gives a state Φloc
+3
+that is localised at χ
+1
++ 4π/3.
+The localised statesΦlocj , j � 1, 2, 3, are linear combinations of symmetry-adapted rotational
+states, i.e. states that transform irreducible in the group C
+n
+(M). This follows from the
+fact that any field-dressed state created by the field can always be expanded in terms of
+symmetry-adapted symmetric top eigenfunctions
+# 73
+Eq.33 Φfd
+npen ,Γ
+(θ, φ, χ) �
+∑
+J,k ,m
+c J,k ,m;Γ,npend
+J
+−m ,−k(θ)· exp
+(
+imφ
+)
+· exp (ikχ) .
+In Eq. 33, J, k ,m denote the quantum numbers of a symmetric top; c J,k ,m;Γ,npen are the
+expansion coefficients of the n
+pen
+-th pendular state with symmetry Γ; and d
+J
+−m ,−k represents
+Wigner’s small d-matrix.
+#85
+Using the projection operator technique,
+# 73
+and taking into
+account the transformation properties of the rotational wave functions from Eq. 33 in the
+MS group,
+#53,84
+we obtain
+# 79
+Eq.34 Φlocj �
+1
+√
+3
+(
+Φrot
+A
++ � j ·Φrot
+E
+1
++ �2j ·Φ
+rot
+E
+2
+)
+j � 1, 2, 3.
+In Eq. 34, � j is a complex number with |� j |2 � 1, andΦrot
+A
+, Φrot
+E
+1
+andΦrot
+E
+2
+are rotational wave
+functions belonging to the irreducible representations A, E
+1
+, and E
+2
+in C
+3
+(M), respectively,
+formed by the three localised states Φlocj .
+# 79
+Hence, each of the three localised states is a
+linear combination of symmetry-adapted states and vice versa; see Ref. 79 for a derivation.
+We stress that the symmetry-adapted states in Eq. 34 are not necessarily eigenfunctions;
+they might be time-dependent symmetry-adapted wave packets instead. For our argument
+is only important, however, that no matter what shape the localised state has, it is always
+a linear combination of three symmetry-adapted states. The only condition the three
+symmetry-adapted states have to fulfil for Φlocj to be localised is
+Eq.35 |Φrot
+A
+|2 !� |Φrot
+E
+1
+|2 !� |Φrot
+E
+2
+|2 .
+Hence, all symmetry-adapted states contribute with the same weight to any of the three
+localised states.
+These arguments are valid for any arbitrary cyclic G
+psms
+: For a system with the symmetry
+group C
+n
+(M), each localised rotational state is a superposition of symmetry-adapted
+rotational functions. Only if one symmetry-adapted state for each irreducible representation
+contributes with the same weight to Φloc in the sense of Eq. 34, the state is localised exactly
+at one classical configuration.
+# 79
+(b) The permutation subgroup of the MS group decomposes into cyclic groups In general, the group
+G
+psms
+is not cyclic. Rigid molecules whose permutation subgroup is not cyclic itself have to
+belong to theMS groups D
+n
+(M), D
+nh
+(M), or D
+nd
+(M), as our analysis in Section 2 shows. Yet,
+in all of these cases, the permutation subgroup G
+psms
+is isomorphic to D
+n
+(M), which can
+always be decomposed into cyclic subgroups, see Section 2, Subsection C and Subsection D.
+July 23, 2020 Page 21 of 38
+Grohmann On the impossibility of frozen nuclei
+Formally, we can write
+D
+2
+(M) � C
+2
+(M) ⊗ C⊥
+2
+(M)Eq.36a
+D
+n
+(M) � C
+n
+(M) o C⊥
+2
+(M) if n > 2 ,Eq.36b
+where the operations of C
+n
+(M) can be mapped on the equivalent rotations Rβz , only
+changing χ, and the operations of C⊥
+2
+(M) can be mapped on the equivalent rotation Rπα ,
+only changing φ and θ; see Eq. 12a and Eq. 12b, respectively, and Subsection A of the
+Appendix.
+Due to the decomposition of the permutation subgroup, see Eq. 36a and Eq. 36b, and
+the form of the rotational basis functions, c.f. Eq. 33, we can generalize the results from
+the last paragraph. Because the rotational basis functions are a product of functions
+being dependent on only one rotational coordinate, we can analyse the symmetry and the
+localisation of the rotational wave functions separately in each coordinate and each cyclic
+subgroup of G
+psms
+.
+A simple example is aligned C
+2
+F
+4
+with MS group D
+2h
+(M).#62 Here, four localised classical
+configurations—1, 1
+′
+, 2, and 2
+′
+—are separated by the potential created by a linearly-
+polarized aligning field; see Fig. 8 and the discussion in Section 2, Subsection D. The
+permutation subgroup G
+psms
+is D
+2
+(M); see Eq. 24 and Eq. 24a. As it is clear from Fig. 7
+and Fig. 8, the operations of
+Eq.37a C
+2
+(M) � {E, (12)(34)}
+interconvert field-dressed version 1 and 1
+′
+, only changing χ to χ + π. Conversely, the
+operations of
+Eq.37b C⊥
+2
+(M) � {E, (14)(23)(56)}
+change field-dressed version 1 to field-dressed version 2 and θ to π − θ, respectively.
+For the localisation in χ, the result is the same as for NF
+3
+: Any rotational wave function
+that is localised in χ is a superposition of symmetry-adapted rotational functions, clas-
+sified according to the subgroup C
+2
+(M) of the permutational subgroup with irreducible
+representations Aχ and Bχ.
+#53,76
+Consider two states Φloc
+1
+and Φloc
+1
+′ that are localised at
+minimum 1 and 1
+′
+of the potential in Fig. 7, respectively. For these states hold
+(12)(34)Φloc
+1
+(θ, φ, χ) � Φloc
+1
+(θ, φ, χ + π)
+� Φloc
+1
+′ (θ, φ, χ)
+Eq.38a
+(12)(34)Φloc
+1
+′ (θ, φ, χ) � Φloc
+1
+′ (θ, φ, χ + π)
+� Φloc
+1
+(θ, φ, χ) .
+Eq.38b
+If we apply the projection operators of C
+2
+(M) to the localised states,# 79 we obtain the
+symmetry-adapted functions
+ΦAχ �
+1
+√
+2
+(
+Φloc
+1
++ Φloc
+1
+′
+)
+Eq.39a
+ΦBχ �
+1
+√
+2
+(
+Φloc
+1
+− Φloc
+1
+′
+)
+.Eq.39b
+Page 22 of 38 July 23, 2020
+Frozen nuclei and localised states
+Thus,
+Φloc
+1
+�
+1
+√
+2
+(
+ΦAχ + ΦBχ
+)
+Eq.40a
+Φloc
+1
+′ �
+1
+√
+2
+(
+ΦAχ − ΦBχ
+)
+.Eq.40b
+Consequently, the two localised functionsΦloc
+1
+andΦloc
+1
+′ are linear combinations of rotational
+wave functions that transform irreducible in C
+2
+(M).
+Analogously, we can consider two states Φloc
+1
+and Φloc
+2
+that are localised in minimum 1
+and 2 of the potential in Fig. 7, respectively, and classify them according the irreducible
+representations Aθ and Bθ of the group C
+⊥
+2
+(M).#53,76 Here,
+(14)(23)(56)Φloc
+1
+(θ, φ, χ) � Φloc
+1
+(π − θ, φ + π, χ)
+� Φloc
+2
+(θ, φ, χ)
+Eq.41a
+(14)(23)(56)Φloc
+2
+(θ, φ, χ) � Φloc
+2
+(π − θ, φ + π, χ)
+� Φloc
+1
+(θ, φ, χ) .
+Eq.41b
+Applying the projections operators for Aθ and Bθ to Φ
+loc
+1
+, we obtain
+ΦAθ �
+1
+√
+2
+(
+Φloc
+1
++ Φloc
+2
+)
+Eq.42a
+ΦBθ �
+1
+√
+2
+(
+Φloc
+1
+− Φloc
+2
+)
+Eq.42b
+and thus,
+Φloc
+1
+�
+1
+√
+2
+(
+ΦAθ + ΦBθ
+)
+Eq.43a
+Φloc
+2
+�
+1
+√
+2
+(
+ΦAθ − ΦBθ
+)
+.Eq.43b
+Hence, also rotational states being localised in θ are superpositions of symmetry-adapted
+states, if classified according to the irreducible representations of C
+⊥
+2
+(M).
+What we have shown here for C
+2
+F
+4
+is valid for any rigid molecule whose permutation
+subgroup, G
+psms
+, decomposes into cyclic subgroups. In general, the ensemble of localised
+states that are interconverted by the operations of one cyclic subgroup is a basis for the
+regular representation of this group;
+# 79
+they generate a representation that contains each
+irreducible representation of the group once and with equal weight. Consequently, it is
+always possible to construct symmetry-adapted rotational states out of localised rotational
+states, and each of these symmetry-adapted rotational states is a superposition of all
+localised rotational states that are interconverted by the operations of the respective cyclic
+subgroup of G
+psms
+.
+# 79
+Moreover, the functions that transform irreducible in the cyclic subgroups of G
+psms
+, such
+as Eq. 39a, Eq. 39b, Eq. 42a, and Eq. 42b, do not have to transform irreducible in the
+permutation subgroups or the full MS group. To show that localised states are unphysical
+representations of molecules with feasible permutations of identical nuclei, it suffices
+to proof that they are linear combinations of functions that transform irreducible in the
+subgroups C
+n
+(M) and C⊥
+2
+(M), as the following discussion shows.
+July 23, 2020 Page 23 of 38
+Grohmann On the impossibility of frozen nuclei
+C The impossibility of localised states revisited
+So far we have only shown that localised rotational states are superposition states of
+different symmetries, if they are classified according to cyclic subgroups of the permutation
+subgroup of the MS group of the molecule. To make plausible why they represent
+unphysical states of the molecule, we need to discuss the following three aspects:
+1) If the nuclei that are permuted by the operations of a cyclic subgroup of Gpsms carry
+zero spin, only one nuclear spin isomer exists in this subgroup. If the nuclei carry
+non-zero spin, every possible nuclear spin isomer exists, i.e. every symmetry-allowed
+combination of nuclear spin states and spatial states is realised.
+2) If the nuclei that are permuted by the operations of the cyclic subgroup carry zero spin,
+localised states are symmetry-forbidden. If the nuclei carry non-zero spin, spatially
+confined nuclear wave packets are superpositions of eigenstates belonging to different
+nuclear spin isomers.
+3) If couplings and correlations between nuclear spins and rotational motions are neg-
+ligible, and the existence of stable nuclear spin isomers is a reasonable assumption,
+localised states are unphysical. They cannot be created by external interactions on
+the time-scale of typical experiments on molecular control if the nuclei are treated as
+quantum objects.
+In the following, we focus on the physical implications each of these statements have for
+the localisation of nuclei in space; the relevant proofs we have presented elsewhere.
+# 79
+(a) On the symmetry of nuclear spin states Let us consider the case of Gpsms being cyclic first. A
+molecule forwhich the operations of a cyclic G
+psms
+only permutes nuclei with zero spin, the
+nuclear spin functions always transform according to the totally symmetric representation,
+Γ
+ts
+, in G
+psms
+.
+# 79
+This argument is valid even if the molecule contains nuclei with non-zero
+spin, but which are not permuted by the operations of G
+psms
+.
+If, however, the permuted nuclei carry non-zero spin, for each irreducible representation of
+G
+psms
+, we find at least one nuclear spin function that forms a basis for this representation.
+In other words, the representation that is generated by the set of all nuclear spin functions,
+Γnu.sp, always contains the regular representation of Gpsms.# 79
+Although the arguments in Ref. 79 are exemplified for single nuclei, they equally apply to
+molecules for which the permutations of G
+psms
+refer to rigid fragments of the molecule,
+like for iodobenzene with G
+psms � C
+2
+(M); see Fig. 2. Then, however, the representation of
+Γnu.sp is identical to Γ
+ts
+only if all nuclei that are permuted by the operations of Gpsms carry
+non-zero spin. Otherwise, Γnu.sp always contains the regular representation of Gpsms.
+If G
+psms
+is not cyclic, for rigid molecules, it is still possible to decompose G
+psms
+into cyclic
+subgroups; see Eq. 36a and Eq. 36b as well as the discussion in Section 2, Subsection C
+and Subsection D. Therefore, the arguments of the preceding paragraph also apply to the
+molecules of this type, because we can analyse their nuclear spin states separately in each
+cyclic subgroup of G
+psms
+.
+Page 24 of 38 July 23, 2020
+Frozen nuclei and localised states
+An illustrative example is again C
+2
+F
+4
+. We consider natural isotopes, I(12C) � 0 and
+I(19F) � 1/2, and specify every non-symmetrised nuclear spin state by the quadruplet
+(mI
+1
+,mI
+2
+,mI
+3
+,mI
+4
+) with mIi � ±1/2; see Fig. 8 for the labelling of identical nuclei. These
+sixteen nuclear spin states form a basis for the representations of the groups C
+2
+(M) and
+C
+⊥
+2
+(M) from Eq. 37a and Eq. 37b, respectively.#53,79
+Consider, for example, the nuclear spin states (−1/2, 1/2, 1/2,−1/2) and (1/2,−1/2,−1/2, 1/2).
+Since
+(−1/2, 1/2, 1/2,−1/2)
+(12)(34)
+−−−−−→ (1/2,−1/2,−1/2, 1/2)Eq.44a
+(1/2,−1/2,−1/2, 1/2)
+(12)(34)
+−−−−−→ (−1/2, 1/2, 1/2,−1/2) ,Eq.44b
+they form a basis for the representation
+Eq.45 Γ
+nu.sp
+reg,C
+2
+� Aχ ⊕ Bχ
+in C
+2
+(M). Likewise, the states (−1/2, 1/2,−1/2, 1/2) and (1/2,−1/2, 1/2,−1/2) form a basis for
+Eq.46 Γ
+nu.sp
+reg,C⊥
+2
+� Aθ ⊕ Bθ ,
+because
+(−1/2, 1/2,−1/2, 1/2)
+(14)(23)(56)
+−−−−−−−−→ (1/2,−1/2, 1/2,−1/2)Eq.47a
+(1/2,−1/2, 1/2,−1/2)
+(14)(23)(56)
+−−−−−−−−→ (−1/2, 1/2,−1/2, 1/2) .Eq.47b
+Consequently, for all irreducible representations in C
+2
+(M) and C⊥
+2
+(M), we find nuclear
+spin states of C
+2
+F
+4
+that form a basis for these irreducible representations.
+Here, we have limited the symmetry analysis of the nuclear spin states to subgroups
+of G
+psms
+only. Properly identifying the observable nuclear spin isomers of a molecule,
+however, requires the use of the full permutation subgroup of the MS group.
+#62,79,80
+Yet, in case G
+psms
+is not cyclic, we can apply the method of (inverse) correlation to relate
+the symmetries of the nuclear spin states in the subgroups C
+n
+(M) and C⊥
+2
+(M) with the
+irreducible representations of G
+psms
+.
+#53
+By doing so, we are able to show that the nuclear
+spin functions transforming irreducible in C
+n
+(M) and C⊥
+2
+(M) can be associated with the
+nuclear spin isomers of the molecule. We return to this aspect at the end of next paragraph.
+(b) Localised states as superpositions of different nuclear spin isomer states The spin-statistics
+theorem allows us to identify each nuclear spin function with one nuclear spin isomer,
+because it only permits combinations of spatial states and nuclear spin states that fulfil
+Eq. 31. Since these combinations are unique in G
+psms
+(and its subgroups), each spatial
+state that transforms irreducible in G
+psms
+represents a nuclear spin isomer of the molecule.
+Showing that localised states are superpositions of states representing different observable
+nuclear spin isomers is straightforward for molecules whose permutation subgroup of the
+MS group, G
+psms
+, is cyclic. A textbook example for this case is NF
+3
+with G
+psms
+� C
+3
+(M),
+and I(14N) � 1, I(19F) � 1/2; see Fig. 6 for three classical configurations. As Eq. 34 shows,
+any of the localised states identified with these classical configurations is a superposition
+of rotational states of different symmetries in C
+3
+(M). The spin states of the three fluorine
+nuclei span the representation
+#53,86
+Eq.48 Γnu.sp � 4A ⊕ 2E
+1
+⊕ 2E
+2
+.
+July 23, 2020 Page 25 of 38
+Grohmann On the impossibility of frozen nuclei
+Since any molecular state has to transform according to Γmol � A, NF
+3
+occurs in form of
+three nuclear spin isomers
+#86
+Eq.49 A[A] E
+1
+[E
+2
+] E
+2
+[E
+1
+] ;
+see Eq. 31. Consequently, the three symmetry-adapted rotational functions forming the
+localised states in Eq. 34 represent the three different nuclear spin isomers of NF
+3
+.
+An illustrative example for a molecule with permuted nuclei of zero spin is CO
+2
+with
+G
+psms
+� C
+2
+(M), and I(12C) � 0, I(16O) � 0. For CO
+2
+, only one totally symmetric nuclear
+spin state exist. Since any molecular state has to be totally symmetric too to fulfil the
+spin-statistics theorem, only totally symmetric rotational states are symmetry-allowed; see
+Eq. 31. Hence, for CO
+2
+localised states principally cannot exist, because the existence of
+rotational states belonging to different Γrot in Gpsms is a necessary condition for forming
+localised states.
+If G
+psms
+is not cyclic, but decomposes into cyclic subgroups, using the method of (inverse)
+correlation allows us to show that localised states are superpositions of different nuclear
+spin isomer states. In case of C
+2
+F
+4
+, for example, the full permutation subgroup of the
+MS group is D
+2
+(M)with irreducible representations A, B
+a
+, B
+b
+, and B
+c
+.
+#62
+In D
+2
+(M), the
+sixteen nuclear spin states of C
+2
+F
+4
+span the representation
+Eq.50 Γnu.sp � 7A ⊕ 3B
+a
+⊕ 3B
+b
+⊕ 3B
+c
+,
+and Eq. 31 shows us that there are four observable nuclear spin isomers of C
+2
+F
+4
+,
+#62
+Eq.51 A[A] B
+a
+[B
+a
+] B
+b
+[B
+b
+] B
+c
+[B
+c
+] .
+However, the symmetry-adapted states in Eq. 40a, Eq. 40b, Eq. 43a, and Eq. 43b, which
+form the localised states in χ and θ, have been classified according to the subgroups C
+2
+(M)
+and C
+⊥
+2
+(M). To identify how the nuclear spin isomers from Eq. 51 are related to the spatial
+wave functions in Eq. 40a, Eq. 40b, Eq. 43a, and Eq. 43b, we have to use the method of
+correlation.
+#53
+Correlating the irreducible representations of D
+2
+(M) and C
+2
+(M) gives#62
+(A, B
+a
+) → AχEq.52a
+(B
+b
+, B
+c
+) → Bχ .Eq.52b
+Hence, rotational functions with Aχ-symmetry in C2(M) represent either the nuclear spin
+isomer A[A] or B
+a
+[B
+a
+], while rotational functions with symmetry Bχ in C2(M) belong to
+the nuclear spin isomer B
+b
+[B
+b
+] or B
+c
+[B
+c
+]. Analogously, we can correlate the irreducible
+representations of D
+2
+(M)with the irreducible representations of C⊥
+2
+(M) to find#62
+(A, B
+c
+) → AθEq.53a
+(B
+a
+, B
+b
+) → Bθ .Eq.53b
+Equation 53 shows that rotational functions with Aχ-symmetry in C
+⊥
+2
+(M) belong either
+to the nuclear spin isomer A[A] or B
+c
+[B
+c
+], and rotational functions with symmetry Bθ in
+C
+⊥
+2
+(M) represent the nuclear spin isomer B
+b
+[B
+b
+] or B
+c
+[B
+c
+]. Consequently, also in case Gpsms
+decomposes into cyclic subgroups, localised states are superpositions of states belonging
+to different nuclear spin isomers.
+Page 26 of 38 July 23, 2020
+Frozen nuclei and localised states
+(c) No frozen nuclei for stable nuclear spin isomers Such superpositions, however, are not
+physical on the time-scales of molecular control experiments, simply because they cannot
+be created deliberately.
+# 79
+As the discussion from the preceding paragraphs shows, to
+create localised states we have to be able to superimpose rotational states of different
+symmetries Γrot in Gpsms such that each symmetry-adapted state contributes with the
+same weight. Two strategies are possible to excite such states within the framework of the
+frozen-nuclei approximation: either by exciting rotational states of different symmetries
+directly with laser fields; or indirectly by superimposing nuclear spin states belonging to
+different Γnu.sp with magnetic fields. As we discuss in the following, both strategies fail.
+The direct approach cannot work because of the permutational symmetry of molecules in
+electromagnetic fields. If Eq. 28 is valid, exciting localised states is not possible, because
+any interaction that creates superpositions of states with different Γrot in Gpsms must be
+able to break the permutational symmetry of the system. Electromagnetic fields only break
+the inversion symmetry, but permutations remain symmetry operations.
+#55
+Thus, the
+permutation subgroup of the MS group remains a symmetry group in the presence of the
+laser field, and the respective field-matter Hamiltonian can only couple rotational states
+belonging to the same irreducible representation in G
+psms
+.
+#55,79
+Mixing rotational states
+directly is therefore not possible if we assume that the rotational motions are adiabatically
+separated from other molecular motions. Consequently, the first strategy for creating
+localised states fails.
+Although most studies on strong-field control assume Eq. 28 to be valid, the frozen-nuclei
+approximation does not have to include the separation of nuclear spin states and spatial
+motions. It is possible to couple rotational motions with nuclear spins, if, for example,
+the dipolar interaction or the spin-rotation coupling is included in the description of the
+nuclei.
+#49,86
+Due to the symmetry properties of the molecular tensors describing these
+interactions, including them creates superposition states of different Γnu.sp—and hence, of
+different rotational symmetries in G
+psms
+. This is the premise of the second strategy for
+creating localised states.
+Usually, however, couplings of rotational motions and nuclear spins are very small, and
+nuclear spin conversion is an extremely slow process compared to the excitation of coherent
+molecular motions.
+#49,86
+Although nuclear spin converting effects can be amplified with
+magnetic fields,
+#86
+preparing superpositions of states belonging to different nuclear spin
+isomers is only possible on time-scales that are much longer than the time-scale on which
+molecular rotations typically take place. Hence, decoherence effects due to interactions
+with the environment
+#87
+would jeopardize any attempt to create localised states.
+#49,86
+Moreover, the superpositions created by the magnetic field do not fulfil the condition
+that every rotational state shall contribute with equal weight.
+# 79,86
+This follows from
+the fact that within a magnetic field, the MS group remains a true symmetry group.
+#55
+As a consequence, it is not possible to directly change the nuclear spin symmetry, but
+only indirectly by employing the dipolar interaction or the spin-rotation coupling. These
+couplings, however, do only occur between specific combinations of rotational and nuclear
+spin states, not between all of them.
+#86
+Thus, if at all, a magnetic field could only create a
+partial localisation.
+July 23, 2020 Page 27 of 38
+Grohmann On the impossibility of frozen nuclei
+For these two reasons, the frozen-nuclei-approximation fails to describe nuclei that are
+confined in strong laser fields. To adequately simulate systems with hindered nuclear
+motion, we either have to use properly (anti-)symmetrised rotational states, or we need to
+go beyond the frozen-nuclei approximation and extend the present theories to explain
+why localised rotational states are reasonable descriptions for molecules with feasible
+permutations of identical nuclei. Both approaches, however, significantly deviate from the
+assumptions scientists make in the context of molecular control.
+D A note on non-rigid molecules
+We insisted many times that the deliberations we make and the conclusions we draw in the
+present paper are limited to rigid molecules. Many interesting phenomena in molecular
+physics and chemistry, however, are related to molecules that cannot be described by
+the concepts used for rigid molecules, be it intramolecular motions and molecular rotors,
+photochemistry, or charge-transfer phenomena. To theoretically describe these non-rigid
+molecules with large amplitude internal motions, many works rely on frozen-nuclei
+approximations, too.
+Yet, treating non-rigid molecules theoretically is far more difficult than rigid molecules:
+neither a systematic analysis of their MS groups exists, nor the derivation of the zero-order
+Hamiltonian is standardized. For non-rigid molecules, different procedures for defining
+the molecule-fixed coordinate system have been developed.
+#53,54,69,88–93
+Depending on
+the method, the rotational and contortional degrees have different meanings, and the MS
+group might have to be modified if a specific method is used.
+#82,91,93
+Both the diversity
+of methods and the sophisticated structure of their MS groups make general statements
+about the validity of the frozen-nuclei approximation for non-rigid molecules challenging.
+Still, we can argue that at least full rotational localisation is not possible also for non-rigid
+molecules. Each MS group G
+ms
+of a molecule with large-amplitude internal motions can
+be expanded according to
+# 77
+Eq.54 Gms � Geq ∪ ˆF
+2
+G
+eq ∪ ... ∪ ˆFn
+V
+G
+eq
+�
+n
+V⋃
+i�1
+ˆFi Geq with ˆF1 ≡ E .
+In Eq. 54, the group G
+eq
+is the MS group of the rigid energy minimum structure of the
+non-rigid molecule; it is isomorphic to the molecular point group of the electronic energy
+minimum structure.
+#50,51
+The operators
+ˆFi transform the reference version 1 into version
+i, i.e. they are permutations or permutation-inversions interconverting the n
+V
+versions of
+the molecule that are separated by superable energy barriers.
+#53,77
+As the expansion Eq. 54 shows, the MS group of the rigid energy minimum structure,
+G
+eq
+, is a subgroup of the full MS group.
+#53,54,77,89,90
+Due to the isomorphism of G
+eq
+and the respective molecular point group, the arguments we present in Section 2 and
+this section also apply to the group G
+eq
+. This suggests that at least with respect to the
+operations of G
+eq
+, localised rotational states are not possible for non-rigid molecules
+as well: symmetry-adapted rotational states, if classified according to the irreducible
+representations of the permutation subgroup of G
+eq
+, represent different nuclear spin
+isomers of the non-rigid molecule, and superpositions of these states, such as localised
+states, are unphysical representations of the molecule.
+Page 28 of 38 July 23, 2020
+Frozen nuclei and localised states
+The problem with this argument, however, is that for a non-rigid molecule, we cannot say
+with certainty what the meaning of the operations in Eq. 54 is, because their interpretation
+strongly depends on the definition of the molecule-fixed coordinate system.
+#53,69,88,91
+Hence, solely from the structure of the MS group, we cannot conclude according to which
+irreducible representations the rotational wave functions transform. There are examples of
+which also the operations
+ˆFi change the rotational coordinate, and not the contortional
+coordinate alone.
+#53,93
+In a future publication, we will address this issue by discussing
+examples of contemporary research on molecular torsions.
+#94
+A related discussion on
+non-rigid molecules with observable inversions was given recently.
+#95
+E Freezing nuclei is not an approximation, but a theory reduction
+When reading books about molecular physics and theoretical chemistry, it is almost
+impossible not to be confronted with the idea that the prominent approach of Born and
+Oppenheimer to calculating molecular eigenstates
+#96,97
+is an approximation. Yet, in the
+literature on the philosophy of theoretical chemistry, it has long been argued that the
+adiabatic separation of nuclear and electronic motions means more than that.
+#22–27,29,98
+Instead, the Born-Oppenheimer programme is better understood as aweak theory reduction
+from a quantum to a classical treatment of the nuclei. By reducing the theoretical
+description to classical mechanics and treating the nuclei as distinguishable objects,
+molecular structures arise as an emergent—classical—property of the molecule.
+#23,29
+The term approximation, these papers point out, is neither mathematically
+#98–101
+nor
+conceptionally
+#23,29
+correct. Mathematically, the Born and Oppenheimer is an asymptotic
+expansion in terms of the ratio ς � (m/M)1/4, where m is the mass of an electron and M is
+a mean nuclear mass of the molecular system. The point ς � 0 is singular and therefore
+leads to a discontinuous change in the description of the molecule. Instead of treating the
+nuclei as quantum objects, they are considered as classical particles in the limit of ς→ 0,
+which ultimately allows us to speak of a molecular structure.
+#23,29
+These arguments apply to the frozen-nuclei approximation alike.
+#98
+Because the change
+from a localised rotational state to a classical configuration is discontinuous, it is not only
+incorrect to assume that it would smoothly converge into the classical configuration if
+only the external interaction is strong enough; see also Section 2, Subsection E. It also
+shows that the nuclei are considered qualitatively different. Since they are described as
+classical objects at this level of theory, neither we can motivate the existence of nuclear
+spin isomers, nor we can understand why localised states are physically wrong. Hence, if
+the frozen-nuclei approximation should be of any merit for describing experiments on
+molecular control, we need to make plausible why it is legitimate to describe the nuclei as
+(quasi-)classical objects.
+4. Conclusion: (anti-)symmetrisation is necessary—twice
+In this paper, we have shown that the frozen-nuclei approximation is an unphysical
+description of rigid molecules with identical nuclei. Because the quantum analogue of
+frozen nuclei, a localised rotational state, is a superposition of states belonging to different
+nuclear spin isomers of the molecule, it is either symmetry-forbidden, or it cannot be
+July 23, 2020 Page 29 of 38
+Grohmann On the impossibility of frozen nuclei
+created on the time-scale of typical experiments on molecular control. The deeper reason
+for this inherent flaw is that the “frozen-nuclei approximation” is a theory reduction
+rather than an approximation, which treats the nuclei of the molecule as classical particles.
+Therefore, it cannot account for the indistinguishability of identical nuclei, the existence of
+nuclear spin isomers, and the impossibility of localised rotational states.
+Consequently, for molecules with identical nuclei, the conventional approaches to molec-
+ular control need to be extended. An obvious example is the orbital tomography of
+symmetric molecules, like CO
+2
+. The alleged reconstruction of molecular orbitals not
+only relies on the assumption that the electronic wave function decomposes into one-
+electron functions.
+# 12,14,16,19–21
+It also assumes that it is justified to freeze the nuclei at
+their equilibrium configuration to eliminate the dependence of orbitals on the nuclear
+coordinates. As our argument shows, however, this assumption is wrong. Because nuclear
+wave functions have to obey the spin-statistics theorem, too, it is impossible to describe
+CO
+2
+by a localised rotational state. Instead, rotational states must be symmetry-adapted
+with respect to the operations of the permutation subgroup of theMS group, even in strong
+electromagnetic fields. Yet, symmetry-adapted states are necessarily delocalised in the
+rotational manifold, and hence, we have to take into account that minima corresponding
+to different potential-dressed versions are equally populated. As a consequence, we must
+not consider one particular classical configuration for the nuclei, but we only can, if at all,
+measure orbitals that are averaged over all potential-dressed versions of the molecule.
+Another area of research for which the failure of the frozen-nuclei approximation is crucial
+is the contortional control of polyatomic molecules.
+#64,79
+Models for describing internal
+motions in molecules, such as torsions or pseudo-rotations, often rely on the assumption
+that slow rotational motions can be considered as frozen over the course of the simulated
+contortional motion; see in particular Ref. 64 for an analysis and the references therein for
+examples. Many of the studied systems, however, exist in form of distinct potential-dressed
+versions, and applying the frozen-nuclei approximation is equivalent to choosing one of
+them and ignoring the consequences of the spin-statistics theorem. Hence, in particular in
+the context of directed motions, it is necessary to re-evaluate the premises of the models on
+contortional control to judge if they can account for the impossibility of localised rotational
+states.
+# 74
+And yet, the fact that conventional models of molecular control fail in case they rely on the
+frozen-nuclei approximation is not the only conclusion we can draw from the impossibility
+of localised rotational states for molecules with stable nuclear spin isomers. Under the
+condition that the nuclei of a molecule can be treated as (quasi-)classical objects, our
+discussion shows, the frozen-nuclei approximation is appropriate. Hence, if it was possible
+to explain why such quasi-classical states of the nuclei exist, and why from all possible
+basis sets spatial position plays a special role,
+# 102
+the localisation of molecules would
+appear as reasonable assumption. The environment-induced superselection of a preferred
+basis approach
+#47,87
+might offer such explanation.
+But no matter if spatial states are preferred or not, our conclusions show that results based
+on conventional models of molecular control employing the frozen-nuclei approximation
+have to be treated with care. For motions that can be described in terms of permutations
+of identical nuclei, models relying on localised states are ignorant about the quantum
+Page 30 of 38 July 23, 2020
+Conclusion: (anti-)symmetrisation is necessary—twice
+properties of nuclei. They cannot account forwhatmight be decisive to properly understand
+the molecule under control: that nuclear wave functions have to obey the spin-statistics
+theorem, too. o
+X. Appendix: Some useful characteristics of MS-groups
+Some of the arguments we have presented in Section 2 are not only valid for rigidmolecules,
+but can be generalised to any type of MS group. Specifically, the typology of MS groups
+makes it easier to identify nuclear spin isomers in particular and allows for making
+conclusions about molecular observables in general.
+A MS groups and point group operations
+To understand the typology introduced in Section 2, it is important to recall some basic
+rules on the relationship of the operations of the MS group and point group operations.
+For rigidmolecules, to each permutation or permutation-inversion Oms in Eq. 11 a different
+point-group operation Opg belongs. As shown by Hougen, the complete set of operations
+constitutes the point-group of the rigid molecule;
+#50,51
+see also the book of Steinborn.
+#66
+Only because of this isomorphism of the MS group and the point group of the rigid
+molecule, it is possible to map the operations of the MS group unambiguously on the
+operations of the respective molecular point group. The rules for this mapping are as
+follows: Permutations P in the MS group correspond to proper rotation operations ˆC
+n
+in
+the molecular point group, while permutation-inversions P∗ are equivalent to improper
+rotation operations
+ˆS
+n
+. Additionally, proper and improper rotations of order n can be
+mapped only on permutations and permutation-inversions consisting of disjoint cycles
+with length n, respectively.
+#50,51,53
+It is important to understand that
+ˆC
+n
+does not physically rotate themolecule; it only rotates the
+vibronic coordinates about the molecule-fixed ez-axis by the angle η � 2π/n. Conversely, the
+equivalent rotations Req change the rotational coordinates by rotating the molecule-fixed
+axes. For rotations about the ez-axis, we can furthermore say: If Req � R
+β
+z , see Eq. 12b,
+the corresponding point group operation rotates the vibronic coordinates by the angle
+η � 2π − β about the molecule-fixed ez-axis.#60
+For improper rotation operations, the following rules hold:
+ˆS
+1
+≡ σ̂
+mol
+and
+ˆS
+2
+≡ ˆi. Here,
+σ̂
+mol
+is a mirror pane being perpendicular to the highest axis of rotation. For any improper
+rotation of higher order,
+ˆS
+n
+� ˆC
+n
+· σ
+mol
+, with the rules for the operations
+ˆC
+n
+being specified
+in the preceding paragraph. We stress that the inversion E
+∗
+does not correspond to the
+inversion operation in the point group, but to the reflection at the molecular plane σ̂
+mol
+.
+#60
+Further, these rules are only valid for rigid molecules. For non-rigid molecules, a permu-
+tation P or a permutation-inversion P∗ might only change the contortional coordinates,
+leaving the rotational and vibronic coordinates of the molecule unaffected. Moreover,
+the meaning of the operations of the MS group in terms of molecular coordinates, in
+July 23, 2020 Page 31 of 38
+Grohmann On the impossibility of frozen nuclei
+general, depends on which method is used to set up the zero-order Hamiltonian. Unlike
+for rigid molecules, the molecule-fixed coordinate system is not defined uniquely; different
+definitions of this coordinate system lead to different geometrical interpretations of the
+operations.
+#53,91
+B A typology of MS groups
+As pointed out in Subsection C of Section 2, any MS group falls into one of the following
+three categories: type-I, type-IIa, or type-IIb. This typology is based on how the permutation
+subgroup G
+psms
+relates to the full MS group of the molecule.
+For MS groups of type-I, this relation is simple: Gpsms is an improper subgroup of Gms
+I
+,
+because these MS groups do not contain any permutation-inversions. For MS groups of
+type-IIa, we stated that they can be written as a direct product of the permutation subgroup
+and the inversion group, while for MS groups of type-IIb this is not possible. As we point
+out in the following, their structure is a direct consequence of the inversion E
+∗
+being a
+feasible operation or not.
+For MS groups of type-IIa, the inversion E∗ is feasible. If E∗ is feasible, the MS group must
+contain for each permutation P the corresponding permutation-inversion P∗. For the
+following reason: Any permutation-inversion P∗ can be written as
+Eq.55 P∗ � PE∗ � E∗P ,
+where P is a pure permutation of identical nuclei. If E∗ is feasible, the element
+Eq.56 E∗P∗ � E∗E∗P � P
+must also be in the MS group, otherwise the group axioms would not be fulfilled.
+#68
+Hence, since P∗ is an arbitrary but feasible permutation-inversion, its corresponding
+permutation P must be feasible, too. Since furthermore {E,E∗} and Gpsms both form
+normal subgroups of G
+ms
+, and both have only the identity E in common, the complete MS
+group can be written as Eq. 13a.
+# 75
+In MS groups of type-IIb, the inversion E∗ is not feasible. Here, the MS group contains
+for none of the feasible permutations P the corresponding permutation-inversion P∗.
+Per definition, the only way of obtaining P∗ from P is by combining P and E∗.#53 Yet,
+if E
+∗
+is not feasible, it is not possible to obtain P∗ by combining P with any element of
+the MS group. Thus, if P∗ is feasible, for MS groups of type-IIb, P is not, and vice versa.
+Nevertheless, the permutation subgroup G
+psms
+still forms an invariant subgroup of the
+MS group, but it can no longer be written as a direct product, see Eq. 13b.
+Since the arguments are independent of the geometrical realization of the operations of
+the MS group, the results apply to any MS group, irrespectively of the molecule being
+rigid or non-rigid.
+Page 32 of 38 July 23, 2020
+References
+C On the irreducible representations of MS groups
+The structure of MS groups has direct consequences for the labelling of their irreducible
+representations. If Γα specifies an irreducible representation of the permutation subgroup,
+for the irreducible representations of the MS group holds the following:
+Type-I The irreducible representations of the MS group can be chosen to be identical to
+Γα.
+Type-IIa The irreducible representations of Gms can be labelled according to Γα,±. Here,
+for the characters of Γα,±,
+#53
+Eq.57 ζΓα,±[P∗] � ±ζΓα,±[P] ,
+and no extra degeneracies are introduced by including the inversion operation
+E
+∗
+. Moreover, the irreducible representations of the MS group correlate with the
+irreducible representations of its permutation subgroup according to
+Eq.58 Γα,±
+G
+ms→Gpsms
+−−−−−−−−−→ Γα .
+Type-IIb There is no general correlation scheme between Γα and the irreducible represen-
+tations of the MS group. In particular, it is possible that two (or more) irreducible
+representations of G
+psms
+correlate with only one irreducible representation in
+the MS group. Therefore, including permutation-inversions might introduce
+additional degeneracies.
+For identifying nuclear spin isomers, this is in particular important. Often, the states of
+the molecular system can be classified in the MS group, but only using the permutation
+subgroup allows for uniquely defining the nuclear spin isomers of molecules. While for
+molecules belonging to MS groups of type-I or type-IIa it is still possible to uniquely define
+the nuclear spin isomers of the molecule in the MS group, for groups of type-IIb this is
+no longer possible. To identify the nuclear spin isomers of a molecule belonging to MS
+groups of type-IIb , we then have to use the method of inverse correlation,#53,62,80; see Ref.
+62 and 80 for examples.
+References
+1 B. Friedrich/D. R. Herschbach “On the possibility of orienting rotationally cooled polar molecules in
+an electric field”. Zeitschrift für Physik D 18 (1991), 153–161. (cit. on pp. 1/3–6/20)
+2 H. Stapelfeldt/T. Seideman “Colloquium: Aligning molecules with strong laser pulses”. Reviews of
+Modern Physics 75 (2003), 543–557. (cit. on pp. 1/3–5)
+3 T. Seideman/E. Hamilton “Nonadiabatic alignment by intense pulses: Concepts, theory, and directions”.
+Advances in Atomic, Molecular and Optical Physics 52 (2005), 289–329. (cit. on pp. 1/4/5/20)
+4 M. Lemeshko/R. V. Krems/J. M. Doyle/S. Kais “Manipulation of molecules with electromagnetic fields”.
+Molecular Physics 111 (2013), 1648–1682. (cit. on pp. 1/3–5)
+5 M. J. J. Vrakking “Attosecond imaging”. Physical Chemistry Chemical Physics 16 (2014), 2775–2789.
+(cit. on pp. 1/2)
+July 23, 2020 Page 33 of 38
+http://dx.doi.org/10.1007/BF01437441
+http://dx.doi.org/10.1103/RevModPhys.75.543
+http://dx.doi.org/10.1016/S1049-250X(05)52006-8
+http://dx.doi.org/10.1080/00268976.2013.813595
+http://dx.doi.org/10.1039/C3CP53659A
+Grohmann On the impossibility of frozen nuclei
+6 K. Ramasesha/S. R. Leone/D. M. Neumark “Real-time probing of electron dynamics using attosecond
+time-resolved spectroscopy”. Annual Review of Physical Chemistry 67 (2016), 41–63. (cit. on pp. 1/2)
+7 G. S. Kottas/L. I. Clarke/D. Horinek/J. Michl “Artificial molecular rotors”. Chemical Reviews 105
+(2005), 1281–1376. (cit. on p. 1)
+8 B. L. Feringa “The art of building small: From molecular switches to motors”. Angewandte Chemie
+International Edition 56 (2017), 11060–11078. (cit. on p. 1)
+9 J. F. Stoddart “Mechanically interlockedmolecules (MIMs)-molecular shuttles, switches, andmachines”.
+Angewandte Chemie International Edition 56 (2017), 11094–11125. (cit. on p. 1)
+10 J. F. Ogilvie “The nature of the chemical bond – 1990: There are no such things as orbitals!” Journal of
+Chemical Education 67 (1990), 280–289. (cit. on pp. 1/2)
+11 E. R. Scerri “The failure of reduction and how to resist disunity of the sciences in the context of chemical
+education”. Science and Education 9 (2000), 405–425. (cit. on pp. 1/2)
+12 E. R. Scerri “The recently claimed observation of atomic orbitals and some related philosophical issues”.
+Philosophy of Science 68 (2001), S76–S88. (cit. on pp. 1/2/30)
+13 J. M. Zuo/M. O’Keefe/J. C. H. Spence “Have orbitals really been observed?” Journal of Chemical Education
+78 (2001), 877. (cit. on p. 1)
+14 W. H. E. Schwarz “Measuring orbitals: provocation or reality?” Angewandte Chemie International Edition
+45.10 (2006), 1508–1517. (cit. on pp. 1/2/30)
+15 V. N. Ostrovsky “Towards a philosophy of approximations in the ’exact’ sciences”. HYLE – International
+Journal for Philosophy of Chemistry 11 (2005), 101–126 (cit. on pp. 1/2)
+16 M. Labarca/O. Lombardi “Why orbitals do not exist?” Foundations of Chemistry 12 (2010), 149–157.
+(cit. on pp. 1/2/30)
+17 P. Mulder “On the alleged non-existence of orbitals”. Studies in History and Philosophy of Science Part B:
+Studies in History and Philosophy of Modern Physics 41 (2010), 178–182. (cit. on pp. 1/2)
+18 P. Mulder “Are orbitals observable?” HYLE – International Journal for Philosophy of Chemistry 17 (2011),
+24–35 (cit. on pp. 1/2)
+19 J. F. Ogilvie “Is a molecular orbital measurable by means of tomographic imaging?” Foundations of
+Chemistry 13 (2011), 87–91. (cit. on pp. 1/2/30)
+20 J. Autschbach “Orbitals: Some Fiction and Some Facts”. Journal of Chemical Education 89 (2012), 1032–
+1040. (cit. on pp. 1/2/30)
+21 G. Villani/E. Ghibaudi/L. Cerruti “The orbital: a pivotal concept in the relationship between chemistry
+and physics? A comment to the work by Fortin and coauthors”. Foundations of Chemistry 20 (2017),
+89–97. (cit. on pp. 1/30)
+22 R. G. Woolley “Quantum theory and molecular structure”. Advances in Physics 25 (1976), 27–52.
+(cit. on pp. 1/29)
+23 H. Primas “Chemistry, quantum mechanics and reductionism”. Berlin, Heidelberg: Springer, 1983.
+(cit. on pp. 1/2/7/29)
+24 S. J. Weininger “The molecular structure conundrum: Can classical chemistry be reduced to quantum
+chemistry?” Journal of Chemical Education 61 (1984), 939–944. (cit. on pp. 1/29)
+25 R. G. Woolley “The molecular structure conundrum”. Journal of Chemical Education 62 (1985), 1082–1084.
+(cit. on pp. 1/29)
+26 H. Primas “Kann Chemie auf Physik reduziert werden? Erster Teil: Das Molekulare Programm”. Chemie
+in unserer Zeit 19 (1985), 109–119. (cit. on pp. 1/7/29)
+Page 34 of 38 July 23, 2020
+http://dx.doi.org/10.1146/annurev-physchem-040215-112025
+http://dx.doi.org/10.1021/cr0300993
+http://dx.doi.org/10.1002/anie.201702979
+http://dx.doi.org/10.1002/anie.201703216
+https://doi.org/10.1021/ed067p280
+http://dx.doi.org/10.1023/A:1008719726538
+https://doi.org/10.1086/392899
+https://doi.org/10.1021/ed078p877.2
+http://dx.doi.org/10.1002/anie.200501333
+http://dx.doi.org/10.1007/s10698-010-9086-5
+http://dx.doi.org/10.1016/j.shpsb.2010.02.003
+http://dx.doi.org/10.1007/s10698-011-9113-1
+https://doi.org/10.1021/ed200673w
+http://dx.doi.org/10.1007/s10698-017-9293-4
+http://dx.doi.org/10.1080/00018737600101352
+http://dx.doi.org/10.1007/978-3-642-69365-6
+http://dx.doi.org/10.1021/ed061p939
+http://dx.doi.org/10.1021/ed062p1082
+http://dx.doi.org/10.1002/ciuz.19850190402
+References
+27 B. T. Sutcliffe “The chemical bond andmolecular structure”. Journal of Molecular Structure: THEOCHEM
+259 (1992), 29–58. (cit. on pp. 1/29)
+28 J. L. Ramsey “Molecular shape, reduction, explanation and approximate concepts”. Synthese 111 (1997),
+233–251. (cit. on p. 1)
+29 H. Primas “Emergence in exact natural science”. Acta Polytechnica Scandinavica 91 (1998), 83–98.
+(cit. on pp. 1/2/29)
+30 R. F. Hendry “Ontological reduction and molecular structure”. Studies in History and Philosophy of
+Science Part B: Studies in History and Philosophy of Modern Physics 41 (2010), 183–191. (cit. on p. 1)
+31 E. Mátyus/J. Hutter/U. Müller-Herold/M. Reiher “On the emergence ofmolecular structure”. Physical
+Review A 83 (2011), 052512. (cit. on p. 1)
+32 B. T. Sutcliffe/R. G. Woolley “On the quantum theory of molecules”. Journal of Chemical Physics 137.22
+(2012), 22A544. (cit. on p. 1)
+33 H. Ochiai “Does a molecule have structure?” Foundations of Chemistry 19 (2017), 197–207. (cit. on p. 1)
+34 E. Ghibaudi/L. Cerruti/G. Villani “Structure, shape, topology: entangled concepts in molecular
+chemistry”. Foundations of Chemistry 22 (2019), 279–307. (cit. on p. 1)
+35 M. F. Kling/M.J.J. Vrakking “Attosecond electron dynamics”. Annual Review of Physical Chemistry 59
+(2008), 463–492. (cit. on pp. 1/2)
+36 T. Bredtmann/D. J. Diestler/S.-D. Li/J. Manz/J. F. Pérez-Torres/W.-J. Tian/Y.-B. Wu/Y. Yang/
+H.-J. Zhai “Quantum theory of concerted electronic and nuclear fluxes associated with adiabatic
+intramolecular processes”. Physical Chemistry Chemical Physics 17 (2015), 29421–29464. (cit. on p. 1)
+37 M. Weisberg/P. Needham/R. Hendry “Philosophy of Chemistry”. In: The Stanford Encyclopedia of
+Philosophy (Winter 2016 Edition). Ed. by E. N. Zalta. 2016. (cit. on p. 1)
+38 H. Hettema “The union of Chemistry and Physics”. Cham: Springer, 2017. (cit. on p. 1)
+39 J. Itatani/J. Levesque/D. Zeidler/Hiromichi Niikura/H. Pépin/J. C. Kieffer/P. B. Corkum/D. M.
+Villeneuve “Tomographic imaging of molecular orbitals”. Nature 432 (2004), 867–871. (cit. on p. 2)
+40 P. H. Bucksbaum “The future of attosecond spectroscopy”. Science 317 (2007), 766–769. (cit. on p. 2)
+41 S. Haessler/J. Caillat/W. Boutu/C. Giovanetti-Teixeira/T. Ruchon/T. Auguste/Z. Diveki/P. Breger/
+A. Maquet/B. Carré/3 R. Taïeb 2/P. Salières “Attosecond imaging ofmolecular electronicwavepackets”.
+Nature Physics 6 (2010), 200–206. (cit. on p. 2)
+42 P. Salières/A. Maquet/J. Haessler S. ans Caillat/R. Taïeb “Imaging orbitals with attosecond and
+˚
+Angström resolutions”. Reports on Progress in Physics 75 (2012), 062401 (cit. on p. 2)
+43 M. Spanner/S. Patchkovskii “Molecular strong field ionization and high harmonic generation: A
+selection of computational illustrations”. Chemical Physics 414 (2013), 10–19. (cit. on p. 2)
+44 Z. Diveki/R. Guichard/J. Caillat/A. Camper/S. Haessler/T. Auguste/T. Ruchon/B. Carré/A. Ma-
+quet/R. Taïeb/P. Salières “Molecular orbital tomography from multi-channel harmonic emission in
+N
+2
+”. Chemical Physics 414 (2013), 121–129. (cit. on p. 2)
+45 P. Peng/C. Marceau/D. M. Villeneuve “Attosecond imaging of molecules using high harmonic
+spectroscopy”. Nature Reviews Physics 1 (2019), 144–155. (cit. on p. 2)
+46 E. R. Scerri “Have orbitals really been observed?” Journal of Chemical Education 77 (2000), 1492–1494.
+(cit. on p. 2)
+47 M. Schlosshauer “Decoherence, themeasurement problem, and interpretations of quantummechanics”.
+Reviews of Modern Physics 76 (2005), 1267–1305. (cit. on pp. 2/30)
+48 W. H. E. Schwarz “Messung von Orbitalen und Schrödinger-Katzen”. Bunsen-Magazin 3 (2001), 59–69
+(cit. on p. 2)
+July 23, 2020 Page 35 of 38
+http://www.sciencedirect.com/science/article/pii/016612809287004J
+http://dx.doi.org/10.1023/A:1004901931804
+http://philsci-archive.pitt.edu/953/
+http://www.sciencedirect.com/science/article/pii/S1355219810000225
+http://dx.doi.org/10.1103/PhysRevA.83.052512
+http://dx.doi.org/10.1063/1.4755287
+http://dx.doi.org/10.1007/s10698-017-9284-5
+http://dx.doi.org/10.1007/s10698-019-09333-8
+http://dx.doi.org/10.1146/annurev.physchem.59.032607.093532
+http://dx.doi.org/10.1039/C5CP03982G
+https://plato.stanford.edu/archives/win2016/entries/chemistry/
+http://dx.doi.org/10.1007/978-3-319-60910-2
+https://doi.org/10.1038/nature03183
+http://dx.doi.org/10.1126/science.1142135
+http://dx.doi.org/10.1038/nphys1511
+http://www.sciencedirect.com/science/article/pii/S0301010411005647
+http://www.sciencedirect.com/science/article/pii/S0301010412001401
+http://dx.doi.org/10.1038/s42254-018-0015-1
+https://doi.org/10.1021/ed077p1492
+http://dx.doi.org/10.1103/RevModPhys.76.1267
+Grohmann On the impossibility of frozen nuclei
+49 P. L. Chapovsky/L. J. F. Hermans “Nuclear spin conversion in polyatomic molecules”. Annual Review of
+Physical Chemistry 50 (1999), 315–345. (cit. on pp. 2/19/27)
+50 J. T. Hougen “Classification of rotational energy levels for symmetric top molecules”. The Journal of
+Chemical Physics 37 (1962), 1433–1441. (cit. on pp. 2/3/6–8/10/28/31)
+51 J. T. Hougen “Classification of rotational energy levels II”. The Journal of Chemical Physics 39 (1963),
+358–365. (cit. on pp. 2/3/6–8/10/28/31)
+52 H. C. Longuet-Higgins “The symmetry groups of non-rigid molecules”. Molecular Physics 6 (1963),
+445–460. (cit. on pp. 2/3/6/7/10/19)
+53 P. R. Bunker/P. Jensen “Molecular symmetry and spectroscopy”. 2nd edition. Ottawa: National
+Research Council of Canada, 1998 (cit. on pp. 2/3/6–8/10–12/14/17/19–23/25/26/28/29/31–33)
+54 G. S. Ezra “Symmetry Properties of Molecules”. Springer Berlin Heidelberg, 1982. (cit. on pp. 2/11–
+13/16/28)
+55 J. K. G. Watson “Molecular rovibronic symmetries in electric and magnetic fields”. Canadian Journal of
+Physics 53 (1975), 2210–2220. (cit. on pp. 2/7/14/27)
+56 B. Friedrich/D. R. Herschbach “Polarization of molecules induced by intense nonresonant laser fields”.
+The Journal of Physical Chemistry 99 (1995), 15686–15693. (cit. on pp. 4–6)
+57 F. Filsinger/J. Küpper/G. Meijer/L. Holmegaard/J. H. Nielsen/I. Nevo/J. L. Hansen/H. Stapelfeldt
+“Quantum-state selection, alignment, and orientation of large molecules using static electric and laser
+fields”. The Journal of Chemical Physics 131 (2009), 064309. (cit. on p. 5)
+58 N. Moiseyev/T. Seideman “Alignment of molecules by lasers: derivation of the Hamiltonian within the
+(t,t′) formalism”. Journal of Physics B: Atomic, Molecular and Optical Physics 39.9 (2006), L211–L216.
+(cit. on p. 5)
+59 M. Artamonov/T. Seideman “Theory of three-dimensional alignment by intense laser pulses”. The
+Journal of Chemical Physics 128 (2008), 154313. (cit. on p. 5)
+60 P. R. Bunker/P. Jensen “Fundamentals of molecular symmetry”. Bristol/Philadelphia: Institute of
+Physics Publishing, 2005 (cit. on pp. 6/7/17/20/31)
+61 E. B. Wilson/J. C. Decius/P. C. Cross “Molecular vibrations: The theory of infrared and Raman
+vibrational spectra”. New York: Dover, 1980 (cit. on p. 7)
+62 T. Grohmann/M. Leibscher “Nuclear spin selective alignment of ethylene and analogues”. The Journal
+of Chemical Physics 134 (2011), 204316. (cit. on pp. 7/22/25/26/33)
+63 T. Grohmann/M. Leibscher/T. Seideman “Laser controlled torsion: a four-dimensional and the validity
+of reduced dimensionality models”. Physical Review Letters 118 (2017), 203201. (cit. on p. 7)
+64 T. Grohmann/T. Seideman/M. Leibscher “Theory of torsional control for G
+16
+-type molecules”. The
+Journal of Chemical Physics 148 (2018), 094304. (cit. on pp. 7/17/30)
+65 T. Grohmann/F. Bader/C. Müller/J. Shao/J. C. Tremblay “On the symmetry of molecules in external
+potentials”. to be published (2020) (cit. on pp. 7/9)
+66 D. Steinborn “Symmetrie und Struktur in der Chemie”. Weinheim: Wiley - VCH, 1993 (cit. on pp. 7/31)
+67 H. Primas/U. Müller-Herold “Elementare Quantenchemie”. 2nd edition. Wiesbaden: Vieweg +
+Teubner, 1990. (cit. on p. 7)
+68 E. P. Wigner “Group theory and its application to quantum theory”. New York: Academic Press, 1959
+(cit. on pp. 7/32)
+69 D. Papoušek/M. R. Aliev “Molecular vibrational-rotational spectra: theory and applications of high
+resolution infrared microwave and Raman spectroscopy of polyatomic molecules”. Vol. 17. Studies in
+physical and theoretical chemistry. New York: Elsevier, 1982 (cit. on pp. 7/28/29)
+Page 36 of 38 July 23, 2020
+http://dx.doi.org/10.1146/annurev.physchem.50.1.315
+http://dx.doi.org/10.1063/1.1733301
+http://dx.doi.org/10.1063/1.1734253
+http://dx.doi.org/10.1080/00268976300100501
+http://dx.doi.org/10.1007/978-3-642-93197-0
+http://dx.doi.org/10.1139/p75-267
+http://dx.doi.org/10.1021/j100042a051
+http://dx.doi.org/10.1063/1.3194287
+http://dx.doi.org/10.1088/0953-4075/39/9/l01
+http://dx.doi.org/10.1063/1.2894876
+http://dx.doi.org/10.1063/1.3595133
+http://dx.doi.org/10.1103/PhysRevLett.118.203201
+http://dx.doi.org/10.1063/1.4997462
+http://dx.doi.org/10.1007/978-3-322-96763-3
+References
+70 P. Atkins/R. Friedman “Molecular quantum mechanics”. 5th edition. New York: Oxford University
+Press, 2010 (cit. on p. 7)
+71 M. Tinkham “Group theory and quantum mechanics”. New York: Dover, 2003 (cit. on pp. 7/12/14)
+72 V. Heine “Group theory in quantum mechanics”. Reprint. New York: Dover, 1993 (cit. on pp. 7/12/14)
+73 R. McWeeny “Symmetry: An introduction to group theory and its applications”. New York: Dover,
+2002 (cit. on pp. 7/14/20/21)
+74 T. Grohmann “On the impossibility of molecular structures”. in preparation. Freie Universität Berlin,
+2021 (cit. on pp. 9/30)
+75 R. Mirman “Group theory: A intuitive approach”. Singapore: World Scientific, 2007 (cit. on pp. 10/12/
+13/32)
+76 S. L. Altmann/P. Herzig “Point-group theory tables”. Oxford: Clarendon Press, 1994 (cit. on pp. 10/
+12/13/22/23)
+77 J. K. G. Watson “The correlation of the symmetry classifications of states of non-rigid molecules”.
+Canadian Journal of Physics 43 (1965), 1996–2007. (cit. on pp. 10/19/28)
+78 F. A. Cotton “Chemical applications of group theory”. 2nd edition. New York: Wiley, 1971 (cit. on p. 12)
+79 T. Grohmann/J. Manz “On the impossibility of localised states for molecular rotors with cyclic
+potentials”. Molecular Physics 116 (2018), 2538–2555. (cit. on pp. 17/19–25/27/30)
+80 T. Grohmann “Theoretische Untersuchungen zur Quantendynamik der Kernspinisomere nicht-linearer
+Moleküle”. Dissertation. Berlin: Freie Universität, Institut für Chemie und Biochemie, 2012. (cit. on
+pp. 17/18/25/33)
+81 M. H. Levitt “Spin dynamics: basics of nuclear magnetic resonance”. 2nd edition. Weinheim: Wiley -
+VCH, 2008 (cit. on p. 19)
+82 P.R. Bunker/P. Jensen “Spectroscopy and broken symmetry”. In: Frontiers of molecular spectroscopy.
+Ed. by J. Laane. Elsevier, 2009, 321–345. (cit. on pp. 19/28)
+83 M. Quack “Fundamental symmetries and symmetry violations from high-resolution spectroscopy”. In:
+Handbook of high-resolution spectroscopy. Weinheim: Wiley, 2011. (cit. on p. 19)
+84 D. Haase “Konstruktion molekularer Wellenfunktionen für Rotation und Kernspin”. Freie Universität
+Berlin, 22.11.2007 (cit. on pp. 19/21)
+85 R. N. Zare “Angular momentum: understanding spatial aspects in chemistry and physics”. New York:
+Wiley, 1988 (cit. on p. 21)
+86 T. Grohmann/M. Leibscher “Quantum-dynamical consequences of the permutation symmetry of
+methyl groups”. The Journal of Chemical Physics 132 (2010), 234301. (cit. on pp. 25–27)
+87 M. A. Schlosshauer “Decoherence and the quantum-to-classical transition”. 2nd edition. Berlin:
+Springer, 2008 (cit. on pp. 27/30)
+88 C. C. Lin/J. D. Swalen “Internal rotation and microwave spectroscopy”. Reviews of Modern Physics 31
+(1959), 841–892. (cit. on pp. 28/29)
+89 G.S. Ezra “On the symmetry properties of non-rigid molecules: A unified approach”. Molecular Physics
+38 (1979), 863–875. (cit. on p. 28)
+90 G.S. Ezra “On the symmetry properties of non-rigid molecules: Semifactorizability of the isometric
+group”. Molecular Physics 43 (1981), 773–783. (cit. on p. 28)
+91 J. T. Hougen “Strategies for advanced applications of permutation-inversion groups to the microwave
+spectra of molecules with large amplitudemotions”. Journal of Molecular Spectroscopy 256 (2009), 170–185.
+(cit. on pp. 28/29/32)
+July 23, 2020 Page 37 of 38
+http://dx.doi.org/10.1139/p65-193
+http://dx.doi.org/10.1080/00268976.2018.1473651
+http://www.diss.fu-berlin.de/diss/receive/FUDISS_thesis_000000038659
+http://dx.doi.org/10.1016/B978-0-444-53175-9.00011-8
+http://dx.doi.org/10.1002/9780470749593.hrs077
+http://dx.doi.org/10.1063/1.3425880
+http://dx.doi.org/10.1103/RevModPhys.31.841
+https://doi.org/10.1080/00268977900102101
+https://doi.org/10.1080/00268978100101681
+http://dx.doi.org/10.1016/j.jms.2009.04.011
+Grohmann On the impossibility of frozen nuclei
+92 C. M. Woodman “The symmetry groups of non-rigid molecules as semi-direct products”. Molecular
+Physics 19 (1970), 753–780. (cit. on p. 28)
+93 P. Soldán “Extended molecular symmetry groups”. Journal of Mathematical Chemistry 20 (1996), 331–349.
+(cit. on pp. 28/29)
+94 T. Grohmann “Four objections why simple models for molecular torsions might be too simple”. in
+preparation. Freie Universität Berlin, 2021 (cit. on p. 29)
+95 F. Bouakline “Does nuclear permutation symmetry allow dynamical localization in symmetric double-
+well achiral molecules?” The Journal of Chemical Physics 152 (2020), 244308. (cit. on p. 29)
+96 M. Born/W. Heisenberg “Zur Quantentheorie der Molekeln”. Annalen der Physik 379 (1924), 1–31.
+(cit. on p. 29)
+97 M. Born/R. Oppenheimer “Zur Quantentheorie der Molekeln”. Annalen der Physik 389 (1927), 457–484.
+(cit. on p. 29)
+98 G. A. Hagedorn “High order corrections to the time-dependent Born-Oppenheimer approximation. II:
+Coulomb systems”. Communications in Mathematical Physics 117 (1988), 387–403. (cit. on p. 29)
+99 G. A. Hagedorn “A time dependent Born-Oppenheimer approximation”. Communications in Mathemati-
+cal Physics 77 (1980), 1–19. (cit. on p. 29)
+100 M. Klein/A. Martinez/R. Seiler/X. P. Wang “On the Born-Oppenheimer expansion for polyatomic
+molecules”. Communications in Mathematical Physics 143 (1992), 607–639. (cit. on p. 29)
+101 A. Kargol “The infinite time limit for the time-dependent Born-Oppenheimer approximation”. Com-
+munications in Mathematical Physics 166 (1994), 129–148. (cit. on p. 29)
+102 J. C. Polkinghorne “Quantum theory: A very short introduction”. Oxford: Oxford University Press,
+2002 (cit. on p. 30)
+Page 38 of 38 July 23, 2020
+http://dx.doi.org/10.1080/00268977000101811
+http://dx.doi.org/10.1007/BF01165352
+https://doi.org/10.1063/1.5141746
+http://dx.doi.org/10.1002/andp.19243790902
+http://dx.doi.org/10.1002/andp.19273892002
+http://dx.doi.org/10.1007/BF01223372
+http://dx.doi.org/10.1007/BF01205036
+http://dx.doi.org/10.1007/BF02099269
+http://dx.doi.org/10.1007/BF02099304
+	1 Frozen nuclei in molecular control
+	2 Symmetry and two-step mechanisms
+	A Confining molecules in space with electromagnetic fields
+	B MS groups and properties of rigid molecules
+	C Confinement and symmetry: symmetric tops
+	D Confinement and symmetry: asymmetric tops
+	E Why the frozen-nuclei argument works: localised states
+	3 Frozen nuclei and localised states
+	A A definition of nuclear spin isomers of molecules
+	B On localised rotational states in external potentials
+	C The impossibility of localised states revisited
+	D A note on non-rigid molecules
+	E Freezing nuclei is not an approximation, but a theory reduction
+	4 Conclusion: (anti-)symmetrisation is necessary—twice
+	X Appendix: Some useful characteristics of MS-groups
+	A MS groups and point group operations
+	B A typology of MS groups
+	C On the irreducible representations of MS groups
+	References

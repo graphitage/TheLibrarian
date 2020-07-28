@@ -1,0 +1,1135 @@
+A quantum simulation of dissociative ionization of H+2 in full dimensionality with
+time-dependent surface flux method
+Jinzhen Zhu∗
+Physics Department, Ludwig Maximilians Universität, D-80333 Munich, Germany
+The dissociative ionization of H+2 in a linearly polarized, 400 nm laser pulse is simulated by solving
+a three-particle time-dependent Schrödinger equation in full dimensionality without using any data
+from quantum chemistry computation. The joint energy spectrum (JES) is computed using a time-
+dependent surface flux (tSurff) method, the details of which are given. The calculated ground
+energy is -0.597 atomic units and internuclear distance is 1.997 atomic units if the kinetic energy
+term of protons is excluded, consistent with the reported precise values from quantum chemistry
+computation. If the kinetic term of the protons is included, the ground energy is -0.592 atomic units
+with an internuclear distance 2.05 atomic units. Energy sharing is observed in JES and we find
+peak of the JES with respect to nuclear kinetic energy release (KER) is within 2 ∼ 4 eV, which is
+different from the previous two dimensional computations (over 10 eV), but is close to the reported
+experimental values. The projected energy distribution on azimuth angles shows that the electron
+and the protons tend to dissociate in the direction of polarization of the laser pulse.
+PACS numbers: 32.80.-t,32.80.Rm,32.80.Fb
+I. INTRODUCTION
+Understanding the three-body Coulomb interaction
+problem is an on-going challenge in attosecond physics.
+The typical candidates for investigation include Helium
+atom and H+2 molecule. In attosecond experiments, a
+short, intense laser pulse is introduced as a probe for the
+measurements. Various mechanisms were proposed in
+the recent decades to describe the dissociation and disso-
+ciative ionization of H+2 , including bond softening [1],the
+charge-resonance enhanced ionization (CREI) [2], bond
+hardening [3], above threshold dissociation (ATD) [4, 5],
+high-order-harmonic generation (HHG) [6] and above
+threshold explosion [7]. One may find a summary of the
+above mechanisms in theoretical and experimental inves-
+tigations of H+2 in literature [8, 9]. Experimental studies
+on the H+2 ion exposed to circular and linearly polarized
+pulses for angular and energy distributions of electrons
+were reported recently [10–13].
+In theory, the joint energy spectra (JES) of the kinetic
+energy release (KER) for one electron and two protons
+of the H+2 ion are predominant observables that show
+how energy distributes around the fragments, where the
+JES is represented by the KER of two electrons for dou-
+ble ionization (DI) [14–16]. In theory, the JES computa-
+tions for double ionization in full dimensionality was very
+scarce for laser pulses with wavelengths beyond the XUV
+regime (≥ 400nm) because the computational consump-
+tion scales dramatically with the wavelength and inten-
+sity of the laser field [16]. With tSurff method, which was
+first introduced in Ref. [17], full dimensional simulation
+of the JES for double ionization was available with mod-
+erate computational resources for 800 nm [16] and 400
+nm [18] laser pulses. The tSurff method was also suc-
+∗ Jinzhen.Zhu@physik.uni-muenchen.de
+cessfully applied to the dissociative ionization of the H+2
+ion [19, 20] in a two-dimensional (2D) model, where the
+energy sharing of the photons and electron is observed in
+JES.
+The dissociative ionization of the H+2 ion has been sim-
+ulated by many groups [10, 14, 21–26]. However, they are
+all in reduced dimensionality. Quantum simulation in full
+dimensionality is not available yet. Although the corre-
+lation among the fragments could be observed in the 2D
+model, the peaks of the JES with total nuclear KER are
+always above 10 eV. This is far from experimental observ-
+ables [11–13], which are usually below 5 eV. The tRecX
+code, which successfully implements the tSurff method
+in full dimensionality, has been applied successfully in
+the simulations of the double ionization of Helium [16]
+and the single ionization of polyelectron molecules [27–
+31]. The dissociative ionization of the H+2 ion has not
+been computed using the tRecX code from before, even
+in reduced dimensionality.
+In this paper, we will introduce simulations of the dis-
+sociative ionization of the H+2 ion by solving the time-
+dependent Schrödinger equation (TDSE) in full dimen-
+sionality based on the tRecX code. We will first present
+the computational method for scattering amplitudes with
+tSurff methods, from which the JES can be obtained.
+Then we will introduce the specific numerical recipes for
+the H+2 ion based on the existing discretization methods
+of tRecX code. With such numerical implementations,
+the ab initio calculation of field free ground energy of the
+Hamiltonian is available. Finally we will present results
+of dissociative ionization in a 400 nm laser pulse, the JES,
+and projected energy spectrum on the azimuth angle.
+II. METHODS
+In this paper, atomic units with specifying ~ = e2 =
+me = 4π�0 ≡ 1 are used if not specified. Spherical coor-
+ar
+X
+iv
+:2
+00
+7.
+10
+17
+9v
+2 
+ [
+ph
+ys
+ic
+s.
+at
+om
+-p
+h]
+  2
+2 
+Ju
+l 
+20
+20
+mailto:Jinzhen.Zhu@physik.uni-muenchen.de
+2
+dinates with center of the two protons as the origin are
+applied. Instead of using the vector between two protons
+~R as an coordinate [14, 19, 20], we specify the coordi-
+nates of the protons and electrons as ~r1,−~r1 and ~r2. We
+denote M = 1836 atomic units as the mass of the proton.
+A. Hamiltonian
+The total Hamiltonian can be represented by sum
+of the electron-proton interaction HEP and two tensor
+products, written as
+H = HB = H
+(+) ⊗ 1+ 1⊗H(−) −HEP , (1)
+where the tensor products are formed by the identity op-
+erator 1 multiplied by the Hamiltonian for two protons
+(H(+)), or that for the electron (H(−)). HB is called the
+Hamiltonian in the B region and will be detailed later.
+With the coordinate transformation used in Ref. [32],
+which is also illustrated in Appendix A for our specific
+case, the single operator for the electron is
+H(−) = −
+∆
+2m
+− iβ ~A(t) · ~O, (2)
+and the Hamiltonian for protons can be written as
+H(+) = −
+∆
+4M
++
+1
+2r
+, (3)
+where we introduce reduced mass m = 2M
+2M+1
+≈ 1 and
+β = 1+M
+M
+≈ 1 for the electron. The Hamiltonian of the
+electron-proton interaction can be written as
+HEP =
+1
+|~r1 + ~r2|
++
+1
+|~r1 − ~r2|
+. (4)
+B. tSurff for dissociative ionization
+The tSurff method is applied here for the dissocia-
+tive ionizations, which was successfully applied to the
+polyelectron molecules and to the double emission of He
+atom [16, 28–31]. In this section, we will follow a similar
+procedure as is done in Ref. [16].
+According to the approximations of tSurff method, be-
+yond a sufficient large tSurff radius R
+(+/−)
+c , the interac-
+tions of protons and electrons can be neglected, with the
+corresponding Hamiltonians being H
+(+)
+V = −
+∆
+4M
+for each
+proton and H
+(−)
+V = −
+∆
+2m
+− iβ ~A(t) · ~O for the electron.
+The scattered states of the two protons, which satisfy
+i∂tχ ~k1(~r1) = H
+(+)
+V χ ~k1(~r1), are
+χ ~k1(~r1) =
+1
+(2π)3/2
+exp(−i
+∫ t
+t0
+k21
+4M
+dτ) exp(−i ~k1 ~r1), (5)
+FIG. 1. The regions of dissociative ionization time propaga-
+tion. The B stands for bound region, D for dissociation region
+where the two protons are out of R
+(+)
+c but electron not ion-
+ized and stays inside. I represents the ionization region where
+electron is out-of-box R
+(−)
+c but two protons are still inside
+R
+(+)
+c . DI stands for the dissociative ionization region where
+both the electron and the protons are out of R
+(+/−)
+c . R
+(+/−)
+c
+are the tSurff radii for r1 = |~r1| or r2 = |~r2|.
+and those of the electron, which satisfies i∂tχ ~k2(~r2) =
+H
+(−)
+V χ ~k2(~r2), are
+χ ~k2(~r2) =
+1
+(2π)3/2
+exp(−i
+∫ t
+t0
+k22
+2m
+−iβ ~A(τ)·~Odτ) exp(−i ~k2 ~r2),
+(6)
+where we assume the laser field starts at t0 and ~k1/2
+denote the momenta of the protons or the electron.
+Based on the tSurff radius R
+(+/−)
+c , we may split
+the dissociative ionization into four regions namely
+B, I,D,DI, shown in figure 1, where bound region B
+preserves the full Hamiltonian in Eq. (1), D, I are time
+propagations by single particles with the Hamiltonian
+HD(~r2, t) = H
+(−)
+V (~r2, t) = −
+∆
+2m
+− iβ ~A(t) · ~O (7)
+and
+HI(~r1, t) = −
+∆
+4M
++
+1
+2r1
+, (8)
+and DI is an integration process. The treatment was first
+introduced in the double ionization of Helium in Ref. [15]
+and then applied in a 2D simulation of the H+2 ion in
+Ref. [19]. Without considering the low-energy free elec-
+trons that stay inside the box after time propagation, we
+may write
+ψB(~r1, ~r2, t) ≈ 0, r1 ≥ R(+)c , or r2 ≥ R
+(−)
+c
+ψD(~r1, ~r2, t) ≈ 0, r1 < R(+)c , or r2 ≥ R
+(−)
+c
+ψI(~r1, ~r2, t) ≈ 0, r1 ≥ R(+)c , or r2 < R
+(−)
+c
+ψDI(~r1, ~r2, t) ≈ 0, r1 < R(+)c , or r2 < R
+(−)
+c
+(9)
+3
+We assume that for a sufficiently long propagation time
+T , the scattering ansatz of electron and protons disentan-
+gle. By introducing the step function
+Θ1/2(Rc) =
+{
+0 , r1/2 < R
+(+/−)
+c
+1 , r1/2 ≥ R
+(+/−)
+c ,
+(10)
+the unbound spectra can be written as
+P ( ~k1, ~k2) = P (φ1, θ1, k1, φ2, θ2, k2) =
+∣∣∣b( ~k1, ~k2, T )∣∣∣2 .
+(11)
+b( ~k1, ~k2, T ) is the scattering amplitudes and can be writ-
+ten as
+b( ~k1, ~k2, T ) =〈χ ~k1 ⊗ χ ~k2 |Θ1(Rc)Θ2(Rc)|ψ(~r1, ~r2, t)〉
+=
+∫ T
+−∞
+[F ( ~k1, ~k2, t) + F̄ ( ~k1, ~k2, t)]dt
+(12)
+with two sources written as
+F ( ~k1, ~k2, t) = 〈χ ~k2(~r2, t)
+∣∣∣[H(−)V (~r2, t),Θ2(Rc)]∣∣∣ϕ ~k1(~r2, t)〉
+(13)
+and
+F̄ ( ~k1, ~k2, t) = 〈χ ~k1(~r1, t)
+∣∣∣[H(+)V (~r1, t),Θ1(Rc)]∣∣∣ϕ ~k2(~r1, t)〉.
+(14)
+The single particle wavefunctions ϕ ~k1(~r2, t) and ϕ ~k2(~r1, t)
+satisfy
+i
+d
+dt
+ϕ ~k1(~r2, t) = HD(~r2, t)ϕ ~k1(~r2, t)− C ~k1(~r2, t) (15)
+and
+i
+d
+dt
+ϕ ~k2(~r1, t) = HI(~r1, t)ϕ ~k2(~r1, t)− C ~k2(~r1, t). (16)
+The sources are the overlaps of the two-electron wave-
+function on the Volkov solutions shown by
+C ~k1(~r2, t) =
+∫
+d~r1χ ~k1(~r1, t)[H
+(+)
+V (~r1, t),Θ1(Rc)]ψ(~r1, ~r2, t)
+(17)
+and
+C ~k2(~r1, t) =
+∫
+d~r2χ ~k2(~r2, t)[H
+(−)
+V (~r2, t),Θ2(Rc)]ψ(~r1, ~r2, t),
+(18)
+with initial values being 0. The two tSurff radii could be
+set to equivalent R
+(+)
+c = R
+(−)
+c , because all Coulomb inter-
+actions are neglected when either the protons or electron
+is out of the tSurff radius. According to our previous re-
+searches, the spectrum computation is independent of the
+Rc if all Coulomb terms are removed and the wavefunc-
+tion is propagated long enough after the pulse [15, 16].
+The tSurff for double emission of two particles was firstly
+introduced in Ref. [15]. The above derivations are very
+similar to what was reported in Ref. [16] of double emis-
+sion of Helium, where the only differences are constants
+before different operators, say ∆, ~O and 1
+r
+. Thus, detailed
+formulas are omitted here and the interested readers can
+refer to Ref. [15, 16].
+The computation for photoelectron spectrum includes
+four steps, similar to the one used in Ref. [16], detailed
+as
+1. Solve full 6D TDSE with the Hamiltonian in the
+B region, given in Eq. (1), and write the time-
+dependent surface values in the disk.
+2. Advance the single-particle wave packets in the D
+region by Eq. (13) with surface values given in the
+B region time propagation.
+3. Advance the single-particle wave packets in I region
+by Eq. (14) with the surface values given in the B
+region time propagation.
+4. Integrate the fluxes calculated from surface values
+written in the D and I regions’ time propagation
+by Eq. (12).
+III. NUMERICAL IMPLEMENTATIONS
+The numerical methods here are similar to what was
+detailed in Ref. [16, 18]. In fact, the code in this paper is
+developed based on the double ionization framework of
+the tRecX code used in the reference [16, 18]. Thus, we
+will focus on the electron-protons interaction which was
+not talked about before and only list relevant discretiza-
+tion methods in this paper.
+A. Discretization and basis functions
+The 6D wavefunction ψ is represented by the product
+of spherical harmonics for angular momentum and radial
+functions as
+ψ(~r1, ~r2, t) = ψ(r1, θ1, φ1, r2, θ2, φ2, t)
+=
+∑
+m1,l1,m2,l2
+Y m1l1 (θ1, φ1)Y
+m1
+l1
+(θ2, φ2)Rm1,m2,l1,l2(r1, r2, t),
+(19)
+where Y m1l1 (θ1, φ1) and Y
+m2
+l2
+(θ2, φ2) are the spherical har-
+monics of the two electrons and the radial function is
+represented by the finite-element discretization variable
+representation (FE-DVR) method as
+Rm1,m2,l1,l2(r1, r2, t) =
+∑
+n1,n2
+R
+n1,n2
+m1,m2,l1,l2
+(r1, r2, t)
+R
+n1,n2
+m1,m2,l1,l2
+(r1, r2, t) =
+∑
+p1,p2
+f (n1)p1 (r1)f
+(n2)
+p2
+(r2)
+1
+r1r2
+cm1,m2,l1,l2n1,n2,p1,p2 (t)
+(20)
+4
+where f
+(n1/2)
+p1/2 (r1/2) are p1/2th basis functions on n1/2th
+element, and the time-dependency of the three parti-
+cles are included in the radial functions and coefficients
+cm1,m2,l1,l2n1,n2,p1,p2 (t), as is used in Ref. [15, 16]. The infinite-
+range exterior complex scaling (irECS) method is utilized
+as an absorber [33]. The tSurff expression for computing
+spectra of such discretization can be found in Ref. [16].
+B. Electron-protons interaction
+The first part of electron-protons interaction can be
+written in a multi-pole expansion as
+1
+|~r1 − ~r2|
+=
+1√
+r21 + r
+2
+2 − 2r1r2 cos γ
+=
+1
+r>
+1√
+1 + h2 − 2h cos γ
+=
+∞∑
+l=0
+hl
+r>
+Pl(cos γ),
+(21)
+where r> = max(r1, r2), r< = min(r1, r2), h =
+r<
+r>
+, γ
+is the angle between ~r1, ~r2 and Pl(cos γ) are Legendre
+polynomials. Similarly, we have
+1
+|~r1 + ~r2|
+=
+1
+r>
+1√
+1 + h2 + 2h cos γ
+=
+∞∑
+l=0
+(−1)l
+hl
+r>
+Pl(cos γ).
+(22)
+And the summation goes as
+1
+|~r1 + ~r2|
++
+1
+|~r1 − ~r2|
+= 2
+∞∑
+l=0
+hl
+r>
+Pl(cos γ) l%2 = 0.
+(23)
+With the Legendre polynomials expanded by spherical
+harmonics Y ml (θ2, φ2) and Y
+m∗
+l (θ1, φ1) , we have
+HEP = 2
+∞∑
+l=0
+l∑
+m=−l
+(−1)m
+rl<
+rl+1>
+Y ml (θ2, φ2)Y
+m∗
+l (θ1, φ1)
+l%2 = 0.
+(24)
+The matrix elements of electron-protons are
+〈ψ(n
+′
+1n
+′
+2)
+m′1m
+′
+2l
+′
+1l
+′
+2
+|
+1
+|~r1 − ~r2|
++
+1
+|~r1 + ~r2|
+|ψ(n1n2)m1,m2,l1,l2〉
+=2
+∑
+λµ
+4π
+2λ+ 1
+〈Y m
+′
+1
+l′1
+Y
+µ
+λ |Y
+m1
+l1
+〉〈Y m
+′
+2
+l′2
+|Y µλ Y
+m2
+l2
+〉
+〈Rn
+′
+1n
+′
+2
+m′1l
+′
+1m
+′
+2l
+′
+2
+|
+rλ<
+rλ+1>
+|Rn1n2m1l1m2l2〉, λ%2 = 0,
+(25)
+which could be obtained by dropping the odd λ terms
+and doubling the even λ terms in the standard multi-pole
+expansion for electron electron interactions from Ref. [16]
+as
+〈ψ(n
+′
+1n
+′
+2)
+m′1m
+′
+2l
+′
+1l
+′
+2
+|
+1
+|~r1 − ~r2|
+|ψ(n1n2)m1,m2,l1,l2〉
+=
+∑
+λµ
+4π
+2λ+ 1
+〈Y m
+′
+1
+l′1
+Y
+µ
+λ |Y
+m1
+l1
+〉〈Y m
+′
+2
+l′2
+|Y µλ Y
+m2
+l2
+〉
+〈Rn
+′
+1n
+′
+2
+m′1l
+′
+1m
+′
+2l
+′
+2
+|
+rλ<
+rλ+1>
+|Rn1n2m1l1m2l2〉.
+(26)
+Here
+ψ
+(n1n2)
+m1,m2,l1,l2
+= Y m1l1 (θ1, φ1)Y
+m1
+l1
+(θ2, φ2)R
+n1,n2
+m1,m2,l1,l2
+(r1, r2, t).
+(27)
+Therein, the matrix for electron-protons interaction
+could be obtained by the numerical recipes used in
+Ref. [16, 34] with limited changes. Numerically, we find
+λ does not need to go to infinity and a maximum value
+of 8 already suffices our simulations.
+IV. NUMERICAL RESULTS
+A numerical convergence study shows, unlike the 6D
+double emission of He, where m1/2 = 0, 0 ≤ l1/2 ≤ 2
+already gives convergent ground eigenenergy [16], here
+the angular quantum number 0 ≤ m1/2 ≤ 2 and 0 ≤
+l1/2 ≤ 8 starts to give convergent calculations, due to the
+lower symmetric property of the H+2 ion. The R
+(+)
+c =
+R
+(−)
+c = 12.5 atomic units is chosen for computation, as
+we find R
+(−)
+c does not change the quality of the spectrum
+but introduces longer propagation time for low-energy
+particles to fly out. R
+(+)
+c = 12.5 atomic units gives the
+internuclear distance R = 25 as is used in Ref. [19]. The
+wavefunction is propagated long enough after the pulse
+for to include the unbound states low kinetic energies.
+If the kinetic energy of protons is included, the field
+free ground energy value is E0 = −0.592 atomic units and
+the internuclear distance is 2.05 atomic units. With the
+kinetic energy of protons excluded, the ground eigenen-
+ergy is -0.597 atomic units, three digits exact to ground
+energy from quantum chemistry calculations in Ref. [35],
+where the internuclear distance is fixed. The internuclear
+distance is 1.997 atomic units, three digits exact to that
+from the precise computations in Ref. [36].
+A. Laser pulses
+The dipole field of a laser pulse with peak intensity I =
+E20 (atomic units) and linear polarization in z-direction
+is defined as Ez(t) = ∂tAz(t) with
+Az(t) =
+E0
+ω
+a(t) sin(ωt+ φCEP ). (28)
+A pulse with λ = 400nm is given with intensities 8.3 ×
+1013W/cm2 close to 2D computation in reference [19]
+5
+and 5.9 × 1013W/cm2 close to experimental conditions
+in Ref. [12]. We choose a(t) = [cos(t/T )]8 as a realis-
+tic envelope. Pulse durations are specified as FWHM=5
+opt.cyc. w.r.t. intensity.
+B. Joint energy spectra
+The JES of the two dissociative protons and the elec-
+tron is obtained by integrating Eq. (11) over angular co-
+ordinates as
+σ(EN , Ee) =
+∫
+dφ1
+∫
+dφ2
+∫
+dθ1 sin θ1
+∫
+dθ2 sin θ2
+P (φ1, θ1,
+√
+4M × EN , φ2, θ2,
+√
+2m× Ee),
+(29)
+where EN , Ee are kinetic energies of two protons and an
+electron, respectively. σ(EN , Ee) is presented in Fig. 2 (a,
+b). The tilt lines with formula EN +Ee = Nω+E0−Up
+with Up =
+A20
+4m
+specify the energy sharing of N pho-
+tons for both the computations from 8.3 × 1013W/cm2
+and 5.9 × 1013W/cm2, indicating correlated emissions
+of the electron and protons, which is also observed in
+the 2D computations [19, 20]. The yields are intense
+around nuclear KER from 2 eV to 4 eV in the cos8 en-
+velope pulse, consistent with the experimental values re-
+ported in Ref. [12, 13]. The peak of JES for dissocia-
+tive ionization is for lower nuclear KER than that (3-4
+eV) from Coulomb explosion from ground eigenstate of
+the H+2 ion, which property is also close to experimen-
+tal observables [37]. The Coulomb explosion JES is ob-
+tained with the same method as dissociative ionization
+except that HEP is removed from B region Hamiltonian
+as H
+(CS)
+B = H
+(+) ⊗ 1 + 1 ⊗ H(−), but the initial state
+is still obtained from Hamiltonian HB in Eq. (1). We
+find that the contribution from time-propagation in sub-
+region D → DI (see Eq. (13)) is small, as the numerical
+error of JES δ(σ) of σ computed from S → DI, and σ′
+computed from two subregions (S → DI and D → DI),
+is always below 1% the main contribution of the JES
+(2 < EN < 4eV ), see Fig. 2 (d). This numerical property
+is also observed in two-dimensional (2D) simulations [19].
+This is because the electrons are much faster than pro-
+tons and the H+2 ion tends to release first.
+One may find that the JES is most considerable around
+2 ∼ 4eV nuclear KER, different from ≈ 0.5a.u. > 10eV
+obtained in the 2D simulations. The difference can also
+be observed from the Coulomb explosion computation
+shown in shown in Fig. 2 (c). In experiments, the distri-
+bution of emitted protons peaks at nuclear KER=4 eV
+for a 780 nm laser pulse6 × 1014W/cm2 [11], Ref. [37]
+reported the Coulomb explosion peak is around 3eV nu-
+clear KER for a 791 nm, 9.3×1013W/cm2 laser pulse and
+Ref. [12, 13] reported the nuclear KER is most probable
+around 3 eV for two protons for 400 nm laser pulses.
+These observables at different experimental conditions
+show nuclear KERs are around 2 ∼ 4 eV, which are close
+FIG. 2. Log-scale JES log10 σ(EN , Ee) represented by total
+energy of two protons EN and that of an electron Ee. Linear
+polarized, 400 nm, with (a) cos8 envelope with FWHM=5
+opt.cyc. at 8.3 × 1013W/cm2 and (b) cos8 envelope with
+FWHM=5 opt.cyc. pulses at 5.9 × 1013W/cm2 is applied
+to the H+2 ion. The dashed lines represent the energy sharing
+between the protons and electron with formula EN + Ee =
+Nω + E0 − Up, where ω is the photon energy. (c) JES from
+Coulomb explosion simulation from the ground eigenstate of
+the H+2 ion. (d) Log-scale error log(δ(σ)) of two spectra
+from cos8 envelope laser pulse at 8.3× 1013W/cm2 with and
+without the contribution from D → DI (from Eq. (13)) by
+δ(σ) = 2
+|σ′(EN ,Ee)−σ(EN ,Ee)|
+|σ′(EN ,Ee)+σ(EN ,Ee)|
+. σ(EN , Ee) of (a) and (b) are
+normalized by dividing the maximum value.
+to our computations but far from the computations in
+the 2D simulations [14, 19]. The deviation of the 2D
+simulation may arise from its limitations for obtaining
+the ground states of protons, because their rotational ki-
+netic energy around the molecular center is not included,
+both for electrons and protons. The existing 2D simu-
+lations for the dissociative ionization put corrections to
+the electron-proton interaction with a smooth factor to
+give the correct ground energy of electrons H+2 [14, 19].
+However, the pure Coulomb repulsion of the two protons
+1/R (R is the internuclear distance) is included without
+a smooth factor. The ground eigenenergy from 2D simu-
+lation including the nuclear KER is -0.597 atomic units,
+identical to the quantum chemistry computations, where
+the nuclear KER is excluded. We would like to point out
+that, for the 2D simulation, for consistency of the correc-
+tion of Coulomb interaction of the electron, the Coulomb
+repulsion term of the two protons may also need a smooth
+factor, which needs further investigations.
+6
+C. Angular distribution
+The projected energy distribution on the azimuth angle
+of the electron and the protons is calculated by integrat-
+ing the 6D scattering amplitudes as
+pN (θ1, E1) =
+∫
+d ~k1
+∫
+dφ1|(
+¯
+~k1, ~k2, T )|2,
+~k2 = [φ1, θ1,
+√
+8M × E1]T
+(30)
+for protons, and
+pe(θ2, E2) =
+∫
+d ~k2
+∫
+dφ2|(
+¯
+~k1, ~k2, T )|2,
+~k2 = [φ1, θ1,
+√
+2m× E2]T
+(31)
+for electron, where E1 and E2 are kinetic energies for an
+individual proton and electron.
+As is observed in Fig. 3, the probability distributions of
+electron and protons reach the highest value in the polar-
+ization direction, which is consistent with the experimen-
+tal observations for linearly polarized laser pulses [11, 13].
+The probability of the dissociative protons is most con-
+siderable with 1 ≤ E1 ≤ 2eV , higher than the E1 < 1eV
+for dissociative channels reported in Ref. [11, 37], but
+in the range of their Coulomb explosion channel, where
+the laser wavelength is 800 nm. For higher intensity
+8.3 × 1013W/cm2, the angular distribution of released
+protons and electron extends more in the polarization
+direction. For distribution of protons, tiny yields around
+3 eV in radial coordinates indicates the Coulomb explo-
+sion channel, close to what is observed in experiments,
+however, for different laser pulses [37].
+V. CONCLUSION AND DISCUSSIONS
+We simulate the dissociative ionization of the H+2 ion in
+full dimensionality and obtain the ground energy same as
+the quantum chemistry methods. Using tSurff methods,
+we obtained the JES where energy sharing is observed,
+which indicates a correlation between proton and elec-
+trons. The JES peaked at EN from 2 eV to 4 eV, which
+is different from the previous 2D simulations, but is con-
+sistent with the experimental data. The projected energy
+distribution on angles shows that the electron and pro-
+tons tend to dissociate in the direction of polarization of
+the laser pulse.
+The simulation of the single emission spectrum
+showing dissociation channels, is however not possi-
+ble yet. The difficulty lies mainly in constructing the
+internuclear-distance-dependent electronic ansatz of H
+with a given ionic state in a single emission TDSE on
+~r1, which might be solved by reading the energy surfaces
+from quantum chemistry calculations or another tRecX
+calculation. We leave work for future studies.
+FIG. 3. The log-scale probability distribution of (left col-
+umn) protons by log10 pN (θ1, E1) and (right column) protons
+by log10 pe(θ2, E2), θ1,2 ∈ [0, π]. The plot is symmetrized by
+pN (2π − θ1, E1) = pN (2π − θ1, E1) and pe(2π − θ2, E2) =
+pe(2π − θ2, E2) The upper row is computed from laser pulse
+at intensity 8.3 × 1013W/cm2 and lower row represents the
+5.9× 1013W/cm2. The values of the radial coordinates E1/2
+are represented in eV. The polarization direction is along the
+horizontal axis and the direction electric field is labeled at
+each sub-figure with an arrow above ”E(t)”. The values are
+all normalized by dividing the maximum value.
+ACKNOWLEDGMENTS
+J.Z. was supported by the DFG Priority Programme
+1840, QUTIF. We are grateful for fruitful discussions
+with Dr. Lun Yue from Louisiana State University, Dr.
+Xiaochun Gong from East China Normal University, and
+Prof. Dr. Armin Scrinzi from Ludwig Maximilians Uni-
+versity.
+Appendix A: Coordinate transformation
+We use sub-indices ”a”, ”b” and ”e” represent the two
+protons and the electron of an arbitrary coordinate. The
+sub-indices ”0”, ”1” and ”2” represent the center of the
+two protons, the relative position of an proton to the cen-
+ter and the electron in our transformed coordinate, re-
+spectively. Suppose originally the coordinates of the two
+protons and electrons are represented by vectors ~xa, ~xb
+and ~xe of an arbitrary origin, respectively. The new co-
+7
+ordinates ~r1 and ~r2 satisfies
+~r0 =
+~xa + ~xb
+2
+~r1 =
+~xa − ~xb
+2
+~r2 = ~xe −
+~xa + ~xb
+2
+,
+(A1)
+where ~r0 is the coordinate of the center of the two pro-
+tons. The Laplacian of the two protons O2a,O
+2
+b and elec-
+tron O2e are
+O2a =
+O20
+4
++
+O21
+4
++
+O22
+4
++
+~O0 · ~O1
+2
+−
+~O1 · ~O2
+2
+−
+~O2 · ~O0
+2
+O2b =
+O20
+4
++
+O21
+4
++
+O22
+4
+−
+~O0 · ~O1
+2
++
+~O1 · ~O2
+2
+−
+~O2 · ~O0
+2
+O2e = O
+2
+2.
+(A2)
+Thus the kinetic energy of the system can be represented
+by
+−
+1
+2
+(
+O2a
+M
++
+O2b
+M
++
+O2e
+1
+)
+=−
+O20
+4M
+−
+O21
+4M
+−
+O22
+4M
++
+~O2 · ~O0
+M
++
+O22
+2
+≈−
+O21
+4M
+−
+O22
+2m
+,
+(A3)
+where m = 2M
+1+2M
+, and ”≈” means the motion of the ~r0
+is neglected. The interaction of the two protons with the
+laser pulse can be written as
+i
+M
+~A · ( ~Oa + ~Ob) = i ~A · ( ~O0 − ~O2) ≈ −
+i
+M
+~A · ~O2, (A4)
+with which the total interaction with the laser field can
+be written as
+− i ~A · ( ~O2 +
+1
+M
+~O2) = −iβ ~A · ~O2, (A5)
+where β = M+1
+M
+.
+[1] P. H. Bucksbaum, A. Zavriyev, H. G. Muller, and D. W.
+Schumacher, Phys. Rev. Lett. 64, 1883 (1990).
+[2] T. Zuo and A. D. Bandrauk, Phys. Rev. A 52, R2511
+(1995).
+[3] G. Yao and S. I. Chu, Phys. Rev. A 48, 485 (1993).
+[4] A. Giusti-Suzor, F. H. Mies, L. F. DiMauro, E. Charron,
+and B. Yang, J. Phys. B At. Mol. Opt. Phys. 28, 309
+(1995).
+[5] G. Jolicard and O. Atabek, Phys. Rev. A 46, 5845 (1992).
+[6] T. Zuo, S. Chelkowski, and A. D. Bandrauk, Phys. Rev.
+A 48, 3837 (1993).
+[7] B. D. Esry, A. M. Sayler, P. Q. Wang, K. D. Carnes, and
+I. Ben-Itzhak, Phys. Rev. Lett. 97, 013003 (2006).
+[8] J. H. Posthumus, Reports Prog. Phys. 67, 623 (2004).
+[9] A. Giusti-Suzor, X. He, O. Atabek, and F. H. Mies,
+Phys. Rev. Lett. 64, 515 (1990).
+[10] M. Odenweller, N. Takemoto, A. Vredenborg, K. Cole,
+K. Pahl, J. Titze, L. P. H. Schmidt, T. Jahnke, R. Dörner,
+and A. Becker, Phys. Rev. Lett. 107, 1 (2011).
+[11] M. Odenweller, J. Lower, K. Pahl, M. Schütt, J. Wu,
+K. Cole, A. Vredenborg, L. P. Schmidt, N. Neumann,
+J. Titze, T. Jahnke, M. Meckel, M. Kunitski, T. Haver-
+meier, S. Voss, M. Schöffler, H. Sann, J. Voigtsberger,
+H. Schmidt-Böcking, and R. Dörner, Phys. Rev. A - At.
+Mol. Opt. Phys. 89, 1 (2014).
+[12] J. Wu, M. Kunitski, M. Pitzer, F. Trinter, L. P. H.
+Schmidt, T. Jahnke, M. Magrakvelidze, C. B. Madsen,
+L. B. Madsen, U. Thumm, and R. Dörner, Phys. Rev.
+Lett. 111, 1 (2013).
+[13] X. Gong, P. He, Q. Song, Q. Ji, K. Lin, W. Zhang, P. Lu,
+H. Pan, J. Ding, H. Zeng, F. He, and J. Wu, Optica 3,
+643 (2016).
+[14] C. B. Madsen, F. Anis, L. B. Madsen, and B. D. Esry,
+Phys. Rev. Lett. 109, 163003 (2012).
+[15] A. Scrinzi, New J. Phys. 14, 085008 (2012).
+[16] A. Zielinski, V. P. Majety, and A. Scrinzi, Phys. Rev. A
+93, 1 (2016).
+[17] L. Tao and A. Scrinzi, New J. Phys. 14, 013021 (2012).
+[18] J. Zhu and A. Scrinzi, Phys. Rev. A 101, 063407 (2020).
+[19] L. Yue and L. B. Madsen, Phys. Rev. A - At. Mol. Opt.
+Phys. 88, 1 (2013).
+[20] L. Yue and L. B. Madsen, Phys. Rev. A 90, 063408
+(2014).
+[21] G. L. V. Steeg, K. Bartschat, and I. Bray, J. Phys. B
+At. Mol. Opt. Phys. 36, 3325 (2003).
+[22] W. Qu, Z. Chen, Z. Xu, and C. H. Keitel, Phys. Rev. A
+- At. Mol. Opt. Phys. 65, 10 (2002).
+[23] R. E. Silva, F. Catoire, P. Rivière, H. Bachau, and
+F. Mart́ın, Phys. Rev. Lett. 110, 113001 (2013).
+[24] N. Takemoto and A. Becker, Phys. Rev. Lett. 105,
+203004 (2010).
+[25] B. Feuerstein and U. Thumm, Phys. Rev. A - At. Mol.
+Opt. Phys. 67, 8 (2003).
+[26] K. C. Kulander, F. H. Mies, and K. J. Schafer, Phys.
+Rev. A - At. Mol. Opt. Phys. 53, 2562 (1996).
+[27] V. P. Majety and A. Scrinzi, Phys. Rev. Lett. 115, 1
+(2015).
+[28] V. P. Majety, A. Zielinski, and A. Scrinzi, J. Phys. B
+48, 025601 (2015).
+[29] V. Majety and A. Scrinzi, Photonics 2, 93 (2015).
+[30] V. P. Majety, A. Zielinski, and A. Scrinzi, New J. Phys.
+17, 63002 (2015).
+[31] V. P. Majety and A. Scrinzi, J. Phys. B 48, 245603
+(2015).
+[32] J. R. Hiskes, Phys. Rev. 122, 1207 (1961).
+[33] A. Scrinzi, Phys. Rev. A 81, 053845 (2010).
+[34] C. W. McCurdy, M. Baertschy, and T. N. Rescigno, J.
+Phys. B 37, R137 (2004).
+http://dx.doi.org/10.1103/PhysRevLett.64.1883
+http://dx.doi.org/10.1103/PhysRevA.52.R2511
+http://dx.doi.org/10.1103/PhysRevA.52.R2511
+http://dx.doi.org/10.1103/PhysRevA.48.485
+http://dx.doi.org/ 10.1088/0953-4075/28/3/006
+http://dx.doi.org/ 10.1088/0953-4075/28/3/006
+http://dx.doi.org/10.1103/PhysRevA.46.5845
+http://dx.doi.org/10.1103/PhysRevA.48.3837
+http://dx.doi.org/10.1103/PhysRevA.48.3837
+http://dx.doi.org/ 10.1103/PhysRevLett.97.013003
+http://dx.doi.org/10.1088/0034-4885/67/5/R01
+http://dx.doi.org/ 10.1103/PhysRevLett.64.515
+http://dx.doi.org/ 10.1103/PhysRevLett.107.143004
+http://dx.doi.org/10.1103/PhysRevA.89.013424
+http://dx.doi.org/10.1103/PhysRevA.89.013424
+http://dx.doi.org/10.1103/PhysRevLett.111.023002
+http://dx.doi.org/10.1103/PhysRevLett.111.023002
+http://dx.doi.org/10.1364/optica.3.000643
+http://dx.doi.org/10.1364/optica.3.000643
+http://dx.doi.org/10.1103/PhysRevLett.109.163003
+http://dx.doi.org/10.1088/1367-2630/14/8/085008
+http://dx.doi.org/10.1103/PhysRevA.93.023406
+http://dx.doi.org/10.1103/PhysRevA.93.023406
+http://dx.doi.org/10.1088/1367-2630/14/1/013021
+http://dx.doi.org/10.1103/PhysRevA.101.063407
+http://dx.doi.org/10.1103/PhysRevA.88.063420
+http://dx.doi.org/10.1103/PhysRevA.88.063420
+http://dx.doi.org/10.1103/PhysRevA.90.063408
+http://dx.doi.org/10.1103/PhysRevA.90.063408
+http://dx.doi.org/10.1088/0953-4075/36/15/313
+http://dx.doi.org/10.1088/0953-4075/36/15/313
+http://dx.doi.org/ 10.1103/PhysRevA.65.013402
+http://dx.doi.org/ 10.1103/PhysRevA.65.013402
+http://dx.doi.org/ 10.1103/PhysRevLett.110.113001
+http://dx.doi.org/10.1103/PhysRevLett.105.203004
+http://dx.doi.org/10.1103/PhysRevLett.105.203004
+http://dx.doi.org/10.1103/PhysRevA.67.043405
+http://dx.doi.org/10.1103/PhysRevA.67.043405
+http://dx.doi.org/10.1103/PhysRevA.53.2562
+http://dx.doi.org/10.1103/PhysRevA.53.2562
+http://dx.doi.org/10.1103/PhysRevLett.115.103002
+http://dx.doi.org/10.1103/PhysRevLett.115.103002
+http://dx.doi.org/10.1088/0953-4075/48/2/025601
+http://dx.doi.org/10.1088/0953-4075/48/2/025601
+http://dx.doi.org/10.3390/photonics2010093
+http://dx.doi.org/10.1088/1367-2630/17/6/063002
+http://dx.doi.org/10.1088/1367-2630/17/6/063002
+http://dx.doi.org/10.1088/0953-4075/48/24/245603
+http://dx.doi.org/10.1088/0953-4075/48/24/245603
+http://dx.doi.org/10.1103/PhysRev.122.1207
+http://dx.doi.org/10.1103/PhysRevA.81.053845
+http://dx.doi.org/10.1088/0953-4075/37/17/R01
+http://dx.doi.org/10.1088/0953-4075/37/17/R01
+8
+[35] D. Bressanini, M. Mella, and G. Morosi, Chem. Phys.
+Lett. 272, 370 (1997).
+[36] L. J. Schaad and W. V. Hicks, “Equilibrium bond length
+in H2+,” (1970).
+[37] D. Pavičić, A. Kiess, T. W. Hänsch, and H. Figger, Phys.
+Rev. Lett. 94, 1 (2005).
+http://dx.doi.org/10.1016/S0009-2614(97)00571-X
+http://dx.doi.org/10.1016/S0009-2614(97)00571-X
+http://dx.doi.org/10.1063/1.1674078
+http://dx.doi.org/10.1063/1.1674078
+http://dx.doi.org/10.1103/PhysRevLett.94.163002
+http://dx.doi.org/10.1103/PhysRevLett.94.163002
+	A quantum simulation of dissociative ionization of H2+ in full dimensionality with time-dependent surface flux method
+	Abstract
+	I Introduction
+	II Methods
+	A Hamiltonian
+	B tSurff for dissociative ionization
+	III Numerical implementations
+	A Discretization and basis functions
+	B Electron-protons interaction
+	IV Numerical results
+	A Laser pulses
+	B Joint energy spectra
+	C Angular distribution
+	V Conclusion and discussions
+	 Acknowledgments
+	A Coordinate transformation
+	 References

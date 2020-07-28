@@ -1,0 +1,663 @@
+Meta-learning for Few-shot Natural Language Processing: A Survey
+Wenpeng Yin
+Salesforce Research
+wyin@salesforce.com
+Abstract
+Few-shot natural language processing (NLP)
+refers to NLP tasks that are accompanied with
+merely a handful of labeled examples. This is
+a real-world challenge that an AI system must
+learn to handle. Usually we rely on collect-
+ing more auxiliary information or developing
+a more efficient learning algorithm. However,
+the general gradient-based optimization in
+high capacity models, if training from scratch,
+requires many parameter-updating steps over a
+large number of labeled examples to perform
+well (Snell et al., 2017).
+If the target task itself cannot provide more
+information, how about collecting more tasks
+equipped with rich annotations to help the
+model learning? The goal of meta-learning is
+to train a model on a variety of tasks with rich
+annotations, such that it can solve a new task
+using only a few labeled samples. The key
+idea is to train the model’s initial parameters
+such that the model has maximal performance
+on a new task after the parameters have been
+updated through zero or a couple of gradient
+steps.
+There are already some surveys for meta-
+learning, such as (Vilalta and Drissi, 2002;
+Vanschoren, 2018; Hospedales et al., 2020).
+Nevertheless, this paper focuses on NLP do-
+main, especially few-shot applications. We try
+to provide clearer definitions, progress sum-
+mary and some common datasets of applying
+meta-learning to few-shot NLP.
+1 What is meta-learning?
+To solve a new task which has only a few exam-
+ples, meta-learning aims to build efficient algo-
+rithms (e.g., need a few or even no task-specific
+fine-tuning) that can learn the new task quickly.
+Conventionally, we train a task-specific model by
+iterating on the task-specific labeled examples. For
+example, we treat an input sentence as a training
+example in text classification problems. In contrast,
+the meta-learning framework treats tasks as train-
+ing examples—to solve a new task, we first collect
+lots of tasks, treating each as a training example
+and train a model to adapt to all those training tasks,
+finally this model is expected to work well for the
+new task.
+In the regular text classification tasks, we usu-
+ally assume that the training sentences and test
+sentences are in the same distribution. Similarly,
+meta-learning also assumes that the training tasks
+and the new task are from the same distribution of
+tasks p(T ). During meta-training, a task Ti is sam-
+pled from p(T ), the model is trained with K sam-
+ples, and then tested on test set from Ti. The test
+error on the sampled task Ti serves as the training
+error of the meta-learning process at the current i-
+th iteration1. After the meta-training, the new task,
+sampled from p(T ) as well, measures the models
+performance after learning from K samples.
+Since the new task only has K labeled examples
+and a large set of unlabeled test instances, each
+training task also keeps merely K labeled exam-
+ples during the training. This is to make sure that
+the training examples (means those training tasks
+here) have the same distribution as the test example
+(means the new task here). Usually, the K labeled
+examples are called “support set”.
+To describe meta-learning at a higher level: meta-
+learning doesn’t learn how to solve a specific task.
+It successively learns to solve many tasks. Each
+time it learns a new task, it becomes better at learn-
+ing new tasks: it learns to learn if “its performance
+at each task improves with experience and with the
+number of tasks” (Thrun and Pratt, 1998).
+Meta-learning vs. Transfer learning. Conven-
+tionally, transfer learning uses past experience of a
+1Here the “test error” is the training loss, because what we
+really care is the test performance on the target task.
+ar
+X
+iv
+:2
+00
+7.
+09
+60
+4v
+1 
+ [
+cs
+.C
+L
+] 
+ 1
+9 
+Ju
+l 
+20
+20
+task with small data task with big data trained model
+Multi-task learning Meta learning
+Figure 1: Multitask learning vs. meta learning. This
+figure is adapted from Dou et al. (2019).
+source task to improve learning on a target task —
+by pre-training a parameter prior plus optional fine-
+tuning. Transfer learning refers to a problem area
+(task A helps task B) while meta-learning refers to
+methodology which can be used to improve trans-
+fer learning as well as other problems (Hospedales
+et al., 2020).
+Technically, the pretraining in transfer learning
+often does not take its ultimate application scenario
+(e.g., a few-shot task) into consideration; meta-
+learning, instead, is optimized particularly towards
+benefiting the target task (for example, the system
+configuration is optimized so that it only needs a
+few gradient updates in a target few-shot problem).
+In effect, meta-learning assumes that the training
+tasks are in the same distribution with the target
+task; this often means that all the so called tasks
+(including training tasks and the target task) are
+essentially the same problem in different domains,
+such as from reviews of other product domains
+to the target cellphone’s review domain. Transfer
+learning, instead, does not have such a strict as-
+sumption; in theory, transfer learning can pretrain
+on any source tasks that can be potentially helpful
+to the target task (such as from a question answer-
+ing task to a coreference resolution task).
+Meta-learning vs. Multi-task learning. If we
+think the aforementioned transfer learning is often
+implemented as a sequential training flow from
+source tasks to the target task, multi-task learning
+is to train all the tasks together simultaneously.
+Since meta-learning also relies on a set of train-
+ing tasks, meta-learning is also a kind of multi-task
+learning. We summarize three differences here:
+• The conventional goal of multi-task learning
+is to learn a well pretrained model that can
+generalize to the target task; meta-learning
+tries to learn an efficient learning algorithm
+that learns the target task quickly.
+• In addition, multi-task learning may favor
+tasks with significantly larger amounts of data
+than others, as shown in Figure 1.
+• Since meta-learning treats tasks as training
+examples, ideally, the more training tasks the
+better. However, multi-task learning may meet
+increasing challenges in training simultane-
+ously over too many tasks.
+2 Meta-learning milestones
+Transferable knowledge in meta-learning is derived
+in the form of generalizable representation space
+or optimization strategies. The target few-shot task
+is then handled in a feed-forward distance function
+without updating network weights or learned by
+fine-tuning with the efficient optimization strategy.
+2.1 Learning to embed: metric-based
+meta-learning
+Metric-based meta-learning (or called “metric
+learning”) learns a distance function between data
+points so that it classifies test instances by compar-
+ing them to the K labeled examples. The “distance
+function” often consists of two parts: one is an
+embedding function which encodes any instances
+into a representation space, the other is a similar-
+ity metric, such as cosine similarity or Euclidean
+distance, to calculate how close two instances are
+in the space. If the distance function is learnt well
+on the training tasks, it can work well on the target
+task without fine-tuning.
+Siamese Network. Koch et al. (2015) proposed
+a Siamese network which takes two instances as
+input and outputs a scalar indicating they belong
+to the same class or not. The Siamese network,
+trained on training tasks, is essentially a distance
+function. However, it does not follow the princi-
+ple of meta-learning: Siamese network was nei-
+ther trained specifically to minimize the test losses
+on training tasks nor trained to learn an efficient
+gradient-based algorithm.
+Matching Network. Vinyals et al. (2016) pro-
+posed “matching network”, the first metric-based
+meta-learning algorithm, to solve one-shot prob-
+lem. Matching network is essentially a parametric
+nearest neighbors algorithm, defined as follows:
+P (ŷ|x̂, S) =
+k∑
+i=1
+a(x̂, xi)yi (1)
+name embedding function similarity metric other notes
+Siamese Network
+deep neural net
+sigmoid over
+(Koch et al., 2015) weighted L1 distance
+Matching Network
+deep neural net cosine
+the embedding function
+(Vinyals et al., 2016) depends on the support set
+Prototypical Network
+deep neural net Euclidean distance
+compare the test example with the
+(Snell et al., 2017) classes rather than support examples
+Relation Network
+deep neural net
+deep net
+(Sung et al., 2018) outputs one scalar
+Table 1: Some representative metric-learning literature.
+where S is a support set containing k labeled exam-
+ples {xi, yi}, i = 1, · · · , k; x̂ is a text example
+with its gold label ŷ. a(·) is a similarity func-
+tion given the representations of x̂ and xi. One
+contribution is that each support/testing example
+learns its representation with the background S;
+it means the whole support set influences the rep-
+resentation learning of each example. In experi-
+ment, they tried one-shot problems with and with-
+out fine-tuning; but fine-tuning does not show im-
+provements. Matching networks can be interpreted
+as a weighted nearest-neighbor classifier applied
+within an embedding space (Snell et al., 2017).
+Prototypical Network. Snell et al. (2017) pro-
+posed “Prototypical Networks” with two novelties
+compared with “Matching Networks”: (i) Using
+class representations rather than example represen-
+tations in the support set; (ii) They found the choice
+of similarity metric is vital—Euclidean distance
+outperforms cosine similarity. Prototypical Net-
+works differ from Matching Networks in the few-
+shot case with equivalence in the one-shot scenario.
+In addition, This literature claimed that the support-
+set-aware representation learning is unnecessary.
+Relation Network. Sung et al. (2018) proposed
+“Relation Network” that defines the metric as:
+ri,j = s(e(xi), e(xj)) (2)
+where function e() is an embedding function which
+generates a representation vector for any input in-
+stance; function s() is a scoring function that pro-
+duces a scalar ri,j between 0 and 1 representing
+the similarity between the two elements xi and
+xj . Different with the “Prototypical Networks”,
+the scoring function s() is a deep neural network
+rather than the Euclidean distance.
+Following the routine of metric-based meta learn-
+ing, Yu et al. (2018) learned multiple metrics for
+loss
+update
+Figure 2: MAML meta-learning
+update
+Figure 3: Reptile meta-learning (batched version)
+few-shot text classification problems. Essentially,
+metric-learning is a pretrained nearest-neighbor al-
+gorithm.
+2.2 Learning to fine-tune:
+optimization-based meta-learning
+Optimization-based methods learn a good point of
+parameter initialization for a neural model from
+which a few steps of gradient descent, given a
+few examples, can reach the optimal point for a
+new task. For each training task (it has train and
+validation2), the rationale is “how to fine-tune
+the model on train so that it can perform well on
+validation”. In order to get good performance
+on the validation of each training task, the meta-
+learning uses the validation error on validation as
+2They correspond to the support and test of a target task.
+the optimization loss. This loss is implemented
+through a two-step procedure: first assume the
+model has fine-tuned on the train, obtaining the
+updated parameters (here are just some “assumed”
+updated parameters, the original model parame-
+ters has not been updated in reality), then applying
+these updated parameters to predict the validation,
+getting the error which is converted as a loss value;
+this loss is used to compute gradients, and the orig-
+inal parameters will be updated at this step.
+MAML. Finn et al. (2017) proposed MAML
+(model-agnostic meta learning) which consists of
+the following steps in one episode:
+• Create a copy of the model with its initial
+parameters θ.
+• Train the model on the training set Dtraini
+(only a few gradient descents):
+θ̂ = θ − α5θ Li(θ,Dtraini ) (3)
+• Apply the model with the updated parameters
+θ̂ on the validation set Dvali .
+• Use the loss on the validation set to update the
+initial parameters θ.
+θ = θ − β 5θ
+∑
+i
+Li(θ̂,Dvali ) (4)
+Then, in the next episode, MAML runs the same
+process on a newly sampled training task. The
+process is depicted in Figure 2.
+During meta-training, the MAML learns initial-
+ization parameters that allow the model to adapt
+quickly and efficiently to a new task with a few
+examples.
+MAML is model agnostic; this means that it can
+virtually be applied to any neural networks. How-
+ever, MAML is quite hard to train because there are
+two levels of training: the meta-backpropagation
+implies the computation of gradients of gradients.
+FOMAML—First-Order MAML (Finn et al.,
+2017). The standard MAML has expensive com-
+putation. FOMAML is a simplified implementation
+as follows:
+θ = θ − β 5
+θ̂
+∑
+i
+Li(θ̂,Dvali ) (5)
+Comparing the Equations 4-5, FOMAML up-
+dates the original parameters θ by considering only
+the gradients on the last version of “fake” parame-
+ters θ̂. So, the gradients from θ̂ to the θ is omitted.
+Reptile (Nichol et al., 2018). Reptile is another
+first-order optimization-based meta-learning, as
+shown in Figure 3. It also samples training tasks
+from p(T ): τ1, · · ·, τi, · · ·, τn. Each training task
+does not have {Dtraini , D
+val
+i } separations. For
+training task τi, let’s assume the original param-
+eters θ have went through m steps of updating
+and become θmi (i.e., θ
+m
+i = SGD(Lτi , θ,m)), then
+Reptile updates θ as follows:
+θ = θ + β
+1
+n
+n∑
+i=1
+(θmi − θ) (6)
+The Reptile algorithm looks like the standard
+SGD in minibatch; if m = 1, they are the same; if
+m > 1, the expectation Eτ [SGD(Lτ , θ,m)] differs
+from SGD(Eτ [Lτ ], θ,m)
+MAML explicitly optimizes the efficiency of the
+algorithm on the support set, making sure the learnt
+algorithm can learn fast in the few-shot examples of
+the target task. In contrast, Reptile tries to optimize
+the system so that it can work well on all training
+tasks—it may work well if the target task is very
+close to the training tasks.
+3 Progress specific to few-shot NLP
+Usually, the progress of meta-learning is split by its
+techniques, such as metric-based or optimization-
+based. Whichever technique applies, the applica-
+tions are often limited to simulated datasets where
+each classification label is treated as a task. To be
+specific to NLP problems, we separate the progress
+in the following two categories: (i) Meta-learning
+on different domains of the same problem. This cat-
+egories usually have access of different domains of
+datasets which essentially belong to the same prob-
+lem, such as different domains of datasets for senti-
+ment classification, different domains of datasets
+for intent classification; (ii) Meta-learning on di-
+verse problems and then it is applied to solve a new
+problem.
+3.1 Meta-learning within a problem
+Here, “the same problem” is often studied in two
+types: one is one dataset of multiple classes where
+each class is treated as a task; the other is related
+to exploring the same task, such as sentiment clas-
+sification, on different domains.
+A class is a task. Jiang et al. (2018) studied topic
+classification problem in which each topic is a task.
+Some topics are training tasks, some are testing
+model main notes
+MAML • Propose the basic framework for optimization-based meta-learning
+(Finn et al., 2017) • Agnostic to model architecture and task specification
+FOMAML
+• First-order MAML algorithm
+(Finn et al., 2017)
+Reptile • First-order optimization algorithm
+(Nichol et al., 2018) • Agnostic to model architecture and task specification
+ATAML
+• Task-agnostic parameters & task-specific parameters
+(Jiang et al., 2018)
+• Meta-train on different tasks
+LEOPARD • Similar with (Jiang et al., 2018), set task-agnostic parameters
+(Bansal et al., 2019) and task-specific parameters
+• Use BERT as text encoder
+Table 2: Some representative optimization-based meta-learning (some are from NLP)
+tasks. ATAML, an extension of the MAML (Finn
+et al., 2017) algorithm was proposed by group-
+ing the parameters into task-agnostic part and task-
+specific part. It also has two levels of optimizations:
+at the task-level, only the task-specific parameters
+will be calculated gradients; at the meta-level, both
+the task-specific and task-agnostic parts will be
+updated.
+Sun et al. (2019) and Gao et al. (2019a) stud-
+ied few-shot relation classification problems. The
+dataset FewRel (Han et al., 2018) has totally 100
+relation types. Some relations are used as training
+tasks, the remaining are dev/test tasks.
+This kind of simulated few-shot study may have
+limited chance in reality, because for a test task
+with multiple few-shot classes, it is not easy to
+access highly related classes which have rich an-
+notations and are in the same distribution as the
+few-shot classes.
+A domain is a task. Yu et al. (2018) and Geng
+et al. (2019) studied two text classification prob-
+lems, each from multiple domains: one is multi-
+domain sentiment classification, the other is multi-
+domain intent classification. Each domain is treated
+as a task. Then some domains are used as train-
+ing tasks, some as test tasks. Technically, Yu et al.
+(2018) proposed to use multiple metrics, learned
+in the training tasks, then a target few-shot task
+determines the best weighted combination from the
+set of learnt metrics.
+Other works that conducted meta-learning
+within a specific problem include word sense dis-
+ambiguation (Holla et al., 2020), event detection
+(Deng et al., 2020; Lai et al., 2020) and so on.
+3.2 Meta-learning on distinct problems
+To solve a target few-shot task, how to make use of
+other types of problems that have rich-annotation
+datasets is more challenging and practically useful.
+Gu et al. (2018) framed low-resource translation
+as a meta-learning problem: eighteen high-resource
+language translation tasks as training tasks, five
+low-resource ones as testing tasks. Then, an ex-
+tended MAML system is developed to handle this
+translation problem.
+Bansal et al. (2019) used GLUE (Wang et al.,
+2019) tasks along with SNLI (Bowman et al., 2015)
+as the training tasks, and evaluated on distinct tasks:
+entity typing, relation classification, sentiment clas-
+sification, text categorization and SciTail (an en-
+tailment dataset by (Khot et al., 2018)). Their ap-
+proach LEOPARD showed better performance than
+some competitive baselines including BERT (De-
+vlin et al., 2019) fine-tuning, multi-task learning
+and prototypical networks.
+Dou et al. (2019) compared three typi-
+cal optimization-based meta-learning, including
+MAML , First-order MAML and Reptile on GLUE
+benchmarks: treating the low-resource tasks CoLA,
+MRPC, STS-B and RTE as the testing tasks, and
+the four high-resource tasks SST-2, QQP, MNLI
+and QNLI as the training tasks. They also showed
+that meta-learning approaches surpass finetuned
+BERT and multi-task learning.
+4 Datasets for few-shot NLP
+4.1 Class as task
+FewRel (Han et al., 2018), a relation classifi-
+cation dataset, has 100 relations, each with 700
+labeled sentences. The official set uses 64, 16,
+and 20 relations as training/dev/test tasks. This
+dataset is constructed by manually annotating the
+distantly supervised results on Wikipedia corpus
+and Wikidata knowledge bases. Hence, all the
+training/dev/testing examples are from the same
+domain. A latest version, named FewRel-2.0 (Gao
+et al., 2019b), added a new domain of test set and
+“none-of-above” relation. FewRel is reported by
+Sun et al. (2019), Gao et al. (2019a) and so on, and
+there is a leaderboard3.
+SNIPS (Coucke et al., 2018)4 is an intent classi-
+fication dataset with only seven intent types. Both
+(Xia et al., 2018, 2020) used two intents as few-shot
+classes and other intents for training.
+4.2 Domain as task
+CLINC150 (Larson et al., 2019)5 is an intent
+classification dataset. It has 23,700 instances in
+which 22,500 examples covers 150 intents, and
+1,200 instances are out-of-scope. The 150 intents
+are distributed in 10 domains: “banking”, “work”,
+“meta”, “auto & commute”, “travel”, “home”, “util-
+ity”, “kitchen & dining”, “small talk” and “credit
+cards”; each domain has 15 intents.
+ARSC (Blitzer et al., 2007) is a sentiment classi-
+fication dataset. It is comprised of Amazon reviews
+for 23 types of products (each product corresponds
+to a domain). For each product domain, there are
+three different binary classification tasks with dif-
+ferent thresholds on the review rating: the tasks
+consider a review as positive if its rating = 5 stars,
+>= 4 starts or >= 2 stars (Yu et al., 2018). There-
+fore, this dataset has totally 23×3=69 tasks. Both
+(Yu et al., 2018; Sui et al., 2020) used 12 tasks
+from 4 domains as target tasks, and the remaining
+domain tasks are training tasks.
+Despite the existence of some few-shot NLP
+datasets, more challenging and realistic bench-
+marks are needed. As Triantafillou et al. (2020)
+claimed: (i) Real-life applications vary in the num-
+bers of classes and examples per class, and are
+unbalanced. Existing datasets, such as FewRel and
+CLINC150 mainly consider homogeneous learn-
+ing tasks; (ii) We are eventually hoping that the
+model can generalize to tasks of new distributions,
+3https://thunlp.github.io/1/fewrel1.
+html
+4https://github.com/snipsco/
+nlu-benchmark/
+5https://github.com/clinc/oos-eval
+as Bansal et al. (2019) did. Existing datasets of-
+ten measure only within-dataset generalization. In
+terms of benchmark building, the computer vision
+community has made some progresses, such as
+the “META-DATASET” by (Triantafillou et al.,
+2020).
+References
+Trapit Bansal, Rishikesh Jha, and Andrew McCal-
+lum. 2019. Learning to few-shot learn across di-
+verse natural language classification tasks. CoRR,
+abs/1911.03863.
+John Blitzer, Mark Dredze, and Fernando Pereira. 2007.
+Biographies, bollywood, boom-boxes and blenders:
+Domain adaptation for sentiment classification. In
+ACL.
+Samuel R. Bowman, Gabor Angeli, Christopher Potts,
+and Christopher D. Manning. 2015. A large anno-
+tated corpus for learning natural language inference.
+In EMNLP, pages 632–642.
+Alice Coucke, Alaa Saade, Adrien Ball, Théodore
+Bluche, Alexandre Caulier, David Leroy, Clément
+Doumouro, Thibault Gisselbrecht, Francesco Calt-
+agirone, Thibaut Lavril, Maël Primet, and Joseph
+Dureau. 2018. Snips voice platform: an embedded
+spoken language understanding system for private-
+by-design voice interfaces. CoRR, abs/1805.10190.
+Shumin Deng, Ningyu Zhang, Jiaojian Kang, Yichi
+Zhang, Wei Zhang, and Huajun Chen. 2020. Meta-
+learning with dynamic-memory-based prototypical
+network for few-shot event detection. In WSDM,
+pages 151–159.
+Jacob Devlin, Ming-Wei Chang, Kenton Lee, and
+Kristina Toutanova. 2019. BERT: pre-training of
+deep bidirectional transformers for language under-
+standing. In NAACL-HLT, pages 4171–4186.
+Zi-Yi Dou, Keyi Yu, and Antonios Anastasopoulos.
+2019. Investigating meta-learning algorithms for
+low-resource natural language understanding tasks.
+In EMNLP-IJCNLP, pages 1192–1197.
+Chelsea Finn, Pieter Abbeel, and Sergey Levine. 2017.
+Model-agnostic meta-learning for fast adaptation of
+deep networks. In ICML, pages 1126–1135.
+Tianyu Gao, Xu Han, Zhiyuan Liu, and Maosong
+Sun. 2019a. Hybrid attention-based prototypical net-
+works for noisy few-shot relation classification. In
+AAAI, pages 6407–6414.
+Tianyu Gao, Xu Han, Hao Zhu, Zhiyuan Liu, Peng Li,
+Maosong Sun, and Jie Zhou. 2019b. Fewrel 2.0: To-
+wards more challenging few-shot relation classifica-
+tion. In EMNLP-IJCNLP, pages 6249–6254.
+https://thunlp.github.io/1/fewrel1.html
+https://thunlp.github.io/1/fewrel1.html
+https://github.com/snipsco/nlu-benchmark/
+https://github.com/snipsco/nlu-benchmark/
+https://github.com/clinc/oos-eval
+Ruiying Geng, Binhua Li, Yongbin Li, Xiaodan Zhu,
+Ping Jian, and Jian Sun. 2019. Induction networks
+for few-shot text classification. In EMNLP-IJCNLP,
+pages 3902–3911.
+Jiatao Gu, Yong Wang, Yun Chen, Victor O. K. Li,
+and Kyunghyun Cho. 2018. Meta-learning for low-
+resource neural machine translation. In EMNLP,
+pages 3622–3631.
+Xu Han, Hao Zhu, Pengfei Yu, Ziyun Wang, Yuan Yao,
+Zhiyuan Liu, and Maosong Sun. 2018. FewRel:
+A large-scale supervised few-shot relation classifi-
+cation dataset with state-of-the-art evaluation. In
+EMNLP, pages 4803–4809.
+Nithin Holla, Pushkar Mishra, Helen Yannakoudakis,
+and Ekaterina Shutova. 2020. Learning to learn
+to disambiguate: Meta-learning for few-shot word
+sense disambiguation. CoRR, abs/2004.14355.
+Timothy M. Hospedales, Antreas Antoniou, Paul Mi-
+caelli, and Amos J. Storkey. 2020. Meta-learning in
+neural networks: A survey. CoRR, abs/2004.05439.
+Xiang Jiang, Mohammad Havaei, Gabriel Chartrand,
+Hassan Chouaib, Thomas Vincent, Andrew Jesson,
+Nicolas Chapados, and Stan Matwin. 2018. Atten-
+tive task-agnostic meta-learning for few-shot text
+classification. In NeurIPS Meta-Learning Work-
+shop.
+Tushar Khot, Ashish Sabharwal, and Peter Clark. 2018.
+SciTaiL: A textual entailment dataset from science
+question answering. In AAAI, pages 5189–5197.
+Gregory Koch, Richard Zemel, and Ruslan Salakhutdi-
+nov. 2015. Siamese neural networks for one-shot im-
+age recognition. In ICML deep learning workshop,
+volume 2.
+Viet Dac Lai, Franck Dernoncourt, and Thien Huu
+Nguyen. 2020. Exploiting the matching information
+in the support set for few shot event classification.
+In PAKDD, pages 233–245.
+Stefan Larson, Anish Mahendran, Joseph J. Peper,
+Christopher Clarke, Andrew Lee, Parker Hill,
+Jonathan K. Kummerfeld, Kevin Leach, Michael A.
+Laurenzano, Lingjia Tang, and Jason Mars. 2019.
+An evaluation dataset for intent classification and
+out-of-scope prediction. In EMNLP-IJCNLP, pages
+1311–1316.
+Alex Nichol, Joshua Achiam, and John Schulman.
+2018. On first-order meta-learning algorithms.
+CoRR, abs/1803.02999.
+Jake Snell, Kevin Swersky, and Richard S. Zemel.
+2017. Prototypical networks for few-shot learning.
+In NeurIPS, pages 4077–4087.
+Dianbo Sui, Yubo Chen, Binjie Mao, Delai Qiu, Kang
+Liu, and Jun Zhao. 2020. Knowledge guided met-
+ric learning for few-shot text classification. CoRR,
+abs/2004.01907.
+Shengli Sun, Qingfeng Sun, Kevin Zhou, and Tengchao
+Lv. 2019. Hierarchical attention prototypical net-
+works for few-shot text classification. In EMNLP-
+IJCNLP, pages 476–485.
+Flood Sung, Yongxin Yang, Li Zhang, Tao Xiang,
+Philip H. S. Torr, and Timothy M. Hospedales. 2018.
+Learning to compare: Relation network for few-shot
+learning. In CVPR, pages 1199–1208.
+Sebastian Thrun and Lorien Y. Pratt. 1998. Learning
+to learn: Introduction and overview. In Learning to
+Learn, pages 3–17.
+Eleni Triantafillou, Tyler Zhu, Vincent Dumoulin, Pas-
+cal Lamblin, Utku Evci, Kelvin Xu, Ross Goroshin,
+Carles Gelada, Kevin Swersky, Pierre-Antoine Man-
+zagol, and Hugo Larochelle. 2020. Meta-dataset: A
+dataset of datasets for learning to learn from few ex-
+amples. In ICLR.
+Joaquin Vanschoren. 2018. Meta-learning: A survey.
+CoRR, abs/1810.03548.
+Ricardo Vilalta and Youssef Drissi. 2002. A perspec-
+tive view and survey of meta-learning. Artif. Intell.
+Rev., 18(2):77–95.
+Oriol Vinyals, Charles Blundell, Tim Lillicrap, Koray
+Kavukcuoglu, and Daan Wierstra. 2016. Matching
+networks for one shot learning. In NeurIPS, pages
+3630–3638.
+Alex Wang, Amanpreet Singh, Julian Michael, Felix
+Hill, Omer Levy, and Samuel R. Bowman. 2019.
+GLUE: A multi-task benchmark and analysis plat-
+form for natural language understanding. In ICLR.
+Congying Xia, Chenwei Zhang, Hoang Nguyen, Jiawei
+Zhang, and Philip S. Yu. 2020. CG-BERT: con-
+ditional text generation with BERT for generalized
+few-shot intent detection. CoRR, abs/2004.01881.
+Congying Xia, Chenwei Zhang, Xiaohui Yan,
+Yi Chang, and Philip S. Yu. 2018. Zero-shot user
+intent detection via capsule neural networks. In
+EMNLP, pages 3090–3099.
+Mo Yu, Xiaoxiao Guo, Jinfeng Yi, Shiyu Chang, Saloni
+Potdar, Yu Cheng, Gerald Tesauro, Haoyu Wang,
+and Bowen Zhou. 2018. Diverse few-shot text clas-
+sification with multiple metrics. In NAACL-HLT,
+pages 1206–1215.

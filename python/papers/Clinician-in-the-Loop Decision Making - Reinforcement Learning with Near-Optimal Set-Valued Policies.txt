@@ -1,0 +1,1742 @@
+Clinician-in-the-Loop Decision Making:  Reinforcement Learning with Near-Optimal Set-Valued Policies
+Clinician-in-the-Loop Decision Making:
+Reinforcement Learning with Near-Optimal Set-Valued Policies
+Shengpu Tang 1 Aditya Modi 1 Michael W. Sjoding 2 3 Jenna Wiens 1
+Abstract
+Standard reinforcement learning (RL) aims to find
+an optimal policy that identifies the best action
+for each state. However, in healthcare settings,
+many actions may be near-equivalent with respect
+to the reward (e.g., survival). We consider an
+alternative objective – learning set-valued poli-
+cies to capture near-equivalent actions that lead to
+similar cumulative rewards. We propose a model-
+free algorithm based on temporal difference learn-
+ing and a near-greedy heuristic for action selec-
+tion. We analyze the theoretical properties of the
+proposed algorithm, providing optimality guar-
+antees and demonstrate our approach on simu-
+lated environments and a real clinical task. Em-
+pirically, the proposed algorithm exhibits good
+convergence properties and discovers meaning-
+ful near-equivalent actions. Our work provides
+theoretical, as well as practical, foundations for
+clinician/human-in-the-loop decision making, in
+which humans (e.g., clinicians, patients) can in-
+corporate additional knowledge (e.g., side effects,
+patient preference) when selecting among near-
+equivalent actions.
+1. Introduction
+In the standard RL setup, one aims to find an optimal policy,
+which identifies the action for each state that maximizes
+some discounted expected cumulative reward. However,
+in healthcare, the reward can be difficult to define; e.g.,
+one might want to optimize for long-term quality of life vs.
+short-term stabilization of the symptoms (without treating
+the underlying disease process). Past work has augmented
+1Department of Electrical Engineering & Computer Science,
+University of Michigan, Ann Arbor, US 2Department of Internal
+Medicine, Michigan Medicine, University of Michigan, Ann Arbor,
+US 3Institute for Healthcare Policy & Innovation, University of
+Michigan, Ann Arbor, US. Correspondence to: Shengpu Tang
+<tangsp@umich.edu>, Jenna Wiens <wiensj@umich.edu>.
+Proceedings of the 37 th International Conference on Machine
+Learning, Vienna, Austria, PMLR 119, 2020. Copyright 2020 by
+the author(s).
+reward signals via reward shaping (Lizotte et al., 2012;
+Raghu et al., 2017a; Nemati et al., 2016). Still, designing a
+single reward function that captures the goals and objectives
+across different individuals remains challenging. As a result,
+when applying RL in healthcare, survival is often used as the
+reward, since it represents a clear goal and is straightforward
+to measure (Raghu et al., 2017b; Komorowski et al., 2018;
+Li et al., 2018).
+While using survival as the reward signal can simplify
+the RL setup, we hypothesize that it induces many near-
+equivalent actions that could otherwise differ. For example,
+different doses of a drug might perform similarly in terms of
+keeping the patient alive, yet doses that are too large might
+cause severe side effects. In other cases, patients may opt
+for less invasive treatments, if they are likely to yield similar
+outcomes to more invasive ones. In such cases, learning a
+single best action and ignoring near-equivalent actions may
+be undesirable, as important considerations not captured
+through the reward signal can impact decision making.
+Thus, we consider the task of learning a “set-valued policy”
+(SVP), which returns a set of near-equivalent actions rather
+than a single optimal action. This allows for interaction
+between the clinician (or patient) and the decision support
+system (i.e., clinician/patient-in-the-loop). Such a setup pro-
+vides clinicians/patients with an opportunity to incorporate
+additional information (e.g., patient preferences, adverse
+drug reactions, costs/availability of equipment) when choos-
+ing among near-equivalent actions.
+We study a particular formalization of SVPs introduced by
+Fard & Pineau (2011) where they consider the problem of
+computing SVPs (planning). In contrast to their exhaus-
+tive search based approach, which requires a model of the
+underlying environment, we propose a model-free learn-
+ing algorithm. The sequential nature of decisions makes
+learning such policies non-trivial, as near-equivalent actions
+should be not only similar in the short term (immediate
+reward), but also similar for all possible future trajectories
+(expected cumulative rewards). Our contributions are:
+• we propose a new algorithm based on temporal differ-
+ence methods and a near-greedy heuristic for learning
+near-optimal set-valued policies,
+ar
+X
+iv
+:2
+00
+7.
+12
+67
+8v
+1 
+ [
+cs
+.L
+G
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+mailto:tangsp@umich.edu
+mailto:wiensj@umich.edu
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies
+• we investigate its convergence behavior and optimal-
+ity using a worst-case analysis, providing theoretical
+guarantees in a directed acyclic graph (DAG) setting,
+• we demonstrate the algorithm’s behavior in both DAG
+and non-DAG synthetic environments, and
+• on a clinical task, we demonstrate how the algo-
+rithm can help discover clinically meaningful near-
+equivalencies among treatment actions.
+Our work provides both theoretical and practical founda-
+tions for learning near-optimal SVPs, and represents an im-
+portant step towards clinician/human-in-the-loop decision
+support systems. Beyond applications in healthcare, this
+framework could also be applied to other domains involving
+human-machine-cooperative decision making, including in-
+telligent tutoring systems and self-driving cars. The code to
+reproduce our experiments is available online1.
+2. Background
+We consider finite Markov decision processes (MDPs)
+defined by a tuple (S,A,P,R, γ), where S is the set
+of states (finite or infinite), A is a finite set of actions,
+P : S × A× S → [0, 1] defines the transition model with
+p(s′|s, a) specifying the probability of moving from state
+s to s′ given action a, and R : S × A → R defines the
+reward function (can be stochastic in general) with r(s, a)
+denoting the expected instantaneous reward obtained from
+taking action a in state s, and discount factor γ ∈ [0, 1].
+2.1. Set-Valued Policy
+In this work, we focus on set-valued policies (SVP), first
+formalized in Fard & Pineau (2011)2.
+Definition 1. An SVP, π, is a function that maps each state
+to a non-empty subset of actions, π : S → 2A \ {∅}.
+SVPs have been explored as a way to encode alternative
+choices (Fard & Pineau, 2011; Lizotte et al., 2012) and
+to encapsulate an (approximately) exponential number of
+deterministic policies (Lizotte & Laber, 2016). In particu-
+lar, Fard & Pineau (2011) proposed a mixed-integer pro-
+gramming (MIP) formulation to find SVP solutions for a
+finite-horizon planning problem. However, their approach
+involves an exhaustive search with exponential complexity
+over the state and action spaces. In contrast, we propose a
+scalable model-free learning algorithm that does not require
+knowledge of the MDP. Moreover, our proposed approach
+allows the extent of near-optimality to be set a priori, pro-
+viding increased flexibility and optimality guarantees.
+1https://gitlab.eecs.umich.edu/MLD3/RL-Set-Valued-Policy
+2In Fard & Pineau (2011), this was referred to as “non-
+deterministic policy”; however, since the policy is indeed a deter-
+ministic mapping, we prefer the term “set-valued policy” to avoid
+confusion.
+2.2. Value Functions for SVPs
+In contrast to the standard RL setting, here, a learning agent
+can suggest a set of actions. Thus, our notion of “value”
+must account for all possible policies consistent with the
+proposed set of actions, regardless of which proposed action
+is selected. To this end, we consider a worst-case analysis
+(Fard & Pineau, 2011), where the value of a state s is taken
+as the worst case over all the actions in the set π(s).
+Definition 2. The worst-case value functions of an SVP π
+are defined as
+V π(s) = min
+a∈π(s)
+{Qπ(s, a)},
+Qπ(s, a) = r(s, a) + γEs′|s,a [V π(s′)] .
+2.3. Near-Optimal SVPs
+We quantify the “goodness” of an SVP according to how
+far it is from the optimal value function, V ∗. This gives
+rise to the definition of near-optimal SVPs. In some of the
+MDP literature, near-optimality has been formalized with
+an additive constraint: ∀s, V π(s) ≥ V ∗(s) − � (Kearns
+& Singh, 2002), which specifies a constant margin of sub-
+optimality across all states. This could lead to conservative
+action choices in some states, as � is fixed but the magni-
+tude of V π(s) and V ∗(s) could vary across different states.
+We argue that in healthcare settings this is not a suitable
+formalization, since at any point of decision making (in
+any particular state), the SVP should be near-optimal with
+respect to what we could achieve in that state; accepting the
+same value margin in a “healthy” state (larger value) vs. a
+“sick” state (smaller value) may not be desirable, because
+a margin that leads to acceptable outcomes in a “healthy”
+state can have a larger relative impact (perhaps devastating)
+in a “sick” state. We consider the additive near-optimality
+formalization as a baseline, providing the derivations of
+this setting in Appendix A. However, given the limitations,
+we focus on a multiplicative constraint for near-optimality,
+which accounts for differences in values at different states.
+Definition 3. An SVP π is ζ-optimal, with ζ ∈ [0, 1], if
+V π(s) ≥ (1− ζ)V ∗(s), ∀s ∈ S.
+Here, ζ is a hyperparameter that defines the sub-optimality
+margin, quantifying the trade-off between action variety and
+optimality.
+Remark. Note that this definition requires V ∗(s) ≥ 0,∀s ∈
+S. A sufficient (though not necessary) condition to ensure
+this is to enforce r(s, a) ≥ 0. In experiments with clinical
+data (Section 4), we discuss practical considerations to deal
+with problem domains having negative rewards.
+As a naı̈ve solution, one might construct π as:
+π(s) = {a : Q∗(s, a) ≥ (1− ζ)V ∗(s)}.
+https://gitlab.eecs.umich.edu/MLD3/RL-Set-Valued-Policy
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies
+However, this construction fails to satisfy near-optimality.
+By using Q∗(s, a) = r(s, a) + γEs′|s,aV ∗(s′), the optimal
+Q-function, it assumes all future returns V ∗(s′) are obtained
+following π∗ as opposed to π. During the roll-out of a pol-
+icy, this fails to account for the fact that the future must be
+consistent with the policy. Alternatively, one might con-
+sider an exponentially large action space, Ã = 2A \ {∅}
+and apply standard value-based methods to learn Q-values
+defined over S × Ã, but analysis shows that this naı̈ve ap-
+proach defaults to the greedy optimal policy (Appendix B).
+In the sections that follow, we propose a new approach to
+learn SVPs that does not violate the ζ-optimal constraint in
+Definition 3 and focuses on value functions in the original
+action space A.
+3. Methods
+We present an algorithm that jointly learns SVPs and their
+value functions. First, we provide two heuristics to con-
+struct near-optimal SVPs given the value functions. Using
+these heuristics as action selection strategies, we describe a
+variant of temporal difference (TD) learning and provide a
+theoretical analysis of its convergence and optimality.
+3.1. Heuristics for Constructing Near-Optimal SVPs
+To guarantee near-optimality, we start with a conservative
+approach based on a loose lower bound of future returns.
+Then, we improve on this approach and propose a near-
+greedy heuristic that leverages the learned policy.
+Conservative. Assuming the future follows a ζ-optimal
+policy, one could construct π as:
+π(s) = {a : Q̌∗ζ(s, a) ≥ (1− ζ)V ∗(s)}, (1)
+where Q̌∗ζ(s, a) = r(s, a) + γ(1 − ζ)Es′|s,a[V ∗(s′)] ≤
+Q∗(s, a) is the action-value function using a loose lower
+bound for near-optimal future returns.
+The conservative heuristic is consistent with the definition
+by Fard & Pineau (2011); however, one key difference is that
+we provide an explicit way to construct a conservative SVP
+given an oracle for the optimal value function V ∗. Though
+this will not violate the near-optimality bound, it may limit
+action diversity.
+To encourage action diversity while satisfying the near-
+optimality criteria, we can formulate a fixed-point equa-
+tion for computing a near-optimal SVP. Recall that, in a
+standard RL setup, the optimal policy π∗ is the unique
+fixed-point solution to the following equation: π∗(s) =
+arg maxaQ
+π∗(s, a) ∀s ∈ S which applies a greedy action
+selection over optimal Q-values. For a near-optimal SVP,
+we seek the fixed-point solution to a similar equation with a
+near-greedy action selection.
+Near-Greedy. Consider the fixed-point solution to the fol-
+lowing equation:
+π(s) = {a : Qπ(s, a) ≥ (1− ζ)V ∗(s)}, (2)
+where Qπ(s, a) is the action-value function for policy π as
+computed via Definition 2.
+Depending on the dynamics of the MDP and the true optimal
+value function V ∗, it is possible that no solution exists for
+Eqn. (2) (see Appendix C for an example). Thus, for a gen-
+eral MDP, directly applying this heuristic might not generate
+the desired near-optimal SVP. In Section 3.3, we discuss
+the sufficient conditions for the existence and uniqueness of
+SVPs constructed according to Eqn. (2).
+For the same optimality threshold ζ, compared to the con-
+servative SVP, the near-greedy SVP is more likely to con-
+tain more actions, due to its consideration of the policy-
+dependent worst-case future V π(s′), rather than a loose
+lower bound (1− ζ)V ∗(s′), when deciding whether an ac-
+tion should be included.
+Algorithm 1 TD learning for near-greedy ζ-optimal SVP
+1: Input: step size αt ∈ (0, 1],
+optimal value function V ∗ where V ∗(s′) ≥ 0 ∀s ∈ S,
+sub-optimality margin ζ ∈ [0, 1].
+2: Initialize Q(s, a) = 0 for all s ∈ S, a ∈ A
+3: for each episode do
+4: Initialize s
+5: for each step do
+6: Choose action a using an exploratory policy (e.g., �-greedy)
+7: Take action a, observe r, s′
+8: π(s′) = {a′ : Q(s′, a′) ≥ (1− ζ)V ∗(s′)}
+9: if π(s′) 6= ∅
+10: Q(s, a)← Q(s, a) + αt[r + γ min
+a′∈π(s′)
+Q(s′, a′)−Q(s, a)]
+11: else
+12: Q(s, a)← Q(s, a) + αt[r + γ max
+a′∈A
+Q(s′, a′)−Q(s, a)]
+13: s← s′
+14: end for
+15: end for
+3.2. Learning Near-Optimal SVPs
+As stated, a fixed-point solution to Eqn. (2) might not exist
+for a general MDP. However, the near-greedy construction
+can be used to devise a model-free learning algorithm in
+the TD-learning framework (Algorithm 1). Specifically, to
+compute the TD update target, we temporarily construct a
+candidate SVP π(s′) for the next state s′ using the current
+estimates of the Q-values (line 8). With V ∗(s′) ≥ 0, when
+we have a non-empty set of near-optimal actions π(s′), we
+compute the update target by using the worst near-greedy
+action (line 10). Otherwise, when π(s′) is empty, we use
+the standard greedy target (line 12). Finally, the algorithm
+outputs estimates of Qπ, as well as the SVP π constructed
+according to Eqn. (2). Note that the algorithm requires the
+optimal value function V ∗ as an input. In practice, one can
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies
+run a separate Q-learning procedure to learn a good estimate
+of Q∗ and thus of V ∗, or learn estimates of Q∗ and Qπ
+simultaneously.
+3.3. Theoretical Analysis
+Here, we discuss the sufficient conditions for which the
+near-greedy SVP exists and is unique and for which the
+near-greedy TD algorithm converges under the same con-
+ditions for Q-learning. For completeness, in Appendix D,
+we show that the conservative heuristic leads to a stochastic
+approximation algorithm that converges to a unique SVP
+solution for any MDP with non-negative rewards.
+Theorem 1. The near-greedy ζ-optimal SVP exists and is
+unique, if the MDP is a directed acyclic graph (DAG) with
+non-negative rewards.
+Proof. We show this by explicit construction of π. Note
+that the states in a DAG form a topological sort tree, where
+s precedes s′ if and only if there is a transition from s to s′.
+Base case. Consider every terminal state s∞ ∈ S∞, for
+which there is no immediate reward and no future time
+step starting from this state, i.e., V π(s∞) = 0. We set
+π(s∞) = A trivially.
+Inductive step. Given a state s, consider its successor
+states s′. Assuming we have every π(s′) and their associ-
+ated value functions satisfying V π(s′) ≥ (1− ζ)V ∗(s′),
+we calculate Qπ(s, a) for all a ∈ A:
+Q
+π
+(s, a) = r(s, a) + γEs′|s,aV
+π
+(s
+′
+)
+≥ r(s, a) + γEs′|s,a(1− ζ)V
+∗
+(s
+′
+)
+= ζr(s, a) + (1− ζ)[r(s, a) + γEs′|s,aV
+∗
+(s
+′
+)]
+= ζr(s, a) + (1− ζ)Q∗(s, a)
+≥ (1− ζ)Q∗(s, a).
+Using Qπ(s, a), we construct π(s) according to Eqn. (2).
+Importantly, π(s) is non-empty because the optimal
+action a∗ is always included. Given π(s), V π(s) =
+mina∈π(s)Q
+π(s, a) ≥ (1 − ζ)V ∗(s) satisfies the near-
+optimality constraint by construction.
+Enumerating the states in reverse topological order starting
+from the terminal states, we follow this process until we
+have π(s) for all s ∈ S. Each step of the construction
+process is unique, hence overall the policy is unique.
+Since the proof relies on the topological ordering of states
+in a DAG MDP, it holds when we are only given V ∗, as we
+can obtain V π from the base case for terminal states and
+from the inductive step for non-terminal states. The above
+theorem provides a sufficient condition for a near-greedy
+SVP to exist: the environment is a DAG with non-negative
+rewards. An MDP with cycles and/or negative rewards may
+still have a near-greedy ζ-optimal SVP, depending on the
+sub-optimality margin ζ and the MDP parameters.
+Similarly, we can show the following convergence result for
+Algorithm 1 (proof provided in Appendix E).
+Theorem 2. The near-greedy TD algorithm converges to
+the unique solution if the MDP is a DAG with non-negative
+rewards, under the same convergence conditions for regular
+TD learning: rewards have bounded variance, each (s, a)
+is updated infinitely many times,
+∑
+t αt =∞,
+∑
+t α
+2
+t <∞.
+Remark. The near-greedy heuristic from Section 3.1 can be
+used as the policy improvement step (replacing the greedy
+action selection) in any value-based generalized policy it-
+eration algorithm. For instance, when we are given the
+MDP model, one can derive a version of near-greedy value
+iteration with similar theoretical guarantees on DAG envi-
+ronments. In that case, it is most efficient to learn the value
+functions in reverse topological order of the states (as per the
+proof). However, in the more general case (where the under-
+lying MDP is unknown, or when we have a continuous state
+space), we require a different approach. In particular, here
+we present an algorithm based on TD learning. Though the
+theoretical analyses only hold for DAG environments, in our
+experiments we will demonstrate the algorithm’s behavior
+in the more general setting of non-DAG environments.
+4. Experiments
+We consider a set of experiments to i) demonstrate the ability
+of the proposed algorithm to learn SVPs for different values
+of ζ and ii) characterize the algorithm’s empirical conver-
+gence behavior. Throughout, we compare to alternative
+approaches to learning SVPs (described in Section 4.2).
+s1 s2 s3 s4 s5
+(a) Chain-5
+s1 s2 s3 s4 s5
+(b) CyclicChain-5
+S
+G
+(c) FrozenLake-4x4
+Figure 1. Synthetic environments include (a) a simple DAG, and
+(b)(c) two non-DAG environments.
+4.1. Environments
+We consider both synthetic and real environments.
+Chain-k (Figure 1a). First, as a sanity check, we consider
+a DAG with k sequentially connected states, with s1 the
+starting state and sk the terminal state. There are four ac-
+tions at each state si that transition to si+1, and intermedi-
+ate rewards r1, r2, r3, r4 ∈ {0, 0.01, 0.02, 0.03, 0.04, 0.05}
+that are predetermined, but randomly assigned. Transitions
+reaching the terminal state result in an additional reward of
++1. In this simple setting, we test the ability of the proposed
+algorithm to identify near-equivalent actions.
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies
+Next, we investigate the empirical performance of the al-
+gorithm in two non-DAG settings: CyclicChain-k and
+FrozenLake. These represent more complex environments,
+testing the generalizability of the proposed algorithm.
+CyclicChain-k (Figure 1b): An extension of RandomWalk
+(Sutton & Barto, 2018), similar to Chain-k, except that of
+the four actions from si, two lead to si−1 and two lead to
+si+1. We set γ < 1 to encourage the agent to reach the
+terminal state quickly and avoid cycling.
+FrozenLake (Figure 1c). This is a standard discrete space
+path-finding problem from OpenAI Gym (Brockman et al.,
+2016). The agent controls the movement of a character
+in a grid world. Some tiles of the grid lead the agent to
+fall into the water. The agent is rewarded +1 for finding a
+path to a goal tile. We used the standard 4 × 4 and 8 × 8
+maps. Multiple paths exist from the starting tile to the goal
+tile; these paths take the same number of steps and are thus
+equivalent. To introduce near-equivalent actions, we added
+a small reward to all actions from every non-terminal state
+so that the four actions vary slightly in value. For the 4× 4
+map, we added ri ∈ {0.01, 0.02, 0.03, 0.04}, while for the
+8× 8 map, we added ri ∈ {0.001, 0.002, 0.003, 0.004}.
+Finally, we explore a challenging clinical task using obser-
+vational patient data. In contrast to the environments above,
+in this setting, i) we do not have access to the underlying
+MDP, ii) transitions are stochastic, and iii) the reward signal
+is sparse.
+MIMIC-sepsis. This is a previously studied RL task in the
+healthcare domain, in which the goal is to learn optimal
+treatment strategies for patients with sepsis in the ICU. Sep-
+sis is defined as severe infection leading to life-threatening
+organ dysfunction and is one of the leading causes of mor-
+tality in hospitals (Gotts & Matthay, 2016; Liu et al., 2014).
+While a lot of work has focused on sepsis prediction (Henry
+et al., 2015; Reyna et al., 2019; Bedoya et al., 2020), the
+management of intravenous (IV) fluids and vasopressors
+in sepsis treatment still represents a key clinical challenge
+(Byrne & Van Haren, 2017). We based our analysis, in part,
+on the setup described in Komorowski et al. (2018), and
+used the same data and preprocessing steps, outlined below.
+Patient data are 48-dimensional time series (Appendix H)
+collected at 4h intervals, consisting of measurements from
+24h preceding until 48h following the time of sepsis onset.
+Similar to in Komorowski et al. (2018), we consider 750 dis-
+crete health states obtained from clustering the training set
+using k-means. Additionally, 2 terminal states are added to
+represent death and discharge. Actions pertain to treatment
+decisions in each 4h interval, representing total volume of
+IV fluids and amount of vasopressors administered. Though
+we consider the same number of discrete actions (25), the
+corresponding IV fluid doses differ substantially from those
+considered by Komorowski et al. (2018). Specifically, we
+updated the five levels of IV fluids to use the following
+bins [0, <500mL, 500mL−1L, 1−2L, >2L] to represent
+more clinically relevant fluid boluses. We made this mod-
+ification based on feedback from a critical care physician.
+Furthermore, the actions available at each state, A(s), are
+restricted to those observed ≥ 5 times (in training data; the
+most frequent action is used if no action occurs ≥ 5 times).
+Rewards are sparse and only assigned at the end of each
+trajectory: +100 for survival (and discharge), −100 for in-
+hospital death; all intermediate rewards are 0. In applying
+Algorithm 1, when V ∗(s) < 0 (due to negative rewards),
+we fall back to the greedy update target in line 12. γ is set
+to 0.99 to place nearly as much importance on late deaths
+as early deaths. Applying the specified inclusion and exclu-
+sion criteria (Komorowski et al., 2018) to the MIMIC-III
+database (Johnson et al., 2016), we identified a cohort of
+20,940 patients with sepsis (Table 1). The cohort was split
+into 70% training, 10% validation and 20% test.
+Table 1. Cohort statistics of MIMIC-sepsis patients.
+N % Female Mean Age
+Mean Hours
+in ICU
+Survivors 18,057 44.3% 64 56.6
+Non-survivors 2,883 42.7% 69 60.9
+In an effort to explore the stability of training with function
+approximation, instead of the tabular lookup algorithm, we
+implemented a linear approximator for the Q-function with
+a one-hot state feature encoding (based on the clustering
+results), where we aimed to minimize the mean squared
+TD error (Sutton & Barto, 2018). This setup allows the
+implementation to be readily extended to any linear (or
+possibly non-linear) approximation of the Q-function.
+4.2. Baselines
+We compare our proposed SVP learning algorithm based
+on a near-greedy heuristic to one based on a conservative
+heuristic. In addition, we compare to three other baselines:
+• Q∗-based (Section 2.3). This approach assumes that
+the future follows an optimal policy, which can result
+in π(s) including arbitrarily bad actions, especially in
+complex environments with long horizons.
+• Q-based. In Algorithm 1, replace the policy construc-
+tion step (line 8) of update rule with:
+π(s) = {a : Q(s, a) ≥ (1− ζ)V (s)},
+where V (s) = maxa∈AQ(s, a) replaces V ∗(s). This
+is similar to the near-greedy algorithm, except that it
+uses V , the worst-case value of the SVP as the baseline
+for near-optimality, instead of V ∗ in the definition of
+ζ-optimal, so the optimality constraint may be violated.
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies
+• Additive. After learning Q∗, we construct π following
+the additive constraint definition in Appendix A:
+π(s) = {a : Qπ(s, a) ≥ V ∗(s)− �},
+where � = ζ(1 − γ)‖V ∗‖∞. Using this selection cri-
+teria, we can guarantee that ∀s : V π(s) ≥ V ∗(s) −
+ζ‖V ∗‖∞.
+In addition to comparing to these model-free alternatives, we
+compare to the MIP approach proposed by Fard & Pineau
+(2011) in Appendix F (their method requires knowledge of
+the MDP model). Another alternative involves first learn-
+ing a (parameterized) probabilistic policy πθ(a|s) and then
+converting it to an SVP by thresholding based on the action
+probabilities, π(s) = {a : πθ(a|s) ≥ τ}. Relevant methods
+to learn probabilistic policies include: diversity-inducing
+policy gradient (Masood & Doshi-Velez, 2019) and maxi-
+mum entropy approaches (e.g., soft actor-critic (Haarnoja
+et al., 2018)). However, such approaches rely on probabilis-
+tic assumptions when computing Q-values and require one
+to choose a probability threshold τ , which does not align
+with our definition of near-optimality.
+4.3. Evaluation
+We perform qualitative evaluations by inspecting the learned
+sets of near-equivalent actions. In particular, we visualize
+the different routes induced by learned SVPs in the Frozen-
+Lake environment, as well as near-equivalent treatment
+actions in MIMIC-sepsis.
+To evaluate the quality of learned policies, we use standard
+Q-learning to establish the optimal Q-function Q∗ as the
+baseline for deciding near-optimality. For synthetic environ-
+ments, we characterize SVPs in terms of:
+• Average policy size: the expected number of actions
+to which the SVP maps a state, 1|S|
+∑
+s∈S
+|π(s)|. A larger
+average policy size means more actions are considered
+near-equivalent within the sub-optimality margin ζ.
+• Worst-case near-optimality: we consider the largest de-
+viation from V ∗ among all states, 1− min
+s∈S
+V π(s)
+V ∗(s)
+. This
+represents to what extent, in the worst-case, optimal-
+ity is sacrificed in exchange for more choice. The
+value of each state is found by running a modified ver-
+sion of policy evaluation for the returned SVP (see
+Appendix G for pseudo-code and convergence result).
+Evaluating the learned policies on the real data task MIMIC-
+sepsis presents significant challenges due to the present
+limitations of off-policy evaluation methods (Imbens & Ru-
+bin, 2015; Thomas & Brunskill, 2016; Gottesman et al.,
+2018). However, our main focus is on testing whether or
+not we can learn reasonable near-equivalent actions, rather
+than on learning the best policy for sepsis treatment. Still,
+for completeness, we evaluated the quality of the learned
+policies using multiple off-policy evaluation estimators and
+considered a non-deterministic variation of the learned poli-
+cies (Gottesman et al., 2018). For both the estimated optimal
+policy and the learned SVPs, we follow Komorowski et al.
+(2018) and evaluate softened policies: 99% probability is
+distributed among actions in the recommended set; the re-
+maining 1% is distributed to non-suggested actions. This
+allows us to use nearly all sample trajectories in the test
+set, maintaining a large effective sample size. We applied
+two off-policy evaluation methods, doubly-robust estimator
+(DR) (Jiang & Li, 2016) and weighted doubly robust esti-
+mator (WDR) (Thomas & Brunskill, 2016), to evaluate the
+softened policies derived from the learned policies, comput-
+ing empirical error bars based on 1,000 bootstraps of the
+test set.
+5. Results
+Across environments, our proposed approach is able to learn
+SVPs and discover near-equivalent actions. Empirically,
+we observe good convergence with near-optimal behavior
+under reasonable settings of γ and ζ even within non-DAG
+environments. The near-greedy algorithm outperforms the
+baselines, while the learned SVPs induce diverse behavior
+and meaningful alternative treatment recommendations.
+ζ Conservative Near-greedy
+0 s1 s2 s3 s4 s5 (100.0%) s1 s2 s3 s4 s5 (100.0%)
+0.01 s1 s2 s3 s4 s5 ( 99.0%) s1 s2 s3 s4 s5 ( 99.0%)
+0.02 s1 s2 s3 s4 s5 ( 99.0%) s1 s2 s3 s4 s5 ( 98.1%)
+0.05 s1 s2 s3 s4 s5 ( 97.1%) s1 s2 s3 s4 s5 ( 95.2%)
+0.1 s1 s2 s3 s4 s5 ( 97.1%) s1 s2 s3 s4 s5 ( 90.2%)
+0.2 s1 s2 s3 s4 s5 ( 97.1%) s1 s2 s3 s4 s5 ( 90.2%)
+1 s1 s2 s3 s4 s5 ( 90.2%) s1 s2 s3 s4 s5 ( 90.2%)
+Figure 2. SVPs learned by the near-greedy and conservative al-
+gorithms on Chain-5 at different ζs. Parenthesized percentages
+denote the worst-case near-optimality.
+5.1. Applied to Synthetic Data
+In the simple DAG environment, Chain-5 with γ = 0.9, we
+recover near-equivalent actions. When ζ = 0.01 is small,
+π(s1) and π(s4) for both the near-greedy and conservative
+heuristics include two actions (Figure 2). As ζ increases, so
+does the number of actions, resulting in diversity and choice
+among near-equivalent actions. As expected, for the same ζ ,
+the conservative approach contains fewer actions compared
+to the near-greedy SVP. Moreover, for a wide range of
+ζ ≥ 0.05, the conservative approach underestimates the
+near-optimality, failing to produce a diversity of choice.
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies
+S
+G
+ζ = 0.00 Avg. policy size: 1.00
+worst-case near-optimality: 100.0%
+S
+G
+ζ = 0.01 Avg. policy size: 1.25
+worst-case near-optimality: 99.1%
+S
+G
+ζ = 0.02 Avg. policy size: 1.36
+worst-case near-optimality: 98.0%
+S
+G
+ζ = 0.03 Avg. policy size: 1.42
+worst-case near-optimality: 97.8%
+Figure 3. On the FrozenLake-8x8 environment, at different levels
+of near-optimality, ζ, the near-greedy algorithm learns different but
+near-equivalent routes to the goal, G. The learned SVPs conform
+to the near-optimality margin in the worst-case for the range of ζ
+values shown.
+On FrozenLake-8x8 with γ = 0.9, our proposed near-
+greedy algorithm discovers different routes to the goal tile
+(Figure 3). Due to subtle differences in instantaneous re-
+wards (see Section 4.1), these routes are not exactly the
+same, but are near-equivalent.
+How does the algorithm perform empirically on non-
+DAGs? Here, we investigate the empirical performance
+of the near-greedy algorithm in non-DAG environments,
+namely, CyclicChain-5 and FrozenLake-4x4. We substi-
+tuted the near-greedy heuristic as the policy improvement
+step in the value iteration algorithm and monitor whether
+the SVP (derived from the learned value estimate V ) sta-
+blizes towards the end of training. For small γ and small ζ,
+the near-greedy algorithm demonstrates good convergence
+(Figure 4). Under settings with large γ or large ζ (close
+to 1), the algorithm displays instability. For large γ, the
+effective horizon is longer and the worst-case value func-
+tion must account for a longer future. When ζ is large, we
+permit more sub-optimal actions, and the local effect of
+adding an action to π(s) could be so large that the action
+is no longer near-optimal, resulting in oscillating behavior
+and non-convergence. Notably, for the region of parameter
+values where the algorithm converges, the learned SVPs are
+non-trivial solutions (they include more than one action for
+certain states), as indicated by lighter colors in Figure 4.
+Empirically, for many operating regimes with reasonable
+settings of γ and ζ (e.g., small ζ for near-optimality), the
+near-greedy algorithm exhibits good convergence behavior.
+0.0 0.5 1.0
+γ
+0.
+0
+0.
+5
+1.
+0
+ζ
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+4.0
+av
+er
+ag
+e
+po
+lic
+y
+si
+ze
+(a) CyclicChain-5
+0.0 0.5 1.0
+γ
+0.
+0
+0.
+5
+1.
+0
+ζ
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+4.0
+av
+er
+ag
+e
+po
+lic
+y
+si
+ze
+(b) FrozenLake-4x4
+Figure 4. Empirical behavior of the near-greedy value iteration
+algorithm, visualized as a heatmap of policy size at the end of
+training. White ×’s indicate non-convergence (i.e., the SVP de-
+rived from the learned V does not stablize towards the end of
+training). In regions of the parameter space where the algorithm
+converges, we are able to discover non-trivial solutions (learned
+policies include more than one action for some states).
+0.00 0.02 0.04 0.06 0.08 0.10
+ζ
+1.0
+1.1
+1.2
+1.3
+1.4
+1.5
+1.6
+1.7
+A
+ve
+ra
+ge
+po
+lic
+y
+si
+ze
+near-greedy (ours)
+Q∗-based
+Q-based
+additive
+(a)
+0.90
+0.92
+0.94
+0.96
+0.98
+1.00
+0.00 0.02 0.04 0.06 0.08 0.10
+ζ
+0.0
+0.1
+W
+or
+st
+-c
+as
+e
+ne
+ar
+-o
+pt
+im
+al
+ity
+near-greedy (ours)
+Q∗-based
+Q-based
+additive
+(1− ζ) threshold
+(b)
+Figure 5. Comparison of average policy size and worst-case near-
+optimality of SVPs for different values of ζ on FrozenLake-8x8.
+How does the proposed algorithm compare to the alter-
+natives? Using the FrozenLake-8x8 environment with
+γ = 0.9, we compare the proposed approach to the three
+baselines in terms of average policy size (Figure 5a) and
+worst-case near-optimality (Figure 5b). We focused on small
+values of ζ, given the goal is to learn near-optimal behavior.
+For this particular environment, the conservative algorithm
+completely fails to discover near-equivalent actions. As ζ
+increases, the near-greedy finds solutions of comparable pol-
+icy size to the baselines. However, holistically, near-greedy
+performs best because it respects the predefined optimality
+threshold (lies to the upper right of the shaded region) while
+maximizing the policy size. For 0 < ζ < 0.04, both Q∗-
+based and Q-based baselines violate the predefined near-
+optimality threshold while only yielding marginally larger
+policy sizes. For ζ ≥ 0.9, the Q∗-based approach finds an
+arbitrarily bad solution with a worst-case near-optimality of
+< 10%. This simple environment illustrates the importance
+of considering a worst-case future during learning and ac-
+counting for the inter-dependence of including/excluding
+actions at different states. On this environment, we used
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies
+‖V ∗‖∞ to define the margin � for additive, and the solu-
+tion includes fewer actions and does not make good use of
+the allowable sub-optimality compared to near-greedy for
+ζ ≤ 0.04 (for other values of ζ it leads to the same behavior
+as near-greedy).
+5.2. Applied to Real Clinical Data
+For the MIMIC-sepsis task, we apply our proposed ap-
+proach with a linear function approximator by first running
+Q-learning to estimateQ∗, and then running the near-greedy
+algorithm with various values of ζ. During training, each
+episode is generated by randomly sampling a patient trajec-
+tory from the training set (with replacement). Given the com-
+plexity of this environment, to improve convergence, we ex-
+ponentially decay the step size α every 1, 000 episodes. We
+train the RL agent for 1, 000, 000 episodes, after which TD
+errors stabilize and the estimated Q-values reach plateaus.
+We consider ζ values from 0.0 to 0.1 to obtain SVPs that
+are near-optimal.
+For illustrative purposes, we focus on an intermediate value
+of ζ = 0.05, where 50% of the states are mapped to more
+than one near-optimal action. On the test set, the estimated
+value of the softened policy derived from π is within ap-
+proximately 5–8% of the estimated optimal value (Table 2),
+which closely matches with the optimality margin ζ = 0.05,
+given the complexity of this task and the noise in the data.
+To better understand the near-equivalence relationships
+among actions, for each ‘optimal’ action, we count the num-
+ber of times every other action is suggested by the learned
+SVP. These counts are aggregated over all states in the test
+set and normalized by the maximum count (red numbers
+next to each cell), visualized as a heatmap in Figure 6. In
+interpreting these results, we worked closely with our co-
+author, MWS, a critical care physician who frequently treats
+patients with sepsis.
+By far, the most common actions correspond to IV fluids
+alone (region A), i.e., no vasopressors are used. We observe
+that actions with similar amounts of IV fluids are often
+considered near-equivalent. Since the differences in fluid
+volumes across these actions (adjacent cells) are non-trivial,
+we hypothesize that grouping those actions together makes
+sense for some (but not all) patient states. Similarly, in re-
+gion B where actions correspond to a low dose of IV fluids
+with various amounts of vasopressors, actions with similar
+vasopressor doses are often considered near-equivalent. We
+observe that the near-equivalent action sets are not always
+contiguous across IV/vasopressor doses. This is due, in
+part, to the fact that we restricted the action space A(s) for
+each state to only those that were taken frequently. Inter-
+estingly, in region C, actions with very high vasopressor
+and IV fluid doses are considered near-equivalent to the null
+action (i.e., do nothing). Typically, only the sickest patients
+Table 2. Value estimates of the learned SVPs on MIMIC-sepsis,
+with standard errors from 1,000 bootstraps of the test set. Effective
+sample size (measured as: usable trajectories / total number of
+trajectories, of the test set): 2,801/4,189.
+observed returns of test set
+clinician 73.1 ± .97
+ζ DR WDR
+0, π∗ 91.6 ± .31 92.2 ± .23
+0.05 84.3 ± .63 89.7 ± .32
+0.0 0.2 0.4 0.6 0.8 1.0
+Vasopressor dose (µg/kg/min)
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+IV
+fl
+u
+id
+d
+o
+se
+(m
+L
+/
+4
+h
+)
+0 0.001-0.08 0.08-0.2 0.2-0.45 >0.45
+0
+1
+-5
+0
+0
+5
+0
+0
+m
+L
+-1
+L
+1
+L
+-2
+L
+>
+2
+L
+A
+B
+C
+Normalized
+Count
+765 0 0 0 106
+5253 74 248 511 458
+6295 326 354 686 419
+4387 3330 2466 3673 1576
+23529 328 0 460 71
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+0.9
+1.0
+Figure 6. Near-equivalent relationships among actions in SVPs on
+the MIMIC-sepsis task with ζ = 0.05. Both the outer grid and
+the inner grid contain the 25 actions, corresponding to 5 doses of
+vasopressor and 5 doses of IV fluids. Red numbers indicate the
+frequency that each action is recommended as optimal.
+are prescribed the highest doses. The near-equivalence of
+this action with the null action may be due to the fact that
+these patients are so critically ill that doing ‘everything’ or
+‘nothing’ leads to a similar outcome.
+In Figure 6, we computed the ‘average’ near-equivalencies
+across all states. However, different sets of actions could
+be considered near-equivalent for different states. To bet-
+ter understand how action near-equivalencies might differ
+for different group of patients, we grouped the states into
+quartiles based on the V ∗ values and calculated the average
+policy size (Figure 7). Compared to ‘sicker’ states (with a
+lower value), the ‘healthier’ states (with a higher value) had
+on average more near-equivalencies. We hypothesize that
+when a patient is stable, the choice of action has less impact
+on the final outcome compared to less stable states.
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies
+(-9
+8.3
+1,
+93
+.65
+]
+(93
+.65
+, 9
+4.2
+8]
+(94
+.28
+, 9
+4.8
+6]
+(94
+.86
+, 9
+8.3
+7]
+V ∗(s)
+0.0
+0.5
+1.0
+1.5
+2.0
+a
+v
+er
+a
+g
+e
+p
+o
+li
+cy
+si
+ze
+Figure 7. Average size of π(s) at ζ = 0.05 for states with different
+V ∗(s) values (grouped into quartiles) on MIMIC-sepsis.
+6. Conclusion
+In the context of learning SVPs for MDPs, we propose a
+model-free algorithm that is a variant of TD learning. On
+both synthetic and real RL tasks, our algorithm discovers
+meaningful action near-equivalencies, while maintaining
+overall near-optimality across states. Though the theoreti-
+cal guarantees only hold for DAG settings, the near-greedy
+action selection heuristic can be easily extended to more
+complex settings involving non-DAGs and function approx-
+imation. In practice, to improve convergence and near-
+optimality guarantees, one could encode temporal informa-
+tion into the states for a discrete state space, converting a sin-
+gle ground state with different histories (e.g., visit number)
+into different states, effectively making the MDP a DAG.
+Despite current limitations, our proposed framework repre-
+sents an important step toward clinician/human-in-the-loop
+decision making. Such a framework, in which both opti-
+mality guarantees and action choices are provided, allows
+clinicians (and patients) to incorporate additional informa-
+tion when making treatment decisions. Though motivated in
+a healthcare setting, our approach could apply more broadly
+to other application domains involving humans-in-the-loop,
+such as intelligent tutoring systems or self-driving cars.
+Acknowledgments
+This work was supported by the National Science Founda-
+tion (NSF award no. IIS-1553146) and the National Library
+of Medicine (NLM grant no. R01LM013325). The views
+and conclusions in this document are those of the authors
+and should not be interpreted as necessarily representing the
+official policies, either expressed or implied, of the National
+Science Foundation nor the National Library of Medicine.
+The authors would like to thank Satinder Singh, Brahmajee
+Nallamothu, Jessica Golbus, and members of the MLD3
+group for helpful discussions regarding this work, as well
+as the reviewers for constructive feedback.
+References
+Bedoya, A. D., Futoma, J., Clement, M. E., Corey, K.,
+Brajer, N., Lin, A., Simons, M. G., Gao, M., Nichols, M.,
+Balu, S., et al. Machine learning for early detection of
+sepsis: an internal and temporal validation study. JAMIA
+Open, 2020.
+Brockman, G., Cheung, V., Pettersson, L., Schneider, J.,
+Schulman, J., Tang, J., and Zaremba, W. OpenAI Gym.
+arXiv preprint arXiv:1606.01540, 2016.
+Byrne, L. and Van Haren, F. Fluid resuscitation in human
+sepsis: time to rewrite history? Annals of intensive care,
+7(1):4, 2017.
+Fard, M. M. and Pineau, J. Non-deterministic policies
+in Markovian decision processes. Journal of Artificial
+Intelligence Research, 40:1–24, 2011.
+Gottesman, O., Johansson, F., Meier, J., Dent, J., Lee,
+D., Srinivasan, S., Zhang, L., Ding, Y., Wihl, D.,
+Peng, X., et al. Evaluating reinforcement learning al-
+gorithms in observational health settings. arXiv preprint
+arXiv:1805.12298, 2018.
+Gotts, J. E. and Matthay, M. A. Sepsis: pathophysiology
+and clinical management. Bmj, 353, 2016.
+Haarnoja, T., Zhou, A., Abbeel, P., and Levine, S. Soft actor-
+critic: Off-policy maximum entropy deep reinforcement
+learning with a stochastic actor. In Dy, J. and Krause,
+A. (eds.), Proceedings of the 35th International Confer-
+ence on Machine Learning, volume 80 of Proceedings
+of Machine Learning Research, pp. 1861–1870, Stock-
+holmsmssan, Stockholm Sweden, 10–15 Jul 2018. PMLR.
+URL http://proceedings.mlr.press/v80/haarnoja18b.html.
+Henry, K. E., Hager, D. N., Pronovost, P. J., and Saria, S.
+A targeted real-time early warning score (TREWScore)
+for septic shock. Science translational medicine, 7(299):
+299ra122–299ra122, 2015.
+Imbens, G. W. and Rubin, D. B. Causal inference in statis-
+tics, social, and biomedical sciences. Cambridge Univer-
+sity Press, 2015.
+Jiang, N. and Li, L. Doubly robust off-policy value evalu-
+ation for reinforcement learning. In Balcan, M. F. and
+Weinberger, K. Q. (eds.), Proceedings of The 33rd Inter-
+national Conference on Machine Learning, volume 48
+of Proceedings of Machine Learning Research, pp. 652–
+661, New York, New York, USA, 20–22 Jun 2016. PMLR.
+URL http://proceedings.mlr.press/v48/jiang16.html.
+Johnson, A. E., Pollard, T. J., Shen, L., Li-wei, H. L., Feng,
+M., Ghassemi, M., Moody, B., Szolovits, P., Celi, L. A.,
+and Mark, R. G. MIMIC-III, a freely accessible critical
+care database. Scientific data, 3:160035, 2016.
+https://wiens-group.engin.umich.edu/
+https://wiens-group.engin.umich.edu/
+http://proceedings.mlr.press/v80/haarnoja18b.html
+http://proceedings.mlr.press/v48/jiang16.html
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies
+Kakade, S. and Langford, J. Approximately optimal approx-
+imate reinforcement learning. In Proceedings of the Nine-
+teenth International Conference on Machine Learning,
+ICML 02, pp. 267274, San Francisco, CA, USA, 2002.
+Morgan Kaufmann Publishers Inc. ISBN 1558608737.
+Kearns, M. and Singh, S. Near-optimal reinforcement learn-
+ing in polynomial time. Machine learning, 49(2-3):209–
+232, 2002.
+Komorowski, M., Celi, L. A., Badawi, O., Gordon, A. C.,
+and Faisal, A. A. The Artificial Intelligence Clinician
+learns optimal treatment strategies for sepsis in intensive
+care. Nature Medicine, 24(11):1716, 2018.
+Li, L., Komorowski, M., and Faisal, A. A. The actor search
+tree critic (ASTC) for off-policy POMDP learning in med-
+ical decision making. arXiv preprint arXiv:1805.11548,
+2018.
+Liu, V., Escobar, G. J., Greene, J. D., Soule, J., Whippy,
+A., Angus, D. C., and Iwashyna, T. J. Hospital Deaths
+in Patients With Sepsis From 2 Independent Cohorts.
+JAMA, 312(1):90–92, 07 2014. ISSN 0098-7484. doi:
+10.1001/jama.2014.5804. URL https://doi.org/10.1001/
+jama.2014.5804.
+Lizotte, D. J. and Laber, E. B. Multi-objective Markov
+decision processes for data-driven decision support. The
+Journal of Machine Learning Research, 17(1):7378–7405,
+2016.
+Lizotte, D. J., Bowling, M., and Murphy, S. A. Linear fitted-
+Q iteration with multiple reward functions. Journal of
+Machine Learning Research, 13(Nov):3253–3295, 2012.
+Masood, M. and Doshi-Velez, F. Diversity-inducing pol-
+icy gradient: Using maximum mean discrepancy to
+find a set of diverse policies. In Proceedings of the
+Twenty-Eighth International Joint Conference on Arti-
+ficial Intelligence, IJCAI-19, pp. 5923–5929. Interna-
+tional Joint Conferences on Artificial Intelligence Or-
+ganization, 7 2019. doi: 10.24963/ijcai.2019/821. URL
+https://doi.org/10.24963/ijcai.2019/821.
+Melo, F. S. Convergence of Q-learning: A simple proof.
+Institute Of Systems and Robotics, Tech. Rep, pp. 1–4,
+2001.
+Nemati, S., Ghassemi, M. M., and Clifford, G. D. Optimal
+medication dosing from suboptimal clinical examples: A
+deep reinforcement learning approach. In 2016 38th An-
+nual International Conference of the IEEE Engineering
+in Medicine and Biology Society (EMBC), pp. 2978–2981.
+IEEE, 2016.
+Raghu, A., Komorowski, M., Ahmed, I., Celi, L., Szolovits,
+P., and Ghassemi, M. Deep reinforcement learning for
+sepsis treatment. Neural Information Processing Systems:
+workshop on Machine Learning for Health, 2017a.
+Raghu, A., Komorowski, M., Celi, L. A., Szolovits, P., and
+Ghassemi, M. Continuous state-space models for optimal
+sepsis treatment: a deep reinforcement learning approach.
+In Doshi-Velez, F., Fackler, J., Kale, D., Ranganath, R.,
+Wallace, B., and Wiens, J. (eds.), Proceedings of the 2nd
+Machine Learning for Healthcare Conference, volume 68
+of Proceedings of Machine Learning Research, pp. 147–
+163, Boston, Massachusetts, 18–19 Aug 2017b. PMLR.
+URL http://proceedings.mlr.press/v68/raghu17a.html.
+Reyna, M. A., Josef, C., Seyedi, S., Jeter, R., Shashikumar,
+S. P., Westover, M. B., Sharma, A., Nemati, S., and Clif-
+ford, G. D. Early prediction of sepsis from clinical data:
+the physionet/computing in cardiology challenge 2019.
+In 2019 Computing in Cardiology (CinC), pp. Page–1.
+IEEE, 2019.
+Robbins, H. and Monro, S. A stochastic approximation
+method. Ann. Math. Statist., 22(3):400–407, 09 1951.
+doi: 10.1214/aoms/1177729586. URL https://doi.org/10.
+1214/aoms/1177729586.
+Sutton, R. S. and Barto, A. G. Reinforcement learning: An
+introduction. MIT press, 2018.
+Thomas, P. and Brunskill, E. Data-efficient off-policy pol-
+icy evaluation for reinforcement learning. In Balcan,
+M. F. and Weinberger, K. Q. (eds.), Proceedings of The
+33rd International Conference on Machine Learning, vol-
+ume 48 of Proceedings of Machine Learning Research,
+pp. 2139–2148, New York, New York, USA, 20–22 Jun
+2016. PMLR. URL http://proceedings.mlr.press/v48/
+thomasa16.html.
+Van Seijen, H., Van Hasselt, H., Whiteson, S., and Wiering,
+M. A theoretical and empirical analysis of Expected
+Sarsa. In 2009 IEEE Symposium on Adaptive Dynamic
+Programming and Reinforcement Learning, pp. 177–184.
+IEEE, 2009.
+Watkins, C. J. and Dayan, P. Q-learning. Machine learning,
+8(3-4):279–292, 1992.
+Williams, D. Probability with martingales. Cambridge
+university press, 1991.
+https://doi.org/10.1001/jama.2014.5804
+https://doi.org/10.1001/jama.2014.5804
+https://doi.org/10.24963/ijcai.2019/821
+http://proceedings.mlr.press/v68/raghu17a.html
+https://doi.org/10.1214/aoms/1177729586
+https://doi.org/10.1214/aoms/1177729586
+http://proceedings.mlr.press/v48/thomasa16.html
+http://proceedings.mlr.press/v48/thomasa16.html
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies — Supplementary Materials
+A. Near-Optimal SVP With Additive Near-Optimality
+We can quantify the near-optimality of any given SVP π by using a version of the performance difference lemma (Kakade &
+Langford, 2002).
+Theorem 3. For any SVP π, if for every state s ∈ S:
+max
+a∈π(s)
+(
+Q∗(s, a∗)−Q∗(s, a)
+)
+≤ � ,
+then
+V ∗(s)− V π(s) ≤ �
+1− γ .
+Proof. Note that V ∗(s) ≤ V π(s) for any SVP π (equality holds when the SVP π corresponds to an optimal policy).
+Denoting a∗ = π∗(s), and ā = arg mina∈π(s)Q
+π(s, a). We can evaluate the difference between V ∗ and V π for a particular
+state s:
+V ∗(s)− V π(s) =
+[
+r(s, a∗) + γEs′|s,a∗V ∗(s′)
+]
+−
+[
+r(s, ā) + γEs′|s,āV π(s′)
+]
+=
+[
+r(s, a∗) + γEs′|s,a∗V ∗(s′)
+]
+−
+[
+r(s, ā) + γEs′|s,āV ∗(s′)
+]
++
+[
+r(s, ā) + γEs′|s,āV ∗(s′)
+]
+−
+[
+r(s, ā) + γEs′|s,āV π(s′)
+]
+(adding and subtracting the expressions in blue)
+= [Q∗(s, a∗)−Q∗(s, ā)] + γ
+[
+Es′|s,ā (V ∗(s′)− V π(s′))
+]
+.
+Suppose we are guaranteed that for every state s, we have the following bound on the action-value gap of actions in π(s):
+max
+a∈π(s)
+(
+Q∗(s, a∗)−Q∗(s, a)
+)
+≤ � ,
+or equivalently,
+∀a ∈ π(s) : Q∗(s, a∗)−Q∗(s, a) ≤ � ,
+we can further simplify:
+V ∗(s)− V π(s) ≤ �+ γ
+[
+Es′|s,ā (V ∗(s′)− V π(s′))
+]
+.
+Unrolling the recursive expression:
+V ∗(s)− V π(s) ≤ �+ γ�+ γ2
+[
+Es′′|s,ā,s′,ā′ (V ∗(s′′)− V π(s′′))
+]
+≤ �+ γ�+ γ2�+ · · ·
+=
+�
+1− γ .
+If we want the worst-case values of π to be within a margin defined as some fraction ζ of the maximum magnitude optimal
+value, e.g.,
+max
+s
+(V ∗(s)− V π(s)) ≤ ζ‖V ∗‖∞ ,
+then we can set
+�
+1− γ = ζ‖V
+∗‖∞ ,
+which implies that the action-value gap should be upper bounded by � = (1− γ)ζ‖V ∗‖∞. In practice, once we learn Q∗
+and V ∗, we can construct the SVP as
+π(s) = {a : Q∗(s, a) ≥ V ∗(s)− �}.
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies — Supplementary Materials
+B. Learning SVPs via an Exponential Action Space – And Why It Does Not Work
+Alternatively, one might reformulate the task of learning SVPs by considering an exponentially large action space, Ã =
+2A \ {∅}. By applying standard approaches to an MDP with this new action space, one can learn a policy π that maps each
+state to an element of Ã, such that π(s) = ã. Under this formulation, Q-values are defined over S × Ã, which we denote
+Qπ(s, ã). Consider the worst-case Q-values defined analogously to Definition 2:
+Qπ(s, ã) = min
+a∈ã
+Qπ(s, a).
+Then, for any ã ∈ Ã, we have
+Qπ(s, ã) = min
+a∈ã
+Qπ(s, a) ≤ max
+a∈ã
+Qπ(s, a),
+and since Qπ(s, a) = Qπ(s, {a}), there exists an ã∗ such that
+Qπ(s, ã) ≤ Qπ(s, ã∗) where ã∗ =
+{
+arg max
+a∈ã
+Qπ(s, a)
+}
+.
+Intuitively, selecting the best action in ã is always no worse than selecting the worst action in ã. This suggests that for any
+non-singleton set action ã, we can always find a singleton set action ã∗ that is better. Thus, this formulation results in trivial
+SVPs and does not discover near-equivalent actions. To yield meaningful solutions, one would require additional constraints.
+C. Example: Non-Existence of Near-Greedy SVP Fixed-Point
+Recall the near-greedy fixed-point equation:
+π(s) = {a : Qπ(s, a) ≥ (1− ζ)V ∗(s)} where Qπ(s, a) = r(s, a) + γEs′|s,a
+[
+min
+a′∈π(s′)
+{Qπ(s′, a′)}}
+]
+Consider the MDP in Figure 8 with two non-terminal states {s1, s2} and two actions {L,R}. Let γ = 0.9, ζ = 0.2. Here,
+V ∗ = [0.9, 1]. There are two candidate SVPs, both of which fail to satisfy the near-greedy fixed-point equation.
+• Suppose π(s1) = {R}, π(s2) = {R}. Then Qπ(s2, L) = 0.81 > (1 − ζ)V ∗(s2), meaning that L is a near-optimal
+action at s2 but not included in π(s2).
+• Suppose π(s1) = {R}, π(s2) = {L,R}. Then the worst-case Qπ(s2, L) = 0 because the agent falls into a cycle in
+the worst case, and thus L is not a near-optimal action but is included in π(s2).
+S1 S2 Send
+R, +1
+R, +0
+L, +0
+Figure 8. A three-state MDP with no near-greedy fixed-point solution when γ = 0.9 and ζ = 0.2.
+D. More on the Conservative Heuristic
+Theorem 4. The conservative ζ-optimal SVP exists and is unique for any MDP with non-negative rewards.
+Proof. In the conservative heuristic, there is no recursive relationship between policy π and its value function V π or Qπ.
+The policy construction depends on the lower-bound action-value function Q̌∗, which computes an expectation over V ∗ and
+immediate rewards r, and is thus unique, and so is π.
+To show that π is a valid SVP, we will show that the optimal action at every state is always included in π(s) such that
+∀s ∈ S, π(s) 6= ∅. Consider the optimal action at state s, a∗ = arg maxa∈AQ∗(s, a) where V ∗(s) = Q∗(s, a∗), we have:
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies — Supplementary Materials
+Q̌∗ζ(s, a
+∗) = r(s, a∗) + γEs′|s,a∗(1− ζ)V ∗(s′)
+= ζr(s, a∗) + (1− ζ)[r(s, a∗) + γEs′|s,a∗V ∗(s′)]
+= ζr(s, a∗) + (1− ζ)Q∗(s, a∗)
+≥ (1− ζ)Q∗(s, a∗)
+= (1− ζ)V ∗(s).
+Since the conservative heuristic calculates an expectation over V ∗ and r(s, a) and does not involve any recursive relationship,
+after learning Q∗ (and thus V ∗), we can apply a standard stochastic approximation algorithm with provable convergence
+guarantees (Robbins & Monro, 1951). While the conservative heuristic has good theoretical properties, in Section 5.1 we
+observe that it does not discover as many near-optimal actions compared to near-greedy (due to it being conservative).
+E. Convergence Analysis for the Near-Greedy TD Algorithm (Algorithm 1)
+E.1. Contraction
+For the case of a general MDP (possibly non-DAG), we refer to the convergence proofs of TD methods such as Q-learning
+and expected SARSA, which have been extensively studied in the tabular setting for problems with discrete state and action
+spaces (Watkins & Dayan, 1992; Melo, 2001; Van Seijen et al., 2009). For Q-learning, given bounded rewards, Q converges
+to the optimal value function Q∗, i.e., Q(s, a) ' Q∗(s, a) for all s ∈ S , a ∈ A with probability 1, under regular conditions
+for stochastic approximation: each (s, a) is updated infinitely many times,
+∑
+t αt =∞, and
+∑
+t α
+2
+t <∞. One of the key
+steps in the proof involves showing that the update operator H is a contraction with respect to sup-norm (Melo, 2001):
+Update operator:
+(HQ)(s, a) = r(s, a) + γEs′|s,a max
+a′∈A
+Q(s′, a′)
+based on the Bellman optimality equation, and
+‖HQ1 − HQ2‖∞ ≤ γ‖Q1 −Q2‖∞.
+Since the proposed algorithms have the same structure as TD learning, ideally we would have the same convergence
+guarantees. Consider the following update operator for the near-optimal TD algorithm:
+(HQ)(s, a) = r(s, a) + γEs′|s,a min
+a′∈π(s′)
+Q(s′, a′)
+where π(s′) = {a′ : Qπ(s′, a′) ≥ (1− ζ)V ∗(s′)}.
+In an attempt to show that the update operator is a contraction, we can manipulate ‖HQ1 − HQ2‖∞ in a similar way:
+‖HQ1 − HQ2‖∞ = max
+s,a
+∣∣∣∣
+(
+r(s, a) + γEs′|s,a min
+a′1∈π1(s′)
+Q1(s
+′, a′1)
+)
+−
+(
+r(s, a) + γEs′|s,a min
+a′2∈π2(s′)
+Q2(s
+′, a′2)
+)∣∣∣∣
+= max
+s,a
+∣∣∣∣γEs′|s,a
+[
+min
+a′1∈π1(s′)
+Q1(s
+′, a′1)− min
+a′2∈π2(s′)
+Q2(s
+′, a′2)
+]∣∣∣∣
+≤ max
+s,a
+γEs′|s,a
+∣∣∣∣ min
+a′1∈π1(s′)
+Q1(s
+′, a′1)− min
+a′2∈π2(s′)
+Q2(s
+′, a′2)
+∣∣∣∣
+≤ γmax
+s′
+∣∣∣∣ min
+a′1∈π1(s′)
+Q1(s
+′, a′1)− min
+a′2∈π2(s′)
+Q2(s
+′, a′2)
+∣∣∣∣
+≤ γmax
+s′
+|V ∗(s′)− (1− ζ)V ∗(s′)|
+= γζ max
+s′
+V ∗(s′) = γζ‖V ∗‖∞.
+With this loose upper bound, the update operator is not necessarily a contraction, suggesting that the algorithm might not
+converge for a general MDP.
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies — Supplementary Materials
+E.2. Convergence Proof for DAG MDPs
+We first state a key result from martingale theory that we will use:
+Theorem 5 (Martingale Convergence Theorem (Williams, 1991)). Consider {Mn}n∈N as martingale in Rd with∑
+n≥0
+E
+[
+‖Mn+1 −Mn‖2|Fn
+]
+<∞
+then there exists a random variable M∞ ∈ R such that ‖M∞‖ <∞ almost surely and Mn →n→∞ M∞ almost surely.
+Using this standard result, we can show the following convergence result:
+Theorem 2 (restated). The near-greedy TD algorithm (Algorithm 1) converges to the unique solution if the MDP is a DAG
+with non-negative rewards, under the same conditions for regular TD learning: rewards have bounded variance, each (s, a)
+is updated infinitely many times,
+∑
+t αt =∞, and
+∑
+t α
+2
+t <∞ for each (s, a) (Watkins & Dayan, 1992; Melo, 2001).
+Proof. Given the DAG MDP, we use H to denote the maximum number of steps (depth of the topological sort tree) and
+(sh, ah) to denote a state-action pair for a particular state sh at step h. We use Qt(sh, ah) to denote the Q-value estimate
+after episode t in Algorithm 1. In addition, we overload the notation Q(h) to refer to the vector containing Q-values of all
+state-action pairs S(h)×A(h) at step h.
+From Theorem 1 we know that for a DAG MDP, the equation π(s) = {a : Qπ(s, a) ≥ (1− ζ)V ∗(s)} has a unique fixed
+point solution, which we denote πζ and its worst-case value function as Qζ . Furthermore, we define the following:
+a(sh) = arg min
+a∈πζ(sh)
+Qζ(sh, a)
+a(sh) = arg max
+a/∈πζ(sh)
+Qζ(sh, a)
+Note that Qζ(s, a(s)) ≥ (1− ζ)V ∗(s) ≥ Qζ(s, a(s)). Intuitively, a gives us the worst-case action whose value will be used
+in the update / backup, whereas a is the best action outside the near-optimal action set for the given ζ.
+We will prove the convergence of the near-greedy TD algorithm for DAG MDPs via backward induction over the episode
+steps H,H − 1, . . . , 1.
+Base step. For every terminal state sH , the estimates are correct by initialization as Qζ(s, a) = 0 and πζ(s) = A trivially.
+Therefore, for all (sH , aH) and � ≥ 0, there exists t� ≥ 0, such that, for all t ≥ t�, ‖Qt(H) − Qζ(H)‖∞ ≤ � where
+Q(H) is the vector containing Q-values of state-action pairs at step H .
+Inductive step. Assume that Qt for all state-action pairs in levels {h+ 1, . . . ,H} converge to the true Qζ almost surely.
+In other words, other than sequences of measure 0, under all possible updates, we have Qt(sj , aj) → Qζ(sj , aj) for
+all j ≥ h + 1. This guarantees that for all (sh+1, ah+1), for every � > 0, there exists t� > 0 such that, for all t ≥ t�,
+‖Qt(h+ 1)−Qζ(h+ 1)‖∞ ≤ �. For notational convenience in the inductive step, we use (s, a) to denote state-action
+pairs at step h and (s′, a′) to denote state-action pairs at step h+ 1.
+Let ∆1(s′) = Qζ(s′, a(s′))−Qζ(s′, a(s′)) and ∆2(s′) = maxa∈πζ(s′)Qζ(s′, a)−Qζ(s′, a(s′)). Note that, if we pick
+� < 1
+2
+mins′(∆1(s
+′),∆2(s
+′)), then convergence implies that, for each state s′, after some episode t0, a constant action
+a(s′) is used in the near-greedy update of Q-values at step h.
+Consider the sequence of Q-values {Qt(h)}t∈N. Let Fth denote the history of the algorithm till step h of episode t. In our
+proof, we consider the updates made to Q(h) after t0 with Qt0(h) as its initialization for our analysis. This reduces the
+proof structure to a simple stochastic approximation based argument where the constant near-greedy action is used while
+bootstrapping for any state s′. At any such episode t > t0, the algorithm makes an update of the following form to Qt(h):
+Qt+1(s, a) =
+{
+Qt(s, a) if (s, a)th 6= (s, a)
+(1− αth)Qt(s, a) + αth[rth + γQt(s′t, a(s′t))] if (s, a)th = (s, a)
+We can rewrite the bootstrapping update as:
+Qt+1(s, a) = (1− αth)Qt(s, a) + αthEr,s′ [r + γQt(s′, a(s′))]︸ ︷︷ ︸
+Bellman update
++αthwth︸ ︷︷ ︸
+noise term
+(3)
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies — Supplementary Materials
+where wth = [rth + γQt(s′t, a(s
+′
+t))]− Er,s′ [r + γQt(s′, a(s′))]. We now analyze these two components of the update
+separately.
+Bellman update. First note that Er,s′ [(r+γQt(s′, a(s′)))2] <∞ by using the assumption E[r2] <∞ and the inductive
+assumption on Qt. In the near-greedy TD algorithm, for each (s, a), the updates are made using step size αt such that∑
+t αt =∞, and
+∑
+t α
+2
+t <∞. Using Q̄(s, a) to denote the noise-free update term in Eqn. (3), for the Bellman update
+sequence, we have:
+Q̄t+1(s, a)−Qζ(s, a) = (1− αth)(Qt(s, a)−Qζ(s, a)) + αthγEs′ [Qt(s′, a(s′))−Qζ(s′, a(s′))]
+≤ (1− αth)(Qt(s, a)−Qζ(s, a)) + αthγ�
+where the last step follows from the inductive assumption. Using the standard results from stochastic approximation
+(Robbins & Monro, 1951), we can conclude that the deterministic error Πt>t0(1 − αth)2(Qt0(s, a) − Qζ(s, a))2
+converges to 0 implying lim supt→∞(Q̄t(s, a)−Qζ(s, a))2 ≤ C� for some constant C. As the chosen � is arbitrary,
+by the sandwich theorem for limits, the error incurred via the Bellman update sequence converges to 0 almost surely.
+Noise term. We will now argue that the noise sequence
+∑
+t>t0
+αthwth also converges to 0. Note that, Zt =∑
+t>t0
+αthwth ∈ RS(h)×A(h) is a martingale sequence as E[wth(s, a)|Fth] = 0. Further, again by the bounded
+variance assumption over rewards and the inductive assumption over Q(h+ 1), we have∑
+t>t0
+E
+[
+‖Zt+1 − Zt‖2|Fth
+]
+=
+∑
+t>t0
+α2thE
+[
+‖wth‖2|Fth
+]
+≤ c ·
+∑
+t>t0
+α2th ≤ ∞
+Now using Theorem 5 and the definition Zt0 = 0, we can conclude that the martingale converges to 0 almost surely.
+We know that for two sequences of random variables Xn and Yn, if Xn → X and Yn → Y almost surely, then
+Xn + Yn → X + Y almost surely. Combining the two parts, we get ‖Q(h) − Qζ(h)‖∞ → 0 almost surely. This
+completes the inductive step.
+By induction, this proves the desired convergence result.
+F. Comparisons to the Mixed-Integer Programming (MIP) Baseline
+Fard & Pineau (2011) proposed a mixed-integer programming formulation for solving the maximal-size SVP in a finite-
+horizon tabular planning problem. The optimization problem jointly solves for the worst-case values V and a binary
+representation of SVP π, where Π(s, a) = Ja ∈ π(s)K is 1 if a is an element of π(s), and 0 otherwise. There are a total
+of |S|(|A|+ 1) decision variables and |S|(|A|+ 2) constraints. The formulation is reproduced below; see Fard & Pineau
+(2011) for more details.
+max
+V,Π
+[
+µᵀV+(Vmax − Vmin)eᵀsπea
+]
+subject to
+V (s) ≥ (1− ζ)V ∗(s) ∀s ∈ S∑
+a∈AΠ(s, a) > 0 ∀s ∈ S
+V (s) ≤ r(s, a) + γ
+∑
+s′∈S
+p(s′|s, a)V (s′) + Vmax(1−Π(s, a)) ∀s ∈ S,∀a ∈ A
+Since the MIP approach requires knowledge of the MDP model, we implemented a dynamic programming based approach
+with the near-greedy heuristic, namely near-greedy value iteration (VI). We applied these two algorithms on simple
+environments where the MIP solution is tractable. On Chain-5 with γ = 0.9, where the underlying MDP is a DAG
+(Figure 9), near-greedy VI converged for all values of ζ. The SVPs learned by both approaches satisfy near-optimality with
+respect to the given ζ, as shown by the worst-case near-optimality percentages. For ζ ≥ 0.1, the SVP included all actions
+at every state. Even though near-greedy VI is not explicitly maximizing the policy size (unlike the MIP approach, which
+includes policy size as part of its objective function), for many of the cases it still finds an SVP solution with maximal size, or
+close to the maximal-size solution as found by MIP (when ζ = 0.03 and 0.04 on this problem). On a non-DAG environment,
+CyclicChain-5 with γ = 0.9 (Figure 10), near-greedy VI did not converge for 0.2 ≤ ζ < 1 (when a near-optimal SVP
+should only include the two ‘right’ actions but no ‘left’ actions). This is consistent with what we observed in Figure 4a.
+On this problem, when near-greedy VI does converge (ζ ≤ 0.1, which is a suitable range of values if one aims to learn
+close-to-optimal behavior), it consistently finds the same maximal-size SVP as MIP. Compared to a model-based approach
+based on exhaustive search, our proposed near-greedy heuristic identifies SVP solutions that achieve good worst-case
+near-optimality and similar average policy sizes, despite the fact that we do not explicitly optimize for the size of the SVP.
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies — Supplementary Materials
+Near-greedy VI MIP
+ζ policy profile
+average
+policy size
+policy profile
+0 s1 s2 s3 s4 s5 (100.0%) 1 1 (100.0%) s1 s2 s3 s4 s5
+0.01 s1 s2 s3 s4 s5 ( 99.0%) 1.5 1.5 ( 99.0%) s1 s2 s3 s4 s5
+0.02 s1 s2 s3 s4 s5 ( 98.1%) 1.75 1.75 ( 98.0%) s1 s2 s3 s4 s5
+0.03 s1 s2 s3 s4 s5 ( 97.1%) 2 2.25 ( 97.0%) s1 s2 s3 s4 s5
+0.04 s1 s2 s3 s4 s5 ( 96.2%) 2.25 2.5 ( 96.1%) s1 s2 s3 s4 s5
+0.05 s1 s2 s3 s4 s5 ( 95.2%) 2.75 2.75 ( 95.2%) s1 s2 s3 s4 s5
+0.1 s1 s2 s3 s4 s5 ( 90.2%) 4 4 ( 90.2%) s1 s2 s3 s4 s5
+0.2 s1 s2 s3 s4 s5 ( 90.2%) 4 4 ( 90.2%) s1 s2 s3 s4 s5
+1 s1 s2 s3 s4 s5 ( 90.2%) 4 4 ( 90.2%) s1 s2 s3 s4 s5
+Figure 9. SVPs learned by the near-greedy and MIP algorithms on Chain-5 at different ζs. Parenthesized percentages denote the
+worst-case near-optimality.
+Near-greedy VI MIP
+ζ policy profile
+average
+policy size
+policy profile
+0 s1 s2 s3 s4 s5 (100.0%) 1 1 (100.0%) s1 s2 s3 s4 s5
+0.01 s1 s2 s3 s4 s5 (100.0%) 1.5 1.5 (100.0%) s1 s2 s3 s4 s5
+0.02 s1 s2 s3 s4 s5 ( 98.1%) 1.75 1.75 ( 98.9%) s1 s2 s3 s4 s5
+0.03 s1 s2 s3 s4 s5 ( 97.9%) 1.75 1.75 ( 98.9%) s1 s2 s3 s4 s5
+0.04 s1 s2 s3 s4 s5 ( 96.8%) 2 2 ( 96.8%) s1 s2 s3 s4 s5
+0.05 s1 s2 s3 s4 s5 ( 96.8%) 2 2 ( 96.8%) s1 s2 s3 s4 s5
+0.1 s1 s2 s3 s4 s5 ( 96.8%) 2 2 ( 96.8%) s1 s2 s3 s4 s5
+0.2 (did not converge) - 2 ( 96.8%) s1 s2 s3 s4 s5
+1 s1 s2 s3 s4 s5 ( 16.1%) 4 4 ( 16.1%) s1 s2 s3 s4 s5
+Figure 10. SVPs learned by the near-greedy and MIP algorithms on CyclicChain-5 at different ζs. Parenthesized percentages denote the
+worst-case near-optimality.
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies — Supplementary Materials
+G. Policy Evaluation for SVPs
+For completeness, we describe the policy evaluation algorithm for an SVP and show that the update is a contraction, thereby,
+guaranteeing convergence.
+Given an SVP π, the value functions are defined as:
+V π(s) = min
+a∈π(s)
+Qπ(s, a)
+Qπ(s, a) = Er,s′ [r + γV π(s′)]
+The value function for any given policy π can be evaluated easily via a simple modification of iterative policy evaluation
+algorithm for deterministic/stochastic policies (Sutton & Barto, 2018):
+Algorithm 2 Iterative policy evaluation for set-valued policies
+1: Input: SVP π
+2: Initialize Q(s, a) = 0 for all s ∈ S, a ∈ A
+3: repeat
+4: ∆← 0
+5: for each s, a ∈ S ×A do
+6: Q′(s, a) = Er,s′
+[
+r + γmina′∈π(s′)Q(s
+′, a′)
+]
+7: ∆← max(∆, |Q′(s, a)−Q(s, a)|)
+8: end for
+9: Q← Q′
+10: until ∆ < θ
+11: return Q
+We now show that the update in Algorithm 2 is a contraction:
+Lemma 1. For any pair of action-value functions Q1 and Q2, and a given policy π, we have:
+‖T Q1 − T Q2‖∞ ≤ γ‖Q1 −Q2‖∞
+Proof. For any s, a ∈ S ×A, we have:
+|(T Q1)(s, a)− (T Q2)(s, a)| = |Er,s′ [r + γV π1 (s′)]− Er,s′ [r + γV π2 (s′)]|
+= γ
+∣∣∣∣Es′
+[
+min
+a1∈π(s′)
+Q1(s
+′, a1)− min
+a2∈π(s′)
+Q2(s
+′, a2)
+]∣∣∣∣
+≤ γmax
+s∈S
+∣∣∣∣
+[
+min
+a1∈π(s)
+Q1(s, a1)− min
+a2∈π(s)
+Q2(s, a2)
+]∣∣∣∣
+≤ γ‖Q1 −Q2‖∞.
+The contraction lemma further implies that Algorithm 2 converges to the unique fixed point of the value function of the
+policy π. As the update is a straightforward modification of the usual Bellman operator, we can implement/analyze a fitted
+policy evaluation algorithm for SVPs as well.
+Clinician-in-the-Loop Decision Making: RL with Near-Optimal Set-Valued Policies — Supplementary Materials
+H. Clinical Task Details
+Following Komorowski et al. (2018), we extracted 48 physiological features (Table 3) to represent each patient.
+Table 3. The 48 physiological features
+Demographics/Static
+Source tables: PATIENTS, ADMISSIONS,
+ICUSTAYS, CHARTEVENTS, elixhauser quan
+• Shock Index
+• Elixhauser
+• SIRS
+• Gender
+• Re-admission
+• GCS - Glasgow Coma Scale
+• SOFA - Sequential Organ Failure Assessment
+• Age
+Lab Values
+Source tables: CHARTEVENTS, LABEVENTS
+• Albumin
+• Arterial pH
+• Calcium
+• Glucose
+• Hemoglobin
+• Magnesium
+• PTT - Partial Thromboplastin Time
+• Potassium
+• SGPT - Serum Glutamic-Pyruvic Transaminase
+• Arterial Blood Gas
+• BUN - Blood Urea Nitrogen
+• Chloride
+• Bicarbonate
+• INR - International Normalized Ratio
+• Sodium
+• Arterial Lactate
+• CO2
+• Creatinine
+• Ionised Calcium
+• PT - Prothrombin Time
+• Platelets Count
+• SGOT - Serum Glutamic-Oxaloacetic Transaminase
+• Total bilirubin
+• White Blood Cell Count
+Vital Signs
+Source tables: CHARTEVENTS
+• Diastolic Blood Pressure
+• Systolic Blood Pressure
+• Mean Blood Pressure
+• PaCO2
+• PaO2
+• FiO2
+• PaO/FiO2 ratio
+• Respiratory Rate
+• Temperature (Celsius)
+• Weight (kg)
+• Heart Rate
+• SpO2
+Intake and Output Events
+Source tables: INPUTEVENTS CV, INPUTEVENTS MV,
+OUTPUTEVENTS
+• Fluid Output - 4 hourly period
+• Total Fluid Output
+• Mechanical Ventilation
+• Timestep
+	1 Introduction
+	2 Background
+	2.1 Set-Valued Policy
+	2.2 Value Functions for SVPs
+	2.3 Near-Optimal SVPs
+	3 Methods
+	3.1 Heuristics for Constructing Near-Optimal SVPs
+	3.2 Learning Near-Optimal SVPs
+	3.3 Theoretical Analysis
+	4 Experiments
+	4.1 Environments
+	4.2 Baselines
+	4.3 Evaluation
+	5 Results
+	5.1 Applied to Synthetic Data
+	5.2 Applied to Real Clinical Data
+	6 Conclusion
+	A Near-Optimal SVP With Additive Near-Optimality
+	B Learning SVPs via an Exponential Action Space – And Why It Does Not Work
+	C Example: Non-Existence of Near-Greedy SVP Fixed-Point
+	D More on the Conservative Heuristic
+	E Convergence Analysis for the Near-Greedy TD Algorithm
+	E.1 Contraction
+	E.2 Convergence Proof for DAG MDPs
+	F Comparisons to the Mixed-Integer Programming (MIP) Baseline
+	G Policy Evaluation for SVPs
+	H Clinical Task Details

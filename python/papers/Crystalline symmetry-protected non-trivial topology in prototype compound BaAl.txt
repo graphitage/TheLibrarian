@@ -1,0 +1,1277 @@
+Crystalline symmetry-protected non-trivial topology in prototype compound BaAl4
+Kefeng Wang+,1 Ryo Mori+,2, 3 Zhijun Wang,4, 5 Limin Wang,1 Jonathan Han
+Son Ma,3, 6 Drew W. Latzke,2, 3 David E. Graf,7 Jonathan D. Denlinger,8 Daniel
+Campbell,1 B. Andrei Bernevig,9 Alessandra Lanzara,3, 6, ∗ and Johnpierre Paglione1, †
+1Center for Nanophysics and Advanced Materials, Department of Physics,
+University of Maryland, College Park, MD 20742, USA
+2Applied Science & Technology, University of California, Berkeley, CA 94720, USA
+3Materials Sciences Division, Lawrence Berkeley National Laboratory, Berkeley, CA 94720, USA
+4Beijing National Laboratory for Condensed Matter Physics,
+and Institute of Physics, Chinese Academy of Sciences, Beijing 100190, China
+5University of Chinese Academy of Sciences, Beijing 100049, China
+6Department of Physics, University of California, Berkeley, CA 94720, USA
+7National High Magnetic Field Laboratory, Florida State University, Tallahassee, FL 32306-4005, USA
+8Advanced Light Source, Lawrence Berkeley National Laboratory, Berkeley, CA 94720, USA
+9Department of Physics, Princeton University, Princeton, NJ 08554, USA
+(Dated: July 27, 2020)
+The BaAl4 prototype crystal structure is the most populous of all structure types, and is the
+building block for a diverse set of sub-structures including the famous ThCr2Si2 family that hosts
+high-temperature superconductivity and numerous magnetic and strongly correlated electron sys-
+tems. The MA4 family of materials (M=Sr, Ba, Eu; A=Al, Ga, In) themselves present an intriguing
+set of ground states including charge and spin orders, but have largely been considered as uninter-
+esting metals. Using electronic structure calculations, symmetry analysis and topological quantum
+chemistry techniques, we predict the exemplary compound BaAl4 to harbor a three-dimensional
+Dirac spectrum with non-trivial topology and possible nodal lines crossing the Brillouin zone,
+wherein one pair of semi-Dirac points with linear dispersion along the kz direction and quadratic
+dispersion along the kx/ky direction resides on the rotational axis with C4v point group symme-
+try. Electrical transport measurements reveal the presence of an extremely large, unsaturating
+positive magnetoresistance in BaAl4 despite an uncompensated band structure, and quantum oscil-
+lations and angle-resolved photoemission spectroscopy measurements confirm the predicted multi-
+band semimetal structure with pockets of Dirac holes and a Van Hove singularity (VHS) remarkably
+consistent with the theoretical prediction. We thus present BaAl4 as a new topological semimetal,
+casting its prototype status into a new role as building block for a vast array of new topological
+materials.
+The development of a better understanding of the role
+of topology in electronic states has led to a revolution
+in exploring both old and new compounds for non-trivial
+topologies, and has provided a fertile platform to search
+for new topological fermionic excitations [1–3]. The dis-
+covery of topological insulators (TIs) with robust metallic
+surface states protected by the topology of the insulat-
+ing bulk [1, 2] was followed by the discovery of topolog-
+ical semimetals (TSMs). These are found to have deep
+connections with particle physics models of relativistic
+chiral (Weyl) fermions and also provide fermionic excita-
+tions without high-energy counterparts [3–12]. In a Dirac
+semimetal (DSM), bulk valence and conduction bands
+cross each other linearly at discrete points protected by
+time-reversal, inversion and crystal symmetries. These
+stable Dirac points with four-fold degeneracy make it
+possible to simulate massless Dirac fermions [3, 4]. By
+breaking either inversion or time reversal symmetry, a
+Dirac semimetal can be tuned to a Weyl state where the
+nondegenerate linear touchings of the bulk bands come
+in pairs. Each Weyl point with two-fold-degeneracy has a
+definite chirality of ±1 and the quasiparticle excitations
+mimic the relativistic Weyl (chiral) fermions [5, 6, 13, 14].
+Cd3As2 and Na3Bi were the first theoretically pre-
+dicted DSM candidates [15, 16], subsequently con-
+firmed by experiments [17–20]. Recently, several materi-
+als including transition-metal icosagenides MA3 (M=V,
+Nb, and Ta; A=Al, Ga, In) [21], MgTa2N3 [22, 23],
+CaAgBi [24] and PtTe2 [25], were predicted to host Dirac
+fermions. These form part of an even larger list of TSMs
+[26–28] that also exhibit exotic physical properties in-
+cluding high carrier mobilities, chiral anomaly physics
+and topological superconductivity. Extremely large mag-
+netoresistance (MR) is another symptom of such materi-
+als, which is usually very small in non-magnetic, non-
+compensated metals according to semiclassical trans-
+port theory. However, several TSMs – including Dirac
+semimetals Cd3As2 and ZrSiS [29–31], the NbAs fam-
+ily [32–35], the type-II Weyl semimetal WTe2 [36] and
+several other TSMs such as NbSb2 [37], PtSn4 [38, 39],
+LaSb[40] – exhibit extremely large MR behavior which
+could have potential application in magnetic sensors,
+spintronics and memories. Very recently, multiple topo-
+logical states have been predicted and observed in the
+iron-based superconductors LiFeAs and Fe(Se,Te)[41],
+while possible Dirac fermions are predicted in heavy
+ar
+X
+iv
+:2
+00
+7.
+12
+57
+1v
+1 
+ [
+co
+nd
+-m
+at
+.m
+tr
+l-
+sc
+i]
+  2
+4 
+Ju
+l 
+20
+20
+2
+fermion superconductors Ce(Co,Rh,Ir)In5[42].
+The MA4 family of materials (M=Sr, Ba, Eu;
+A=Al,Ga,In) form the prototype parent crystal structure
+of a large family of compounds including the ThCr2Si2-
+based iron superconductors[43], classic heavy fermions
+systems such as CeCu2Si2[44, 45], and numerous non-
+centrosymmetric compounds[46]. In addition, the MA4
+family itself presents a rich variety of ground states. For
+instance, SrAl4 exhibits a charge density wave transition
+at 200 K, while Eu(Ga,Al)4 orders antiferromagnetically
+at 15 K and is thought to also exhibit charge density wave
+order [47, 48]. In this work, we present the first compre-
+hensive combined experimental and theoretical study of
+topology in the classic prototype compound BaAl4, in-
+cluding first principles electronic structure calculations,
+transport measurements, and angle-resolved photoemis-
+sion (ARPES) studies. We predict BaAl4 to be a topolog-
+ical three dimensional Dirac semimetal, where one pair
+of type-I Dirac points resides on the rotational axis with
+the C4v point group symmetry, and confirm this predic-
+tion using ARPES and quantum oscillations experiments.
+The calculated band structure is in excellent agreement
+with ARPES spectra, and Hall resistivity and quantum
+oscillations measurements confirm the multi-band struc-
+ture with electron and hole pockets, and is consistent
+with the predicted presence of Dirac hole pockets. To-
+gether with an extremely large MR that does not saturate
+in fields up to 32 T, our results indicate BaAl4 is a new
+topological semimetal, and point to the MA4 family of
+materials as fertile territory for the exploration of a new
+basis of topological systems.
+Non-Trivial Topology in BaAl4
+Fig. 1(a,b) presents schematic illustrations of both the
+crystal structure and the bulk Brillouin zone of BaAl4.
+The high quality of single crystals grown by a self-flux
+method (see Fig. 1(c)) is confirmed by X-ray diffraction
+(FIG. S1 in SM) and core-level electron photoemission
+spectrum, as shown in Fig. 1(d). Rietveld refinement of
+powder X-ray diffraction spectra confirms our samples to
+have the body-centered tetragonal structure with space
+group I4/mmm (No. 139). Clear peaks from Ba-5s, Ba-
+5s, and Al-2p core-level electrons observed by photoemis-
+sion spectroscopy confirm the correct chemical composi-
+tion.
+In the BaAl4 unit cell, the Ba atoms sit at the Wyckoff
+position 2a, while the Al atoms sit at two non-equivalent
+Wyckoff positions 4d and 4e, as shown in Table I in the
+Supplementary Materials. Among them, 2a and 4d sites
+are the maximal Wyckoff positions, but 4e is not. The
+4e Wyckoff position has a stabilizer group [49] which is a
+subgroup of the stabilizer group of the maximal positon
+2a or 2b. Fig. 1(e,f) show the calculated bulk electronic
+structure along high-symmetry lines without (with) spin-
+orbit coupling, showing its semimetallic ground state fea-
+ture. One observes that there are several crossing points
+along Γ−X, Γ−Σ, and Z−Σ1 directions in different mir-
+ror reflection planes from two quasi-linear bands close to
+the Fermi level (EF ) in the band structure without SOC.
+These Dirac nodal points could give rise to a variety of
+nodal Dirac nodal lines in each mirror plane and also
+exotic surface states, which deserve further study.
+Once the SOC is included, most of these crossing
+points open small gaps because the two crossing bands
+belong to same irreducible representation of the point
+group indicated by the eigenvalue analyses. For example,
+the two bands crossing each other along Γ− Σ direction
+at ∼ 0.1 eV both belong to Γ5 representation and then
+the crossing point is gapped out. However, the crossing
+point along Γ − Z direction is different. On Γ − Z
+path which is along the rotational axis, the point group
+symmetry is of C4v. The two doubly-degenerate crossing
+bands (highlighted by the red square in Fig. 1(f)) are
+found to form two distinct irreducible representations
+Γ6 and Γ7 representation of the C4v double group. In
+Fig. 1(g), we show these two bands belong to different
+representations of the symmetry group; therefore, the
+intersection of the two double-degenerate bands is
+protected by the crystalline symmetry, C4v, forming a
+massless Dirac fermion. Figs. 1(h,i) show the zoomed
+dispersion along out-of-plane (kz) and in-plane directions
+(kx/ky). While the slopes of the two crossing bands
+along the out-of-plane (kz) have opposite signs, remi-
+niscent of a type-I Dirac point [16–20], the dispersion
+along the other directions show quadratic dispersion.
+The crossing points are above the Fermi level, according
+to the ab initio calculations. The physical elemental
+band representations (pEBRs) are constructed by the
+orbitals at the maximal positions with time reversal
+symmetry [49], with all the pEBRs of 2a 2b and 4d
+listed in Table II in the Supplementary Materials. For
+high-symmetry points, the eigenvalues (irreps) of all
+symmetry operators have been computed [50] from the
+VASP wave functions for each band [27, 51]. Referring
+to the character tables in the Bilbao Crystallographic
+Server (BCS) [49, 52], we successfully assign all the
+bands to corresponding irreducible representations
+(irreps). The irrep characters of the valence bands are
+listed in Table III in the Supplementary Materials. One
+can check if those valence bands can be decomposed
+into a linear combination of pEBRs. It turns out they
+can not, which means those valence bands cannot be
+topologically trivial.
+Angle-resolved photoemission
+To verify band structure calculations, we measured
+ARPES to obtain the electronic structure of BaAl4 at
+3
+Ba
+Al
+ 
+Al 2p
+Ba 5s
+Ba 5p
+In
+te
+n
+s
+it
+y
+ (
+a
+.u
+.)
+ 
+kz kx / ky
+E
+n
+e
+rg
+y
+ (
+e
+V
+)
+Γ6
+Γ6
+Γ7
+Γ7
+Γ Z
+C4v
+Out-of-plane In-plane
+Γ X Y Γ Z 
+E F 
+E
+n
+e
+rg
+y
+ (
+e
+V
+)
+  0.0
+  1.0
+  2.0
+  3.0
+  4.0
+ -1.0
+ -2.0
+ -3.0
+ -4.0
+ -5.0
+ -6.0
+E F 
+Without SOC                                                   SOC
+Binding Energy (eV)
+Σ
+  0.0
+  1.0
+  2.0
+  3.0
+  4.0
+ -1.0
+ -2.0
+ -3.0
+ -4.0
+ -5.0
+ -6.0
+Γ Γ Z ΣX Y
+a                                   b                                    e                                            f   
+c
+                g                                 h                               i
+kxkxkk
+G
+S1
+S
+N
+X
+Z
+Y1
+P
+ky
+kz
+d
+Σ1 N Σ1 N
+FIG. 1. Non-trivial topology of prototype compound BaAl4. The crystal structure (a) and Brillouin zone (b) of single-
+crystalline BaAl4 (c) with I4/mmm space group are presented along with electronic structure calculations and symmetry
+analysis, revealing a three-dimensional Dirac spectrum with non-trivial topology. (d) The integrated photoemission core-level
+spectrum exhibits sharp peaks from Ba-5s, Ba-5p, and Al-2p core-levels, confirming high sample quality. The calculated
+bulk electronic structure is presented (e) without spin-orbit coupling and (f) with spin-orbit coupling included, with red
+box highlighting the Γ–Z dispersion where a Dirac point is located. (g) Enlarged low-energy band structure with irreducible
+representation, where the two crossing bands belong to two different irreducible representations of the C4v point group, showing
+the accidental band crossing protected by the crystal symmetry. The zoomed 3D Dirac structure exhibits a linear dispersion
+along the out-of plane (kz) direction [panel (h)] and a quadratic dispersion along the in-plane (kx/ky) directions [panel (i)],
+classifying this as a semi-Dirac point where massless and massive fermions can coexist at the same point in momentum space
+(see text).
+various photon energies, using in-situ cleaved single crys-
+tals of BaAl4 where the (001) surface cleavage plane
+is determined by X-ray diffraction (FIG. S1(b) of Sup-
+plementary Information). Fig. 2 shows the measured
+ARPES spectra compared to calculation (red curves).
+The intensity variation across the measured ARPES data
+is attributed to photoemission matrix element effects.
+Note that we shifted the calculated band structure by 70
+meV (hole doping) to take into account the experimen-
+tal data in Fig. 2. In Fig. 2(a), we present the Fermi
+surface in the out-of-plane direction. The highly dis-
+persive Fermi surface is clearly resolved, suggesting its
+bulk three-dimensional nature. Fig. 2(e) shows the en-
+ergy and momentum cut along the Z − Γ−Z line where
+the C4v exists. Consistent with the DFT prediction, the
+tail of the Dirac dispersion, which consists of small and
+large electron pockets at Z and Γ points respectively,
+is observed. To further investigate the electronic struc-
+tures, we show the in-plane Fermi surfaces for the high-
+symmetry planes (kz ∼ 0, kz ∼ 2π/c, and kz ∼ 0.92π/c
+where the Dirac point (DP) protected by C4v is located)
+and the electronic dispersions (Γ−Σ, Z−Σ1, and DP) in
+Fig. 2(b–c) and Fig. 2(f–h). Overall, the experimental
+Fermi surfaces and electronic dispersions are consistent
+with band structure calculations for all directions.
+Similar to graphene, multiple Dirac dispersions in
+BaAl4 create a saddle-point singularity in between the
+two DPs in momentum space as a result of a change in
+4
+FIG. 2. ARPES spectra near the Fermi level compared to DFT calculation of BaAl4. a–c, Constant energy
+maps at EF in the high-symmetry planes: the ky − kz plane (perpendicular to the surface (001)-plane) (a) using the incident
+photon energy ranging from 80 to 120 eV, the kx − ky plane crossing Γ (b) using the incident photon energy of 95 eV, and the
+kx − ky plane crossing Z (c) using the incident photon energy of 112 eV. Black solid line represents the bulk Brillouin zones
+(BZ), marked with high-symmetry points. d, Constant energy map at EF crossing the location of Dirac point (DP) using the
+incident photon energy of 86 eV. e–g, ARPES spectra of energy versus momentum cuts along the high-symmetry directions:
+Z −Γ−Z (e), Σ−Γ−Σ (f), and Σ1 −Z −Σ1 (g). h, ARPES spectra of energy versus momentum cut crossing the DP along
+the in-plane direction ky. All spectra shown in a–d are obtained by integrating intensities in the energy window of ±20 meV
+at EF . The red lines superposed in all panels here are the DFT calculation results for BaAl4. The locations of Dirac point are
+marked with green dots in a,d. For a direct comparison, all Fermi surfaces (a–d) and all energy and momentum cuts (e–h)
+shown here are centered at (kx, ky, kz) = (0, 0, 0).
+electronic topology, reminiscent of a Lifshitz transition
+in the electronic structure. Fig. 3(a) shows the location
+of the DP and VHS in the bulk BZ of BaAl4. To iden-
+tify the saddle-point singularity experimentally, we show
+the energy and momentum dispersion along Z − Γ − Σ
+direction (along the red line in the Fig. 3(a,b)) in Fig.
+3(c). While the tail of the Dirac dispersion has the lo-
+cal energy minimum in between the DPs, the Γ point,
+the dispersion along the orthogonal direction (in-plane
+direction, Γ − Σ) has the opposite curvature, resulting
+in the saddle point singularity of band structure, a Van
+Hove singularity (VHS). The integrated energy distribu-
+tion curve (EDC) around the Γ point shown in Fig. 3(d)
+clearly indicates the peak of local density of states (DOS)
+at ∼ −0.45 eV. This peak is consistent with a local DOS
+maximum in a saddle-point since the band structure is
+nearly flat at the VHS. Emergence of a VHS is associated
+with a Lifshitz transition. Fig. 3(e–j) represent a series of
+ARPES constant energy maps near the Γ point (see the
+blue square in Fig. 3(b)) with various binding energies,
+emphasizing the change of topology of electronic struc-
+tures. The energy contours of Dirac dispersions become
+close to each other toward the Γ point as the binding en-
+ergy changes to deeper level (shown in Fig. 3(e–g)). Once
+5
+FIG. 3. Lifshitz point and Van Hove singularity in BaAl4. a, The bulk BZ marked with the location of Dirac point (DP,
+green dot) and Van Hove singularity of saddle point type (VHS, light blue point). The light green plane represents the location
+for the constant energy contours shown in b,e–j. b, Constant energy map at EF . The light blue square shows the location for
+e–j. Red lines in a,b are the high symmetry lines for the energy and momentum cut shown in c. c, ARPES spectra of energy
+versus momentum cuts along the Z − Γ−Σ. The local maximum and minimum are observed at the same momentum Γ point,
+showing the saddle point singularity VHS. d, Energy-distribution curve (EDC) obtained by integrating the ARPES intensity in
+the vicinity of Γ point (window size: ± 0.02 Å−1). The peak of the EDC marks the VHS at EB ∼ −450meV where the topology
+of Fermi surface changes. e–j, Series of the symmetrized constant energy maps at EB = −0.2, −0.35, −0.4, −0.45, −0.5, and
+−0.55 eV, respectively, showing the topology of electronic structure changes at the Lifshitz point (h), EB ∼ −450meV. The
+red lines superposed in these panels here are the DFT calculation results for EB = −0.27, −0.4, −0.45, −0.497, −0.55, and
+−0.57, respectively. For a direct comparison, all constant energy maps (a,e–j) and the energy and momentum cut (c) shown
+here are centered at (kx, ky, kz) = (0, 0, 0).
+it reaches the Lifshitz point (∼ −0.45 eV), the two uncon-
+nected tails of Dirac dispersions merge and the electronic
+topology changes as shown in Fig. 3(h–j). This change
+in electronic topology is also clearly reproduced by the
+theoretical calculation (The red lines in Fig. 3(h–j)).
+Because the Dirac point protected by C4v symmetry is
+above EF and hence not accessible to ARPES, we can-
+not directly observe the vicinity of DP. However, the ex-
+cellent agreement between our ARPES results and the
+first-principles calculation, validates the theoretical pre-
+diction of Dirac fermions above EF , confirming BaAl4 as
+a topological semimetal with Dirac points. The observa-
+tion of the saddle point singularity VHS and the Lifshitz
+point in between DPs identifies this family of materials
+as an ideal 3D analogue of graphene, similar to Na3Bi.
+Moreover, in BaAl4, while the Dirac dispersion along the
+out-of-plane axis (kz) has a linearly type-I dispersion, the
+dispersion is quadratic along the in-plane axis (kx/ky)
+as shown in Fig. 1(h,i) and Fig. 2(e,h). Hence these
+DPs can be classified as semi-Dirac points where mass-
+less and massive fermions can coexist at the same point
+in momentum space. Similar semi-Dirac points are the-
+oretically predicted and/or experimentally observed in
+two-dimensional systems such as a silicene oxide Si2O
+and black phosphorus [53, 54], and could result in inter-
+esting properties including highly anisotropic transport,
+distinct Landau level spectrum in a magnetic field, non-
+Fermi liquid, and Bloch-Zener oscillations.[55, 56]
+Magnetoresistance and Quantum Oscillations
+Fig. 4 presents the electrical transport properties of
+single-crystalline BaAl4 samples. Extremely high mo-
+bilities approaching 200,000 cm2/Vs (see Hall analysis
+below) are reflective of the high quality of the samples,
+also indicated by very large residual resistivity ratios
+6
+� � � � � � � � � �
+� � �
+� � �
+� � �
+� � �
+� � �
+� (
+mΩ
+ cm
+)
+T  ( K )
+S a m p l e  A
+ 0  T
+ 1  T
+ 4  T
+ 8  T
+ 1 1  T
+ 1 4  T
+a
+� � � � � � �
+�
+�
+�
+�
+(�(
+H)
+-�(
+0))
+/�(
+0)X
+10
+3
+B  ( T )
+S a m p l e  B
+ 2  K
+ 3 . 5  K
+ 5  K
+ 7  K
+ 1 0  K
+ 1 5  K
+b
+c                                                      d                                  e
+� � � � �
+� � �
+� � �
+� � �
+� � �
+� � � 	 � � � �
+� � �
+� � �
+� � �
+� � �
+� � �
+� � �
+ 5 0  K
+ 3 0  K
+ 2 0  K
+ 1 0  K
+ 2  K
+� x
+y (
+mΩ
+ cm
+)
+B  ( T )
+� � � � � � �
+�
+�
+�
+�
+e,�
+h (
+10
+5  c
+m2
+/V
+s)
+T  ( K )
+ µh
+ µe
+0 2 0 4 0 6 00
+2
+4
+6
+8
+ n h
+ n e
+n e
+,n h
+ (X
+10
+20
+ cm
+-3 )
+T  ( K )
+T  ( K )
+� (
+µΩ
+ cm
+)
+FIG. 4. Extremely large magnetoresistance and carriers of Dirac semimetal BaAl4. a, Temperature dependence
+of the resistivity at different magnetic field which is perpendicular to the electrical current for single crystal sample A. b,
+Transverse magnetoresistance with current in the ab plane and field along the c axis, for single crystal Sample B at several
+representative temperatures under field up to 35 T. In the measurements, the current is in the ab plane and the field is along
+the c axis. c, Field dependence of the Hall resistivity measured at several representative temperatures. d–e, Temperature
+dependence of the mobility of the holes (µh) and electrons (µe), as well as the density of the holes (nh) and the density of the
+electrons (ne).
+(RRR=ρ(300K)/ρ(2K)=1,500 in Sample A) and tiny
+residual resistivities (∼ 90 nΩ·cm). As observed in other
+TSMs such as WTe2, NaBi3, Cd3As2, TaAs, LaBi and
+other related compounds [16, 29, 34, 36, 40], a dramatic
+onset of strong MR develops at low temperatures and
+presents astonishingly high and unsaturating MR values
+attributed to the opening of an energy gap by magnetic
+fields at the band-touching point. In BaAl4, we also ob-
+serve similar behavior, with a large upturn in resistivity
+at low temperatures that tends to saturate. Fig. 4(b)
+presents the transverse MR for Sample B with current
+applied parallel to the ab plane and field along the c axis,
+showing a quadratic evolution with field that does not
+saturate up to at least 35 T. MR exhibits an amplitude
+correlated with crystal quality (shown in Fig. S2 of sup-
+plementary materials). For Sample A with the highest
+RRR ∼ 1500, the MR approaches 2 × 105% at 14 T
+(shown in Fig. 4(a) and also in Fig. S2 of supplemen-
+tary materials), a value comparable to that reported in
+Cd3As2, the TaAs family and other TSMs (including LaP
+with P=Sb and Bi, WTe2, NbSb2 family). At higher
+fields, the MR does not saturate, as shown for Sample
+B data up to 35 T, where MR approaches 106% (FIG.
+4(b)).
+As shown in Fig. 4(c), the Hall resistivity ρxy is pos-
+itive above 50 K and nearly linear with field, indicating
+holes as the majority carriers at high temperatures. How-
+ever, ρxy deviates from linear at temperatures below 50
+K, and even changes sign at low temperature and high
+field, indicating a coexistence of electrons and holes. It
+has been proposed that the extremely large MR in several
+semimetals arises due to a perfect compensation between
+7
+a c
+d
+0 200 400 600 800 1000
+0.0
+0.2
+0.4
+0.6
+0.8
+a
+3
+a
+2
+A
+m
+p
+lit
+u
+d
+e
+ (
+A
+rb
+it
+ra
+y
+ U
+n
+it
+s
+)
+Frequency (T)
+ 25 K
+ 10 K
+ 6 K
+ 4 K
+ 3 K
+ 1.6 K
+ 0.8 K
+ 0.4K
+a
+1
+0 5 10 15 20 25 30
+-1.0
+-0.8
+-0.6
+-0.4
+-0.2
+0.0
+0.2
+R
+ (
+A
+rb
+. 
+U
+n
+it
+s
+)
+Field (T)
+2 4 6 8 10
+Field (T)
+Δ
+0 1 2 3
+0.0
+0.1
+0.2
+A
+m
+p
+lit
+u
+d
+e
+ (
+A
+rb
+. 
+U
+n
+it
+)
+Frequency (kT)
+b
+a4
+i+1 
+i 
+South Pole (SP)
+North Pole (NP)
+ 
+-0.5
+0
+0.5
+�
+  
+(2
+�
+)
+SP NP
+θ 
+j
+b
+f
+e
+FIG. 5. Fermi surface and quantum oscillation of Dirac semimetal BaAl4. a-b, Calculated hole pockets (a) and electron
+pockets (b) in the Fermi surface for BaAl4 by density function theory with spin-orbit coupling. c, The quantum oscillation
+in the magnetoresistance of BaAl4 single crystal at 2K. The inset shows the FFT spectrum of the quantum oscillation. d,
+Enlarged part of the low frequency region of the FFT spectrum of the quantum oscillation for Sample B of BaAl4 at different
+temperatures. The inset shows the detail of the FFT spectrum in high frequency region at 2K. (e) Wilson loop spectrum on a
+spherical surface enclosing the Dirac point (0, 0, kcz). (f) Phase ϕj of the individual loop eigenvalues (e
+iϕj ) as a function of the
+azimuthal angle θ.
+electron and hole carrier concentrations [57]. The calcu-
+lated band structure of BaAl4 does indeed show complex
+coexistence of electron and hole pockets. The hole pock-
+ets (see Fig. 5(a)) corresponding to the Dirac point along
+Γ − Z direction mostly consist of two separated hollow
+cylinders surrounding the Z points, while the electron
+pocket is a one-piece structure centered at the Γ point
+shown in Fig. 5(b). However, the volume surrounded
+by the hole and electron pockets are different. To esti-
+mate the carrier densities and mobility, a semi-classical
+two-band model is used to analyze the longitudinal con-
+ductivity σxx(B) and Hall conductivity σxy(B) in the
+magnetic fields B:
+σxx(B) =
+neqµe
+1+(µeB)2
++
+σxx(0)−neqµe
+1+(µhB)2
+, (1)
+σxy(B) =
+[
+neµ
+2
+e
+1+(µeB)2
+− nhµ
+2
+h
+1+(µhB)2
+]
+eB. (2)
+Here ne (µe) and nh (µh) are the carrier densities (mo-
+bilities) of electrons and holes, respectively. σxx(0) is the
+longitudinal conductivity at 0 T. The typical fitting re-
+sults at several different temperatures are shown in Fig.
+S3 (a) and (b) in the Supplementary Materials, and the
+fitting parameters are shown in Fig. 4(d,e) in tempera-
+ture range 2 K ∼ 50 K. At low temperatures, holes are
+the minority carriers, but their mobility is nearly one or-
+der higher than the mobility of electrons. At 2 K, µh
+approaches ∼ 20 m2/Vs. With increasing temperature,
+µh decreases significantly and becomes comparable to µe.
+Hence, the minority hole carriers dominate the transport
+in the entire temperature range because of their high mo-
+bility. This is consistent with the calculated electronic
+structure, where the Dirac pockets have hole character-
+istics.
+Quantum oscillations measurements further clarify the
+nature of carriers in BaAl4. As shown in Fig. 4(b),
+the measured MR of several BaAl4 crystals exhibit clear
+Shubnikov-de Haas oscillations. Subtracting a back-
+ground MR yields an oscillatory signal composed of sev-
+eral components observable down to a few Teslas, as
+shown in Fig. 5(c). The oscillation frequencies of differ-
+ent pockets in the calculated Fermi surface are extracted
+by finding the supercell k-space extremal area imple-
+8
+mented in the SKEAF code [58] and are compared to the
+frequencies by Fourier transform analysis of the exper-
+imental curves, correspondingly the oscillation frequen-
+cies got by Fourier transform of our experiment curves
+(in FIG. 5(d)) are assigned to different pockets the cal-
+culated Fermi surface. Our experimental results are in
+consistent with the calculated Fermi surface shown in
+Fig. 5(a-b), and also most of them are close to the pre-
+vious report reports [47], as shown in Table IV of SM. In
+the high frequency region as shown in the inset of Fig.
+5(d), the frequency Fβ ∼ 2.5 kT corresponds to the elec-
+tron pocket shown in Fig. 5(b), and the other frequency
+Fα4 ∼ 1.6 kT corresponds to the outer branch of the
+hole pocket surrounding Γ point in Fig. 5(a). A small
+frequency Fα3 ∼ 300 T corresponds to the inner branch
+of the hole pocket. Besides these frequencies already ob-
+served in Ref. [47] where a detailed angular dependence
+of these frequencies consistent with calculated Fermi sur-
+face is reported, two very close oscillation frequencies
+Fα1 ∼ 100 T and Fα2 ∼ 106 T which are missing in pre-
+vious report[47], are observed. These two close frequen-
+cies give a clear beating behavior shown in Fig. 5, and
+correspond to the small hole pockets along Γ −X lines.
+Lifshitz-Kosevich analysis of the temperature-dependent
+oscillation amplitude (Fig. S4 of SM) for these two fre-
+quencies Fα1 and Fα2 reveals a similar effective mass of
+∼ 0.2(1)me. This small effective mass of the hole pockets
+is consistent with the calculated hole-like Dirac spectrum
+(with a mass of about 0.15me, shown in Table IV of SM)
+and the ARPES measurement.
+Discussion and Conclusions
+Quantum oscillations, Hall resistivity and ARPES re-
+sults reveal that although the electron and hole pockets
+coexist in BaAl4, they harbor different densities. This
+implies that some other mechanism beyond the perfect
+compensation between electron and hole pockets should
+govern the extremely large MR found in BaAl4, which
+may be related to the Dirac spectra as discussed for other
+TSMs. The extremely small residual resistivity ∼ 90
+nΩ cm is quite anomalous given the low carrier den-
+sity ∼ 1020 cm−3, and is similar to the case for other
+topological semimetals such as WTe2 (∼ 30nΩ · cm)
+and La(Bi,Sb) (∼ 0.1µΩ · cm), suggesting a topology-
+derived mechanism for reduction in scattering and large
+MR [29, 59]. Although the Fermi surface is about 0.4 eV
+away form the Dirac points, the winding feature of the
+Wilson loop spectrum can still b stabilized by the C4z
+symmetry. FIG. 5 shows the Wilson loop spectrum on a
+spherical surface enclosing the Dirac point (0, 0, kcz) (e)
+and the phase ϕj of the individual loop eigenvalues (e
+iϕj )
+as a function of the azimuthal angle θ (f). On a given-
+θ Wilson loop, (rṡin(θ)cos(φ), rṡin(θ)sin(φ), kz(θ)) with
+kz(θ) = k
+c
+z + rċos(274) and the spherical radius r, the
+Wilson loop is mapped as C4zW2π←0C
+−1
+4z = W 5π2 ←
+π
+2
+=
+Wπ
+2
+←0W2π←0W0←π
+2
+, where WB←A represents a parallel
+transport from φ = A to φ = B. Then we can redefine a
+symmetry ς4z = W
+−1
+π
+2
+←0C4z, which yield ς4zW2π←0ς
+−1
+4z =
+W2π←0. Thus, each Wilson energy ϕj can be labeled by
+λαe
+−i
+ϕj
+4 with λj = e
+i
+(2n−1)π
+4 for j = {1, 2, 3, 4}, where
+we use ς4z = W
+−1
+π
+2
+←0C4z = −e
+−iϕj . Our further calcula-
+tions show that the ς4z eigenvalue of the blue(red) line is
+λ2e
+−i
+ϕj
+4 (λ3e
+−i
+ϕj
+4 ). Thus, those two Wilson eigenstates
+can not hybridize with each other, giving rise to a stable
+crossing in the Wilson loop spectrum. As long as the sur-
+face states are C4z symmetric, the winding feature of the
+Wilson loop spectrum is stable. This could, for instance
+affect the bulk transport properties, but requires further
+investigation.
+Our results indicate BaAl4 as a new topological
+semimetal, as confirmed by calculations, symmetry anal-
+ysis, photoemission and transport experiments. Since a
+large diversity of physical phenomena appears in com-
+pounds derived from this prototype structure, one can
+consider the MA4 family as a new playground for ex-
+ploring the interaction between the non-trivial topology
+and symmetry-breaking or correlated phases, including
+superconductivity, heavy fermion and quantum critical
+systems, charge/spin density wave, etc.. It could also be
+expected that some distortion/modification of the origi-
+nal crystal structure in the derived structures will slightly
+modify the topological electronic structure and induce
+new phenomena. One interesting direction is to consider
+the consequences of breaking the inversion symmetry to
+achieve a non-centrosymmetric structure (e.g. LaPtSi3
+and other materials), where band splitting could be ex-
+pected to achieve Weyl or multiple-fermion states [3, 60].
+Noncollinear magnetic order (such as in EuAl4) may
+also induce band splitting, yielding other exotic topo-
+logical states. Extending the symmetry analysis to the
+rest of the MA4 family of materials (M=Sr, Ba, Eu;
+A=Al,Ga,In), as well as the enormous set of derivative
+structures[27], will expose new topological materials.
+METHODS
+Crystal growth
+Single crystals of BaAl4 were synthesized by a high-
+temperature self-flux method. Chunks of Ba (99.98%,
+Alfa Aesar) and pieces of Al (99.999% metal basis, Alfa
+Aesar) in the ratio of 2:98 were placed in the Canfield
+alumina crucible set with a decanting frit (LSP ceram-
+ics), sealed in the quartz ampule under partial Ar pres-
+sure, heated to 1150 oC, held at that temperature for 6
+h, cooled down at 3 degree/h to 950 oC with subsequent
+decanting of the excess Al with the help of a centrifuge.
+The crystals tend to grow with large faceted surfaces nor-
+9
+mal to the (001) crystallographic plane. X-ray diffrac-
+tion data were taken at room temperature with Cu Kα
+(λ = 0.15418 nm) radiation in a powder diffractometer.
+Transport measurement
+Electrical transport measurements up to 14 T were
+conducted on polished samples in a Quantum Design
+Physical Properties Measurement System (Dynacool) ap-
+plying the conventional four-wire contact method. High
+field MR and dHvA oscillation were measured at the Na-
+tional High Magnetic Field Laboratory (NHMFL) Tal-
+lahassee DC Field Facility up to 35 T, using a one-axis
+rotator in a He-3 cryostat with temperature range 0.35
+K ∼ 70 K. In all transport measurements, the electrical
+current flowing in the ab-plane. The magnetization and
+dHvA oscillations were measured using a piezoresistive
+cantilever. The magnetic field rotated from a direction
+parallel to the c-axis to a direction parallel to the ab-
+plane.
+Photoemission measurement
+ARPES measurements on single crystalline samples
+of BaAl4 were performed at the Beamline 4.0.3 (MER-
+LIN) of the Advanced Light Source in Berkley, California.
+Samples were cleaved in situ to yield clean (001) surfaces
+and measured at 14–20 K in ultra high vacuum better
+than 3 × 10−11 Torr using photon energy of 80-120 eV
+with Scienta R4000 analyzer. The energy resolution was
+20-30 meV and the angular resolution was better than
+0.2◦ for all measurements. The inner potential V0 = 10.5
+eV was used to calculate the momentum perpendicular
+to the surface.
+DFT calculation
+Theoretical calculations compared to ARPES were
+performed within generalized gradient approximation
+(GGA) [61] for bulk BaAl4 as implemented in the VASP
+package [62–64], using a relativistic version of PAW
+potentials[65, 66]. The experimental crystal data (a =
+b = 4.566Åand c = 11.278Å) were used for the bulk
+calculation. PAW pseudopotentials with a plane wave
+energy cut-off of 40 Ry were used, and Monkhorst k-
+mesh was chosen as 24 × 24 × 24. All calculations pre-
+pared by VASP were double checked by the QUANTUM
+ESPRESSO Package[67, 68].
+AUTHOR CONTRIBUTIONS
+J.P., K.W., and A.L. initiated and directed this re-
+search project. The samples were grown and character-
+ized by K.W. Transport measurements were carried out
+by K.W. with the assistance of D.E.G. R.M., J.H.M, and
+D.W.L. carried out ARPES measurements with the as-
+sistance of J.D., and R.M. analyzed the data. L. W and
+R. M did a portion of the calculation. Z.W. and B.A.B
+did the calculation and symmetry analysis. K.W. and
+R.M. wrote the text, with feedback from all authors. All
+authors contributed to the scientific planning and discus-
+sions.
+ACKNOWLEDGMENTS
+This work was supported by the Gordon and Betty
+Moore Foundation’s EPiQS Initiative through Grant
+GBMF4419. ARPES work and a portion of the cal-
+culation are supported by the U.S. Department of En-
+ergy, Office of Science, Office of Basic Energy Sciences,
+Materials Sciences and Engineering Division under Con-
+tract No. DE-AC02-05-CH11231 (Quantum materials
+KC2202). A.L. acknowledges partial support for this re-
+search from the Gordon and Betty Moore Foundation’s
+EPiQS Initiative through grant GBMF4859. A portion of
+this work was performed at the National High Magnetic
+Field Laboratory, which is supported by National Science
+Foundation Cooperative Agreement No. DMR-1157490
+and the State of Florida. R.M. also acknowledges sup-
+port from the Funai Foundation for Information Tech-
+nology. Z.W. and B.B. are supported by the Department
+of Energy Grant No. de-sc0016239, the National Science
+Foundation EAGER Grant No. noaawd1004957, Simons
+Investigator Grants No. ONRN00014-14-1-0330, and No.
+NSF-MRSEC DMR- 1420541, the Packard Foundation,
+the Schmidt Fund for Innovative Research. Z.W. ac-
+knowledges support from the CAS Pioneer Hundred Tal-
+ents Program.
+∗ To whom correspondence should be addressed. Email:
+lanzara@berkeley.edu
+† To whom correspondence should be addressed. Email:
+paglione@umd.edu
+[1] Hasan, M. Z. & Kane, C. L. Colloquium : Topological
+insulators. Reviews of Modern Physics 82, 3045–3067
+(2010). URL http://dx.doi.org/10.1103/RevModPhys.
+82.3045.
+[2] Qi, X.-L. & Zhang, S.-C. Topological insulators
+and superconductors. Reviews of Modern Physics 83,
+1057–1110 (2011). URL http://dx.doi.org/10.1103/
+RevModPhys.83.1057.
+mailto:lanzara@berkeley.edu
+mailto:paglione@umd.edu
+http://dx.doi.org/10.1103/RevModPhys.82.3045
+http://dx.doi.org/10.1103/RevModPhys.82.3045
+http://dx.doi.org/10.1103/RevModPhys.83.1057
+http://dx.doi.org/10.1103/RevModPhys.83.1057
+10
+[3] Armitage, N., Mele, E. & Vishwanath, A. Weyl and
+dirac semimetals in three-dimensional solids. Reviews of
+Modern Physics 90, 015001 (2018).
+[4] Young, S. M. et al. Dirac semimetal in three dimensions.
+Phys. Rev. Lett. 108, 140405 (2012). URL http://dx.
+doi.org/10.1103/PhysRevLett.108.140405.
+[5] Wan, X., Turner, A. M., Vishwanath, A. & Savrasov,
+S. Y. Topological semimetal and fermi-arc surface states
+in the electronic structure of pyrochlore iridates. Phys.
+Rev. B 83, 205101 (2011). URL http://dx.doi.org/
+10.1103/PhysRevB.83.205101.
+[6] Fang, C., Gilbert, M. J., Dai, X. & Bernevig,
+B. A. Multi-weyl topological semimetals stabilized
+by point group symmetry. Phys. Rev. Lett. 108,
+266802 (2012). URL http://dx.doi.org/10.1103/
+PhysRevLett.108.266802.
+[7] Bzdušek, T., Wu, Q., Regg, A., Sigrist, M. & Soluyanov,
+A. A. Nodal-chain metals. Nature 538, 75–78 (2016).
+URL http://dx.doi.org/10.1038/nature19099.
+[8] Burkov, A. A., Hook, M. D. & Balents, L. Topological
+nodal semimetals. Phys. Rev. B 84, 235126 (2011). URL
+http://dx.doi.org/10.1103/PhysRevB.84.235126.
+[9] Weng, H., Fang, C., Fang, Z. & Dai, X. Topological
+semimetals with triply degenerate nodal points in β phase
+tantalum nitride. Physical Review B 93 (2016).
+[10] Zhu, Z., Winkler, G. W., Wu, Q., Li, J. & Soluyanov,
+A. A. Triple point topological metals. Physical Review
+X 6, 031003 (2016).
+[11] Lv, B. Q. et al. Observation of three-component fermions
+in the topological semimetal molybdenum phosphide.
+Nature 546, 627–631 (2017).
+[12] Bradlyn, B. et al. Beyond dirac and weyl fermions: Un-
+conventional quasiparticles in conventional crystals. Sci-
+ence 353, aaf5037 (2016).
+[13] Lv, B. Q. et al. Experimental discovery of weyl semimetal
+TaAs. Phys. Rev. X 5, 031013 (2015). URL http://dx.
+doi.org/10.1103/PhysRevX.5.031013.
+[14] Xu, S.-Y. et al. Discovery of a weyl fermion semimetal
+and topological fermi arcs. Science 349, 613–617 (2015).
+URL http://dx.doi.org/10.1126/science.aaa9297.
+[15] Wang, Z. et al. Dirac semimetal and topological phase
+transitions in a 3 Bi ( a = na , k, rb). Phys. Rev. B
+85, 195320 (2012). URL http://dx.doi.org/10.1103/
+PhysRevB.85.195320.
+[16] Wang, Z., Weng, H., Wu, Q., Dai, X. & Fang, Z. Three-
+dimensional dirac semimetal and quantum transport in
+cd 3 As 2. Phys. Rev. B 88, 125427 (2013). URL http:
+//dx.doi.org/10.1103/PhysRevB.88.125427.
+[17] Borisenko, S. et al. Experimental realization of a
+three-dimensional dirac semimetal. Phys. Rev. Lett.
+113, 027603 (2014). URL http://dx.doi.org/10.1103/
+PhysRevLett.113.027603.
+[18] Neupane, M. et al. Observation of a three-dimensional
+topological dirac semimetal phase in high-mobility
+cd3As2. Nature Communications 5 (2014). URL http:
+//dx.doi.org/10.1038/ncomms4786.
+[19] Liu, Z. K. et al. A stable three-dimensional topological
+dirac semimetal cd3As2. Nature Materials 13, 677–681
+(2014). URL http://dx.doi.org/10.1038/nmat3990.
+[20] Jeon, S. et al. Landau quantization and quasiparti-
+cle interference in the three-dimensional dirac semimetal
+cd3As2. Nature Materials 13, 851–856 (2014). URL
+http://dx.doi.org/10.1038/nmat4023.
+[21] Chang, T.-R. et al. Type-II symmetry-protected topo-
+logical dirac semimetals. Physical Review Letters
+119, 026404 (2017). URL https://doi.org/10.1103/
+PhysRevLett.119.026404.
+[22] Wu, Q., Piveteau, C., Song, Z. & Yazyev, O. V. MgTa2n3
+: A reference dirac semimetal. Physical Review B
+98, 081115 (2018). URL https://doi.org/10.1103/
+PhysRevB.98.081115.
+[23] Huang, H., Jin, K.-H. & Liu, F. Alloy engi-
+neering of topological semimetal phase transition in
+MgTa2-xNbxN3. Physical Review Letters 120, 136403
+(2018). URL https://doi.org/10.1103/PhysRevLett.
+120.136403.
+[24] Chen, C. et al. Ternary wurtzite CaAgBi materials fam-
+ily: A playground for essential and accidental, type-
+i and type-II dirac fermions. Physical Review Materi-
+als 1, 044201 (2017). URL https://doi.org/10.1103/
+PhysRevMaterials.1.044201.
+[25] Yan, M. et al. Lorentz-violating type-II dirac fermions
+in transition metal dichalcogenide PtTe2. Nature Com-
+munications 8 (2017). URL https://doi.org/10.1038/
+s41467-017-00280-6.
+[26] Zhang, T. et al. Catalogue of topological electronic ma-
+terials 1807.08756v1.
+[27] Vergniory, M. G. et al. A complete catalogue of high-
+quality topological materials. Nature 566, 480–485
+(2019).
+[28] Topological material database. URL https://
+topologicalquantumchemistry.org/#/.
+[29] Liang, T. et al. Ultrahigh mobility and giant magnetore-
+sistance in the dirac semimetal cd3As2. Nature Materials
+14, 280–284 (2014). URL http://dx.doi.org/10.1038/
+nmat4143.
+[30] Narayanan, A. et al. Linear magnetoresistance caused by
+mobility fluctuations in n -doped cd 3 As 2. Phys. Rev.
+Lett. 114, 117201 (2015). URL http://dx.doi.org/10.
+1103/PhysRevLett.114.117201.
+[31] Ali, M. N. et al. Butterfly magnetoresistance, quasi-2d
+dirac fermi surface and topological phase transition in
+ZrSiS. Science Advances 2, e1601742 (2016).
+[32] Shekhar, C. et al. Extremely large magnetoresistance
+and ultrahigh mobility in the topological weyl semimetal
+candidate NbP. Nat Phys 11, 645–649 (2015). URL
+http://dx.doi.org/10.1038/nphys3372.
+[33] Zhang, C. et al. Tantalum monoarsenide: an exotic
+compensated semimetal. URL https://arxiv.org/abs/
+1502.00251.
+[34] Huang, X. et al. Observation of the chiral-anomaly-
+induced negative magnetoresistance in 3d weyl semimetal
+TaAs. Phys. Rev. X 5, 031023 (2015). URL http:
+//dx.doi.org/10.1103/PhysRevX.5.031023.
+[35] Luo, Y. et al. Electron-hole compensation effect be-
+tween topologically trivial electrons and nontrivial holes
+in NbAs. Phys. Rev. B 92, 205134 (2015). URL http:
+//dx.doi.org/10.1103/PhysRevB.92.205134.
+[36] Ali, M. N. et al. Large, non-saturating magnetoresistance
+in WTe2. Nature (2014). URL http://dx.doi.org/10.
+1038/nature13763.
+[37] Wang, K., Graf, D., Li, L., Wang, L. & Petrovic, C.
+Anisotropic giant magnetoresistance in NbSb2. Sci.
+Rep. 4, 7328 (2014). URL http://dx.doi.org/10.1038/
+srep07328.
+[38] Mun, E. et al. Magnetic field effects on transport prop-
+erties of PtSn4. Physical Review B 85, 035135 (2012).
+http://dx.doi.org/10.1103/PhysRevLett.108.140405
+http://dx.doi.org/10.1103/PhysRevLett.108.140405
+http://dx.doi.org/10.1103/PhysRevB.83.205101
+http://dx.doi.org/10.1103/PhysRevB.83.205101
+http://dx.doi.org/10.1103/PhysRevLett.108.266802
+http://dx.doi.org/10.1103/PhysRevLett.108.266802
+http://dx.doi.org/10.1038/nature19099
+http://dx.doi.org/10.1103/PhysRevB.84.235126
+http://dx.doi.org/10.1103/PhysRevX.5.031013
+http://dx.doi.org/10.1103/PhysRevX.5.031013
+http://dx.doi.org/10.1126/science.aaa9297
+http://dx.doi.org/10.1103/PhysRevB.85.195320
+http://dx.doi.org/10.1103/PhysRevB.85.195320
+http://dx.doi.org/10.1103/PhysRevB.88.125427
+http://dx.doi.org/10.1103/PhysRevB.88.125427
+http://dx.doi.org/10.1103/PhysRevLett.113.027603
+http://dx.doi.org/10.1103/PhysRevLett.113.027603
+http://dx.doi.org/10.1038/ncomms4786
+http://dx.doi.org/10.1038/ncomms4786
+http://dx.doi.org/10.1038/nmat3990
+http://dx.doi.org/10.1038/nmat4023
+https://doi.org/10.1103/PhysRevLett.119.026404
+https://doi.org/10.1103/PhysRevLett.119.026404
+https://doi.org/10.1103/PhysRevB.98.081115
+https://doi.org/10.1103/PhysRevB.98.081115
+https://doi.org/10.1103/PhysRevLett.120.136403
+https://doi.org/10.1103/PhysRevLett.120.136403
+https://doi.org/10.1103/PhysRevMaterials.1.044201
+https://doi.org/10.1103/PhysRevMaterials.1.044201
+https://doi.org/10.1038/s41467-017-00280-6
+https://doi.org/10.1038/s41467-017-00280-6
+https://topologicalquantumchemistry.org/#/
+https://topologicalquantumchemistry.org/#/
+http://dx.doi.org/10.1038/nmat4143
+http://dx.doi.org/10.1038/nmat4143
+http://dx.doi.org/10.1103/PhysRevLett.114.117201
+http://dx.doi.org/10.1103/PhysRevLett.114.117201
+http://dx.doi.org/10.1038/nphys3372
+https://arxiv.org/abs/1502.00251
+https://arxiv.org/abs/1502.00251
+http://dx.doi.org/10.1103/PhysRevX.5.031023
+http://dx.doi.org/10.1103/PhysRevX.5.031023
+http://dx.doi.org/10.1103/PhysRevB.92.205134
+http://dx.doi.org/10.1103/PhysRevB.92.205134
+http://dx.doi.org/10.1038/nature13763
+http://dx.doi.org/10.1038/nature13763
+http://dx.doi.org/10.1038/srep07328
+http://dx.doi.org/10.1038/srep07328
+11
+[39] Wu, Y. et al. Dirac node arcs in PtSn4. Nature Physics
+12, 667–671 (2016).
+[40] Tafti, F. F., Gibson, Q. D., Kushwaha, S. K., Hal-
+dolaarachchige, N. & Cava, R. J. Resistivity plateau
+and extreme magnetoresistance in LaSb. Nature Physics
+12, 272–277 (2015). URL http://dx.doi.org/10.1038/
+nphys3581.
+[41] Zhang, P. et al. Multiple topological states in iron-based
+superconductors. Nature Physics 15, 41–47 (2018).
+[42] Shirer, K. R. et al. Dirac fermions in the heavy-fermion
+superconductors ce(co,rh,ir)in5 1808.00403v1.
+[43] Paglione, J. & Greene, R. L. High-temperature super-
+conductivity in iron-based materials. Nature Physics 6,
+645–658 (2010).
+[44] Steglich, F. et al. Superconductivity in the presence of
+strong pauli paramagnetism: CeCu2si2. Physical Review
+Letters 43, 1892–1896 (1979).
+[45] Stewart, G. R. Heavy-fermion systems. Reviews of Mod-
+ern Physics 56, 755–787 (1984).
+[46] Kneidinger, F. et al. Superconductivity in noncentrosym-
+metricBaAl4derived structures. Physical Review B 90
+(2014).
+[47] Nakamura, A. et al. Characteristic fermi surfaces and
+charge density wave in SrAl4 and related compounds with
+the BaAl4-type tetragonal structure. Journal of Alloys
+and Compounds 654, 290–299 (2016).
+[48] Nakamura, A. et al. Magnetic and fermi surface proper-
+ties of EuGa4. Journal of the Physical Society of Japan
+82, 104703 (2013).
+[49] Bradlyn, B. et al. Topological quantum chemistry. Nature
+547, 298–305 (2017). URL https://doi.org/10.1038/
+nature23268.
+[50] Vergniory, M. G., Elcoro, L., Felser, C., Bernevig, B. A.
+& Wang, Z. The (high quality) topological materials in
+the world 1807.10271v2.
+[51] Wang, Z. The open-source code vasp2trace and
+end-user button checktopologicalmat are available on-
+line at www.cryst.ehu.es/cryst/checktopologicalmat.
+URL http://www.cryst.ehu.es/cryst/
+checktopologicalmat.
+[52] Cano, J. et al. Building blocks of topologi-
+cal quantum chemistry: Elementary band represen-
+tations. Physical Review B 97, 035139 (2018).
+http://arxiv.org/abs/1709.01935v3.
+[53] Kim, J. et al. Observation of tunable band gap and
+anisotropic dirac semimetal state in black phosphorus.
+Science 349, 723–726 (2015).
+[54] Zhong, C., Chen, Y., Xie, Y., Sun, Y.-Y. & Zhang, S.
+Semi-dirac semimetal in silicene oxide. Physical Chem-
+istry Chemical Physics 19, 3820–3825 (2017).
+[55] Dietl, P., Piéchon, F. & Montambaux, G. New magnetic
+field dependence of landau levels in a graphenelike struc-
+ture. Physical Review Letters 100 (2008).
+[56] Lim, L.-K., Fuchs, J.-N. & Montambaux, G. Bloch-zener
+oscillations across a merging transition of dirac points.
+Physical Review Letters 108 (2012).
+[57] Soluyanov, A. A. et al. Type-II weyl semimetals. Na-
+ture 527, 495–498 (2015). URL http://dx.doi.org/10.
+1038/nature15768.
+[58] Rourke, P. & Julian, S. Numerical extraction of de
+haas–van alphen frequencies from calculated band ener-
+gies. Computer Physics Communications 183, 324–332
+(2012).
+[59] Jiang, J. et al. Signature of strong spin-orbital
+coupling in the large nonsaturating magnetoresistance
+material WTe 2. Physical Review Letters 115,
+166601 (2015). URL http://dx.doi.org/10.1103/
+PhysRevLett.115.166601.
+[60] Tay-Rong Chang, D. S. S. S.-M. H. G. C. C.-H. H. G. B.
+I. B. Z.-M. Y. X. X. C. X. S. A. Y. T. N. H.-T. J. H. L. M.
+Z. H., Su-Yang Xu. Type-ii topological dirac semimet-
+als: Theory and materials prediction (val3 family). URL
+https://arxiv.org/abs/1606.07555.
+[61] Perdew, J. P., Burke, K. & Ernzerhof, M. General-
+ized gradient approximation made simple. Phys. Rev.
+Lett. 77, 3865–3868 (1996). URL http://dx.doi.org/
+10.1103/PhysRevLett.77.3865.
+[62] Kresse, G. & Hafner, J. Ab initiomolecular dynamics for
+liquid metals. Physical Review B 47, 558–561 (1993).
+[63] Kresse, G. & Furthmller, J. Efficiency of ab-initio total
+energy calculations for metals and semiconductors using
+a plane-wave basis set. Computational Materials Science
+6, 15–50 (1996).
+[64] Kresse, G. & Furthmller, J. Efficient iterative schemes
+forab initiototal-energy calculations using a plane-wave
+basis set. Physical Review B 54, 11169–11186 (1996).
+[65] Bl?chl, P. E. Projector augmented-wave method. Physi-
+cal Review B 50, 17953–17979 (1994).
+[66] Kresse, G. & Joubert, D. From ultrasoft pseudopoten-
+tials to the projector augmented-wave method. Physical
+Review B 59, 1758–1775 (1999).
+[67] Giannozzi, P. et al. Quantum espresso: a modular
+and open-source software project for quantum simu-
+lations of materials. Journal of Physics: Condensed
+Matter 21, 395502 (19pp) (2009). URL http://www.
+quantum-espresso.org.
+[68] Giannozzi, P. et al. Advanced capabilities for materials
+modelling with quantum espresso. Journal of Physics:
+Condensed Matter 29, 465901 (2017). URL http://
+stacks.iop.org/0953-8984/29/i=46/a=465901.
+http://dx.doi.org/10.1038/nphys3581
+http://dx.doi.org/10.1038/nphys3581
+https://doi.org/10.1038/nature23268
+https://doi.org/10.1038/nature23268
+http://www.cryst.ehu.es/cryst/checktopologicalmat
+http://www.cryst.ehu.es/cryst/checktopologicalmat
+http://dx.doi.org/10.1038/nature15768
+http://dx.doi.org/10.1038/nature15768
+http://dx.doi.org/10.1103/PhysRevLett.115.166601
+http://dx.doi.org/10.1103/PhysRevLett.115.166601
+https://arxiv.org/abs/1606.07555
+http://dx.doi.org/10.1103/PhysRevLett.77.3865
+http://dx.doi.org/10.1103/PhysRevLett.77.3865
+http://www.quantum-espresso.org
+http://www.quantum-espresso.org
+http://stacks.iop.org/0953-8984/29/i=46/a=465901
+http://stacks.iop.org/0953-8984/29/i=46/a=465901
+	Crystalline symmetry-protected non-trivial topology in prototype compound BaAl4
+	Abstract
+	 Non-Trivial Topology in BaAl4
+	 Angle-resolved photoemission
+	 Magnetoresistance and Quantum Oscillations
+	 Discussion and Conclusions
+	 Methods
+	 Crystal growth
+	 Transport measurement
+	 Photoemission measurement
+	 DFT calculation
+	 Author contributions
+	 acknowledgments
+	 References

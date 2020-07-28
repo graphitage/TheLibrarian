@@ -1,0 +1,2239 @@
+Predictive Information Accelerates Learning in RL
+Kuang-Huei Lee
+Google Research
+leekh@google.com
+Ian Fischer
+Google Research
+iansf@google.com
+Anthony Liu
+University of Michigan
+anthliu@umich.edu
+Yijie Guo
+University of Michigan
+guoyijie@umich.edu
+Honglak Lee
+Google Research
+honglak@google.com
+John Canny
+Google Research
+canny@google.com
+Sergio Guadarrama
+Google Research
+sguada@google.com
+Abstract
+The Predictive Information is the mutual information between the past and the
+future, I(Xpast;Xfuture). We hypothesize that capturing the predictive information
+is useful in RL, since the ability to model what will happen next is necessary for
+success on many tasks. To test our hypothesis, we train Soft Actor-Critic (SAC)
+agents from pixels with an auxiliary task that learns a compressed representation
+of the predictive information of the RL environment dynamics using a contrastive
+version of the Conditional Entropy Bottleneck (CEB) objective. We refer to these
+as Predictive Information SAC (PI-SAC) agents. We show that PI-SAC agents can
+substantially improve sample efficiency over challenging baselines on tasks from
+the DM Control suite of continuous control environments. We evaluate PI-SAC
+agents by comparing against uncompressed PI-SAC agents, other compressed and
+uncompressed agents, and SAC agents directly trained from pixels.
+1 Introduction
+Many Reinforcement Learning environments have specific dynamics and clear temporal structure:
+observations of the past allow us to predict what is likely to happen in the future. However, it is also
+commonly the case that not all information about the past is relevant for predicting the future. Indeed,
+there is common a Markov assumption in the modeling of RL tasks: given the full state at time t, the
+past and the future are independent of each other.
+However, in general not all RL tasks are specified with a full state vector that can guarantee Markovity.
+Instead, the environment may be only partially observable, or the state may be represented in very
+high dimensions, such as an image. In such environments, the task of the agent may be described
+as finding a representation of the past that is most useful for predicting the future, upon which an
+optimal policy may more easily be learned.
+In this work, we approach the problem of learning continuous control policies from pixel observations.
+We do this by first explicitly modeling the Predictive Information, the mutual information between
+the past and the future. In so doing, we are looking for a compressed representation of the past that
+the agent can use to select its next action, since most of the information about the past is irrelevant
+for predicting the future, as shown in [4]. This corresponds to learning a small state description that
+makes the environment more Markovian, rather than using the entire observed past as a state vector.
+Preprint. Under review.
+ar
+X
+iv
+:2
+00
+7.
+12
+40
+1v
+1 
+ [
+cs
+.L
+G
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+This explicit requirement for a concise representation of the Predictive Information leads us to prefer
+objective functions that are compressive. Philosophically and technically, this is in contrast to other
+recent approaches that have been described in terms of the Predictive Information, such as Contrastive
+Predictive Coding (CPC) [28] and Deep InfoMax (DIM) [17], which do not explicitly compress.
+Modeling the Predictive Information is, of course, insufficient to solve RL problems. We must also
+provide a mechanism for learning how to select actions. In purely model-based approaches, such as
+PlaNet [16], that can be achieved with a planner and a reward estimator that both use the model’s state
+representation. Alternatively, one can use the learned state representation as an input to a model-free
+RL algorithm. That is the approach we explore in this paper. We train a standard Soft Actor-Critic
+(SAC) agent with an auxiliary model of the Predictive Information. Together, these pieces give us
+Predictive Information Soft Actor-Critic (PI-SAC).
+The main contributions of this paper are:
+• PI-SAC: A description of the core PI-SAC agent (Section 3).
+• Sample Efficiency: We demonstrate strong gains in sample efficiency on nine tasks from the
+DM Control Suite [36] of continuous control tasks, compared to state-of-the-art baselines such as
+Dreamer [15] and DrQ [25] (Section 4.1).
+• Ablations: Through careful ablations and analysis, we show that the benefit of PI-SAC is due
+substantially to the use of the Predictive Information and compression (Section 4.2).
+• Generalization: We show that compressed representations outperform uncompressed representa-
+tions in generalization to unseen tasks (Section 4.3).
+2 Preliminaries
+Predictive Information. The Predictive Information [4] is the mutual information between the
+past and the future, I(past; future). From here on, we will denote the past by X and the future by Y .
+[4] shows that the entropy of the past, H(X), is a quantity that grows much faster than the Predictive
+Information, I(X;Y ), as the duration of past observations increases. Consequently, if we would
+like to represent only the information in X that is relevant for predicting Y , we should prefer a
+compressed representation of X . This is a sharp distinction with techniques such as Contrastive
+Predictive Coding (CPC) [28] and Deep InfoMax (DIM) [17] which explicitly attempt to maximize a
+lower bound on I(X;Y ) without respect to whether the learned representation has compressed away
+irrelevant information about X .
+The Conditional Entropy Bottleneck. In order to learn a compressed representation of the Predic-
+tive Information, we will use the Conditional Entropy Bottleneck (CEB) [6] objective. CEB attempts
+to learn a representation Z of some observed variable X such that Z is as useful as possible for
+predicting a target variable Y , while compressing away any information from X that is not also
+contained in Y :
+CEB ≡min
+Z
+βI(X;Z|Y )− I(Y ;Z) (1)
+= min
+Z
+β(−H(Z|X) +H(Z|Y ))− I(Y ;Z) (2)
+= min
+Z
+Ex,y,z∼p(x,y)e(z|x) β log
+e(z|x)
+p(z|y)
+− I(Y ;Z) (3)
+≤min
+Z
+Ex,y,z∼p(x,y)e(z|x) β log
+e(z|x)
+b(z|y)
+− I(Y ;Z) (4)
+Here, e(z|x) is the true encoder distribution and b(z|y) is the variational backwards encoder distribu-
+tion. Both can be parameterized by the outputs of neural networks. Compression increases as β goes
+from 0 to 1.
+To get a variational lower bound on the I(Y ;Z) term, we will use the CatGen formulation from [6],
+which is equivalent to the InfoNCE bound [28, 29] but reuses the backwards encoder:
+I(Y ;Z) ≥ Ex,y,z∼p(x,y)e(z|x) log
+b(z|y)
+1
+K
+∑K
+k=1 b(z|yk)
+(5)
+2
+Figure 1: PI-SAC system diagram for a single minibatch example. To compute JCEB requires K
+bψb(·) distributions from the minibatch, as described in Section 2. Colored edges show how gradients
+flow back to model weights.
+We write the objective for a single example in a minibatch of size K to simplify notation. The K
+examples are sampled independently. Altogether, this gives us:
+CEB ≤ min
+Z
+Ex,y,z∼p(x,y)e(z|x) β log
+e(z|x)
+b(z|y)
+− log
+b(z|y)
+1
+K
+∑K
+k=1 b(z|yk)
+(6)
+Soft Actor-Critic. Soft Actor-Critic (SAC) [14] is an off-policy algorithm that learns a stochastic
+policy πφ, a Q-value function Qθ, and a temperature coefficient α to find an optimal control policy. It
+maximizes a γ-discounted return objective based on the Maximum Entropy Principle [39, 38, 13, 22].
+SAC has objectives for the critic, the actor, and the temperature parameter, α. The critic minimizes:
+JQ(θ) = Est,at∼D
+1
+2
+(
+Qθ(st, at)− (r(st, at) + γ Est+1∼p Vθ̄(st+1)
+)2
+(7)
+where Vθ̄(st) ≡ Eat∼π(at|st)Qθ̄(st, at)− α log π(at|st) is a value function that uses an exponential
+moving average of the θ parameters, θ̄. The actor minimizes:
+Jπ(φ) = Est∼D Eat∼π(at|st) α log π(at|st)−Qθ(st, at) (8)
+GivenH, a target entropy for the policy distribution, the temperature α is learned by minimizing:
+Jα(α) = Eat∼π(at|st)−α log π(at|st)− αH (9)
+3 Predictive Information Soft Actor-Critic (PI-SAC)
+A natural way to combine a stochastic latent variable model trained with CEB with a model-free
+RL algorithm like SAC is to use the latent representation at timestep t, zt, as the state variable for
+the actor, the critic, or both. We will call this Representation PI-SAC and define it in Section G.
+However, any representation given to the actor cannot have a dependency on the next action, and any
+representation given to the critic can depend on at most the next action, since during training and
+evaluation, the actor must use the representation to decide what action to take, and the critic needs the
+representation to decide how good a particular state and action are. The CEB model’s strength, on the
+other hand, lies in capturing a representation of the dynamics of the environment multiple steps into
+the future. We may therefore hypothesize that using CEB as an auxiliary loss can be more effective,
+since in that setting, the future prediction task can be conditioned on the actions taken at each future
+frame. Conditioning on multiple future actions in the forward encoder allows it to make more precise
+predictions about the future states, thereby allowing the forward encoder to more accurately model
+environment dynamics.1 Consequently, PI-SAC agents are trained using CEB as an auxiliary task, as
+shown in Figure 1.
+1We give details and results for Representation PI-SAC agents in Section G. Representation PI-SAC agents
+are also very sample efficient on most tasks we consider, but they don’t achieve as strong performance on tasks
+with more complicated environment dynamics, such as Cheetah, Hopper, and Walker.
+3
+Algorithm 1 Training Algorithm for PI-SAC
+Require: Estep, θe, φ1c , φ
+2
+c , φa, α, ψe, ψb . Environment and initial parameters
+θ̄b ← θe . Copy initial forward conv weights to the backward conv encoder
+D ← ∅ . Initialize replay buffer
+for each initial collection step do . Initial collection with random policy
+at ∼ πrandom(at) . Sample action from a random policy
+st+1, rt+1 ∼ Estep(at)
+D ← D ∪ (st+1, at, rt+1)
+end for
+s1 ← Estep() . Get initial environment step
+for t=1 to M do
+at ∼ πφ(at|st) . Sample action from the policy
+st+1, rt+1 ∼ Estep(at) . Sample next observation from environment
+D ← D ∪ (st+1, at, rt+1)
+for each gradient step do
+{φic, θe} ← {φic, θe} − λQ∇̂{φic,θe}JQ(φ
+i
+c, θe) for i ∈ {1, 2} . gradient step on critics
+φa ← φa − λπ∇̂φaJπ(φa) . gradient step on actor
+α← α− λα∇̂αJα(α) . adjust temperature
+{θe, ψe, ψb} ← {θe, ψe, ψb} − λCEB∇̂{θe,ψe,ψb}JCEB(θe, ψe, ψb) . CEB gradient step
+θ̄i ← τθi − (1− τ)θ̄i for i ∈ {1, 2} . Update target network weights
+θ̄e ← τθe − (1− τ)θ̄e . Update target conv encoder weights
+θ̄b ← τbθe − (1− τb)θ̄b . Update backward conv encoder weights
+end for
+end for
+PI-SAC uses the same three objective functions from SAC, described above. The only additional
+piece to specify is the choice ofX and Y for the CEB objective. In our setting, X consists of previous
+observations and future actions, and Y consists of future observations and future rewards. If we
+define the present as t = 0 and we limit ourselves to observations from −T + 1 to T , we have:
+JCEB(θe, ψe, ψb) = Es−T+1:T ,a0:T−1,r1:T∼D,z0∼e(z0|·) log
+eθe,ψe(z0|s−T+1:0, a0:T−1)
+bψb(z0|s1:T , r1:T )
++ log
+bψb(z0|s1:T , r1:T )
+1
+K
+∑K
+k=1 bψb(z0|s
+k
+1:T , r
+k
+1:T )
+(10)
+The training algorithm for PI-SAC is in Algorithm 1. Estep is the environment step function. θe
+is the weight vector of the convolutional encoder. θ̄b = EMA(θe, τb) is the weight vector of the
+convolutional backwards encoder, where EMA(·) is the exponential moving average function. φ1c ,
+φ2c , and φa are the weight vectors for two critic networks and the actor network, respectively. α is the
+SAC temperature parameter. ψe and ψb are the weight vectors of MLPs to parameterize the CEB
+forward and backwards encoders. τ and τb are exponents for EMA calls. λQ, λπ , λα, and λCEB are
+learning rates for the four different objective functions. See Section A for implementation details.
+4 Experiments
+We evaluate PI-SAC on the DeepMind control suite [36] and compare with leading model-free and
+model-based approaches for continuous control from pixels: SLAC [27], Dreamer [15], and DrQ [25].
+Our benchmark includes the six tasks from the PlaNet benchmark [16] and three additional tasks:
+Cartpole Balance Sparse, Hopper Stand, and Walker Stand.
+The PlaNet benchmark treats action repeat as a hyperparameter. On each PlaNet task, we evaluate
+PI-SAC with the action repeat at which SLAC performs the best2, and compare with the best DrQ
+result. The choices of action repeat are listed in Section A.2. On Walker Walk (also in the PlaNet
+benchmark), Cartpole Balance Sparse, Hopper Stand, and Walker Stand, we evaluate PI-SAC with
+action repeat 2 and directly compare with Dreamer and DrQ results on the Dreamer benchmark. We
+2The SLAC results that we report outperform the current version [27] at the time of submission. The paper
+also made a typo in that SLAC actually takes 3 gradient updates per environment step instead of 1.
+4
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Ball In Cup Catch
+PI-SAC
+Dreamer*
+DrQ
+SLAC
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Swingup
+PI-SAC
+Dreamer*
+DrQ
+SLAC
+0.0 0.5 1.0 1.5 2.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cheetah Run
+PI-SAC
+Dreamer*
+DrQ
+SLAC
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Finger Spin
+PI-SAC
+Dreamer*
+DrQ
+SLAC
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Reacher Easy
+PI-SAC
+Dreamer*
+DrQ
+SLAC
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Walk
+PI-SAC
+Dreamer
+DrQ
+SLAC
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Balance Sparse
+PI-SAC
+Dreamer
+DrQ
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Hopper Stand
+PI-SAC
+Dreamer
+DrQ
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Stand
+PI-SAC
+Dreamer
+DrQ
+Figure 2: Performance comparison to existing methods on 9 tasks from DeepMind control suite. The
+upper 6 tasks are the PlaNet benchmark [16]. Dreamer* indicates that the other agents do not use
+Dreamer’s action repeat of 2. We additionally include the 3 lower tasks with a fixed action repeat of 2
+to compare with Dreamer [15] and DrQ [25] results on the Dreamer benchmark. PI-SAC matches the
+state-of-the-art performance on all 9 tasks and is consistently the most sample efficient.
+report the performance using true environment steps to be invariant to action repeat. All figures show
+mean, minimum, and maximum episode returns of 10 runs unless specified otherwise.
+Throughout these experiments we mostly use the standard SAC hyperparameters [14], including the
+sizes of the actor and critic networks, learning rates, and target critic update rate. Unless otherwise
+specified, we set CEB β = 0.01. We report our results with the best number of gradient updates
+per environment step in Section 4.1, and use one gradient update per environment step for the rest
+of the experiments. Full details of hyperparameters are listed in Section A.2. We use an encoder
+architecture similar to DrQ [25]; the details are described in Section A.1.
+4.1 Sample Efficiency
+Figure 2 compares PI-SAC with SLAC, Dreamer, and DrQ. PI-SAC consistently achieves state-
+of-the-art performance and better sample efficiency across all benchmark tasks. We report our
+results on Reacher Easy with one gradient update per environment step, on Cheetah Run with four
+gradient updates, and the rest with two gradient updates. A comparison of PI-SAC agents with
+different numbers of gradient updates is available in Section B. The comparison in this section is
+system-to-system as all baseline methods have their own implementation advantages: SLAC performs
+three gradient updates per environment step and uses a much larger encoder architecture; DrQ’s
+SAC differs substantially from the standard SAC [14], including having much larger actor and critic
+networks; Dreamer is a model-based method that uses RNNs and learns a policy in simulation.
+4.2 Predictive Information
+We test our hypothesis that predictive information is the source of the sample efficiency gains here.
+5
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Swingup
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+SAC (Aug)
+0.0 0.5 1.0 1.5 2.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cheetah Run
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+SAC (Aug)
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Reacher Easy
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+SAC (Aug)
+Figure 3: The predictive information improves performance on Cartpole Swingup and Cheetah
+Run without any data augmentation. With data augmentation, it continues showing strong improve-
+ments over the SAC baseline on all three tasks. We perform 5 runs for PI-SAC and SAC without
+augmentation. More results are presented in Section E.
+Figure 4: We learn a diagnostic deconvolutional decoder to predict future observations from CEB
+representations learned along with PI-SAC for Reacher. We show ground truth future observations
+and the predicted future observations from CEB representations. Left: CEB representations learned
+without data augmentation only capture positions of the target. Right: CEB representations learned
+with data augmentation capture both the target and the arm.
+Data Augmentation. We follow [25] to train our models with image sequences randomly shifted by
+[−4, 4] pixels. Without this perturbation, Figure 3 shows that learning the predictive information by
+itself still greatly improves agents’ performance on Cartpole and Cheetah but makes little difference
+on Reacher. Learning PI-SAC with data augmentation continues showing strong improvements over
+the SAC baseline with data augmentation and solves all benchmark tasks.
+[25, 26] showed that input perturbation facilitates actor-critic learning, and we show that it also
+improves CEB learning. As described in Section 2, we use the contrastive CatGen formulation to
+get a variational lower bound on I(Y ;Z). Because of its contrastive nature, CatGen can ignore
+information that is not required for it to distinguish different samples and still saturate its bound. In
+our experiments without data augmentation, we found that it ignores essential information for solving
+Reacher. We train a deconvolutional decoder to diagnostically predict future frames from CEB
+representations (we stop gradients from the decoder). As shown in Figure 4, CEB representations
+learned without input perturbation completely fail to capture the arm’s pose. This is because CatGen
+can perfectly distinguish frame sequences in a minibatch sampled from the replay buffer by only
+looking at the position of the target, since that is constant in each episode but varies between episodes.
+In contrast, CatGen representations learned with randomly shifted images successfully capture both
+the target and the arm. This observation suggests that appropriate data augmentation helps CatGen to
+capture meaningful information for control.
+Compression. As described in Section 2, we compress the residual information I(X;Z|Y ) out
+to preserve the minimum necessary predictive information. Figure 5 studies the trade-off between
+strength of compression and agents’ performance by sweeping β values. Some amount of compression
+improves sample efficiency and stability of the results, but overly strong compression can be harmful.
+The impact of β on the agent’s performance confirms that, even though the CEB representation isn’t
+being used directly by the agent, the auxiliary CEB objective is able to substantially change the
+agent’s weights. Sweeping β allows us to explore the frontier of the agent’s performance, as well
+as the Pareto-optimal frontier of the CEB objective as usual [6]. For example, for Cheetah Run, the
+residual information at the end of training ranges between ∼ 0 nats for β = 1, to ∼ 947 nats for
+β = 0. For the top performing agent, β = 0.01, the residual information was ∼ 6 nats.
+Comparison to Multiview Self-Prediction. Multiview Self-Prediction (MVSP) is an auxiliary
+objective used by CURL [34]. CURL uses the InfoNCE bound to capture the mutual information
+6
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Swingup (No Aug)
+beta=1.0
+beta=0.1
+beta=0.01
+beta=0.001
+beta=0.0
+0.0 0.5 1.0 1.5 2.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cheetah Run
+beta=1.0
+beta=0.1
+beta=0.01
+beta=0.001
+beta=0.0
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Walk
+beta=1.0
+beta=0.1
+beta=0.01
+beta=0.001
+beta=0.0
+Figure 5: Compression improves agents’ performance. We disable data augmentation for Cartpole
+Swingup to amplify the benefit of compression. At β = 0, compression is not part of the learning
+objective. We perform 5 runs for each curve shown in this figure.
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Swingup
+MVSP beta=1.0
+MVSP beta=0.1
+MVSP beta=0.01
+MVSP beta=0.001
+MVSP beta=0.0
+PI-SAC
+0.0 0.5 1.0 1.5 2.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cheetah Run
+MVSP beta=1.0
+MVSP beta=0.1
+MVSP beta=0.01
+MVSP beta=0.001
+MVSP beta=0.0
+PI-SAC
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Reacher Easy
+MVSP beta=1.0
+MVSP beta=0.1
+MVSP beta=0.01
+MVSP beta=0.001
+MVSP beta=0.0
+PI-SAC
+Figure 6: Learning the predictive information outperforms multiview self-prediction at all levels of
+compression. We perform 5 runs for the multiview experiments. MVSP: multiview self-prediction.
+between two random crops I(Xcrop1;Xcrop2) as an auxiliary task for continuous control from pixels.
+This approach preserves information about the present, differing philosophically from PI-SAC which
+captures information about the future. By changing the CEB prediction target from the future (Y ) to
+a random shift of the past observation, X ′, we can achieve the equivalent multiview self-prediction
+in our framework and fairly compare the two approaches. Figure 6 compares PI-SAC to the MVSP
+auxiliary task. PI-SAC agents outperform MVSP agents at all levels of compression. For MVSP
+agents, compression also helps for tasks like Cheetah and Reacher. More results are in Section D.
+This empirical evidence suggests that, for RL agents, knowing what will happen in the future matters
+more than knowing what has happened in the past.
+4.3 Generalization to Unseen Tasks
+It is well-known that compressed representations can generalize better in many machine learning
+settings [31, 3, 7], including RL [18, 10, 9]. In addition to sample efficiency, for more testing of
+generalization, we explore transferring representations to an unseen task with the same environment
+dynamics. Specifically, we learn a PI-SAC agent on a source task, freeze the representation zdete (see
+Figure 1), and train a new agent for a target task using the frozen representation. Figure 7 shows
+that compressed representations generalize substantially better to unseen tasks than uncompressed
+representations. Especially when the target task is intuitively harder than the source task, i.e. Cartpole
+Balance to Swingup and Walker Stand to Walk, the performance differences between different levels
+of compression are more significant on the target task than on the original tasks. It is, however, less
+prominent when the target task is easier, i.e. Walker Walk to Stand. Our conjecture is that solving
+the original Walk task would require exploring a wider range of the environment dynamics that
+presumably includes much what the Stand task would need. On the other hand, transferring from
+Stand to Walk requires generalization to more unseen part of the environment dynamics. Note that
+in these settings it is still more sample efficient to train a full new PI-SAC agent on the target task.
+These experiments simply demonstrate that the more compressed predictive information models have
+representations that are more useful in a task transfer setting.
+5 Related Work
+Future Prediction in RL. Future prediction is commonly used in reinforcement learning in a few
+different ways. Model-based RL algorithms build world model(s) to predict the future conditioned on
+7
+0.00 0.05 0.10 0.15
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+SRC: Cartpole Balance (No Aug)
+beta=1.0
+beta=0.1
+beta=0.01
+beta=0.001
+beta=0.0
+0.0 0.5 1.0 1.5 2.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+TGT: Cartpole Swingup (No Aug)
+beta=1.0
+beta=0.1
+beta=0.01
+beta=0.001
+beta=0.0
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+SRC: Walker Stand
+beta=1.0
+beta=0.1
+beta=0.01
+beta=0.001
+beta=0.0
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+TGT: Walker Walk
+beta=1.0
+beta=0.1
+beta=0.01
+beta=0.001
+beta=0.0
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+SRC: Walker Walk
+beta=1.0
+beta=0.1
+beta=0.01
+beta=0.001
+beta=0.0
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+TGT: Walker Stand
+beta=1.0
+beta=0.1
+beta=0.01
+beta=0.001
+beta=0.0
+Figure 7: Compression improves task transfer. We train a PI-SAC agent on a source task (SRC),
+freeze the representation zdete (see Figure 1), and train a new agent on a target task (TGT). We show
+the results of normal PI-SAC agents with different β for the source tasks, and the transfer results
+using representations learned on the source tasks with different β for the target tasks. Compression
+substantially improves task transfer when the target task is intuitively more difficult than the source,
+i.e. Cartpole Balance to Swingup and Walker Stand to Walk. The difference is less significant when
+the target task is presumably easier, i.e. Walker Walk to Stand. We disable data augmentation for the
+Cartpole experiment to amplify the benefit of compression. All curves show 5 runs.
+past observations and actions, and then find the policy through planning [16, 5, 15, 23, 12, 21, 35].
+On the other hand, as we study in this work, it is often used as an auxiliary or representation learning
+method for model-free RL agents [28, 30, 12, 20, 32, 1, 8]. We hypothesize that the success of these
+methods comes from the predictive information they capture. In contrast to prior work, our approach
+directly measures and compresses the predictive information, so that the representation avoids
+capturing the large amount of information in the past that is irrelevant to the future. As described
+in Section 2, the predictive information that we consider captures environment dynamics. This is
+different from some other approaches [28, 1] that use a contrastive mutual information estimator (e.g.
+InfoNCE) to capture temporal coherence of observations instead of environment dynamics (since
+their predictions are not action-conditioned) and thus have their limitations in off-policy learning.
+Continuous Control from Pixels. Recent successes in continuous control from visual observations
+can roughly be classified into two groups: model-based and model-free approaches. Prominent model-
+based approaches like PlaNet [16] and Dreamer [15], for example, learn latent dynamics and perform
+planning in latent space. Several recent works with the model-free approach [25, 34, 26] have
+demonstrated that image augmentation improves sample-efficiency and robustness of model-free
+continuous control from pixels. In this work, we also perform image augmentation and discover its
+value in learning the predictive information with a contrastive loss (Section 4.2). An example falling
+between model-based and model-free is SLAC [27] which captures latent dynamics for representation
+learning but learns the model-free SAC [14] with the representation. The approach is different from
+ours as PI-SAC does not model roll-outs in latent space.
+6 Conclusion
+We presented Predictive Information Soft Actor-Critic (PI-SAC), a continuous control algorithm
+that trains a SAC agent using an auxiliary objective that learns a compressed representation of the
+predictive information of the RL environment dynamics. We showed with extensive experiments that
+learning a compressed predictive information representation can substantially improve sample effi-
+ciency and training stability at no cost to final agent performance. Furthermore, we gave preliminary
+indications that compressed representations can generalize better than uncompressed representations
+at task transfer. Future work will explore variations of the PI-SAC architecture, such as using RNNs
+for environments that require long-term planning.
+8
+Acknowledgements
+We thank Justin Fu, Anoop Korattikara, and Ed Chi for valuable discussions. Furthermore, we thank
+Danijar Hafner, Alex Lee, Ilya Kostrikov and Denis Yarats for sharing performance data for the
+Dreamer [15], SLAC [27], and DrQ [25] baselines.
+References
+[1] Ankesh Anand, Evan Racah, Sherjil Ozair, Yoshua Bengio, Marc-Alexandre Côté, and R Devon
+Hjelm. Unsupervised state representation learning in atari. In Advances in Neural Information
+Processing Systems, pages 8766–8779, 2019.
+[2] Jimmy Lei Ba, Jamie Ryan Kiros, and Geoffrey E Hinton. Layer normalization. arXiv preprint
+arXiv:1607.06450, 2016.
+[3] Raef Bassily, Shay Moran, Ido Nachum, Jonathan Shafer, and Amir Yehudayoff. Learners that
+use little information. In Algorithmic Learning Theory, pages 25–55, 2018.
+[4] William Bialek and Naftali Tishby. Predictive information. arXiv preprint cond-mat/9902341,
+1999.
+[5] Kurtland Chua, Roberto Calandra, Rowan McAllister, and Sergey Levine. Deep reinforcement
+learning in a handful of trials using probabilistic dynamics models. In Advances in Neural
+Information Processing Systems, pages 4754–4765, 2018.
+[6] Ian Fischer. The conditional entropy bottleneck. arXiv preprint arXiv:2002.05379, 2020.
+[7] Ian Fischer and Alexander A Alemi. CEB improves model robustness. arXiv preprint
+arXiv:2002.05380, 2020.
+[8] Carles Gelada, Saurabh Kumar, Jacob Buckman, Ofir Nachum, and Marc G Bellemare. Deep-
+MDP: Learning continuous latent space models for representation learning. In International
+Conference on Machine Learning, pages 2170–2179, 2019.
+[9] Anirudh Goyal, Yoshua Bengio, Matthew Botvinick, and Sergey Levine. The variational band-
+width bottleneck: Stochastic evaluation on an information budget. In International Conference
+on Learning Representations, 2020.
+[10] Anirudh Goyal, Riashat Islam, Daniel Strouse, Zafarali Ahmed, Matthew Botvinick, Hugo
+Larochelle, Yoshua Bengio, and Sergey Levine. Infobot: Transfer and exploration via the
+information bottleneck. In International Conference on Learning Representations, 2019.
+[11] Sergio Guadarrama, Anoop Korattikara, Oscar Ramirez, Pablo Castro, Ethan Holly, Sam
+Fishman, Ke Wang, Ekaterina Gonina, Neal Wu, Efi Kokiopoulou, Luciano Sbaiz, Jamie Smith,
+Gábor Bartók, Jesse Berent, Chris Harris, Vincent Vanhoucke, and Eugene Brevdo. TF-Agents:
+A library for reinforcement learning in tensorflow. https://github.com/tensorflow/
+agents, 2018. [Online; accessed 25-June-2019].
+[12] David Ha and Jürgen Schmidhuber. World models. arXiv preprint arXiv:1803.10122, 2018.
+[13] Tuomas Haarnoja, Haoran Tang, Pieter Abbeel, and Sergey Levine. Reinforcement learning
+with deep energy-based policies. In International Conference on Machine Learning, pages
+1352–1361, 2017.
+[14] Tuomas Haarnoja, Aurick Zhou, Kristian Hartikainen, George Tucker, Sehoon Ha, Jie Tan,
+Vikash Kumar, Henry Zhu, Abhishek Gupta, Pieter Abbeel, et al. Soft actor-critic algorithms
+and applications. arXiv preprint arXiv:1812.05905, 2018.
+[15] Danijar Hafner, Timothy Lillicrap, Jimmy Ba, and Mohammad Norouzi. Dream to control:
+Learning behaviors by latent imagination. In International Conference on Learning Representa-
+tions, 2019.
+9
+https://github.com/tensorflow/agents
+https://github.com/tensorflow/agents
+[16] Danijar Hafner, Timothy Lillicrap, Ian Fischer, Ruben Villegas, David Ha, Honglak Lee,
+and James Davidson. Learning latent dynamics for planning from pixels. In International
+Conference on Machine Learning, pages 2555–2565, 2019.
+[17] R Devon Hjelm, Alex Fedorov, Samuel Lavoie-Marchildon, Karan Grewal, Phil Bachman,
+Adam Trischler, and Yoshua Bengio. Learning deep representations by mutual information
+estimation and maximization. In International Conference on Learning Representations, 2019.
+[18] Maximilian Igl, Kamil Ciosek, Yingzhen Li, Sebastian Tschiatschek, Cheng Zhang, Sam Devlin,
+and Katja Hofmann. Generalization in reinforcement learning with selective noise injection
+and information bottleneck. In Advances in Neural Information Processing Systems, pages
+13978–13990, 2019.
+[19] Sergey Ioffe and Christian Szegedy. Batch normalization: Accelerating deep network training
+by reducing internal covariate shift. In International Conference on Machine Learning, pages
+448–456, 2015.
+[20] Max Jaderberg, Volodymyr Mnih, Wojciech Marian Czarnecki, Tom Schaul, Joel Z Leibo,
+David Silver, and Koray Kavukcuoglu. Reinforcement learning with unsupervised auxiliary
+tasks. In International Conference on Learning Representations, 2017.
+[21] Michael Janner, Justin Fu, Marvin Zhang, and Sergey Levine. When to trust your model:
+Model-based policy optimization. In Advances in Neural Information Processing Systems,
+pages 12498–12509, 2019.
+[22] Edwin T Jaynes. Information theory and statistical mechanics. Physical review, 106(4):620,
+1957.
+[23] Lukasz Kaiser, Mohammad Babaeizadeh, Piotr Milos, Blazej Osinski, Roy H Campbell, Konrad
+Czechowski, Dumitru Erhan, Chelsea Finn, Piotr Kozakowski, Sergey Levine, et al. Model-
+based reinforcement learning for atari. In International Conference on Learning Representations,
+2020.
+[24] Diederik P Kingma and Jimmy Ba. Adam: A method for stochastic optimization. In Interna-
+tional Conference on Learning Representations, 2015.
+[25] Ilya Kostrikov, Denis Yarats, and Rob Fergus. Image augmentation is all you need: Regularizing
+deep reinforcement learning from pixels. arXiv preprint arXiv:2004.13649, 2020.
+[26] Michael Laskin, Kimin Lee, Adam Stooke, Lerrel Pinto, Pieter Abbeel, and Aravind Srinivas.
+Reinforcement learning with augmented data. arXiv preprint arXiv:2004.14990, 2020.
+[27] Alex X Lee, Anusha Nagabandi, Pieter Abbeel, and Sergey Levine. Stochastic latent actor-critic:
+Deep reinforcement learning with a latent variable model. arXiv preprint arXiv:1907.00953,
+2019.
+[28] Aaron van den Oord, Yazhe Li, and Oriol Vinyals. Representation learning with contrastive
+predictive coding. arXiv preprint arXiv:1807.03748, 2018.
+[29] Ben Poole, Sherjil Ozair, Aaron Van Den Oord, Alex Alemi, and George Tucker. On variational
+bounds of mutual information. In International Conference on Machine Learning, pages
+5171–5180, 2019.
+[30] Jürgen Schmidhuber. Making the world differentiable: On using self-supervised fully re-
+current neural networks for dynamic reinforcement learning and planning in non-stationary
+environments. Technical report, Institut für Informatik, Technische Universität München, 1990.
+[31] Ohad Shamir, Sivan Sabato, and Naftali Tishby. Learning and generalization with the informa-
+tion bottleneck. Theoretical Computer Science, 411(29-30):2696–2711, 2010.
+[32] Evan Shelhamer, Parsa Mahmoudieh, Max Argus, and Trevor Darrell. Loss is its own reward:
+Self-supervision for reinforcement learning. arXiv preprint arXiv:1612.07307, 2016.
+10
+[33] Saurabh Singh and Shankar Krishnan. Filter response normalization layer: Eliminating batch
+dependence in the training of deep neural networks. In Proceedings of the IEEE/CVF Conference
+on Computer Vision and Pattern Recognition, pages 11237–11246, 2020.
+[34] Aravind Srinivas, Michael Laskin, and Pieter Abbeel. CURL: Contrastive unsupervised repre-
+sentations for reinforcement learning. arXiv preprint arXiv:2004.04136, 2020.
+[35] Richard S Sutton. Dyna, an integrated architecture for learning, planning, and reacting. ACM
+Sigart Bulletin, 2(4):160–163, 1991.
+[36] Yuval Tassa, Yotam Doron, Alistair Muldal, Tom Erez, Yazhe Li, Diego de Las Casas, David
+Budden, Abbas Abdolmaleki, Josh Merel, Andrew Lefrancq, et al. DeepMind control suite.
+arXiv preprint arXiv:1801.00690, 2018.
+[37] Denis Yarats, Amy Zhang, Ilya Kostrikov, Brandon Amos, Joelle Pineau, and Rob Fergus.
+Improving sample efficiency in model-free reinforcement learning from images. arXiv preprint
+arXiv:1910.01741, 2019.
+[38] Brian D Ziebart. Modeling Purposeful Adaptive Behavior with the Principle of Maximum
+Causal Entropy. PhD thesis, Carnegie Mellon University, 2010.
+[39] Brian D Ziebart, Andrew L Maas, J Andrew Bagnell, and Anind K Dey. Maximum entropy
+inverse reinforcement learning. In AAAI, volume 8, pages 1433–1438. Chicago, IL, USA, 2008.
+11
+Appendices
+A PI-SAC Implementation
+Initial CEB training steps. After collecting initial experiences with a random policy (in Algo-
+rithm 1), we optionally pre-train with the predictive information CEB objective (θe, θ̄e, ψe, ψb are
+updated). The amount of initial CEB steps are selected empirically for each task (listed in Table 1).
+Observation Horizon and Frame Stacking. As described in Section 3, we limit our observations
+from −T + 1 to T (following [34, 25], we set T = 3). We construct the observational input to the
+encoder and backward encoder as a T -stack of consecutive frames, where each frame is a [84×84×3]
+RGB image rendered from the 0th DMControl camera. The pixel values range from [0, 255], and we
+divide each pixel by 255.0.
+Evaluation Setups. We evaluate our agent at every evaluation point by computing the average
+episode return over 10 evaluation episodes. At test time, our policy is deterministic and uses the mean
+of the policy distribution. For most of the experiments, we evaluate every 2500 environment steps
+after applying action repeat for Cheetah, Walker, and Hopper tasks. For Ball in Cup, Cartpole, Finger,
+and Reacher tasks, we evaluate every 1000 environment steps after applying action repeat.
+SAC Implementation. Our SAC implementation is based off of TF-Agents [11]. It follows
+the standard SAC implementation [14]. The performance and sample-efficiency match with the
+benchmark results reported in [14].
+A.1 Network Architecture
+Encoder Networks. The convolutional encoder architecture consists of four convolution layers
+with 3× 3 kernels, 32 channels, similar to the encoder architecture being used in [37, 34, 25]. We use
+stride 2 at the first convolution layer and 1 in the rest. Filter Response Normalization and Thresholded
+Linear Unit [33] are applied after each convolution layer. The output of the last convolution layer
+is fed into a fully-connected layer which projects to a 50-d feature vector and followed by Layer
+Normalization [2]. This gives us the 50-d zdete . As shown in Figure 1, we stop gradients from the actor
+network, but allow the critic optimizer and the CEB optimizer to update the convolutional encoder.
+Actor and Critic Networks. Implementations of actor and critic follow the standard SAC [14].
+Both actor and critic are parameterized by MLPs with two 256-d hidden layers. The actor network
+outputs mean and covariance for a parametric Gaussian distribution. And we use tanh as an
+invertible squashing function to enforce the action bounds as in [14]. Inputs to the critic network is a
+concatenation of zdete and action.
+CEB Auxiliary Model. Our CEB forward and backward MLP encoders are parameterized by
+MLPs with two 128-d hidden layers. Each MLP outputs 50-d mean followed by Batch Normalization
+[19] for a multivariate Gaussian distribution, and we fix diagonal covariance at 1.0. Inputs to the
+forward MLP is a concatenation of zdete and T future actions. Inputs to the backward MLP is a
+concatenation of zdete and T future rewards.
+A.2 Hyperparameters
+Throughout these experiments we mostly use the standard SAC hyperparameters [14]. The hyperpa-
+rameters that are fixed across all tasks are listed in Table 1. The size of the replay buffer is a smaller
+105 due to high memory usage for storing image observations. The heuristic entropy target is set to
+−dim(A)/2, a default value used in TF-Agents SAC implementation [11], where dim(A) is number
+of dimensions of action. In our experiments the results are similar to using −dim(A), the default
+used in [14].
+The amount of action repeat (described in Section 4), initial collection steps, and initial CEB steps
+for each task are listed in Table 1. The standard SAC takes 10,000 initial collection steps, but for
+some of the tasks we take fewer steps of 1,000 in favor of sample efficiency.
+12
+Table 1: Left: Global PI-SAC hyperparameters. Right: Per-task PI-SAC hyperparameters. PlaNet
+tasks are indicated with (P).
+Parameter Value
+optimizer Adam [24]
+batch size 256
+actor learning rate λπ 3× 10−4
+critic learning rate λQ 3× 10−4
+alpha learning rate λα 3× 10−4
+CEB learning rate λCEB 3× 10−4
+discount (γ) 0.99
+replay buffer size 105
+entropy targetH −dim(A)/2
+target smoothing
+coefficient (τ ) 0.005
+target update interval 1
+initial log(α) 0.0
+backward encoder
+EMA update rate 0.05
+observation horizon T 3
+Task
+Action
+Repeat
+Initial
+Collection Steps
+Initial
+CEB steps
+Cartpole Swingup (P) 4 1000 5000
+Cartpole Balance Sparse 2 1000 5000
+Reacher Easy (P) 4 1000 5000
+Ball in Cup Catch (P) 4 1000 5000
+Finger Spin (P) 1 10000 0
+Cheetah Run (P) 4 10000 10000
+Walker Walk (P) 2 10000 10000
+Walker Stand 2 10000 10000
+Hopper Stand 2 10000 10000
+B PI-SAC and SAC at Different Numbers of Gradient Steps
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Ball In Cup Catch
+PI-SAC gs=1
+PI-SAC gs=2
+SAC gs=1
+SAC gs=2
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Swingup
+PI-SAC gs=1
+PI-SAC gs=2
+SAC gs=1
+SAC gs=2
+0.0 0.5 1.0 1.5 2.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cheetah Run
+PI-SAC gs=1
+PI-SAC gs=4
+SAC gs=1
+SAC gs=4
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Finger Spin
+PI-SAC gs=1
+PI-SAC gs=2
+SAC gs=1
+SAC gs=2
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Reacher Easy
+PI-SAC gs=1
+PI-SAC gs=2
+SAC gs=1
+SAC gs=2
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Walk
+PI-SAC gs=1
+PI-SAC gs=2
+SAC gs=1
+SAC gs=2
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Balance Sparse
+PI-SAC gs=1
+PI-SAC gs=2
+SAC gs=1
+SAC gs=2
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Hopper Stand
+PI-SAC gs=1
+PI-SAC gs=2
+SAC gs=1
+SAC gs=2
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Stand
+PI-SAC gs=1
+PI-SAC gs=2
+SAC gs=1
+SAC gs=2
+Figure 8: Comparison of PI-SAC and SAC with image augmentation at different numbers of gradient
+steps (gs) per environment step. We report results at 1 and 2 gradient steps, except that we show 1
+and 4 gradient steps for Cheetah Run. PI-SAC consistently outperforms the SAC baseline.
+Another way to improve sample efficiency in SAC and PI-SAC models is to increase the number of
+gradient steps taken per environment step collected. In Figure 8, we see that PI-SAC outperforms the
+SAC baseline while varying gradient steps, particularly on Ball In Cup Catch and Cheetah Run.
+13
+C Comparison to SAC from States
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Ball In Cup Catch
+PI-SAC gs=1
+PI-SAC gs=2
+state-SAC gs=1
+state-SAC gs=2
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Swingup
+PI-SAC gs=1
+PI-SAC gs=2
+state-SAC gs=1
+state-SAC gs=2
+0.0 0.5 1.0 1.5 2.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cheetah Run
+PI-SAC gs=1
+PI-SAC gs=4
+state-SAC gs=1
+state-SAC gs=4
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Finger Spin
+PI-SAC gs=1
+PI-SAC gs=2
+state-SAC gs=1
+state-SAC gs=2
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Reacher Easy
+PI-SAC gs=1
+PI-SAC gs=2
+state-SAC gs=1
+state-SAC gs=2
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Walk
+PI-SAC gs=1
+PI-SAC gs=2
+state-SAC gs=1
+state-SAC gs=2
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Balance Sparse
+PI-SAC gs=1
+PI-SAC gs=2
+state-SAC gs=1
+state-SAC gs=2
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Hopper Stand
+PI-SAC gs=1
+PI-SAC gs=2
+state-SAC gs=1
+state-SAC gs=2
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Stand
+PI-SAC gs=1
+PI-SAC gs=2
+state-SAC gs=1
+state-SAC gs=2
+Figure 9: Comparison of PI-SAC (from pixels) to SAC from states (state-SAC) at different numbers
+of gradient steps (gs) per environment step. We report results at 1 and 2 gradient steps for all tasks
+except Cheetah Run, which uses 1 and 4 gradient steps. We use the action repeat values from Table 1
+for state-SAC as well. PI-SAC performs comparably to state-SAC on most tasks.
+It is interesting to compare PI-SAC agents, which are trained from pixels, to SAC agents that have
+been trained from states. Generally, training from pixels is considered to be more challenging than
+training from states. However, we find that PI-SAC performs comparably to SAC from states on most
+tasks. On Cheetah Run and Finger Spin, PI-SAC significantly outperforms state-SAC, indicating that
+those tasks benefit strongly from representations that model what will happen next, rather than simply
+needing a precise description of the current state. In contrast, state-SAC has a noticeable sample
+efficiency advantage over PI-SAC on Ball In Cup Catch, indicating that a precise description of the
+current state that is stable throughout training is more important than learning to model what will
+happen next.
+14
+D Comparison to Multiview Self-Prediction
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Ball In Cup Catch
+MVSP
+PI-SAC
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Swingup
+MVSP
+PI-SAC
+0.0 0.5 1.0 1.5 2.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cheetah Run
+MVSP
+PI-SAC
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Finger Spin
+MVSP
+PI-SAC
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Reacher Easy
+MVSP
+PI-SAC
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Walk
+MVSP
+PI-SAC
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Balance Sparse
+MVSP
+PI-SAC
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Hopper Stand
+MVSP
+PI-SAC
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Stand
+MVSP
+PI-SAC
+Figure 10: Learning the predictive information outperforms multiview self-prediction (MVSP), which
+is described in Section 4.2. We compare PI-SAC to using the MVSP auxiliary task on all 9 tasks. We
+use the default β = 0.01 for experiments in this figure. The MVSP curves show results of 5 runs.
+In Figure 10 we present results on all nine tasks for our experiments in Figure 6. For these experiments,
+we don’t sweep β for the MVSP models, and instead use the default β = 0.01 for all models. In all
+cases, the PI-SAC models achieve equal or better performance.
+15
+E PI-SAC and SAC without Image Augmentation
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Ball In Cup Catch
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Swingup
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+0.0 0.5 1.0 1.5 2.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cheetah Run
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Finger Spin
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Reacher Easy
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Walk
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Balance Sparse
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Hopper Stand
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Stand
+PI-SAC (No Aug)
+SAC (No Aug)
+PI-SAC (Aug)
+Figure 11: Comparison of PI-SAC and SAC both without image augmentation on all 9 tasks. We
+perform 5 runs for experiments without image augmentation. PI-SAC without image augmentation
+always matches or improves on the SAC baseline, but some tasks are only solved with the addition of
+image augmentation.
+In Figure 11 we compare PI-SAC agents with SAC and PI-SAC agents trained without image
+augmentation on all nine tasks. This is the same setting as Figure 3. Learning the predictive
+information without image augmentation is sufficient to significantly improve SAC agents for some
+tasks, and is never detrimental compared to the SAC baseline. However, augmentation is essential
+to solving Reacher Easy, Walker Walk, and Hopper Stand. On all tasks, having both the predictive
+information and image augmentation performs the best.
+16
+F Comparison of Contrastive and Generative PI-SAC
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Ball In Cup Catch
+Generative
+Contrastive
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Swingup
+Generative
+Contrastive
+0.0 0.5 1.0 1.5 2.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cheetah Run
+Generative
+Contrastive
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Finger Spin
+Generative
+Contrastive
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Reacher Easy
+Generative
+Contrastive
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Walk
+Generative
+Contrastive
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Balance Sparse
+Generative
+Contrastive
+0.0 0.2 0.4 0.6 0.8 1.0
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Hopper Stand
+Generative
+Contrastive
+0.00 0.05 0.10 0.15 0.20 0.25
+Environment Steps (×106)
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Stand
+Generative
+Contrastive
+Figure 12: Comparison of the standard contrastive version and PI-SAC and the generative version
+of PI-SAC which directly predicts future observations and future rewards. The contrastive version
+shows better sample-efficiency and performance than the generative version every task except Hopper
+Stand, where the two approaches are essentially indistinguishable. The wall time per gradient step of
+the contrastive models is about 30% faster than the generative models, even with the small number of
+frames being predicted (3 future frames).
+As shown in [6], under an assumption of a uniform distribution over the training examples, the
+contrastive CatGen formulation (eq. (5)) approximates the decoder distribution:
+b(z|y)∑K
+k=1 b(z|yk)
+≈ p(y|z) (11)
+Instead of using CatGen in CEB, we can alternatively learn to predict y, the future observations and
+future rewards. This gives a generative variant of PI-SAC. To predict the future observations for the
+generative PI-SAC, we use a decoder network consisting of four transposed convolution layers with
+features of (12, 64, 32, 3), kernel widths of (3× 3, 3× 3, 11× 11, 3× 3), and strides of (2, 2, 1, 2).
+To predict the future rewards, we use an MLP with 50-d first hidden layer and 25-d second hidden
+layer.
+Figure 12 compares the standard contrastive version of PI-SAC to the generative variant. It shows that
+the contrastive version is generally more sample-efficient and gives better performance. Additionally,
+the generative version is slower to train in terms of wall time. These observations lead us to prefer
+the contrastive CatGen formulation for PI-SAC.
+17
+Figure 13: Left: Actor Representation PI-SAC system diagram. Right: Critic Representation
+PI-SAC system diagram.
+G Representation PI-SAC
+The CEB representation, Z, can be used directly by either the actor, the critic, or both. Figure 13
+show the system diagrams for actor and critic Representation PI-SAC models. For models that use
+CEB representations for both actor and critic, it suffices to combine those systems so that there are
+two separate CEB objectives, but with both objectives updating the same convolutional encoder
+parameters (θe). In this setting, neither the actor nor the critic pass gradients back through the
+convolutional encoder parameters. This an important difference from PI-SAC, where both the CEB
+objective and the SAC critic objective contribute gradient information to the convolutional encoder
+parameters. As shown in Figure 13, the actor or the critic use the mean of the forward encoder’s Z
+distribution (zdete in the figures). It is also possible to train using samples from the distribution (z0 in
+the figures). Empirically, we found that the results were qualitatively the same, but often with higher
+variance in evaluation performance early in training, so we only present results using the mean of the
+representation here.
+Figure 14 shows results comparing Representation PI-SAC models to Dreamer on the same tasks
+from the paper. In these experiments, no hyperparameters are changed between the different tasks.
+All Representation PI-SAC models in Figure 14 are trained using the hyperparameters in Table 1,
+action repeat of 2, 1000 initial collection steps, and 0 initial CEB steps. This makes the results directly
+comparable to Dreamer, which also uses action repeat of 2 for all tasks and has no task-specific
+hyperparameters.
+Using a CEB representation for the actor, the critic, or both still gives much better sample efficiency
+than Dreamer at 6 of the 9 tasks, but the lack of the full set of future actions as input to the forward
+encoder in these models appears to make it more difficult for the agents to solve locomotion tasks
+like Cheetah Run and Walker Walk. We also tested a critic Representation PI-SAC model variant that
+allowed critic gradients to flow to the convolutional encoder parameters (as in PI-SAC), and found
+that doing so improved performance on Cartpole Swingup and Reacher Easy, but substantially worse
+on Ball In Cup Catch, Cartpole Balance Sparse, and Cheetah Run, and comparable on the remaining
+four tasks. This indicates that the difficulty on the locomotion tasks we see here is not due to the lack
+of critic gradients.
+On most tasks, we found that actor Representation PI-SAC had the strongest performance and best
+stability of the three Representation PI-SAC variants. In particular, its stability on Cartpole Balance
+Sparse was remarkable: from 80,000 environment steps through 480,000 environment steps, all five
+agents got perfect scores of 1,000 on all 10 evaluation trials that occurred every 10,000 environment
+steps, for a total of 2,000 perfect evaluations in a row. In contrast, the other two variants (and
+Dreamer) had substantial deviations from perfect scores throughout training. More exploration is
+necessary to understand why actor Representation PI-SAC has this stability advantage.
+18
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Ball In Cup Catch
+CEB for critic
+CEB for both
+CEB for actor
+Dreamer
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Swingup
+CEB for critic
+CEB for both
+CEB for actor
+Dreamer
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cheetah Run
+CEB for critic
+CEB for both
+CEB for actor
+Dreamer
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Finger Spin
+CEB for critic
+CEB for both
+CEB for actor
+Dreamer
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Reacher Easy
+CEB for critic
+CEB for both
+CEB for actor
+Dreamer
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Walk
+CEB for critic
+CEB for both
+CEB for actor
+Dreamer
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Cartpole Balance Sparse
+CEB for critic
+CEB for both
+CEB for actor
+Dreamer
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+0
+200
+400
+600
+800
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Hopper Stand
+CEB for critic
+CEB for both
+CEB for actor
+Dreamer
+0.0 0.1 0.2 0.3 0.4 0.5
+Environment Steps (×106)
+200
+400
+600
+800
+1000
+Ep
+is
+od
+e 
+Re
+tu
+rn
+Walker Stand
+CEB for critic
+CEB for both
+CEB for actor
+Dreamer
+Figure 14: Representation PI-SAC models with action repeat of 2 and no task-dependent hyperpa-
+rameter changes, making the experiments directly comparable to the Dreamer results. All curves are
+5 runs.
+H Discussion of Compression
+As discussed in Section 4.3, compression is known to improve generalization [31, 3, 7]. For example,
+in [31], the authors show that every additional bit in a representation Z requires four times as much
+training data to achieve the same generalization, which may explain PI-SAC sample efficiency gains:
+|I(Y ;Z)− I(Ŷ ;Z)| ≤ O
+(
+|Y |2I(X̂;Z)
+√
+N
+)
+(12)
+Here, X̂ and Ŷ are the training observations and targets, Z is the learned representation, N is the
+number of training examples, and X and Y are the observations and targets in the full distribution the
+training examples are sampled from. Since we are trying to learn Z that maximizes I(Y ;Z) while
+only observing X̂ and Ŷ , we want I(Ŷ ;Z) to be as close to I(Y ;Z) as possible. This bound makes
+it clear that we can make the two close by either increasing N or decreasing I(X̂;Z).
+Of course, one way to make that bound tight is to make Z independent of X̂ and Ŷ . In that case, all
+of I(X̂;Z), I(Ŷ ;Z), and I(Y ;Z) converge to 0. To avoid this, we would like to learn the Minimum
+Necessary Information (MNI), introduced in [6]. The MNI is defined as the equality:
+I(X;Y ) = I(X;Z) = I(Y ;Z) (13)
+Intuitively, this says that we are trying to find a representation Z that captures exactly the information
+that is shared between X and Y . Learning such a Z corresponds to finding the maximum of I(Y ;Z)
+while also having I(X;Z|Y ) = 0.3 This is basis of the CEB objective function which we apply here
+to the problem of bounding the Predictive Information, as described in Section 2.
+3And also having I(Y ;Z|X) = 0, but that can be enforced by having the Markov chain Z ← X → Y ,
+which means that Z is a stochastic function of X only.
+19
+	1 Introduction
+	2 Preliminaries
+	3 Predictive Information Soft Actor-Critic (PI-SAC)
+	4 Experiments
+	4.1 Sample Efficiency
+	4.2 Predictive Information
+	4.3 Generalization to Unseen Tasks
+	5 Related Work
+	6 Conclusion
+	Appendices
+	A PI-SAC Implementation
+	A.1 Network Architecture
+	A.2 Hyperparameters
+	B PI-SAC and SAC at Different Numbers of Gradient Steps
+	C Comparison to SAC from States
+	D Comparison to Multiview Self-Prediction
+	E PI-SAC and SAC without Image Augmentation
+	F Comparison of Contrastive and Generative PI-SAC
+	G Representation PI-SAC
+	H Discussion of Compression

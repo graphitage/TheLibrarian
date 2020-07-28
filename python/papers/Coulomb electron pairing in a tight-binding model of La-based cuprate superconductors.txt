@@ -1,0 +1,1283 @@
+arXiv:2007.12414v1  [cond-mat.supr-con]  24 Jul 2020
+ar
+X
+iv
+:2
+00
+7.
+12
+41
+4v
+1 
+ [
+co
+nd
+-m
+at
+.s
+up
+r-
+co
+n]
+  2
+4 
+Ju
+l 
+20
+20
+Annalen der Physik, July 27, 2020
+Coulomb electron pairing in a tight-binding model of
+La-based cuprate superconductors
+K. M. Frahm,1 and D. L. Shepelyansky1,∗
+We study the properties of two electrons with Coulomb
+interactions in a tight-binding model of La-based
+cuprate superconductors. This tight-binding model is
+characterized by long-range hopping obtained previ-
+ously by advanced quantum chemistry computations.
+We show analytically and numerically that the Coulomb
+repulsion leads to a formation of compact pairs prop-
+agating through the whole system. The mechanism of
+pair formation is related to the emergence of an effec-
+tive narrow energy band for Coulomb electron pairs
+with conserved total pair energy and momentum. The
+dependence of the pair formation probability on an ef-
+fective filling factor is obtained with a maximum around
+a filling factor of 20 (or 80) percent. The comparison
+with the case of the nearest neighbor tight-binding
+model shows that the long-range hopping provides
+an increase of the phase space volume with high pair
+formation probability. We conjecture that the Coulomb
+electron pairs discussed here may play a role in high
+temperature superconductivity.
+1 Introduction
+The phenomenon of high temperature superconductiv-
+ity (HTC), discovered in [1], still requires its detailed phys-
+ical understanding as discussed by various experts of
+this field (see e.g. [2–4]). The analysis is complicated by
+the complexity of the phase diagram and strong interac-
+tions between electrons (or holes). As a generic model,
+that can be used for a description of most supercon-
+ducting cuprates, it was proposed to use a simplified
+one-body Hamiltonian with nearest-neighbor hopping
+on a square lattice formed by the Cu ions [5]. In addi-
+tion the interactions between electrons are considered
+as a strongly screened Coulomb interaction that results
+in the 2D Hubbard model [5]. However, a variety of ex-
+perimental results cannot be described by the 2D Hub-
+bard model (see e.g. discussion in [6]). Other models of
+type Emery [7–10] were developed and extended on the
+basis of extensive computations with various numerical
+methods of quantum chemistry (see e.g. [6, 11] and Refs.
+therein). These studies demonstrated the importance of
+next-nearest hopping and allowed to determine reliably
+the longer-ranged tight-binding parameters.
+In this work we use the 2D longer-ranged tight-binding
+parameters reported in [6] and study the effects of Coulomb
+interactions between electrons in the frame work of this
+tight-binding model. There are different reasons indicat-
+ing that long-range interactions between electrons may
+lead to certain new features as compared to the Hub-
+bard case (see [3, 4, 6]). Recently, we demonstrated that
+for two electrons on a 2D lattice with nearest-neighbor
+hopping the energy and momentum conservation laws
+leads to appearance of an effective narrow energy band
+for energy dispersion of two electrons [12]. In such a nar-
+row band even a repulsive Coulomb interaction leads to
+electron pairing and ballistic propagation of such pairs
+through the whole system. The internal classical dynam-
+ics of electrons inside such a pair is chaotic suggesting
+nontrivial properties of pair formation in the quantum
+case. In this work we extend the investigations of the
+properties of such Coulomb electron pairs for a more
+generic longer-ranged tight-binding lattice of one-body
+Hamiltonian typical for La-based cuprate superconduc-
+tors. We find that the long-range hopping leads to new
+features of Coulomb electron pairs.
+In Sec. 2 a detailed description of the tight-binding
+model for two interacting electrons for general lattices
+with a particular application to HTC is presented to-
+gether with an analysis of the effective band width at
+fixed conserved total pair momentum. Section 3 provides
+first results of the full space time evolution obtained in
+the frame work of the Trotter formula approximation.
+∗ Corresponding author E-mail: dima(at)irsamc.ups-tlse.fr
+1 Laboratoire de Physique Théorique, IRSAMC, Université de
+Toulouse, CNRS, UPS, 31062 Toulouse, France
+Copyright line will be provided by the publisher 1
+http://arxiv.org/abs/2007.12414v1
+K. M. Frahm and D. L. Shepelyansky: Coulomb electron pairing in a tight-binding model of La-based cuprate superconductors
+Section 4 introduces the theoretical basis for the descrip-
+tion in terms of an effective block Hamiltonian for a given
+sector of fixed momentum of a pair with technical de-
+tails provided in Appendix A. In Sec. 5 the phase diagram
+of the long time average of the pair formation probabil-
+ity in the plane of total momentum is discussed while
+Sec. 6 provides some results for the intermediate time
+evolution of pair formation. An overview of the results for
+the pair formation probability at different filling factors
+is given in Section 7. The final discussion is presented in
+Section 8.
+2 Generalized tight-binding model on a
+2D lattice
+We assume that each electron moves on a square lattice
+of size N × N with periodic boundary conditions with
+respect to the following generalized one-particle tight-
+binding Hamiltonian:
+H1p =−
+∑
+r
+∑
+a∈A
+ta
+(
+|r〉〈r+a|+ |r+a〉〈r|
+)
+(1)
+where the first sum is over all discrete lattice points r
+(measured in units of the lattice constant) and a belongs
+to a certain set of neighbor vectors A such that for each
+lattice state |r〉 there are non-vanishing hopping matrix
+elements ta with |r+a〉 and |r−a〉 for a ∈ A . To be more
+precise, due to notational reasons, we choose the set A
+to contain all neighbor vectors a = (ax , ay ) in one half
+plane with either ax > 0 or ay > 0 if ax = 0 such that
+A
+′
+= A ∪ (−A ) is the full set of all neighbor vectors. For
+each vector a of the full set A ′, we require that any other
+vector ã which can be obtained from a by a reflection at
+either the x-axis, y-axis or the x-y diagonal also belongs
+to the full set A ′ and has the same hopping amplitude
+ta = tã.
+For the usual nearest neighbor tight-binding model
+(NN-model), already considered in [12], we have the set
+ANN = {(1,0), (0,1)} with t(1,0) = t(0,1) = t = 1. The nu-
+merical results presented in this work correspond either
+to the NN-model (for illustration and comparison) or
+to a longer-ranged tight-binding lattice according to [6]
+which we denote as the HTC-model. For this case the
+set of neighbor vectors is AHTC = {(1,0), (0,1), (2,0), (0,2),
+(1,±2),(2,±1),(1,±1),(2,±2)} and the hopping amplitudes
+are: t = t(1,0) = 1, t
+′
+= t(1,1) = −0.136, t
+′′
+= t(2,0) = 0.068,
+t ′′′ = t(2,1) = 0.061 and t
+(4)
+= t(2,2) = −0.017 correspond-
+ing to the values given in Table 2 of [6] (all energies are
+measured in units of the hopping amplitude t = t(1,0) =
+t(0,1) which is therefore set to unity here; see also Fig. 6a of
+[6] for the neighbor vectors of the different hopping am-
+plitudes). The hopping amplitudes for other vectors such
+as (0,1), (1,−1), (2,1), (1,−2) etc. are obtained from the
+above amplitudes by the appropriate symmetry transfor-
+mations, e.g. t(1,−1) = t(1,1) = t
+′
+=−0.136 etc.
+Even though that most of our numerical results pre-
+sented in this work apply to the HTC-model (or the NN-
+model), we emphasize that certain theoretical consid-
+erations given below, especially for the effective block
+Hamiltonian in relative coordinates at given total mo-
+mentum, are valid for arbitrary generalized tight binding
+models with more general sets A and also with a poten-
+tial generalization to other dimensions.
+The eigenstates of H1p given in (1) are simple plane
+waves:
+|p〉 =
+1
+N
+∑
+r
+e
+i p·r (2)
+with energy eigenvalues:
+E1p (p) =−2
+∑
+a∈A
+ta cos(p ·a) (3)
+and momenta p = (px , py ) such that px and py are inte-
+ger multiples of 2π/N (i.e. pα = 2πlα/N , lα = 0, . . . , N −1,
+α= x, y). For the HTC model, we can give a more explicit
+expression of the energy dispersion:
+E1p (px , py ) =−2
+[
+cos(px)+cos(py )
+]
+−4t ′ cos(px )cos(py )−2t
+′′
+[
+cos(2px)+cos(2py )
+]
+−4t ′′′
+[
+cos(2px )cos(py )+cos(2py )cos(px )
+]
+−4t
+(4)
+cos(2px )cos(2py )
+(4)
+which corresponds to eq. (30) of [6] (assuming t = 1 and
+t (5) = t (6) = t (7) = 0).
+The quantum Hamiltonian of the model with two in-
+teracting particles (TIP) has the form:
+H = H
+(1)
+1p
+⊗1
+(2)
++1
+(1)
+⊗H
+(2)
+1p
++
+∑
+r1 ,r2
+Ū (r2−r1)|r1,r2〉〈r1,r2| (5)
+where H
+( j )
+1p
+is the one-particle Hamiltonian (1) of parti-
+cle j = 1,2 with positional coordinate r j = (x j , y j ) and
+1( j ) is the unit operator of particle j . The last term in (5)
+represents a (regularized) Coulomb type long-range in-
+teraction Ū (r2 − r1) = U /[1+ r (r2 − r1)] with amplitude
+U and the effective distance r (r2 − r1) =
+√
+∆x̄2 +∆ȳ2
+between the two electrons on the lattice with periodic
+boundary conditions. (Here ∆x̄ = min(∆x, N −∆x); ∆ȳ =
+min(∆y, N −∆y); ∆x = x2 − x1; ∆y = y2 − y1 and the lat-
+ter differences are taken modulo N , i.e. ∆x = N + x2 − x1
+if x2 − x1 < 0 and similarly for ∆y). Furthermore, we
+2 Copyright line will be provided by the publisher
+Annalen der Physik, July 27, 2020
+consider symmetric (spatial) wavefunctions with respect
+to particle exchange assuming an antisymmetric spin-
+singlet state (similar results are obtained for antisymmet-
+ric wavefunctions).
+In absence of interaction (U = 0) the energy eigen-
+values (the classical energy) of the two electron Hamilto-
+nian (5) (the two electrons) at given momenta p1 and p2
+are (is) given by:
+Ec (p1,p2) = E1p (p1)+E1p (p2)
+=−4
+∑
+a∈A
+ta cos(p+ ·a/2)cos(∆p ·a)
+(6)
+where p+ = p1 + p2 is the total momentum and ∆p =
+(p2−p1)/2 is the momentum associated to the relative co-
+ordinate ∆r = r2 − r1. For the NN-model Eq. (6) becomes
+Ec (p1,p2) =−4
+∑
+α=x,y cos(p+α/2)cos(∆pα).
+Due to the translational invariance the total momen-
+tum p+ is conserved even in the presence of interac-
+tion (U 6= 0) and only two-particle plane wave states
+with identical p+ are coupled by non-vanishing interac-
+tion matrix elements. For the case of the NN-model, an-
+alyzed in [12], the kinetic energy at fixed p+ is bounded
+by ∆Eb = 4
+∑
+α=x,y |cos(p+α/2)|. Thus for TIP states with
+E > ∆Eb the two electrons cannot separate and propa-
+gate as one pair even if their interaction is repulsive. For
+p+x = p+y = π+δ being close to π and |δ| ≪ 1 there are
+compact Coulomb electron pairs even for very small in-
+teractions U as soon as ∆Eb ≈ 4|δ| < U ≪ B2 with B2 =
+16+U being the maximal energy bandwidth1 in 2D. Thus
+the conservation of the total momentum of a pair with
+p+x = p+y ≈ π leads to the appearance of an effective
+narrow energy band with formation of coupled electron
+pairs propagating through the whole system. However,
+the results obtained in [12] show that even for other val-
+ues of p+x , p+y the probability of pair formation is rather
+high.
+For the NN-model the effective band width for pairs
+∆Eb can be exactly zero for the specific pair momentum
+p+ = (π,π). However, this is not the case for the HTC-
+model where due to the longer-ranged hopping the min-
+imal width ∆Eb is finite due to the additional terms with
+factors cos(p+ ·a/2) in (6). Therefore, we determined nu-
+merically for each given value of total momentum p+ the
+effective bandwidth as:
+∆Eb (p+) = max
+∆p
+[
+Ec (p1,p2)
+]
+−min
+∆p
+[
+Ec (p1,p2)
+]
+(7)
+1 In the following we use the notation B2 = 16+U for the band-
+width of the NN-model.
+with p1 = p+/2−∆p and p2 = p+/2+∆p. Top panels of
+Fig. 1 show density color plots of ∆Eb(p+) for the NN-
+and the HTC-model. For the HTC-case ∆Eb(p+) is max-
+imal at p+ = (0,0) with value ∆Eb,max = 17.952 and min-
+imal at p+ = (π,π) with value ∆Eb,min = 2.176 while for
+the NN-model we have ∆Eb,max = 16 at p+ = (0,0) and
+∆Eb,min = 0 at p+ = (π,π). The value ∆Eb,min = 2.176 for
+the HTC-model is still rather small compared to the max-
+imal value ∆Eb,max ≈ 18 and we may expect a somewhat
+stronger pair formation probability for total momenta p+
+close to (π,π). However, this situation is qualitatively dif-
+ferent as compared to the NN-model and the HTC-case
+requires new careful studies.
+For comparison, we also show in the lower panels of
+Fig. 1 the kinetic energy Ec at p1 = p2 = p+/2 (for the
+square p+ ∈ [0,π]× [0,π]) corresponding to ∆p = 0. While
+for the NN-model this quantity vanishes at p+ = (π,π)
+there is for the HTC-model a zero-line between the two
+points (βπ,π) and (π,βπ) where β ≈ 0.877 ≈ 7/8 is a nu-
+merical constant slightly below unity.
+3 Full space time evolution of electron
+pairs
+As in [12] the full time evolution of two electrons is com-
+puted numerically for N = 128 using the Trotter formula
+approximation (see e.g. [12, 13] for computational de-
+tails). We use the Trotter time step ∆t = B2 = 1/(16 +
+U ) which is the inverse bandwidth for the case of NN-
+model. A further decrease of the time step does not af-
+fect the obtained results. At the initial time both elec-
+trons are localized approximately at (N/2, N/2) with the
+distance ∆x̄ = ∆ȳ = 1 using a linear combination of 8
+states with all combinations due to particle exchange
+symmetry and reflection symmetry at the ∆x- and ∆y-
+axis. The method provides for each time value a wave-
+function ψ(x1, y1, x2, y2) from which we extract different
+quantities such as the density in x1-x2 plane:
+ρX X (x1, x2) =
+∑
+y1,y2
+|ψ(x1, y1, x2, y2)|
+2
+(8)
+or the density ∆x-∆y plane:
+ρrel(∆x,∆y) =
+∑
+x1 ,x2
+|ψ(x1, y1, x1 +∆x, y1 +∆y)|
+2
+(9)
+(with position sums taken modulo N ). We also compute
+the quantity w10 by summing the latter density (9) over
+all values such that |∆x̄| ≤ 10 and |∆ȳ | ≤ 10 which corre-
+sponds to a square of size 21× 21 in ∆x-∆y plane (due
+to negative values of x2 − x1 etc.). This quantity gives the
+Copyright line will be provided by the publisher 3
+K. M. Frahm and D. L. Shepelyansky: Coulomb electron pairing in a tight-binding model of La-based cuprate superconductors
+✲�
+✲✁✂✄
+✁
+✁✂✄
+�
+Figure 1 Top panels show the dependence of the effective
+electron pair band width ∆Eb (p+) on the pair momentum
+p+ = (p+x , p+y ). Bottom panels show the kinetic electron
+pair energy Ec (p1,p2) (in absence of interaction) at momenta
+p1 = p2 = p+/2. Left panels correspond to the NN-model
+and right panels to the HTC-model. In all panels the horizon-
+tal axis corresponds to p+x ∈ [0,π] and the vertical axis to
+p+y ∈ [0,π]. The numbers of the color bar correspond for top
+panels to the ratio of the bandwidth over its maximal value and
+for lower panels to the quantity sgn(Ec )
+√
+|Ec |/Ec,max with
+Ec,max being the maximum of |Ec |. In all subsequent color plot
+figures the numerical values of the color bar corresponds to
+the ratio of the shown quantity over its maximal value.
+quantum probability to find both electrons at a distance
+≤ 10 (in each direction) and we will refer to it as the pair
+formation probability.
+In Fig. 2 the density ρX X is shown for U = 2, both
+NN- and HTC-models at two time values t = 445∆t and
+t = 104∆t . These results show that the wavefunction has
+a component with electrons separating from each other
+and a component where electrons stay close to each
+other forming a pair propagating through the whole sys-
+tem that corresponds to a high density near a diagonal
+with x1 ≈ x2. For t = 445∆t the value of w10 is roughly
+10% and for t = 104∆t it is roughly 13% for both models.
+However, the remaining diffusing component of about
+87-90% probability has a stronger periodic structure for
+the NN-model as compared to the HTC-model.
+Figure 3 shows the density ρrel(∆x,∆y) for the same
+cases of Fig. 2. We clearly see a strong enhancement of
+the probability at small values ∆x̄ ≈ ∆ȳ < 5 (< 6 − 7)
+for the NN-model (HTC-model) showing that there is a
+✵
+✵�✁✂
+✵�✂
+✵�✄✂
+✶
+Figure 2 2D Wavefunction density ρX X (x1, x2) in x1-x2
+plane (see Eq. (8)) obtained from the time evolution using the
+Trotter formula approximation for initial electron positions at
+≈ (N/2, N/2) with distance ∆x̄ =∆ȳ = 1 for N = 128, U = 2
+and Trotter integration time step ∆t = 1/B2 = 1/(16 +U ).
+Top (bottom) panels correspond to the time value t = 445∆t
+(t = 104∆t ) and left (right) panels correspond to the NN-lattice
+(HTC-lattice). The corresponding values of the pair formation
+probability w10 are 0.106 (top left), 0.133 (bottom left), 0.0940
+(top right) and 0.125 (bottom right). Related videos are avail-
+able at [14, 15].
+considerable probability that both electrons stay close
+to each other forming a Coulomb electron pair. Further-
+more, the remaining wavefunction component of inde-
+pendently propagating electrons, clearly visible in Fig. 2,
+is not visible in the density shown in Fig. 3 even though
+this component corresponds to 87-90% probability.
+The supplementary material contains two videos (for
+∼ 460 time values in the range ∆t ≤ t ≤ 104∆t with
+roughly uniform logarithmic density) of the two densities
+ρX X andρrel where both models NN and HTC are directly
+compared in the same video. The raw-data used for these
+videos is the same as in Figs. 2 and 3.
+4 Time evolution in sectors of fixed total
+momentum
+As already mentioned in Sec. 3 the total momentum p+
+is conserved by the TIP dynamics of the Hamiltonian (5).
+In order to exploit this more explicitly, we introduce as in
+4 Copyright line will be provided by the publisher
+Annalen der Physik, July 27, 2020
+✵
+✵�✁✂
+✵�✂
+✵�✄✂
+✶
+Figure 3 2D Wavefunction density ρrel(∆x,∆y) in ∆x-∆y
+plane of relative coordinates (see Eq. (9)) for the same states,
+cases and parameters of Fig. 2. All panels show the zoomed
+density for 0 ≤ ∆x,∆y < 32. Related videos are available at
+[14, 15].
+[12], block basis states by:
+|p+,∆r〉 =
+1
+N
+∑
+r1
+e
+i p+·(r1+∆r/2)|r1,r1 +∆r〉 (10)
+where p+ = (p+x , p+y ) (with p+α = 2πl+α/N ; l+α = 0, . . . , N−
+1; α= x, y) is a fixed value of the total momentum and r1,
+∆r are vectors on the square lattice (with position sums
+in each spatial direction taken modulo N ). One can show
+(see Appendix A for details) that the TIP Hamiltonian (5)
+applied to such state gives a linear combination of such
+states for different ∆r values but the same total momen-
+tum value p+ which provides for each value or sector of
+p+ an effective block Hamiltonian:
+h̄
+(p+) =−
+∑
+∆r
+∑
+a∈A
+t̄
+(p+)
+a
+(
+|∆r+a〉〈∆r|+ |∆r〉〈∆r+a|
+)
++
+∑
+∆r
+Ū (∆r)|∆r〉〈∆r|
+(11)
+where t̄
+(p+)
+a = 2cos(p+ ·a/2) ta is an effective rescaled hop-
+ping amplitude depending also on p+ and we have for
+simplicity omitted the index p+ in the block basis states.
+This effective block Hamiltonian corresponds to a tight-
+binding model in 2D of similar structure as (1) with mod-
+ified hopping amplitudes and an additional “potential”
+Ū (∆r). We note that in absence of this external poten-
+tial (U = 0) the eigenfunctions of (11) are plane waves
+and we immediately recover the expression (6) for its en-
+ergy eigenvalues where ∆p is the momentum associated
+to the relative coordinate ∆r. For the simple NN-model
+the result for the effective block Hamiltonian was already
+given in [12] and the above expression (11) provides the
+generalization to arbitrary tight-binding lattices charac-
+terized by a certain set of neighbor vectors A and as-
+sociated hopping amplitudes ta (the generalization to
+arbitrary spatial dimension is also obvious). As already
+discussed in [12] the boundary conditions of (11) in x−
+(y−)direction are either periodic if the integer index l+x
+(l+y ) of p+x (p+y ) is even or anti-periodic if this index is
+odd. This can be understood by the fact that the expres-
+sion (10) is modified by the factor e±i p+x N /2 = e±iπl+x =
+(−1)l+x if ∆x is replaced by ∆x ± N and similarly for ∆y
+(with ∆r = (∆x,∆y)).
+Diagonalizing the effective block Hamiltonian (11),
+we can rather efficiently compute the exact quantum
+time evolution |ψ̄(t )〉 = e−i h̄
+(p+) t
+|ψ̄(0)〉 inside a given sec-
+tor of p+. As initial state |ψ̄(0)〉 we choose a state (in the
+reduced block space) given as the totally symmetric su-
+perposition of four localized states where ∆x and ∆y are
+either 1 or N − 1. Such a state corresponds in full space
+to a plane wave in the center of mass direction with total
+fixed momentum p+ and strongly localized in the relative
+coordinate ∆r. The matrix size of (11) is N 2 which corre-
+sponds to a complexity of N 6 for the numerical diagonal-
+ization.
+However, for a general lattice, such as the HTC-model,
+one can exploit the particle exchange symmetry to re-
+duce the effective matrix size to roughly N 2/2 and for the
+special cases of p+x = p+y or either p+x = 0 or p+y = 0
+a second symmetry allows a further reduction of the ef-
+fective matrix size to ≈ N 2/4 (for the NN-model there are
+two or three symmetries for these cases with effective ma-
+trix sizes of ≈ N 2/4 or ≈ N 2/8 respectively; see [12] and
+Appendix A for details).
+In view of this, we have been able to compute numer-
+ically the exact time evolution for the HTC-model in cer-
+tain p+ sectors for a lattice size up to N = 384 for the
+case of two symmetries and a limited number of differ-
+ent other parameters (values of p+ and U ). For the case
+of one symmetry and the exploration of all possible val-
+ues of p+x and p+y we used the maximum system size
+N = 192. We also implemented more expensive compu-
+tations where no or less possible symmetries are used to
+verify (at smaller values of N ) that they provide identical
+numerical results.
+We compute the wavefunction in block representa-
+tion ψ̄(p+,∆r) for about 700 time values t = 0 and 10
+−1
+≤
+t /∆t ≤ 106 (with a uniform density in logarithmic scale)
+Copyright line will be provided by the publisher 5
+K. M. Frahm and D. L. Shepelyansky: Coulomb electron pairing in a tight-binding model of La-based cuprate superconductors
+where ∆t = 1/B2 = 1/(16 +U ) is the time step already
+used for the Trotter formula approximation given as the
+inverse bandwidth for the case of the NN-model which is
+the smallest time (inverse of the largest energy) scale of
+the system.
+From the wavefunction we extract in a similar way
+as in Sec. 3 the pair formation probability w10 by sum-
+ming the (normalized) wavefunction density |ψ̄(p+,∆r)|
+2
+at fixed p+ over the 21 × 21 square with |∆x̄| ≤ 10 and
+|∆ȳ | ≤ 10. We also compute the inverse participation ra-
+tio:
+ξIPR =
+(
+∑
+∆r
+|ψ̄(p+,∆r)|
+4
+)−1
+(12)
+which gives roughly the number of lattice sites (in ∆r
+space) over which the wavefunction is localized. Both
+quantities w10 and ξIPR converge typically rather well to
+their stationary values at times t > 103∆t with some time
+dependent fluctuations. Therefore for the cases where
+we are interested in the long time limit we compute the
+wavefunction only for 70 times values (in the same inter-
+val as above with uniform logarithmic density) and take
+the average over the 21 values with 104 ≤ t /∆t ≤ 106. We
+note that for the case of a uniform wavefunction density
+the ergodic values are w10,erg = (21/N )
+2 and ξIPR,erg = N
+2.
+Values of w10 significantly above w10,erg or of ξIPR below
+ξIPR,erg indicate an enhanced probability for the forma-
+tion of compact electron pairs.
+We also mention that both quantities w10 and ξIPR
+are invariant with respect to the three transformations
+p+x ↔ p+y , p+x → −p+x and p+y → −p+y (or p+x →
+2π− p+x and p+y → 2π− p+y ) corresponding to reflec-
+tions at the x-y diagonal, the y-axis and the x-axis. Even
+though the effective block Hamiltonian (11) is not (al-
+ways) invariant with respect to all three of these transfor-
+mations (see Appendix A for details), the choice of an in-
+variant initial state ensures that at finite times the wave-
+function in block space satisfies for example the identity
+ψ̄(p+x , p+y ,∆x,∆y) = ψ̄(p+y , p+x ,∆y,∆x) (and similarly
+for the other reflections). In other words a certain reflec-
+tion transformation for p+ results in the equivalent trans-
+formation for the time dependent block space wavefunc-
+tion in ∆r space. Obviously the two quantities w10 and
+ξIPR do not change with respect to these transformations
+(in ∆r space) and therefore they are conserved. As a re-
+sult it is sufficient to compute these quantities only for
+the triangle 0 ≤ p+y ≤ p+x ≤π.
+In the following sections we present the results for
+these quantities and the wavefunction in block represen-
+tation.
+✵
+✵�✁✂
+✵�✂
+✵�✄✂
+✶
+Figure 4 Phase diagram of electron pair formation in the
+plane of pair momentum p+ = (p+x , p+y ) for the NN-lattice
+(left panels), the HTC-lattice (right panels) and the interaction
+values U = 0.5 (top panels), U = 2 (bottom panels). Shown
+is the pair formation probability w10 for N = 192 obtained
+from the exact time evolution for each sector of p+ with an
+initial electron distance ∆x̄ = ∆ȳ = 1 and computed from an
+average over 21 time values in the interval 104 ≤ t /∆t ≤
+106. In all panels the horizontal (vertical) axis corresponds to
+p+x (p+y ) ∈ [0,π] and the numerical values of the color bar
+correspond to the ratio of w10 over its maximal value. The
+maximum values corresponding to the red region at the top
+right corner p+ = (π,π) are w10 = 1 (both left panels), w10 =
+0.4510 (top right) and w10 = 0.8542 (bottom right). For com-
+parison the ergodic value is w10,erg. = (21/192)
+2
+= 0.01196.
+5 Phase diagram of pair formation
+The phase diagram of the long time average of the pair
+formation probability w10 in the p+-plane is shown in
+Fig. 4 for both models and the interaction values U =
+0.5, 2. As expected from the features of the effective band-
+width shown in (the top panels of) Fig. 1, we find that
+globally for both models the pair formation probability is
+clearly maximal at p+ = (π,π) and minimal at p+ = (0,0).
+Furthermore, the size of the maximum region is signifi-
+cantly stronger for U = 2 than for U = 0.5 which is also
+to be expected. Thus for these p+ values even a rela-
+tively weak or moderate Coulomb repulsion creates quite
+strongly coupled electron pairs.
+For the NN-model the top (p+y =π) or right (p+x =π)
+boundary also provide large values with w10 ≈ 0.5 and
+the width of these regions is stronger for U = 2 than for
+6 Copyright line will be provided by the publisher
+Annalen der Physik, July 27, 2020
+U = 0.5. However, for U = 2 also the remaining region
+provides values between 0.14 and 0.25 of the maximum
+value which are clearly above the ergodic value 0.012.
+Even for U = 0.5 the remaining region is mostly ≈ 0.04
+(with some part close to 0.25) which is still above the er-
+godic value.
+For the HTC-model the situation is more compli-
+cated. The boundary regions are more limited, espe-
+cially for U = 0.5. However, for the remaining region
+there is a new interesting feature which is a signifi-
+cantly enhanced “green-circle” of approximate radius
+rg =
+√
+p2+x +p
+2
++y ≈ 0.85π for U = 0.5 (w10 ≈ 0.14). For
+U = 2 there is also a circle (w10 ≈ 0.20) with approxi-
+mate radius rg ≈ 0.75π. This circle seems to be less pro-
+nounced despite its larger value of w10 as compared to
+U = 0.5 due to the fact that the maximum value for U = 2
+(w10 ≈ 0.85 at p+ = (π,π)) is roughly twice the maxi-
+mum value for U = 0.5 (w10 ≈ 0.45). This structure can-
+not be explained by the behavior of the effective band-
+width. The minimum values of w10 at p+ ≈ (0,0) are
+w10 ≈ 0.02− 0.03 (w10 ≈ 0.09− 0.10) for U = 0.5 (U = 2)
+which are slightly (significantly) above the ergodic value
+0.012.
+Globally, nearly for all values of p+, for both mod-
+els and both interaction values U = 0.5, 2 there is an en-
+hanced probability to create coupled electron pairs.
+The above observations are perfectly confirmed by
+the phase diagram for the inverse participation ratio ξIPR
+which is shown in Fig. 5 for the same cases and raw data
+of Fig. 4. Large (small) values of ξIPR corresponds to small
+(large) values of w10 and a small (strong) pair forma-
+tion probability. Here minimum (maximum) values are
+at p+ = (π,π) (p+ = (0,0)) as for the effective bandwidth
+of Fig. 1 (see figure caption for the numerical minimum,
+maximum and ergodic values). The boundary structure
+of the NN-model and the circle-structure of the HTC-
+case are also clearly visible.
+We have also computed the long time average of the
+pair formation probability for the HTC-model at larger
+system size N = 256 and the special cases of either p+x =
+p+y or p+y = 0 where the additional second symmetry
+(see discussion in the previous section and Appendix A)
+reduces the computational effort. In this way we can ex-
+plore the diagonal and right boundary of the phase dia-
+gram in more detail.
+Figure 6 shows w10 for the HTC-model, N = 256, p+ =
+p+x = p+y and both interaction values U = 0.5, 2 as a
+function of the parameter ν = (1 − cos(p+/2))/2. Both
+curves clearly confirm some of the observations of the
+phase diagrams, i.e. strongest pair formation probability
+at ν = 0.5 (p+x,y = π) with a somewhat larger maximum
+✵
+✵�✁✂
+✵�✂
+✵�✄✂
+✶
+Figure 5 Phase diagram of the inverse participation ratio ξIPR
+in the plane of pair momentum p+ = (p+x , p+y ) and computed
+from the same states, data and cases as in Fig. 4. The maxi-
+mum values corresponding to the red region close to the bot-
+tom left corner p+ = (0,0) are ξIPR = 15300 (top left), ξIPR =
+4300 (bottom left), ξIPR = 18200 (top right) and ξIPR = 8600
+(bottom right). The minimum values at the top right corner
+p+ = (π,π) are ξIPR = 14.87 (top left), ξIPR = 4 (bottom left),
+ξIPR = 126 (top right) and ξIPR = 9.8 (bottom right). For com-
+parison the ergodic value is ξIPR,erg = 192
+2
+= 36864 and the
+value for the totally symmetrized and localized initial state is
+ξIPR,init = 4.
+range for U = 2 as compared to U = 0.5 and a minimal
+pair formation probability at ν = 0 (p+x,y = 0) or ν = 1
+(p+x,y = 2π) but still clearly above the ergodic limit for
+all cases. The precise numerical maximum values of w10
+at ν = 0.5 are slightly different from, but still in general
+agreement with, those of Fig. 4 due to the different sys-
+tem size. The corresponding figure for the NN-model was
+already given in [12].
+Figure 7 shows w10 for the HTC model, N = 256 and
+both interaction values U = 0.5, 2 at the boundary p+y =
+0 as a function of the parameter ν= (1−cos(p+/2))/2 with
+p+ = p+x . The curve for U = 0.5 clearly shows a strong lo-
+cal maximum at ν ≈ 0.5±0.1 (p+ ≈ π±π/8) correspond-
+ing to green-circle with radius rg ≈ 0.85π visible in the
+phase diagram. For U = 2 there are higher but less pro-
+nounced local maxima at ν≈ 0.5±0.19 corresponding to
+the slightly visible circle for this case. However, at U = 2
+the value of w10 at ν = 0.5 is rather high while at U = 0.5
+its value at ν = 0.5 is quite low but still clearly above the
+ergodic limit.
+Copyright line will be provided by the publisher 7
+K. M. Frahm and D. L. Shepelyansky: Coulomb electron pairing in a tight-binding model of La-based cuprate superconductors
+✶�
+✲✁
+✶�
+✲✂
+✶�
+✵
+� �✄☎ �✄✆ �✄✝ �✄✞ ✶
+◆✟✠✡☛☞ ✌✰✟✌✰✍✟✌✰✎
+✇
+✏
+✑
+♥❂✒✶✓✔✕✖✒✗✘✴☎✙✙✴☎
+❯❂☎
+❯❂�✄✚
+❡✛✜✕✢✣✔
+Figure 6 Dependence of the electron pair formation proba-
+bility w10 on ν = (1−cos(p+/2))/2 for p+ = p+x = p+y and
+the HTC-model at U = 0.5, 2 and N = 256. w10 is computed
+from the same long time average as in Fig. 4. The maximum
+value at ν = νmax = 0.5 is w10 = 0.8535 (w10 = 0.4456) for
+U = 2 (U = 0.5). See Fig. 5 of [12] for the corresponding fig-
+ure for the NN-model. For the NN-model the maximum value at
+ν= νmax = 0.5 is exactly w10 = 1 for both interaction values.
+✶�
+✲✁
+✶�
+✲✂
+✶�
+✵
+� �✄☎ �✄✆ �✄✝ �✄✞ ✶
+◆✟✠✡☛☞ ✌✰✟✌✰✍☞ ✌✰✎✟❂
+✇
+✏
+✑
+♥✒✓✶✔✕✖✗✓✘✙✴☎✚✚✴☎
+❯✒☎
+❯✒�✄✛
+❡✜✢✖✣✤✕
+Figure 7 Dependence of the electron pair formation probabil-
+ity w10 on ν = (1−cos(p+/2))/2 for p+ = p+x , p+y = 0 and
+the HTC-model at U = 0.5,2 and N = 256. w10 is computed
+from the same long time average as in Fig. 4. The value at
+ν= 0.5 is w10 = 0.2302 (w10 = 0.01479) for U = 2 (U = 0.5).
+Figures S1 and S2 of the supplementary material are
+similar to Figs. 6 and 7 respectively but for the inverse
+participation ratio ξIPR.
+6 Time evolution of pair formation
+We also computed a more precise time evolution of
+the pair formation probability w10 for the larger system
+size N = 384 and certain specific cases p+x = p+y ∈
+{0, 2π/3, π} and p+y = 0 with p+x ∈ {7π/8, π}. The re-
+sults together with the full space results using the Trot-
+ter formula approximation at N = 128 are shown in Fig. 8
+for U = 0.5, 2. In all cases the value of w10 starts decay-
+ing from its initial value w10 = 1 at t /∆t > 20-30 and
+converges to a long time saturation value for t /∆t > 103
+sometimes with some temporal quasi-periodic fluctua-
+tions. In most cases the saturation values at U = 2 are
+clearly larger than for U = 0.5 except for the case p+y = 0
+and p+x = 7π/8 where both saturation values are some-
+what comparable. In particular, at U = 0.5 the value for
+p+y = 0 and p+x = 7π/8 is significantly larger than the
+value for p+y = 0 and p+x = π while at U = 2 it is the in-
+verse. This observation is in agreement with the appear-
+ance of the green circle in the phase diagram where for
+U = 0.5 the circle is dominant in comparison to the right
+boundary while for U = 2 it is dominated by the right
+boundary.
+The saturation value of the data obtained by the
+Trotter formula approximation, which somehow corre-
+sponds to an average over all possible p+ values, is quite
+low if compared to the case p+ = 0 but still clearly above
+the corresponding ergodic value (for its reduced system
+size). Also for most of the other cases the saturation value
+is clearly above the ergodic value except for U = 0.5,
+p+y = 0 and p+x = π where the curve is a t ≈ 10
+3
+∆t even
+below the ergodic value and saturates later at a value only
+slightly above the ergodic value.
+Motivated by the observation of the green-circle at
+radius rg ≈ 0.85π in the phase diagram for U = 0.5, we
+show in Fig. 9 the wavefunction amplitude at p+x =
+7π/8, p+y = 0, N = 384 and both interaction values U =
+0.5, 2 and two time values t /∆t = 100, 105. The first ob-
+servation is that the diffusive spreading in x-direction
+is strongly suppressed if compared to the y-direction
+which is expected since p+x is rather close to π while
+p+y = 0.
+At U = 0.5 the steady-state at t /∆t = 105, despite
+a smaller value of w10 = 0.0754 if compared to w10 =
+0.1342 at U = 2, has a larger spatial extension of ∼ 30 lat-
+tice sites compared to ∼ 12 lattice sites for U = 2. This in
+rough qualitative agreement with the values ξIPR = 940
+(for U = 0.5) and ξIPR = 268 (for U = 2). However, a large
+amount of the contribution to the inverse participation
+ratio comes from the remaining probability of about 87-
+90% which has uniformly spread over the full lattice thus
+explaining the difference between ξIPR and the visible
+8 Copyright line will be provided by the publisher
+Annalen der Physik, July 27, 2020
+✶�
+✲✁
+✶�
+✲✂
+✶�
+✲✄
+✶�
+✵
+✶�
+✲✂
+✶�
+✵
+✶�
+✂
+✶�
+✹
+✶�
+✻
+❯☎�✆✝
+✇
+✞
+✟
+t✠❉t
+◆✡☛☞✌✍ ✎✰✏✡✎✰✑✡❂
+◆✡☛☞✌✍ ✎✰✏✡✎✰✑✡✒♣✴☛
+◆✡☛☞✌✍ ✎✰✏✡✎✰✑✡♣
+◆✡☛☞✌✍ ✎✰✏✡♣✍ ✎✰✑✡❂
+◆✡☛☞✌✍ ✎✰✏✡✓♣✴☞✍ ✎✰✑✡❂
+◆✡✔✒☞✍ ✕✖✗✘✘✙✖
+✙✖❡✗✚✛✜✍ ◆✡✔✒☞
+✙✖❡✗✚✛✜✍ ◆✡☛☞✌
+✢✣
+✤✥
+✢✣
+✤✦
+✢✣
+✤✧
+✢✣
+★
+✢✣
+✤✦
+✢✣
+★
+✢✣
+✦
+✢✣
+✩
+✢✣
+✪
+✫✬✭
+✮
+✯
+✱
+✳✷✸✳
+✺✼✽✾✿❀ ❁❃❄✼❁❃❅✼❆
+✺✼✽✾✿❀ ❁❃❄✼❁❃❅✼❇❈❊✽
+✺✼✽✾✿❀ ❁❃❄✼❁❃❅✼❈
+✺✼✽✾✿❀ ❁❃❄✼❈❀ ❁❃❅✼❆
+✺✼✽✾✿❀ ❁❃❄✼❋❈❊✾❀ ❁❃❅✼❆
+✺✼●❇✾❀ ❍■❏❑❑▲■
+▲■▼❏❖P◗❀ ✺✼●❇✾
+▲■▼❏❖P◗❀ ✺✼✽✾✿
+Figure 8 Time dependence of the pair formation probability
+w10 for U = 0.5 (top panel) and U = 2 (bottom panel) and
+different cases of the exact time evolution in certain p+ =
+(p+x , p+y ) sectors at N = 384 and the full space Trotter for-
+mula time evolution at N = 128. The dashed lines correspond
+to the ergodic values (21/N )2 = 0.0269 for N = 128 (grey
+dashed) and (21/N )2 = 0.00299 for N = 384 (black dashed).
+spatial extension in Fig. 9 (for this reason with consider
+w10 to be a more suitable quantity than ξIPR to describe
+the pair formation probability).
+7 Results overview
+The discussion of the phase diagram given in Fig. 4 has
+shown that the pair formation probability is maximal at
+the point p+ = (π,π). However, the surrounding region to
+this point is quite small if compared to the green-circle
+where we have a somewhat more modest pair formation
+probability. In terms of available values of p+ the latter
+region is possibly more important. In order to analyze
+this point in a more quantitative way, we assume a simple
+✵
+✵�✁✂
+✵�✂
+✵�✄✂
+✶
+Figure 9 Color plot of wavefunction amplitude |ψ̄(p+,∆r)| in
+block representation in ∆r = (∆x,∆y) plane obtained from the
+2D quantum time evolution for the HTC lattice with N = 384
+and the sector p+x = 7π/8, p+y = 0. All panels show a
+zoomed region 0 ≤ ∆x,∆y < 32. Left (right) panels corre-
+spond to t = 100∆t (t = 105∆t ; with ∆t = 1/B2 = 1/(16+U ))
+and top (bottom) panels correspond to interaction strength
+U = 0.5 (U = 2). Related videos are available at [15].
+model where both electrons have the same momentum
+p+/2 (i.e. ∆p = 0) and where the available states of this
+type are filled from smallest to largest energies. We sub-
+divide these states, ordered in energy, in slices of equal
+number (∼ 1/100 of all available states) and compute the
+average of w10 for each slice which is equivalent to the
+average of w10 at lines of constant energy. In Fig.10, we
+show the dependence of this average on the effective 2D-
+filling factor ν2D which is the weight of slices below a cer-
+tain energy.
+For the NN-model we observe a strong peak at ν2D =
+0.2 (and similarly at ν2D = 0.8 due to symmetry). This
+peak is caused by the combination of the maximum
+point at p+ = (π,π) and rather strong (top or right)
+boundary contributions visible in the left panels of Fig. 4.
+For the HTC-model at U = 2 this peak is still visible but
+its value is reduced. However, for U = 0.5, there are two
+separated peaks, a stronger one at ν2D ≈ 0.15 related to
+the average over the green circle at radius rg ≈ 0.85 and a
+second lower peak at ν2D ≈ 0.24 related to the average of
+the maximum region close to p+ = (π,π). For this partic-
+ular case, the green circle has a stronger global contribu-
+tion to the pair formation probability than the maximum
+region at p+ = (π,π).
+Copyright line will be provided by the publisher 9
+K. M. Frahm and D. L. Shepelyansky: Coulomb electron pairing in a tight-binding model of La-based cuprate superconductors
+✵
+✵�✁
+✵�✂
+✵�✄
+✵ ✵�✂ ✵�☎ ✵�✆ ✵�✝ ✁
+◆◆
+✇
+✶
+✞
+♥✷✟
+❡✠✡☛☞✌✍✎ ◆✏✁✑✂
+❯✏✂
+❯✏✵�✒
+✵
+✵�✁
+✵�✂
+✵�✄
+✵ ✵�✂ ✵�☎ ✵�✆ ✵�✝ ✁
+❍✓✔
+✇
+✶
+✞
+♥✷✟
+❡✠✡☛☞✌✍✎ ◆✏✁✑✂
+❯✏✂
+❯✏✵�✒
+Figure 10 Dependence of the electron pair formation prob-
+ability w10 on the effective 2D filling factor ν2D for the NN-
+lattice (top) and the HTC-lattice (bottom). The values of w10
+have been obtained from the data of Fig. 4 (for N = 192) by
+an average along lines of constant electron pair energy Ec
+at momenta p1 = p2 = p+/2 with p+x , p+y ∈ [0,2π]. Low-
+est (largest) energy corresponds to ν2D = 0 (ν2D = 1). The
+data points shown correspond to an effective histogram with
+bin width ∆ν2D ≈ 0.01. The red (blue) curve corresponds to
+the interaction value U = 2 (U = 0.5) and the grey dashed line
+corresponds to the ergodic value (21/192)2 = 0.01196.
+8 Discussion
+In our studies we analyzed the electron pair formation in
+a tight-binding model of La-based cuprate superconduc-
+tors induced by Coulomb repulsion. Our analytical and
+numerical results show that even a repulsive Coulomb in-
+teraction can form two electron pairs with a high prob-
+ability. Such pairs have a compact size and propagate
+through the whole system. We expect that such pairs may
+contribute to the emergence of superconductivity in La-
+based cuprates.
+Of course, our analysis only considers two electrons
+and in a real system at finite electron density there
+is a Fermi sea which can modify electron interactions.
+However, we expect that electrons significantly below
+the Fermi energy will only create a mean-field potential
+which will not significantly affect interacting electrons
+with energies in the vicinity of the Fermi energy. A de-
+tailed investigation of effects of finite electron density
+on the Coulomb pair formation represents an important
+task for future studies.
+9 Acknowledgments
+This work has been partially supported through the grant
+NANOX N o ANR-17-EURE-0009 in the framework of the
+Programme Investissements d’Avenir (project MTDINA).
+This work was granted access to the HPC resources of
+CALMIP (Toulouse) under the allocation 2020-P0110.
+A Appendix
+In this appendix we present the derivation of the block
+Hamiltonian (11) and a more detailed discussion about
+its discrete symmetries. In order to simplify the notations,
+we will use here the full set A ′ = A ∪ (−A ) of neigh-
+bor vectors (in the full and not only half plane) for the
+summation over the vectors a which allows to reduce the
+number of terms in the following expressions. The TIP
+Hamiltonian (5) can then be written in a more explicit
+form as:
+H = −
+∑
+r1 ,r2
+∑
+a∈A ′
+ta
+(
+|r1,r2〉〈r1 +a,r2|+ |r1,r2〉〈r1,r2 −a|
+)
++
+∑
+r1 ,r2
+Ū (r2 −r1)|r1,r2〉〈r1,r2| (13)
+where for convenience we have written “r2 − a” instead
+of “r2 + a” (in the second term of the first line) since for
+a ∈ A ′ also −a ∈ A ′. Furthermore, the terms with shifts
+of a in the left side have been absorbed by the increased
+set A ′ (with respect to A used in (1)) combined with a
+subsequent shift of the summation index r1 or r2 and ex-
+ploiting the periodic boundary conditions.
+Applying (13) to a block basis state (10) we find that:
+H |p+,∆r〉 = −
+1
+N
+∑
+r1
+∑
+a∈A ′
+ta
+(
+|r1 −a,r1 +∆r〉e
+i p+·(r1+∆r/2)
++|r1,r1 +∆r+a〉e
+i p+·(r1+∆r/2)
+)
+(14)
++Ū (∆r)|p+,∆r〉.
+10 Copyright line will be provided by the publisher
+Annalen der Physik, July 27, 2020
+Using the shift r1 → r1+a in the r1-sum of the first line
+of this expression we obtain:
+H |p+,∆r〉 = −
+1
+N
+∑
+r1
+∑
+a∈A ′
+ta
+(
+|r1,r1 +∆r+a〉e
+i p+·(r1+a+∆r/2)
++|r1,r1 +∆r+a〉e
+i p+·(r1+∆r/2)
+)
+(15)
++Ū (∆r)|p+,∆r〉
+which can be rewritten as:
+H |p+,∆r〉 = −
+1
+N
+∑
+r1
+∑
+a∈A ′
+ta |r1,r1 +∆r+a〉
+×e
+i p+·[r1+(∆r+a)/2]
+(
+e
+i p+·a/2 +e
+−i p+·a/2
+)
+︸ ︷︷ ︸
+2cos(p+·a/2)
++Ū (∆r)|p+,∆r〉 (16)
+= −2
+∑
+a∈A ′
+ta cos(p+ ·a/2) |p+,∆r+a〉 (17)
++Ū (∆r)|p+,∆r〉 .
+The last expression provides exactly the effective block
+Hamiltonian (11) if we replace the sum over a ∈ A ′ by
+a sum over a ∈ A with two contributions “+a” and “−a”
+and applying for the latter contribution a subsequent
+shift ∆r →∆r+a in the ∆r sum. However, there is one ad-
+ditional complication if∆r+a = (∆x +ax ,∆y +ay ) in (17)
+leaves the initial square of ∆x,∆y ∈ {0, . . . N −1}. Then we
+have to add (subtract) N to (from)∆x+ax and/or∆y+ay
+which provides according to (10) the factor e±i p+x N /2 =
+e±iπl+x = (−1)l+x (for ∆x and similarly for ∆y) resulting
+in either periodic or anti-periodic boundary conditions
+in x- (y-)direction depending on the parity of the integer
+index l+x (l+y ).
+We close this appendix with a short discussion about
+the discrete reflection symmetries of the block Hamilto-
+nian (11) and the possibility to reduce its effective matrix
+size N 2 due to such symmetries. For the NN-model, as
+already discussed in detail in [12], there are at least two
+symmetries with respect to∆x → N−∆x (reflection at the
+∆y-axis) or∆y → N−∆y (reflection at the∆x-axis) and in
+case if p+x = p+y there is a third symmetry with respect
+to ∆x ↔ ∆y (reflection at the ∆x-∆y diagonal) which al-
+lows for an effective matrix size of roughly either N 2/4 or
+N 2/8 (if p+x = p+y ).
+However, for a more general lattice, such as the HTC-
+model, or more generally in presence of at least one
+neighbor vector a = (ax , ay ) with both ax 6= 0 and ay 6=
+0 (e.g. a = (1,1)) the number of symmetries is reduced.
+For the most generic case with p+x 6= p+y , p+x 6= 0 and
+p+y 6= 0 there is only one symmetry corresponding to par-
+ticle exchange with two simultaneous transformations
+∆x → N −∆x and ∆y → N −∆y which allows for a re-
+duction of the effective matrix size to ≈ N 2/2. In this
+case the factors cos(p+ ·a/2) = cos[(p+x ax+p+y ay )/2] ap-
+pearing in the effective hopping amplitudes are not mod-
+ified because the replacement a →−a due the symmetry
+transformation only changes the global sign inside the
+cosine argument. However, this is no longer true if we
+apply for example the transformation ∆x → N −∆x with-
+out modifying∆y which is equivalent to the replacement
+of (ax , ay ) → (−ax , ay ) of the neighbor vectors. Therefore
+a single reflection at the ∆y (or ∆x) axis modifies the
+hopping amplitude (if both ax 6= 0, ay 6= 0 and also both
+p+x 6= 0, p+y 6= 0) and (11) is (in general) not invariant
+with respect to such transformations. However, if either
+p+x = 0 or p+y = 0 the effective hopping amplitudes are
+not modified with respect to these two individual reflec-
+tions and we have two symmetries with an effective ma-
+trix size of ≈ N 2/4. Also if p+x = p+y 6= 0 we have two sym-
+metries (particle exchange and reflection at the∆x-∆y di-
+agonal) leading also to an effective matrix size of ≈ N 2/4.
+Finally, for the special case p+x = p+y = 0, we have even
+three symmetries (as in the NN-Model for p+x = p+y )
+with effective matrix size of ≈ N 2/8.
+Key words. tight-binding model, interactions, Coulomb elec-
+tron pairs, cuprates, high-Tc superconductivity
+References
+[1] K. A. Müller, J. G. Bednorz, Z. Phys. B: Condens. Matter
+1986, 64, 189.
+[2] E. Dagotto, Rev. Mod. Phys. 1994, 66, 763.
+[3] B. Keimer, S. A. Kivelson, M. R. Norman, S. Uchida,
+Z. Zaanen, Nature 2015, 518, 179.
+[4] C. Proust, L. Taillefer, Annu. Rev. Condens. Matter
+Phys. 2019, 10, 409.
+[5] P. W. Anderson, Science 1987, 235, 1196.
+[6] R. Photopoulos, R. Fresard, Ann. Phys. (Berlin) 2019,
+1900177.
+[7] V. J. Emery, Phys. Rev. Lett. 1987, 58, 2794.
+[8] V. J. Emery, G. Reiter, Phys. Rev. B 1988, 38, 4547.
+[9] C. M. Varma, Solid State Commun. 1987, 62, 681.
+[10] Y. B. Gaididei, V. M. Loktev, Phys. Status Solidi 1988,
+147, 307.
+[11] R. S. Markiewicz, S. Sahrakorpi, M. Lindroos, H. Lin,
+A. Bansil, Phys. Rev. B 2005, 72, 054519.
+[12] K. M. Frahm, D. L. Shepelyansky, Phys. Rev. Research
+2020, 2, 023354.
+[13] K. M. Frahm, D. L. Shepelyansky, Eur. Phys. J. B 2016,
+89, 8.
+[14] See Supplemental Material at http:XXXX that con-
+tains extra-figures and videos supporting the main
+conclusions and results.
+Copyright line will be provided by the publisher 11
+Annalen der Physik, July 27, 2020
+✶�
+✵
+✶�
+✁
+✶�
+✷
+✶�
+✸
+✶�
+✹
+✶�
+✺
+� �✂✄ �✂☎ �✂✆ �✂✝ ✶
+◆✞✟✠✡☛ ☞✰✞☞✰✌✞☞✰✍
+①
+■✎
+✏
+♥❂✑✶✒✓✔✕✑✖✗✴✄✘✘✴✄
+❯❂✄
+❯❂�✂✙
+❡✚✛✔✜✢✓
+Figure S1 As Fig. 6 but for the inverse participation ratio ξIPR.
+✶�
+✵
+✶�
+✁
+✶�
+✷
+✶�
+✸
+✶�
+✹
+✶�
+✺
+� �✂✄ �✂☎ �✂✆ �✂✝ ✶
+◆✞✟✠✡☛ ☞✰✞☞✰✌☛ ☞✰✍✞❂
+①
+■✎
+✏
+♥✑✒✶✓✔✕✖✒✗✘✴✄✙✙✴✄
+❯✑✄
+❯✑�✂✚
+❡✛✜✕✢✣✔
+Figure S2 As Fig. 7 but for the inverse participation ratio ξIPR.
+[15] K. M. Frahm, D. L. Shepelyansky, Available upon
+request: http://www.quantware.ups-tlse.fr/QWLIB/
+ectronpairsforhtc/; Accessed July (2020)
+Supplementary Material for
+Coulomb electron pairing in a tight-binding model of
+La-based cuprate superconductors
+by K. M. Frahm and D. L. Shepelyansky.
+Here, we present additional material for the main part
+of the article.
+Figure S1 presents data for the inverse participation
+ratio for the case of Fig. 6.
+Figure S2 presents data for the inverse participation
+ratio for the case of Fig. 7.
+Two video files for the time evolution obtained by
+the Trotter formula approximation corresponding to the
+parameters of Fig. 2 and Fig. 3 are presented in files
+videofig2.avi for the density ρX X (x1, x2) defined in
+Eq. (8) and in videofig3.avi for the density ρrel(∆x,∆y)
+defined in Eq. (9) (here N = 128, U = 2). Both video
+files provide a direct comparison between the NN-model
+(right box in video) and the HTC-model (left box in video)
+and correspond to 464 time values t = l j ∆t (25 values
+per second of video) with integer l0 = 0, 1 ≤ l j ≤ 10
+4 for
+j = 1, . . . ,463 and roughly uniform logarithmic density.
+Copyright line will be provided by the publisher 1

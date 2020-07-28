@@ -1,0 +1,913 @@
+Real-World Multi-Domain Data Applications for
+Generalizations to Clinical Settings
+Nooshin Mojab
+Department of Computer Science
+University of Illinois at Chicago
+Chicago, IL, USA
+nmojab2@uic.edu
+Manoj Prabhakar Nallabothula
+Department of Ophthalmology
+University of Illinois at Chicago
+Chicago, IL, USA
+mnalla2@uic.edu
+Joelle A. Hallak
+Department of Ophthalmology
+University of Illinois at Chicago
+Chicago, IL, USA
+joelle@uic.edu
+Vahid Noroozi
+Department of Computer Science
+University of Illinois at Chicago
+Chicago, IL, USA
+vnoroo2@uic.edu
+Abdullah Aleem
+Department of Ophthalmology
+University of Illinois at Chicago
+Chicago, IL, USA
+aaleem2@uic.edu
+Darvin Yi
+Department of Ophthalmology
+University of Illinois at Chicago
+Chicago, IL, USA
+dyi9@uic.edu
+Philip S. Yu
+Department of Computer Science
+University of Illinois at Chicago
+Chicago, IL, USA
+psyu@uic.edu
+Abstract—With promising results of machine learning based
+models in computer vision, applications on medical imaging data
+have been increasing exponentially. However, generalizations to
+complex real-world clinical data is a persistent problem. Deep
+learning models perform well when trained on standardized
+datasets from artificial settings, such as clinical trials. However,
+real-world data is different and translations are yielding varying
+results. The complexity of real-world applications in healthcare
+could emanate from a mixture of different data distributions
+across multiple device domains alongside the inevitable noise
+sourced from varying image resolutions, human errors, and the
+lack of manual gradings. In addition, healthcare applications not
+only suffer from the scarcity of labeled data, but also face limited
+access to unlabeled data due to HIPAA regulations, patient
+privacy, ambiguity in data ownership, and challenges in collecting
+data from different sources. These limitations pose additional
+challenges to applying deep learning algorithms in healthcare
+and clinical translations. In this paper, we utilize self-supervised
+representation learning methods, formulated effectively in trans-
+fer learning settings, to address limited data availability. Our
+experiments verify the importance of diverse real-world data for
+generalization to clinical settings. We show that by employing
+a self-supervised approach with transfer learning on a multi-
+domain real-world dataset, we can achieve 16% relative improve-
+ment on a standardized dataset over supervised baselines.
+Index Terms—Self-Supervised Learning, Transfer learning,
+Medical Imaging, Generalization, Multi-Domain Data.
+I. INTRODUCTION
+With successful applications of deep neural networks in
+computer vision, there has been a growing interest in utilizing
+these machine learning based models on real-world data,
+particularly in medical imaging. However, the applications
+on real-world data are limited and challenging. Most of the
+existing deep learning based approaches have shown promising
+results by relying on the availability of standardized and
+adequately labeled datasets. However, real-world data is char-
+acterized by variability in quality, machine-type, setting, and
+source, lacking standardization and labels. Therefore, with the
+existence of complex real-world data across different clinical
+applications, and the significant growing interest in employing
+deep learning models in medical imaging, it becomes crucial
+to assess the generalization capacity of such models on real-
+world data applications.
+In this paper, we aim to assess the capacity of deep learning
+models in coping with real-world data and their generalization
+aspect by answering two main questions: (1) How well can
+deep learning based models cope with the complexity of
+real-world data comprised of multiple device domains versus
+standardized datasets with a single device domain? And (2)
+What is the role of real-world data in generalizing to a clinical
+setting? We answer these two questions by applying deep
+learning based models on real-world ophthalmic imaging data
+for the task of glaucoma detection.
+Glaucoma is a complex disease that gradually leads to
+optic nerve damage, resulting in progressive irreversible vision
+loss. Over 60 million people are diagnosed with glaucoma,
+encompassing more than 8 million cases with irreversible
+blindness [1]. The global incidence of glaucoma is anticipated
+to increase up to 111.8 million by 2040 [2].
+Ocular imaging is one of the main modalities used for
+glaucoma screening. Among the imaging modalities most
+ar
+X
+iv
+:2
+00
+7.
+12
+67
+2v
+1 
+ [
+cs
+.C
+V
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+commonly used for glaucoma, digital Fundus photos are
+heavily utilized, given their ease and visualization abilities
+of the disc and cup regions for noninvasive evaluation of
+the optic nerve head. Assessment of the optic nerve head is
+based on measuring the optic disc and optic cup regions in
+Fundus photos and calculating the cup-to-disc ratio (CDR). A
+sample of glaucomatous and non-glaucomatous optic nerve,
+with localization of the optic disc and optic cup regions is illus-
+trated in Fig. 1. All types of glaucoma involve glaucomatous
+optic neuropathy, and structural progression is characterized by
+optic nerve thinning, resulting in larger CDR measurements.
+Glaucoma is suspected when CDR is above some threshold,
+usually 0.6.
+D
+isc
+C
+up
+D
+iscC
+up
+Fig. 1: Samples of full Fundus images from I-ODA dataset.
+The top row represents a glaucomatous Fundus of the eye and
+the bottom row shows a non-glaucomatous Fundus. The area
+of the optic nerve head is zoomed in for better visualization
+of optic disc and cup. CDR is calculated by dividing the
+cup height (in green arrows) over disc height (in bright blue
+arrows).
+Most approaches used to detect the presence of glaucoma in
+Fundus photos fall into two main categories. (i) Segmentation
+based approaches utilizing the CDR measurement to detect
+glaucoma. These approaches involve localizing the disc and
+cup regions and identifying the presence of glaucoma by
+measuring the CDR in Fundus photos [3], [4], [5]. These
+methods require labeled segmented data requiring the expertise
+of at least two ophthalmologists to manually mark the region
+of interest (ROI) in the image. The high variability among
+graders and low reproducibility limit the application of such
+approaches. There are some approaches that propose to address
+the scarcity of segmented labeled data utilizing a multi-
+task framework [6]. However, their optimal performance is
+achieved when labeled data for both tasks are available from
+the same domain. (ii) Classification based approaches in which
+Fundus photos are being directly fed to a neural network
+for detecting glaucoma [7], [8], [9]. These approaches mostly
+employ specifically designed Convolutional Neural Networks
+(CNNs) trained on small-scaled standardized datasets, limiting
+their applications to other clinical settings.
+Acquiring labeled data in healthcare is an ongoing chal-
+lenge as the labeling process not only is time-consuming and
+expensive but also requires at least two expert graders. Ad-
+ditionally, medical applications suffer from limited access to
+even unlabeled data due to HIPAA regulations, patient privacy,
+and ethical considerations, data ownership, and challenges in
+collecting data from different sources.
+Transfer learning and self-supervised methods have shown
+promising results in exploiting unlabeled data to learn visual
+representations [10], [11] in applications with data limitations
+such as healthcare. Although self-supervised learning could be
+a potential solution for applications with data shortages, most
+of the proposed methods rely on specific design choices for
+network architecture and predictive pretext tasks [12], [13],
+[14], [15]. Clinical applications such as glaucoma detection,
+mostly involve complex multi-domain datasets which limit the
+employment of such methods that are specifically designed for
+a particular task or dataset. The recent approach proposed in
+[16], which is currently the state-of-the-art in self-supervised
+learning attempts to avoid the complexity of specific design
+choices by incorporating a broad family of augmentation and
+contrastive loss into a simple off the shelf architecture, ResNet-
+50. The composition of data augmentation incorporated in
+a simple design choice in [16] could lead to learning more
+generalizable visual features and potentially generalize better
+to other settings. This inspired us to apply the proposed
+method in [16] on a real-world clinical application, glaucoma
+detection. We believe that real-world clinical applications with
+diverse multi-domain datasets can benefit from a broad com-
+position of augmentations embedded in a simple framework.
+This could potentially lessen the sensitivity of the model to
+domain-specific information in data to some degree and hence
+improves upon the generalization capacity of the model.
+We propose to formulate our problem into a transfer learn-
+ing framework where we employ the self-supervised approach
+proposed in [16] for visual feature extraction to both alleviate
+the scarcity of the data and improve generalizations. We
+evaluate our work by performing extensive experiments on
+the task of glaucoma detection using real-world datasets. Due
+to the lack of publicly available large and diverse datasets, we
+employ a subset of a private clinical ophthalmology dataset
+referred to as I-ODA which is a diverse multi-domain dataset
+capturing the complexity characteristic of a real-world data.
+The main contribution of our work is as follows:
+• We effectively apply the self-supervised representation
+method via transfer learning on multi-domain real-world
+data applications and show its superiority over supervised
+approaches.
+• We show that leveraging self-supervised visual represen-
+tation learning via transfer learning could be a potential
+solution to the limited data in healthcare applications.
+• Our experiments shows that deep neural networks have
+a limited capacity in coping with real-world datasets
+compared to a standardized dataset.
+• Our experiments demonstrate that training deep learning
+models with diverse real-world data generalizes better to
+clinical settings.
+II. METHOD
+A. Problem Formulation
+The training data in our problem is comprised of M samples
+denoted as D =
+{
+(xk, yk)|yk ∈ {0, 1}
+}M
+k=1
+. yk indicates the
+binary label of input xk where values of 1 and 0 represent
+diseased and non-diseased class respectively. Given D, our
+goal is to learn a binary classifier function fc : X −→ Y
+parameterized by θc. We define the following functions
+f(xk; θf ) = zk (1)
+g(zk; θg) = yk (2)
+where f(.) parameterized by θf represents the encoder
+function f : X −→ H mapping the given input to the latent
+feature encoding zk. g(.) parameterized by θg represent the
+decoder function g : H −→ Y mapping the feature encoding zk
+to the label space. Given the input xk ∈ X , function fc can
+be decomposed such that
+fc(xk, θc) = (g ◦ f)(xk) (3)
+where θc = {θg, θf}. Given the input xk, binary classifier fc(.)
+estimates the probability of an input image being diseased.
+Both encoder and decoder functions f(.) and g(.) are modeled
+using neural networks. In particular, the encoder function f(.)
+is modeled by a Convolutional Neural Network proposed in
+[16] and function g(.) is taken to be a simple linear layer.
+The loss function of the model comprises a contrastive and
+classification loss which will be explained in the following
+sections.
+B. Contrastive Loss
+To model our encoder function f(.) we employ the approach
+proposed in [16] in which the representations are learned via
+contrastive loss in the latent space of two augmented views of
+the same data input. More specifically, this approach comprises
+three key components: (i) Given the input xk, two augmented
+views of x(1)k and x
+(2)
+k are obtained by applying stochastic
+augmentations, (ii) The base encoder f(.) maps the augmented
+inputs x(1)k and x
+(2)
+k to feature maps z
+(1)
+k and z
+(2)
+k , (iii) A
+projection head q(.) maps the feature maps z(1)k and z
+(2)
+k to
+latent vectors h(1)k and h
+(2)
+k respectively. Encoder function f(.)
+and projection head q(.) are both modeled by neural networks.
+Given two latent vectors h(1)k and h
+(2)
+k , the contrastive loss is
+defined as
+`(1),(2) = −log
+exp(sim(1),(2))/τ∑2N
+i=1 1[(i)6=(1)]exp(sim(1),(i))/τ
+(4)
+where sim(i),(j) represents the cosine similarity and τ repre-
+sents a temperature parameter. Given a batch of N samples,
+the application of the two augmentations results in 2N samples
+where pairs of (h(1)k , h
+(2)
+k ) and (h
+(2)
+k , h
+(1)
+k ) are accounted as
+positive samples, and the remainder of pair samples in the
+augmented batch are accounted as negative. Therefore the
+overall loss is defined as
+L =
+1
+2N
+N∑
+i=1
+[`((2i− 1), (2i)) + `((2i), (2i− 1))] (5)
+C. Classification Loss
+Given the training set of D, the loss function over the M
+samples is as follows
+Lc(D; θc) =
+M∑
+k=1
+`c(xk; θc) (6)
+where `c(xk) represents the classification loss for sample
+xk and it is defined as cross-entropy between the model’s
+estimation and the ground-truth label
+`c(xk; Θc) = −yk log ŷk − (1− yk) log(1− ŷk)) (7)
+where ŷk = fc(xk; Θc), 0 < ŷk < 1 indicates the model’s
+estimation for sample xk being diseased or not and yi represent
+its corresponding ground-truth label. We aim to perform the
+task of detecting glaucoma disease given the Fundus photo.
+Therefore our dataset is a collection of Fundus photos labeled
+as either glaucoma (yi = 1) or non-glaucoma (yi=0).
+D. Transfer Learning
+We propose the solution to our task by formulating our
+problem into the transfer learning framework. For the purpose
+of this paper, we employ the pretrained encoder networks
+obtained via the approach proposed in [16], where the pro-
+jection head is thrown away and the encoder function f and
+feature maps zk are used to perform the binary classification
+task of glaucoma detection. We take the base encoder f to
+be ResNet-50 as suggested in [16] and consider two settings
+for transfer learning across our datasets: (i) using the fixed
+features extracted from a pretrained encoder network to train
+a linear classifier on top of the frozen based network, and
+(ii) fine-tuning a fraction of the network. In this scenario, we
+utilize the weights of the pretrained network as initialization.
+III. EXPERIMENTS
+A. Dataset
+I-ODA 1 has been created from imaging data belonging to
+patients who visited the Illinois Eye and Ear Infirmary of the
+University of Illinois Chicago (UIC). This dataset was created
+by assigning ∼ 4M unlabeled images into 12 categories based
+on the imaging devices by utilizing metadata information
+and a hybrid approach of machine learning algorithms and
+manual search. After labeling images into one of the 12
+categories, patients were labeled with their corresponding
+diagnosis using billing information (ICD codes). We isolated
+1For questions related to accessing the I-ODA database please contact the
+author, Joelle Hallak.
+6244 glaucoma and 7664 non-glaucoma patients from this
+dataset. Non-glaucoma patients in our dataset are selected
+as those patients being diagnosed with neither glaucoma, nor
+glaucoma suspect with no potential damage to the optic nerve
+head. Among the 12 categories, we isolated Fundus images for
+the purpose of our experiments in this paper which we refer
+to as ODA-G dataset. Each Fundus image can be generated
+by a different imaging device. The statistics of image data and
+the corresponding imaging device distribution in the ODA-G
+dataset is illustrated in Fig. 2.
+0
+1000
+2000
+3000
+4000
+A B C D Others
+N
+um
+be
+r o
+f F
+un
+du
+s
+Imaging Device
+Glaucoma
+Non-Glaucoma
+Fig. 2: The number of Fundus photos per imaging device. The
+majority of Fundus images are generated by devices A and B.
+Imaging data in the ODA-G dataset is spread across 11
+different imaging devices where devices A, B, C, and D
+comprise 96% of the data, while the other 7 devices are
+responsible for almost 4% of the data. The data distribution for
+images generated from each device can be different and hence
+we can have a dataset which is a mixture of different domains.
+A snapshot of samples of Fundus photos from 4 major imaging
+devices A, B, C, and D are illustrated in Fig. 3. As can be
+seen, images across different devices can have different color
+distributions, different shapes, and positioning of the cup and
+disc regions. We refer to imaging devices as different domains
+in our dataset. In order to analyze the complexity of coping
+with complex real-world data and its generalization capacity,
+we consider two subsets of data, (i) Fundus images generated
+from only one imaging device. We isolated the Fundus photos
+from device A which we refer to as ODA-A and (ii) ODA-
+G which contains Fundus generated by all devices used for
+glaucoma screening in our dataset. Both subsets are generated
+from a real-world setting, however, in this scenario, ODA-
+A comprises a single domain data resembling the properties
+of a standardized dataset to some extent. On the other hand,
+ODA-G comprises multi-domain data capturing the complex
+aspect of diverse real-world data. We aim to answer two main
+questions using these two subsets, (1) how do deep learning
+models cope with the complexity of real-world data as opposed
+to a standardized dataset? (2) Is training the model on real-
+world data important for generalizations?
+Our goal was to also validate our results on an external
+dataset. However, to the best of our knowledge, the availability
+of public datasets with adequate samples of full Fundus
+photos for glaucoma detection is very limited. Therefore we
+performed all of our experiments on our datasets, ODA-G and
+ODA-A.
+B. Experimental Setting
+1) Base Encoder: The base encoder f and projection
+function q are modeled with ResNet-50 and 2 layer MLP
+with Rectified Linear Unit (ReLU) activation respectively. We
+employ pretrained networks on ImageNet and CIFAR-10 in
+our experiments. The CIFAR-10 based network employs a
+simpler network compared to the ImageNet based network.
+The CIFAR-10 based encoder employs a ResNet like architec-
+ture with a depth of 18 composing of 4 main residual blocks
+each consists of two stacked convolutional followed by batch
+normalization. The ImageNet based encoder employs ResNet-
+50 with three hidden layers widths (1×, 2×, 4×) [16], [17]
+which we utilize in our experiments. When using the ImageNet
+pretrained network, a random crop and resize with random flip,
+color distortions, and Gaussian blur are employed for data
+augmentations. When CIFAR-10 is used, only random crop
+and resize with random flip and color distortions are employed
+for augmentation [16].
+2) Transfer Learning: We evaluate our transfer learning
+setting across two datasets ODA-G and ODA-A by (1) learning
+a linear classifier on top of the pretrained network and (2) fine-
+tuning x% of the network where x ∈ {25, 50, 75, 100}.
+In the first setting, a logistic regression classifier is trained
+on top of the frozen base encoder network. The extracted
+features from the pretrained network are used to perform
+binary classification for detecting glaucoma in a given Fundus
+input. In this scenario, no data augmentation is applied. The
+number of epochs is selected from {50, 100, 200, 300}, batch
+size is selected from {1024, 512, 256, 128} and learning rate
+is selected from {0.1, 0.07, 0.05, 0.03}.
+In the second setting, we fine-tune the base network
+using the pretrained network’s weights as initialization.
+We fine-tune {25%, 50%, 75%, 100%} of the network for
+{50, 100, 200, 300} epochs where learning rate is selected
+from {0.1, 0.07, 0.05, 0.03, 0.01, 0.007}. The batch size is
+selected from {512, 256, 128, 64} and the rest of hyperpa-
+rameters are set to default value as reported in [16]. For
+optimizer we use SGD optimizer with Nestrov momentum
+with momentum parameter set to 0.9 and Adam.
+In all of our experiments, input images were resized to
+224×224 when using ImageNet based pretrained network and
+resized to 32× 32 when CIFAR-10 based pretrained network
+is employed. The split of 80% and 20% is used for training
+and testing. The hyperparameter tuning for each dataset is
+performed on the validation set chosen randomly as 20%
+subset of the training set. After finding the appropriate values
+for hyperparameters, all the training set is used for training.
+Notably, each patient in our dataset can have more than one
+Fundus photo taken in multiple exam sessions. To prevent the
+leakage of information from the test set into training, we split
+the data by patients. Eventually, the result on the test data is
+reported in terms of the accuracy metric.
+(a) Fundus samples from device A (b) Fundus samples from device B
+(c) Fundus samples from device C (d) Fundus samples from device D
+Fig. 3: A snapshot of samples of Fundus photos generated by different devices. The top row illustrates a subset of images
+from devices A and B from left to right. The bottom row illustrates a subset of Fundus generated by devices C and D from
+left to right.
+3) Baselines: We compare our results with fully supervised
+methods. Previous approaches proposed for glaucoma detec-
+tion mostly employ a Convolutional Neural Network (CNN)
+trained on small unique datasets. Since most of these studies
+do not release their code publicly, we simulate the employed
+general approach by developing a CNN model and consider
+that as our supervised baseline. We employ two approaches
+for our supervised baselines. (1) For the sake of comparison
+with our proposed approach, we employ ResNet-50, similar
+to the base encoder network architecture, followed by MLP
+with 1 hidden layer of size 1024, batch normalization, ReLU
+activation, and dropout. Then sigmoid activation function
+is applied on the last layer to get the final output. (2) A
+simpler CNN specifically designed for our dataset. Our CNN
+network is composed of 2 convolutional block, where each
+consists of 1 convolutional layers with ReLU activation, batch
+normalization, non-linearity ReLU, and max pooling. Two
+fully connected layers with size 512 and 64 followed by batch
+normalization, non-linearity ReLU, and dropout are further
+applied. The Sigmoid activation function is used on the final
+layer to get the output of the model.
+We consider both random and ImagNet weights as initial-
+ization for the ResNet-50 model. We consider our supervised
+baselines in both absence and presence of data augmentation.
+We explore color distortion and random flip for our augmen-
+tation.
+C. Experimental Results
+In this section we attempt to answer our two main ques-
+tions through extensive experiments performed on the task of
+glaucoma detection: (1) How well can deep learning based
+models cope with the complexity of real-world data comprised
+of multiple device domains versus standardized datasets with
+a single device domain? and (2) What is the role of real-world
+data in generalizing to a clinical setting?
+We first demonstrate the effectiveness of combining a self-
+supervised method with transfer learning on applications with
+limited data compared to fully supervised models. Further, to
+address our two main goals, we assess the capacity of neural
+networks in dealing with complex real-world data by com-
+paring the performance of the model on a multi-domain real-
+world dataset, ODA-G, as opposed to a single-domain dataset
+ODA-A, resembling a standardized and simpler dataset. Ad-
+ditionally, we assess the role of learning with real-world data
+for generalization to a clinical setting (glaucoma detection).
+We also analyze the effect of data augmentation, training
+time, and fraction of fine-tuning on the performance of the
+model.
+1) Comparison against fully supervised approach: In this
+section, we demonstrate the result of our work on both ODA-
+G and ODA-A dataset for the task of glaucoma detection
+using transfer learning in both linear evaluation and fine-
+tuning settings. We first evaluate our approach by learning a
+linear classifier using self-supervised representations learned
+by a pretrained network and compare the result with super-
+vised baselines. To potentially improve the performance of
+the network compared to using the fixed extracted features,
+we further investigate the performance of our classifier with
+fine-tuning the base encoder network using the weights of
+the pretrained network as initialization. We experiment with
+fine-tuning {25%, 50%, 75%, 100%} of the network. For self-
+supervised pretrained networks, we consider both ImageNet
+and CIFAR-10 based networks proposed in [16]. For the
+ImageNet based pretrained network, we report the results for
+all ResNet-50 (1×, 2×, 4×) [16], [17]. For the CIFAR-10
+based network, we report the result on the simpler ResNet.
+We report the best result achieved for each combination of
+dataset and model in Table I.
+The result depicted in Table I shows the superiority of
+transfer learning using self-supervised learned representations
+TABLE I: Comparison of employing self-supervised learned
+representations via transfer learning (TR) in linear evaluation
+and fine-tuning settings against fully supervised baselines.
+ODA-G ODA-A Weights
+Supervised Baselines
+ResNet-50 (1×) 59.93 83.57 Random
+ResNet-50 (1×) (+Augmentation) 82.61 86.44 Random
+CNN 64.67 88.35 Random
+CNN (+Augmentation) 82.93 90.43 Random
+self-supervised TR+Linear
+ResNet 72.87 82.40 CIFAR-10
+ResNet-50 (1×) 80.26 88.92 ImageNet
+ResNet-50 (2×) 83.84 91.00 ImageNet
+ResNet-50 (4×) 84.30 92.34 ImageNet
+self-supervised TR+Fine-tuning
+ResNet 82.05 86.04 CIFAR-10
+ResNet-50 (1×) 83.28 90.35 ImageNet
+ResNet-50 (2×) 83.14 90.43 ImageNet
+ResNet-50 (4×) 82.05 90.11 ImageNet
+over fully supervised approaches. We achieve our best result
+with ResNet-50 (4×). For supervised baselines, we only report
+the result for ResNet-50 with random initialization as we did
+not observe any significant change between the two weight
+initializations (i.e. random and ImageNet weights). We can
+also see that employing wider networks can further improve
+the performance of the linear classifier on the test set.
+We observed that fine-tuning the network does not signifi-
+cantly change the performance of the model compared to train-
+ing a linear classifier. Moreover, the result shown in Table I
+indicates that employing ImageNet pretrained weights com-
+pared to CIFAR-10 achieves a better result on both datasets
+ODA-G and ODA-A. This result is expected as training with
+a more diverse dataset comprised of a broader range of image
+categories, helps with learning more generalizable features.
+2) Medical domains benefit from transfer learning us-
+ing self-supervised learned features: Among the supervised
+baselines in Table I, the CNN (+Augmentation) method that
+is specifically designed for our dataset-task achieves a better
+result over off the shelf ResNet networks. This result sug-
+gests that specifically designed networks for each dataset-task
+combination are usually crucial to the success of supervised
+approaches which limits their applications and generalization
+capacity to some extent. The superiority of our framework over
+supervised baselines shows that we can avoid the complexity
+of design choice for each particular task by simply using one
+of off the shelf networks. This result is particularly important
+in medical imaging where applications are limited with data
+to train robust supervised models.
+3) Neural Networks On real-world Data: In this section,
+we assess the capacity of neural networks in coping with
+real-world datasets versus standardized datasets, commonly
+used by most deep learning algorithms. We analyze our
+experimental results on the two datasets ODA-G and ODA-
+A. As a reminder, ODA comprises data from multiple imaging
+devices forming a complex multi-domain dataset, while ODA-
+A comprises a single domain data representing a less chal-
+lenging standardized dataset. Naturally, a mixture of different
+TABLE II: Generalization across pairs of datasets employing
+self-supervised learned representation via transfer learning.
+Training Data Testing Data Test Accuracy(%)
+ODA-G ODA-G 84.30
+ODA-G ODA-A 90.35
+ODA-A ODA-G 76.53
+ODA-A ODA-A 92.34
+data distributions emanating from different imaging devices in
+the ODA-G dataset poses a major challenge for training deep
+neural networks. From Table I we observe that experiments on
+ODA-A significantly outperform the experiments on ODA-G
+in all three settings supervised, linear evaluation, and fine-
+tuning. The performance gap is particularly noticeable in
+supervised settings as their success usually relies on the avail-
+ability of large standardized labeled datasets. This experiment
+verifies that deep learning models do not perform as well on
+complex real-world datasets as on standardized datasets.
+4) Training deep learning models with diverse real-world
+data generalizes better to clinical settings.: To assess the role
+of training with complex real-world data in generalization to
+a clinical setting, we design an experiment where we form
+four pairs of (ODA-G, ODA-G), (ODA-G, ODA-A), (ODA-
+A, ODA-G) and (ODA-A, ODA-A) datasets. We train on the
+first element of each pair and evaluate on the second element.
+The result of this experiment is shown in Table II. As the
+results suggest if we only train the model on one small unique
+dataset, ODA-A, and evaluate on an extremely complex real-
+world dataset, ODA-G, we achieve the worst result depicted
+in red in Table II. On the other hand, when we train the model
+using a diverse multi-domain real-world dataset, ODA-G and
+evaluate it on a smaller and more unique dataset, ODA-A, we
+achieve a promising result as depicted in green in Table II.
+This result indicates that even though complex data makes the
+learning process harder, it leads the model towards learning
+more generalizable features. It is not surprising that (ODA-A,
+ODA-A) experiment achieves the best result, as this is where
+usually neural networks perform best. However, we can see
+that the obtained result from the (ODA-G, ODA-A) experiment
+is also competitive with the result of the (ODA-A, ODA-A)
+experiment, indicating the advantage of learning with real-
+world data. The overall results validate the crucial role of real-
+world data for generalizing to clinical settings. If the network
+trains on small unique datasets, it fails to generalize to other
+domains. Hence we need complex diverse datasets that capture
+aspects of real-world data to cope with generalizations to other
+domains, especially in clinical settings.
+Self-supervised learning approaches generalize better
+on real-world data. We would like to assess the capacity
+of self-supervised approaches in generalization compared to
+supervised methods. We perform the same experiments but this
+time under supervised settings. The result is shown in Table III.
+The observation from Table III (shown in bold) supports the
+result in our previous section. Training with a real-world
+dataset, ODA-G, generalizes better on ODA-A dataset than
+the reversed experiment (ODA-A, ODA-G). However, we can
+TABLE III: Generalization across pairs of datasets employing
+supervised approaches.
+Training Data Testing data Test Accuracy (%)
+ODA-G ODA-G 82.93
+ODA-G ODA-A 74.00
+ODA-A ODA-G 69.19
+ODA-A ODA-A 90.43
+see that the performance gap between (ODA-G, ODA-G) and
+(ODA-G, ODA-A) experiment and between (ODA-A, ODA-
+A) and (ODA-A, ODA-G) is more noticeable compared to
+the result in Table II. This result may indicate that supervised
+approaches perform the best when they are trained and eval-
+uated on the same dataset. Moreove, the comparison between
+the results in Tables II and III shows that (ODA-G, ODA-
+A) performs poorly under a supervised approach achieving
+only 74% accuracy, while under a self-supervised approach it
+achieves 90.35% which is more than 16% improvement over
+the supervised setting. This result verifies the superior capacity
+of self-supervised approaches in generalizing across different
+device domains, indicating another advantage of applications
+of self-supervised representation learning methods.
+5) Performance Analysis: In this section, we first analyze
+the role of data augmentation on generalization. Then we
+evaluate the effect of training time and fine-tuning x% of the
+network on the performance.
+Data augmentation is crucial for generalization on real-
+world data. To assess the role of data augmentation in gener-
+alization, we explore the behavior of our supervised approach
+in both the presence and absence of data augmentation. For
+ODA-G we applied the composition of color distortion and
+random flip and for ODA-A we only applied the random
+flip. As the result in Table I suggests, data augmentation can
+efficiently improve the generalization on the test data. This
+result shows that incorporating data augmentation enhances
+the capacity of the model to learn more generalizable fea-
+tures. This improvement is particularly more noticeable for
+the ODA-G dataset containing multi-domain data. This result
+could indicate that the model leverages the most from data
+augmentation when training on a diverse real-world dataset.
+We believe that the composition of data augmentation utilized
+in [16], also contributes significantly in the success of this
+method on our task.
+Diverse large-scaled datasets benefit from longer train-
+ing. We perform our experiments by increasing the number
+of training epochs while keeping the batch size fixed for each
+model and report the accuracy on the testing set. Fig. 4 and
+5 shows the plots of test accuracy versus training epochs for
+linear evaluation employing ImageNet based ResNet-50 (1×,
+2×, 4×) and CIFAR-10 based ResNet respectively on both
+ODA-G and ODA-A datasets.
+As the plots in Fig. 4 suggest, the performance improves as
+we increase the number of training epochs when employing
+the ImageNet based encoder network on the ODA-G dataset.
+However, increasing the number of epochs has the opposite
+effect on the ODA-A dataset. We observe a similar effect
+4x
+2x
+1x
+79
+80
+81
+82
+83
+84
+85
+86
+50 100 200 300
+Te
+st
+ A
+cc
+ur
+ac
+y 
+(%
+)
+Number of Training Epochs
+(a) ODA-G dataset
+4x
+2x
+1x
+88
+89
+90
+91
+92
+93
+50 100 200 300
+Te
+st
+ A
+cc
+ur
+ac
+y 
+(%
+)
+Number of Training Epochs
+(b) ODA-A dataset
+Fig. 4: Effect of the number of training epochs on testing
+accuracy employing ImageNet based pretrained network for
+ODA-G and ODA-A datasets.
+70
+72
+74
+76
+78
+80
+82
+84
+50 100 200 300
+Te
+st
+ A
+cc
+ur
+ac
+y 
+(%
+)
+Number of Training Epochs
+ODA-G
+ODA-A
+Fig. 5: Effect of the number of training epochs on testing
+accuracy employing CIFAR-10 based pretrained network for
+ODA-G and ODA-A datasets.
+when using CIFAR-10 based encoder as the Fig. 5 suggests.
+However, we can see that increasing the number of epochs
+has a less effect on performance improvement on ODA-G
+compared to using the ImageNet based encoder. The overall
+result indicates that more diverse and larger datasets can
+benefit more from longer training.
+Additionally, we plot the effect of fine-tuning x% of the
+network on test accuracy. The result is shown in Fig. 6 when
+fine-tuning the network using the CIFAR-10 based encoder
+network.
+70
+72
+74
+76
+78
+80
+82
+84
+86
+88
+90
+0 25 50 75 100
+Te
+st
+ A
+cc
+ur
+ac
+y 
+(%
+)
+Fraction of Fine-tuning (%)
+ODA-G
+ODA-A
+Fig. 6: The effect of x%, x ∈ {25, 50, 75, 100} fine-tuned
+network on test accuracy using CIFAR-10 based encoder
+network.
+As the plot in Fig. 6 suggests, the test accuracy improves
+as we fine-tune a larger portion of the network when training
+on ODA-G dataset. Training on the ODA-A still benefits from
+fine-tuning the network especially when it is fine-tuned on 1/4
+of the network but after that, we do not observe a significant
+change in the performance. We achieved our best result for
+this experiment by fine-tuning the whole network from scratch
+when using the ODA-G dataset and 25% of the network
+when using ODA-A. We also observed that the model does
+not benefit substantially from fine-tuning the network with
+ImageNet weights.
+IV. CONCLUSION
+In this paper, we utilized self-supervised visual representa-
+tion learning methods effectively formulated in transfer learn-
+ing settings to alleviate the shortage of data in medical imaging
+applications and improve upon the generalization capacity of
+the model. We verified our results by performing a glaucoma
+detection task on a real-world ophthalmic data application.
+We showcased the importance of learning with real-world data
+for generalization, through performing extensive experiments
+on a multi-domain real-world dataset versus a single-domain
+standardized dataset. Additionally, We showed that without
+learning on complex real-world data, the deep learning models
+cannot generalize well to clinical settings.
+REFERENCES
+[1] B. M. Davis, L. Crawley, M. Pahlitzsch, F. Javaid, and M. F. Cordeiro,
+“Glaucoma: the retina and beyond,” Acta neuropathologica, vol. 132,
+no. 6, pp. 807–826, 2016.
+[2] Y.-C. Tham, X. Li, T. Y. Wong, H. A. Quigley, T. Aung, and C.-Y.
+Cheng, “Global prevalence of glaucoma and projections of glaucoma
+burden through 2040: a systematic review and meta-analysis,” Ophthal-
+mology, vol. 121, no. 11, pp. 2081–2090, 2014.
+[3] F. Khan, S. A. Khan, U. U. Yasin, I. ul Haq, and U. Qamar, “Detection
+of glaucoma using retinal fundus images,” in The 6th 2013 Biomedical
+Engineering International Conference. IEEE, 2013, pp. 1–5.
+[4] A. Sevastopolsky, “Optic disc and cup segmentation methods for
+glaucoma detection with modification of u-net convolutional neural
+network,” Pattern Recognition and Image Analysis, vol. 27, no. 3, pp.
+618–624, 2017.
+[5] J. G. Zilly, J. M. Buhmann, and D. Mahapatra, “Boosting convolutional
+filters with entropy sampling for optic cup and disc image segmentation
+from fundus images,” in International Workshop on Machine Learning
+in Medical Imaging. Springer, 2015, pp. 136–143.
+[6] N. Mojab, V. Noroozi, P. Yu, and J. Hallak, “Deep multi-task learning
+for interpretable glaucoma detection,” in 2019 IEEE 20th International
+Conference on Information Reuse and Integration for Data Science (IRI).
+IEEE, 2019, pp. 167–174.
+[7] X. Chen, Y. Xu, D. W. K. Wong, T. Y. Wong, and J. Liu, “Glaucoma
+detection based on deep convolutional neural network,” in 2015 37th
+Annual International Conference of the IEEE Engineering in Medicine
+and Biology Society (EMBC). IEEE, 2015, pp. 715–718.
+[8] Q. Abbas, “Glaucoma-deep: Detection of glaucoma eye disease on
+retinal fundus images using deep learning,” International Journal of
+Advanced Computer Science and Applications, vol. 8, no. 6, pp. 41–
+45, 2017.
+[9] U. Raghavendra, H. Fujita, S. V. Bhandary, A. Gudigar, J. H. Tan, and
+U. R. Acharya, “Deep convolution neural network for accurate diagnosis
+of glaucoma using digital fundus images,” Information Sciences, vol.
+441, pp. 41–49, 2018.
+[10] Y. Bengio, “Deep learning of representations for unsupervised and
+transfer learning,” in Proceedings of ICML workshop on unsupervised
+and transfer learning, 2012, pp. 17–36.
+[11] K. Weiss, T. M. Khoshgoftaar, and D. Wang, “A survey of transfer
+learning,” Journal of Big data, vol. 3, no. 1, p. 9, 2016.
+[12] C. Doersch, A. Gupta, and A. A. Efros, “Unsupervised visual repre-
+sentation learning by context prediction,” in Proceedings of the IEEE
+international conference on computer vision, 2015, pp. 1422–1430.
+[13] M. Noroozi and P. Favaro, “Unsupervised learning of visual representa-
+tions by solving jigsaw puzzles,” in European Conference on Computer
+Vision. Springer, 2016, pp. 69–84.
+[14] S. Gidaris, P. Singh, and N. Komodakis, “Unsupervised repre-
+sentation learning by predicting image rotations,” arXiv preprint
+arXiv:1803.07728, 2018.
+[15] R. Zhang, P. Isola, and A. A. Efros, “Colorful image colorization,” in
+European conference on computer vision. Springer, 2016, pp. 649–666.
+[16] T. Chen, S. Kornblith, M. Norouzi, and G. Hinton, “A simple frame-
+work for contrastive learning of visual representations,” arXiv preprint
+arXiv:2002.05709, 2020.
+[17] A. Kolesnikov, X. Zhai, and L. Beyer, “Revisiting self-supervised visual
+representation learning,” in Proceedings of the IEEE conference on
+Computer Vision and Pattern Recognition, 2019, pp. 1920–1929.
+	I Introduction
+	II Method
+	II-A Problem Formulation
+	II-B Contrastive Loss
+	II-C Classification Loss
+	II-D Transfer Learning
+	III Experiments
+	III-A Dataset
+	III-B Experimental Setting
+	III-B1 Base Encoder
+	III-B2 Transfer Learning
+	III-B3 Baselines
+	III-C Experimental Results
+	III-C1 Comparison against fully supervised approach
+	III-C2 Medical domains benefit from transfer learning using self-supervised learned features
+	III-C3 Neural Networks On real-world Data
+	III-C4 Training deep learning models with diverse real-world data generalizes better to clinical settings.
+	III-C5 Performance Analysis
+	IV Conclusion
+	References

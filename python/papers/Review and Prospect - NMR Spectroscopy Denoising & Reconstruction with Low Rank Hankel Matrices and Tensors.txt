@@ -1,0 +1,1613 @@
+Microsoft Word - arXiv_LR_MRC_Review_20200716
+[a] Tianyu Qiu, Zi Wang, Huiting Liu, Prof. X. Qu[*] 
+Department of Electronic Science, Fujian Provincial Key Laboratory of Plasma and Magnetic Resonance, Xiamen University    
+P.O.Box 979, Xiamen 361005 (China)  
+*E-mail: quxiaobo@xmu.edu.cn 
+[b] Prof. D. Guo 
+School of Computer and Information Engineering, Xiamen University of Technology, Xiamen 361024, China 
+Review and Prospect: NMR Spectroscopy Denoising & 
+Reconstruction with Low Rank Hankel Matrices and Tensors 
+Tianyu Qiu[a], Zi Wang[a], Huiting Liu[a], Di Guo[b], Xiaobo Qu*[a] 
+ 
+Abstract: Nuclear Magnetic Resonance (NMR) spectroscopy is an 
+important analytical tool in chemistry, biology, and life science, but it 
+suffers from relatively low sensitivity and long acquisition time. Thus, 
+improving the apparent signal-to-noise ratio and accelerating data 
+acquisition become indispensable. In this review, we summarize the 
+recent progress on low rank Hankel matrix and tensor methods, that 
+exploit the exponential property of free induction decay signals, to 
+enable effective denoising and spectra reconstruction. We also 
+outline future developments that are likely to make NMR 
+spectroscopy a far more powerful technique. 
+Keywords: low rank • Hankel matrix • reconstruction • non-
+uniformly sampling • NMR spectroscopy 
+1. Introduction 
+1.1. Overview of NMR Spectroscopy 
+Nuclear Magnetic Resonance (NMR) spectroscopy plays an 
+irreplaceable role in the science of chemistry, biology, and 
+medicine, such as structure detection [1], quantitative analysis [2], 
+reaction monitoring [3], disease diagnosis [4], and other fields. 
+Relatively low sensitivity of the spectra is a fundamental 
+problem that is recurrently addressed in the development of the 
+NMR methodology. Discarding part of data points at the end of 
+FID signals is an intuitive and effective way but at the cost of 
+reducing the spectra resolution. Signal averaging is another 
+common way to enhance the signal-to-noise ratio (SNR). 
+However, this approach suffers from a long acquisition time. In 
+order to improve the SNR efficiently, if taking both resolution and 
+acquisition time into consideration, denoising becomes an 
+important process in NMR data processing. 
+It is well known that multi-dimensional spectroscopy can 
+provide fruitful chemical information and prevent the peaks 
+overlapping of the macromolecule. As the duration of NMR 
+experiments increases exponentially with spectral dimensionality, 
+another critical problem in developing the NMR technique is the 
+long acquisition time. Non-Uniform Sampling (NUS) [5] is widely 
+used to accelerate the acquisition of experimental data by 
+acquiring partial data, and it needs advanced reconstruction 
+methods to obtain full spectra. To obtain high-quality spectra, it 
+is possible to introduce proper characteristics of NMR signals as 
+constraints to solve the reconstruction problem. 
+In this review, we review the state-of-the-art low rank Hankel 
+matrix and tensor methods to address the problem of denoising 
+and NUS spectra reconstruction. We believe these methods 
+would be very valuable to the NMR community since they exploit 
+the intrinsic exponential property of Free Induction Decay (FID) 
+signals. 
+1.2. Mathematical Model and Its Hankel Matrix 
+Typically, the time domain signals of NMR, which are often 
+called FID, can be modeled as the superposition of several 
+decaying exponential signals [5e, 6, 9]. A standard 1D signal is of 
+the form 
+                       2
+1
+= ,r r
+R
+i f n t
+n r
+r
+x c e
+  
+
+  (1) 
+Where nx  denotes the 
+thn  element of vector 1Nx  . rc , 
+fr , r  and  denote the complex amplitudes, resonance 
+frequencies, damped factors, and the number of exponentials, 
+respectively. And t  is the sampling interval. 
+The process of rearranging a 1D FID signal x  into a Hankel 
+matrix has been illustrated in Figure 1(a) and (b). The Hankel 
+matrix given by x  is written as 
+               
+1 2
+2 3 1
+1 2
+Q
+Q
+N Q N Q N
+x x x
+x x x
+x x x
+
+   
+ 
+ 
+   
+  
+ 
+xH
+
+
+   
+
+.  (2) 
+Define the operator 
+ 11:
+N Q QN      , and Q  is larger 
+than the number of exponential components of x . In general, 
+the Hankel matrix is defined as a square matrix, i.e., 
+ 1 2Q N   when N is an odd number, so that the Hankel 
+matrix is capable of presenting enough exponential components. 
+The Hankel matrix is close to a square matrix, i.e., 2Q N ,  
+when N is an even number. Such that for any 1Nx  , 
+                          xH x .  (3) 
+For a Hankel matrix xH , its matrix rank, i.e., the number of 
+non-zero singular values is equal to the number of exponential 
+components [5e, 6a, 7]. According to the Fourier theory, the number 
+of exponential components is also equal to the number of 
+spectral peaks. Thus, the rank of the Hankel matrix and the 
+number of peaks should be the same. This property has been 
+explored in NMR signal processing for many years, such as 
+linear prediction [6a, 25], parameter estimation [26], denoising [8], 
+and reconstructing [6a, 6b, 9]. 
+Similar to the 1D case, it is possible to model a 2D FID signal 
+as a sum of damped exponentials as 
+                    1 2
+1 2,
+1
+R
+n n
+n n r r r
+r
+X c d 
+
+ , (4) 
+where 1 2N NX  ,  1, 1, 1
+2 r ri f t
+rd e
+  
+ ,  2, 2, 2
+2 r ri f t
+r e
+    , and i  
+denotes the imaginary unit satisfying 2 1i   . 
+The sketch map of the procedure when converting 2D FID to 
+a block Hankel matrix is shown in Figure 2. 
+Also, we denote an operator   to represent the 
+transformation procedure and define it as [10] 
+      
+1 1
+1 1
+1 1 1
+1 2 1
+2 3 2
+1
+N k
+N k
+k k N
+ 
+ 
+
+ 
+ 
+    
+ 
+  
+X
+X X X
+X X X
+B X
+X X X
+
+
+
+   
+
+,  (5) 
+where 1 2 1 1 2 2( 1)( 1)k k N k N k    XB   denotes a block Hankel matrix 
+R
+and 1k  is a parameter. Each submatrix 1nX  in XB  is a 
+Hankel matrix, satisfying  
+        
+1 1 1 2 2
+1 1 1 2 2
+1
+1 2 1 2 1 2
+,1 ,2 , 1
+,2 ,3 , 2
+, , 1 ,
+n n n N k
+n n n N k
+n
+n k n k n N
+x x x
+x x x
+x x x
+ 
+ 
+
+ 
+ 
+   
+ 
+  
+X
+
+
+   
+
+,  (6) 
+where 2k  denotes another parameter. Similarly, the matrix XB  
+also possesses the same property as the matrix xH , which has 
+been formed in several works [10b, 11]. This property is derived 
+from Singular Value Decomposition (SVD). From this 
+decomposition, a lot of information, such as the number and the 
+line shape of peaks, which can be well utilized in the 
+denoising/reconstruction problem. 
+As an example, the signal in Figure 1(a) is used to illustrate 
+the definition of SVD as follows  
+            HxH UΣV ,                   (7) 
+where  1N Q Q  Σ   denotes a rectangular diagonal matrix, 
+whose entries are singular values, and H  denotes the 
+conjugate transpose.    
+1 1N Q N Q    U   and Q QV   are 
+unitary matrices. 
+   Before discussing the subspace, let us define subspaces of 
+the 1D FID signal x  and the Hankel matrix xH  first.  
+(1) Subspaces of x : A FID signal  1Nx   can be linearly 
+combined as 
+1
+R
+r r
+r
+a
+
+x x ,                  (8)                                
+where 1x , 2x ,   , and Rx  are subspaces of x .  
+According to Eq. (1), the subspace set could be
+  21 ,
+1,2, ,
+r ri f n tN
+r r n
+r R
+x e
+  
+
+ x
+
+ . Here we denote this subspace 
+set as  
+1,2, ,r r R
+D
+
+ d
+
+ and the FID signal is expressed as 
+1
+R
+r r
+r
+c
+
+x d . 
+(2) Subspaces of xH : A Hankel matrix 
+ 1N Q Q  xH   with 
+rank R can be linearly combined by a set of rank-1 matrices 
+  1
+1,2, ,
+N Q Q
+r
+r R
+  
+
+H
+
+  as 
+ 
+1
+R
+r r
+r
+a
+
+xH H ,             (9)                                                             
+where 1H , 2H ,  , and RH  are subspaces of xH . 
+According to the definition of SVD in Eq. (7), the subspace 
+set could be  
+1,2, ,
+H
+r r r r r R
+H H u v
+
+ and the Hankel matrix is 
+written as 
+1
+R
+H
+r r r
+r
+
+
+xH u v , where ru  and rv  denote the thr  
+column of matrices U  and V  in Eq. (7). 
+For the FID signal 1Nx   expressed in Eq. (1), its 
+subspace set is not unique. One possible subspace set could be 
+D , another possible set could be  *
+1,2, ,
+H
+r r r r R
+x u v
+
+ (Figure 
+1(e)), where *  denotes an operator which converts a matrix 
+to a vector via averaging the sum of entries on anti-diagonals of 
+the matrix. 
+Since  
+1,2, ,r r R
+d
+
+ and  
+1,2, ,r r R
+x
+
+ are capable of combining 
+x , both of them contain the information of line shape, such as 
+the location and the width, of peaks (Figure 1(c) and (e)). 
+Compared with  
+1,2, ,r r R
+d
+
+, the physical meaning of  
+1,2, ,r r R
+x
+
+ 
+is still unclear. However, this set is relatively easier to obtain in 
+the applications, because it is derived from sets  
+1,2, ,r r R
+u
+
+ and
+ 
+1,2, ,r r R
+v
+
+. 
+In some realistic cases, the number of peaks is found to be 
+much lower than that of data points. Compared to the length of 
+FID signals, take a 1D signal as an example, if the number of 
+peaks is small enough, usually 0.1R N , then the Hankel matrix 
+can be considered as “low rank”. In this paper, we focus on the 
+denoising and reconstruction of spectra under these situations. 
+ 
+Figure 1. The relationship between a Hankel matrix converted by an FID signal 
+and the number of exponential functions. (a) is a synthetic FID signal with 5 
+exponential functions; (b) denotes its Hankel matrix; (c) and (d) is the Fourier 
+spectrum and the singular value spectrum of (a) and (b), respectively. (e) is 
+subspaces of the signal in (a). 
+ 
+Figure 2. The procedure of converting 2D FID into a block Hankel matrix. 
+Adapted from Ref. [11b]. 
+1.3. What is Low Rank Hankel Matrix-based Denoising and 
+Reconstruction? 
+During recent decades, this low rank Hankel property has 
+been adopted in many powerful denoising [8] and reconstruction 
+[6b, 9] methods. All these methods are based on solving the 
+following problem 
+             22min . .s t rank R x y x x  ,  (10) 
+where 
+1 1: N M    denotes the sampling operator and 
+2
+ represents the 2l  norm. Due to the interference of noise, 
+which is mostly described as Gaussian random distribution, the 
+consistency with the measurement data is forced by minimizing 
+the 2l  norm. Note that for M N , we end up with a denoising 
+problem. And if M N , we are in the context of a reconstruction 
+problem. 
+ 
+Figure 3. The organization of reviewed approaches in this paper.  
+Table 1. The parallel computational time and equipment for reviewed methods in this paper. 
+Applications Methods Computational equipment Data size 
+Computational 
+time(second/hour) 
+Ref. 
+Denoising from 
+fully sampled data 
+Cadzow 
+Intel i5-8259u ×1, 8G RAM 1000 
+3.4s  [8a] 
+CHORD 2.2s [8c] 
+rQRd  0.09s [8b] 
+Reconstruction 
+from Non-uniformly 
+sampled data 
+LRHM 
+Intel E5-2650v4 (2.2GHz/12c) ×2, 128G 
+RAM 
+256×116 28.0s [6b] 
+128×64×512 23.0h 
+[11b] 
+LRHMF 
+256×116 17.8s 
+128×64×512 0.34h 
+WLR 
+256×116 
+64.3s [12] 
+ECLR 120.7s [13] 
+HVaF 1.3h [14] 
+2. Low Rank Hankel Denoising 
+Numerous efforts have been made in the denoising of NMR 
+spectroscopy by using the low rank property [8a, 8b, 15]. The 
+denoising methods are divided into three types, full low rank 
+decomposition, partial low rank decomposition, and convex low 
+rank constraint. This section is dedicated to listing typical and the 
+state-of-the-art methods in FID signals that exploit the low rank 
+Hankel property and evaluate the performances of 
+representative methods to analyze their advantages and 
+shortcomings. 
+2.1. Full Low Rank Decomposition 
+Figure 1 implies that, for the FID signal x  in Eq. (1) with the 
+SVD in Eq. (7), the first R  singular values and the first R  
+columns of matrices U  and V  can represent the whole 
+signal. For a measurement vector y  corrupted by Gaussian 
+noise z , its Hankel matrix tends to possess R  large singular 
+values. However, the rank R  is difficult to determine in 
+applications. Here we replace R  by R̂  which denotes the 
+estimated rank. 
+The simplest denoising method based on low rank Hankel 
+matrix is SVD Truncation (TSVD), which holds the first R̂  
+columns of matrices Σ , U  and V  through the truncation. 
+TSVD is based on solving the following problem 
+            2 ˆmin . .F s t rank R X Y X X ,  (11) 
+where R̂  denotes the estimate rank of X . 
+However, in denoising, TSVD may cause the omission of 
+peaks or the appearance of artifacts under relatively low SNR [8b]. 
+Cadzow is another common tool in denoising of NMR 
+spectroscopy [8a, 15a, 15c]. Compared with TSVD, this method 
+constrains the truncated matrix owns Hankel structure. It is used 
+to solve the following problem [8b] 
+             22 ˆmin . .s t rank R x y x x .  (12) 
+Let us consider a map defined as    1 1
+ˆ :
+N Q Q N Q Q
+R
+       . 
+Let matrix  1N Q Q  X   with the SVD HX UΣV , 
+ ˆ ˆ ˆ ˆHR R R RX U Σ V , where matrices R̂U , R̂Σ  and R̂V  are the 
+first R̂  columns of U , Σ , and V , respectively. The 
+operator 
+ 1* 1:
+N Q Q N      converts a Hankel matrix into a 
+vector through summing the entries on the same anti-diagonal. 
+Denote 1N w  , and kw  stands for the reciprocal of the 
+number of the entries on thk  anti-diagonal.   is the Hadamard 
+production.  
+For each step, the thresholding on the singular values of the 
+Hankel matrix guarantees that   ˆkrank Rx . But the 
+thresholding may destroy the Hankel structure (Figure 4(c)). 
+Thus, it is necessary to adopt an averaging on the sum of anti-
+diagonals of 1kH  ensures that 1kx  is given by a matrix that 
+owns the Hankel matrix structure (Figure 4(d)).  
+ 
+ 
+Figure 4. The sketch map for maintaining the Hankel matrix structure. (a) is a 
+Hankel matrix. (b) denotes SVD of the matrix in (a). (c) stands for the 
+thresholding on the singular values. (d) is the procedure of the averaging on 
+the sum of anti-diagonals. 
+2.2. Partial Low Rank Decomposition 
+It is well known that SVD is a time-consuming procedure, 
+particularly for large data size, which is common in the 
+application of NMR spectroscopy. Some partial methods of low 
+rank decomposition [8b, 15b] are proposed to accelerate the 
+computation. These two methods, randomized SVD (rSVD) [15b] 
+and randomized QR decomposition (rQRd) [8b, 15b], reduce the 
+size of Hankel matrix by constructing a much smaller random 
+matrix Ω  thereby decreasing the computation time effectively. 
+Because of similar main concept, we only present the solver of 
+rQRd as an example in Table 3. 
+rSVD and rQRd both reduce the computation time at the cost 
+of retaining the noise residue and weakening the signal intensity, 
+which results in the loss of low intensity peaks [15d]. 
+To address this problem, Yu Yang et al. [15d] proposed a 
+method that exploits a soft-thresholding generated from pre-
+denoised rSVD outcomes, which can remain the peak region and 
+suppress noise region. 
+2.3. Convex Low Rank Hankel Constraint 
+The estimated rank R̂ ,which is necessary in denoising 
+methods above, is at least one parameter. Denoised 
+performances of TSVD and Cadzow are highly dependent on this 
+parameter. Although rSVD and rQRd have a more flexible R̂ , 
+the dimension reduction of Hankel matrix, which is controlled by 
+R̂ , still effects the denoised results. 
+There is a novel method, Convex Hankel lOw Rank 
+Denoising (CHORD) [8c], which is expressed as 
+                 
+2
+* 2
+min
+2
+
+ 
+x
+x y x ,  (13) 
+where 
+*
+  denotes the nuclear norm, defined as the sum of the 
+singular values.   is a regularization parameter balancing the 
+nuclear norm and data consistency. 
+CHORD minimizes the rank of Hankel matrix, and uses the 
+nuclear norm as a surrogate for the rank since the original issue 
+is NP-Hard. Furthermore, it only has one parameter  , and the 
+parameter setting is automatic by theoretical guidance [8c]. 
+Define the soft-thresholding operator which applies to 
+ 1N Q Q  X   as     1 1 Hrdiag    X U V , where 
+ diag   is an operator which spans a vector into a diagonal 
+matrix, and  max 0,t t  [16]. Introducing variable Z  and 
+Lagrange multiplier D , and utilizing Alternating Direction 
+Method of Multipliers (ADMM) [17], the solution of Eq. (13) is given 
+in Table 4. 
+2.4. Conclusion on Low Rank Hankel Methods in Denoising 
+We analyze the denoised performances of a typical method, 
+Cadzow, the state-of-the-art techniques, rQRd and CHORD on 
+1D 1H NMR data [8c]. This spectrum was acquired at 298 K on a 
+Varian 500 MHz NMR system. The sample is a mixture of 
+creatine, choline, magnesium citrate and calcium citrate. The 
+concentration of these metabolites is 2:2:1:1. 
+All three methods produce reasonable and comparable 
+denoised results under a high SNR circumstance (Figure 5(c)). 
+For a relatively strong noise level (Figure 5(a)), Cadzow smooths 
+the spectrum and offers a nice noise removing results. However, 
+it also causes some peaks to be omitted (such as the peaks at 
+6.8 ppm). rQRd provides a spectrum with noticeable noise 
+residue (orange lines in Figure 5(a)), which weakens low-
+intensity peaks (such as the peaks at 6.8 and 3.7 ppm). CHORD 
+effectively removes noise and retains more details of peaks 
+(Figure 5(a)).
+Table 2. The solver of Cadzow. 
+Initialization: Input , , set iteration steps . And 
+initialize . 
+Main: 
+While:   
+1) Update ; 
+2) Update .  
+End while 
+Output: x .  
+Table 3. The solver of rQRd. 
+Initialization: Input  and .  
+Main: 
+1) Generate a random matrix ˆQ RΩ  ; 
+2) Form matrix ; 
+3) Construct orthogonal matrix 
+ˆQ RQ   such that 
+ via QR factorization; 
+4) Form matrix ; 
+5) Calculate .  
+Output: .  
+Table 4. The solver of CHORD. 
+Initialization: Input , , set , and tolerance of 
+solution in iterations . Initialize the multiplier , 
+the variable , , and .  
+Main: 
+While:   
+1) Update 
+; 
+2) Update ; 
+3) Update ;  
+4) Compute . 
+End while 
+Output: x .  
+y R̂ 50t 
+0 x y
+k t
+ ˆ1k kR H x 
+*
+1 +1k k x w H
+y R̂
+ C y Ω
+C QR
+ *C QQ y 
+*x w C 
+x
+y  = 1  
+-8=10 0 D 1
+0 Z 0 0 x y 1 01 0 x
+ x
+  1* *1 kk k  
+
+
+  
+     
+  
+D
+x I y Z  
+1 1 1
+k
+k k
+  
+ 
+  
+ 
+D
+Z x 
+ 1 1 1k k k k    D D x Z
+2
+1 2
+2
+1 2
+k k
+k
+
+
+
+ 
+x x
+x
+x
+ 
+ 
+Figure 5. Denoised performances of a 1H spectrum of metabolites with 0.035   (a), 0.020  (b), and 0.005  (c), respectively. The green lines denote the 
+ground truth. The black lines indicate observations. Blue, orange, and red lines are denoised results of Cadzow, rQRd, and CHORD, respectively. Note: The results 
+of Cadzow and rQRd that enable the lowest RLNE are presented here. Adapted from Ref. [8c]. 
+3. Typical Low Rank Hankel Matrix/Tensor 
+Reconstruction 
+To accelerate the acquisition of experimental data, a 
+sampling schedule called NUS which circumvents the limitations 
+of the Nyquist theorem, is widely used. In NUS, the location of 
+sampling points can be completely random [5a, 5d], or satisfy 
+certain distributions [5b, 5c]. One may also think of under-sampling 
+and truncation as part of NUS. 
+Since the long acquisition time in high-dimensional 
+spectroscopy is primarily due to the evolution, the NUS schedule 
+is applied only in indirect dimensions. The sketch map (Figure 6) 
+shows the procedure of random sampling in 2D and 3D 
+spectroscopy. Solid circles stand for sampled data points, while 
+hollow circles denote un-sampled data points. Accordingly, the 
+reconstruction along the indirect dimension is sufficient to 
+recover the entire spectrum. For example, a 2D NMR spectrum 
+can be found by a series of 1D reconstructions. The region 
+marked by a hollow red rectangle (or parallelogram) represents 
+one reconstruction. 
+Previously, Linear Prediction (LP) [6a, 18, 25] in NMR data 
+processing was one of the most typical techniques that exploit 
+the low rank Hankel property, to reconstruct the spectra and 
+estimate parameters. Recently, many novel methods utilizing the 
+low-rankness are springing up. They all have good performance 
+in reconstructing high-quality spectra from NUS data. We will 
+discuss each method in more detail below. 
+ 
+Figure 6. The sketch map of the random sampling schedule in the 
+reconstruction of 2D and 3D NMR spectra. Adapted from Ref. [11b].  
+3.1. 2D and 3D Spectra Reconstruction with Low Rank 
+Hankel Matrix 
+The Low Rank Hankel Matrix reconstruction method（LRHM）
+[6b] is a new scheme, which theoretically is well adapted to NMR 
+spectroscopy [19]. The LRHM method can be formulated as a low 
+rank matrix completion problem: 
+                  
+2
+2min || || || ||
+2
+
+  
+x
+x y x  . (14) 
+In a nutshell, the high-quality spectrum can be reconstructed 
+in two simple steps: 1) Convert the NUS FID signal into the 
+Hankel matrix x . 2) Solve x  in Eq. (14) through ADMM. 
+Figure 7 shows the reconstruction of the 1H-15N HSQC 
+spectrum of the intrinsically disordered cytosolic domain of 
+human CD79b protein from the B-cell receptor by LRHM, 
+compared with the fully sampled reference spectrum. At a 35% 
+sampling rate, LRHM offers a high-quality result. For the better 
+analysis, 1D 15N traces of four representative peaks are 
+presented, indicating that LRHM performs well at broad and 
+weak peaks compared with Compressed Sensing (CS) [20]. 
+ 
+ 
+Figure 7. 1H-15N HSQC spectrum of the cytosolic domain of CD79b. (a) fully 
+sampling reference spectrum, (b) the LRHM reconstruction of 35% NUS data. 
+(c)-(f) stand for the reconstruction of 4 peaks, 11G, 37T, 38G, and 45G, 
+respectively. Dashed, gray, and black lines stand for the 1D 15N trace of four 
+peaks in the reference, LRHM, and CS, respectively. Reproduced from Ref. 
+[6b]. Copyright 2015, John Wiley and Sons. 
+In the reconstruction of 3D NMR spectra, the Block Hankel 
+matrix is constructed (Figure 2) to replace the Hankel matrix. The 
+LRHM for 3D NMR data is expressed as [11b] 
+              , (15) 
+where  denotes the Frobenius norm. 
+ADMM algorithm also can be utilized to solve Eq. (15). The 
+solver is similar to that in the 2D case. Thus, it is not shown here. 
+3.2. Fast 2D and 3D Spectra Reconstruction with Low Rank 
+Hankel Matrix 
+Ordinary methods of low rank Hankel matrix reconstruction 
+include SVD, which consumes a lot of time in ADMM. It 
+dramatically increases the reconstruction time, especially for 
+solving the multi-dimensional spectral reconstruction problem. 
+An improved method called Low Rank Hankel Matrix 
+Factorization (LRHMF) [11b] reduces the computation time 
+dramatically by avoiding SVD.  
+Take the reconstruction of 2D NMR spectra as an example, 
+LRHMF calculates 
+*
+x  through solving 
+          2 2
+,
+1
+min , . .
+2
+H
+F F
+s t
+P Q
+P Q x = PQ . (16) 
+The LRHMF method is based on solving the following 
+problem: 
+    2 2 22, ,
+1
+min . .
+2 2
+H
+F F
+s t
+
+   
+P Q x
+P Q y x x PQ   . (17) 
+The solver of LRHMF, which utilizes ADMM, is shown in Table 
+6. 
+We compare the reconstruction results of LRHM and LRHMF 
+on the 1H-15N HSQC spectrum and analyze the performance 
+through the correlation of peak intensities in Figure 8 and 9. 
+Under the same computation time, LRHMF produces a spectrum 
+with high-fidelity, while LRHM provides a spectrum with a large 
+number of artifacts (Figure 8(b) and (d)). When the computation 
+time is adequate for LRHM, reconstruction spectra of two 
+methods are nice and comparable (Figure 8(c), (d), and Figure 
+9(a), (b)).  
+ 
+Figure 8. Reconstructed results of HSQC spectrum in Figure 7(a). (a) The fully 
+sampled spectrum, (b) and (c) are reconstructed spectra at the time of 11.6s 
+and 46.4s using LRHM, respectively, (d) the reconstructed spectrum at the 
+time of 11.6s using LRHMF. Note: 35% data are acquired in NUS. The 
+2
+*
+min
+2 F
+
+ 
+X
+X Y X 
+F
+
+Table 5. The solver of LRHM. 
+Initialization: Input: , step size ,and 
+tolerance of solution in iterations . Initialize the dual 
+variable  and initialize . 
+Main:  
+While:  
+1) Given  update  
+ 
+2)  Update  
+3)  Update  
+4)  Compute   
+Output: . 
+Table 6. The solver of LRHMF. 
+Initialization: Input , , , set step size , 
+convergence condition  and maximum number of 
+iterations . Initialize the solution , the dual 
+variable . 0P  and 0Q  are complex random matrices 
+with  1 0.1N Q N    and 0.1Q N , respectively. 
+Main: 
+While ( ) or ( ), do: 
+1) Update
+ ; 
+2) Update ; 
+3) Update ; 
+4) Update ;  
+5) Compute . 
+End while 
+Output: .  
+, , , 1  y   
+810 
+D 1 * 3
+last, , 10   x y x x x
+ x
+, ,Z x D
+  1* * * *1 ( )kk k    
+
+
+ 
+    
+ 
+D
+x y Z     
+1 1 1
+k
+k kS
+ 
+ 
+ 
+  
+ 
+D
+Z x +
+1 1 1( )k k k k   D D x -Z
+|| || || ||last last  x x x x
+x
+y   1 
+24 10  
+100K  *
+0 x y
+1D
+k  k K
+  1* * * *1 H kk k k    
+
+
+  
+     
+  
+D
+x y P Q     
+  11 1 Hkk k k k k 
+
+ 
+ 
+   
+ 
+D
+P x Q Q Q I
+  11 1 1 1 1
+H
+Hk
+k k k k k 
+
+    
+ 
+   
+ 
+D
+Q x P P P I
+ 1 1 1 1Hk k k k k     D D x P Q
+1k k
+k
+k
+ 
+
+
+x x
+x
+x
+mentioned time is based on the reconstruction algorithms without parallel 
+acceleration. Adapted from Ref. [11b]. 
+ 
+Figure 9. Peaks intensities correlation for the spectra in Figure 8. (a) and (b) 
+are peak intensities correlations between the fully sampled spectrum and the 
+reconstructions by LRHM and LRHMF, respectively; (c) is peak intensities 
+correlation between two reconstructed spectra by LRHM and LRHMF, 
+respectively. Note: The value of 2R  lies between 0 and 1 and 2R  is 
+proportional to the correlation between the fully sampled and reconstructed 
+spectrum. Reproduced from Ref. [11b]. Copyright 2017, IEEE. 
+In 3D case, similar to (15), LRHMF is expressed as 
+            2 2 2
+, ,
+1
+min
+2 2F F F
+
+  
+P Q X
+P Q Y X .  (18) 
+The performance of LRHMF has been tested on a 3D HNCO 
+spectrum of U-[15N, 13C] RNA recognition motifs domain of 
+protein RNA binding motif protein 5 [21]. This spectrum was 
+acquired on a Bruker AVANCE III 600 MHz spectrometer 
+equipped with a cryogenic probe at 293K.  
+Compared with LRHM, the reconstruction of LRHMF is 
+presented in Figure 10. Within 1.32h, LRHMF generates a 
+satisfying spectrum with a high correlation of peak intensities, 
+while LRHM provides a spectrum with a large amount of missing 
+and weakened peaks.  
+ 
+Figure 10. The 1H-15N and 1H-13C skyline projection in reconstructed 3D HNCO 
+spectra [21] from 30% NUS data. (a) denotes the fully sampled spectrum, (b) 
+and (c) are reconstruction spectra at the time of 1.32h by LRHM and LRHMF, 
+respectively. (d) represents the reconstruction at the time of 27.8h by LRHM. 
+Note: The mentioned time is based on the reconstruction algorithms without 
+parallel acceleration. Adapted from Ref. [11b]. 
+As indicated in Figure 6, under NUS, the reconstruction can 
+be carried out independently. Parallel computation is a 
+technology that makes it possible to reconstruct several indirect 
+planes simultaneously, which accelerates the reconstruction, 
+especially when the reconstruction in each indirect plane takes 
+time. 
+We apply the parallel computation in 2D and 3D spectra 
+reconstruction. The setting of the parallel computing environment 
+and the computation time has been recorded in Table 1. 
+ 
+Figure 11. The sketch map of parallel computation of 3D spectra 
+reconstruction. Adapted from Ref. [11b]. 
+Compared with LRHM, LRHMF approximately decreases 67 
+times of computational time in 3D spectra reconstruction. 
+In some applications, such as the spatiotemporally encoded 
+ultrafast (STEU) NMR spectroscopy, NUS is applied to save the 
+sampling time. Unlike the standard NMR spectrum, the 2D STEU 
+spectrum is obtained in a hybrid time and frequency (HTF) plane, 
+involving the reconstruction of NUS within the mixing frequency 
+domain. It has been proved that LRHMF can be used to solve 
+this problem [11a], which shows the advantages of leveraging the 
+low rank Hankel property. This method, called LRBHM-HTF, can 
+be expressed as 
+      2 2 2 11min  . . ,
+2 2
+H
+freqF F F
+s t
+    
+P,Q,G
+P Q Y G G PQ   (19) 
+where G  represents a two-dimensional HTF signal, and 1
+freq
+  
+is an operator to transform every row vector of HTF with 1D 
+discrete Fourier transform into a time-domain signal. 
+This method is verified on a real 2D STEU COSY of a special 
+type of oil existing in intrahepatic fat of the liver [11a]. Results in 
+Figure 12 illustrate that, compared with CS, LRBHM-HTF 
+enhances peak intensities and suppresses fake peaks, nearly 
+restoring the information of the original spectrum, even when the 
+NUS reconstruction problem is extended to the HTF plane.  
+ 
+Figure 12. Reconstruction of STEU COSY spectrum. (a) The full sampled 
+spectrum; (b) and (c) The reconstructed spectrum by CS and LRBHM-HTF 
+method from 20% NUS data, respectively. Adapted from Ref. [11a]. 
+We evaluate the reconstruction by comparing the proton 
+resonance volume of two methods. The comparison in Table 7 
+indicates that the resonance volume of the reconstruction by 
+LRBHM-HTF is much more robust and closer to the reference 
+than CS.  
+Furthermore, in order to better analyze the results in Table 7, 
+we define the Quantitative Error Factor (QEF) as [11a] 
+                       
+ˆ
+QEF
+s s
+s
+
+ ,  (20) 
+where s  and ŝ denote the resonance volume of the reference 
+and the reconstructions, respectively. 
+The results shown in Figure 13 confirm our claims in Table 7. 
+LRBHM-HTF owns lower QEF and smaller error bars than CS. 
+Moreover, for most of the peaks with high resonance volume 
+(such as Peak 2, 3, and 4), QEF of both methods is sufficiently 
+low, implies that both two methods achieve nice results. For low-
+resonance peaks (such as Peak 5-9), QEF of CS is much higher 
+than LRBHM-HTF. For Peak 1, with the largest resonance 
+volume in the spectrum, CS enhanced its intensity too much 
+while LRBHM-HTF provided a more reasonable result [11a].
+Table 7. The proton resonance volume comparison between CS and LRBHM-HTF [11a].
+ 
+Figure 13. QEF of the proton resonance volume in Table 7. Note: the vertical 
+bar comes from the randomness of sampling schedules [11a]. Adapted from Ref. 
+[11a]. 
+3.3. N-D Spectra Reconstruction with Low Rank Tensor 
+In theory, for N-dimensional ( 3N  ) spectra, spectral signals 
+can be recovered by minimizing the rank of N-fold Hankel matrix 
+[6b], which theoretically ensures the stability of recovery. This 
+approach nevertheless invokes the problem of minimizing a 
+matrix with too large size [6c] and prohibits its application to high 
+dimensional signals. 
+ 
+Figure 14. CANDECOMP/PARAFAC (CP) tensor decomposition for 3D 
+exponential signals. 
+Another idea is to reduce the dimension of N-D signals, 
+transforming this issue into the reconstruction in a lower 
+dimension. Therefore, the decomposition of tensor was taken 
+into consideration. Taking a 3D case as an example (Figure 14), 
+the signal can be treated as a cube with 
+CANDECOMP/PARAFAC (CP) tensor. The small number of 
+peaks means that the signal is “low-CP-rank”. The typical 
+reconstruction method, Multi-Dimensional Decomposition (MDD) 
+[22], assumes that N-D spectral signals own a low-CP-rank 
+structure. This property has also been utilized in a typical non-
+convex approach [23], named as the CP-Tensor method, in matrix 
+completion issue. Ying et al. [6c] proposed a method, called 
+Hankel Matrix nuclear norm Regularized low-CP-rank Tensor 
+Completion (HMRTC), to simultaneously exploits the low-CP-
+rank structure and the exponential structure via constraining the 
+low rank Hankel property of the associated factor vectors. This 
+method is expressed as 
+               
+  2
+1 1 *
+1, ,
+1, ,
+min ,
+2nr
+R N
+n
+r F
+r n
+r R
+n N
+
+ 
+
+
+ 
+u
+u  
+
+
+  (21) 
+where       1 21 2
+1
+N
+R
+N I I I
+r r r
+r
+ 
+
+    u u u    are N-D signals with 
+R  components in the time domain,   is the outer product, 
+and   is the NUS data with noise.  
+The solver of HMRTC and its convergence has been 
+provided [6c]. HMRTC is validated on a 3D HNCO spectrum and 
+compared with CP-Tensor in Figure 15. Under a very limited 
+sampling rate (10%), HMRTC still offers a high-quality spectrum 
+while CP-Tensor weakens peak intensity and loses a number of 
+peaks. 
+ 
+Figure 15. The reconstructed spectra of a 3D HNCO experiment[21]. (a) 
+denotes the fully sampled spectrum; (b) and (c) are the CP-Tensor and 
+HMRTC reconstructions with 10% 3D NUS data, respectively. The parameter 
+setting of CP-Tensor and HMRTC is explained in [6c]. Adapted from Ref. [6c]. 
+Protons Resonance volume 
+ID Type ppm Reference CS LRBHM-HTF 
+1 methylene  1.30 37.69 40.30 0.13  38.01 0.03  
+2 methyl  0.90 16.79 16.73 0.15  16.80 0.02  
+3 olefinic  5.29 12.98 12.92 0.20  13.00 0.01  
+4 -olefinic  2.02 12.08 11.79 0.16  12.06 0.03  
+5 -carboxyl  2.24 8.16 7.69 0.18  8.12 0.04  
+6 diacyl methylene  2.75 5.23 4.64 0.11  5.17 0.03  
+7 -carboxyl  1.60 4.78 4.28 0.18  4.63 0.02  
+8 glecerol backbone CH  4.30 1.19 0.86 0.04  1.16 0.01  
+9 2CH  4.05 1.10 0.79 0.02  1.05 0.01  
+3.4. Conclusion on Typical Low Rank Hankel Matrix/Tensor 
+Reconstruction 
+Typical low rank Hankel matrix/tensor methods exploit the 
+intrinsic property of exponential and is considered to be 
+theoretically best adapted to NMR signals [19], enabling to 
+overcome some difficulties that are troublesome to other 
+conventional methods [6a, 20], such as the reconstruction of broad 
+peaks. 
+However, their drawbacks are also obvious. The computation 
+time of these methods remains an issue, especially for high-
+dimensional or large number point signals. Nevertheless, some 
+new algorithms are proposed to decrease a large amount of 
+computational time.  
+In some methods of reconstruction, the nuclear norm is the 
+surrogate to the rank. For SVD, both Σ  and two unitary 
+matrices ( U  and V ) can be exploited in the reconstruction 
+issue. LRHM minimizes the rank of the Hankel matrix given by 
+the FID signal (i.e., the number of peaks). The adopted nuclear 
+norm is a type of convex approximation of the rank so that some 
+convex algorithms, such as ADMM[6b] and SVT[27], can be 
+employed to solve the low rank reconstruction problem. However, 
+compared with the original problem, this convex approximation 
+requires more NUS data points[28]. Besides, as is mentioned in 
+Figure 1, the subspace set  *
+1,2, ,
+H
+r r r r R
+x u v
+
+, which is 
+derived from matrices U  and V , contains the line shape 
+information of peaks, which is ignored in LRHM. 
+4. Enhanced Low Rank Hankel Matrix 
+Reconstruction 
+4.1. Better Approximation to the Rank 
+As stated above, in typical low rank Hankel matrix/tensor 
+reconstruction methods, such as LRHM, although the convex 
+relaxation of the rank avoids the NP-hard, another problem 
+emerges that the relaxation puts weights on the singular values 
+(Figure 16(a)). This problem results in imperfect performance in 
+the reconstruction with a low sampling rate or low-intensity peaks 
+(Figure 16(b) and (c)). 
+ 
+Figure 16. The limitations of LRHM. (a) Comparison between rank function 
+and nuclear norm. (b) and (c) are the fully sampled signal and the 
+reconstruction result with 10% sampled data, respectively. Adapted from Ref. 
+[13]. 
+Two enhanced low rank Hankel methods are proposed based 
+on replacing the nuclear norm by other constraints. One is 
+Weighted Low Rank Hankel matrix (WLR) [12], the other is 
+Enhanced Low Rank Hankel matrix (ECLR) [13]. 
+In WLR, a weighted nuclear norm has been introduced to 
+substitute the nuclear norm, and its definition is presented as 
+                       
+,*
+1
+Q
+q q
+q
+w 
+
+ wX ,  (22) 
+where 
+1
+T
+q Qw w w   w    is the weight, and qw  
+denotes the weight put on the 
+thq  singular value q . 
+The WLR method is to solve such a problem: 
+                     
+2
+,* 2
+min
+2
+
+ 
+wx
+x y x  .  (23) 
+According to Figure 16(a), ideal weights should be located at 
+the reciprocal of non-zero singular values so that the constraint 
+approximates the rank function. In practice, however, neither the 
+true rank nor singular values are known. Thus, we use LRHM to 
+obtain pre-reconstruction, utilize its rank and singular values to 
+replace real ones, and update them in each outer loop.  
+ 
+And for ECLR, it is stated as 
+                   22
+1
+min ;
+2
+Q
+q
+q
+a
+
+ 
+
+ 
+x
+x y x  ,  (24) 
+where Q  stands for the total number of the singular values in 
+Hankel matrix. The function   is given by 
+               
+2 1,
+2
+;
+1 1
+,
+2
+q q q
+q
+q
+a
+a
+a
+a a
+  
+ 
+
+
+ 
+ 
+ 
+
+x , (25) 
+where q  stands for the 
+thq  singular value of the matrix, and 
+a  is a parameter which controls the distance of the value of the 
+function  to the actual rank (The red and pink lines in Figure 
+Table 8. The solver of WLR. 
+Initialization: Input , , , set , . 
+Initialize , , , , and 
+obtain the pre-reconstruction  from LRHM. 
+Main: 
+For each time  of updating weights, do: 
+1) Estimate  from  according to ; 
+2)  Compute  according to 
+  
+While  and , do 
+a) Update 
+; 
+b) Update ; 
+c) Update 
+; 
+d) Update ; 
+e)  
+End while 
+3) , , , ; 
+End while 
+Output: .  
+y   4P  3max 10k 
+*
+0 x y 0 D 1 0k 
+1 2
+2
+1
+k k
+k
+  
+x x
+x
+x
+1, 2, ,p P 
+P x Hx UΣV  
+1
+T
+q Qw w w   w  
+  1q qw 
+
+ Σ
+maxk k
+1 62
+2
+10
+k k
+k
+ 
+
+
+x x
+x
+  11 kk k    
+   
+
+       
+  
+D
+x y Z     
+1 1 1 1=
+H k
+k k k k     
+D
+U Σ V x 
+ 
+1 1 1 1
+H
+k k k k
+diag
+   
+ 
+  
+ 
+w
+Z U Σ V
+ 1 1 1k k k k    D D x Z
+1k k 
+0k 
+1 2
+2
+1
+k k
+k
+  
+x x
+x
+1p p  1kx x
+x
+16(a)). 
+In Table 9,   denotes a thresholding function on singular 
+values stored in the diagonal entry in Σ  and is defined as 
+       22 2; , min , max 1 ,0a aa     Σ Σ Σ .   (26) 
+4.2. Subspace Constraint via Vandermonde Factorization 
+LRHM and LRHMF exploit the exponential property of FID 
+signals via minimizing the number of non-zero singular values of 
+the Hankel/block Hankel matrix given by FID signals. However, 
+as is mentioned above, the spectral line shape information 
+(including the amplitude, location and width of peaks) in the 
+subspace set  *
+1,2, ,
+H
+r r r r R
+x u v
+
+ is ignored. Furthermore, the 
+SVD is not the most suitable way to decompose exponentials, 
+because the subspace set  *
+1,2, ,
+H
+r r r r R
+x u v
+
+ does not 
+correspond to the actual exponentials and their physical meaning 
+is still unclear. Introducing a more proper decomposition way and 
+exploiting the subspaces of this new decomposition may 
+promote the fidelity of reconstructed spectra. 
+A method called Hankel matrix completed by Vandermonde 
+factorization (HVaF) [14] is available. Unlike SVD, Vandermonde 
+factorization of the Hankel matrix generates a series of 
+exponential subspaces, which correspond to the exponential 
+components of FID signals in theory. HVaF constrains the low 
+rank Hankel properties of these exponential subspaces, allowing 
+better use of the exponential structure of FID signals than LRHM. 
+ 
+ 
+Figure 17. The key idea of HVaF.  
+HVaF is written as 
+  
+ˆ
+2
+2* *, ,
+1
+min , s.t.
+2
+R
+T
+m r m r
+r
+
+
+   
+U V x
+U V x y x UV      , (27) 
+where 1: M N Mr
+    represents the operation of extracting 
+thr  column of the matrix. 
+Since the factorization in HVaF is theoretically adapted to 
+NMR spectral signals, this method is expected to provide an 
+accurate estimate of parameters, including the amplitude, the 
+central frequency, and the damped factor [14]. 
+4.3. Conclusion on Enhanced Low Rank Hankel Matrix 
+Reconstruction 
+Here, we analyze the reconstruction performances of LRHM, 
+WLR, ECLR, and HVaF on 1D synthetic data and 2D realistic 
+NMR data. The 2D realistic NMR data is from a 1H-15N HSQC 
+spectrum of intrinsically disordered cytosolic domain of human 
+CD79b protein from the B-cell receptor. 
+Firstly, we compare WLR, ECLR, and HVaF with LRHM on 
+the 2D HSQC spectrum (Figure 18). All four methods still achieve 
+reasonable results under a high acceleration factor (5 factors). 
+LRHM yields a spectrum with several peaks diminished and lost. 
+Compared with LRHM, WLR, ECLR, and HVaF offer better 
+results with a higher Pearson coefficient , promoting peak 
+intensity, especially low intensity (lower than 2×107). For WLR, 
+some artifacts do appear while ECLR and HVaF suppress 
+artifacts better.  
+2R
+Table 9. The solver of ECLR. 
+Initialization: Input , , , , set , , 
+, , , , and .  
+Main: 
+While  and , do: 
+While  and , do: 
+1) Update ; 
+2) Update ; 
+3) Update 
+; 
+4)  
+End while 
+5) , , , ; 
+End while 
+Output: .  
+y    0j  0k 
+0a  0.2b  1  max 500k 
+20
+max 2  0 x y
+maxj 
+1 42
+2
+10
+j j
+j
+ 
+
+
+x x
+x
+maxk k
+1 42
+2
+10
+k k
+k
+ 
+
+
+x x
+x
+1 1 1 1=
+H
+k k k k   x U Σ V
+1 1 1 1
+2; , Hk k k k
+j
+a a   
+ 
+  
+ 
+Z U Σ V
+   11k j j k   
+   
+   x Z y     
+1k k 
+0k  2  2
+ba 
+1 1j k x x
+x
+ 
+Figure 18. The reconstructions of the 2D HSQC spectrum from 20% NUS data. (a) denotes the fully sampled spectrum. (b)-(e) are reconstructed spectra of LRHM, 
+WLR, ECLR, and HVaF, respectively. (f)-(i) stand for the peak intensity correlation for four methods. In (j)-(m), green, blue, yellow, red, and purple lines stand for 
+the 1D 15N trace at 8.42 ppm (the black line in (a)) in the full sampling, LRHM, WLR, ECLR, and HVaF, respectively. 
+To better evaluate the performance of these four methods, we 
+test them at different sampling rates (8%, 10%, and 15%) on 1D 
+synthetic data (Figure 19).  
+At a relatively high NUS level (15%), four methods generate 
+reasonable results, although LRHM slightly distorts the shape 
+peaks of low intensity (the first two peaks). As the decreasing of 
+the NUS level (10% and 8%), the reconstructed spectra of WLR, 
+ECLR, and HVaF remain the high-fidelity, LRHM, however, 
+severely distorts and weakens peaks (marked by black arrows). 
+We utilize the peak intensities correlation of reconstructions 
+in 100 Monte Carlo trials to evaluate the line shape of peaks. The 
+average and the standard deviation are recorded in Figure 19, 
+showing that these three enhanced methods offer higher and 
+more robust correlation values compared with LRHM, especially 
+for peaks with low intensity. Taking Peak 1 as an example, at 
+these three NUS levels, three enhanced methods improve the 
+correlation, providing higher averages and relatively smaller 
+standard deviations. Furthermore, compared with WLR, ECLR 
+and HVaF generate more accurate and robust correlations. 
+However, under very limited NUS measurement (8%), for some 
+peaks (such as Peak 3), ECLR and HVaF produce worse 
+correlation compared with LRHM.
+ 
+Figure 19. The reconstructions of 1D synthetic spectrum from 8%, 10% and 15% NUS data. (a)-(c) denote fully sampled spectra with noise ( ) and 
+reconstructed spectra of LRHM, WLR, ECLR and HVaF from 8%, 10% and 15% NUS data. (d)-(f) are the peak intensity correlation for four methods. The vertical 
+bars come from the randomness of NUS schedules in 100 Monte Carlo trials. 
+The joint distribution of correlation for Peak 3 is presented in 
+Figure 20 to compare the performance of four methods in each 
+trial. Taking Figure 20(a) as an example, in each trial, the 
+correlation of WLR and LRHM are denoted as the horizontal axis 
+value and the vertical axis value of one point, respectively. WLR 
+is claimed to achieve a higher correlation than LRHM if this point 
+is located above the dash-dot line.  
+For Peak 3, in most of the trials, compared with LRHM, 
+enhanced methods obtain relatively higher correlation values, 
+meaning that peaks of the reconstructed spectra are closer to 
+those of the fully sampled spectrum. However, in several trials, 
+ECLR and HVaF offer some extremely low correlation (marked 
+by arrows in Figure 20(b) and (c)). These abnormal values result 
+in lower average and larger standard deviation. 
+ 
+Figure 20. The joint distribution of correlation for Peak 3. (a)-(c) denote the 
+joint distribution of LRHM, WLR, ECLR, and HVaF from 8% NUS data, 
+respectively. Note: For each Monte Carlo trial, the method presented in the 
+vertical axis, denoted as method A, is claimed to improve the correlation than 
+the method presented in the horizontal axis, denoted as method B, if the point 
+lies above the dash-dot line. The red (or blue) number stands for the 
+percentage that method A reaches a higher (or lower) correlation than method 
+B. 
+In summary, results on synthetic and experimental data 
+confirm that enhanced methods do promote the fidelity of 
+reconstructed spectra. These three enhanced methods improve 
+the basic LRHM from different aspects: 1) WLR and ECLR 
+introduce new approximations that are closer to the rank function 
+than the nuclear norm; 2) HVaF exploits both exponential 
+subspaces and the number of non-zero singular values. 
+Nevertheless, enhanced methods might be trapped into local 
+optimum since the numerical algorithms are non-convex. 
+Besides, enhanced methods cost a longer computational time 
+than LRHM. All in all, how to fast reconstruct high-quality spectra 
+from NUS data is still a problem worthy of in-depth study. 
+5. Summary and Outlook 
+In this review, we demonstrate that low rank Hankel 
+matrix/tensor methods play an essential role in denoising and 
+reconstructing NMR spectra. So far, non-uniformly sampling has 
+been an alternative approach to overcome the long acquisition 
+time and low SNR problems. The FID signals can be modeled as 
+the sum of complex exponentials of which Hankel matrices are 
+often low rank. These low rank Hankel matrix/tensor methods 
+have shown good performance in denoising low SNR spectra 
+and reconstructing non-uniformly sampled spectra under high 
+acceleration factors. The long computational time and the 
+existence of non-exponential signals, however, for these 
+reconstruction methods limit their wider spread.  
+Deep Learning (DL) is a representative artificial intelligence 
+technique utilizing neural networks [29], which has the advantages 
+of high-speed, end to end, and user-friendly. Recently, it has 
+been successfully used for the fast reconstruction of high-quality 
+NMR spectra [9, 24]. These works prove that the neural network of 
+DL can be successfully trained using solely synthetic NMR data 
+0.005 
+with exponential functions [6c, 11a, 12, 14]. We think that introducing 
+the low rank Hankel property of exponential functions may 
+improve the stability of DL, enhance its interpretability, and make 
+it a much more efficient and powerful technique in NMR 
+spectroscopy [30]. 
+With the future development of low rank Hankel matrix/tensor 
+methods, we may anticipate that more problems in NMR 
+spectroscopy will be solved. An incomplete list of possible future 
+wok may include: (1) Develop faster algorithms with new 
+numerical solvers or high-performance computing hardware. (2) 
+Reconstruct higher-dimensional NMR and functional NMR, such 
+as diffusion and time-resolved spectra. (3) Combine the 
+exponential structure and Hankel matrices/tensors with artificial 
+intelligence to enable more accurate and faster reconstruction. 
+Acknowledgements 
+Xiaobo Qu thanks Prof. Zhi-Pei Liang, from University of 
+Illinois at Urbana-Champaign, for the generous invitation to join 
+Prof. Liang’s lab in 2009-2011. During the visit, the low rank 
+Hankel matrix property of exponential functions[31] came into his 
+horizon and inspired him to complete a series of low rank Hankel 
+reconstruction methods in NMR spectroscopy. The authors 
+would like to thank Prof. Zhong Chen from Xiamen University, 
+and Prof. Vladislav Orekhov from University of Gothenburg, for 
+valuable discussions in collaboration. The authors thank Wanqi 
+Hu, Dongbao Liu, Xianfeng Chen and Khan Asfar for preparing 
+some figures and polishing English. The authors are also deeply 
+grateful to other researchers for insightful discussions and 
+publishers for permission to adopt figures. Besides, the authors 
+thank editors and reviewers for valuable suggestions. This work 
+was supported in part by the National Natural Science 
+Foundation of China (NSFC) under grants 61971361, 61871341 
+and U1632274, the Joint NSFC-Swedish Foundation for 
+International Cooperation in Research and Higher Education 
+(STINT) under grant 61811530021, the National Key R&D 
+Program of China under grant 2017YFC0108703, the Natural 
+Science Foundation of Fujian Province of China under grant 
+2018J06018, the Fundamental Research Funds for the Central 
+Universities under grant 20720180056, and the Xiamen 
+University Nanqiang Outstanding Talents Program. 
+References  
+[1] a) T. W.-M. Fan, A. N. Lane, Prog. Nucl. Mag. Res. Sp. 2016, 92, 18-53; 
+b) K. Wuthrich, Science 1989, 243, 45-50; c) K. Wuethrich, Accounts 
+Chem. Res. 1989, 22, 36-44. 
+[2] S. Tiziani, A.-H. Emwas, A. Lodi, C. Ludwig, C. M. Bunce, M. R. Viant, 
+U. L. Günther, Anal. Biochem. 2008, 377, 16-23. 
+[3] a) M. Gal, M. Mishkovsky, L. Frydman, J. Am. Chem. Soc. 2006, 128, 
+951-956; b) B. Fürtig, J. Buck, V. Manoharan, W. Bermel, A. Jäschke, P. 
+Wenter, S. Pitsch, H. Schwalbe, Biopolymers 2007, 86, 360–383. 
+[4] a) S. J. Nelson, IEEE Eng. Med. Biol. 2004, 23, 30-39; b) S. Posse, R. 
+Otazo, S. R. Dager, J. Alger, J. Magn. Reson. Imaging 2013, 37, 1301-
+1325; c) K. Golman, R. I. Zandt, M. Lerche, R. Pehrson, J. H. 
+Ardenkjaer-Larsen, Cancer Res. 2006, 66, 10855-10860. 
+[5] a) K. Kazimierczuk, A. Zawadzka, W. Koźmiński, J. Magn. Reson. 2008, 
+192, 123-130; b) J. Barna, E. Laue, M. R. Mayger, J. Skilling, S. Worrall, 
+J. Magn. Reson. 1987, 73, 69-77; c) S. G. Hyberts, K. Takeuchi, G. 
+Wagner, J. Am. Chem. Soc. 2010, 132, 2145-2147; d) V. Y. Orekhov, V. 
+A. Jaravine, Prog. Nucl. Mag. Res. Sp. 2011, 59, 271-292; e) J. C. Hoch, 
+A. S. Stern, in NMR Data Processing, Wiley-Liss New York, 1996. 
+[6] a) P. Koehl, Prog. Nucl. Mag. Res. Sp. 1999, 34, 257-299; b) X. Qu, M. 
+Mayzel, J.-F. Cai, Z. Chen, V. Orekhov, Angew. Chem. Int. Edit. 2015, 
+54, 852-854; c) J. Ying, H. Lu, Q. Wei, J.-F. Cai, D. Guo, J. Wu, Z. Chen, 
+X. Qu, IEEE Trans. Signal Proces. 2017, 66, 5520-5533. 
+[7] V. Jaravine, I. Ibraghimov, V. Y. Orekhov, Nature Methods 2006, 3, 605. 
+[8] a) J. A. Cadzow, IEEE Trans. on Acoust. Speech Signal Proces. 1988, 
+36, 49-62; b) L. Chiron, M. A. van Agthoven, B. Kieffer, C. Rolando, M.-
+A. Delsuc, P. Natl. Acad. Sci. 2014, 111, 1385-1390; c) T. Qiu, W. Liao, 
+D. Guo, D. Liu, X. Wang, X. Qu, arXiv preprint, arXiv:2001.11815 2020. 
+[9] X. Qu, Y. Huang, H. Lu, T. Qiu, D. Guo, T. Agback, V. Orekhov, Z. Chen, 
+Angew. Chem. Int. Edit. 2020, 59, 10297-10300. 
+[10] a) Y. Hua, IEEE Trans. Signal Proces. 1992, 40, 2267-2280; b) Y. Hua, 
+T. K. Sarkar, IEEE Trans. on Acoust. Speech Signal Proces. 1990, 38, 
+814-824. 
+[11] a) H. Lu, X. Zhang, T. Qiu, J. Yang, J. Ying, D. Guo, Z. Chen, X. Qu, 
+IEEE Trans. Biomed. Eng. 2017; b) D. Guo, H. Lu, X. Qu, IEEE Access 
+2017. 
+[12] D. Guo, X. Qu, IEEE Access 2018, 6, 4933-4940. 
+[13] X. Qu, T. Qiu, D. Guo, H. Lu, J. Ying, M. Shen, B. Hu, V. Orekhov, Z. 
+Chen, Chem. Commun. 2018, 54, 10958-10961. 
+[14] J. Ying, J.-F. Cai, D. Guo, G. Tang, Z. Chen, X. Qu, IEEE Trans. Signal 
+Proces. 2018, 66, 5520-5533. 
+[15] a) J. Gillard, Stat. Interface 2010, 3, 335-343; b) N. Halko, P. G. 
+Martinsson, J. A. Tropp, SIAM Review 2011, 53, 217-288; c) L. Condat, 
+A. Hirabayashi, Sampl. Theory Signal Image Proces. 2015, 14, 17-47; 
+d) Y. Yang, J. Rao, IEEE Access 2019, 7, 77607-77617. 
+[16] J.-F. Cai, E. J. Candès, Z. Shen, SIAM J. Optimiz. 2008, 20, 1956-1982. 
+[17] S. Boyd, N. Parikh, E. Chu, B. Peleato, J. Eckstein, Foundations & 
+Trends® in Machine Learning 2011, 3, 1-122. 
+[18] a) B. de Prony, J. de l’Ecole Polytechnique 1795, 1, 24-76; b) S. M. Kay, 
+S. L. Marple, P. IEEE 1981, 69, 1380-1419. 
+[19] A. Shchukina, P. Kasprzak, R. Dass, M. Nowakowski, K. Kazimierczuk, 
+J. Biomol. NMR 2016, 1-20. 
+[20] K. Kazimierczuk, V. Y. Orekhov, Angew. Chem. Int. Edit. 2011, 50, 5556-
+5559. 
+[21] Z. Song, P. Wu, P. Ji, J. Zhang, Q. Gong, J. Wu, Y. Shi, Biochemistry 
+2012, 51, 6667-6678. 
+[22] V. Y. Orekhov, I. V. Ibraghimov, M. Billeter, J. Biomol. NMR 2001, 20, 49. 
+[23] a) E. Acar, D. M. Dunlavy, T. G. Kolda, M. Mørup, Chemometr. Intell. 
+Lab. 2011, 106, 41-56; b) G. Tomasi, R. Bro, Chemometr. Intell. Lab. 
+2005, 75, 163-180. 
+[24] D. F. Hansen, J. Biomol. NMR 2019, 73, 577-585. 
+[25]   H. Barkhuijsen, R. De Beer, W. M. M. J. Bovee, J. H. N. Creyghton, D. 
+Van Ormondt, Magn. Reson. Med 1985, 2, 1, 86-89. 
+[26]   a) W. W. F. Pijnappel, A. Van den Boogaart, R. De Beer, D. Van 
+Ormondt, J. Magn. Reson 1992, 97, 1, 122-134; b) S. Cavassila, S. 
+Deval, C. Huegen, D. van Ormondt, D. Graveron-Demilly, NMR Biomed 
+2001, 14, 4, 278-283; c) H. Ratiney, M. Sdika, Y. Coenradie, S. 
+Cavassila, D. van Ormondt, D. Graveron-Demilly, NMR Biomed 2005, 
+18, 1, 1-13; d) H. Rabeson, F. Fauvelle, G. Testylier, A. Foquin, P. 
+Carpentier, F. Dorandeu, D. van Ormondt, D. Graveron-Demilly, Magn. 
+Reson. Med 2008, 59, 6, 1266-1273; e) D. Stefan, F. Di Cesare, A. 
+Andrasescu, E. Papa, A. Lazariev, E. Vescovo, O. Strbak, S. Williams, 
+Z. Starcuk, M. Cabanas, D. van Ormondt, D. Graveron-Demilly, Meas. 
+Sci. Technol 2009, 20, 10, 104035. 
+[27]   J.-F. Cai, E. J. Candès, Z. Shen, D. Li, R. Brüschweiler, SIAM J. Optimiz. 
+2008, 20, 1956-1982. 
+[28]   a) J.-F. Cai, X. Qu, W. Xu, G. B. Ye, Appl. Comput. Harmon. Anal. 2016, 
+41, 470-490; b) E. J. Candès, B. Recht, Found. Comput. Math. 2009, 9, 
+717; c) E. J. Candès, T. Tao, IEEE Trans. Inform. Theory. 2010, 56, 
+2053-2080; d) Y. Chen, Y. Chi, IEEE Trans. Inform. Theory. 2014, 60, 
+6576-6601. 
+[29]   Y. LeCun, Y. Bengio, G. Hinton, Nature 2015, 521, 436–444. 
+[30]   D. Chen, Z. Wang, D. Guo, V. Orekhov, X. Qu, Chem. Eur. J. 2020, 
+DOI:10.1002/chem.202000246. 
+[31]   H. M. Nguyen, X. Peng, M. N. Do, Z. Liang, IEEE Trans. Biomed. Eng. 
+2013, 60, 78-89. 

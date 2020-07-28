@@ -1,0 +1,723 @@
+i
+i
+“main” — 2020/7/22 — 1:11 — page 1 — #1 i
+i
+i
+i
+i
+i
+Bioinformatics
+doi.10.1093/bioinformatics/xxxxxx
+Advance Access Publication Date: Day Month Year
+Manuscript Category
+Sequence Analysis
+i6mA-CNN: a convolution based computational
+approach towards identification of DNA
+N 6-methyladenine sites in rice genome
+Ruhul Amin 1,, Chowdhury Rafeed Rahman 1∗, Swakkhar Shatabda 1∗ and Md.
+Sadrul Islam Toaha 1,
+1Department of Computer Science and Engineering, United International University, Dhaka, 1207, Bangladesh
+∗Swakkhar Shatabda
+Associate Editor: XXXXXXX
+Received on XXXXX; revised on XXXXX; accepted on XXXXX
+Abstract
+Motivation: DNA N6-methylation (6mA) in Adenine nucleotide is a post replication modification and is
+responsible for many biological functions. Experimental methods for genome wide 6mA site detection is
+an expensive and manual labour intensive process. Automated and accurate computational methods can
+help to identify 6mA sites in long genomes saving significant time and money.
+Results: Our study develops a convolutional neural network based tool i6mA-CNN capable of identifying
+6mA sites in the rice genome. Our model coordinates among multiple types of features such as PseAAC
+inspired customized feature vector, multiple one hot representations and dinucleotide physicochemical
+properties. It achieves area under the receiver operating characteristic curve of 0.98 with an overall
+accuracy of 0.94 using 5 fold cross validation on benchmark dataset. Finally, we evaluate our model on
+two other plant genome 6mA site identification datasets besides rice. Results suggest that our proposed
+tool is able to generalize its ability of 6mA site identification on plant genomes irrespective of plant species.
+Availability: Web tool for this research can be found at: https://cutt.ly/Co6KuWG. Contact:
+rafeed@cse.uiu.ac.bd
+Supplementary information: Supplementary data (benchmark dataset, independent test dataset,
+comparison purpose dataset, trained model, physicochemical property values, attention mechanism
+details for motif finding) are available at https://cutt.ly/PpDdeDH .
+1 Introduction
+N4-methylcytosine, N6-methyladenine and 5-methylcytosine exist in
+DNA of different species (Feng et al. (2019a)). DNA N6-methylation is a
+part of epigenetics where methyl groups are transferred to DNA molecules
+(von Meyenn et al. (2016)). It is one kind of post replication modification.
+Such modification has been identified in three kingdoms of life such as
+Bacteria, Archaea, and Eukaryotes (O’Brown and Greer (2016)). N6-
+methylation occurs when methyl group is transferred to the 6th position
+of purine ring of Adenine nucleotide. Such modification is responsible
+for discrimination between original DNA strand and newly synthesized
+DNA strand, gene transcription regulation, replication and repair (Wion
+and Casadesús (2006)).
+Laboratory based experimental methods such as sequencing
+(SMRT-seq, MeDIP-seq) (Flusberg et al. (2010)), methylated DNA
+Immunoprecipitation (Pomraning et al. (2009)), capillary electrophoresis
+and laser-induced fluorescence (Krais et al. (2010)) have been proposed
+to identify N6-methyladenine (6mA) sites in the genome. 6mA profile
+of rice has been obtained recently using mass spectrometry analysis and
+6mA Immunoprecipitation followed by sequencing (IP-seq) (Zhou et al.
+(2018a)). Genome wide identification of 6mA sites is labor intensive and
+costly using such experimental methods. Computational experiment based
+pLogo plot (O’shea et al. (2013)) on benchmark dataset regarding rice
+6mA site identification shows nucleotide distribution to be different near
+6mA and non-6mA sites (Hao et al. (2019)). So, accurate computational
+methods can be effective for automatic 6mA site identification in rice
+genome.
+© The Author 2020. 1
+ar
+X
+iv
+:2
+00
+7.
+10
+45
+8v
+1 
+ [
+q-
+bi
+o.
+G
+N
+] 
+ 2
+0 
+Ju
+l 
+20
+20
+https://cutt.ly/Co6KuWG
+name@bio.com
+https://cutt.ly/PpDdeDH
+i
+i
+“main” — 2020/7/22 — 1:11 — page 2 — #2 i
+i
+i
+i
+i
+i
+2 R.Amin et al.
+Feng et al. (2019b) established iDNA6mA-PseKNC tool for N6-
+methyladenine site identification on Mus musculus genome dataset
+containing 1934 samples in each class. They used custom feature vector
+for each sample inspired by PseAAC (Shen and Chou (2008)). They used
+LibSVM package 3.18 for their classification task. This same package was
+used in i6mA-Pred tool for the same task in rice genome dataset containing
+880 samples in each class using similar feature vector by Chen et al.
+(2019). They used Maximum Relevance Maximum Distance (MRMD)
+method (Chen et al. (2018)) along with Incremental Feature Selection
+(IFS) for limiting feature space. This same dataset was used to train and
+build iDNA6mA tool which utilized one hot matrix as sample feature by
+Tahir et al. (2019). They used sequential one dimensional convolutional
+neural network architecture for classification. Kong and Zhang (2019) used
+the same benchmark rice genome dataset to build i6mA-DNCP tool. They
+used di-nucleotide composition frequency and dinucleotide based DNA
+properties as sample features. TreeBagging algorithm was used as their
+classifier. They implemented heuristic based DNA property selection for
+selecting four dinucleotide based DNA properties for their classification.
+Hao et al. (2019) developed iDNA6mA-Rice tool using a rice genome
+dataset containing 1,54,000 samples in each of the two classes. They used
+one hot vector based linear feature space with Random Forest algorithm.
+The main limitation of these methods is that they require single feature
+vector for training and validation purpose irrespective of the heterogeneity
+of the features they are using. Moreover, these proposed algorithms are
+unable to use two dimensional matrix oriented features which limits local
+and sequential pattern detection capability.
+We propose i6mA-CNN, a one dimensional CNN based branched
+classifier which can identify 6mA sites in plant genome. We work with four
+different types of feature matrices used for DNA sequence representation
+- PseAAC inspired customized feature matrix, monomer one hot matrix,
+dimer one hot matrix and dimer physicochemical properties. We use
+correlation based dimer physicochemical property selection technique in
+order to remove unnecessary and/ or redundant property features. Our
+proposed model is able to coordinate between these heterogeneous feature
+matrices and learn distinguishing features between 6mA and non-6mA
+sites successfully. Accurate experimental results on a large benchmark
+dataset and success on independent test datasets show the effectiveness of
+our proposed tool.
+2 Materials and Methods
+2.1 Benchmark Dataset Construction
+Gene Expression Omnibus (GEO) database maintained by National Center
+for Biotechnology Information (NCBI) (Long et al. (2018)) has a total of
+2,65,290 6mA site containing sequences each of 41 base pair (bp) length
+with 6mA site at the center. CD-HIT program (Li and Godzik (2006))
+with 80% (following similar research conducted by Hao et al. (2019))
+similarity threshold has been implemented on these sequences in order
+to avoid redundancy bias which resulted in 1,54,000 mA site containing
+sequences. This is our positive set of samples. Same number of negative
+samples (no 6mA site) have been obtained from NCBI to formulate a class
+balanced dataset following some specific criteria. Each 41 bp long negative
+sequence has Adenine at the center, where the center is not methylated
+(proven by experiment). 6mA sites have a tendency of occurring near
+GAGG rich sequences (Zhou et al. (2018b)). In order to avoid such bias
+while classification, negative sequences rich with GAGG motifs were
+considered only to make negative data more objective.
+2.2 Sequence Representation
+A sample sequence of our dataset looks as follows:
+D = N1, N2, N3, · · · , NL
+where, L is the length of the DNA sequence, which is 41 in our case
+and Ni ∈ {A, T,C,G}. With appropriate mathematical representation
+of these sequences, deep learning models can learn class distinguishing
+features from the sequence local and global patterns (Umarov and Solovyev
+(2017)). It is clear from Figure 1 that our model is capable of coordinating
+between multiple types of feature vectors and matrices using branch like
+structure which has been explained in detail in Subsection 2.3. We use the
+following sequence representation features in our model:
+2.2.1 PseAAC Inspired Feature Representation
+PseAAC (Pseudo Amino Acid Composition) has shown success in dealing
+with protein sequences (Zhong and Zhou (2014); Zhou and Zhong
+(2016)). Inspired by such success, PseKNC (Pseudo K-tuple Nucleotide
+Composition) has been introduced for dealing with DNA/RNA sequences
+in computational biology (Chen et al. (2014, 2015)). The general form of
+PseKNC has been designed in such a way that their values will depend on
+user specified feature extraction techniques from DNA samples.
+The four types of nucleotides of DNA can be classified into three categories
+of attributes. These attributes along with representation code have been
+provided in Table 1. The categories are as follows:
+Ring number: A and G have two rings, whereas C and T have only one
+ring.
+Chemical functionality: A and C are from amino group, whereas G and
+T are from keto group.
+Hydrogen bonding: C and G are bonded to each other with 3 hydrogen
+bonds (strong), whereas A and T with only two (weak).
+The above mentioned properties have significant impact on biological
+functions as well (Chou (1988)). The ith nucleotide Ni of a sequence
+can be represented by (xi, yi, zi), where xi, yi and zi represent ring
+structure, functional group and hydrogen bonding code (see Table 1) of
+nucleotide Ni, respectively. Besides these three properties, we consider
+lingering density of each nucleotide to preserve sequence oriented features.
+Lingering density of nucleotide Ni is defined below:
+Di =
+1
+Li
+∑Li
+j=1 f(Nj)
+Here, Li is the length of the substring up to nucleotide Ni and
+f(Nj) =
+{
+1, if Ni = Nj
+0, otherwise
+So, for each nucleotide, we have four properties to calculate. Since
+each sequence in our dataset is 41 bp long, we have a 41 ×
+4 dimensional feature matrix for each sequence. We illustrate this
+four property representation scheme on a toy example sequence
+Table 1: Nucleotide categorical attribute-wise encoding
+Category Attribute Nucleotides Code
+Ring
+Structure
+Purine A, G 1
+Pyrimidine C, T 0
+Functional
+Group
+Amino A, C 1
+Keto G, T 0
+Hydrogen
+Bonding
+Strong C, G 1
+Weak A, T 0
+i
+i
+“main” — 2020/7/22 — 1:11 — page 3 — #3 i
+i
+i
+i
+i
+i
+i6mA-CNN 3
+"ACGGA" in Table 2. The resultant matrix representation is:
+[[1, 1, 0, 1], [0, 1, 1, 0.5], [1, 0, 1, 0.33], [1, 0, 1, 0.5], [1, 1, 0, 0.4]]
+2.2.2 Monomer One Hot Representation
+Tahir et al. (2019) developed tool iDNA6mA based on monomer one hot
+encoding. Their one dimensional convolutional neural network (1D CNN)
+was quite successful in class discrimination based on one hot encoding
+based mathematical representation. Each branch of our designed model is
+also 1D CNN oriented. So, we have used this particular feature. There are
+four types of nucleotides in DNA sequence and each of them is represented
+by a four size one hot vector. A, T, C and G are represented by (1,0,0,0),
+(0,1,0,0), (0,0,1,0) and (0,0,0,1), respectively. So, a 41 bp long sequence
+is represented by a 41× 4 dimensional matrix.
+2.2.3 (c) Dimer one hot representation
+There is statistically significant difference (considering p-value of 0.05)
+between 6mA and non-6mA site containing samples in terms of
+dinucleotide composition frequencies (Kong and Zhang (2019)). There are
+sixteen possible unique dimers such as AA, AT, AC, …in DNA sequences.
+We represent each dimer by a 16 size one hot vector. 1D CNN based
+feature extraction technique is able to learn from class distinguishing dimer
+patterns which include difference in frequency. In a 41 length sequence,
+there are 40 overlapping dimers such as N1N2, N2N3, N3N4, …. So,
+each sample of our dataset is represented by a 40×16 dimensional matrix.
+2.2.4 Dimer Physicochemical Property Based Representation
+According to Cheng et al. (1985), Adenine methylation may have impact
+on DNA structure and its stability. We have used the 90 dinucleotide
+physicochemical properties used by PseKNC tool (Chen et al. (2014)).
+So, each dimer of our sample sequence is represented by a 90 size Z-
+score normalized vector. As a result, each 41 bp long sample has been
+represented by a 40× 90 dimensional matrix.
+This is certainly a large matrix. If the dinucleotide physicochemical
+property set contains features which include redundant or less important
+information in terms of our classification task, it will lead to overfitting
+problem (Hawkins (2004)). The steps of dinucleotide physicochemical
+property (DPP) selection are as follows:
+• We use Logistic regression based model for 6mA site identification
+task using one DPP at a time.
+• We note the 5 fold cross validation Mathew’s correlation coefficient
+(MCC) score for each DPP and select the the top 20 DPPs according
+to obtained MCC score. The higher the MCC, the better is the DPP
+for our identification task. It is to note that MCC score is better than
+F1 score and accuracy for binary classification evaluation (Chicco and
+Jurman (2020)).
+• We select the topmost DPP. Now we want to remove redundant
+information. Each DPP is represented by a 16 size vector as there
+are 16 possible dimers. DPPs which have a high positive or negative
+correlation coefficient represent the same type of information. We
+Table 2: Four property representation scheme detail of "ACGGA" sequence
+Pos Nuc X Y Z D
+1 A 1 1 0 1/1 = 1
+2 C 0 1 1 1/2 = 0.5
+3 G 1 0 1 1/3 = 0.33
+4 G 1 0 1 2/4 = 0.5
+5 A 1 1 0 2/5 = 0.4
+Input shape
+(41, 4)
+Input shape
+(40, 16)
+Input shape
+(40, 9)
+Input shape
+(41, 4)
+Mono-Mer
+One Hot
+Di-Mer
+One Hot
+Di-nucleotide 
+Property
+PseAAC Inspired 
+Features
+Filters = 128
+Kernel = 5
+Filters = 128
+Kernel = 5
+Filters = 128
+Kernel = 5
+Filters = 128
+Kernel = 5
+1D
+Convolution
+Filters = 64
+Kernel = 3
+Filters = 64
+Kernel = 3
+Filters = 128
+Kernel = 3
+Filters = 64
+Kernel = 3
+1D
+Convolution
+Filters = 32
+Kernel = 3
+Filters = 32
+Kernel = 3
+Filters = 64
+Kernel = 3
+Filters = 32
+Kernel = 3
+1D
+Convolution
+Concatenate
+RD = Relu + Dropout (0.5)
+RD RD RD RD
+RD RD RD RD
+Node = 1
+Flatten Flatten Flatten Flatten
+Node = 1 Node = 1 Node = 1 Node = 1 Dense Layer
+RD RD RD RD
+S = Sigmoid
+Dense Layer
+Output
+S
+S
+S S
+S
+Fig. 1. Proposed Model Architecture
+calculate Pearson’s correlation coefficient for each of the 19 other
+selected DPPs with the topmost DPP.
+• We leave out those DPPs which have correlation score greater than 0.9
+(positive correlation) or less than -0.9 (negative correlation) with the
+topmost DPP.
+Thus we select nine DPPs out of 90 which include Roll rise, major Groove
+distance, twist stiffness, protein induced deformability, mobility to bend
+towards major groove, melting temperature, Hartman trans free energy,
+protein DNA twist and tip.
+2.3 Model Architecture
+Our model architecture has been shown in Figure 1. There are four branches
+for four different feature matrices (described in detail in Subsection
+Sequence Representation). Each branch has three 1D convolution layers
+put sequentially. The kernel size and filter number of each convolution
+layer have been shown in the figure. 1D CNN plays important role in
+position independent local feature extraction (Chen et al. (2017); Amin
+et al. (2019)). Each branch of the architecture learns class distinguishing
+features regarding its corresponding input feature matrix independent of
+the other three branches. The monomer one hot representation of the
+leftmost branch represents raw representation of sample sequence. Model
+parameters of this branch learn from this raw representation free from
+any feature specific knowledge bias. This branch has the potential of
+learning those class specific hidden features which may not be apparent
+to humans. The second branch which has dimer one hot representation
+as input helps the model learn statistically significant differences between
+6mA and non-6mA site containing samples in terms of dinucleotide pattern
+and frequency of occurrence. Such difference has been pointed out by
+Kong and Zhang (2019). The third branch uses dimer physicochemical
+property based representation. These properties played an important role
+i
+i
+“main” — 2020/7/22 — 1:11 — page 4 — #4 i
+i
+i
+i
+i
+i
+4 R.Amin et al.
+in DNA specific classification and identification tasks such as promoter
+classification (Amin et al. (2019)), 6mA site identification (Kong and
+Zhang (2019)), recombination spot identification (Zhang and Kong (2019))
+and DNase I hypersensitive sites identification (Zhang et al. (2019)). This
+third branch facilitates learning the interaction between these property
+values in a sequence order basis. The last branch is based on learning
+from ring structure, functional group, hydrogen bonding and lingering
+density based nucleotide features. These features have impact on DNA
+biological functions (Chou (1988); Chou and Mao (1988)). This last branch
+parameters learn to identify patterns from these sequence coupled features.
+We need to have a way to combine these branches for a mutual
+classification decision depending on the four heterogeneous feature
+matrices. The convolutional part of each branch i returns a matrix of
+dimension mi × ni. We flatten and convert this matrix into a linear
+vector. We pass this vector through a dense node having Sigmoid activation
+function, which outputs a value in the range of 0 to 1. This single value
+obtained from the ith branch is its representative for 6mA identification
+task. We have total four values in a range of 0 to 1 from the four branches,
+which we concatenate and turn into a four size vector. This four size vector
+is the representative vector of all four branches. The final dense layer with
+Sigmoid activation function provides the output value depending on the
+four values of the concatenated vector. If the output value is greater than
+0.5, then we consider the sample sequence to have 6mA site. Else, we
+decide that there is no 6 mA site in the input sequence.
+2.4 Performance Evaluation and Model Selection
+Accuracy (Acc), sensitivity (Sn), specificity (Sp) and Mathew’s correlation
+coefficient (MCC) have been used as evaluation metrics which are
+described as follows:
+Acc =
+TP + TN
+TP + TN + FP + FN
+Sn =
+TP
+TP + FN
+Sp =
+TN
+TN + FP
+MCC =
+TP × TN − FP × FN√
+(TP + FP )(TP + FN)(TN + FP )(TN + FN)
+Here, TP, FP, TN and FN represent true positive, false positive, true
+negative and false negative, respectively. We consider the 6mA site
+containing samples as positive class samples. Apart from the above four
+metrics, we have also used area under receiver operating characteristic
+(auROC) curve for performance evaluation. This metric provides classifier
+performance irrespective of provided threshold for class discrimination to
+the classifier. This score has an impact on classification confidence value
+for each sample as well. Acc, Sn, Sp and auROC lie in the range [0, 1]
+while for MCC score, the range is [-1, +1]. Higher value indicates better
+classification ability.
+We have tuned and selected our model hyperparameters using 5 fold
+cross validation on our benchmark dataset. We took a local search oriented
+approach where we went in uphill direction in terms of obtained MCC
+value. The tuned model hyperparameters are as follows:
+• Convolution layer: Change in number of convolution layers in each
+branch, convolution filter number and kernel size in each convolution
+layer
+• Learning rate: Experimentation with different learning rates such as
+0.01, 0.001, 0.0001, 0.00001 and adaptive learning rate scheme
+• Dropout rate: Testing out dropout rate of 0.1, 0.3 and 0.5.
+• Optimizer: Model training with adaptive moment estimation
+(ADAM), stochastic gradient descent (SGD) and Nesterov accelerated
+gradient (NAG) optimizer.
+• Activation function: Experimentation with Relu, Tanh and
+LeakyRelu activation function in initial convolution layers
+As shown in Figure 1, Each branch has three convolution layers.
+These three consecutive layers contain kernel size of 5, 3 and 3, whereas
+the number of filters are 128, 64 and 32, respectively. Learning rate
+of 0.0001 has been used in order to avoid divergence while training.
+Dropout of 0.5 has been used for overfitting avoidance. Addition of dropout
+changes network connectivity on each training epoch and thus helps model
+to understand the training sample features instead of memorizing them
+(Srivastava et al. (2014)). ADAM has been chosen as the optimizer for
+model weight update during training. Each intermediate convolution layer
+output goes through Relu activation function which is very popular for
+being effective and simple (Agarap (2018)).
+3 Results and Discussion
+i6mA-Pred (Chen et al. (2019)), iDNA6mA-Rice (Hao et al. (2019)),
+iDNA6mA (Tahir et al. (2019)) and i6mA-DNCP (Kong and Zhang (2019))
+are some of the state-of-art tools which can identify 6mA sites in rice
+genome. For comparison purpose of our proposed tool with these state-
+of-the-art tools, consistency in dataset usage and evaluation method are
+necessary.
+The benchmark dataset that we have used for this research has also
+been used for constructing the latest rice genome i6mA site identification
+tool iDNA6mA-Rice (Hao et al. (2019)). Tools for the same task have
+been developed by Chen et al. (2019); Tahir et al. (2019); Kong and
+Zhang (2019), though they used a different dataset for benchmarking
+which contains 880 samples in each of the two classes. They used either
+Jackknife testing or 10 fold cross validation for algorithm and model
+selection. For comparison purpose, we also test our custom model on
+the same 880 sample per class dataset using similar validation methods.
+This comparison purpose dataset has been obtained from NCBI GEO
+under accession number GSE103145. All sequences with 6mA site in
+the center and with modification score greater than 30 (according to
+Methylome Analysis Technical Note, 30 is the minimum score to call
+a nucleotide as modified) have been considered as positive samples. Each
+sample sequence is 41 bp long. CD-HIT (Li and Godzik (2006)) with 60%
+similarity threshold has been applied on the chosen positive sequences in
+order to remove redundancy. Thus the 880 positive samples were obtained.
+The 880 negative samples of this dataset have been obtained in a manner
+similar to our negative benchmark dataset samples. Detailed performance
+comparison between the tools used for 6mA site identification has been
+provided in Table 3. All the tool results except for our proposed tool i6mA-
+CNN have been obtained from corresponding research articles (Chen et al.
+(2019); Hao et al. (2019); Tahir et al. (2019); Kong and Zhang (2019)).
+Our proposed tool clearly outperforms all other tools for similar task by
+all five performance metrics. Tool i6mA-CNN achieves a high 5 fold cross
+validation auROC score of 0.98 on our benchmark dataset. ROC curve has
+been shown in Figure 2.
+Independent test set performance of a tool can help in proving the
+generalization ability of that tool. Following procedures similar to our
+benchmark dataset construction, we have constructed two independent test
+datasets in order to evaluate the robustness of our proposed tool in terms
+of N6-Methyladenine site identification in plant genome. Fragaria Vesca
+(Wild strawberry) and Arabidopsis thaliana (cress weed plant) 6mA site
+containing sequences have been obtained from the MDR database (Liu
+et al. (2019)) and from NCBI GEO with accession number GSE81597
+i
+i
+“main” — 2020/7/22 — 1:11 — page 5 — #5 i
+i
+i
+i
+i
+i
+i6mA-CNN 5
+Fig. 2. ROC curve of i6mA-CNN on benchmark dataset
+(Liang et al. (2018)), respectively. Performance of i6mA-CNN on these
+datasets have been shown in detail in Table 4. Results show the robustness
+of the proposed tool for 6mA site identification in plant genome.
+Our tool has also been tested on Mus musculus (house mouse) genome
+dataset. It was used for constructing iDNA6mA-PseKNC tool (Feng et al.
+(2019b)). The 6mA site containing positive samples were extracted from
+MethSMRT database (Ye et al. (2016)). Our tool achieved less than
+50% test accuracy on this particular dataset. This proves that 6mA site
+containing region pattern of plants are different from that of animals.
+Our model is a CNN based branched model with no time stamp oriented
+sequential information processing capability. There are reasons why we
+did not use recurrent layers which utilize time stamp information while
+working with sequence type data. First, it is not possible to provide
+multiple feature representations simultaneously in each time stamp input in
+recurrent neural networks. Second, each time stamp of such networks only
+accept linear vector representation which would limit our current ability
+of using matrices. Third, recurrent neural networks such as RNN, GRU or
+LSTM give importance to positional information (Yin et al. (2017)). But
+classification of genome related sample sequence often depends on the
+presence of potential motif type patterns irrespective of their position in
+the sequence (Zhou et al. (2018b)). Finally, training and validation using
+recurrent layer based networks are costly because of sequential type of
+computation. 1D CNN based model having multiple convolution layers
+have the capability of encoding and learning both short and long range
+patterns. Parallel processing is possible in such networks which allow
+fast computation. Our customized model architecture is able to work
+with multiple heterogeneous features simultaneously and is able to utilize
+the benefits of feature matrix representation. Because of such inherent
+characteristics, our proposed tool is fast, accurate and shows performance
+superior to the remaining state-of-the-art tools for 6mA site identification
+in rice genome and also generalizes well to other plant genomes for the
+same task.
+Table 5: Potential motifs for N6-Methyladenine site identification
+Motif Sequence Active Occurrence %
+ATAT 5.2
+AGGC 4.1
+AAAA 4.0
+AAAT 3.9
+GAGG 3.5
+We have found potential motifs which our deep learning based model
+actively searches for in order to perform 6mA site identification in rice
+genome. Motifs are class specific substrings found frequently in the sample
+sequences of that class. Following the procedure shown in the research by
+Amin et al. (2019), we have customized an attention model (details of this
+model have been provided as supplementary information) based on our
+proposed CNN model provided in Figure 1 with a view to identifying the
+potential motifs. A list of potential motifs found for 6mA site identification
+on our benchmark dataset have been provided in Table 5. The top motif that
+we have found is ATAT. It was found to be active 5.2% of the time during
+6mA site identification. The pLogo plot constructed by Hao et al. (2019)
+showed the significant difference of nucleotide distribution in postive and
+negative samples. This analysis has not been repeated in our current work.
+4 Conclusion
+Tool i6mA-CNN is the outcome of the current research aimed at 6mA site
+identification in rice genome. The combination of four different feature
+matrices and redundant feature reduction have facilitated our customized
+CNN based architecture to be robust and accurate. Experimental results on
+two rice genome datasets and two other independent plant genome datasets
+related to 6mA site identification show the effectiveness of our tool.
+Proposed i6mA-CNN is expected to be an effective tool for automation
+Table 3: i6mA-CNN performance comparison with state-of-the-art tools. Best performance results have been marked in bold. Dataset 1 is the 880 sample
+per class dataset used for comparison purpose, while Dataset 2 is our benchmark dataset with 1,54,000 samples in each class
+Dataset Evaluation Method Tool Sn Sp Acc MCC auROC
+Dataset 1
+Jackknife Testing
+i6mA-Pred 83.41% 83.64% 83.52% 0.67 0.91
+i6mA-CNN 90.61% 94.12% 93.15% 0.85 0.98
+10 Fold Cross Validation
+iDNA6mA 86.7% 86.59% 86.64% 0.73 0.93
+i6mA-DNCP 84.09% 88.07% 86.08% 0.72 0.93
+i6mA-CNN 89.55% 93.18% 91.36% 0.83 0.97
+Dataset 2 5 Fold Cross Validation
+iDNA6mA-Rice 93% 90.5% 91.7% 0.83 0.96
+i6mA-CNN 95.13% 92.81% 93.97% 0.88 0.98
+Table 4: i6mA-CNN performance on independent test datasets
+Independent Test
+Dataset
+Total
+Sample No.
+TP
+Sample No.
+FN
+Sample No.
+Success
+Rate
+Fragaria Vesca 8979 8642 337 96.25%
+Arabidopsis Thaliana 67650 63252 4398 93.5%
+i
+i
+“main” — 2020/7/22 — 1:11 — page 6 — #6 i
+i
+i
+i
+i
+i
+6 R.Amin et al.
+in epigenetics related research. Future research may aim at constructing
+a tool that can perform 6mA site identification in both plant and animal
+genome effectively.
+References
+Agarap, A. F. (2018). Deep learning using rectified linear units (relu).
+arXiv preprint arXiv:1803.08375.
+Amin, R. et al. (2019). ipromoter-bncnn: a novel branched cnn
+based predictor for identifying and classifying sigma promoters.
+Bioinformatics.
+Chen, T. et al. (2017). Improving sentiment analysis via sentence
+type classification using bilstm-crf and cnn. Expert Systems with
+Applications, 72, 221–230.
+Chen, W. et al. (2014). Pseknc: a flexible web server for generating pseudo
+k-tuple nucleotide composition. Analytical biochemistry, 456, 53–60.
+Chen, W. et al. (2015). Pseudo nucleotide composition or pseknc: an
+effective formulation for analyzing genomic sequences. Molecular
+BioSystems, 11(10), 2620–2634.
+Chen, W. et al. (2018). Classifying included and excluded exons in exon
+skipping event using histone modifications. Frontiers in genetics, 9, 433.
+Chen, W. et al. (2019). i6ma-pred: Identifying dna n6-methyladenine sites
+in the rice genome. Bioinformatics, 35(16), 2796–2800.
+Cheng, S. et al. (1985). Extent of equilibrium perturbation of the dna helix
+upon enzymatic methylation of adenine residues. Journal of Biological
+Chemistry, 260(1), 191–194.
+Chicco, D. and Jurman, G. (2020). The advantages of the matthews
+correlation coefficient (mcc) over f1 score and accuracy in binary
+classification evaluation. BMC genomics, 21(1), 6.
+Chou, K.-C. (1988). Low-frequency collective motion in
+biomacromolecules and its biological functions. Biophysical chemistry,
+30(1), 3–48.
+Chou, K.-C. and Mao, B. (1988). Collective motion in dna and its role in
+drug intercalation. Biopolymers: Original Research on Biomolecules,
+27(11), 1795–1815.
+Feng, P. et al. (2019a). idna6ma-pseknc: Identifying dna n6-
+methyladenosine sites by incorporating nucleotide physicochemical
+properties into pseknc. Genomics, 111(1), 96–102.
+Feng, P. et al. (2019b). idna6ma-pseknc: Identifying dna n6-
+methyladenosine sites by incorporating nucleotide physicochemical
+properties into pseknc. Genomics, 111(1), 96–102.
+Flusberg, B. A. et al. (2010). Direct detection of dna methylation during
+single-molecule, real-time sequencing. Nature methods, 7(6), 461.
+Hao, L. et al. (2019). idna6ma-rice: a computational tool for detecting
+n6-methyladenine sites in rice. Frontiers in genetics, 10, 793.
+Hawkins, D. M. (2004). The problem of overfitting. Journal of chemical
+information and computer sciences, 44(1), 1–12.
+Kong, L. and Zhang, L. (2019). i6ma-dncp: computational identification
+of dna n6-methyladenine sites in the rice genome using optimized
+dinucleotide-based features. Genes, 10(10), 828.
+Krais, A. M. et al. (2010). Genomic n6-methyladenine determination by
+mekc with lif. Electrophoresis, 31(21), 3548–3551.
+Li, W. and Godzik, A. (2006). Cd-hit: a fast program for clustering and
+comparing large sets of protein or nucleotide sequences. Bioinformatics,
+22(13), 1658–1659.
+Liang, Z. et al. (2018). Dna n6-adenine methylation in arabidopsis
+thaliana. Developmental cell, 45(3), 406–416.
+Liu, Z.-Y. et al. (2019). Mdr: an integrative dna n6-methyladenine and
+n4-methylcytosine modification database for rosaceae. Horticulture
+research, 6(1), 1–7.
+Long, C. et al. (2018). Transcriptome comparisons of multi-species
+identify differential genome activation of mammals embryogenesis. Ieee
+Access, 7, 7794–7802.
+O’shea, J. P. et al. (2013). plogo: a probabilistic approach to visualizing
+sequence motifs. Nature methods, 10(12), 1211–1212.
+O’Brown, Z. K. and Greer, E. L. (2016). N6-methyladenine: a conserved
+and dynamic dna mark. In DNA Methyltransferases-Role and Function,
+pages 213–246. Springer.
+Pomraning, K. R. et al. (2009). Genome-wide high throughput analysis
+of dna methylation in eukaryotes. Methods, 47(3), 142–150.
+Shen, H.-B. and Chou, K.-C. (2008). Pseaac: a flexible web server for
+generating various kinds of protein pseudo amino acid composition.
+Analytical biochemistry, 373(2), 386–388.
+Srivastava, N. et al. (2014). Dropout: a simple way to prevent neural
+networks from overfitting. The journal of machine learning research,
+15(1), 1929–1958.
+Tahir, M. et al. (2019). idna6ma (5-step rule): Identification of dna n6-
+methyladenine sites in the rice genome by intelligent computational
+model via chou’s 5-step rule. Chemometrics and Intelligent Laboratory
+Systems, 189, 96–101.
+Umarov, R. K. and Solovyev, V. V. (2017). Recognition of prokaryotic and
+eukaryotic promoters using convolutional deep learning neural networks.
+PloS one, 12(2), e0171410.
+von Meyenn, F. et al. (2016). Impairment of dna methylation maintenance
+is the main cause of global demethylation in naive embryonic stem cells.
+Molecular cell, 62(6), 848–861.
+Wion, D. and Casadesús, J. (2006). N 6-methyl-adenine: an epigenetic
+signal for dna–protein interactions. Nature Reviews Microbiology, 4(3),
+183–192.
+Ye, P. et al. (2016). Methsmrt: an integrative database for dna n6-
+methyladenine and n4-methylcytosine generated by single-molecular
+real-time sequencing. Nucleic acids research, page gkw950.
+Yin, W. et al. (2017). Comparative study of cnn and rnn for natural
+language processing. arXiv preprint arXiv:1702.01923.
+Zhang, L. and Kong, L. (2019). irspot-pdi: Identification of recombination
+spots by incorporating dinucleotide property diversity information into
+chou’s pseudo components. Genomics, 111(3), 457–464.
+Zhang, S. et al. (2019). pdhs-dset: Prediction of dnase i hypersensitive
+sites in plant genome using ds evidence theory. Analytical biochemistry,
+564, 54–63.
+Zhong, W.-Z. and Zhou, S.-F. (2014). Molecular science for drug
+development and biomedicine.
+Zhou, C. et al. (2018a). Identification and analysis of adenine n
+6-methylation sites in the rice genome. Nature plants, 4(8), 554–563.
+Zhou, C. et al. (2018b). Identification and analysis of adenine n
+6-methylation sites in the rice genome. Nature plants, 4(8), 554–563.
+Zhou, G.-P. and Zhong, W.-Z. (2016). Perspectives in medicinal chemistry.
+Current topics in medicinal chemistry, 16(4), 381.
+	1 Introduction
+	2  Materials and Methods
+	2.1 Benchmark Dataset Construction
+	2.2 Sequence Representation
+	2.2.1 PseAAC Inspired Feature Representation
+	2.2.2 Monomer One Hot Representation
+	2.2.3 (c) Dimer one hot representation
+	2.2.4 Dimer Physicochemical Property Based Representation
+	2.3 Model Architecture
+	2.4 Performance Evaluation and Model Selection
+	3 Results and Discussion
+	4 Conclusion

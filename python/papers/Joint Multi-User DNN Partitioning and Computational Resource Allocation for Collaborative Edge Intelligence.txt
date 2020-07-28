@@ -1,0 +1,1494 @@
+1
+Joint Multi-User DNN Partitioning and
+Computational Resource Allocation for
+Collaborative Edge Intelligence
+Xin Tang, Xu Chen, Liekang Zeng, Shuai Yu, and Lin Chen
+School of Data and Computer Science, Sun Yat-sen University, Guangzhou, China
+Abstract—Mobile Edge Computing (MEC) has emerged as
+a promising supporting architecture providing a variety of
+resources to the network edge, thus acting as an enabler for edge
+intelligence services empowering massive mobile and Internet
+of Things (IoT) devices with AI capability. With the assistance
+of edge servers, user equipments (UEs) are able to run deep
+neural network (DNN) based AI applications, which are generally
+resource-hungry and compute-intensive, such that an individual
+UE can hardly afford by itself in real time. However the
+resources in each individual edge server are typically limited.
+Therefore, any resource optimization involving edge servers is
+by nature a resource-constrained optimization problem and
+needs to be tackled in such realistic context. Motivated by
+this observation, we investigate the optimization problem of
+DNN partitioning (an emerging DNN offloading scheme) in a
+realistic multi-user resource-constrained condition that rarely
+considered in previous works. Despite the extremely large solution
+space, we reveal several properties of this specific optimization
+problem of joint multi-UE DNN partitioning and computational
+resource allocation. We propose an algorithm called Iterative
+Alternating Optimization (IAO) that can achieve the optimal
+solution in polynomial time. In addition, we present rigorous
+theoretic analysis of our algorithm in terms of time complexity
+and performance under realistic estimation error. Moreover, we
+build a prototype that implements our framework and conduct
+extensive experiments using realistic DNN models, whose results
+demonstrate its effectiveness and efficiency.
+Index Terms—Mobile edge computing, DNN partitioning,
+Computation offloading, Computational resource allocation.
+I. INTRODUCTION
+DRIVEN by the breakthroughs in deep learning, recentyears have witnessed a booming of artificial intelligence
+(AI) applications and services, ranging from face recogni-
+tion [1], video analytics [2] to natural language processing [3].
+In the meantime, with the proliferation of mobile Internet and
+Internet of Things (IoT), a large number of mobile and IoT
+devices are deployed at the network edge and generate a huge
+amount of data [4], [5]. To fully unleash the potential of these
+mobile and IoT big data, there is an urgent need to push the AI
+capability to the network edge for real-time data processing.
+In this context, edge AI or edge intelligence is emerging as a
+promising paradigm to fulfill such demand [6].
+Due to its great potential, edge intelligence is starting to
+attract extensive research attention [7], [8], [9]. By providing
+a variety of resources to user equipments (UEs) in close
+proximity [4], [10], edge servers are able to assist UEs in
+running resource-hungry applications. However, running one
+of the most fundamental AI tools in real time at the network
+edge, deep neural network (DNN), is still a challenging task.
+There are mainly two kinds of approaches to deploy a DNN
+model on mobile and IoT devices:
+1) Leveraging model compression mechanism to reduce
+the model trading accuracy for less computation, such as
+model pruning [11], [12], [13], [14] and weights/activations
+quantization [15], [16], [17], [18]. Generally, the accuracy of
+a compressed model is not geranteed theoretically. Besides,
+model compression methods are model-specific that highly
+depending on the architecture of DNN [19].
+2) Deploying DNN models in a distributed manner by
+offloading part or entire computation tasks onto other devices
+to reduce the local workload [20], [21], [22], [23], [24]. It’s
+worth noting that model compression tricks can be jointly
+applied together with offloading mechanisms (e.g. [7], [19]).
+As a matter of fact, traditional computation offloading
+schemes of edge computing can hardly deal with DNN-
+related tasks in real time due to its large data volume and
+high computation overhead. To address the above challenge,
+DNN partitioning [7], [20], [21] is proposed, which, instead
+of offloading the entire task onto an edge server, handles a
+neural network model as a sequential connection of several
+independent layers and executes them separately on multiple
+devices. By carefully configuring layers, DNN partitioning can
+limit the communication between the UEs and their serving
+servers, thus reducing the corresponding latency.
+Frameworks like Edgent [7] and Neurosurgeon [20] choose
+to use a binary DNN partitioning scheme. Eshratifar et al.
+goes one step further such that the execution of each layer
+can be independently decided to be placed at either the local
+device or cloud [21]. The propositions in [22], [24], [25]
+apply general offloading mechanisms for tasks with specific
+structural dependency like DNN Models. However, all of these
+works focus on the single-user case.
+When it comes to the more general multi-user case, com-
+putation offloading needs to be handled jointly with resource
+allocation among users. In this regard, there exists a handful
+of propositions (cf. [26], [27], [28], [29], [30]) on the multi-
+user computation offloading and resource allocation for gen-
+eral tasks. However, most of them only consider offloading
+the entire task to edge or cloud servers, or optimizing an
+offloading ratio of several tasks. As for the multi-user multi-
+level offloading, Du et al. discusses joint resource management
+for multiple devices, but only a fixed number of offloading
+ar
+X
+iv
+:2
+00
+7.
+09
+07
+2v
+1 
+ [
+cs
+.D
+C
+] 
+ 1
+5 
+Ju
+l 
+20
+20
+2
+decisions can be supported such that the whole task can be
+either offloaded to an edge or cloud server [31]. [32] adopts the
+idea of DNN filter pruning for dynamic model resizing in order
+to reduce the total computation offloading cost. However, since
+filter pruning would damage the inference accuracy, a good
+balance between cost reduction and accuracy loss is difficult
+to derive.
+To the best of our knowledge, none of the previous work
+has considered a joint multi-user DNN partitioning based
+multi-level offloading and the related computational resource
+allocation problem, which is the focus of our work.
+Motivated by the above observation, we embark in this
+paper on the study of joint multi-UE DNN partitioning and
+the related edge computational resource allocation. Our long-
+term vision is to build an intelligent edge that can satisfy vast
+demands on DNN-based edge AI applications from heteroge-
+neous UEs. More specifically, multiple UEs cooperate with a
+resource-constrained edge server, where each UE can make a
+DNN partitioning decision on its own DNN model and the
+edge server efficiently allocates its computational resources to
+different UEs to accelerate the execution of their offloaded
+DNN layers at the edge server. For many edge intelligence
+applications such as smart manufacturing, intelligent trans-
+portation and unmanned aerial vehicles, boosting the real-time
+performance is a key primary metric to pursuit particularly
+when there are multiple devices that run concurrent DNN
+tasks and compete for the limited computing resources on
+the edge server. Thus, in this study we aim to minimize the
+maximum DNN execution latency among all the devices, in
+order to reduce the global latency and enhance the system-
+wide real-time performance. We develop a resource allocation
+framework minimizing the maximum latency of the DNN
+executions among the UEs.
+The main contributions of our work are articulated as
+follows.
+Problem formulation and framework. We investigate the
+multi-user edge intelligence application scenario and develop
+a framework of joint DNN partitioning and computational
+resource allocation. We advocate using data-driven correction
+function for more accurate multi-core computing capability
+modeling, based on which we formulate a max-min optimiza-
+tion problem.
+Algorithm design and analysis. We analyze the struc-
+tural properties of the multi-user joint DNN partitioning and
+computational resource allocation problem, based on which
+we further develop an algorithm called Iterative Alternating
+Optimization (IAO) that can achieve the optimal solution in
+polynomial time. We present rigorous theoretic analysis of our
+algorithm in terms of time complexity and performance bound
+under realistic estimation error.
+Prototyping and experiment. We build a prototype that
+implements our algorithm. We implement several popular
+DNN models with heterogeneous UEs including Raspberry Pis
+and NVIDIA Jetson Nanos. We conduct extensive experiments
+whose results demonstrate the effectiveness and efficiency of
+our approaches over existing benchmarks.
+The rest of this paper is organized as follows. In Section II,
+we introduce the basic concepts of DNN partitioning and for-
+Local Computing
+User Equipments
+Edge Server
+Fig. 1: Illustration of DNN Partitioning: different UEs can
+choose different partition patterns for DNN task offloading.
+mulate this problem as an optimization problem. In Section III,
+we propose an iterative alternating optimization algorithm to
+efficiently solve this problem. Besides, detailed analysis and
+proofs are given in this section. In Section IV, we evaluate the
+performance of our framework on a realistic prototype with
+extensive experiments. Additionally, we analyze the efficiency
+of our algorithms against the increase of the problem size.
+Finally, we draw conclusions in Section V.
+II. SYSTEM MODEL AND PROBLEM FORMULATION
+We consider that a set N of UEs executing their DNN
+inference tasks with the assistance of a resource-constrained
+edge server in proximity. As shown in Fig. 1, each UE
+is equipped with a pre-trained DNN model. To accelerate
+the execution process of a DNN inference task, each UE
+is able to make a layer-level offloading decision using a
+mechanism called DNN Partitioning (will be discussed in
+the next subsection). A replicate of virtual server, which can
+be a container or virtual machine hosted in the edge server,
+equipped with a fixed amount of computational resources, can
+assist its associated UEs by allocating computational resources
+of the edge server and executed concurrently the offloaded
+tasks. Tab. I lists the main notations used in this paper.
+Note that as an initial thrust towards efficient algorithm
+design for multi-user edge intelligence, in this paper we focus
+on the computational resource allocation of the edge server,
+which would be the key bottleneck resource for supporting
+computationally-intensive DNN tasks by multiple users. The
+joint allocation of multi-dimensional resources consisting of
+computing, communication and energy would be much more
+challenging due to the combinatorial nature of the resource
+allocation decision spaces. Nevertheless, in practice to avoid
+heavy overhead due to frequent system configurations, the
+allocation of other resources such as bandwidth and energy
+is typically carried out at a slower time-scale than that of
+computational resource allocation, and hence the proposed
+algorithms in this paper can also be useful for an integrated
+system resource allocation framework design in the future
+work.
+A. DNN Partitioning
+Generally, most modern DNN models are constructed by
+several basic elements called “layers”. The identity of a “layer”
+3
+TABLE I: Main notations
+N UE set, n = |N |
+si DNN partitioning and offloading decision variable of UE i
+ki number of logical layers of DNN inference task at UE i
+CD
+i
+computational capability of UE i
+Cmin Minimum Computational Resource Unit (MCRU)
+β total number of MCRU on the edge server
+fi number of assigned MCRU for each UE i
+Bul
+i
+upload bandwidth of UE i
+Bdl
+i
+download bandwidth of UE i
+Xi,si amount of computation before separation point si at UE i
+Yi,si amount of computation after separation point si at UE i
+Mi,si intermediate output after separation point si at UE i
+p decremental factor for IAO-DS
+Fig. 2: Abstraction of residual block consisting of multiple
+layers as a logical layer.
+represents a combination of computations with similar effort
+toward a set of input (e.g., the convolution layer in CNN).
+In this paper, we consider layers as the atomic elements
+of a DNN model. To deal with different DNN architectures,
+we first abstract them as sequential computational graphs by
+considering parallel layers or layers with shortcut connections
+as a composite entity called logical layer (e.g., a residual
+block, as shown in Fig. 2). Thus, a DNN model is treated as
+a sequential connection of several logical layers. To partition
+the computation of a DNN model, we divide the logical layers
+into two categories, those executed locally, and those executed
+on the edge server. Only intermediate outputs are transferred
+from a UE to its edge server1.
+Specifically, the DNN model of each UE i is composed of
+ki logical layers. An offloading decision at UE i can thus be
+modeled with an integer variable si ∈ {0, 1, 2, ..., ki}, indicating
+that the layers 0 to si are executed locally while the rest of
+layers are offloaded to the edge server. The two degenerated
+cases si = ki and si = 0 correspond to the cases where the
+entire computation task is run locally at the UE and offloaded
+to the edge server, respectively.
+B. DNN Execution Latency Model
+Once the DNN partitioning decision is made, the execution
+time for a UE is composed of four parts, which are described
+as follows.
+1Model compressions and parameter pruning are also widely used to reduce
+the size of edge AI applications, and DNN partitioning can be applied based
+on the compressed or pruned edge AI models as well.
+Fig. 3: The theoretical and real execution time of multiple
+cores using a VGG19 inference task and Intelr Xeonr W-
+2145 CPU. The result illustrates the non-linearity in multicore
+concurrent efficiency.
+1) Execution Time on UE: Let Xi,si denote the amount of
+the local computation of DNN model before separation point
+si of UE i; let CDi denote the computational capability of UE
+i. The local execution time is given by:
+tlocal =
+Xi,si
+CD
+i
+.
+2) Intermediate Output Transmission Time: Let Mi,si de-
+note the data size of intermediate output to be transferred after
+DNN partitioning; let Bul
+i
+denote the upload bandwidth of UE
+i. The transmission time of intermediate output to the offloaded
+edge server is given by:
+tupload = θ(ki − si)
+Mi,si
+Bul
+i
+,
+where θ(x) is the unit step function defined as follows:
+θ(x) =
+{
+1 x > 0,
+0 x ≤ 0.
+When si ≤ ki , the inference is executed locally without any
+communication between UE and the edge server, i.e., tupload =
+0.
+3) Execution Time on Edge Server: It is generally assumed
+in the literature that the task execution speeds scales linearly
+w.r.t. the amount of allocated computation resource. Hence,
+the execution time is inversely proportional to the amount of
+allocated computational resource.
+However, this generic assumption is no longer valid for the
+DNN inference tasks, particularly with multi-core CPUs. To
+verify this, we carry out experiments by executing a standard
+DNN inference task on docker containers [33], which are
+widely applied in server virtualization, with different numbers
+of CPU cores. As shown in Fig. 3, there is up to 44% error
+in execution time between theory and experiment (when there
+are 7.2 cores).
+In our model, we apply a data-driven approach to mitigate
+the above gap in the case of multi-core CPUs. Our approach is
+based on the practical model with discrete computational re-
+sources. Let Cmin denote the minimum computational resource
+4
+Fig. 4: Performance of Latency Model investigated by a
+MobilenetV2 instance
+unit (MCRU). Let β denote the total number of MCRU. Let
+fi denote the number of MCRU allocated to UE i. Note that∑
+i∈N fi ≤ β.
+To model the non-linearity in the execution time, we express
+the execution time on edge as
+tedge = θ(ki − si)
+Yi,si
+γ( fi)Cmin
+,
+where Yi,si denotes the amount of computation offloaded
+by UE i to the edge after separation point si , γ( f ) is a
+compensation function we introduce to fit the execution time
+in the multi-core CPU case2. Note that in the single-core
+case, γ( f ) is degenerated to f . In practice, we can conduct
+data-driven fitting to obtain γ( f ). A common practice is to
+gather a large samples of runtime profiles of the edge server
+and then carry out nonlinear regression-based (e.g., regression
+trees [34]) estimation for γ( f ). In the following algorithm
+design and analysis, we only assume that the compensation
+function γ( f ) (equivalently, the effective computing capability
+γ( f )Cmin) increases with the computational resource f .
+4) Final Result Transmission Time: Similar to the transmis-
+sion time of intermediate output, we can derive the transmis-
+sion time of the final results as
+tdownload = θ(ki − si)
+Mi,ki
+Bdl
+i
+,
+where Mi,ki denotes the size of the final results of offloaded
+DNN, Bdl
+i
+denotes the down-link bandwidth.
+By combining the above analysis, we can derive the overall
+latency of each UE i as follows:
+2For the ease of implementation, we focus on the multi-core CPU case in
+this study. Nevertheless, similar method can be also applied in the GPU case.
+Ti(si, fi) =
+Xi,si
+CD
+i︸︷︷︸
+Local
++
+θ(ki − si)
+
+Mi,si
+Bul
+i︸︷︷︸
+Upload
++
+Yi,si
+γ( fi)Cmin︸      ︷︷      ︸
+on Edge
++
+Mi,ki
+Bdl
+i︸︷︷︸
+Download
+
+. (1)
+We conclude this subsection by checking our model on the
+DNN execution latency in real-world environment. Our exper-
+iment results, shown in Fig. 4, demonstrate that: 1) the average
+relative error between the latency estimated by our model
+and the actual latency (i.e. |Testimated − Tactual |/Tactual) is
+2.121%; 2) 92.5% of estimation samples have an error less
+than 5%3.
+C. Problem Formulation
+To fulfill the demand of the real-time capability, we aim
+to optimize the worst-case latency of all UEs in a min-
+max fashion. Therefore the global utitlity function we aim
+to minimize is defined as:
+U(S, F) , max
+i∈N
+Ti(si, fi),
+where S is the vector of partitioning decisions, i.e. S ,
+(s1, s2, · · · , sn), F denotes the vector of computational re-
+sources allcation, i.e. F , ( f1, f2, · · · , fn), the execution
+latency Ti(si, fi) is given by (1).
+And our problem can be formulated as follows:
+P : min U(S, F)∑
+i∈N
+fi = β, (2)
+(1 − fi)ki ≤ si ≤ ki ∀i ∈ N, (3)
+fi, si ∈ N ∀i ∈ N, (4)
+where (2) is the constraint on the total number of computa-
+tional resources on the edge server, (4) indicates that fi and si
+are non-negative integers, (3) establishes the constraint on si
+such that (i) si is no more than ki , (ii) if the edge server does
+not assign resource to UE i (i.e., fi = 0), si = ki , meaning
+that the entire computation task should be done locally.
+It’s worth noting that there are approximately kn ∗ (β+n−1)!(n−1)!β!
+possible solutions in decision space, which is extremely large.
+Besides, the generalized problem of P (with arbitrary utility
+function) is a typical multi-choice knapsack problem (by
+considering the utility as profit and the assigned resource as
+weight), which is well known to be NP-hard. As for our
+specific utility function, noticing (1) is a nonlinear function,
+our problem P is by nature a nonlinear integer optimization
+problem which is notoriously intractable in general.
+3The performance of our model may vary with different DNN models, but
+our empirical results show limited estimation error in all the architectures we
+tested.
+5
+In the next section, we investigate the structural properties
+of our utility function and propose an algorithm that can solve
+P optimally in polynomial time.
+III. SOLVING P: ITERATIVE ALTERNATING OPTIMIZATION
+In this section, we present our proposition, termed as
+Iterative Alternating Optimization (IAO), to solve P. We first
+reveal several structural properties of our problem. We then
+describe our IAO algorithm in detail. Using the established
+structural properties, we further prove the optimality of our
+algorithm and analyze its complexity. We complete this section
+by investigating the impact of estimation error.
+A. Structural Properties of P
+Property 1. Given a fixed number of resources fi , we can
+derive the optimal solution si minimizing Ti(si, fi).
+Since the partitioning decision space is discrete, we can
+always obtain the individual optimal solution by searching all
+possible si in O(ki) time, given the fixed assigned computa-
+tional resource fi .
+In the second property we establish below, we consider the
+case where the resource allocated to UE i, fi , is given, and
+define the corresponding optimal partitioning decision as
+s∗i ( fi) , arg minsi
+Ti(si, fi).
+Property 2. It holds that Ti(s∗i , fi) is monotonically non-
+increasing in fi , i.e.,
+f 1i ≥ f
+2
+i −→ Ti(s
+∗
+i ( f
+1
+i ), f
+1
+i ) ≤ Ti(s
+∗
+i ( f
+2
+i ), f
+2
+i ) ∀i ∈ N .
+Proof. See Appendix A. �
+Property 2 is intuitive to understand by reflecting the
+common sense that “more resources do no harm”.
+B. The Iterative Alternating Optimization Algorithm
+The rationale of our iterative alternating optimization algo-
+rithm to is that the min-max objective function of P will only
+benefit from the improvement of the UE with the worst utility.
+Therefore, we iteratively adjust the allocation of computational
+resources by reallocating the computational resources to the
+UE with the worst utility. Hopefully we can reach an equi-
+librium where no further improvement can be made, which
+corresponds to the system optimum.
+The pseudo-code of our IAO algorithm is illustrated in
+Alg. 1. We first set the adjustment stepsize denoted by τ, the
+quantity of computing resource the algorithm adjusts in each
+iteration. We then choose a random resource allocation vector
+as the initial strategy and compute s∗
+i
+based on fi . As analyzed
+in Section III-D, if we have certain prior knowledge, we can
+select better initial strategy which may reduce the convergence
+time.
+The core part of our algorithm is the main loop, which can
+be decomposed into three steps. In the first step, we check each
+UE j if its allocated resource fj is small than the stepsize and
+if its latency exceeds the maximum latency among all UEs
+Algorithm 1 Iterative Alternating Optimization (IAO)
+1: set adjustment stepsize τ ↔ 1
+2: choose a random resource allocation vector (S, F)
+3: for each i ∈ N do
+4: s∗
+i
+← arg minsi Ti(si, fi)
+5: end for
+6: loop
+7: Lmax ← maxi∈N Ti(s∗i , fi)
+8: for each j ∈ N do
+9: if fj − τ < 0 then
+10: mark UE j as exhausted
+11: continue
+12: end if
+13: s′
+j
+← arg minsj Tj(sj, fj − τ)
+14: if Tj(s′j, fj − τ) ≥ Lmax then
+15: mark UE j as exhausted
+16: end if
+17: end for
+18: if all UEs are marked as exhausted then
+19: return (S, F)
+20: end if
+21: imin ← mini∈N Ti(s′i, fi − τ)
+22: imax ← maxi∈N Ti(s∗i , fi)
+23: move τ quantity of resources from UE imin to imax :
+fimax ← fimax + τ, fimin ← fimin − τ
+24: update s∗
+imax
+and s∗
+imin
+:
+s∗imax ← arg minsimax
+Timax (simax , fimax ),
+s∗imin ← arg minsimin
+Timin (simin, fimin )
+25: end loop
+and mark it as exhausted if yes. If all the UEs are exhausted,
+indicating we cannot be better off by conducting any resource
+adjustment, we terminate the algorithm by outputting the
+current allocation vector. Otherwise we move τ quantity of
+resource from a non-exhausted UE with the lowest latency
+after adjustment to the UE with the highest latency. We then
+update the related latencies of the touched UEs. The above
+loop terminates if all the UEs are exhausted, meaning that
+no UE can improve the maximum latency among UEs by
+snapping resource from others.
+C. Optimality Analysis
+In this subsection, we prove the optimality of the IAO
+algorithm.
+Theorem 1. Once terminated, Alg. 1 outputs an optimal
+solution of P.
+Proof. See Appendix B. �
+D. Complexity Analysis
+In this subsection, we investigate the complexity of our IAO
+algorithm.
+6
+In this regard, we define the Manhattan Distance between
+any two allocation vectors (S, F) and (S′, F ′) as Dm ,∑n
+i=1 | fi− f
+′
+i
+|. The Manhattan distance quantifies the difference
+in resource allocation between (S, F) and (S′, F ′). We prove in
+the following proposition that the Manhattan distance between
+any two profiles (S, F) and (S∗, F∗) is upper-bounded by 2β
+as long as
+∑
+i∈N f
+∗
+i
+=
+∑
+i∈N fi = β, where we recall that β is
+the total amount of computation resource of the edge server.
+Proposition 1. The Manhattan distance between two pro-
+files (S, F) and (S∗, F∗) is upper-bounded by 2β as long as∑
+i∈N f
+∗
+i
+=
+∑
+i∈N fi = β.
+Proof. It follows from fi ≥ 0, fi ≥ 0, ∀i ∈ N and
+∑
+i∈N f
+∗
+i
+=∑
+i∈N fi = β that
+Dm =
+∑
+i∈N
+| fi − f ∗i | ≤
+∑
+i∈N
+| fi | +
+∑
+i∈N
+| f ∗i |
+=
+∑
+i∈N
+fi +
+∑
+i∈N
+f ∗i = 2β.
+�
+Let (S(t), F(t)) denote the resource allocation profile derived
+in iteration t of Alg. 1, we prove that the Manhattan distance
+between (S(t), F(t)) and the optimal solution (S∗, F∗) decreases
+by 2 every iteration t until when Alg. 1 is terminated.
+Proposition 2. Denote Dm(t) as the Manhattan distance
+between (S(t), F(t)) and (S∗, F∗). Before the termination of
+Alg. 1, it holds that Dm(t) − Dm(t + 1) = 2, ∀t.
+Proof. See Appendix C. �
+Armed with the above two propositions, the following
+theorem establishes the time complexity of Alg. 1.
+Theorem 2. Alg. 1 terminates in at most β iterations and its
+time complexity is upper bounded by O(nkβ).
+Proof. The first for loop takes O(nk) time. And each iteration
+of the main loop (from step 6 to 25) takes O(nk) time,
+dominated by the second for loop (from step 8 to 17). Dm
+is the Manhattan distance indicating the difference between
+initial solution to optimal solution. It follows from Proposition
+2 that each iteration shrinks this difference by 2. Therefore,
+the total rounds of iteration is Dm/2. The time complexity,
+dominated by the main loop, is O(nkDm).
+Beside, it follows from Proposition 1 that the Manhattan
+distance between any initial allocation profile (S(0), F(0)) is
+at most 2β from the optimal one. Hence, Alg. 1 terminates in
+at most β iterations. Therefore, the total time complexity of
+Alg. 1 is upper bounded by O(nkβ). �
+Theorem 2 demonstrates that the complexity of our algo-
+rithm scales linearly in terms of the number of UEs, the
+quantity of computing resources, and the number of DNN
+layers. And it also indicates that a proper initialization (closer
+to the optimal solution and less Manhattan distance) will lead
+to less runtime of the algorithm. This feature would help when
+the algorithm is adapted to an online system since the historical
+performance can be utilized to perform a better initialization.
+Algorithm 2 Iterative Alternating Optimization with Decre-
+mental Stepsize (IAO-DS)
+1: set decremental factor p, set q← blogp βc
+2: choose random initial allocation profile (S0, F0)
+3: for i = 0 to q do
+4: run Alg. 1 with (Si, Fi) as the initial allocation profile
+under stepsize τ = pq−i , obtain the output denoted by
+(Si+1, Fi+1)
+5: end for
+6: return (Sq+1, Fq+1)
+E. Accelerating Alg. 1 with Decremental Stepsize τ
+In this subsection, we improve Alg. 1 by adopting a dynamic
+stepsize τ instead of fixing τ to 1 using the algorithm named
+iterative alternating optimization with decremental stepsize
+(IAO-DS). The rationale behind our idea is to start with a
+large stepsize to quickly adjust the allocation profile (S, F)
+towards the optimal and then gradually refine our search by
+decreasing the stepsize.
+The pseudo-code of IAO-DS algorithm is illustrated in
+Alg. 2. We start by choosing a decremental factor p which
+is an integer larger than 1, e.g., p = 2. We then enter the
+for loop. At each iteration, we run Alg. 1 with the output
+of the last iteration (Si, Fi) as the initial allocation profile by
+using stepsize τ = pq−i . By this we gradually approaches the
+optimal allocation and refine our search by decreasing τ until
+the last iteration where we can find the optimal solution with
+τ = 1. Noting that the optimal decremental factor p with fastest
+convergence speed is hard to derive theoretically, but can be
+enumerated efficiently in practice since the value of resource
+amount β will not be a large number.
+Alg. 2 is guaranteed to return an optimal solution because
+the last iteration of the for loop invokes Alg. 1 with τ = 1,
+whose optimality is proved in Theorem 1. We next establish
+the complexity of Alg. 2.
+Theorem 3. The time complexity of Alg. 2 is bounded by
+O(nkβ).
+Proof. See Appendix D. �
+In Theorem 3, we prove that the theoretical complexity of
+IAO-DS is still bounded by O(nkβ), i.e., iteratively adjusting
+the stepsize would not increase the complexity. Furthermore,
+extensive experimental results in Section IV-E show that IAO-
+DS can converge much faster than IAO, due to the fact that
+large stepsizes at the initial iterations can quickly steer the
+resource allocation towards the optimal solution.
+F. Performance Analysis with Estimation Error
+In the theoretical analysis above, we implicitly assume that
+the estimation of execution latency of a UE is absolutely
+accurate. We complete the analysis of our algorithm by investi-
+gating a realistic case when the latency model is inaccurate. As
+proved in the following, our framework guarantees a bounded
+performance loss in such case.
+7
+Fig. 5: Experiment Prototype
+We use superscript E to denote the estimated latency given
+by our model and A for the actual latency. Let � be the relative
+estimation error defined as
+� ,
+|TE − T A |
+T A
+. (5)
+Theorem 4. The relative utility loss of Alg. 1 and Alg. 2 under
+relative estimation error � is upper-bounded by 2�/(1 − �).
+Proof. See Appendix E. �
+Theorem 4 essentially demonstrates that our solution at most
+doubles the estimation error in the final result under small � . In
+this regard, it exhibits nice resilience against estimation error.
+IV. PERFORMANCE EVALUATION
+A. Prototype Setup
+To evaluate the performance of our proposal, we build a
+multi-UE edge system prototype. As shown in Fig. 5, we use
+a workstation equipped with a 8-core 3.7GHz Intel CPU and
+16G RAM to act as the edge server to provide computing
+services to UEs. The UEs are composed of 2 Raspberry
+Pis and 2 NVIDIA Jetson Nanos. All the UEs are either
+wirelessly connected to the edge server through Wi-Fi, or
+directly connected with the edge server by LAN to emulate
+heterogeneous network conditions for different UEs.
+We use the pretrained DNN models from the standard
+implementation from famous package tensorflow [35]. In
+this prototype, we deploy the lightweight DNN model –
+MobilenetV2 [36] on Raspberry Pis, since Raspberry Pi is
+incapable to load a large-size DNN model like VGG19 [37]
+due to its 1G memory limit. Both MobilenetV2 and VGG19
+are deployed on NVIDIA Jetson Nanos.
+At the edge server side, we use the Docker containers [33]
+as virtual servers to provide the DNN partitioning service to
+each UE independently. Multiple CPU cores (i.e., computa-
+tional resources) are assigned to dockers, and the minimum
+computational resource unit is set to 0.1 core.
+B. Experiment Settings
+By default, the edge server is cooperating with 4 UEs if not
+explicitly mentioned. Two Raspberry Pis running MobilenetV2
+are connected to the edge server via WiFi to represent low-
+end mobile devices, and two NVIDIA Jetson Nanos running
+VGG19 are connected with the edge server by LAN to act
+as high-end devices such as smart routers and smart home
+devices. We will also conduct experimental evaluations with
+different number of UEs.
+C. Benchmarks
+We evaluate our framework by comparing the performance
+with two state-of-the-art paradigms and three naive approaches
+as follows.
+Binary Offloading Choice. A paradigm from [31] that
+makes a joint decision over task offloading and computational
+resources allocation. However, their work only considers to
+offload a task as an entire entity. Thus, a task can only be
+executed on either the edge server or the local device in a
+non-cooperative fashion.
+Even Resource Allocation. Several works have considered
+to offload part of the neural network to edge/cloud in a
+single user case [20] [21] [7]. We extend them into multi-user
+case that the edge server fairly allocates the computational
+resources for each UE evenly.
+Competition Unconscious. All users optimize their own
+DNN partitioning choice according to the amount of compu-
+tational resource at the edge server without considering the
+competition of resource allocation against other UEs. After
+offloading decisions are made, the edge server evenly allocates
+its computational resources to the offloaded tasks.
+Local Only. All users execute their tasks locally.
+Edge Only. All users offload their tasks to the edge server,
+and the edge server is capable to adjust the computational
+resources assigned to each user.
+D. Experimental Results
+We first present extensive experiments over different
+amounts of bandwidth and computational resource on the edge
+server. Since IAO algorithm achieves the same performance
+as the IAO-DS algorithm, here in this part we only illustrate
+the results of the IAO algorithm. We will compare these two
+algorithms from the scalability point of view in the coming
+section.
+As shown in Figs. 6, 7, 8 and 9, generally, the execution
+latency of UEs benefits from the increase of computational
+resources and bandwidth. However, for Competition Uncon-
+scious scheme, the increase of resources may sometimes lead
+to worse performances. The reason is that, with the increase
+of resources of the environment, UEs blindly make aggressive
+offloading decisions to pursue better utilities. However, when
+there are multiple UEs competing on the limited resources on
+the edge server, none of them is able to enjoy the expected
+performance as there were no competitions and the global
+utility may become worse than before.
+Comparing with the traditional Local Execution and Edge
+Only Execution schemes, as shown in Fig. 7, our scheme
+8
+Fig. 6: Latency versus the amount of computational
+resources under average bandwidth of 5Mb/s
+Fig. 7: Latency versus the amount of computational
+resources with high bandwidth (10Mb/s for mobile devices and
+100M/s for immobile devices)
+Fig. 8: Latency versus average bandwidth
+when edge server has 2 CPU cores
+Fig. 9: Latency versus average bandwidth
+when edge server has 7 CPU cores
+shows a significant improvement of at most 67.6% than Local
+Execution and 41% than Edge Only Execution when there
+are enough computational resources and bandwidth.
+As for the scheme of Even Resource Allocation, the main
+drawback is it can not properly assign computational resources
+to help the neediest UEs with large latencies. As shown in
+in Figs. 7 and 9, our scheme outperforms Even Resource
+Allocation for at most 63%.
+The scheme of Binary Offloading Choice is basically a
+weak version of our scheme. Besides the choices of executing
+locally and offloading to the edge server, our scheme explores
+more possible offloading choices with DNN partitioning. As
+shown in Figs. 7 and 9, when there are abundant resources,
+the optimal choice could just be sending all tasks to the edge
+server if needed. However, when the resource becomes scarce
+as in Figs. 6 and 7, our scheme is capable to utilize a very
+tiny amount of resources to optimize the performance. From
+Fig. 7 it shows that our scheme at most 14% improvement
+than Binary Offloading Choice scheme. This ratio varies
+according to the architecture of DNN model for whether there
+are proper positions for DNN partitioning.
+E. Scalability
+Since IAO and IAO-DS achieve the same execution latency
+performance, in this section we compare the IAO and IAO-
+DS algorithms from the perspective of scalability (i.e., the
+Fig. 10: Run time versus k
+change of convergence time with different factors) in large-
+scale numerical settings to verify that our algorithms are
+competent for large-scale practical deployments. We conduct
+detailed evaluations as follows.
+Scale increase by the number of layers. k is the number of
+logical layers of our neural network (i.e., the number of pos-
+sible offloading decisions in decision space). As we analyzed
+in Section III-D, the execution time of IAO should increase
+linearly with k since we always traverse over k offloading
+9
+Fig. 11: Run time versus n
+Fig. 12: Run time versus β
+decisions in any iteration. Fig. 10 shows the practical increase
+with k which obeys our theoretical analysis. Also, IAO-DS
+runs much faster than IAO, with more than 50% convergence
+time reduction.
+Scale increase by the number of UEs. n is the number
+of UEs. As shown in Fig. 11, the run time increases rapidly
+at first and however, its gradient decrease immediately after
+some certain boundary. This happens because when n grows
+larger as β stays unchanged, the average resource for each
+UE is getting smaller, and most UEs with no resources do not
+participate in resource reallocation step as mentioned in step
+8-12 in Algorithm 1. That leads to a low increasing rate of run
+time. Also, we observe that the convergence time of IAO-DS
+is much smaller than that of IAO.
+Scale increase by the amount of computational resource.
+β is the number of MCRU on the edge server, intuitively,
+if there are more resources to allocate, it takes more time
+to make a decision. In Fig. 12, we also observe that IAO-
+DS shows a significant reduction in run time than IAO. For
+IAO-DS, it achieves the fastest run time when the decremental
+factor p = 2, due to the rich generated stepsizes for sufficient
+resource allocation profile adjustment.
+Note that, similar to many existing studies, to enable
+tractable analysis we consider that the edge server conducts
+the DNN tasks scheduling in the batch-by-batch manner (batch
+size can be set dynamically according to the time-varying
+task arriving rates). This can be achieved via a task buffering
+mechanism (which is widely used in cloud computing) in
+practice.
+Also, our algorithm has a linear convergence time in terms
+of the number of device users, and hence our algorithm can
+work well if the set of users in the system change at a slower
+time-scale (e.g., seconds/minutes) than the convergence time
+by the algorithm (e.g., tens of milliseconds).
+The algorithm design with efficient worst-case performance
+guarantee for the online scheduling scenarios with very fast-
+change changing system dynamics at the time-scale of mil-
+liseconds is much more challenging, and we will consider such
+challenging case in a future work.
+V. CONCLUSION
+In this paper, we have proposed a framework to jointly
+address multi-user DNN partitioning and computational re-
+source allocation. The central component of our framework
+is an algorithm minimizing the maximum delay among all
+UEs. Our algorithm is shown to achieve system optimum
+with polynomial time complexity, and exhibits nice resilience
+against estimation error. We also validate our proposition by
+building a prototype in the multi-user MEC environment for
+the task of device-edge cooperative DNN partitioning. By
+extensive experiments on real environment, we show that our
+framework outperforms the existing offloading schemes and
+scales effectively.
+For the future work, we are going to consider the more
+challenging scenarios of the joint computing, communication
+and energy resource allocation for multi-user edge intelligence
+applications.
+APPENDIX A
+PROOF OF PROPERTY 2
+Proof. It follows from (1) that
+Ti(s∗i ( f
+2
+i ), f1) ≤ Ti(s
+∗
+i ( f
+2
+i ), f2).
+By the definition of s∗
+i
+( f 1
+i
+), we have
+Ti(s∗i ( f
+1
+i ), f1) ≤ Ti(s
+∗
+i ( f
+2
+i ), f1).
+Therefore we have
+Ti(s∗i ( f
+1
+i ), f1) ≤ Ti(s
+∗
+i ( f
+2
+i ), f1) ≤ Ti(s
+∗
+i ( f
+2
+i ), f2).
+Property 2 is proved. �
+APPENDIX B
+PROOF OF OPTIMALITY OF IAO
+Proof. Assume, by contradiction, that there exists a better
+solution (S′, F ′) , (s′1, s
+′
+2, · · · , s
+′
+n, f
+′
+1 , f
+′
+2 , · · · , , f
+′
+n) than the
+output of Alg. 1 denoted by (S, F), i.e.,
+U(S′, F ′) < U(S, F). (6)
+We denote p as the UE with the largest latency Tp(sp, fp)
+among all Ti(si, fi) (∀i ∈ N). By the definition of U(S, F), we
+have
+U(S, F) = Tp(sp, fp). (7)
+10
+By definition, we have U(S′, F ′) = maxi∈N Ti(s′i, f
+′
+i
+). It then
+follows from (6) and (7) that
+Tp(s′p, f
+′
+p) ≤ U(S
+′, F ′) < U(S, F) = Tp(sp, fp). (8)
+If f ′p = fp , following from Alg. 1 that sp is optimal w.r.t.
+fp , it holds that Tp(s′p, f ′p) ≥ Tp(sp, fp), which contradicts
+with (8). Therefore we have f ′p , fp . It then follows from (8)
+and Property 2 that
+f ′p > fp . (9)
+Noticing
+∑
+i∈N f
+′
+i
+=
+∑
+i∈N fi = β, there must exist another UE
+q such that
+f ′q < fq . (10)
+Recall that Alg. 1 terminates when all UEs are “exhausted”,
+i.e.,
+Tj(s∗j, fj − 1) ≥ Lmax ∀ j ∈ N,
+where Lmax = U(S, F), the largest individual latency T(s, f ).
+Recall the definition of p, we have
+Lmax = Tp(sp, fp) = U(S, F), (11)
+and
+Tj(s∗j, fj − 1) ≥ Lmax ∀ j ∈ N . (12)
+Particularly from (12), we have
+Tq(sq, fq − 1) ≥ Lmax . (13)
+Recall (10) that f ′q < fq . For both fq and f
+′
+q being integers,
+we have f ′q ≤ fq −1. It then follows from Property 2 and (13)
+that
+Tq(s′q, f
+′
+q) ≥ Tq(sq, fq − 1) ≥ Lmax . (14)
+Combining (14) and (11) yields
+U(S′, F ′) ≥ Tq(s′q, f
+′
+q) ≥ Lmax = Tp(sp, fp) = U(S, F),
+which contradicts with the assumption (6). This contradiction
+proves the optimality of Alg. 1. �
+APPENDIX C
+PROOF OF PROPOSITION 2
+Proof. To make the notation concise, denote
+(S, F) , (S(t), F(t)), (S′, F ′) , (S(t + 1), F(t + 1)).
+Denote i , arg maxq∈N Tq(sq, fq) and j ,
+arg minq∈N Tq(sq, fq − 1). We have
+Ti(si, fi) ≥ Tq(sq, fq) ∀q ∈ N, (15)
+Tj(sj, fj − 1) < Tq(sq, fq − 1) ∀q ∈ N, q , j . (16)
+It follows from Line 23 of Alg. 1 that
+f ′i = fi + 1, f
+′
+j = fj − 1. (17)
+Recall that the UE with the largest latency is marked ex-
+hausted, which indicates that it can not lose resource in any
+later iteration, we have
+fi < f
+′
+i ≤ f
+∗
+i . (18)
+We then have
+∆Dm , Dm(t + 1) − Dm(t)
+=
+∑
+q∈N
+| f ′q − f
+∗
+q | −
+∑
+q∈N
+| fq − f ∗q |
+= | f ′i − f
+∗
+i | + | f
+′
+j − f
+∗
+j | − | fi − f
+∗
+i | − | fj − f
+∗
+j |
+= | f ′j − f
+∗
+j | − | fj − f
+∗
+j | − 1.
+(19)
+We next prove fj > f ∗j . To that end, assume by contradiction
+that
+fj ≤ f ∗j . (20)
+It follows from Property 2 that
+Tj(s∗j, f
+∗
+j − 1) ≤ Tj(sj, fj − 1). (21)
+Recall
+∑
+i∈N f
+∗
+i
+=
+∑
+i∈N fi = β, there must exist a UE x such
+that
+fx > f
+∗
+x ,
+which further leads to fx −1 ≥ f ∗x as they are integers. It then
+follows from Property 2 that
+Tx(sx, fx − 1) ≤ Tx(s∗x, f
+∗
+x ). (22)
+Recall that at an optimal solution all UEs are exhausted (oth-
+erwise we can perform adjustment to decrease the maximum
+delay among UEs), i.e.,
+Tq(s∗q, f
+∗
+q − 1) ≥ max
+p∈N
+Tp(s∗p, f
+∗
+p ) ∀q ∈ N . (23)
+It then follows from (22) and (23) that
+Tj(s∗j, f
+∗
+j − 1) ≥ max
+p∈N
+Tp(s∗p, f
+∗
+p ) ≥ Tx(s
+∗
+x, f
+∗
+x ) ≥ Tx(sx, fx − 1),
+which contradicts with (16). We thus have: fj > f ∗j . Combin-
+ing with (17), we have
+∆Dm = | f ′j − f
+∗
+j | − | fj − f
+∗
+j | − 1 = −2.
+The proposition is thus proved. �
+APPENDIX D
+PROOF OF THEOREM 3
+Proof. By regarding τ units of resource as a bundle, there are
+at most
+⌊
+β
+τ
+⌋
+bundles that can be adjusted w.r.t. stepsize τ.
+By adapting the analysis in Sec. III-D, we can easily show
+that running Alg. 1 with stepize τ needs at most O(nk
+⌊
+β
+τ
+⌋
+).
+The time complexity of Alg. 2 can be derived by summing
+O(nk
+⌊
+β
+τ
+⌋
+) from τ = pq to 1, i.e.:
+q∑
+i=0
+nk
+⌊
+β
+pi
+⌋
+= nk(b
+β
+pq
+c + b
+β
+pq−1
+c + ... + b
+β
+1
+c)
+≤ nk(b
+pq+1
+pq
+c + b
+pq+1
+pq−1
+c + ... + b
+pq+1
+1
+c)
+≤ nk(p + p2 + ... + pq+1)
+= nk
+p(pq − 1)
+p − 1
+≤ nk(β − 1)
+p
+p − 1
+.
+Noting p is a chosen constant, therefore the total time com-
+plexity of IAO-DS is bounded by O(nkβ). �
+11
+APPENDIX E
+PROOF OF THEOREM 4
+Proof. We prove the theorem for Alg. 1. Alg. 2 can be handled
+in the same way.
+Denote the estimated latency and the actual latency of
+UE i using the solution derived from Alg. 1 as TE
+i
+and
+T A
+i
+, respectively. Denote the actual latency and the estimated
+latency of UE i of the optimal solution as T A∗
+i
+and TE∗
+i
+,
+respectively. Further define the following utilities:
+UA = max
+i∈N
+T Ai , (24)
+UE = max
+i∈N
+TEi , (25)
+UA∗ = max
+i∈N
+T A∗i , (26)
+UE∗ = max
+i∈N
+TE∗i . (27)
+We have shown that
+UE ≤ UE∗. (28)
+Denote the UEs i, j, k, l as the UEs with the largest latency
+to the utility of eqs. (24)- (27), respectively, i.e.,:
+UA = T Ai , U
+E
+= TEj , U
+A∗
+= T A∗k , U
+E∗
+= TE∗l . (29)
+It follows from (5) that
+(1 − �)T A ≤ TE ≤ (1 + �)T A,
+TE
+1 + �
+≤ T A ≤
+TE
+1 − �
+. (30)
+Combining eqs. (28)- (30) yields
+UA = T Ai ≤
+TE
+i
+1 − �
+≤
+UE
+1 − �
+≤
+UE∗
+1 − �
+=
+TE∗
+l
+1 − �
+≤
+(1 + �)T A∗
+l
+1 − �
+≤
+(1 + �)UA∗
+1 − �
+. (31)
+Armed with the above results, we can then upper-bound the
+relative utility loss of Alg. 1 under the relative estimation error
+� as
+|UA −UA∗ |
+UA∗
+≤
+2�
+1 − �
+.
+The theorem is proved. �
+REFERENCES
+[1] G. Guo and N. Zhang, “A survey on deep learning based face
+recognition,” Comput. Vis. Image Underst., vol. 189, 2019. [Online].
+Available: https://doi.org/10.1016/j.cviu.2019.102805
+[2] G. Sreenu and M. A. S. Durai, “Intelligent video surveillance:
+a review through deep learning techniques for crowd analysis,”
+J. Big Data, vol. 6, p. 48, 2019. [Online]. Available: https:
+//doi.org/10.1186/s40537-019-0212-5
+[3] J. Chai and A. Li, “Deep learning in natural language processing:
+A state-of-the-art survey,” in 2019 International Conference on
+Machine Learning and Cybernetics, ICMLC 2019, Kobe, Japan,
+July 7-10, 2019. IEEE, 2019, pp. 1–6. [Online]. Available:
+https://doi.org/10.1109/ICMLC48188.2019.8949185
+[4] Y. Mao, C. You, J. Zhang, K. Huang, and K. B. Letaief, “A
+survey on mobile edge computing: The communication perspective,”
+IEEE Communications Surveys and Tutorials, vol. 19, no. 4, pp.
+2322–2358, 2017. [Online]. Available: https://doi.org/10.1109/COMST.
+2017.2745201
+[5] J. Yu, J. Liu, R. Zhang, L. Chen, and S. Zhang, “Multi-seed group
+labeling in rfid systems,” IEEE Transactions on Mobile Computing,
+vol. PP, no. 99, pp. 1–1, 2019.
+[6] Z. Zhou, X. Chen, E. Li, L. Zeng, K. Luo, and J. Zhang, “Edge
+intelligence: Paving the last mile of artificial intelligence with edge
+computing,” Proceedings of the IEEE, vol. 107, no. 8, pp. 1738–1762,
+2019. [Online]. Available: https://doi.org/10.1109/JPROC.2019.2918951
+[7] E. Li, Z. Zhou, and X. Chen, “Edge intelligence: On-demand
+deep learning model co-inference with device-edge synergy,” in
+Proceedings of the 2018 Workshop on Mobile Edge Communications,
+MECOMM@SIGCOMM 2018, Budapest, Hungary, August 20, 2018.
+ACM, 2018, pp. 31–36. [Online]. Available: https://doi.org/10.1145/
+3229556.3229562
+[8] Z. Huang, K. Lin, and C. Shih, “Supporting edge intelligence in
+service-oriented smart iot applications,” in 2016 IEEE International
+Conference on Computer and Information Technology, CIT 2016,
+Nadi, Fiji, December 8-10, 2016. IEEE Computer Society, 2016, pp.
+492–499. [Online]. Available: https://doi.org/10.1109/CIT.2016.40
+[9] K. Zhang, Y. Zhu, S. Maharjan, and Y. Zhang, “Edge intelligence and
+blockchain empowered 5g beyond for the industrial internet of things,”
+IEEE Network, vol. 33, no. 5, pp. 12–19, 2019. [Online]. Available:
+https://doi.org/10.1109/MNET.001.1800526
+[10] W. Shi, J. Cao, Q. Zhang, Y. Li, and L. Xu, “Edge computing: Vision and
+challenges,” IEEE Internet of Things Journal, vol. 3, no. 5, pp. 637–646,
+2016. [Online]. Available: https://doi.org/10.1109/JIOT.2016.2579198
+[11] X. Dai, H. Yin, and N. K. Jha, “Nest: A neural network
+synthesis tool based on a grow-and-prune paradigm,” IEEE Trans.
+Computers, vol. 68, no. 10, pp. 1487–1497, 2019. [Online]. Available:
+https://doi.org/10.1109/TC.2019.2914438
+[12] Y. Guo, A. Yao, and Y. Chen, “Dynamic network surgery for
+efficient dnns,” in Advances in Neural Information Processing
+Systems 29: Annual Conference on Neural Information Processing
+Systems 2016, December 5-10, 2016, Barcelona, Spain, D. D. Lee,
+M. Sugiyama, U. von Luxburg, I. Guyon, and R. Garnett, Eds.,
+2016, pp. 1379–1387. [Online]. Available: http://papers.nips.cc/paper/
+6165-dynamic-network-surgery-for-efficient-dnns
+[13] S. Han, H. Mao, and W. J. Dally, “Deep compression: Compressing
+deep neural network with pruning, trained quantization and huffman
+coding,” in 4th International Conference on Learning Representations,
+ICLR 2016, San Juan, Puerto Rico, May 2-4, 2016, Conference Track
+Proceedings, Y. Bengio and Y. LeCun, Eds., 2016. [Online]. Available:
+http://arxiv.org/abs/1510.00149
+[14] S. Han, J. Pool, J. Tran, and W. J. Dally, “Learning both weights
+and connections for efficient neural network,” in Advances in
+Neural Information Processing Systems 28: Annual Conference
+on Neural Information Processing Systems 2015, December
+7-12, 2015, Montreal, Quebec, Canada, C. Cortes, N. D.
+Lawrence, D. D. Lee, M. Sugiyama, and R. Garnett, Eds.,
+2015, pp. 1135–1143. [Online]. Available: http://papers.nips.cc/paper/
+5784-learning-both-weights-and-connections-for-efficient-neural-network
+[15] M. Courbariaux, Y. Bengio, and J. David, “Binaryconnect: Training
+deep neural networks with binary weights during propagations,” in
+Advances in Neural Information Processing Systems 28: Annual
+Conference on Neural Information Processing Systems 2015,
+December 7-12, 2015, Montreal, Quebec, Canada, C. Cortes,
+N. D. Lawrence, D. D. Lee, M. Sugiyama, and R. Garnett, Eds.,
+2015, pp. 3123–3131. [Online]. Available: http://papers.nips.cc/paper/
+5647-binaryconnect-training-deep-neural-networks-with-binary-weights-during-propagations
+[16] M. Courbariaux and Y. Bengio, “Binarynet: Training deep neural
+networks with weights and activations constrained to +1 or -
+1,” CoRR, vol. abs/1602.02830, 2016. [Online]. Available: http:
+//arxiv.org/abs/1602.02830
+[17] S. Gupta, A. Agrawal, K. Gopalakrishnan, and P. Narayanan,
+“Deep learning with limited numerical precision,” in Proceedings
+of the 32nd International Conference on Machine Learning, ICML
+2015, Lille, France, 6-11 July 2015, ser. JMLR Workshop and
+Conference Proceedings, F. R. Bach and D. M. Blei, Eds.,
+vol. 37. JMLR.org, 2015, pp. 1737–1746. [Online]. Available:
+http://proceedings.mlr.press/v37/gupta15.html
+[18] I. Hubara, M. Courbariaux, D. Soudry, R. El-Yaniv, and Y. Bengio,
+“Binarized neural networks,” in Advances in Neural Information
+Processing Systems 29: Annual Conference on Neural Information
+Processing Systems 2016, December 5-10, 2016, Barcelona, Spain,
+D. D. Lee, M. Sugiyama, U. von Luxburg, I. Guyon, and
+R. Garnett, Eds., 2016, pp. 4107–4115. [Online]. Available: http:
+//papers.nips.cc/paper/6573-binarized-neural-networks
+[19] J. Mao, Z. Yang, W. Wen, C. Wu, L. Song, K. W. Nixon,
+X. Chen, H. Li, and Y. Chen, “Mednn: A distributed mobile
+system with enhanced partition and deployment for large-scale dnns,”
+in 2017 IEEE/ACM International Conference on Computer-Aided
+https://doi.org/10.1016/j.cviu.2019.102805
+https://doi.org/10.1186/s40537-019-0212-5
+https://doi.org/10.1186/s40537-019-0212-5
+https://doi.org/10.1109/ICMLC48188.2019.8949185
+https://doi.org/10.1109/COMST.2017.2745201
+https://doi.org/10.1109/COMST.2017.2745201
+https://doi.org/10.1109/JPROC.2019.2918951
+https://doi.org/10.1145/3229556.3229562
+https://doi.org/10.1145/3229556.3229562
+https://doi.org/10.1109/CIT.2016.40
+https://doi.org/10.1109/MNET.001.1800526
+https://doi.org/10.1109/JIOT.2016.2579198
+https://doi.org/10.1109/TC.2019.2914438
+http://papers.nips.cc/paper/6165-dynamic-network-surgery-for-efficient-dnns
+http://papers.nips.cc/paper/6165-dynamic-network-surgery-for-efficient-dnns
+http://arxiv.org/abs/1510.00149
+http://papers.nips.cc/paper/5784-learning-both-weights-and-connections-for-efficient-neural-network
+http://papers.nips.cc/paper/5784-learning-both-weights-and-connections-for-efficient-neural-network
+http://papers.nips.cc/paper/5647-binaryconnect-training-deep-neural-networks-with-binary-weights-during-propagations
+http://papers.nips.cc/paper/5647-binaryconnect-training-deep-neural-networks-with-binary-weights-during-propagations
+http://arxiv.org/abs/1602.02830
+http://arxiv.org/abs/1602.02830
+http://proceedings.mlr.press/v37/gupta15.html
+http://papers.nips.cc/paper/6573-binarized-neural-networks
+http://papers.nips.cc/paper/6573-binarized-neural-networks
+12
+Design, ICCAD 2017, Irvine, CA, USA, November 13-16, 2017,
+S. Parameswaran, Ed. IEEE, 2017, pp. 751–756. [Online]. Available:
+https://doi.org/10.1109/ICCAD.2017.8203852
+[20] Y. Kang, J. Hauswald, C. Gao, A. Rovinski, T. N. Mudge, J. Mars, and
+L. Tang, “Neurosurgeon: Collaborative intelligence between the cloud
+and mobile edge,” in Proceedings of the Twenty-Second International
+Conference on Architectural Support for Programming Languages and
+Operating Systems, ASPLOS 2017, Xi’an, China, April 8-12, 2017,
+Y. Chen, O. Temam, and J. Carter, Eds. ACM, 2017, pp. 615–629.
+[Online]. Available: https://doi.org/10.1145/3037697.3037698
+[21] A. E. Eshratifar, M. S. Abrishami, and M. Pedram, “Jointdnn: An
+efficient training and inference engine for intelligent mobile cloud
+computing services,” CoRR, vol. abs/1801.08618, 2018. [Online].
+Available: http://arxiv.org/abs/1801.08618
+[22] Y. Kao, B. Krishnamachari, M. Ra, and F. Bai, “Hermes: Latency
+optimal task assignment for resource-constrained mobile computing,”
+IEEE Trans. Mob. Comput., vol. 16, no. 11, pp. 3056–3069, 2017.
+[Online]. Available: https://doi.org/10.1109/TMC.2017.2679712
+[23] H. Shahzad and T. H. Szymanski, “A dynamic programming offloading
+algorithm for mobile cloud computing,” in 2016 IEEE Canadian
+Conference on Electrical and Computer Engineering, CCECE 2016,
+Vancouver, BC, Canada, May 15-18, 2016. IEEE, 2016, pp. 1–5.
+[Online]. Available: https://doi.org/10.1109/CCECE.2016.7726790
+[24] Y. Wen, W. Zhang, and H. Luo, “Energy-optimal mobile application
+execution: Taming resource-poor mobile devices with cloud clones,”
+in Proceedings of the IEEE INFOCOM 2012, Orlando, FL,
+USA, March 25-30, 2012, A. G. Greenberg and K. Sohraby,
+Eds. IEEE, 2012, pp. 2716–2720. [Online]. Available: https:
+//doi.org/10.1109/INFCOM.2012.6195685
+[25] D. Huang, P. Wang, and D. Niyato, “A dynamic offloading algorithm
+for mobile computing,” IEEE Trans. Wireless Communications,
+vol. 11, no. 6, pp. 1991–1995, 2012. [Online]. Available: https:
+//doi.org/10.1109/TWC.2012.041912.110912
+[26] X. Chen, “Decentralized computation offloading game for mobile
+cloud computing,” IEEE Trans. Parallel Distrib. Syst., vol. 26, no. 4,
+pp. 974–983, 2015. [Online]. Available: https://doi.org/10.1109/TPDS.
+2014.2316834
+[27] R. Kaewpuang, D. Niyato, P. Wang, and E. Hossain, “A framework for
+cooperative resource management in mobile cloud computing,” IEEE
+Journal on Selected Areas in Communications, vol. 31, no. 12, pp.
+2685–2700, 2013. [Online]. Available: https://doi.org/10.1109/JSAC.
+2013.131209
+[28] L. Yang, J. Cao, Y. Yuan, T. Li, A. Han, and A. T. S. Chan, “A
+framework for partitioning and execution of data stream applications
+in mobile cloud computing,” SIGMETRICS Performance Evaluation
+Review, vol. 40, no. 4, pp. 23–32, 2013. [Online]. Available:
+https://doi.org/10.1145/2479942.2479946
+[29] Y. Zhao, S. Zhou, T. Zhao, and Z. Niu, “Energy-efficient task offloading
+for multiuser mobile cloud computing,” in 2015 IEEE/CIC International
+Conference on Communications in China (ICCC). IEEE, 2015, pp. 1–5.
+[30] S. Sardellitti, G. Scutari, and S. Barbarossa, “Joint optimization of radio
+and computational resources for multicell mobile-edge computing,”
+IEEE Transactions on Signal and Information Processing over Networks,
+vol. 1, no. 2, pp. 89–103, 2015.
+[31] J. Du, L. Zhao, J. Feng, and X. Chu, “Computation offloading
+and resource allocation in mixed fog/cloud computing systems
+with min-max fairness guarantee,” IEEE Trans. Communications,
+vol. 66, no. 4, pp. 1594–1608, 2018. [Online]. Available: https:
+//doi.org/10.1109/TCOMM.2017.2787700
+[32] B. Fang, X. Zeng, and M. Zhang, “Nestdnn: Resource-aware multi-
+tenant on-device deep learning for continuous mobile vision,” in Pro-
+ceedings of the 24th Annual International Conference on Mobile Com-
+puting and Networking. ACM, 2018, pp. 115–127.
+[33] C. Anderson, “Docker,” IEEE Software, vol. 32, no. 3, p. 102, 2015.
+[Online]. Available: https://doi.org/10.1109/MS.2015.62
+[34] F. Hutter, L. Xu, H. H. Hoos, and K. Leyton-Brown, “Algorithm runtime
+prediction: Methods & evaluation,” Artificial Intelligence, vol. 206, pp.
+79–111, 2014.
+[35] M. Abadi, A. Agarwal, P. Barham, and e. a. Eugene Brevdo,
+“TensorFlow: Large-scale machine learning on heterogeneous systems,”
+2015, software available from tensorflow.org. [Online]. Available:
+https://www.tensorflow.org/
+[36] M. Sandler, A. G. Howard, M. Zhu, A. Zhmoginov, and
+L. Chen, “Mobilenetv2: Inverted residuals and linear bottlenecks,”
+in 2018 IEEE Conference on Computer Vision and Pattern
+Recognition, CVPR 2018, Salt Lake City, UT, USA, June 18-
+22, 2018. IEEE Computer Society, 2018, pp. 4510–4520. [On-
+line]. Available: http://openaccess.thecvf.com/content_cvpr_2018/html/
+Sandler_MobileNetV2_Inverted_Residuals_CVPR_2018_paper.html
+[37] K. Simonyan and A. Zisserman, “Very deep convolutional networks
+for large-scale image recognition,” in 3rd International Conference on
+Learning Representations, ICLR 2015, San Diego, CA, USA, May 7-9,
+2015, Conference Track Proceedings, Y. Bengio and Y. LeCun, Eds.,
+2015. [Online]. Available: http://arxiv.org/abs/1409.1556
+https://doi.org/10.1109/ICCAD.2017.8203852
+https://doi.org/10.1145/3037697.3037698
+http://arxiv.org/abs/1801.08618
+https://doi.org/10.1109/TMC.2017.2679712
+https://doi.org/10.1109/CCECE.2016.7726790
+https://doi.org/10.1109/INFCOM.2012.6195685
+https://doi.org/10.1109/INFCOM.2012.6195685
+https://doi.org/10.1109/TWC.2012.041912.110912
+https://doi.org/10.1109/TWC.2012.041912.110912
+https://doi.org/10.1109/TPDS.2014.2316834
+https://doi.org/10.1109/TPDS.2014.2316834
+https://doi.org/10.1109/JSAC.2013.131209
+https://doi.org/10.1109/JSAC.2013.131209
+https://doi.org/10.1145/2479942.2479946
+https://doi.org/10.1109/TCOMM.2017.2787700
+https://doi.org/10.1109/TCOMM.2017.2787700
+https://doi.org/10.1109/MS.2015.62
+https://www.tensorflow.org/
+http://openaccess.thecvf.com/content_cvpr_2018/html/Sandler _MobileNetV2_Inverted_Residuals_CVPR_2018_paper.html
+http://openaccess.thecvf.com/content_cvpr_2018/html/Sandler _MobileNetV2_Inverted_Residuals_CVPR_2018_paper.html
+http://arxiv.org/abs/1409.1556
+	I Introduction
+	II System Model and Problem Formulation
+	II-A DNN Partitioning
+	II-B DNN Execution Latency Model
+	II-B1 Execution Time on UE
+	II-B2 Intermediate Output Transmission Time
+	II-B3 Execution Time on Edge Server
+	II-B4 Final Result Transmission Time
+	II-C Problem Formulation
+	III Solving P: Iterative Alternating Optimization
+	III-A Structural Properties of P
+	III-B The Iterative Alternating Optimization Algorithm
+	III-C Optimality Analysis
+	III-D Complexity Analysis
+	III-E Accelerating Alg. 1 with Decremental Stepsize 
+	III-F Performance Analysis with Estimation Error
+	IV Performance Evaluation
+	IV-A Prototype Setup
+	IV-B Experiment Settings
+	IV-C Benchmarks
+	IV-D Experimental Results
+	IV-E Scalability
+	V Conclusion
+	Appendix A: Proof of Property 2
+	Appendix B: Proof of Optimality of IAO
+	Appendix C: Proof of Proposition 2
+	Appendix D: Proof of Theorem 3
+	Appendix E: Proof of Theorem 4
+	References

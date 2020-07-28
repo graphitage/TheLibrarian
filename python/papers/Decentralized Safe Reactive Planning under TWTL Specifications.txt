@@ -1,0 +1,956 @@
+Decentralized Safe Reactive Planning under TWTL Specifications
+Ryan Peterson, Ali Tevfik Buyukkocak, Derya Aksaray, and Yasin Yazıcıoğlu
+Abstract— We investigate a multi-agent planning problem,
+where each agent aims to achieve an individual task while
+avoiding collisions with others. We assume that each agent’s
+task is expressed as a Time-Window Temporal Logic (TWTL)
+specification defined over a 3D environment. We propose a
+decentralized receding horizon algorithm for online planning
+of trajectories. We show that when the environment is suffi-
+ciently connected, the resulting agent trajectories are always
+safe (collision-free) and lead to the satisfaction of the TWTL
+specifications or their finite temporal relaxations. Accordingly,
+deadlocks are always avoided and each agent is guaranteed
+to safely achieve its task with a finite time-delay in the worst
+case. Performance of the proposed algorithm is demonstrated
+via numerical simulations and experiments with quadrotors.
+I. INTRODUCTION
+Collision avoidance is critical for the safe operation of
+multi-agent systems. Since the complexity of joint planning
+grows exponentially with the number of agents, significant
+effort has been devoted to the design of decentralized algo-
+rithms that avoid deadlocks and ensure safety. Methods such
+as potential fields, control barrier functions, or differential
+games have been used for decentralized planning (e.g., [1],
+[2], [3]). However, these methods typically do not accom-
+modate complex spatio-temporal requirements.
+Recently, there has been a significant interest in the analy-
+sis and control of dynamical systems under complex spatio-
+temporal specifications that can be expressed by temporal
+logics. For instance, linear temporal logic (LTL) [4] has been
+extensively used in motion planning and control of robots
+(e.g., [5], [6], [7]). However, LTL cannot express tasks with
+time constraints such as “visit A for 1 time unit within 5 time
+units, and after this visit B for 3 time units within 10 time
+units, and visiting C must be performed after visiting both
+A and B twice”. Such tasks with time constraints can be
+expressed via bounded temporal logics (e.g., [8], [9], [10]).
+In this paper, we introduce a decentralized algorithm for
+multi-agent systems to satisfy time-window temporal logic
+(TWTL) [10] specifications while operating in shared envi-
+ronments. In this setting, each agent has an individual TWTL
+specification. Agents can communicate with the other agents
+in their local neighborhoods to plan collision-free paths in a
+receding horizon manner based on the energy functions [11]
+computed over their individual product automata. Since it
+may be sometimes impossible to find safe paths which satisfy
+*This work was supported by Honeywell Aerospace and MnDRIVE.
+R. Peterson, A.T. Buyukkocak, and D. Aksaray are with the
+Department of Aerospace Engineering and Mechanics, University
+of Minnesota, Minneapolis, MN, 55455, pete9936@umn.edu,
+buyuk012@umn.edu, daksaray@umn.edu, and Y. Yazıcıoğlu
+is with the Department of Electrical and Computer Engineering, University
+of Minnesota, Minneapolis, MN, 55455, ayasin@umn.edu,
+the exact specifications, we allow for the temporal relaxation
+of TWTL specifications and show that, if the environment
+is sufficiently connected, the proposed approach ensures the
+completion of all TWTL specifications with finite relaxation.
+This work is closely related to [5], [12], [13]. In [5],
+a multi-agent receding horizon approach is proposed to
+generate each agent’s path independently using only local
+information. Their method ensured LTL satisfaction using
+the idea of energy function defined over a product automaton
+[11]. However, our work differs from [5] by 1) considering
+tasks with explicit time constraints (TWTL) and allowing
+its relaxation when necessary, and 2) guaranteeing collision
+avoidance under mild assumptions on graph connectivity. In
+[12], collision avoidance was ensured by penalizing transi-
+tions in the centralized graph which captures the environment
+and TWTL specifications for all agents. However, this cen-
+tralized approach is not scalable as the number of agents
+increases. Moreover, in [12], if a safe path satisfying the
+TWTL cannot be found, the algorithm terminates and does
+not allow for relaxations of the TWTLs. Finally, the work
+in [13] considered a global task that needs to be achieved
+by a multi-agent system and allowed for temporal relaxation
+of TWTL specifications. However, collision avoidance was
+not incorporated in path planning and practically achieved
+by the assumption of quadrotors flying at different altitudes.
+The paper is organized as follows: Section II introduces
+TWTL, its temporal relaxation, and some graph theory
+preliminaries. Section III states the problem. The proposed
+method and theoretical results are presented in Section IV.
+Results from numerical simulations and experiments with a
+team of quadrotors are presented in Section V. A summary of
+the work and possible future work is presented in Section VI.
+II. PRELIMINARIES
+A. Time Window Temporal Logic (TWTL)
+Syntax and Semantics: The syntax of TWTL is defined as:
+φ := s |φi ∧ φj |φi ∨ φj | ¬φi |φi · φj |Hds | [φi][a,b],
+where φ is a TWTL formula; s ∈ S is a site label and S is the
+set of site labels; ∧, ∨, and ¬ are the Boolean operators for
+conjunction, disjunction, and negation, respectively; · is the
+concatenation operator such that φi ·φj specifies that first φi
+and then immediately φj must be satisfied. The semantics are
+defined with respect to finite output words o over S where
+o(k) denotes the kth element on o. The hold operator Hds
+specifies that a region s ∈ S should be visited for d time
+units (i.e., o |= Hds if o(t) = s ∀t ∈ [0, d]), while the within
+operator [φ][a,b] bounds the satisfaction of φ within a time
+ar
+X
+iv
+:2
+00
+7.
+12
+27
+8v
+1 
+ [
+cs
+.R
+O
+] 
+ 2
+3 
+Ju
+l 
+20
+20
+window [a, b]. For instance, consider the TWTL formula:
+φ = ¬C [0,5] ·
+[
+H2A ∧ [H2B][0,6]
+][1,10]
+, (1)
+which means “Do not visit C within the time bound [0,5],
+and immediately after this, service A for 2 time units and
+service B for two time units within [0,6], both of which must
+be performed within [1,10].”
+Temporal Relaxation: Given a TWTL specification, its tem-
+poral relaxation is written by adding slack variables to the
+time windows of each hold operator to represent shorter or
+longer time windows. The relaxed version of φ in (1) is:
+φ(τ ) = ¬C [0,(5+τ1)] ·
+[
+H2A ∧ [H2B][0,(6+τ2)]
+][1,(10+τ3)] (2)
+where τ = (τ1, τ2, τ3) ∈ Z3 is the temporal relaxation
+vector. Overall, the temporal relaxation of φ(τ ) is quantified
+by |τ |TR = maxj(τj) [10].
+For any TWTL specification, φ, a finite deterministic
+state automaton (dFSA) can be constructed that captures all
+temporal relaxations of φ.
+Definition 1. (Deterministic Finite State Automaton) [10]
+A dFSA that represents all temporal relaxations of a TWTL
+formula is a tuple A∞ = (SA∞ , s0,Σ, δA∞ , FA∞)1 where
+SA∞ is a finite set of states; s0 ∈ SA∞ is the initial state;
+Σ is the input alphabet; δA∞ : SA∞ × Σ → SA∞ is the
+transition function; FA∞ ⊆ SA∞ is the set of accepting
+states.
+B. Graph Theory
+A weighted directed graph is a tuple G = (X,∆, w) where
+X is a set of nodes, ∆ ⊂ X ×X is a set of edges between
+the nodes, and w : ∆ → R+ denotes the weight function,
+which is a mapping from the edge set to the set of positive
+real numbers. A node xj ∈ X is said to be an out-neighbor
+to another node xi ∈ X if (xi, xj) ∈ ∆, this can also be
+denoted by xj ∈ Ni where Ni is the set of out-neighboring
+nodes to xi. For brevity, we will use the term “neighbor” to
+refer to “out-neighbor” in the rest of the paper. A path p on
+a graph G is a sequence of adjacent nodes, i.e, there exists an
+edge from any node in p to the next node in the sequence. We
+use |p| to denote the path length (the total number of edges
+traversed on p). The weighted graph distance between the
+nodes, d(xi, xj), is equal to the cumulative weight of edges
+traversed along the shortest (minimum cumulative weight)
+path from xi to xj . We use N hi to denote the set of all
+nodes that are reachable from xi in at most h-hops (via a
+path of length at most h). A graph is strongly connected if
+there exists a path from any node xi to any other node xj .
+The graph G is said to be k-connected if it remains connected
+whenever fewer than k nodes are removed.
+III. PROBLEM STATEMENT
+A. Agent Model
+Dynamics: We assume that an agent moves in a 3D en-
+vironment, whose abstraction is initially given as a graph
+G = (X,∆, w). In general, several methods (e.g., [14], [15])
+1The subscript ∞ is used to indicate all temporal relaxations.
+can be used to construct such an abstraction; however, the
+construction of the abstraction is beyond the scope of this
+paper. Given an environment graph, we model the dynamics
+of each agent as a deterministic weighted transition system.
+Moreover, the agents move synchronously on G meaning
+state transitions for any agent happens at the same time.
+Definition 2. (Deterministic Weighted Transition System) A
+deterministic weighted transition system (dWTS) is a tuple
+T = (X,x0,∆, w,AP, l) where:
+• X is a finite set of states;
+• x0 ∈ X is the initial state;
+• ∆ ⊆ X ×X is the set of transitions;
+• w : ∆→ R+ is the weight function;
+• AP is a finite set of atomic propositions;
+• l : X → 2AP is the labeling function.
+We assume that the transition system T is (strongly)
+connected, that is, for each x ∈ X , there exists x′ ∈ X that
+can be reached in a finite number of transitions. A path (or
+run) of the system is a sequence of states x = x0x1 . . .. This
+path x generates an output word o = o0o1 . . ., where ot =
+l(xt), ∀t ≥ 0. The language corresponding to a transition
+system T is the set of all generated output words, denoted by
+L(T ). The weight of a transition can be defined by the time
+and/or fuel cost required to traverse the transition. Without
+loss of generality, we will consider normalized weights, i.e.,
+w(x, x′) ∈ (0, 1] for all (x, x′) ∈ ∆.
+Communication: All agents are assumed to communicate
+with the agents within their 2H-hop neighborhood where
+H ≥ 1 is the length of planning horizon. When agents
+communicate, each shares its progress towards its individual
+task (a notion to measure progress will be defined in Sec. IV),
+the next H-hop path, and an indicator for planning update.
+Specification: Each agent i aims to satisfy a TWTL φi that is
+defined over the atomic proposition set AP of the transition
+system T . It is assumed that agents do not know about the
+other agents’ specifications. In presence of violations, instead
+of terminating the mission, it will be allowed to satisfy a
+temporally relaxed version of φi, i.e., φi(τ i).
+B. Problem Statement
+Suppose that there are n identical agents, each of which
+has the same transition system T . We address the problem
+of planning paths for n agents, each of which is required
+to satisfy an individual TWTL specification while avoiding
+collisions with each other. In order to enforce collision
+avoidance, the collision cases are first identified.
+Occupying the same state: If agent i occupies the same state
+as another agent j, then there exists a time t ≥ 0 such that
+xit = x
+j
+t .
+Traversing the same transition: Let agents i and j move
+according to the transitions denoted as (xit, x
+i
+t+1) and
+(x
+j
+t , x
+j
+t+1), respectively. If (x
+i
+t, x
+i
+t+1) = (x
+j
+t+1, x
+j
+t ), then the
+agents traverse the same transition (i.e., swapping).
+Finally, a safe path can be formally defined as:
+Definition 3. (Safe path) The path of agent i, xi = xi0x
+i
+1 . . . ,
+is safe if the following statements are true for all t ≥ 0 and
+for all j 6= i: 1) xit 6= x
+j
+t , and 2) (x
+i
+t, x
+i
+t+1) 6= (x
+j
+t+1, x
+j
+t ).
+In this paper, we aim to solve a multi-agent path planning
+problem, which results in agent paths always ensuring col-
+lision avoidance and satisfying the TWTL specifications (or
+minimally relaxed versions of the original TWTLs).
+Problem 1. Let a multi-agent system consist of n identi-
+cal agents each of which has a transition system T and
+individual TWTL specifications φi. Find safe agent paths
+x1, . . . ,xn that satisfy minimally relaxed TWTL specifica-
+tions φ1(τ 1), . . . , φn(τn), i.e.,
+min
+x1,...,xn
+n∑
+i=1
+|τ i|TR
+s.t. xit 6= x
+j
+t , ∀j 6= i
+(xit, x
+i
+t+1) 6= (x
+j
+t+1, x
+j
+t ), ∀j 6= i
+oi |= φi(τ i), ∀i ∈ {1, ..., n}.
+(3)
+where oi is the output word associated with the state path
+xi = x
+i
+0x
+i
+1 . . . over T , and |τ i|TR ∈ Z is the temporal
+relaxation of φi.
+C. Challenges of a Centralized Solution
+The multi-agent problem defined in (3) can be solved
+via an automata-theoretic approach. To this end, a product
+automaton P can be constructed for each agent given its
+transition system T and its automaton A∞. The purpose of
+product automaton is to encode all possible satisfactory cases
+given the feasible movement on the transition system.
+Definition 4. (Product Automaton) Given a transition system
+T = (X,x0,∆, w,AP, l) and a finite state automaton A∞ =
+(SA∞ , s0,Σ, δ, FA∞) capturing all temporal relaxations of
+a TWTL specification, a (weighted) product automaton P =
+T × A∞ is a tuple P = (SP , p0,∆P , wp, FP), where
+• SP = X × SA∞ is the finite set of states;
+• p0 := (x0, s0) ∈ SP is the initial state;
+• ∆P ⊆ SP × SP is the set of transitions;
+• wp : ∆P → R+ is the weight function defined as:
+wp
+(
+(x, s), (x′, s′)
+)
+= w
+(
+(x, x′)
+)
+;
+• FP = X × FA∞ is the set of accepting states.
+Let p = (x, s) ∈ SP and p′ = (x′, s′) ∈ SP be states in
+product automaton P . A transition from p to p′, i.e., (p, p′) ∈
+∆P , implies a transition (x, x′) ∈ ∆ and δ(s, l(x′)) = s′.
+The notions of path and acceptance are the same as in dFSA.
+A satisfying run of T with respect to φ can be obtained by
+computing a path from the initial state to an accepting state
+over P and projecting the path onto T .
+The centralized solution of (3) requires to construct an
+aggregated product automaton Pfull = Tfull × A∞,full
+where Tfull is the cartesian product of T for n times,
+and A∞,full = A∞,1 × A∞,2 × . . . × A∞,n. Such an
+aggregated product automaton captures all possible agent
+movements and enable to find safe paths that satisfy the
+TWTL specifications (or their temporal relaxations). While
+such an approach can result in optimal agent trajectories,
+the complexity of constructing Pfull exponentially grows
+as the number of agents n increases. Hence, we propose
+a decentralized approximate solution to Problem 1 by con-
+structing individual product automaton of each agent and
+solve a planning problem over individual product automata
+by using only local neighborhood information.
+IV. RECEDING HORIZON SAFE PATH PLANNING WITH
+TWTL SATISFACTION
+The proposed decentralized approach is comprised of
+two parts. In the offline part, a product automaton Pi is
+constructed for each agent i given its transition system T
+and automaton A∞,i (representing all temporal relaxations
+of TWTL φi). Based on P1, . . . ,Pn, each agent computes its
+nominal plan (from its initial product automaton state to an
+accepting state in FPi via a Dijkstra-based algorithm) irre-
+spective of other agents’ paths. Note that the path computed
+over P is pi = (xit, sit)(xit+1, sit+1) . . . , so the corresponding
+path xi on T can always be extracted from pi.
+In the online portion, agents move according to the path
+pi. Whenever an agent encounters other agents in its local
+neighborhood, a negotiation protocol, i.e., priority assign-
+ment to the agents, is performed. This protocol is used to
+decide which agents are “yielded” to by considering their
+respective paths for collision avoidance. Such a priority
+assignment is achieved by the energy function defined over
+the product automaton states.
+Definition 5. (Energy Function) Given a product automaton
+P , the energy of a product automaton state p ∈ SP is defined
+similar to [11] as,
+E(p,P) =
+{
+min
+p′∈FP
+d
+(
+p, p′
+)
+if p 6∈ FP
+0 otherwise
+(4)
+where d
+(
+p, p′
+)
+is the weighted graph distance between p and
+p′. If there is no such reachable accepting state p′ ∈ FP ,
+the energy of p is E(p,P) = ∞. Accordingly, the energy
+function serves as a measure of “progress” towards satisfying
+the given TWTL specification. Any states in P with infinite
+energy, E(p,P) = ∞, are pruned from P to ensure the
+satisfiability of the specification.
+Each agent i is given an initial priority based on the
+energy of its current state, E(pit,Pi). An agent with lower
+energy is given priority over the higher energy agents in
+its local neighborhood in order to ensure finite relaxation
+of all TWTL specifications as discussed in Sec. IV-B. If
+agents have equivalent energy then the higher priority agent
+is chosen at random between these agents. Note that the
+highest priority agent does not consider the other agents
+and is never required to do replanning; therefore, we can
+guarantee progress toward satisfying its TWTL specification.
+For a local horizon path that consists of H-hops, a
+minimum communication neighborhood of 2H is required
+to detect collisions along the H-length path. We define this
+communication neighborhood of 2H as the local neighbor-
+hood. For an agent i, we consider the set of its 2H-hop
+neighbors as N 2Hi . For each agent i in the environment,
+the proposed method requires that all agents in its local
+neighborhood, j ∈ N 2Hi , communicate their H-horizon
+path information, pj = p
+j
+t , p
+j
+t+1, . . . , p
+j
+t+H with agent i at
+any time instant t. The method also requires sharing of an
+indicator that states if the agent’s path has been updated with
+respect to its local neighborhood. We denote this “update
+flag” as Uflag which is required for a proper path update
+protocol discussed below.
+A. Algorithm Descriptions
+The outline of the proposed method is shown in Fig.
+1 for a single agent. Note that the proposed method runs
+independently (for each agent) in a distributed manner.
+Online Computation
+While φi not satisfied:
+- find agents in neighborhood
+- assign priorities to agents
+- compute conflict states and transitions
+- generate local horizon path
+- append first state to safe path
+- check if φi satisfied
+Algorithm1
+- compute the set of
+constraints C
+Algorithm2
+- generate receding
+horizon path
+pi = p
+i
+t . . . p
+i
+t+H
+Algorithm3
+Ai,∞: dFSA for φi
+Pi: product automaton
+E(·,Pi): energy function
+pi: nominal plan
+Offline Computation
+φi: TWTL specification
+T : dWTS
+Inputs
+pSi : safe plan which satisfies oi |= φ(τ i)
+Final Output
+Fig. 1. Outline of the proposed method.
+In the offline part, the product automaton and a nominal
+plan (without considering any other agents) are computed.
+The online part includes Algorithms 1-3. First, Alg. 1 takes in
+the initial information computed offline and executes until an
+accepting product automaton state is reached (i.e., satisfying
+either the original or the temporally relxaed TWTL formula,
+φi) (line 3). In each iteration of the while loop, the set of all
+agents within agent i’s local neighborhood, N 2Hi , is found
+in line 4. Next, the agent priorities are determined for all
+neighboring agents including the agent i itself (line 5). Note
+that agent priority depends on the energy associated with the
+agent’s current state, E(pit,Pi). Then, the set of agents which
+have a higher priority than agent i, i.e., HPi is generated
+(line 6). Note that the set HPi will be used by Alg. 2 to
+determine the set of conflicting states and transitions. Now,
+line 7 in Alg. 1 ensures that all agents in HPi have been
+updated based on their local neighborhoods before agent
+i’s path can be updated. This step is required to ensure
+that the current finite horizon path information obtained in
+line 8 from all agents in N 2Hi is correct (line 9) and the
+set of conflicting states and transitions, C, can be properly
+computed in (line 9). The, the set C is used in line 10 in order
+to find a finite horizon safe path starting from the current
+state (according to Def. 3). With an updated safe path, the
+finite-path information and update flag, which is now set to
+true, are shared with the neighboring agents (line 11). Note
+that line 12 ensures that the updated path is not executed until
+all agents in its local neighborhood have updated their own
+paths to account for potential collisions with higher priority
+agents. As in conventional receding horizon approaches, only
+the next state pi(1) of the generated path is appended to the
+safe plan psi (line 13). Lastly, line 14 checks if pi(1) is an
+accepting product automaton state, and if so the agent has
+satisfied its TWTL specification, φ(τ i), and is assigned with
+the lowest priority (line 15). The agent’s path is advanced
+one step and the update flag is set back to false (line 16).
+Algorithm 1: Online Safe Path Planning for Agent i
+Input: Pi, pi Product Automaton and Nominal Plan
+1 Note: pit =
+(
+xit, s
+i
+t
+)
+is an element of the finite horizon path
+pi = p
+i
+t, . . . , p
+i
+t+H ;
+2 Initialization: xi0 = p
+i
+x,0;p
+s
+i = p
+i
+0; Uflag = false;
+3 while pit /∈ FP do
+4 Find the set of neighboring agents, N 2Hi ;
+5 Compute agent priorities (including self);
+6 Generate HPi, the set of neighboring agents with higher
+priority;
+7 Wait until all agents’ Uflag in HPi set to true;
+8 Obtain H-hop path pj from agents ∀j ∈ N 2Hi ;
+9 C ← algorithm2
+(
+HPi,Pi,pi,pj |∀j ∈ HPi
+)
+;
+10 pi, Uflag ← algorithm3 (Pi, pit, C);
+11 Share path pi and Uflag with neighboring agents, N 2Hi ;
+12 Wait until all agents’ Uflag in N 2Hi set to true;
+13 psi = p
+s
+i ,pi(1)
+14 if pi(1) ∈ FP then
+15 HPi = N 2Hi
+16 pit = pi(0) and Uflag = false ;
+In Alg. 2, we account for two types of conflicts in order to
+guarantee a safe update in Alg. 3. The first type of conflict,
+CX , enforces that agent i cannot occupy the same state with
+an agent of higher priority at the next time step as required
+by the first constraint in (3) (lines 4-5). The second type
+of conflict, C∆, enforces that no two agents’ traverse the
+same transition (i.e., swapping) as the second constraint in
+(3) (lines 6-7). If any conflicts, CX or C∆, are found then
+they are added to the set of conflicting states and transitions,
+C, with the hop h associated with them (line 8). Finally,
+lines 9-10 in Alg. 2 ensures that the highest priority agent
+cannot transition to higher energy states in the first hop.
+This is required in order to guarantee progress toward TWTL
+satisfaction discussed in Sec. IV-B-Thm. 2.
+The objective of Alg. 3 is to generate a local H-hop path
+over the agent’s product automaton, Pi. Alg. 3 essentially
+Algorithm 2: Find Conflicts for Agent i
+Input: HPi,Pi - Set of higher priority agents than agent i in
+local neighborhood, product automaton
+Input: pi,pj |∀j ∈ HPi - finite horizon paths considered for
+conflicts (Recall pi = pit, . . . , p
+i
+t+H )
+Output: C - Set of conflict states and transitions
+1 Initialization: CX = ∅, C∆ = ∅, C = (CX , C∆), xi0 = xit,
+x
+j
+0 = x
+j
+t
+2 for h = 1 : H do
+3 for each agent j in HPi do
+4 if xih = x
+j
+h then
+5 CX,h = x
+j
+h
+6 if (xit, x
+i
+t+1) 6= (x
+j
+t+1, x
+j
+t) then
+7 C∆,h = (x
+i
+h−1, x
+i
+h)
+8 C = C ∪ (CX,h, C∆,h)
+9 if HPi == ∅ and E(pit,Pi) > 0 then
+10 C∆,1 = {(xit, x′) from (pit, p′) ∈ ∆Pi |Ei(p
+′,Pi) ≥
+E(pit,Pi)}
+11 return C = (CX , C∆)
+performs a depth-first-like search from the current state pit on
+Pi to find a conflict-free H-length path that has the minimum
+the sum of energies. To this end, the set of H-length safe
+paths originating from pit is found in lines 1 and 2 by making
+sure that each pit+h = (x
+i
+h, s
+i
+h) over an H-length safe path
+satisfies xih /∈ CX,h and (x
+i
+h−1, x
+i
+h) /∈ C∆,h for all h =
+{1, . . . ,H}. Then, the cost of each path is computed as the
+sum of energies of each state in the path (line 3). Finally, the
+path with lowest cumulative energy is chosen (line 4) and
+the update flag is set to true (line 5). This path and update
+flag are then returned to line 10 of Alg. 1.
+Algorithm 3: Receding Horizon Plan for Agent i
+Input: Pi, pit - Product automaton and current state
+Input: C - Set of conflict states and transitions
+Output: pi, Uflag - Conflict-free path; Update flag
+1 Find the set of all H-length paths starting from pit, P
+H ;
+2 Find safe paths Ps ⊆ PH by removing the paths that contain
+conflicts based on C = (CX , C∆);
+3 Calculate the cumulative energy Ekpath of each p
+k ∈ Ps;
+4 pi = arg min
+pk∈Ps
+(Ekpath);
+5 Uflag = true
+6 return pi, Uflag
+B. Theoretical Results
+Now, we will show that the proposed method guarantees
+the generation of a safe path which satisfies the correspond-
+ing agent’s TWTL formula or a finite relaxation of it, φ(τ ).
+Theorem 1. (Safety) If the environment graph G =
+(X,∆, w) is n-connected, then Alg. 1 always produces a
+safe path pi which satisfies the properties in Def. 3.
+Proof. Path planning for each agent i in Alg. 1 is imple-
+mented over the product automaton, Pi, which is pruned
+of any unsafe states and transitions, C = (CX , C∆) (found
+in Alg. 2 according to Def. 3). The n-connectivity of the
+environment graph G implies that any node in G has at
+least n neighbors. This means that an agent can move to
+at least n different adjacent states in its transition system T
+at one time step. Considering a system with n agents, at any
+time step t, the number of conflicting states for agent i is
+at most n− 1, i.e., |CX | ≤ n− 1. Therefore, n-connectivity
+guarantees that, after the pruning of the conflicted states
+by Alg. 2, there always exists at least one unoccupied
+state in the neighborhood (which is mapped to the product
+automaton state, i.e., the pair of the unoccupied state in T
+and the corresponding automaton state). Thus at least one
+safe transition exists over P to take. Finally, since Alg. 3
+generates a path pi over P ′i ⊂ Pi that is pruned of the states
+and transitions in C, pi is always a safe path.
+In order to guarantee that the energy of each agent de-
+creases to zero in finite time, we show that each agent in the
+system will eventually be the globally highest priority agent
+meaning that all other agents in the environment “yield” to
+it, and the only goal of the highest priority one becomes to
+decrease its energy (which is computed offline in a topology
+where CX = ∅ and C∆ = ∅). This enables the agent to
+decrease its energy during the receding horizon plan (for
+each successive update) and will reach an accepting state
+p ∈ FP in finite time which by definition has E(p,P) = 0.
+Theorem 2. (Satisfaction of TWTL with Finite Relaxation) If
+agent i has an initial product automaton state pi0 such that
+E(pi0,Pi) < ∞, then Alg. 1 produces a finite path which
+satisfies the given TWTL specification or a relaxed version
+of the specification, φ(τ i).
+Proof. If E(pi0,Pi) = ∞, then an accepting state is not
+reachable from pi0. Suppose that agent i has the global
+highest priority at time t, i.e., E(pit,Pi) ≤ E(pit,Pj), ∀j 6= i.
+Then Alg. 2 (line 10) always updates C∆ with the transitions
+that lead agent i to higher energy states in the next time step,
+i.e., C∆,1 = {(xit, xit+1) from
+(
+(xit, s
+i
+t), (x
+i
+t+1, s
+i
+t+1)
+)
+∈
+∆Pi |E(pit+1,Pi) ≥ E(pit,Pi)}. Accordingly, line 5 in
+Alg. 3 guarantees to prune the transitions in C∆,1, thus
+E(pit+1,Pi) < E(pit,Pi) is always true.
+Let t be the current time. If all agents have zero energy
+at t, then all the TWTL specifications are satisfied originally
+or with some temporal relaxation by time t. If there exists at
+least one agent that has a non-zero energy, then we will show
+that non-zero energies will eventually go to zero. Suppose
+that agent i has the minimum non-zero energy at time t,
+i.e., E(pmint ,Pmin) = E(pit,Pi), meaning that it is the
+global highest priority agent. Moreover, E(pmint+1 ,Pmin) ≤
+E(pit+1,Pi) by definition. Overall, the previous three energy
+relations imply E(pmint+1 ,Pmin) < E(pmint ,Pmin), i.e., the
+minimum non-zero energy strictly decreases even when the
+highest priority agent has changed.
+C. Computational Complexity
+We discuss the computational complexity for a single
+agent as we propose a decentralized approach. We show that
+the bulk of the computation lies in constructing the product
+automaton and computing the energy of its states, which are
+both performed offline. The complexity of generating the
+weighted product automaton P is highly dependent on the
+size of the transition system T and the size of the TWTL
+formula used to construct A∞, i.e., O
+(
+|X|×|φ|×2|φ|+|AP |
+)
+where |X| is the number of states in T , and |φ|×2|φ|+|AP | is
+the maximum number of states in A∞ created from TWTL
+φ. Note that the size ofA∞ is independent of the deadlines of
+the within operators in φ [10] thus the quantity of relaxation
+does not influence the automata sizes. In light of Section 4.3
+of [11], the complexity of computing the energy function is
+O(|FP |3 + |FP |2 + |SP |2 × |FP |) where FP is the set of
+accepting states and SP is the set of states in the product
+automaton P . Note that this is only computed once offline.
+The complexity of generating local horizon plans in Alg. 3 is
+highly dependent on the horizon length H . If we consider the
+maximum number of transitions at each state of P as δP , then
+the number of operations for the receding horizon update
+scales as O
+(
+δHP
+)
+which is similar to a depth-first search.
+V. RESULTS
+The code for our simulations and experiments is derived
+from the PyTWTL package (hyness.bu.edu/twtl)
+which handles the construction of A∞ corresponding to a
+given TWTL φ, and the creation of the product automaton
+P given a transition system T . The algorithms presented
+in this paper can be found at https://github.com/
+pete9936/pyTWTL_ObsAvoid. All simulations were
+carried out on a desktop computer with 4 cores running
+Ubuntu 16.04, 4.0GHz CPU, and 32GB of RAM.
+In simulations, five agents moving in an environment
+shown in Fig. 2 are considered, where each agent is given a
+different TWTL specification defined over the environment.
+φ1 = [H
+2B][0,(6+τ
+1
+1 )] · [H1A][0,(5+τ
+1
+2 )],
+φ2 = [H
+2B][0,(5+τ
+2
+1 )] · [H1C][0,(4+τ
+2
+2 )],
+φ3 = [H
+1D][0,(4+τ
+3
+1 )] · [H2F ][0,(4+τ
+3
+2 )], (5)
+φ4 = [H
+1E][0,(5+τ
+4
+1 )] · [H1Base4][0,(3+τ
+4
+2 )],
+φ5 = [H
+1G][0,(6+τ
+5
+1 )] · [H1Base5][0,(6+τ
+5
+2 )],
+where τ i1 and τ
+i
+2 refer to the temporal relaxations of the
+corresponding tasks of agent i. All five TWTL specifications
+are examples of servicing some regions in sequence. These
+were kept relatively simple and of similar form to illustrate
+how the number of agents and horizon length impact perfor-
+mance and computation time (shown in Tables II and III). In
+practice, these task specifications can be made more complex
+due to the richness of the TWTL language.
+For each agent, the temporal relaxations of the nominal
+and collision-free paths are highlighted in Tab. I. For the
+given scenario, Tab. I shows that only Agent 1 needs positive
+temporal relaxation. This is due to Agent 1 waiting Agent
+2 to satisfy the “service B for 2 time units” part of its
+formula since Agent 2 has higher priority (lower energy)
+than Agent 1 as illustrated in Fig. 3. Notice that while
+Fig. 2. The 6 x 6 x 3 discretized environment shared by 5 agents.
+Initial positions are given by the green nodes. Obstacles are shown
+in red, and seven regions of interest (A, B, C, D, E, F, G) are shown
+in magenta. Agents can stay put or move to any neighboring cell
+(non-obstacle) in one time step.
+Agent 1 is waiting between t ∈ [2, 4], its energy is not
+decreasing (no progress towards task satisfaction) in Fig. 3.
+Also, negative relaxation in Tab. I implies that the formulae
+are satisfied within a shorter time window than the time
+window originally allotted.
+TABLE I
+TEMPORAL RELAXATION (τ ) OF PATHS.
+Nominal paths Safe paths
+x1 x2 x3 x4 x5 x1
+S x2
+S x3
+S x4
+S x5
+S
+τ1 −1 -1 -1 -1 -1 +1 -1 -1 -1 -1
+τ2 -1 -1 0 0 -1 -1 -1 0 0 -1
+For the 6 × 6 × 3 environment shown in Fig. 2, each
+respective agent has a transition system T of (102; 1594)
+states and transitions and a product automaton Pi of about
+(200; 3200) states and transitions. The offline part of our
+approach (generating T , P1...5, Ei..., and the nominal paths
+p1, . . . ,p5) takes 3.90 seconds. Generating the collision-free
+paths (the online portion of our algorithm) with a horizon
+length H = 3 takes 1.17 seconds. However, the metric of
+greater concern is the average time for an individual agent’s
+receding horizon update which is approximately 0.0275
+seconds, fast enough for real-time execution.
+We define the iteration time as the time consumed by a
+single agent to update its receding horizon path. Table II
+shows the total online run-time (i.e., the sum of all iteration
+times of all agents) and the average iteration time for varying
+lengths of horizon. As seen from Tab. II, the average iteration
+time (and the total run time) significantly grows when the
+horizon, H , increases (as discussed in Sec. IV-C). Note that
+the safe paths generated based on the TWTL formulae (5)
+trying to be satisfied in Fig. 2 were identical for all values of
+H , meaning that extended path information from neighboring
+agents did not affect the outcome of this scenario. However,
+in more constrained environments such as a narrow corridor
+with many agents, increasing the horizon will potentially
+influence the outcome as longer paths will include more
+information from the neighbors.
+Selecting the horizon H = 3, Table III shows that the
+total online run-time increases linearly with the number of
+hyness.bu.edu/twtl
+https://github.com/pete9936/pyTWTL_ObsAvoid
+https://github.com/pete9936/pyTWTL_ObsAvoid
+Fig. 3. The agent energy values at each state along the paths
+are shown as well as the collective energy of the system. These
+energy values correspond to each state along the path which leads
+to satisfaction of each agents’ TWTL formula shown in (5).
+TABLE II
+HOW RECEDING HORIZON LENGTH IMPACTS EXECUTION TIME
+H = 2 H = 3 H = 4
+Total Online Run-time (s) 0.15 1.17 68.1
+Avg. Iteration time (s) 0.0037 0.0275 1.621
+TABLE III
+HOW NUMBER OF AGENTS IMPACTS EXECUTION TIME (H=3)
+n = 3 n = 4 n = 5
+Total Online Run-time (s) 0.63 0.83 1.17
+Avg. Iteration time (s) 0.0253 0.0259 0.0275
+agents. This is due to the fact that all n agents must update
+their respective paths at each step before moving to the
+next iteration since we are running the simulations on a
+centralized machine. However, in general, our method can be
+run in a distributed manner where this computation would
+only increase based on the number of agents in the local
+neighborhood at each iteration, |N 2Hi |. The average time for
+an individual agent’s path update is hardly impacted by the
+number of agents in the scenario, which implies that the
+numbers of agents in the local neighborhood are almost the
+same across different cases of total number of agents.
+The proposed method is also verified experimentally on a
+team of five Crazyflies 2.0. All experiments are conducted
+in a testing environment of 3m × 3m × 1.5m motion-
+capture space identical to the simulation environment shown
+in Fig. 2, using a VICON camera system with 8 cameras.
+We use the Crazyswarm package [16] to perform the low-
+level control algorithms, communication, and interface of
+the VICON system with the Crazyflies. Note that in the
+experiments a “downwash zone” below each quadrotor was
+considered, since entering these regions would lead to loss
+of flight. This restriction was not formally considered in
+the presented method since this is both an environment and
+agent-dependent constraint. An instance from the experiment
+is shown in Fig. 4 and a video of the experiment can be found
+at https://youtu.be/A7iadOqIVNk.
+Fig. 4. An instance from the experiment which includes 5 Crazyflies
+and bases (brown), obstacles (red), some regions of interest (blue).
+VI. CONCLUSIONS AND FUTURE WORK
+We present an automaton-theoretic approach for gener-
+ating collision-free paths for a multi-agent system such
+that each agent satisfies an individual task encoded as a
+TWTL specification in finite time. The proposed approach
+guarantees both collision avoidance among agents (and static
+obstacles) and the satisfaction of the individual TWTL
+specifications (with a finite relaxation) given some mild as-
+sumptions on the environment. Simulation and experimental
+results show that the proposed approach can be used in real-
+time applications and scales well with increasing number of
+agents. Future work may include to relax the assumption for
+environment connectivity and ensure collision avoidance in
+more cluttered environments.
+REFERENCES
+[1] L. Wang, A. D. Ames, and M. Egerstedt, “Safety barrier certificates for
+collisions-free multirobot systems,” IEEE Transactions on Robotics,
+vol. 33, no. 3, pp. 661–674, 2017.
+[2] C. E. Luis and A. P. Schoellig, “Trajectory generation for multiagent
+point-to-point transitions via distributed model predictive control,”
+IEEE Robotics and Automation Letters, vol. 4, no. 2, pp. 375–382,
+2019.
+[3] T. Mylvaganam, M. Sassano, and A. Astolfi, “A differential game
+approach to multi-agent collision avoidance,” IEEE Transactions on
+Automatic Control, vol. 62, no. 8, pp. 4229–4235, 2017.
+[4] C. Baier, J.-P. Katoen et al., Principles of Model Checking. MIT
+press Cambridge, 2008, vol. 26202649.
+[5] D. Aksaray, K. Leahy, and C. Belta, “Distributed multi-agent persistent
+surveillance under temporal logic constraints,” IFAC-PapersOnLine,
+vol. 48, no. 22, pp. 174–179, 2015.
+[6] G. E. Fainekos, A. Girard, H. Kress-Gazit, and G. J. Pappas, “Temporal
+logic motion planning for dynamic robots,” Automatica, vol. 45, no. 2,
+pp. 343–352, 2009.
+[7] E. M. Wolff, U. Topcu, and R. M. Murray, “Optimization-based
+trajectory generation with linear temporal logic specifications,” in Int.
+Conference on Robotics and Automation (ICRA). IEEE, 2014, pp.
+5319–5325.
+[8] R. Koymans, “Specifying real-time properties with metric temporal
+logic,” Real-Time Systems, vol. 2, no. 4, pp. 255–299, 1990. [Online].
+Available: http://dx.doi.org/10.1007/BF01995674
+[9] I. Tkachev and A. Abate, “Formula-free Finite Abstractions for Linear
+Temporal Verification of Stochastic Hybrid Systems,” in Proc. of the
+16th Int. Conference on Hybrid Systems: Computation and Control,
+Philadelphia, PA, April 2013.
+[10] C.-I. Vasile, D. Aksaray, and C. Belta, “Time window temporal logic,”
+Theoretical Computer Science, vol. 691, pp. 27–54, 2017.
+https://youtu.be/A7iadOqIVNk
+http://dx.doi.org/10.1007/BF01995674
+[11] X. Ding, M. Lazar, and C. Belta, “Ltl receding horizon control for
+finite deterministic systems,” Automatica, vol. 50, no. 2, pp. 399–408,
+2014.
+[12] C.-I. Vasile and C. Belta, “An Automata-Theoretic Approach to the
+Vehicle Routing Problem,” in Proceedings of the Robotics: Science
+and Systems (RSS), Berkeley, California, USA, July 2014.
+[13] D. Aksaray, C.-I. Vasile, and C. Belta, “Dynamic routing of energy-
+aware vehicles with temporal logic constraints,” in Int. Conference on
+Robotics and Automation (ICRA). IEEE, 2016, pp. 3141–3146.
+[14] G. J. Pappas, “Bisimilar linear systems,” Automatica, vol. 39, no. 12,
+pp. 2035–2047, 2003.
+[15] A. Nikou, D. Boskos, J. Tumova, and D. V. Dimarogonas, “On
+the timed temporal logic planning of coupled multi-agent systems,”
+Automatica, vol. 97, pp. 339–345, 2018.
+[16] J. A. Preiss, W. Honig, G. S. Sukhatme, and N. Ayanian, “Crazyswarm:
+A large nano-quadcopter swarm,” in Int. Conference on Robotics and
+Automation (ICRA). IEEE, 2017, pp. 3299–3304.
+	I Introduction
+	II Preliminaries
+	II-A Time Window Temporal Logic (TWTL)
+	II-B Graph Theory
+	III Problem Statement
+	III-A Agent Model
+	III-B Problem Statement
+	III-C Challenges of a Centralized Solution
+	IV Receding Horizon Safe Path Planning with TWTL Satisfaction
+	IV-A Algorithm Descriptions
+	IV-B Theoretical Results
+	IV-C Computational Complexity
+	V Results
+	VI Conclusions and Future Work
+	References

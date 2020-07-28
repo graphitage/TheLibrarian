@@ -1,0 +1,654 @@
+Deep Preset: Blending and Retouching Photos with Color Style Transfer
+Man M. Ho
+Hosei University
+Tokyo, Japan
+man.hominh.6m@stu.hosei.ac.jp
+Jinjia Zhou
+Hosei University and JST
+Tokyo, Japan
+jinjia.zhou.35@hosei.ac.jp
+Abstract
+End-users, without knowledge in photography, desire to
+beautify their photos to have a similar color style as a well-
+retouched reference. However, recent works in image style
+transfer are overused. They usually synthesize undesirable
+results due to transferring exact colors to the wrong desti-
+nation. It becomes even worse in sensitive cases such as
+portraits. In this work, we concentrate on learning low-
+level image transformation, especially color-shifting meth-
+ods, rather than mixing contextual features, then present a
+novel scheme to train color style transfer with ground-truth.
+Furthermore, we propose a color style transfer named Deep
+Preset. It is designed to 1) generalize the features rep-
+resenting the color transformation from content with nat-
+ural colors to retouched reference, then blend it into the
+contextual features of content, 2) predict hyper-parameters
+(settings or preset) of the applied low-level color transfor-
+mation methods, 3) stylize content to have a similar color
+style as reference. We script Lightroom, a powerful tool
+in editing photos, to generate 600,000 training samples us-
+ing 1,200 images from the Flick2K dataset and 500 user-
+generated presets with 69 settings. Experimental results
+show that our Deep Preset outperforms the previous works
+in color style transfer quantitatively and qualitatively. Our
+work is available at https://minhmanho.github.
+io/deep_preset.
+1. Introduction
+Everyone has their life’s precious moments captured in
+photographs. It may tell stories about old memories such
+as a wedding, a birthday party. Although modern cameras
+have many techniques to correct the colors and enhance im-
+age quality, the natural color style may not express the sto-
+ries well. Therefore, many powerful tools in editing pho-
+tos (e.g., Lightroom [1]) have been released to enrich the
+preciousness of photographs. However, professional tools
+require professional skills and knowledge in photography.
+It causes the end-users a difficulty in making their pho-
+tos prettier. They may create an unexpected color style.
+Therefore, many photo applications provide fixed filters to
+beautify photos easier. Unfortunately, the filters are limited
+and do not meet the user’s expectations sometimes. Reg-
+ularly, experienced users try to mimic the color style of a
+well-retouched photo using a professional tool. Besides, re-
+touched photos with similar contexts give the users an over-
+all of their intended color style. It reveals a correlation be-
+tween human behavior and style transfer tasks. In this work,
+we present a novel training scheme based on blending and
+retouching photos for color style transfer; plus, we design a
+specific neural network, named Deep Preset, for our case.
+Photorealistic Style Transfer (PST). The seminal
+work, Neural Style Transfer (NST), of Gatys et al. [3]
+presents an optimization-based method transferring an artis-
+tic style into a photo using convolutional neural networks.
+Afterward, it has a huge improvement in achieving real-time
+performance [5], creating a novel way to transform contex-
+tual features based on mean and standard deviation (AdaIN)
+[4], whitening and coloring (WCT) [8]. However, the men-
+tioned methods are designed for artistic stylization rather
+than photorealistic stylization, which is challenging in re-
+taining structural details. Therefore, Luan et al. [12] pro-
+pose a regularization for NST to prevent distortion. How-
+ever, the optimization-based method costs long computa-
+tional time, and their result is still distorted. Li et al. [9]
+propose an enhanced photo stylization PhotoWCT based
+on WCT with post-processing such as smoothing and fil-
+tering techniques. Based on PhotoWCT, Yoo et al. [15]
+present a progressive strategy transferring style in a sin-
+gle pass, and propose Wavelet Corrected Transfer (WCT2)
+with wavelet pooling/unpooling. Furthermore, they do not
+need any post-processing; however, their performance still
+relies on semantic masks. Recently, An et al. [2] propose
+asymmetric auto-encoder PhotoNet with two modules, Bot-
+tleneck Feature Aggregation (BFA) and Instance Normal-
+ized Skip Link (INSL), without requiring post-processing
+and guided masks. Although the methods can retain struc-
+tural details with a well-transferred photo style, the net-
+work architectures are not explored well. Thus, they ap-
+1
+ar
+X
+iv
+:2
+00
+7.
+10
+70
+1v
+1 
+ [
+cs
+.C
+V
+] 
+ 2
+1 
+Ju
+l 
+20
+20
+https://minhmanho.github.io/deep_preset
+https://minhmanho.github.io/deep_preset
+Figure 1. Our concept and the problems of previous works Fast Photo Style (FPS) [9], WCT2 [15], PhotoNAS [2] shown with PSNR↑ /
+LPIPS↓ [17]. (↑: higher is better, ↓: lower is better).
+ply Network Architecture Search (NAS) to find an efficient
+network architecture for photorealistic style transfer (Pho-
+toNAS) under network complexity constraint. However, in
+blending and retouching photos, the previous methods in
+PST are overused transferring exact colors with degrada-
+tion, while the end-users desire to have a similar color style
+as a well-retouched photo, especially in sensitive cases such
+as portraits. The mentioned works transfer the exact colors
+of a retouched reference rather than learn the color trans-
+formation/style representation, as well as ”what beautifies
+the reference”. Consequently, their results show the color
+overflowed due to mis-transferring the color style, as shown
+in Figure 1. In this work, we define that the color style
+is a bunch of low-level image transformation methods con-
+verting a photo with natural colors (likely original colors
+taken by camera) to retouched one. In photo editing tools,
+each low-level image transformation method is controlled
+by a parameter (setting) telling how the method effects on
+the content, and a preset contains a bunch of parameters
+set by experienced user for a specific photo. Based on that
+definition, we present a novel training scheme for color
+style transfer with ground-truth by applying various user-
+generated presets. As a result, having ground-truth helps
+our model converged in the right direction rather than based
+on extracted features and mixing methods. Furthermore, we
+propose the Deep Preset to 1) learn well-generalized fea-
+tures representing color style transforming the input (natu-
+ral) to reference (retouched), 2) estimate the preset applied
+on the reference, 3) synthesize the well-retouched input.
+Color Blending. Nowadays, most digital cameras have
+post-processing techniques to correct color and enhance im-
+age quality. It provides natural colors for captured photos
+before saving. Afterward, photographers blend the colors
+according to their purposes, such as a wedding photo with
+a vintage color tone. In detail, they adjust the photo set-
+Figure 2. Illustration for color-shifting methods transforming the
+costume from cyan to blue. The panel is captured from Lightroom
+[1].
+tings representing low-level color transformation methods
+(e.g., Hue, Saturation, etc.), as shown in Figure 2. Regard-
+ing end-users without knowledge in editing photos, they use
+available color settings set by professional photographers
+for a specific context. It opens a novel scheme in gener-
+ating photos having the same color style for training. The
+ill-posed problem is how to generalize a color transforma-
+tion and enhance color style transfer. In our work, we con-
+sider two approaches: 1) Let the proposed Deep Preset pre-
+dict the preset, a color transformation behind the retouched
+reference. The extracted features from many contexts thus
+define the transformation. However, predicting an accurate
+preset is a difficult issue; we thus 2) add a positive pair-wise
+loss function to minimize distances between same-preset-
+applied photos in latent space. Consequently, the extracted
+features are robust, and Deep Preset can transfer reference’s
+style to another photo efficiently.
+Our contributions are as follows:
+• We present a novel way to train deep neural networks
+for color style transfer by applying user-generated pre-
+sets. Therefore, our work is the first work in training
+color style transfer with ground-truth.
+2
+Figure 3. Deep Preset transferring the color style of Reference Z to Input X .
+• We propose a specific deep neural network, named
+Deep Preset, to transfer the color style of a reference
+to a photo. As a result, our work outperforms pre-
+vious works qualitatively and quantitatively in color
+style transfer.
+• Our scheme, optimizing the distances between latent
+features of the photos applied by the same preset,
+shows the capability of enhancing color transformation
+as well as stylized output.
+• Our work can automatically beautify a photo by select-
+ing its suitable reference among well-retouched photos
+based on the perceptual measurement [17].
+2. Deep Preset
+2.1. Overview
+Blending and retouching photos help everyone to en-
+hance the preciousness of their life’s moments captured in
+photographs. Color style is the way of telling expression.
+However, it is not easy for them to create a plausible color
+style for their context. They thus search a well-retouched
+photo having the same contextual information for a refer-
+ence (a). Even a suitable sample is found, it is difficult
+for the end-users without knowledge in photography to re-
+touch their photos using powerful photo editing application
+(b). In our work, we solve (b) using our proposed Deep
+Preset, which can synthesize a similar color style as a ref-
+erence for a photo. Instead of considering photorealistic
+style, our Deep Preset considers which color-shifting meth-
+ods (preset) have been applied to the reference, and learns
+the features representing the cross-content color transfor-
+mation from natural colors (input) to retouched ones (refer-
+ence). Regarding the problem (a), we also provide a strat-
+egy to find a reference in a bunch of well-retouched photos
+by matching the contextual information [17]. Consequently,
+the end-users can retouch their photos in one-click. Addi-
+tionally, we minimize the distance between photos with the
+same color transformation to enhance generated color style
+and preset estimation. Our performance is thus improved.
+Our Deep Preset learns the cross-content color trans-
+formation from a natural photo X ∈ RH×W×3 to ref-
+erence Z ∈ RH×W×3 and generates the stylized photo
+Ŷ ∈ RH×W×3. Furthermore, our work also predicts the
+applied preset P ∈ R69 representing the hyper-parameters
+of 69 post-processing color-shifting techniques retouching
+Z, as shown in Figure 3. Besides, we extract embeddings
+FZ and FZ′ , ∀FZ , FZ′ ∈ R1024 from Z and Z ′ while pre-
+dicting the applied preset, where Z ′ is the random photo
+retouched by P same as Z.
+Our advantages are as follows:
+• Our models can be converged in the right direction
+with ground-truth. Meanwhile, previous works are
+significantly based on perceptual features and mixing
+methods.
+• Learning color transformation, rather than transferring
+exact colors in latent space, can reduce the sensitive-
+3
+Figure 4. Illustration for our Down- and Up-sampling Layers,
+where Conv2D is a convolutional module, EvoNorm-S0 denotes
+Sample-based Evolving Normalization-Activation [11], ⊕ repre-
+sents a summation, ∗ denotes that the first layer of both the en-
+coders and the fifth layer of the decoder G do not include the blur
+pooling [16].
+ness of color style transfer.
+• Our positive pair-wise loss function helps preset esti-
+mation to be stable and enhances generated color style.
+2.2. Network Architecture
+We adopt the U-Net [13], which is an encoder-decoder
+architecture, to design the Deep Preset. Our network in-
+cludes four main components: Encoder T , Encoder C, Lin-
+ear Layers L and Decoder G.
+First of all, the encoder T leverages the content X and
+the reference Z to synthesize feature maps representing
+color transformation. Meanwhile, the encoder C extracts
+contextual information preparing for blending features be-
+tween T and C. Afterwards, the linear L leverages the final
+feature map of T to extract the transformation embedding
+F∗ and estimate the preset P , as follows:
+F∗, P̂ = L(T (X,Z)) (1)
+where ∗ can be Z or Z ′, P̂ is the estimated preset. Fi-
+nally, the generator G leverages the concatenated features
+between T and C to synthesize the stylized photo Ŷ , as:
+Ŷ = G(T (X,Z) • C(X)) (2)
+where • represents concatenations of extracted feature maps
+between T and C corresponding to feeding order, as shown
+in Figure 3.
+Technical details. The encoder T contains five Down-
+sampling Layers (DL) with Max Pooling in prior (excluding
+the first one), same as the encoder C. Meanwhile, the de-
+coderG includes 5 Up-sampling Layers (UL) with Bi-linear
+Pooling (excluding the fifth layer), and the final convolu-
+tional module with Tanh activation function to synthesize
+the stylized output. To avoid aliasing, we adopt the works
+[16, 6] and apply a blur filter with a size of [1, 2, 1] to all
+pooling modules. All convolutional modules in DL and UL
+have a Sample-based Evolving Normalization-Activation
+[11] followed. The linear L consists of 3 fully-connected
+layers with the Leaky ReLU activation function. The activa-
+tion of its last layer is replaced by Tanh function to estimate
+the applied preset, as shown in Figure 3 and Figure 4. The
+first convolution module in each encoder uses a kernel size
+of 5×5 to observe features on a large receptive field; mean-
+while, remaining convolution modules use a kernel size of
+3× 3.
+2.3. Loss functions
+In this work, we propose a new scheme to train color
+style transfer with ground-truth; therefore, our loss func-
+tions are based on the ground-truth rather than extracted
+features of content and reference images. Consequently, our
+models can be converged the right way to be closer to the
+ground-truth. We apply Mean Square Error (MSE) to di-
+rectly minimize the distance between our stylized Ŷ and
+the ground-truth Y as:
+LMSE =
+1
+N
+N∑
+i=1
+||Yi − Ŷi||
+2
+2 (3)
+where N is the batch size. Additionally, we adopt the
+perceptual loss LPIPS [17] to enhance contextual details as:
+Llpips = LPIPS(Ŷ , Y ) (4)
+Additionally, we also estimate the preset, the applied
+low-level image transformation. The estimated preset P̂ is
+observed as:
+Lp =
+1
+N
+N∑
+i=1
+||Pi − P̂i||1 (5)
+the number of hyper-parameters representing low-level
+image transformation methods such as color-shifting. How-
+ever, predicting an exact preset is difficult due to various
+possible cases; furthermore, as human experience, we con-
+sider the presets having a similar, but not exact, color tone
+visually. Therefore, to enhance the color transformation
+representation, we randomly select a photo Z ′ having the
+same color style as Z and extract the embedding FZ′ , as
+described in the Equation 1. The distance between FZ and
+FZ′ , so-called positive pair-wise error, is optimized as:
+Lpp =
+1
+N
+N∑
+i=1
+||FZ′ i − FZi||1 (6)
+Finally, our total loss function is:
+4
+Figure 5. Ablation study on our positive pair-wise (PP) loss function. Training with PP loss achieves the higher performance. Results are
+measured using PSNR/LPIPS/Chi-squared distances. Bold values mean better.
+Figure 6. Validation on estimating presets with/without our posi-
+tive pair-wise (PP) loss function. Predicted presets with PP loss
+show more stable.
+Ltotal = αLMSE + βLlpips + γLp + ηLpp (7)
+where α, β, γ, η are empirically set as 1, 0.5, 0.01, 1 re-
+spectively.
+2.4. Data Preparation
+In this section, we describe how we collect and pre-
+process the data for training and evaluation.
+Lightroom presets. Our data processing is based on the
+Lightroom [1], the most powerful photo editing software
+recently. We collect 510 user-generated presets, 500 presets
+for training, and 10 for testing. Additionally, we only select
+69 settings (e.g., White Balance, Hue, and more) presented
+by Lightroom. Each setting has a value representing how
+large colors are shifted in a specific way. Therefore, a preset
+with 69 settings is assigned as a 69-dimension vector. All
+elements are normalized [−1, 1] based on its min and max
+values that the end-users can intervene.
+Training data. We script the Lightroom [1] to generate
+601, 200 photos using 1, 200 high-definition photos from
+Flickr2K [10] and 501 pre-processed presets including base
+color style. Since our training target is to convert a photo
+with correct colors (natural) to a retouched version, we only
+choose the photos with corrected colors, likely the original
+colors taken by a camera. All training photos are resized to
+have the short dimension is 720 with the same ratio. Be-
+sides, we deal with JPEG distortion for efficient storage.
+Testing data. Different from the training concept, we
+conduct experiments 100 natural and retouched photos from
+DIV2K [14] validation set. Regarding the color style, we
+utilize 10 user-generated presets to stylize the references.
+Since a content retouched by same-preset-applied photos
+should have the same color style, we select 1 content im-
+age to be stylized by 100 reference images (1-100 × 10).
+Additionally, we also create a set with natural style only
+including 10 content images and 10 reference images (10-
+10×10). Eventually, we have 1000 samples each set. All
+photos are stored in JPEG format and resized to 512× 512
+on-the-fly using bicubic interpolation while testing.
+5
+Table 1. Quantitative comparison between our models with/without positive-pairwise loss, the previous works DeepPriors [18], Fast Photo
+Style Transfer (FPS) [9], WCT2 [15], and PhotoNAS [2]. Bold values indicate the best performance. ↑: higher is better, ↓: lower is better.
+Method
+1-100×10 10-10×10 Average
+H-Corr ↑ H-CHI ↓ PSNR ↑ LPIPS ↓ H-Corr ↑ H-CHI ↓ PSNR ↑ LPIPS ↓ H-Corr ↑ H-CHI ↓ PSNR ↑ LPIPS ↓
+DeepPriors [18] 0.5420 749.50 20.53 0.2033 0.4606 819.44 17.69 0.2845 0.5013 784.47 19.11 0.2439
+FPS [9] 0.3856 1232.97 14.71 0.3025 0.3272 1494.40 13.79 0.3340 0.3564 1363.69 14.25 0.3183
+WCT2 [15] 0.3917 1269.91 16.40 0.2726 0.3404 1793.18 14.85 0.3042 0.3661 1531.54 15.63 0.2884
+PhotoNAS [2] 0.4129 824.74 17.06 0.2559 0.3516 4269.09 15.05 0.2932 0.3823 2546.92 16.05 0.2746
+Our presets w/o PP Loss 0.6792 273.98 23.66 0.1176 0.6039 745.45 21.62 0.1102 0.6416 509.71 22.62 0.1139
+Our presets with PP Loss 0.6573 145.1861 23.12 0.1288 0.5815 453.50 20.94 0.1262 0.6194 299.34 22.03 0.1275
+Ours w/o PP Loss 0.7188 126.29 23.79 0.1039 0.6678 990.82 21.96 0.1015 0.6933 558.56 22.87 0.1027
+Ours with PP Loss 0.7269 145.47 24.01 0.0993 0.6743 959.43 22.24 0.0966 0.7006 552.45 23.12 0.0980
+Figure 7. Ablation study on the preset-based transformation stabil-
+ity of models without the positive pair-wise loss (middle), and with
+the loss (bottom). We apply the predicted presets of each model to
+a photo based on references retouched by the same preset (top).
+2.5. Training details
+We train our models using Adam optimizer [7] with the
+learning rate of 0.0001, momentum beta1 = 0.9, beta2 =
+0.999, the batch size of 8. To make diversity training sam-
+ples, we apply random crop with the size of 352 × 352,
+random rotation with degrees 90, 180, 270, and finally ran-
+dom flip in both horizontal and vertical ways. All photos
+are normalized to the range [−1, 1].
+3. Experimental results
+3.1. On our positive pair-wise loss function
+In this section, we conduct an ablation study on our pos-
+itive pair-wise (PP) loss function. The encoder T of Deep
+Preset learns color transformation in cross-content with an
+auxiliary regression as the preset prediction. However, it is
+difficult to estimate an accurate preset. The features rep-
+resenting color transformation is thus unstable. Therefore,
+we enhance the color transformation representation by op-
+timizing distances between photos having the same color
+style in latent space. The extracted features are thus ro-
+bust for transformation, and it makes predicted preset stable
+while training, as shown in Figure 6. Regarding compar-
+ison, we train two models with/without PP loss function
+in the same condition and compare them by qualitatively
+showing evidence, and quantitatively evaluating on DIV2K
+validation set using Peak Signal-to-Noise Ratio (PSNR), the
+perceptual metric LPIPS [17], Chi-squared distance for his-
+togram (H-CHI). As a result, our model with PP loss func-
+tion shows the efficiency in improving color style transfer.
+In detail, the model with PP loss gives the more yellow in
+color tone as a retouched reference. Quantitatively, styl-
+ized results with PP loss have a higher PSNR, lower LPIPS
+showing a better quality; furthermore, it has a smaller Chi-
+squared distance on histogram proving its outperformance
+in transferring color style, as shown in Figure 5. Although
+the predicted presets of the model without PP loss are bet-
+ter and can mimic the color style of the reference, as shown
+in Figure 7, it still cannot outperform in directly stylizing
+photos, as the overall result shown in Table 1.
+3.2. Comparison to recent works
+The photorealistic style transfer Fast Photo Style Trans-
+fer [9], WCT2 [15], PhotoNAS [2] present creative tech-
+niques to mix contextual features extracted from content
+and style. They significantly transfer textures and colors
+of reference into another photo; for example, changing the
+day to night, summer to winter. However, they are overused
+in color style transfer. This work defines that the color
+style is made by the color transformation converting a photo
+with natural colors to its retouched version based on color-
+shifting methods. The proposed Deep Preset learns the
+defined color style and transforms the base colors, rather
+than transferring exact colors. To prove our proficiency, we
+compare our work to the mentioned works in quantitative
+and qualitative ways. Besides, the works in colorization
+with reference-guided can be treated as color style transfer.
+Therefore, we also compare this work to the interactive col-
+orization of Zhang et al. [18]. Since our scheme provides
+the ground-truth, we thus utilize similarity metrics such as
+histogram correlation (H-Corr), histogram Chi-squared dis-
+tance (H-CHI), Peak Signal-to-Noise Ratio (PSNR), and the
+perceptual metric LPIPS [17] for quantitative comparison
+on the DIV2K [14] validation set. Regarding qualitative
+comparison, we show the photos taken by the DSLR camera
+and its stylized version generated by the mentioned works.
+6
+Figure 8. Qualitative comparison between our Deep Preset and the previous works DeepPriors [18], FPS [9], WCT2 [15], PhotoNAS [2].
+Quantitative comparison. We compare our work to
+previous works in two concepts: a content with 100 same-
+color-style photos and 10 contents and 10 same-color-style
+photos, as described in Section 2.4. As a result, the
+reference-guided colorization DeepPriors [18] outperforms
+other previous works in overall. Their colorization removes
+color channels, then colorize the black-and-white photo
+based on a given reference. The color of output thus has a
+high correlation with the ground-truth. However, they still
+suffer from color overflowed. Meanwhile, this work out-
+performs the previous works in generating a similar color
+style as 0.7006, 552.45 histogram correlation, histogram
+chi-squared distance correspondingly. Furthermore, our re-
+sults also have the highest quality as 23.12dB, 0.098 in av-
+erage PSNR, LPIPS respectively, as shown in Table 1.
+Qualitative comparison. To make our quantitative re-
+sults more reliable, we conduct experiments on portraits
+taken by DSLR cameras with three presets. As a result,
+the proposed Deep Preset obviously can beautify the con-
+tent using a well-retouched reference; meanwhile, the pre-
+vious works try to transfer exact colors leading to abnor-
+mal colors. In detail, the previous works transfer the red
+color of the rose in reference to the girl’s hair band with
+overexposed skin; meanwhile, the DeepPriors synthesize a
+monochrome tone in the first two columns. In the next
+two columns, all methods, excepting DeepPriors, synthe-
+size a correct color for the girl uniform; however, they all
+have color pollution such as red color on the face and uni-
+form. Meanwhile, our work can provide a plausible color
+with fresher looking as reference. For the last two columns,
+we directly check Hue-Saturation-Lightness (HSL) infor-
+mation where the color picker located. Our result gives the
+closest values (H,S,L) compared to the ground-truth as (∆0,
+∆−1, ∆−3); meanwhile, DeepPriors [18], FPS [9], WCT2
+[15], and PhotoNAS [2] give (∆− 2, ∆− 23, ∆− 3), (∆0,
+∆ + 59, ∆−34), (∆−6, ∆ + 37, ∆−56), (∆ + 5, ∆ + 39,
+∆− 32) respectively, as shown in Figure 8. See more inter-
+esting results in our supplementary materials.
+3.3. Out-of-distribution
+Our work does not treat colors of content as transfer des-
+tination but changing the base colors of content. Plus, we
+only train our model on natural-to-retouched transforma-
+tion. Therefore, we conduct experiments on ”stylizing a
+7
+Figure 9. A result of stylizing a retouched content compared to
+previous works.
+Figure 10. A result of stylizing a photo (natural) with paintings (by
+Yuumei Art).
+Figure 11. Our failed cases.
+retouched content” and ”what if we use an artistic image
+as reference”.
+On retouched contents. Deep Preset is trained to con-
+vert a photo with natural colors to its retouched version;
+therefore, retouched-to-retouched transformation is an out-
+of-distribution case. As a result, our model implicitly learns
+cross-content color transformation from input to reference
+in any style and has the same behavior as a natural-to-
+retouched scheme, as shown in Figure 9. Our work thus
+outperforms others in the retouched-to-retouched domain.
+On artistic styles. Artistic paintings are out-of-
+distribution since we only train on camera-taken photos. As
+a result, our work can slightly beautify a photo with a paint-
+ing as a reference. It proves that the contextual information
+of content is preserved while training, then blended by the
+color-shifting-like transformation. Therefore, the proposed
+Deep Preset can retain the structural details with homolo-
+gous colors as reference. For example, in left-to-right order,
+our result is brighter with the first style, the uniform has
+richer blue with the second one, and the color tone slightly
+turns to yellow, especially the girl’s hair with the third style,
+as shown in Figure 10.
+4. Discussion
+Trade-off between preset prediction and positive
+pair-wise minimization in color transformation. As
+shown in Figure 7, the presets predicted without positive
+pair-wise (PP) loss give the promising transformation in
+mimicking the overall color of reference. For example, the
+predicted presets turns content to have bluish tone as the
+costume in the third column, greenish tone as the grass in
+the last column. However, with references retouched by the
+same preset, the predicted presets should provide the same
+color style as our hypothesis. Meanwhile, our presets with
+PP loss show the stability in generating a preset with vari-
+ous contexts, though it is worse in overall performance, as
+evaluated in Table 1. As mentioned, predicting an accurate
+preset is challenging. It leads to the difficulty of defining
+the features representing color transformation. Therefore,
+we reduce the expectation of predicting presets and concen-
+trate on training the features to enhance color transforma-
+tion with PP loss. Our direct stylization thus outperforms
+the preset-based approach.
+Failed Cases. Our stylization is failed when the refer-
+ence falsifies color transformation (blue uniform to purple
+one) in the first row, or reference has an unstable light con-
+dition. For example, near-overexposed (on the man’s cos-
+tume) reference gives near-overexposed result in the first
+row, same as low-light reference in the second row, as
+shown in Figure 11.
+Automatic Beautification. The automatic colorization
+works can be treated as automatic beautification. They
+beautify a black-and-white by giving a plausible color based
+on trained data. However, they aim to synthesize the cor-
+rect colors but retouched ones. Although the DeepPriors
+[18] provide a scheme to transfer the color from reference
+to the black-and-white photo, they still suffer from color
+mismatched, overflowed. In our case, end-users consider
+choosing a retouched reference having the similar context
+as their photo. It presents a scheme for the proposed Deep
+Preset to select a reference in among well-retouched photos
+by matching perceptual information [17]. The photo is thus
+retouched automatically. Visit our repository 1 for more in-
+formation.
+1https://minhmanho.github.io/deep_preset
+8
+https://minhmanho.github.io/deep_preset
+5. Conclusion
+We define the color style as color transformation
+based on low-level image transformations, especially color-
+shifting methods. On that point, we first present a novel
+scheme to train color style transfer with ground-truth. Af-
+terward, we propose the Deep Preset to transfer the color
+style of a well-retouched reference to a photo. Besides, it
+is also designed to predict the applied preset behind the re-
+touched reference. The experiments show that the repre-
+sentation between photos having the same color style can
+be learned not only while predicting the same preset, but
+also in latent space. Consequently, our positive pair-wise
+loss, optimizing distances between the representable fea-
+tures of same-preset-applied photos, can enhance the color
+transformation, as shown in Figure 5. As a result, the
+proposed Deep Preset outperforms previous works in color
+style transfer quantitatively and qualitatively.
+References
+[1] Adobe. Lightroom https://www.adobe.com/
+products/photoshop-lightroom.html.
+[2] Jie An, Haoyi Xiong, Jun Huan, and Jiebo Luo. Ultrafast
+photorealistic style transfer via neural architecture search. In
+AAAI, 2020.
+[3] Leon A Gatys, Alexander S Ecker, and Matthias Bethge. Im-
+age style transfer using convolutional neural networks. In
+Proceedings of the IEEE conference on computer vision and
+pattern recognition, pages 2414–2423, 2016.
+[4] Xun Huang and Serge Belongie. Arbitrary style transfer in
+real-time with adaptive instance normalization. In Proceed-
+ings of the IEEE International Conference on Computer Vi-
+sion, pages 1501–1510, 2017.
+[5] Justin Johnson, Alexandre Alahi, and Li Fei-Fei. Perceptual
+losses for real-time style transfer and super-resolution. In
+European conference on computer vision, pages 694–711.
+Springer, 2016.
+[6] Tero Karras, Samuli Laine, and Timo Aila. A style-based
+generator architecture for generative adversarial networks.
+In Proceedings of the IEEE Conference on Computer Vision
+and Pattern Recognition, pages 4401–4410, 2019.
+[7] Diederik P Kingma and Jimmy Ba. Adam: A method for
+stochastic optimization. arXiv preprint arXiv:1412.6980,
+2014.
+[8] Yijun Li, Chen Fang, Jimei Yang, Zhaowen Wang, Xin Lu,
+and Ming-Hsuan Yang. Universal style transfer via feature
+transforms. In Advances in neural information processing
+systems, pages 386–396, 2017.
+[9] Yijun Li, Ming-Yu Liu, Xueting Li, Ming-Hsuan Yang, and
+Jan Kautz. A closed-form solution to photorealistic image
+stylization. In Proceedings of the European Conference on
+Computer Vision (ECCV), pages 453–468, 2018.
+[10] Bee Lim, Sanghyun Son, Heewon Kim, Seungjun Nah, and
+Kyoung Mu Lee. Enhanced deep residual networks for single
+image super-resolution. In The IEEE Conference on Com-
+puter Vision and Pattern Recognition (CVPR) Workshops,
+July 2017.
+[11] Hanxiao Liu, Andrew Brock, Karen Simonyan, and Quoc V
+Le. Evolving normalization-activation layers. arXiv preprint
+arXiv:2004.02967, 2020.
+[12] Fujun Luan, Sylvain Paris, Eli Shechtman, and Kavita Bala.
+Deep photo style transfer. In Proceedings of the IEEE Con-
+ference on Computer Vision and Pattern Recognition, pages
+4990–4998, 2017.
+[13] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-
+net: Convolutional networks for biomedical image segmen-
+tation. In International Conference on Medical image com-
+puting and computer-assisted intervention, pages 234–241.
+Springer, 2015.
+[14] Radu Timofte, Shuhang Gu, Jiqing Wu, Luc Van Gool, Lei
+Zhang, Ming-Hsuan Yang, Muhammad Haris, et al. Ntire
+2018 challenge on single image super-resolution: Methods
+and results. In The IEEE Conference on Computer Vision
+and Pattern Recognition (CVPR) Workshops, June 2018.
+[15] Jaejun Yoo, Youngjung Uh, Sanghyuk Chun, Byeongkyu
+Kang, and Jung-Woo Ha. Photorealistic style transfer via
+wavelet transforms. In Proceedings of the IEEE Interna-
+tional Conference on Computer Vision, pages 9036–9045,
+2019.
+[16] Richard Zhang. Making convolutional networks shift-
+invariant again. In ICML, 2019.
+[17] Richard Zhang, Phillip Isola, Alexei A Efros, Eli Shecht-
+man, and Oliver Wang. The unreasonable effectiveness of
+deep features as a perceptual metric. In Proceedings of the
+IEEE Conference on Computer Vision and Pattern Recogni-
+tion, pages 586–595, 2018.
+[18] Richard Zhang, Jun-Yan Zhu, Phillip Isola, Xinyang Geng,
+Angela S Lin, Tianhe Yu, and Alexei A Efros. Real-time
+user-guided image colorization with learned deep priors.
+ACM Transactions on Graphics (TOG), 9(4), 2017.
+9
+https://www.adobe.com/products/photoshop-lightroom.html
+https://www.adobe.com/products/photoshop-lightroom.html

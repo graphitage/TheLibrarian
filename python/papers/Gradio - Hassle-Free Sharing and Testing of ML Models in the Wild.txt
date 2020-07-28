@@ -1,0 +1,437 @@
+Gradio: Hassle-Free Sharing and Testing of ML Models in the Wild
+Gradio: Hassle-Free Sharing and Testing of ML Models in the Wild
+Abubakar Abid * 1 2 Ali Abdalla * 2 Ali Abid * 2 Dawood Khan * 2 Abdulrahman Alfozan 2 James Zou 3
+Abstract
+Accessibility is a major challenge of machine
+learning (ML). Typical ML models are built by
+specialists and require specialized hardware/soft-
+ware as well as ML experience to validate. This
+makes it challenging for non-technical collabora-
+tors and endpoint users (e.g. physicians) to easily
+provide feedback on model development and to
+gain trust in ML. The accessibility challenge also
+makes collaboration more difficult and limits the
+ML researcher’s exposure to realistic data and sce-
+narios that occur in the wild. To improve accessi-
+bility and facilitate collaboration, we developed
+an open-source Python package, Gradio, which
+allows researchers to rapidly generate a visual in-
+terface for their ML models. Gradio makes access-
+ing any ML model as easy as sharing a URL. Our
+development of Gradio is informed by interviews
+with a number of machine learning researchers
+who participate in interdisciplinary collaborations.
+Their feedback identified that Gradio should sup-
+port a variety of interfaces and frameworks, al-
+low for easy sharing of the interface, allow for
+input manipulation and interactive inference by
+the domain expert, as well as allow embedding
+the interface in iPython notebooks. We devel-
+oped these features and carried out a case study
+to understand Gradio’s usefulness and usability
+in the setting of a machine learning collaboration
+between a researcher and a cardiologist.
+1. Introduction
+Machine learning (ML) researchers are increasingly part of
+interdisciplinary collaborations in which they work closely
+with domain experts, such as doctors, physicists, geneticists,
+and artists (Bhardwaj et al., 2017; Radovic et al., 2018; Zou
+*Equal contribution 1Department of Electrical Engineering,
+Stanford University, Stanford, California, USA 2Gradio Inc.,
+Mountain View, California, USA 3Department of Biomedical Data
+Science, Stanford University, Stanford, California, USA. Corre-
+spondence to: Abubakar Abid <a12d@stanford.edu>.
+2019 ICML Workshop on Human in the Loop Learning (HILL
+2019), Long Beach, USA. Copyright by the author(s).
+et al., 2018; Hertzmann, 2018). In a typical work flow, the
+domain experts will provide the data sets that the ML re-
+searcher analyzes, and will provide high-level feedback on
+the progress of a project. However, the domain expert is
+usually very limited in their ability to provide direct feed-
+back on model performance, since, without a background
+in ML or coding, they are unable to try out the ML models
+during development.
+This causes several problems during the course of the collab-
+oration. First, the lack of an accessible model for collabora-
+tors makes it very difficult for domain experts to understand
+when a model is working well and communicate relevant
+feedback to improve model performance. Second, it makes
+it difficult to build models that will be reliable when de-
+ployed in the real world, since they were only only trained
+on a fixed dataset and not tested with the domain shifts
+present in the real world (“in the wild”). Real-world data
+often includes artifacts that are not present in fixed training
+data; domain experts are usually aware of such artifacts and
+if they could access the model, they may be able to expose
+the model to such data, and gather additional data as needed
+(Thiagarajan et al., 2018). Lack of end-user engagement
+in model testing can lead to models that are biased or par-
+ticularly inaccurate on certain kinds of samples. Finally,
+end-user domain experts who have not engaged with the
+model as it was being developed tend to exhibit a general
+distrust of the model when it is deployed.
+In order to address these issues, we have developed an open-
+source python package, Gradio1, which allows researchers
+to rapidly generate a web-based visual interface for their ML
+models. This visual interface allows domain experts to inter-
+act with the model without writing any code. The package
+includes a library of common interfaces to support a wide
+variety of models, e.g. image, audio, and text-based mod-
+els. Additionally, Gradio makes it easy for researchers to
+securely share their public links to their models so that col-
+laborators can try out the model directly from their browsers
+without downloading any software, and also lets the domain
+expert provide feedback on individual samples, fully en-
+abling the feedback loop between domain experts and ML
+researchers.
+In the rest of this paper, we begin by discussing related
+1The name is an abbrevation of gradient input output
+ar
+X
+iv
+:1
+90
+6.
+02
+56
+9v
+1 
+ [
+cs
+.L
+G
+] 
+ 6
+ J
+un
+ 2
+01
+9
+Gradio: Hassle-Free Sharing and Testing of ML Models in the Wild
+Figure 1. An illustration of a web interface generated by Gradio, which allows users to drag and drop their own images (left), and get
+predicted labels (right). Gradio can provide an interface wrapper around any machine learning model (InceptionNetv3 is shown in the
+example here). The web interface can be shared with others using the share link button (center top), and collaborators can provide
+feedback by flagging particular input samples (bottom right).
+works and their limitations, which led to the development
+of Gradio (Section 2). We then detail the implementation
+of Gradio in Section 3. We have carried out a preliminary
+pilot study that includes an ML researcher and a clinical
+collaborator, which we describe in Section 4. We conclude
+with a discussion of the next steps for Gradio in Section 5.
+2. Motivation
+2.1. Related Works
+The usefulness of visual interfaces in interdisciplinary col-
+laborations has been observed by many prior researchers,
+who have typically created highly customized tools for spe-
+cific use cases. For example Xu et al. (2018) created an
+interactive dashboard to visualize ECG data and classify
+heart beats. The authors found that the visualization signifi-
+cantly increased adoption of the ML method and improved
+clinical effectiveness at detecting arrhythmias.
+However, visual interfaces that have been developed by
+prior researchers have been tightly restricted to a specific
+machine learning framework (Klemm et al., 2018) or to
+a specific application domain (Muthukrishna et al., 2019).
+When we interviewed our users with regards to such tools,
+they indicated that the limited scope of these tools would
+make them unsuitable for their particular work.
+2.2. Design Requirements
+We interviewed 12 machine learning researchers who par-
+ticipate in interdisciplinary collaborations. Based on the
+feedback gathered during these interviews, we identified the
+following key design requirements.
+R1: Support a variety of interfaces and frameworks.
+Our users reported working with different kinds of models,
+where the input (or output) could be: text, image, and even
+audio. To support the majority of models, Gradio must be
+able to offer developers a range of interfaces to match their
+needs. Each of these interfaces must be intuitive enough
+so that domain users can use them without a background
+in machine learning. In addition, ML researchers did not
+want to be restricted in which ML framework to use: Gradio
+needed to work with at least Scikit-Learn, TensorFlow, and
+PyTorch models.
+R2: Easily share a machine learning model. Our users
+indicated that deploying a model so that it can be used
+by domain experts is very difficult. They said that Gradio
+should allow developers to easily create a link that can be
+shared with researchers, domain experts, and peers, ideally
+without having to package the model in a particular way or
+having to upload it to a hosting server.
+R3: Manipulate input data. To support exploration and
+improvement of models, the domain expert needs the ability
+to manipulate the input. For example, the ability to crop an
+image, occlude certain parts of the image, edit the text, add
+noise to an audio recording, or trim a video clip. This helps
+the domain expert detect which features affect the model,
+and what kind of additional data needs to be collected in
+order to increase the robustness of the model.
+R4: Running in iPython notebooks & embedding. Fi-
+nally, our users asked that the interfaces be run from and
+embedded in Jupyter and Google’s Colab notebooks, as well
+as embedded in websites. A use case for many of our re-
+searchers was to expose machine learning models publicly
+Gradio: Hassle-Free Sharing and Testing of ML Models in the Wild
+after being trained. This would allow their models to be
+tested by many people e.g. in a citizen data science effort, or
+as part of a tutorial. They needed Gradio to both allow shar-
+ing of models directly with collaborators, but also widely
+with the general public.
+3. Implementation
+Gradio is implemented as a python library, and can be in-
+stalled from PyPi2. Once installed, running a Gradio inter-
+face requires minimal change to a ML developer’s existing
+workflow. After the model is trained, the developer creates
+an Interface object with four required parameters (Fig. 2a).
+The first and second parameter are inputs and outputs, which
+takes as argument the input/output interface to be used.
+The developer can choose any of the subclasses of Gra-
+dio.AbstractInput and Gradio.AbstractOutput, respectively.
+Currently this includes a library of standard interfaces for
+handling image, text, and audio data. The next parameter is
+model type which is a string representing the type of model
+being passed in; This may be keras, pytorch, or sklearn – or
+it may be pyfunc, which handles arbitrary python functions.
+The final parameter is model where the developer passes in
+the actual model to use for processing. Due to the common
+practice of pre-processing or post-processing the input and
+output of a specific model, we implemented a feature to
+instantiate Gradio.Input/Gradio.Output objects with custom
+parameters or alternatively supply custom pre-processing
+and post-processing functions.
+We give the developer the option of how the interface should
+be launched. The launch function accepts 4 boolean vari-
+ables, which allow for displaying the model inbrowser
+(whether to display model in a new browser window) (Fig.
+2b), displaying it inline (whether to display model embed-
+ded in interactive python environment such as Jupyter or
+Colab notebooks), attempting to validate (whether to val-
+idate the interface-model compatibility before launching),
+and creating a share link (whether to create a public link
+to the model interface). If Gradio creates a share link to
+the model, then the model continues running on the host
+machine, and an SSH tunnel is created allowing collabora-
+tors to pass in data into the model remotely, and observe
+the output. This allows the user to continue running using
+the same machine, with the same hardware and software de-
+pendencies. The collaborator does not need any specialized
+hardware or software: just a browser running on a computer
+or mobile phone (the user interfaces are mobile-friendly).
+The user of the interface can input any data and also ma-
+nipulate the input by, for example, cropping an image (Fig.
+2c). The data from the input is encrypted and then is passed
+securely through the SSH tunnel to the developer’s com-
+2pip install Gradio
+puter, which is actually running the model, and the output is
+passed back to the end user to display (www.gradio.app
+also serves as a coordinator service between public links
+and the SSH tunnels). The amount of time until the end user
+receives the output is simply the amount of time it takes for
+model inference plus any network latency in sending data.
+The collaborator can additionally flag data where the output
+was false, which sends the inputs and outputs (along with
+a message) to the ML researcher’s computer, closing the
+feedback loop between researcher and domain expert. (Fig.
+2d).
+4. Pilot Study: Echocardiogram Classification
+We carried out a user study to understand the usefulness of
+Gradio in the setting of an ML collaboration. The partici-
+pants were an ML researcher and a cardiologist who had in
+collaboration developed an ultrasound classification model
+that could determine whether a pacemaker was present in
+a patient from a single frame in an ultrasound video. The
+model scored an area under receiver-operating characteristic
+curve (AUC) of 0.93 on the binary classification task.
+We first asked participants a series of questions to record
+their typical workflow without using the Gradio library. We
+then taught the participants the Gradio library and let them
+use it for collaborative work. After being shown instructions
+about the Gradio library, the ML researcher was able to set
+up Gradio on a lab server that was running his model. The
+process of setting up Gradio took about 10 minutes, as some
+additional python dependencies needed to be installed on
+the lab server. After the installation, the researcher was able
+to copy and adapt the standard code from Gradio documen-
+tation and did not run into any bugs. The ML researcher
+was advised to share the model with the cardiologist. He
+did so, and the cardiologist automatically began to test the
+robustness of the model by inputting his own images and
+observing the model’s response. After using Gradio, the
+cardiologist gained more confidence and trust in the perfor-
+mance of this particular ML model.
+We observed the researchers while they carried out these
+tasks, as we sought to answer four research questions:
+Q1: How do researchers share data and models with
+and without Gradio?
+Before Gradio, the cardiologist provided the entire dataset
+of videos to the machine learning researcher in monthly
+batches. These batches were the latest set of videos that were
+available to the cardiologist. The ML researcher would train
+the model on increasingly larger datasets and report metrics
+such as classification accuracy and AUC to the cardiologist.
+Beyond this, there was very little data sharing from the
+cardiologist and the researcher did not ever share the model
+with the cardiologist.
+www.gradio.app
+Gradio: Hassle-Free Sharing and Testing of ML Models in the Wild
+Figure 2. A diagram of the steps to share a machine learning model using Gradio. Steps: (a) The machine learning researcher defines
+the input and output interface types, and launches the interface either inline or in a new browser tab. (b) The interfaces launches, and
+optionally, a public link is created that allows remote collaborators to input their own data into the model. (c) The users of the interface
+can also manipulate the model in natural ways, such as cropping images or obscuring parts of the image. (d) All of the model computation
+is done by the host (i.e. the computer that called Gradio). The collaborator or user can interact with the model on their browser without
+local computation, and can provide real-time feedback (e.g. flagging incorrect answers) which is sent to the host.
+With Gradio, the cardiologist opened the link to the model
+sent by the ML researcher. Even though it was his first
+time using the model, the cardiologist immediately began
+to probe the model by inputting an ultrasound image from
+his desktop into the Gradio model. He chose an image
+which clearly contained a pacemaker, see Fig. 3(a). The
+model correctly predicted that a pacemaker was present in
+the patient. The cardiologist then occluded the pacemaker
+using the paint tool built into Gradio, see Fig. 3(b). After
+completely occluding the pacemaker, the cardiologist resub-
+mitted the image; the model switched its prediction to “no
+pacemaker,” which elicited an audible sigh of relief from
+the ML researcher and cardiologist.
+The cardiologist proceeded to choose more difficult images,
+generally finding that the model correctly determined when
+a pacemaker was and was not present in the image. He also
+occluded different regions in the image to serve as a compar-
+ison to occluding the pacemaker. The model performance
+was generally found to be accurate and robust; a notable
+exception was in the case of flipping over the vertical axis,
+which would generally significantly affect the prediction
+accuracy. When this happened, the cardiologist flagged the
+problematic images, sending them to the ML researcher’s
+computer for further analysis.
+Q2: What features of Gradio are most used and most
+unused by developers and collaborators?
+We found that the machine learning researcher quickly un-
+derstood the different interfaces available to him for his
+model. He selected the appropriate interface for his model,
+and set share=True to generate a unique publicly accessible
+link for the model. When he shared the link with the car-
+diologist, the cardiologist spent a great deal of time trying
+different ways to manipulate a few sample images to affect
+the model prediction. The cardiologist treated this as a chal-
+lenge and tried to cause the model to make a mistake in an
+adversarial manner. The cardiologist also used the flagging
+feature in the cases where the model did make a mistake.
+The “share” button which appears at the top of the interface
+was not used; instead, the ML researcher simply copied and
+pasted the URL to share it with his collaborator. And de-
+spite the general interest in running model interfaces inside
+iPython notebooks, our users did not use that feature.
+Q3: What kind of model feedback do collaborators pro-
+vide to developers through the Gradio interface?
+The collaborator tested various transformations on the test
+images, including changing the orientation of the image to
+occluding parts of the image. Whenever this would cause
+the model to make a mistake on an image, the cardiologist
+would flag the image, but would usually pass a blank mes-
+sage. Thus, it seemed that the collaborator would only send
+images that were misclassified back to the ML researcher.
+Gradio: Hassle-Free Sharing and Testing of ML Models in the Wild
+(a)
+(b)
+Figure 3. In our pilot study, the clinician used Gradio to test a model that classified echocardiograms based on the presence of a pacemaker.
+(a) The clinician submitted his own image of an echocardiagram, similar to the one shown here, and the model correctly predicted that a
+pacemaker was present. (b) The clinician used Gradio’s built-in tools to obscure the pacemaker and the model correctly predicted the
+absence of a pacemaker. (The white arrows are included to point out the location of the pacemaker to the reader; they were not present in
+the original images).
+Q4: What additional features are requested by the de-
+velopers and collaborators?
+Our users verbally requested two features as they were us-
+ing the model. First, the cardiologist asked if it would be
+possible for the ML developer to pre-supply images to the
+interface. This way, he would not need to find an ultrasound
+image from his computer, but would be able to choose one
+from a set of images already displayed to him.
+Second, the collaborator was used to seeing saliency maps
+for ultrasound images that the ML researcher had gener-
+ated in previous updates. The collaborator expressed that it
+would be very helpful for him to see these saliency maps,
+especially as he was choosing what areas inside of the image
+to occlude.
+5. Discussion & Next Steps
+In this paper, we describe a Python package that allows ma-
+chine learning researchers to easily create visual interfaces
+for their machine learning models, and share them with col-
+laborators. Collaborators are then able to interact with the
+machine learning models without writing code, and provide
+feedback to the machine learning researchers. In this way,
+collaborators and end users can test machine learning mod-
+els in settings that are realistic and can provide new data to
+build models that work reliably in the wild.
+We think this will lower the barrier of accessibility for do-
+main experts to use machine learning and take a stronger
+part in the development cycle of models. At a time when
+machine learning is becoming more and more ubiquitous,
+the barrier to accessibility is still very high.
+We carried out a case study to evaluate the usability and use-
+fulness of Gradio within an existing collaboration between
+an ML researcher and a cardiologist working on detecting
+pacemakers in ultrasounds. We were surprised to see that
+both the ML researcher and the domain expert seemed to be
+relieved when the model worked, as though they expected
+it not to. We think because researchers can not manipulate
+inputs the way a domain expert would, they generally have
+less confidence in the model’s robustness in the wild. At
+Gradio: Hassle-Free Sharing and Testing of ML Models in the Wild
+the same time, because domain experts have not interacted
+with the model or used it, they feel the same doubt in its
+robustness. This study was however limited in scope to one
+pair of users, and a short time. We plan to conduct more us-
+ability studies and quantitative measures of trust in machine
+learning models to get a better holistic view of the usability
+and usefulness of Gradio. Similarly, quantitative measures
+of user satisfaction on both the end of machine learning
+researcher and domain expert can be used to evaluate the
+product and guide its further development.
+The next steps in the development of the package would
+be creating features for saliency, handling other types of
+inputs (ex: tabular data), handling bulk inputs, as well as
+helping ML researchers reach domain experts even if they
+don’t already have access to them.
+Additional documentation about Gradio and example code
+can be found at: www.gradio.app.
+Acknowledgments
+We thank all of the machine learning researchers who talked
+with us to help us understand the current difficulties in
+sharing machine learning models with collaborators, and
+gave us feedback during the development of Gradio. In
+particular, we thank Amirata Ghorbani and David Ouyang
+for participating in our pilot study and for sharing their
+echocardiogram models using Gradio.
+References
+Bhardwaj, R., Nambiar, A. R., and Dutta, D. A study
+of machine learning in healthcare. In 2017 IEEE 41st
+Annual Computer Software and Applications Conference
+(COMPSAC), volume 2, pp. 236–241. IEEE, 2017.
+Hertzmann, A. Can computers create art? In Arts, volume 7,
+pp. 18. Multidisciplinary Digital Publishing Institute,
+2018.
+Klemm, S., Scherzinger, A., Drees, D., and Jiang, X. Barista-
+a graphical tool for designing and training deep neural
+networks. arXiv preprint arXiv:1802.04626, 2018.
+Muthukrishna, D., Parkinson, D., and Tucker, B. Dash:
+Deep learning for the automated spectral classifica-
+tion of supernovae and their hosts. arXiv preprint
+arXiv:1903.02557, 2019.
+Radovic, A., Williams, M., Rousseau, D., Kagan, M., Bona-
+corsi, D., Himmel, A., Aurisano, A., Terao, K., and
+Wongjirad, T. Machine learning at the energy and in-
+tensity frontiers of particle physics. Nature, 560(7716):
+41, 2018.
+Thiagarajan, J. J., Rajan, D., and Sattigeri, P. Can deep
+clinical models handle real-world domain shifts? arXiv
+preprint arXiv:1809.07806, 2018.
+Xu, K., Guo, S., Cao, N., Gotz, D., Xu, A., Qu, H., Yao, Z.,
+and Chen, Y. Ecglens: Interactive visual exploration of
+large scale ecg data for arrhythmia detection. In Proceed-
+ings of the 2018 CHI Conference on Human Factors in
+Computing Systems, pp. 663. ACM, 2018.
+Zou, J., Huss, M., Abid, A., Mohammadi, P., Torkamani, A.,
+and Telenti, A. A primer on deep learning in genomics.
+Nature genetics, pp. 1, 2018.
+www.gradio.app

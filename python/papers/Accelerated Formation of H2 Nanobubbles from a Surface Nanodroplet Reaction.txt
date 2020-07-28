@@ -1,0 +1,931 @@
+Accelerated Formation of H2 Nanobubbles from a
+Surface Nanodroplet Reaction
+Brendan P. Dyett∗,† and Xuehua Zhang∗,‡
+†School of Science, RMIT University, Melbourne, VIC 3001, Australia
+‡Department of Chemical & Materials Engineering, University of Alberta, Edmonton,
+T6G1H9, Alberta, Canada
+E-mail: brendan.dyett@rmit.edu.au; xuehua.zhang@ualberta.ca
+Abstract
+The compartmentalization of chemical reactions within droplets has advantages in
+low costs, reduced consumption of reagents and increased throughput. Reactions in
+small droplets have also been shown to greatly accelerate the rate of many chemical
+reactions. The accelerated growth rate of nanobubbles from nanodroplet reactions is
+demonstrated in this work. The gaseous products from the reaction at the nanodroplet
+surface promoted nucleation of hydrogen nanobubbles within multiple organic liquid
+nanodroplets. The nanobubbles were confined within the droplets and selectively grew
+and collapsed at the droplet perimeter, as visualized by microscopy with high spatial
+and temporal resolutions. The growth rate of the bubbles was significantly accelerated
+within small droplets and scaled inversely with droplet radius. The acceleration was
+attributed to confinement from the droplet volume and effect from the surface area on
+the interfacial chemical reaction for gas production. The results of this study provide
+further understanding for applications in droplet enhanced production of nanobubbles
+and the on-demand liberation of hydrogen.
+1
+ar
+X
+iv
+:2
+00
+7.
+12
+65
+9v
+1 
+ [
+co
+nd
+-m
+at
+.s
+of
+t]
+  2
+4 
+Ju
+l 
+20
+20
+brendan.dyett@rmit.edu.au
+xuehua.zhang@ualberta.ca
+Keywords
+nano, bubble, droplet, enhanced, hydrogen, rate
+Droplets readily facilitate the miniaturization and compartmentalization of reactions as ‘mini
+reactors’. Their discrete nature lends itself to cost-effective, high throughput screening and
+sensing applications.1–8 Many chemical reactions confined within droplets may also occur
+much faster than in bulk, in some cases, by a factor of a million.9–15 Similar acceleration has
+also been demonstrated for reactions taking place within a thin liquid film.16 The approach
+draws parallels to ‘on-water’ chemistry, where the rate of reaction and product collection
+are enhanced at the water interface, despite of poor reagent solubility.17 Now, so called
+‘on-droplet’ chemistry is attracting increasing research attention to accelerate reactions even
+further.18
+The mechanisms of acceleration are still under investigation, however, are generally at-
+tributed to the following factors. First, the concentration of reagents within droplets may
+be progressively increased as the solvent component evaporates; as is the case in sprays dur-
+ing mass-spectrometry. Second, the diffusion of reagents is enhanced within small droplets.
+Moreover, the collision and mixing of droplets may enhance the rate by further reducing the
+effective diffusion length scale.19–21 Both these influences are intuitively rationalized through
+concepts such as collision theory.
+Arguably the most intriguingly and complex factor is influence from the droplet interface.
+Several studies have demonstrated that the interface itself may alter the reaction. Nakatani
+and coworkers utilized optical trapping to demonstrate that dye formation and electron
+transfer were accelerated at singular droplet interfaces. The enhancement was attributed to
+the increasing surface area to volume ratio as the droplet size was reduced.22–24 Meanwhile,
+Fallah-Araghi et al. demonstrated that reaction rate was inversely proportional to the droplet
+2
+radius owing to the favourable adsorption/desorption of products at the droplet interface,
+shifting equilibrium forward.25 Li et al. further demonstrated that the transport of precursors
+to the interface was proportional to the reaction rate and could be varied according the the
+reagent substituents.11 Besides altering the reaction rate, microdroplet reactions sometimes
+yield products different from their bulk counterparts or occur via distinct intermediates.26,27
+This scale influence on the reaction is so pronounced that droplet mediated reactions are
+a burgeoning area of interest within prebiotic chemistry as a component to the origins of
+life.28,29 Nam et al. showed that the phosphorylation of sugars occurred spontaneously in
+aqueous microdroplets. The entropic barrier observed in bulk solution was found to be
+negligible within droplets, suggesting that reduced entropy change may be attributed to
+the alignment of reactants at the interface.27 At low concentrations, various biomolecules
+such as pyruvate and cysteine have been shown to spontaneously reduce at the droplet-air
+interface.30 Moreover, it was recently demonstrated that gold nanowires could be prepared
+within microdroplets despite the absence of reducing agents.31 Banerjee and Zare have also
+highlighted that surface charge, namely, surface protons of the droplet, could replace the need
+for acid catalysts.32 These discoveries demonstrate the replacement of a pivotal reagents by
+the physical properties of the interface, alluding to an alternative approach for enhanced
+chemical reactions.27,30,32,33
+In studying reactions confined by liquid-air interfaces, microdroplets are most often pro-
+duced as atomized sprays, such as in electrospray ionisation (ESI). The sprays yield a range
+of droplet radii typically between 1 - 50 µm. The various adaptations of this method have
+recently been reviewed.34 During flight, reactions take place as the droplets evaporate, be-
+fore the product(s) are collected, typically by a mass spectrometer inlet. Multiple droplet
+sources may also be combined to promote collisions.20 The distance, velocity of the spray can
+be experimentally controlled or subjected to other experimental conditions such as light.35
+In an effort to accurately control droplet size, piezoelectric dispensers were recently uti-
+lized to study reactions within singular droplets.36 At the same time, recent reports indicate
+3
+challenges in disentangling the influence of compartmentalization from non-droplet related
+processes in ESI experiments. Gallo et al.37 suggested the results observed in electrosprays
+were not necessarily reflective of pristine droplet-air interfaces. Meanwhile Jacobs et al.38
+demonstrated gas-phase reactions could also account for the products attributed to in-droplet
+processes. These findings suggest the development of alternative experiment designs are nec-
+essary in advancing the field. Alternative methods including larger sized Leidenfrost droplets
+from simple pipette deposition has also been studied.9 Reactions confined within liquid-liquid
+interfaces have also been investigated by multiple droplet sprays.13 In addition, several stud-
+ies have utilized emulsions (radius ∼ 1 - 30 µm) to study reactions internal to the droplet25
+and between the droplet and bulk phase.3,22–24
+In terms of further elucidating the mechanisms of droplet accelerated reactions, surface
+nanodroplets may provide many advantages. Surface nanodroplets are droplets with lateral
+diameters between 0.1 – 10 µm, heights ranging 10 – 1000 nm, and typical volume of the
+order femto- or attoliters; (10−15 L, 10−18 L, respectively.) Solvent exchange demonstrates
+flexibility in terms of controlling droplet size, morphology and liquid properties.39,40 Solvent
+exchange describes the heterogeneous nucleation and growth from mixing induced oversat-
+uration. The droplet size can be tailored by solution and flow conditions while the droplet
+morphology can be tailored by the relevant interfacial tensions.39,41,42 Different compositions
+in the droplets can be formed by co-precipitation from the mixture of the solutions.43 Sur-
+face nanodroplets are stabilized by pinning effect on the boundary. Their long-term stability
+allows for following the reaction dynamics with high temporal and spatial resolutions.
+Despite of significant influences on a wide range of chemical reactions, formation and
+growth of nanobubbles from droplet reactions has been rarely explored. The formation of
+bubbles confined within fluids is in and of itself relevant to a number of processes,44 such as
+food and material manufacturing, and local heating in thermal therapy by plasmonic effect of
+nanoparticle.45,46 In particular, the formation of bubbles within confined nano/micro-fluids
+is a growing field which has largely only been discussed theoretically.47–52 Experimentally,
+4
+the cavitation of bubbles has been explored in droplets of the order ∼ 20-150 µm.53–55 It is
+unclear how the droplet size influences the evolution of gas nanobubbles produced from a
+droplet reaction.
+Here, we exploit the unique properties of surface nanodroplets to expand the portfolio
+of droplet mediated reactions. While existing studies have been isolated to liquid phase
+reactions, we will demonstrate the liberation of gaseous products as surface nanobubbles
+confined by surface nanodroplets. Gas-evolution reaction with polymeric and composite
+surface nanodroplets liberates H2 gas and subsequently drives the formation of nanobubbles
+(< 200 nm). By following the size of nanobubbles, the effect of the droplet size on the growth
+rate of nanobubbles is unravelled. The findings from this study highlight the opportunities for
+enhanced nanobubble formation and the on-demand liberation of hydrogen as clean energy
+source by control and design of the size of reactive droplets.
+H2PMH
+OH
+_
+OH
+_
+Si O Si O Si CH3
+CH3
+CH3
+CH3
+CH3
+H CH3
+CH3
+OHH
+OH
+–
+n
++ Si O Si O Si O
+CH3
+CH3
+CH3
+CH3
+H OH
+CH3
+Si
+CH3
+CH3
+CH3
+n-m m
+HH +
+Figure 1: NaOH catalyzed dehydrogenation of PMH. The two-phase reaction between PMH
+microdroplets and surrounding aqueous media is depicted schematically. The droplets are
+shown as the larger blue spherical caps, with the smaller hydrogen bubbles shown as the
+purple spherical caps.
+5
+Results and Discussion
+Nanobubble formation from droplet reaction
+Hydrogen nanobubbles were produced from the biphasic reaction between PMH nan-
+odroplets and water, catalyzed by NaOH in the solution as shown in Figure 1. PMH is
+attacked by hydroxide ions, driving the liberation of H2, the reformation of hydroxide and
+the progressive formation of a copolymer, poly(methylhydro-co-methylhydroxy)siloxane.56
+The reaction takes place at the surface of PMH droplets as water is insoluble in PMH
+droplets.
+The size of the droplets produced by solvent exchange was heterogeneous, enabling com-
+parison of the effect of droplet size on bubble production rate in the same experiment. The
+morphology of PMH droplets was revealed by liquid AFM, as shown in Figure 2. These
+droplets exhibit and maintain spherical cap geometry from a range of droplet sizes with
+lateral diameters ∼ 250 nm - 1 µm. For droplets with 0.7 µm < D < 1 µm the contact angle
+was measured by height imaging in water to be ∼ 14-18◦, possibly influenced by slight defor-
+mation from AFM imaging.57 Utilizing the PeakForce imaging at an extremely low set-point
+force gave the contact angle of the droplets on the order ∼ 20 ± 2 ◦ in water, still smaller
+than the macroscopic contact angles in Table 1. This result is consistent with the previ-
+ous report that the contact angle of nanodroplets is generally smaller than the macroscopic
+counterparts.39
+The bubble formation was induced by addition of sodium hydroxide solution. Certain
+incubation time was required before onset of nanobubble formation. Three representative
+examples of the visualized reactions in varying droplet size are shown in Figure 3. A largest
+PMH droplet with a diameter D of ∼ 15 µm is shown in Figure 3A. At t1 ∼ 320 s, a number
+of small bubbles can be seen as bright circular regions at the perimeter of the droplet. The
+bubbles were approximately ∼ 500 nm in diameter. Over time, an increased number of
+bubbles formed and grew. Next series in Figure 3B shows the case of a smaller droplet with
+∼ 6 µm in diameter. Here it is clear that the bubbles could grow (t1 – t2), coalesce (t2 –
+6
+A
+B
+C
+Figure 2: (A) 3D Height topology of immersed PMH surface droplets. (B) Corresponding
+2D height profile of immersed PMH droplets. Scale bar = 200 nm. (C) Extracted height
+profile for 5 representative droplets.
+t3) and collapse (t3 – t4). The final frame demonstrates that following bubble collapse, new
+bubbles nucleated around the vacated areas of the rim. Figure 3C shows the series of the
+smallest droplet with a diameter D of only ∼ 2.5 µm. For this series, multiple bubbles are
+already observed at t1 ∼ 160 s. A full cycle of bubble growth and collapse across the droplet
+was completed within 365 s.
+From the collective series, the bubbles showed a tendency to nucleate and grow at the
+droplet rim. This is in stark contrast to cavitation experiments which show highly localized
+formation.54,55 The bubbles did not appear to occupy the inner portions of the droplet until
+a significantly later stage of the reaction. Given the droplets are small, the product diffusion
+would be rapid throughout the droplet. This result may reflect a reduced nucleation barrier
+at the droplet rim, analogous to capillary condensation. The other possibility is that the
+reaction rate is much faster around the droplet rim, in analogy to coffee stain effect in droplet
+evaporation.58 The bubble size remained consistent throughout a range of droplet sizes. It
+is observed and rationalized through geometric confinement that fewer bubbles fit along the
+droplet perimeter as the droplet size reduces. In addition, the bubbles were forced to occupy
+7
+the increasing proportion of the droplet.
+A
+B
+PMH H2
+t0
+t0 t1 t2 t3 t4 t5
+t1 t2 t3 t4 t5
+C t0 t1 t2 t3 D
+Figure 3: (A) Series of optical images of H2 nanobubbles produced from a PMH droplet (D
+∼ 15 µm). The large initial droplet is highlighted in purple while the formed H2 bubbles are
+highlighted in orange. Over time numerous bubbles were observed to form over the perimeter
+of the droplet. The relative times for t0−5 are 0 s, 320 s, 640 s, 960 s, 1280 s and 2560 s. Scale
+bar = 2 µm. (B) Series of optical images of H2 nanobubbles produced from a PMH droplet
+(D ∼ 6 µm). The relative times for t0−5 are 0 s, 320 s, 480 s, 640 s, 960 s and 1120 s. (C)
+Series of optical images of H2 nanobubbles from a PMH droplet (D ∼ 2.5 µm). The relative
+times for t0−3 are 0 s, 160 s, 256 s and 365 s. Scale bar = 1 µm. The concentration of NaOH
+is 0.048 M, same for (A)-(C). (D) Representative optical image prior to and following image
+processing. Individual bubbles are highlighted in assorted colours. Scale bar = 2 µm.
+The bubbles appeared earlier in smaller droplets, as shown in Figure 4. Classical nucle-
+ation theory typically dictates a non-linear relationship for the probability of bubble nucle-
+ation, which in this case, is complicated by both droplet geometry and chemical reaction.
+Here, a linear slope is shown to indicate the general trend over this window of droplet size.
+Given that H2 is a product of the reaction, with time the reaction should drive oversatu-
+ration within the droplet and eventually induce nucleation and growth of surface bubbles.
+Moreover, the rate of bubble production should act as a proxy to track the reaction rate.
+Although the abundance of literature reports acceleration reaction rates in droplets,22,25,27,32
+our results show that there is enhancement in the nanobubble production rate due to the
+reduction in the droplet size. The bubble formation within such confined liquid domains
+8
+demonstrates several intriguing features in this complex colloidal system. The subtleties
+in bubble dynamics will be discussed below. Then we will focus on the growth of singular
+bubbles, free of coalescence will be utilized to determine the dependence of the nanobubble
+growth rates on droplet size more quantitatively.
+0 2 4 6
+rdroplet (µm)
+0
+25
+50
+75
+100
+125
+t in
+c(
+s)
+Figure 4: Plot of the observed incubation time tinc vs the radius rdroplet of the reacting droplet,
+derived from the first bubble detected in the images. The dashed black line indicates a linear
+fit as a guide.
+Nanobubble dynamics
+The dynamical behaviours of nanobubbles around the droplet rim are captured with
+increased temporal resolution. Figure 5 highlights the appearance and disappearance of in-
+dividual bubbles. Figure 5A-B show that the bubbles often collapsed with radii less than
+0.5 µm, before interacting with other bubbles. Conversely, in Figure 5C-E, some larger bub-
+bles shown formed by coalescence. The coalescence of bubbles is indicated by dashed green
+circles. Following coalescence, bubble morphology may become elliptical in nature, indicat-
+ing the initial bubbles were strongly pinned. Figure 5E captures the process that following
+coalescence, the bubbles may then collapse. It is expected that the bubble collapse was
+induced by rupture of the thin polymer film between the gaseous and aqueous phase. Upon
+this rupture, a significant increase in Laplace pressure would be expected. Here interfacial
+tension γpmh−air is ∼ 20 mN/m and γwater−air is ∼ 72 mN/m. The collapse of nanobubbles
+9
+A 
+G 
+E 
+H 
+B 
+C 
+D 
+F 
+I J 
+Figure 5: Series of optical images highlighting bubble dynamics during growth. The presence
+and collapse of bubbles is highlighted by the blue and red arrows respectively. Coalescence
+between bubbles is highlighted by dashed green circles. The change in morphology is guided
+by the coloured shapes. (A) Collapse of isolated bubble at droplet rim, bubble radius of
+0.4 µm. (B) Collapse of isolated bubble at droplet rim, bubble radius of ∼ 0.6 µm. (C)
+Coalescence of two bubbles at the droplet rim, ∼ 0.3 µm and 0.4 µm, respectively. (D)
+Coalescence of larger bubbles, bubble radius ∼ 0.7 µm and 0.9 µm, respectively. The final
+morphology becomes elliptical. (E) Coalescence of larger bubbles, radius of ∼ 0.9 µm and
+1 µm, respectively. The final morphology becomes elliptical. After coalescence the bubble
+collapses. (F) Coalescence induced collapse. After the bubble collapse the morphology of the
+droplet altered. (G) Coalescence induced collapse. After the bubble collapse the morphology
+of the droplet altered. (H) A number of bubbles form and coalesce triggering damage to the
+droplet morphology, highlighted in blue. Later, new bubbles form, coalescence and engulf
+the entirety of the droplet. Scale bar = 1 µm. Fluorescence (I) and bright field (J) images
+of nanobubbles inside the droplets dyed by Rhodamine 6G. Image area: 50 µm by 20 µm.
+10
+may induce significant damage to underlying materials.59 The droplet deformation is pre-
+sented in Figure 5F-G. Following coalescence induced collapse, the droplet perimeter is seen
+to be locally concave. A similar series is shown in Figure 5H, where the droplet perimeter is
+highlighted in purple. Following collapse, the droplet edge receded inwards, suggesting the
+bubble was occupying the space in the droplet. The later frames of this series demonstrate
+that bubbles may coalescence into a bubble that becomes large enough to engulf and detach
+the droplet. The bright and fluorescence images in Figure 5I,J clearly show that inside a
+reacting droplet, larger nanobubbles are near the rim while small nanobubbles are forming
+from the inner area.
+How fast nanobubbles evolve with time is closely related to the reaction conditions. At
+a high concentration of NaOH, dramatic differences in nanobubble dynamics were observed.
+After addition of NaOH, the droplets appeared to rapidly reduce in size and detach from the
+substrate. It is suspected that the rapid production of gas, as well as the bubble collapse,
+provides sufficient force to detach the droplets from the substrate. Representative images of
+this process are shown in Figure S1. The result at higher concentration of NaOH is indicative
+of further increases to the reaction rate, although the exact rate was very difficult to measure
+in our current experimental setup. These results indicate that the bubble formation at
+the rim only occurs within a range of reaction conditions with a mild level of hydrogen
+oversaturation.
+Dependence of nanobubble growth rate on droplet size
+To further investigate the correlations between reaction conditions and production of
+nanobubbles, the growth rate of bubbles in various droplet sizes were determined. The
+droplet size is defined as the initial droplet radius before reaction and any of the observed
+changes shown in Figure 3 & 5. The change in droplet size due to the reaction is presented
+in Figure S2 and shows a negligible change within the growth time of each bubble. The
+nanobubble growth was determined by particle tracking as shown in processed image in
+Figure 3D, following the same procedure in our recent work.46 Due to the resolution and
+11
+noise of the measurements, linear fits were utilised to quantify the growth rate. Further,
+we find that due to the collapse of bubbles, the window of their growth is well described
+by linear slopes, as presented in Figure S3. Figure 6A-C, shows a representative bubble
+growth as radius vs time for bubbles formed in a droplet with the radius ∼ 5, 3 and 1
+µm, respectively. From the plots, the radius of nanobubbles steadily increased until a final
+radius of ∼ 500 nm. Notably, the time taken to reach the maximal radius progressively
+decreases with reduction in the droplet size, yielding growth rates of ∼ 3.1 nms−1, 4.5 nms−1
+and 49 nms−1, respectively. The average growth rate as a function of the droplet size was
+determined and plotted in Figure 6D. The average growth rate revealed a strong dependency
+on droplet size, namely, that the bubble growth rate was accelerated in smaller droplets. The
+best exponential fit, demonstrates rate scales as rate ∼ r−1.6d . That said, rd
+−1 can also fit
+the experimental closely within the accuracy of our experimental measurements.
+To investigate the dependency of bubble growth rate on the concentration of reagents,
+the concentration of [NaOH] in the surrounding medium was increased two fold to 0.098 M.
+Representative plots of bubble radius with time are shown in Figure 7A-B. The growth rate
+was determined to ∼ 5.9 nms−1 and ∼ 11 nms−1 within a droplet of radius approximately
+6 µm and 4 µm, respectively. The reaction rate increased by more than two fold, compared
+to Figure 6A-C indicate, as reasonably expected. Again, the growth rate was observed to
+be faster within smaller droplets. This increase in rate is again demonstrated in the plot of
+the average bubble growth rate vs droplet size shown in Figure 7C. Once again the average
+bubble growth rate demonstrated a strong correlation to rate ∼ r−1d and best fit r
+−1.3
+d . In
+both cases, the error bar is larger for smaller droplets, which is expected given the relative
+increase in spatial noise.
+Given that NaOH is acting as a homogeneous catalyst, the rate law may also be described
+as Rate = k[PMH][OH−]. Then considering that aqueous volume is magnitudes larger than
+the volume of PMH, [OH−] will remain constant. It should then be expected that the reaction
+rate may be normalized by [OH−]. The normalized rate is shown in Figure 7D, showing an
+12
+0 20 40 60
+t (s)
+0.0
+0.2
+0.4
+0.6
+r b
+ub
+bl
+e
+(µ
+m
+)
+(A)
+0 20 40 60
+t (s)
+0.0
+0.2
+0.4
+0.6
+r b
+ub
+bl
+e
+(µ
+m
+)
+(B)
+0 2 4 6 8
+t (s)
+0.0
+0.2
+0.4
+0.6
+r b
+ub
+bl
+e
+(µ
+m
+)
+(C)
+0 2 4 6
+rdroplet (µm)
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+r
+(µ
+m
+/s
+)
+(D)
+r
+1.6
+r
+1
+Figure 6: Plot of the radius of a representative individual bubble vs time, formed in a droplet
+with the radius ∼ 5 µm in (A), 3 µm in (B) and 1 µm in (C), respectively. The corresponding
+linear best fits yield growth rates of ∼ 0.0031 µms−1, 0.0045 µms−1 and 0.049 µms−1. (D)
+Plot of the average bubble growth rate vs droplet size at [NaOH] = 0.048 M with the best
+exponent fit of -1.6 in blue and enforced exponent of -1 in green.
+13
+excellent collapse between multiple concentrations. Obviously, the same collapse is achieved
+treating hydroxide as a reagent to the first order. The master curve highlights the universal
+dependance of the bubble growth rate with the droplet size as 1/r.
+0 10 20 30 40
+t (s)
+0.0
+0.2
+0.4
+0.6
+r b
+ub
+bl
+e
+(µ
+m
+)
+(A)
+0 5 10 15 20
+t (s)
+0.0
+0.2
+0.4
+0.6
+r b
+ub
+bl
+e
+(µ
+m
+)
+(B)
+0.0 2.5 5.0 7.5 10.0
+rdroplet (µm)
+0.00
+0.02
+0.04
+0.06
+0.08
+0.10
+r(
+µm
+/s
+)
+r
+1
+(C)
+High [OH ]
+Low [OH ]
+0.0 2.5 5.0 7.5 10.0
+rdroplet (µm)
+0.0
+0.5
+1.0
+1.5
+2.0
+r/
+/[O
+H
+]
+r
+1
+(D) 0.098 M
+0.065 M
+0.047 M
+Figure 7: (A-B) Representative plot of an individual bubble growth as radius vs time, formed
+in a droplet with the radius ∼ 6 µm and ∼ 4 µm with [NaOH] of 0.098 M in the surrounding
+solution. The corresponding linear best fits yield growth rates of ∼ 0.0059 µms−1 and ∼
+0.011 µms−1. (C) Plot of the average bubble growth rate vs droplet size at high and low
+[NaOH] of 0.098 M (orange) and 0.047 M (blue). The exponents for the orange and blue
+fittings of n = -1. (D) Plot of bubble growth rate vs droplet size normalized by sodium
+hydroxide concentration. 0.098 M, 0.065 M, and 0.048 M are plotted as orange, green and
+blue respectively.
+The accelerated reactions within pure droplets suggest that the accessibility of OH− to
+the droplet interface plays a determinant role within this reaction. Considering a typical
+14
+Langmuir isotherm,60 the rate of adsorption of hydroxide to the interface can be described
+as kads[OH]f , where f is the area fraction available for adsorption and is defined as f = (1 -
+θ), where θ describes the droplet surface area already occupied by droplet-OH intermediates.
+The results shown in Figure 7 indicate the adsorption of hydroxide to the interface was not
+saturated. Upon saturation, it would be expected that the rate become zero order with
+respect to [OH].
+The experiments were typically recorded over a period of 60 – 90 min. From observations
+at later stages, it became evident that the growth rate of the bubbles dramatically slowed,
+reducing by a factor of ∼3 after ∼45 minutes due to a consumption of reagents and accu-
+mulation of the product as shown in Figure 8. After some time, it was also observed that
+the smallest droplets depleted themselves and no longer liberated bubbles. The reduction
+in reaction rate may be compounded by changes in the polymer within the droplet. During
+reaction the polymer chain is hydrolysed yielding reactive silanol groups. It is suspected that
+some crosslinking of the polymer may occur with sufficient time, impeding the reactivity of
+remaining functional groups.
+2.4 3.9
+rdroplet (µm)
+0.000
+0.005
+0.010
+r
+(µ
+m
+/s
+)
+< 10 min
+~ 45 min
+Figure 8: Plot of the average bubble growth rate for two droplet sizes at the early (blue)
+and late stage (orange). The concentration of NaOH in the surrounding solution is 0.048 M.
+To investigate the effect of PMH concentration on the reaction rate, solvent exchange was
+performed using a mixture of non-reactive oil decane and PMH. As shown in Figure 9A, the
+15
+reaction rate of the droplets consisting of decane and PMH again showed strong correlation
+to r−1d . That said, the reaction of composite droplets revealed a reduced bubble growth
+rate, indicating the reaction was dependent to the concentration of PMH in the droplets.
+Furthermore, the coefficient Q was obtained from fitting bubble growth rate by ∼ Qr−1d ,
+yielding the ratio Qpmh/Qcomposite of ∼ 16. In other words, the reaction was ∼ 16 times
+slower for decane - PMH composite droplets. Based on our recent work,43 the composition
+of the surface droplets was determined to be masspmh/massdec ∼ 0.073, corresponding to
+a ∼ 14 times dilution. Considering the reaction to be first order with respect to PMH,
+this dilution factor correlates well with reduced reaction rate. From Figure 9B, the reaction
+within the composite droplets also slowed with time, reducing by a factor of 2-3, after 40
+minutes of reaction, suggesting concentration of PMH within the droplet had also reduced
+by a factor 2-3..
+0.0 2.5 5.0 7.5 10.0
+rdroplet (µm)
+0.000
+0.002
+0.004
+0.006
+r(
+µm
+/s
+)
+(A)
+r
+1
+2.3 7.2
+rdroplet (µm)
+0.000
+0.001
+0.002
+r(
+µm
+/s
+)
+(B) < 10 min
+~ 45 min
+Figure 9: (A) Plot of the average bubble growth rate within composite decane-PMH droplets
+vs droplet size at [NaOH] = 0.048 M. Fit to r−1d is highlighted in blue. Best fit was r
+−0.7
+d (B)
+Plot of the average bubble growth rate for two sizes of the composite decane-PMH droplet,
+at the early and late stage, shown in blue and orange respectively.
+Proposed mechanism for enhanced nanobubble growth
+Our results under various conditions show that the bubble growth rate was all acceler-
+ated with reducing droplet radius within the range of ∼ 0.5 – 9 µm. A number of factors
+can contribute to the enhanced growth rate. Given that the volume of droplets was not
+16
+reducing rapidly, the concentrating of reagents with decreasing droplet size as observed in
+electrosprays, can obviously be excluded. Our droplets can be regarded as a pure reagent,
+at least at the initial stage of hydrogen production.
+This dependence of the bubble growth rate on r−nd is in agreement with earlier reports
+where the increase in reaction rate increases with r−nd , which was attributed to a thermo-
+dynamic advantage from the adsorption and desorption of species at the interface.11,25 That
+said, there are important factors which differentiate the reaction here to those studies. In
+those early reports, all reactants were internal to the droplet, whereas here the reaction is
+occurring between two phases, at the liquid-liquid interface. This biphasic reaction is also
+considered to be irreversible and never reach equilibrium. Considering stochastic nature of
+bubble nucleation, our experimental results show strong correlation between bubble growth
+rate and the droplet radius, expanding the scope of enhancement by reduced droplet size to
+nanobubble production.
+The scaling of bubble growth rate with r−nd is rationalized as below. As the reaction is
+biphasic, taking place only at the surface of the droplet. The rate can be expressed in terms
+of the interfacial area (Adroplet) as:
+dm(g)
+dt
+= Adroplet ∗ k ∗ [PMH]d[OH−]s (1)
+Here the chemical reaction shown in Figure 1 follows a second order rate law while k is as-
+sumed to be a reaction constant. None of [PMH], [OH−] or k varies with the droplet size. The
+amount of hydrogen produced per unit time is proportional to the area of the droplet surface
+Adroplet (∼ r2droplet). The produced gas from the reaction on the droplet surface diffuses out
+to increase the concentration of the dissolved hydrogen Cg in the boundary layer adjacent to
+the droplet surface. During the period of incubation, the concentration of hydrogen Cg in the
+boundary layer increases with time. The liquid volume in the boundary layer is proportional
+to the droplet size, scaling with r3droplet. In per unit time the concentration of the dissolved
+hydrogen Cg in the boundary layer increases with Adroplet∗k∗ [PMH]d[OH−]s/Vdroplet, which
+17
+leads to Cg ∼ r−1droplet.
+Growth rate of a sphere bubble in an oversaturated environment was analytically cal-
+culated by Epstein and Plesset,61 and recently reviewed by Lohse and Zhang.62 Assuming
+bubble growth is governed by the ideal gas, Young-Laplace and diffusion equations.,62 the
+radial growth rate
+dr
+dt
+= α(
+1
+r
++
+1
+√
+πDt
+) (2)
+With
+α =
+D
+ρg
+Cg − Cs(1 + 2σ/(rP0)
+1 + 4σ/(3rP0))
+(3)
+Here D is gas diffusion coefficient, ρ the density of the gas, Cs the gas solubility, σ the
+surface tension of the gas-liquid interface, P0 the ambient pressure. There are two limiting
+cases of big and small bubbles to simplify α.62 For large bubbles, Laplace pressure inside
+the bubble is much smaller than the ambient pressure. For r(t) � 2σ/P0, α ≈
+D(Cg−Cs)
+ρg
+.
+Although the size of nanobubbles here is small, the condition may not necessarily satisfy
+r(t) � 2σ/(P0Cg/Cs) because of Cg/Cs � 1. So the growth rate of these nanobubbles
+may be closer to the case of large bubbles. Given the gas concentration Cg ∼ r−1droplet, it is
+immediately clear that α and the growth rate of nanobubbles ∼ r−1droplet. The exact growth
+rate of hydrogen nanobubbles can be more complicated than a free bubble, due to geometrical
+derivation from a sphere, pinning effect from the substrate and the confinement from the
+droplet surface.
+The above analysis would suggest that the bubble growth rate should decrease with time
+as the concentration of PMH decreases from depletion in the reaction at the droplet surface.
+The initial growth rate of nanobubbles also decreases with the ratio of PMH to non-reactive
+liquid in the droplets, as observed experimentally. It is interesting to note that for surface
+droplets, as the contact angle and thus the surface-to-volume ratio may be tuned. This may
+18
+prove desirable in future mechanistic or kinetic control studies for nanobubble growth rates.
+Conclusions
+Hydrogen nanobubbles produced from reactive polymer nanodroplets demonstrate an accel-
+erated growth rate as the droplet radius is reduced. The bubbles demonstrated a preferential
+nucleation at the drop rim and revealed numerous growth dynamics including coalescence,
+collapse, and secondary nucleation. It was determined that the growth rate of the bubbles
+scaled inversely with the droplet radius. Furthermore, the reaction rate was proportional
+to both the concentration of reactants inside and outside the droplet. The experimental
+results simultaneously demonstrate the production of surface nanobubbles within pure reac-
+tive reagent and composite droplets. The mechanism for the enhanced growth rate was the
+confinement of oversaturated gas in the droplet volume as the gas production from the in-
+terfacial reaction is proportional to the surface area of the droplet. The results invite future
+research toward droplet accelerated reaction, in particular, where the droplet may also con-
+tain a catalyst. The findings from this study provide further understanding for applications
+in droplet enhanced chemical reactions and the on-demand liberation of hydrogen.
+Experimental method and simulations
+Chemicals and Materials
+Polymethylhydrosiloxane (PMH) (Mn = 3400 g/mol, Sigma) and decane (99%, Sigma)
+were utilized as to prepare reactive oils and were diluted in acetone (AR, Chem-supply) to
+prepare the first solution for solvent exchange. Sodium hydroxide (98%, Sigma) and Milli-Q
+water (18 MΩcm) were used to prepare basic solution to trigger the reaction. 8-well plates
+with bottom glass substrates (Lab-Tek, No. 1.5H) were used following chemical vapour
+deposition of 1H,1H,2H,2H-perfluorododecyltrichlorosilane (97%, Sigma). The substrates
+were used immediately following sonication in Isopropanol (AR, Chem-supply) and drying
+19
+by compressed nitrogen. All reagents were used as received without further purification.
+Droplet preparation and reaction conditions
+PMH droplets were prepared by solvent exchange within the well. The first solution was
+prepared as 1% PMH in acetone (v/v), termed solution A. The second solution was Milli-Q
+water (18 MΩcm), termed solution B. Initially 0.2 ml of solution A was added to the well,
+followed by 0.6 ml of solution B. Upon addition of solution B, the solution was immediately
+cloudy, indicative of nanodroplet formation from ouzo effect. From the solution 0.2 ml was
+then removed and replaced by 0.2 ml of fresh solution B. This process was repeated 12 times
+to remove solution A thoroughly, then leaving a final well volume of 0.5 ml. PMH in solution
+A was removed in the experiments, reducing light scattering and allowed the reaction to be
+visualized within the surface droplets on the same plane with the glass substrate.
+Composite nanodroplets consisting of PMH and decane were prepared by the solvent
+exchange in the well by following the same procedure for formation of PMH nanodroplets.
+Solution A was 0.91 vol. % decane and 0.01 vol. % PMH in acetone while solution B was
+water. Composite nanodroplets of PMH and 1-octanol were also prepared by the solvent
+exchange in the well by following the same procedure for formation of PMH nanodroplets.
+Solution A was 0.91 vol. % 1-octanol and 0.01 % PMH in acetone while solution B was
+1-octanol saturated water. Both decane (99%) and 1-octanol (99%) were purchased from
+Sigma and used as received. The reaction for producing hydrogen nanobubbles was initiated
+by addition of the aqueous solution of NaOH into the well. The volume of the solution was
+25 µl to the concentration of the alkaline solution of ∼ 0.05 M in the well during the reaction.
+The physical parameters for the oil droplets are summarized in Table 1. The viscosity µ
+of PMH is ∼ 45 cSt while the composite viscosity is estimated to be ∼ 4 cSt assuming an
+ideal mixture. The interfacial tensions with air and water demonstrated a downward trend
+with increasing PMH content. The macroscopic contact angle (CA) with air and water and
+the fluorinated substrate were ∼ 60◦ for both oil compositions.
+Characterization of hydrogen nanobubbles from droplet reaction
+20
+Table 1: Physical properties of PMH and the DEC-PMH mixtures at different volume ratios
+Oil γoil−water γoil−air CA in air CA in H2O Density ρ Viscosity µ
+(mNm−1) (mNm−1) (◦) (◦) (kgm−3) (mPa ·s)
+PMH 0.4 19.9 60.7 60.5 1006 45
+DEC-PMH (91:9) 30.8 24.6 59.2 58.6 760 4
+DEC-PMH(50:50) 25.6 22.3 - - 868 23
+The interfacial surface tensions and contact angles were determined by pendant and sessile
+droplet method using a goniometer (OCA20, DataPhysics Instruments GmbH, Germany).
+The interfacial tensions were determined using the ‘OpenDrop’ package for python.63 Fluid
+AFM measurements were performed using an Asylum MFP-3D Bio AFM in AC mode with
+an iDrive cantilever holder and BL-TR400PB tip (nominal spring constant, k = 0.02 N/m;
+freq. = 7-14 kHz). Additional Fluid AFM measurements were performed using a Dimension
+Icon utilizing ScanAsyst-Fluid+ tip (nominal spring constant, k = 0.7 N/m; tip radius = 2
+nm). The PeakForce setpoint was maintained during all images at 334.9 pN.
+The reaction experiments were recorded in situ on a Nikon N-Storm super resolution
+confocal microscope (TIRF 100x, 1.49 NA objective lens). A white-light LED was used to
+capture the surface of the substrate through bright-field imaging. The region of interest was
+collected by an Andor iXon DU-897 EMCCD camera, at 58 frames per second with a pixel
+calibration of 0.16 µm per pixel. Image analysis was performed using a combination of NIS-
+Elements instrument software and homebuilt python codes, in part utilizing the open source
+PIMS, scikit64 and TrackPy65 packages for python. Each frame was enhanced by filtering
+and unsharp masking, before binarization. The bubbles were detected as bright, nominally
+circular features. In each frame, the size, shape and position of all detected bubbles were
+measured, as shown in Figure 3D. The linking of frames within allowed time and movement
+parameters allows for each bubble to be assigned a unique numerical identifier through time.
+i.e. A bubble in the same location in subsequent frames is identified as the same bubble.
+Conversely, if the bubble collapses and is absent for a designated number of frames, any
+21
+new bubbles in this location is given a new numerical identifier. The fluorescence images of
+reacting droplets were taken by using 488 nm laser as excitation. The droplets were binary
+mixture of PMH and decane, stained by Rhodamine 6G at 5 µM. The concentration of NaOH
+in the surrounding solution was 0.048 M.
+Supporting Information
+Supporting Information Available: (Figure S1) Time-lapse showing the PMH nan-
+odroplet response to external stimuli of high concentration of NaOH. (Figure S2) Plot of
+droplet diameter vs time during reaction. (Figure S3) Plot of the radius vs time for repre-
+sentative bubbles with fiitting against equation 2. This material is available free of charge
+via the Internet at http://pubs.acs.org.
+Acknowledgement
+We thank the funding support from the Natural Sciences and Engineering Research Council
+of Canada (NSERC) and Future Energy Systems (Canada First Research Excellence Fund).
+This research was undertaken, in part, thanks to funding from the Canada Research Chairs
+program. We also acknowledge the RMIT MicroNano Research Facility and the RMIT
+Microscopy and Microanalysis Facility for providing access to equipment and resources.
+References
+1. Kelly, B. T.; Baret, J.-C.; Taly, V.; Griffiths, A. D. Miniaturizing Chemistry and Biology
+in Microdroplets. Chem. Commun. 2007, 1773–1788.
+2. Wang, W.; Yang, C.; Li, C. M. Efficient On-Demand Compound Droplet Formation:
+22
+From Microfluidics to Microdroplets as Miniaturized Laboratories. Small 2009, 5, 1149–
+1152.
+3. Zhang, M.; Ettelaie, R.; Yan, T.; Zhang, S.; Cheng, F.; Binks, B. P.; Yang, H. Ionic
+Liquid Droplet Microreactor for Catalysis Reactions Not at Equilibrium. J. Am. Chem.
+Soc. 2017, 139, 17387–17396.
+4. Guardingo, M.; Busqué, F.; Ruiz-Molina, D. Reactions in Ultra-Small Droplets by Tip-
+Assisted Chemistry. Chem. Commun. 2016, 52, 11617–11626.
+5. Zhu, Y.; Power, B. E. Lab-On-A-Chip In Vitro Compartmentalization Technologies for
+Protein Studies. In Protein–Protein Interaction; Springer: Berlin, Heidelberg, 2008; Vol.
+110; pp 81–114.
+6. Feng, W.; Ueda, E.; Levkin, P. A. Droplet Microarrays: From Surface Patterning to
+High-Throughput Applications. Adv. Mater. 2018, 30, 1706111.
+7. Dittrich, P. S.; Manz, A. Lab-On-A-Chip: Microfluidics in Drug Discovery. Nat. Rev.
+Drug Discovery 2006, 5, 210–218.
+8. Ueda, E.; Geyer, F. L.; Nedashkivska, V.; Levkin, P. A. DropletMicroarray: Facile
+Formation of Arrays of Microdroplets and Hydrogel Micropads for Cell Screening Ap-
+plications. Lab Chip 2012, 12, 5218–5224.
+9. Bain, R. M.; Pulliam, C. J.; Thery, F.; Cooks, R. G. Accelerated Chemical Reactions
+and Organic Synthesis in Leidenfrost Droplets. Angew. Chem., Int. Ed. 2016, 55, 10478–
+10482.
+10. Yan, X.; Bain, R. M.; Cooks, R. G. Organic Reactions in Microdroplets: Reaction
+Acceleration Revealed by Mass Spectrometry. Angew. Chem., Int. Ed. 2016, 55, 12960–
+12972.
+23
+11. Li, Y.; Yan, X.; Cooks, R. G. The Role of the Interface in Thin Film and Droplet
+Accelerated Reactions Studied by Competitive Substituent Effects. Angew. Chem., Int.
+Ed. 2016, 55, 3433–3437.
+12. Banerjee, S.; Gnanamani, E.; Yan, X.; Zare, R. N. Can All Bulk-Phase Reactions Be
+Accelerated in Microdroplets? Analyst 2017, 142, 1399–1402.
+13. Yan, X.; Cheng, H.; Zare, R. N. Two-Phase Reactions in Microdroplets without the Use
+of Phase-Transfer Catalysts. Angew. Chem., Int. Ed. 2017, 56, 3562–3565.
+14. Kuksenok, O. Chemical Synthesis in Small Spaces. Physics 2014, 7, 4.
+15. Girod, M.; Moyano, E.; Campbell, D. I.; Cooks, R. G. Accelerated Bimolecular Reac-
+tions in Microdroplets Studied by Desorption Electrospray Ionization Mass Spectrome-
+try. Chem. Sci. 2011, 2, 501–510.
+16. Wei, Z.; Wleklinski, M.; Ferreira, C.; Cooks, R. G. Reaction Acceleration in Thin Films
+with Continuous Product Deposition for Organic Synthesis. Angew. Chem., Int. Ed.
+2017, 129, 9514–9518.
+17. Narayan, S.; Muldoon, J.; Finn, M.; Fokin, V. V.; Kolb, H. C.; Sharpless, K. B. “On Wa-
+ter”: Unique Reactivity of Organic Compounds in Aqueous Suspension. Angew. Chem.,
+Int. Ed. 2005, 44, 3275–3279.
+18. Bain, R. M.; Sathyamoorthi, S.; Zare, R. N. “On-Droplet” Chemistry: The Cycloaddition
+of Diethyl Azodicarboxylate and Quadricyclane. Angew. Chem., Int. Ed. 2017, 129,
+15279–15283.
+19. Carroll, B.; Hidrovo, C. Experimental Investigation of Inertial Mixing in Colliding
+Droplets. Heat Transfer Eng. 2013, 34, 120–130.
+20. Lee, J. K.; Kim, S.; Nam, H. G.; Zare, R. N. Microdroplet Fusion Mass Spectrometry
+for Fast Reaction Kinetics. Proc. Natl. Acad. Sci. U. S. A. 2015, 112, 3898–3903.
+24
+21. Davis, R. D.; Jacobs, M. I.; Houle, F. A.; Wilson, K. R. Colliding-Droplet Microreac-
+tor: Rapid On-Demand Inertial Mixing and Metal-Catalyzed Aqueous Phase Oxidation
+Processes. Anal. Chem. 2017, 89, 12494–12501.
+22. Nakatani, K.; Chikama, K.; Kim, H.-B.; Kitamura, N. Droplet-Size Dependence of the
+Electron Transfer Rate across the Single-Microdroplet/Water Interface. Chem. Phys.
+Lett. 1995, 237, 133–136.
+23. Nakatani, K.; Suto, T.; Wakabayashi, M.; Kim, H.-B.; Kitamura, N. Direct Anal-
+yses of an Electrochemically Induced Dye Formation Reaction across a Single-
+Microdroplet/Water Interface. J. Phys. Chem. 1995, 99, 4745–4749.
+24. Nakatani, K.; Wakabayashi, M.; Chikama, K.; Kitamura, N. Electrochemical
+Studies on Mass Transfer of Ferrocene Derivatives across a Single-Nitrobenzene-
+Microdroplet/Water Interface. J. Phys. Chem. 1996, 100, 6749–6754.
+25. Fallah-Araghi, A.; Meguellati, K.; Baret, J.-C.; El Harrak, A.; Mangeat, T.; Karplus, M.;
+Ladame, S.; Marques, C. M.; Griffiths, A. D. Enhanced Chemical Synthesis at Soft
+Interfaces: A Universal Reaction-Adsorption Mechanism in Microcompartments. Phys.
+Rev. Lett. 2014, 112, 028301.
+26. Baffou, G.; Polleux, J.; Rigneault, H.; Monneret, S. Super-Heating and Micro-Bubble
+Generation around Plasmonic Nanoparticles under cw Illumination. J. Phys. Chem. C
+2014, 118, 4890–4898.
+27. Nam, I.; Lee, J. K.; Nam, H. G.; Zare, R. N. Abiotic Production of Sugar Phosphates
+and Uridine Ribonucleoside in Aqueous Microdroplets. Proc. Natl. Acad. Sci. U. S. A.
+2017, 114, 12396–12400.
+28. Vaida, V. Prebiotic Phosphorylation Enabled by Microdroplets. Proc. Natl. Acad. Sci.
+U. S. A. 2017, 114, 12359–12361.
+25
+29. Urban, P. L. Compartmentalised Chemistry: From Studies on the Origin of Life to
+Engineered Biochemical Systems. New J. Chem. 2014, 38, 5135–5141.
+30. Lee, J. K.; Samanta, D.; Nam, I.; Nam, H. G.; Zare, R. N. Spontaneous Reduction of
+Biomolecules on the Surface of Water Droplets. Biophys. J. 2018, 114, 542a.
+31. Lee, J. K.; Samanta, D.; Nam, H. G.; Zare, R. N. Spontaneous Formation of Gold
+Nanostructures in Aqueous Microdroplets. Nat. Commun. 2018, 9, 1562.
+32. Banerjee, S.; Zare, R. N. Syntheses of Isoquinoline and Substituted Quinolines in
+Charged Microdroplets. Angew. Chem., Int. Ed. 2015, 127, 15008–15012.
+33. Lee, J. K.; Banerjee, S.; Nam, H. G.; Zare, R. N. Acceleration of Reaction in Charged
+Microdroplets. Q. Rev. Biophys. 2015, 48, 437–444.
+34. Ingram, A. J.; Boeser, C. L.; Zare, R. N. Going Beyond Electrospray: Mass Spectrometric
+Studies of Chemical Reactions in and on Liquids. Chem. Sci. 2016, 7, 39–55.
+35. Chen, S.; Wan, Q.; Badu-Tawiah, A. K. Picomole-Scale Real-Time Photoreaction Screen-
+ing: Discovery of the Visible-Light-Promoted Dehydrogenation of Tetrahydroquinolines
+under Ambient Conditions. Angew. Chem., Int. Ed. 2016, 128, 9491–9495.
+36. Jacobs, M. I.; Davies, J. F.; Lee, L.; Davis, R. D.; Houle, F.; Wilson, K. R. Explor-
+ing Chemistry in Microcompartments Using Guided Droplet Collisions in a Branched
+Quadrupole Trap Coupled to a Single Droplet, Paper Spray Mass Spectrometer. Anal.
+Chem. 2017, 89, 12511–12519.
+37. Gallo, A.; Farinha, A. S.; Dinis, M.; Emwas, A.-H.; Santana, A.; Nielsen, R. J.; God-
+dard, W. A.; Mishra, H. The Chemical Reactions in Electrosprays of Water Do Not
+Always Correspond to Those at the Pristine Air–Water Interface. Chem. Sci. 2019, 10,
+2566–2577.
+26
+38. Jacobs, M. I.; Davis, R. D.; Rapf, R. J.; Wilson, K. R. Studying Chemistry in Micro-
+Compartments by Separating Droplet Generation from Ionization. J. Am. Soc. Mass
+Spectrom. 2018, 30, 339–343.
+39. Zhang, X.; Lu, Z.; Tan, H.; Bao, L.; He, Y.; Sun, C.; Lohse, D. Formation of Surface
+Nanodroplets under Controlled Flow Conditions. Proc. Natl. Acad. Sci. U. S. A. 2015,
+112, 9253–9257.
+40. Dyett, B.; Yu, H.; Zhang, X. Formation of Surface Nanodroplets of Viscous Liquids by
+Solvent Exchange. Eur. Phys. J. E: Soft Matter Biol. Phys. 2017, 40, 1–6.
+41. Bao, L.; Rezk, A. R.; Yeo, L. Y.; Zhang, X. Highly Ordered Arrays of Femtoliter Surface
+Droplets. Small 2015, 11, 4850–4855.
+42. Lu, Z.; Peng, S.; Zhang, X. Influence of Solution Composition on the Formation of
+Surface Nanodroplets by Solvent Exchange. Langmuir 2016, 32, 1700–1706.
+43. Li, M.; Bao, L.; Yu, H.; Zhang, X. Formation of Multicomponent Surface Nanodroplets
+by Solvent Exchange. J. Phys. Chem. C 2018, 122, 8647–8654.
+44. Hain, N.; Handschuh-Wang, S.; Wesner, D.; Druzhinin, S. I.; Schönherr, H. Multimodal
+Microscopy-Based Identification of Surface Nanobubbles. J. Colloid Interface Sci. 2019,
+547, 162–170.
+45. Vincent, O.; Marmottant, P. On the Statics and Dynamics of Fully Confined Bubbles.
+J. Fluid Mech. 2017, 827, 194–224.
+46. Dyett, B. P.; Li, M.; Zhao, H.; Zhang, X. Plasmonic Nanobubbles in “Armored” Surface
+Nanodroplets. J. Phys. Chem. C 2019, 123, 29866–29874.
+47. Favelukis, M. Dynamics of Foam Growth: Bubble Growth in a Limited Amount of
+Liquid. Polym. Eng. Sci. 2004, 44, 1900–1906.
+27
+48. Xu, X.; Zhao, G.; Li, H. Numerical Simulation of Bubble Growth in a Limited Amount
+of Liquid. J. Appl. Polym. Sci. 2010, 116, 1264–1271.
+49. Arefmanesh, A.; Advani, S. Diffusion-Induced Growth of a Gas Bubble in a Viscoelastic
+Fluid. Rheol. Acta 1991, 30, 274–283.
+50. Doinikov, A. A.; Marmottant, P. Natural Oscillations of a Gas Bubble in a Liquid-Filled
+Cavity Located in a Viscoelastic Medium. J. Sound Vib. 2018, 420, 61–72.
+51. Doinikov, A. A.; Dollet, B.; Marmottant, P. Cavitation in a Liquid-Filled Cavity Sur-
+rounded by an Elastic Medium: Intercoupling of Cavitation Events in Neighboring Cav-
+ities. Phys. Rev. E 2018, 98, 013108.
+52. Doinikov, A. A.; Dollet, B.; Marmottant, P. Model for the Growth and the Oscillation of
+a Cavitation Bubble in a Spherical Liquid-Filled Cavity Enclosed in an Elastic Medium.
+Phys. Rev. E 2018, 97, 013108.
+53. Vincent, O.; Marmottant, P.; Quinto-Su, P. A.; Ohl, C.-D. Birth and Growth of Cavi-
+tation Bubbles within Water under Tension Confined in a Simple Synthetic Tree. Phys.
+Rev. Lett. 2012, 108, 184502.
+54. Vincent, O.; Marmottant, P.; Gonzalez-Avila, S. R.; Ando, K.; Ohl, C.-D. The Fast
+Dynamics of Cavitation Bubbles within Water Confined in Elastic Solids. Soft Matter
+2014, 10, 1455–1461.
+55. Shang, L.; Cheng, Y.; Wang, J.; Yu, Y.; Zhao, Y.; Chen, Y.; Gu, Z. Osmotic Pressure-
+Triggered Cavitation in Microcapsules. Lab Chip 2016, 16, 251–255.
+56. Toutov, A. A.; Betz, K. N.; Haibach, M. C.; Romine, A. M.; Grubbs, R. H. Sodium
+Hydroxide Catalyzed Dehydrocoupling of Alcohols with Hydrosilanes. Org. Lett. 2016,
+18, 5776–5779.
+57. Zhang, X. H.; Ducker, W. Interfacial Oil Droplets. Langmuir 2008, 24, 110–115.
+28
+58. Deegan, R. D.; Bakajin, O.; Dupont, T. F.; Huber, G.; Nagel, S. R.; Witten, T. A.
+Contact Line Deposits in an Evaporating Drop. Phys. Rev. E 2000, 62, 756–765.
+59. Zhang, L.; Belova, V.; Wang, H.; Dong, W.; Moehwald, H. Controlled Cavitation at
+Nano/Microparticle Surfaces. Chem. Mater. 2014, 26, 2244–2248.
+60. Langmuir, I. The Constitution and Fundamental Properties of Solids and Liquids. Part
+I. Solids. J. Am. Chem. Soc. 1916, 38, 2221–2295.
+61. Epstein, P. S.; Plesset, M. S. On the Stability of Gas Bubbles in Liquid-Gas Solutions.
+J. Chem. Phys. 1950, 18, 1505–1509.
+62. Lohse, D.; Zhang, X. Surface Nanobubbles and Nanodroplets. Rev. Mod. Phys. 2015,
+87, 981.
+63. Berry, J.; Neeson, M.; Dagastine, R.; Chan, D.; Tabor, R. Measurement of Surface and
+Interfacial Tension Using Pendant Drop Tensiometry. J. Colloid Interface Sci. 2015,
+454, 226–237.
+64. Van der Walt, S.; Schönberger, J. L.; Nunez-Iglesias, J.; Boulogne, F.; Warner, J. D.;
+Yager, N.; Gouillart, E.; Yu, T. Scikit-Image: Image Processing in Python. PeerJ 2014,
+2, e453.
+65. Allan, D.; Caswell, T.; Keim, N.; Van Der Wel, C. trackpy . Trackpy v0. 3.2., Zenodo:
+http://doi.org/10.5281/zenodo.60550; 2016.
+29
+Graphical TOC Entry
+30

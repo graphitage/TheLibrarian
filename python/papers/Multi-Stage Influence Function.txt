@@ -1,0 +1,1099 @@
+Multi-Stage Influence Function
+Hongge Chen*,1 Si Si2 Yang Li 2 Ciprian Chelba 2
+Sanjiv Kumar 2 Duane Boning 1 Cho-Jui Hsieh 3
+1MIT 2 Google Research 3UCLA
+*Work was done when interning at Google Research.
+chenhg@mit.edu sisidaisy@google.com liyang@google.com ciprianchelba@google.com
+sanjivk@google.com boning@mtl.mit.edu chohsieh@cs.ucla.edu
+Abstract
+Multi-stage training and knowledge transfer, from a large-scale pretraining task to various
+finetuning tasks, have revolutionized natural language processing and computer vision resulting
+in state-of-the-art performance improvements. In this paper, we develop a multi-stage influence
+function score to track predictions from a finetuned model all the way back to the pretraining data.
+With this score, we can identify the pretraining examples in the pretraining task that contribute
+most to a prediction in the finetuning task. The proposed multi-stage influence function generalizes
+the original influence function for a single model in (Koh & Liang, 2017), thereby enabling
+influence computation through both pretrained and finetuned models. We study two different
+scenarios with the pretrained embeddings fixed or updated in the finetuning tasks. We test our
+proposed method in various experiments to show its effectiveness and potential applications.
+1 Introduction
+Multi-stage training (pretrain and then finetune) has become increasingly important and has achieved
+state-of-the-art results in many tasks. In natural language processing (NLP) applications, it is now
+a common practice to first learn word embeddings (e.g., word2vec [16], GloVe [19]) or contextual
+representations (e.g., ELMo [20], BERT [7]) from a large unsupervised corpus, and then refine or
+finetune the model on supervised end tasks. Similar ideas in transfer learning have also been widely
+used in many different tasks. Intuitively, the successes of these multi-stage learning paradigms are
+due to knowledge transfer from pretraining tasks to the end task. However, current approaches using
+multi-stage learning are usually based on trial-and-error and many fundamental questions remain
+unanswered. For example, which part of the pretraining data/task contributes most to the end task?
+How can one detect “false transfer” where some pretraining data/task could be harmful for the end
+task? If a testing point is wrongly predicted by the finetuned model, can we trace back to the
+problematic examples in the pretraining data? Answering these questions requires a quantitative
+measurement of how the data and loss function in the pretraining stage influence the end model,
+which has not been studied in the past and is the main focus of this paper.
+To find the most influential training data responsible for a model’s prediction, the influence function
+was first introduced by [5], from a robust statistics point of view. More recently, as large-scale
+applications become more challenging for influence function computation, [13] proposed to use a first-
+order approximation to measure the effect of removing one training point on the model’s prediction,
+to overcome computational challenges. These methods are widely used in model debugging and there
+are also some applications in machine learning fairness [2, 26]. However, all of the existing influence
+function scores computation algorithms studied the case of single-stage training – where there is
+only one model with one set of training/prediction data in the training process. To the best of our
+knowledge, the influence of pretraining data on a subsequent finetuning task and model has
+not been studied, and it is nontrivial to apply the original influence function in [13] to this scenario.
+A naive approach to solve this problem is to remove each individual instance out of the pretraining
+1
+ar
+X
+iv
+:2
+00
+7.
+09
+08
+1v
+1 
+ [
+cs
+.L
+G
+] 
+ 1
+7 
+Ju
+l 
+20
+20
+data one at a time and retrain both pretrain and finetune models; this is prohibitively expensive,
+especially given that pretraining models are often large-scale and may take days to train.
+In this work, we study the influence function from pretraining data to the end task, and propose a
+novel approach to estimate the influence scores in multi-stage training that requires no additional
+retrain, does not require model convexity, and is computationally tractable. The proposed approach
+is based on the definition of influence function, and considers estimating influence score under two
+multi-stage training settings depending on whether the embedding from pretraining model is retrained
+in the finetuning task. The derived influence function well explains how pretraining data benefits the
+finetuning task. In summary, our contributions are threefold:
+• We propose a novel estimation of influence score for multi-stage training. In real datasets
+and experiments across various tasks, our predicted and actual influence score of the pretraining
+data to the finetuned model are well correlated. This shows the effectiveness of our proposed
+technique for estimating influence scores in multi-stage models.
+• We propose effective methods to determine how testing data from the finetuning task is
+impacted by changes in the pretraining data. We show that the influence of the pretraining
+data to the finetuned model consists of two parts: the influence of the pretraining data on the
+pretrained model, and influence of the pretraining data on the finetuned model. These two parts
+can be quantified using our proposed technique.
+• We propose methods to decide whether the pretraining data can benefit the finetuning
+task. We show that the influence of the pretraining data on the finetuning task is highly
+dependent on 1) the similarity of two tasks or stages, and 2) the number of training data in the
+finetuning task. Our proposed technique provides a novel way to measure how the pretraining
+data helps or benefits the finetuning task.
+2 Related Work
+Multi-stage model training that trains models in many stages on different tasks to improve the end-task
+has been used widely in many machine learning areas. For example, transfer learning has been widely
+used to transfer knowledge from source task to the target task [18]. More recently, researchers have
+shown that training the computer vision or NLP encoder on a source task with huge amount of data
+can often benefit the performance of small end-tasks, and these techniques including BERT [7],
+Elmo [14] and large ResNet pretraining [15] have achieved state-of-the-arts on many tasks.
+Although mutli-stage models have been widely used, there are few works on understanding multi-
+stage models and exploiting the influence of the training data in the pretraining step to benefit the
+fine-tune task. In contrast, there are many works that focus on understanding single stage machine
+learning models and explaining model predictions. Algorithms developed along this line of research
+can be categorized into features based and data based approaches. Feature based approaches aim to
+explain predictions with respect to model variables, and trace back the contribution of variables to the
+prediction [17, 9, 21, 23, 22, 25, 8, 6, 1]. However, they are not aiming for attributing the prediction
+back to the training data.
+On the other hand, data based approaches seek to connect model prediction and training data, and
+trace back the most influential training data that are most responsible for the model prediction. Among
+them, the influence function [5, 13], which aims to model the prediction changes when training data
+is added/removed, has been shown to be effective in many applications. There is a series of work on
+influence functions, including investigating the influence of a group of data on the prediction [12],
+using influence functions to detect bias in word embeddings [2], and using it in preventing data
+poisoning attacks [24]. There are also works on data importance estimation to explain the model
+from the data prospective [27, 10, 11].
+2
+All of these previous works, however, only consider a single stage training procedure, and it is
+not straightforward to apply them to multi-stage models. In this paper, we propose to analyze the
+influence of pretraining data on predictions in the subsequent finetuned model and end task.
+3 Algorithms
+In this section, we detail the procedure of multi-stage training, show how to compute the influence
+score for the multi-stage training, and then discuss how to scale up the computation.
+3.1 Multi-Stage Model Training
+Multi-stage models, which train different models in consecutive stages, have been widely used in
+various ML tasks. Mathematically, letZ be the training set for pretraining task with data size |Z| = m,
+and X be the training data for the finetuning task with data size |X | = n. In pretraining stage, we
+assume the parameters of the pretrained network have two parts: the parameters W that are shared
+with the end task, and the task-specific parameters U that will only be used in the pretraining stage.
+Note that W could be a word embedding matrix (e.g., in word2vec) or a representation extraction
+network (e.g., Elmo, BERT, ResNet), while U is usually the last few layers that corresponds to the
+pretraining task. After training on the pretraining task, we obtain the optimal parameters W ∗, U∗.
+The pretraining stage can be formulated as
+W ∗, U∗ = arg min
+W,U
+1
+m
+∑
+z∈Z
+g(z, W, U) := arg min
+W,U
+G(W,U), (1)
+where g(·) is the loss function for the pretrain task and G(·) is summation of loss with respect to all
+the pretraining examples.
+In the finetuning stage, the network parameters are W,Θ, where W is shared with the pretraining task
+and Θ is the rest of the parameters specifically associated with the finetuning task. We will initialize
+the W part by W ∗. Let f(·) denote the finetuning loss, and F (·) summarizes all the loss with respect
+to finetuning data, there are two cases when finetuning the end-task:
+• Finetuning Case 1: Fixing embedding parameters W = W ∗, and only finetune Θ:
+Θ∗ = arg min
+Θ
+1
+n
+∑
+x∈X
+f(x, W ∗, Θ) := arg min
+Θ
+F (W ∗,Θ). (2)
+• Finetuning Case 2: finetune both the embedding parameters W (initialized from W ∗) and Θ.
+Sometimes updating the embedding parameters W in the finetuning stage is necessary, as the
+embedding parameters from the pretrained model may not be good enough for the finetuning
+task. This corresponds to the following formulation:
+W ∗∗,Θ∗ = arg min
+W,Θ
+1
+n
+∑
+x∈X
+f(x, W, Θ) := arg min
+W,Θ
+F (W,Θ). (3)
+3.2 Influence function for multi-stage models
+We derive the influence function for the multi-stage model to trace the influence of pretraining data
+on the finetuned model. In Figure 1 we show the task we are interested in solving in this paper. Note
+that we use the same definition of influence function as [13] and discuss how to compute it in the
+multi-stage training scenario. As discussed at the end of Section 3.1, depending on whether or not we
+are updating the shared parameters W in the finetuning stage, we will derive the influence functions
+under two different scenarios.
+3
+Embedding with a 
+parameter set W 
+A pre-training task with a 
+parameter set U
+Embedding with a 
+parameter set W
+A downstream task 
+with parameter Θ
+Pre-training data {z1, z2, z3 …}   +/- z 
+Finetune data {x1, x2, x3…}
+test loss f(xt)Pretrain loss G
+Test data xt
+Fine tune loss F
+Figure 1: The setting for influence functions in multi-stage models. We consider a two-stage model,
+where we have a pretrained model, and a finetuned model for a desired end task. We seek to compute
+the influence of the pretraining data on predictions using testing data in the finetuning task.
+3.2.1 Case 1: embedding parameters W are fixed in finetuning
+To compute the influence of pretraining data on the finetuning task, the main idea is to perturb one
+data example in the pretraining data, and study how that impacts the test data. Mathematically, if
+we perturb a pretraining data example z with loss change by a small �, the perturbed model can be
+defined as
+Ŵ�, Û� = arg min
+W,U
+G(W,U) + �g(z,W,U). (4)
+Note that choices of � can result in different effects in the loss function from the original solution
+in (1). For instance, setting � = − 1
+m
+is equivalent to removing the sample z in the pretraining dataset.
+For the finetuning stage, since we consider Case 1 where the embedding parameters W are fixed in
+the finetuning stage, the new model for the end-task or finetuning task will thus be
+Θ̂� = arg min
+Θ
+F (Ŵ�,Θ). (5)
+The influence function that measures the impact of a small � perturbation on z to the finetuning loss
+on a test sample xt from finetuning task is defined as
+Iz,xt :=
+∂f(xt, Ŵ�, Θ̂�)
+∂�
+∣∣
+�=0
+= ∇Θf(xt,W ∗,Θ∗)T · Iz,Θ +∇W f(xt,W ∗,Θ∗)T · Iz,W , (6)
+with Iz,Θ :=
+∂Θ̂�
+∂�
+∣∣
+�=0
+and Iz,W :=
+∂Ŵ�
+∂�
+∣∣
+�=0
+, (7)
+where Iz,Θ measures the influence of z on the finetuning task parameters Θ, and Iz,W measures how
+z influences the pretrained model W . Therefore we can split the influence of z on the test sample
+into two pieces: one is the impact of z on the pretrained model Iz,W , and the other is the impact of z
+on the finetuned model Iz,Θ. It is worth mentioning that, due to linearity, if we want to estimate a set
+of test example influence function scores with respect to a set of pretraining examples, we can simply
+sum up the pair-wise influence functions, and so define
+I{z(i)},{x(j)t }
+:=
+∑
+i
+∑
+j
+I
+z(i),x
+(j)
+t
+, (8)
+where {z(i)} contains a set of pretraining data and {x(j)t } contains a group of finetuning test data that
+we are targeting on. Next we will derive these two influence scores Iz,Θ and Iz,W (see the detailed
+derivations in the appendix) in Theorem 1 below.
+4
+Theorem 1. For the two-stage training procedure in (1) and (2), we have
+Iz,W :=
+∂Ŵ�
+∂�
+∣∣
+�=0
+= −
+[(∂2G(W ∗, U∗)
+∂(W,U)2
+)−1
+(
+∂g(z,W ∗, U∗)
+∂(W,U)
+)
+]
+W
+(9)
+Iz,Θ :=
+∂Θ̂�
+∂�
+∣∣
+�=0
+= (
+∂2F (W ∗,Θ∗)
+∂Θ2
+)−1 · (
+∂2F (W ∗,Θ∗)
+∂Θ∂W
+) ·
+[(∂2G(W ∗, U∗)
+∂(W,U)2
+)−1
+(
+∂g(z,W ∗, U∗)
+∂(W,U)
+)
+]
+W
+(10)
+where [·]W means taking the W part of the vector.
+By plugging (9) and (10) into (6), we finally obtain the influence score of pretraining data z on the
+finetuning task testing point xt, Iz,xt as
+Iz,xt =
+[
+−
+∂f(x,W ∗,Θ∗)T
+∂Θ
+·(
+∂2F (W ∗,Θ∗)
+∂Θ2
+)−1 ·
+∂2F (W ∗,Θ∗)
+∂Θ∂W
++
+∂f(x,W ∗,Θ∗)T
+∂W
+]
+Iz,W
+(11)
+The pseudocode for the influence function in (11) is shown in Algorithm 1.
+Algorithm 1 Multi-Stage Influence Score with Fixed Embedding
+Input: pretrain and finetune models with W ∗, Θ∗, and U∗; pretrain and finetune training data Z and
+X ; test example xt; and a pretrain training example z.
+Output: Influence function value Iz,xt .
+1: Compute fintune model’s gradients∂f(xt,W
+∗,Θ∗)
+∂Θ
+and ∂f(xt,W
+∗,Θ∗)
+∂W
+2: Compute the first inverse Hessian vector product Vihvp1(xt) := (
+∂2F (W∗,Θ∗)
+∂Θ2
+)−1
+∂f(xt,W
+∗,Θ∗)
+∂Θ
+3: Compute finetune loss’s gradient w.r.t W : ∂f(xt,W
+∗,Θ∗)T
+∂W
+= V Tihvp1
+∂2F (W∗Θ∗)
+∂Θ∂W
+− f(xt,W
+∗,Θ∗)
+∂W
+and concatenate it with 0 to make it the same dimension as (W, U)
+4: Compute and save the second inverse Hessian vector product V Tihvp2(xt) :=
+[
+∂f(xt,Θ
+∗,W∗)T
+∂W
+, 0](
+∂2G(W∗,U∗)
+∂(W,U)2
+)−1
+5: Compute influence function score Iz,xt = V
+T
+ihvp2(xt)
+∂g(z,W∗,U∗)
+∂(W,U)
+3.2.2 Case 2: embedding parameter W is also updated in the finetuning stage
+For the second finetuning stage case in (3), we will also further train the embedding parameter W
+from the pretraining stage. When W is also updated in the finetuning stage, it is challenging to
+characterize the influence since the pretrained embedding W ∗ is only used as an initialization. In
+general, the final model (W ∗∗,Θ∗) may be totally unrelated to W ∗; for instance, when the objective
+function is strongly convex, any initialization of W in (3) will converge to the same solution.
+However, in practice the initialization of W will strongly influence the finetuning stage in deep
+learning, since the finetuning objective is usually highly non-convex and initializing W with W ∗ will
+converge to a local minimum near W ∗. Therefore, we propose to approximate the whole training
+procedure as
+W̄ , Ū = arg min
+W,U
+G(W,U) (12)
+W ∗,Θ∗ = arg min
+W,Θ
+{α‖W − W̄‖2F + F (W,Θ)},
+where W̄ , Ū are optimal for the pretraining stage, W ∗,Θ∗ are optimal for the finetuning stage, and
+0 ≤ α� 1 is a small value. This is to characterize that in the finetuning stage, we are targeting to
+5
+find a solution that minimizes F (W,Θ) and is close to W̄ . In this way, the pretrained parameters are
+connected with finetuning task and thus influence of pretraining data to the finetuning task can be
+tractable. The results in our experiments show that with this approximation, the computed influence
+score can still reflect the real influence quite well.
+Similarly we can have ∂Θ̂�
+∂�
+, ∂Ŵ�
+∂�
+, and ∂W̄�
+∂�
+to measure the difference between their original optimal
+solutions in (12) and the optimal solutions from � perturbation over the pretraining data z. Similar to
+(6), the influence function Iz,xt that measures the influence of � perturbation to pretraining data z on
+test sample xt’s loss is
+Iz,xt : =
+∂f(xt, Ŵ�, Θ̂�)
+∂�
+∣∣
+�=0
+=
+∂f(xt,W
+∗,Θ∗)
+∂(W,Θ)
+T
+[
+∂Ŵ�
+∂�
+∣∣
+�=0
+∂Θ̂�
+∂�
+∣∣
+�=0
+]
+. (13)
+The influence function of small perturbation of G(W,U) to W̄ ,W ∗,Θ∗ can be computed following
+the same approach in Subsection 3.2.1 by replacing W̄ for W ∗ and [Θ∗,W ∗] for Θ∗ in (9). This will
+lead to
+∂W̄�
+∂�
+∣∣
+�=0
+=−
+[(∂2G(W̄ , Ū)
+∂(W,U)2
+)−1
+(
+∂g(z, W̄ , Ū)
+∂(W,U)
+)
+]
+W
+, (14)
+[
+∂Θ̂�
+∂�
+∣∣
+�=0
+∂Ŵ�
+∂�
+∣∣
+�=0
+]
+=
+[
+∂2F (W∗,Θ∗)
+∂Θ2
+∂2F (W∗,Θ∗)
+∂Θ∂W
+∂2F (W∗,Θ∗)
+∂Θ∂W
+∂2F (W∗,Θ∗)
+∂W 2
++ 2αI
+]−1
+·
+[
+0
+−2αI
+]
+·
+[(∂2G(W̄ , Ū)
+∂(W,U)2
+)−1
+(
+∂g(z, W̄ , Ū)
+∂(W,U)
+)
+]
+W
+.
+(15)
+After plugging (14) and (15) into (13), we will have the influence function Iz,xt .
+Similarly, the algorithm for computing Iz,xt for Case 2 can follow Algorithm 1 for Case 1 by replacing
+gradient computation. Through the derivation we can see that our proposed multi-stage influence
+function does not require model convexity.
+3.3 Computation Challenges
+The influence function computation for multi-stage model is presented in the previous section. As we
+can see in Algorithm 1 that the influence score computation involves many Hessian matrix operations,
+which will be very expensive and sometimes unstable for large-scale models. We used several
+strategies to speed up the computation and make the scores more stable.
+Large Hessian Matrices As we can see from Algorithm 1, our algorithm involves several Hessian
+inverse operations, which is known to be computation and memory demanding. For a Hessian matrix
+H with a size of p×p and p is the number of parameters in the model, it requires p×pmemory to store
+H andO(p3) operations to invert it. Therefore, for large deep learning models with thousands or even
+millions of parameters, it is almost impossible to perform Hessian matrix inverse. Similar to [13], we
+avoid explicitly computing and storing the Hessian matrix and its inverse, and instead compute product
+of the inverse Hessian with a vector directly. More specifically, every time when we need an inverse
+Hessian vector product v = H−1b, we invoke conjugate gradients (CG), which transforms the linear
+system problem into an quadratic optimization problem H−1b ≡ arg minx{
+1
+2
+xTHx − bTx}. In
+each iteration of CG, instead of computing H−1b directly, we will compute a Hessian vector product,
+which can be efficiently done by backprop through the model twice with O(p) time complexity [4].
+The aforementioned conjugate gradient method requires the Hessian matrix to be positive definite.
+However, in practice the Hessian may have negative eigenvalues, since we run a SGD and the final
+Hessian matrix H may not at a local minimum exactly. To tackle this issue, we solve
+arg min
+x
+{
+1
+2
+xTH2x− bTHx}, (16)
+6
+whose solution can be shown to be the same as arg minx{
+1
+2
+xTHx− bTx} since the Hessian matrix
+is symmetric. H2 is guaranteed to be positive definite as long as H is invertible, even when H
+has negative eigenvalues. If H2 is not ill-conditioned, we can solve (16) directly. The rate of
+convergence of CG depends on
+√
+κ(H2)−1√
+κ(H2)+1
+, where κ(H2) is the condition number of H2, which
+can be very large if H2 is ill-conditioned. When H2 is ill-conditioned, to stabilize the solution
+and to encourage faster convergence, we add a small damping term λ on the diagonal and solve
+arg minx{
+1
+2
+xT (H2 + λI)x− bTHx}.
+Time Complexity As mentioned above, we can get an inverse Hessian vector product in O(p) time
+if the Hessian is with size p× p. To analyze the time complexity of Algorithm 1, assume there are
+p1 parameters in our pretrained model and p2 parameters in our finetuned model, it takes O(mp1)
+or O(np2) to compute a Hessian vector product, where m is the number of pretraining examples
+and n is the number of finetuning examples. For the two inverse Hessian vector products as shown
+in Algorithm 1, the time complexity therefore is O(np2r) and O(mp1r), where r is the number of
+iterations in CG. For other operations in Algorithm 1, vector product has a time complexity of O(p1)
+or O(p2), and computing the gradients of all pretraining examples has a complexity of O(mp1). So
+the total time complexity of computing a multi-stage influence score is O((mp1 + np2)r). Therefore
+we can see that the computation is tractable as it is linear to the number of training samples and model
+parameters. All the computation related to inverse Hessian can use inverse Hessian vector produc
+(IHVP), which makes the memory usage and computation efficient.
+4 Experiments
+In this section, we will conduct experiment on real datasets in both vision and NLP tasks to show the
+effectiveness of our proposed method.
+4.1 Evaluation of Influence Score Estimation
+We first evaluate the effectiveness of our proposed approach for the estimation of influence function.
+For this purpose, we build two CNN models based on CIFAR-10 and MNIST datasets. The model
+structures are shown in Table A in Appendix. For both MNIST and CIFAR-10 models, CNN layers
+are used as embeddings and fully connected layers are task-specific. At the pretraining stage, we train
+the models with examples from two classes (“bird" vs. “frog") for CIFAR-10 and four classes (0, 1,
+2, and 3) for MNIST. The resulting embedding is used in the finetuning tasks, where we finetune the
+model with the examples from the remaining eight classes in CIFAR-10 or the other 6 numbers in
+MNIST for classification task.
+We test the correlation between individual pretraining example’s multi-stage influence function and
+the real loss difference when the pretraining examples are removed. We test two cases (as mentioned
+in Section 3.1) – where the pretrained embedding is fixed, and where it is updated during finetuning.
+For a given example in the pretraining data, we calculate its influence function score with respect
+to each test example in the finetuning task test set using the method presented in Section 3. To
+evaluate this pretraining example’s contribution to the overall performance of the model, we sum up
+the influence function scores across the whole test set in the finetuning task.
+To validate the score, we remove that pretraining example and go through the aforementioned process
+again by updating the model. Then we run a linear regression between the true loss difference values
+obtained and the influence score computed to show their correlation. The detailed hyperparameters
+used in these experiments are presented in Appendix B.
+Embedding is fixed In Figures 2(a) and 2(b) we show the correlation results of CIFAR-10 and
+MNIST models when the embedding is fixed in finetuning task training. From Figures 2(a) and 2(b)
+7
+we can see that there is a linear correlation between the true loss difference and the influence function
+scores obtained. The correlation is evaluated with Pearson’s r value. It is almost impossible to get the
+exact linear correlation because the influence function is based on the first-order conditions (gradients
+equal to zero) of the loss function, which may not hold in practice. In [13], it shows the r value is
+around 0.8 but their correlation is based on a single model with a single data source, but we consider a
+much more complex case with two models and two data sources: the relationship between pretraining
+data and finetuning loss function. So we expect to have a lower r value. Therefore 0.6 is reasonable
+to show a strong correlation between pretraining data’s influence score and finetuning loss difference.
+This supports our argument that we can use this score to detect the examples in the pretraining set
+which contributes most to the model’s performance.
+0.06725 0.06775 0.06825 0.06875 0.06925
+True Loss Difference
+0.0010
+0.0005
+0.0000
+0.0005
+Sc
+or
+e 
+V
+al
+ue
+Pearson r=0.62
+(a) CIFAR-10, r = 0.62. Embedding is
+fixed in finetuning task.
+0.00182 0.00180 0.00178 0.00176 0.00174 0.00172
+True Loss Difference
+0.000015
+0.000010
+0.000005
+0.000000
+0.000005
+0.000010
+0.000015
+Sc
+or
+e 
+V
+al
+ue
+Pearson r=0.47
+(b) MNIST, r = 0.47. Embedding is fixed
+in finetuning task.
+0.3745 0.3740 0.3735 0.3730 0.3725
+True Loss Difference
+0.003
+0.002
+0.001
+0.000
+0.001
+0.002
+Sc
+or
+e 
+V
+al
+ue
+Pearson r=0.40
+(c) CIFAR-10, r = 0.40. Embedding is
+updated in finetuning task.
+Figure 2: True loss difference vs. the influence function scores by our proposed method.
+One may doubt the effectiveness of the expensive inverse Hessian computation in our formulation.
+As a comparison, we replace all inverse Hessians in (11) with identity matrices to compute the
+influence function score for the MNIST model. The results are shown in Figure 3 with a much smaller
+Pearson’s r of 0.17. This again shows effectiveness of our proposed influence function.
+0.00182 0.00180 0.00178 0.00176 0.00174 0.00172
+True Loss Difference
+0.00075
+0.00050
+0.00025
+0.00000
+0.00025
+0.00050
+0.00075
+0.00100
+Sc
+or
+e 
+Va
+lu
+e
+Pearson r=0.17
+Figure 3: MNIST model true loss difference and influence function with all Hessians replaced by
+identity matrices. Pearson’s r = 0.17.
+Embedding is updated in finetune Practically, the embedding can also be updated in the finetuning
+process. In Figure 1(c) we show the correlation between true loss difference and influence function
+score values using (12). We can see that even under this challenging condition, our multi-stage
+influence function from (12) still has a strong correlation with the true loss difference, with a Pearson’s
+r = 0.40.
+In Figure 4 we demonstrate the misclassified test images in the finetuning task and their corresponding
+largest positive influence score (meaning most influential) images in the pretraining dataset. Examples
+with large positive influence score are expected to have negative effect on the model’s performance
+since intuitively when they are added to the pretraining dataset, the loss of the test example will
+8
+test example pretrain example test example pretrain example
+prediction=6 influence score=91.6 prediction=“cat" influence score=1060.9
+true label=5 true label=2 true label=“automobile" true label=“bird"
+Figure 4: Identifying the pretrain example with largest influence function score which contributes an
+error in the finetune task. In this figure, we pair a misclassified test image in the finetuning task with
+the pretraining image which has the largest positive influence score value with respect to that test
+image. Intuitively, the identified pretraining image contributes most to the test image’s error. We can
+indeed see that the identified examples are of low quality, which leads to negative transfer.
+increase. From Figure 4 we can indeed see that the identified examples are with low quality, and they
+can be easily misclassified even with human eyes.
+4.2 Data Cleansing using Predicted Influence Score
+Since the pretraining examples with large positive influences scores are the ones that will increase
+the loss function value indicating negative transfer. Based on the influence score computed, we can
+improve the negative transfer issue. We perform experiment on the CIFAR-10 dataset with the same
+setting as Section 4.1. After we removed the top 10% highest influence scores (positive values)
+examples from pretrain (source data), we can improve the accuracy on target data from 58.15% to
+58.36%. As a reference, if we randomly remove 10% of pretraining data, the accuracy will drop to
+58.08%. Note that the influence score computation is fast. For example, on the CIFAR-10 dataset, the
+time for computing influence function with respect to all pretraining data is 230 seconds on a single
+Tesla V100 GPU, where 200 iterations of Conjugate Gradient for 2 IHVPs in (9), (10) and (11).
+4.3 The Finetuning Task’s Similarity to the Pretraining Task
+In this experiment, we explore the relationship between influence function score and finetuning task
+similarity with the pretraining task. Specifically, we study whether the influence function score
+will increase in absolute value if the finetuning task is very similar to the pretraining task. To do
+this, we use the CIFAR-10 embedding obtained from a “bird vs. frog" classification and test its
+influence function scores on two finetuning tasks. The finetuning task A is exactly the same as the
+pretraining “bird vs. frog" classification, while the finetuning task B is a classification on two other
+classes (“automobile vs. deer"). All hyperparameters used in the two finetuning tasks are the same.
+In Figure 5, for both tasks we plot the distribution of the influence function values with respect to
+each pretraining example. We sum up the influence score for all test examples. We can see that, the
+first finetuning task influence function has much larger absolute values than that of the second task.
+The average absolute value of task A influence function score is 0.055, much larger than that of task
+B, which is 0.025. This supports the argument that if pretraining task and finetuning task are similar,
+the pretraining data will have larger influence on the finetuning task performance.
+4.4 Influence Function Score with Different Numbers of Finetuning Exam-
+ples
+We also study the relationship between the influence function scores and number of examples used in
+finetuning. In this experiment, we update the pretrained embedding in finetuning stage. We use the
+same pretraining and finetuning task as in Section 4.1. The results are presented in Figure 6, model C
+9
+12.5 10.0 7.5 5.0 2.5 0.0 2.5 5.0
+Influence Function Score Value
+10 3
+10 2
+10 1
+100
+Pr
+ob
+ab
+ili
+ty
+ D
+en
+si
+ty
+A: bird vs. frog
+B: automobile vs. deer
+Figure 5: Two different finetuning task distribution of influence function scores. The pretrained
+embedding is fixed in finetuning. For both finetuning tasks, the pretrained model is the same, and is
+trained using “bird vs. frog" in CIFAR-10. For model A, finetuning task and pretraining task are the
+same. The average absolute values of influence function scores for models A and B are 0.055 and
+0.025, respectively.
+20 10 0 10 20 30 40
+Influence Function Score Value
+10 3
+10 2
+10 1
+100
+Pr
+ob
+ab
+ili
+ty
+ D
+en
+si
+ty
+C: 5k finetune data
+D: 15k finetune data
+Figure 6: Influence function scores and number of examples used in the finetuning stage. The
+pretrained embedding is updated in finetuning. The pretraining and finetuning tasks are the same
+as in Section 4.1. Model D’s number of finetuning examples and finetuning steps are 3X of model
+C’s. The average absolute values of influence function scores for Models C and D are 0.22 and 0.15,
+respectively.
+is the model used in Section 4.1 while in model D we triple the number of finetuning examples as
+well as the number of finetuning steps. Figure 6 demonstrates the distribution of each pretraining
+examples’ influence function score with the whole test set. The average absolute value of influence
+function score in model D is 0.15, much less than that of model C. This indicates that with more
+finetuning examples and more finetuning steps, the influence of pretraining data to the finetuning
+model’s performance will decrease. This makes sense as if the finetuning data does not have sufficient
+information for training a good finetuning task, then pretraining data will have more impact on the
+finetuning task.
+4.5 Quantitative Results on NLP Task
+In this section we show the application of our proposed model on NLP task. In this experiment,
+the pretraining task is training ELMo [20] model on the one-billion-word (OBW) dataset [3] which
+contains 30 million sentences and 8 million unique words. The final pretrained ELMo model contains
+93.6 million parameters. The finetuning task is a binary sentiment classification task on the First GOP
+Debate Twitter Sentiment data1 containing 16,654 tweets about the early August GOP debate in Ohio.
+1https://www.kaggle.com/crowdflower/first-gop-debate-twitter-sentiment
+10
+Table 1: Exmaples of test sentences and pretraining sentences with the largest and the smallest
+absolute influence function score values in our subset of pretraining data. The subset consists of
+1000 random sentences from one-billion-word, which is used to pretrained ELMo embedding. Test
+examples are from a binary sentiment calssification task of Twitter.
+Test Sentence
+Max absolute
+influence function value Sentence in Pretrain
+Min absolute
+influence function value Sentence in Pretrain
+JebBush said he cut FL taxes
+by $19B. But that includes
+cuts in estate taxes mandated
+by federal law.
+0.0841 Specifically , British Prime
+Minister Gordon Brown has
+recommended that security
+control in five provinces be
+handed over by the end of
+2010.
+4.5396× 10−6 One red shirt suffered a
+gunshot wound , most likely
+from a rubber bullet.
+Creating jobs is our greatest
+moral purpose because they
+strengthen our families and
+communities.
+0.0070 And Friday, the Commerce
+Department reports on
+durable goods orders and the
+University of Michigan
+releases its reading on
+consumer sentiment.
+−1.3393× 10−7 Then there is the issue of why
+readers buy print publications
+, and whether the content they
+are buying can be consumed
+more easily or conveniently
+on the Internet .
+The Kryptonian science
+council was more worried
+about climate change than
+these scary people.
+0.0102 In addition the PTM also runs
+a vast network of mobile
+courts in the rest of the Fata
+areas, he said .
+−1.999× 10−6 Until recently , such terror
+attacks inside Iraq could have
+coerced the village into
+sheltering Al Qaeda.
+The finetuned model uses original pretrained ELMo embedding and a feed-forward neural network
+with hidden size 64 to build the classifier. The embedding is fixed in the finetuning task. To show
+quantitative results, we randomly pick a test sentence from the finetuning task, and sample a subset of
+1000 sentences from one-billion-word dataset to check the influence of this test sentence to these data
+from the pretraining task. In Table 1 we show examples of test sentences and pretraining sentences
+with the largest and the smallest absolute influence function score values. Note that the computation
+time on this large-scale experiment experiment (the model contains 93.6 million parameters) is
+reasonable – each pretraining data point takes average of 0.94 second to compute influence score.
+For extremely large models and data sets, the computation can be further sped up by using parallel
+algorithm as each data point’s influence computation is independent.
+5 Conclusion
+We introduce a multi-stage influence function for two multi-stage training setups: 1) the pretrained
+embedding is fixed during finetuning, and 2) the pretrained embedding is updated during finetuning.
+Our experimental results on CV and NLP tasks show strong correlation between the score of an
+example, computed from the proposed multi-stage influence function, and the true loss difference
+when the example is removed from the pretraining data. We believe our multi-stage influence function
+is a promising approach to connect the performance of a finetuned model with pretraining data.
+11
+References
+[1] Marco Ancona, Enea Ceolini, Cengiz Oztireli, and Markus Gross. A unified view of gradient-
+based attribution methods for deep neural networks. International Conference on Learning
+Representations, 2018.
+[2] Marc-Etienne Brunet, Colleen Alkalay-Houlihan, Ashton Anderson, and Richard Zemel. Un-
+derstanding the origins of bias in word embeddings. In ICML, pages 803–811, 2019.
+[3] Ciprian Chelba, Tomas Mikolov, Mike Schuster, Qi Ge, Thorsten Brants, Phillipp Koehn, and
+Tony Robinson. One billion word benchmark for measuring progress in statistical language
+modeling. arXiv preprint arXiv:1312.3005, 2013.
+[4] BRUCE CHRISTIANSON. Automatic Hessians by reverse accumulation. IMA Journal of
+Numerical Analysis, 12(2):135–150, 04 1992.
+[5] R. Dennis Cook and Sanford Weisberg. Characterizations of an empirical influence function for
+detecting influential cases in regression. Technometrics, 22(4):495–508, 1980.
+[6] Piotr Dabkowski and Yarin Gal. Real time image saliency for black box classifiers. In NIPS,
+2017.
+[7] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. Bert: Pre-training of
+deep bidirectional transformers for language understanding. arXiv preprint arXiv:1810.04805,
+2018.
+[8] Ruth C. Fong and Andrea Vedaldi. Interpretable explanations of black boxes by meaningful
+perturbation. 2017 IEEE International Conference on Computer Vision (ICCV), pages 3449–
+3457, 2017.
+[9] Tian Guo, Tao Lin, and Nino Antulov-Fantulin. Exploring interpretable LSTM neural networks
+over multi-variable data. In Proceedings of the 36th International Conference on Machine
+Learning, pages 2494–2504, 2019.
+[10] Satoshi Hara, Atsushi Nitanda, and Takanori Maehara. Data cleansing for models trained with
+sgd. In Advances in Neural Information Processing Systems 32, pages 4213–4222. 2019.
+[11] Rajiv Khanna, Been Kim, Joydeep Ghosh, and Sanmi Koyejo. Interpreting black box predictions
+using fisher kernels. In The 22nd International Conference on Artificial Intelligence and
+Statistics, AISTATS 2019, volume 89, pages 3382–3390.
+[12] Pang Wei Koh, Kai-Siang Ang, Hubert H. K. Teo, and Percy Liang. On the accuracy of influence
+functions for measuring group effects. In NeurIPS, 2019.
+[13] Pang Wei Koh and Percy Liang. Understanding black-box predictions via influence functions.
+In Proceedings of the 34th International Conference on Machine Learning-Volume 70, pages
+1885–1894. JMLR. org, 2017.
+[14] Hugo Larochelle, Dumitru Erhan, and Yoshua Bengio. Zero-data learning of new tasks. In
+Proceedings of the 23rd National Conference on Artificial Intelligence - Volume 2, AAAI’08,
+pages 646–651, 2008.
+[15] Dhruv Mahajan, Ross Girshick, Vignesh Ramanathan, Kaiming He, Manohar Paluri, Yixuan Li,
+Ashwin Bharambe, and Laurens van der Maaten. Exploring the limits of weakly supervised
+pretraining. In Proceedings of the European Conference on Computer Vision (ECCV), pages
+181–196, 2018.
+[16] Tomas Mikolov, Ilya Sutskever, Kai Chen, Greg S Corrado, and Jeff Dean. Distributed repre-
+sentations of words and phrases and their compositionality. In Advances in neural information
+processing systems, pages 3111–3119, 2013.
+12
+[17] Jose Oramas, Kaili Wang, and Tinne Tuytelaars. Visual explanation by interpretation: Improving
+visual feedback capabilities of deep neural networks. In International Conference on Learning
+Representations, 2019.
+[18] Sinno Jialin Pan and Qiang Yang. A survey on transfer learning. IEEE Transactions on
+knowledge and data engineering, 22(10):1345–1359, 2009.
+[19] Jeffrey Pennington, Richard Socher, and Christopher Manning. Glove: Global vectors for
+word representation. In Proceedings of the 2014 conference on empirical methods in natural
+language processing (EMNLP), pages 1532–1543, 2014.
+[20] Matthew E Peters, Mark Neumann, Mohit Iyyer, Matt Gardner, Christopher Clark, Ken-
+ton Lee, and Luke Zettlemoyer. Deep contextualized word representations. arXiv preprint
+arXiv:1802.05365, 2018.
+[21] Avanti Shrikumar, Peyton Greenside, and Anshul Kundaje. Learning important features through
+propagating activation differences. In Proceedings of the 34th International Conference on
+Machine Learning-Volume 70, pages 3145–3153. JMLR. org, 2017.
+[22] Karen Simonyan, Andrea Vedaldi, and Andrew Zisserman. Deep inside convolutional networks:
+Visualising image classification models and saliency maps, 2013.
+[23] Daniel Smilkov, Nikhil Thorat, Been Kim, Fernanda Viégas, and Martin Wattenberg. Smooth-
+grad: removing noise by adding noise. arXiv preprint arXiv:1706.03825, 2017.
+[24] Jacob Steinhardt, Pang Wei Koh, and Percy Liang. Certified defenses for data poisoning attacks.
+In Proceedings of the 31st International Conference on Neural Information Processing Systems,
+pages 3520–3532, 2017.
+[25] Mukund Sundararajan, Ankur Taly, and Qiqi Yan. Gradients of counterfactuals. CoRR,
+abs/1611.02639, 2016.
+[26] Hao Wang, Berk Ustun, and Flávio P. Calmon. Repairing without retraining: Avoiding disparate
+impact with counterfactual distributions. In Proceedings of the 36th International Conference
+on Machine Learning, ICML 2019, 9-15 June 2019, Long Beach, California, USA, pages
+6618–6627, 2019.
+[27] Chih-Kuan Yeh, Joon Kim, Ian En-Hsu Yen, and Pradeep K Ravikumar. Representer point
+selection for explaining deep neural networks. In Advances in Neural Information Processing
+Systems 31, pages 9291–9301. 2018.
+13
+A Proof of Theorem 1
+Proof. Since Θ̂�, Û�, Ŵ� are optimal solutions, and thus satisfy the following optimality conditions:
+0 =
+∂
+∂Θ
+F (Ŵ�, Θ̂�) (17)
+0 =
+∂
+∂(W,U)
+G(Ŵ�, Û�) + �
+∂
+∂(W,U)
+g(z, Ŵ�, Û�), (18)
+where ∂(W,U) means concatenate the U and W as [W,U ] and compute the gradient w.r.t [W,U ].
+We define the changes of parameters as ∆W� = Ŵ� − Ŵ , ∆Θ� = Θ̂� − Θ̂, and ∆U� = Û� − Û .
+Applying Taylor expansion to the rhs of (18) we get
+0 ≈
+∂
+∂(W,U)
+G(W ∗, U∗) +
+∂2G(W ∗, U∗)
+∂(W,U)2
+[
+∆W�
+∆U�
+]
+(19)
++ �
+∂g(z,W ∗, U∗)
+∂(W,U)
++ �
+∂2g(z,W ∗, U∗)
+∂(W,U)2
+[
+∆W�
+∆U�
+]
+Since W ∗, U∗ are optimal of unperturbed problem, ∂
+∂(W,U)
+G(W ∗, U∗) = 0, and we have
+[
+∆W�
+∆U�
+]
+≈ −
+(
+∂2G(W ∗, U∗)
+∂(W,U)2
++ �
+∂2g(z,W ∗, U∗)
+∂(W,U)2
+)−1
+(20)
+·(
+∂g(z,W ∗, U∗)
+∂(W,U)
+)�.
+Since �→ 0, we have further approximation[
+∆W�
+∆U�
+]
+≈
+(
+∂2G(W ∗, U∗)
+∂(W,U)2
+)−1
+(
+∂g(z,W ∗, U∗)
+∂(W,U)
+)�. (21)
+Similarly, based on (17) and applying first order Taylor expansion to its rhs we have
+0 ≈ λ
+∂F (W ∗,Θ∗)
+∂Θ
++ λ
+∂2F (W ∗,Θ∗)
+∂Θ∂W
+·∆W� + λ
+∂2F (W ∗,Θ∗)
+∂Θ2
+∆Θ�. (22)
+Combining (21) and (22) we have
+∆Θ� ≈ (λ
+∂2F (W ∗,Θ∗)
+∂Θ2
+)−1 · (λ
+∂2F (W ∗,Θ∗)
+∂Θ∂W
+) (23)
+·
+[(∂2G(W ∗, U∗)
+∂(W,U)2
+)−1
+(
+∂g(z,W ∗, U∗)
+∂(W,U)
+)
+]
+W
+�
+where [·]W means taking the W part of the vector. Therefore,
+Iz,W :=
+∂Ŵ�
+∂�
+∣∣
+�=0
+= −
+[(∂2G(W ∗, U∗)
+∂(W,U)2
+)−1
+(
+∂g(z,W ∗, U∗)
+∂(W,U)
+)
+]
+W
+(24)
+Iz,Θ :=
+∂Θ̂�
+∂�
+∣∣
+�=0
+= (λ
+∂2F (W ∗,Θ∗)
+∂Θ2
+)−1 · (λ
+∂2F (W ∗,Θ∗)
+∂Θ∂W
+) (25)
+·
+[(∂2G(W ∗, U∗)
+∂(W,U)2
+)−1
+(
+∂g(z,W ∗, U∗)
+∂(W,U)
+)
+]
+W
+.
+14
+B Models and Hyperparameters for the Experiments in Sections 4.1, 4.2,
+4.3 and 4.4
+The model structures we used in Sections 4.1, 4.2, 4.3 and 4.4 are listed in Table A. As mentioned
+in the main text, for all models, CNN layers are used as embeddings and fully connected layers are
+task-specific. The number of neurons on the last fully connected layer is determined by the number
+of classes in the classification. There is no activation at the final output layer and all other activations
+are Tanh.
+• For MNIST experiments in Section 4.1 on embedding fixed, we train a four-class classification
+(0, 1, 2, and 3) in pretraining. All examples in the original MNIST training set with with
+these four labels are used in pretraining. The finetuning task is to classify the rest six classes,
+and we subsample only 5000 examples to finetune. The pretrained embedding is fixed in
+finetuning. We run Adam optimizer in both pretraining and finetuning with a batch size of 512.
+The pretrained and finetuned models are trained to converge. When validating the influence
+function score, we remove an example from pretraining dataset. Then we re-run the pretraining
+and finetuning process with this leave-one-out pretraining dataset starting from the original
+models’ weights. In this process, we only run 100 steps for pretraining and finetuning as the
+models converge. When computing the influence function scores, the damping term for the
+pretrained and finetuned model’s Hessians are 1×10−2 and 1×10−8, respectively. We sample
+1000 pretraining examples when computing the pretraind model’s Hessian summation.
+• For CIFAR experiments on embedding fixed, we train a two-class classification (“bird" vs
+“frog") in pretraining. All examples in the original CIFAR training set with with these four
+labels are used in pretraining. The finetuning task is to classify the rest eight classes, and we
+subsample only 5000 examples to finetune. The pretrained embedding is fixed in finetuning.
+We run Adam optimizer to train both pretrained and finetuned model with a batch size of 128.
+The pretrained and finetuned models are trained to converge. When validating the influence
+function score, we remove an example from pretraining dataset. Then we re-run the pretraining
+and finetuning process with this leave-one-out pretraining dataset starting from the original
+models’ weights. In this process, we only run 6000 steps for pretraining and 3000 steps for
+finetuning. When computing the influence function scores, the damping term for the pretrained
+and finetuned model’s Hessians are 1×10−8 and 1×10−6, respectively. Same hyperparameters
+are used in experiments in Sections 4.3 and 4.4. We also use these hyperparameters in with
+embedding unfix on CIFAR10’s experiments, except that the pretrained embedding is updated
+in finetuning and the number of finetuning steps is reduced to 1000 in validation. The α constant
+in Equation 15 is chosen as 0.01. We sample 1000 pretraining examples when computing the
+pretrained model’s Hessian summation.
+15
+Dataset MNIST CIFAR
+Embedding
+CONV 32 5×5+1 CONV 32 3×3+1
+MAX-POOL 2×2 +2 CONV 64 4×4+1
+CONV 64 5×5+1 MAX-POOL 2×2 +2
+MAX-POOL 2×2 +2 CONV 128 2×2+1
+MAX-POOL 2×2 +2
+CONV 128 2×2+1
+MAX-POOL 2×2 +2
+Task specific
+FC <# classes> FC 1500
+FC <# classes>
+Table A: Model Architectures. “CONV k w×h+s” represents a 2D convolutional layer with k filters
+of size w×h using a stride of s in both dimensions. “MAX-POOL w×h+s” represents a 2D max
+pooling layer with kernel size w×h using a stride of s in both dimensions. “FC n” = fully connected
+layer with n outputs. All activation functions are Tanh and last fully connected layers do not have
+activation functions. The number of neurons on the last fully connected layer is determined by the
+number of classes in the task.
+16
+	1 Introduction
+	2 Related Work
+	3 Algorithms
+	3.1 Multi-Stage Model Training
+	3.2 Influence function for multi-stage models
+	3.2.1 Case 1: embedding parameters W are fixed in finetuning
+	3.2.2 Case 2: embedding parameter W is also updated in the finetuning stage
+	3.3 Computation Challenges
+	4 Experiments
+	4.1 Evaluation of Influence Score Estimation
+	4.2 Data Cleansing using Predicted Influence Score
+	4.3 The Finetuning Task's Similarity to the Pretraining Task
+	4.4 Influence Function Score with Different Numbers of Finetuning Examples
+	4.5 Quantitative Results on NLP Task
+	5 Conclusion
+	A Proof of Theorem 1
+	B Models and Hyperparameters for the Experiments in Sections 4.1, 4.2, 4.3 and 4.4

@@ -1,0 +1,2910 @@
+Beating Greedy For Approximating Reserve Prices
+in Multi-Unit VCG Auctions
+Mahsa Derakhshan∗
+University of Maryland
+David M. Pennock †
+Rutgers University
+Aleksandrs Slivkins
+Microsoft Research
+Abstract
+We study the problem of finding personalized reserve prices for unit-demand buyers in multi-
+unit eager VCG auctions with correlated buyers. The input to this problem is a dataset of
+submitted bids of n buyers in a set of auctions. The goal is to find a vector of reserve prices,
+one for each buyer, that maximizes the total revenue across all auctions.
+Roughgarden and Wang (2016) showed that this problem is APX-hard but admits a greedy
+1/2-approximation algorithm. Later, Derakhshan, Golrezai, and Paes Leme (2019) gave an LP-
+based algorithm achieving a 0.68-approximation for the (important) special case of the problem
+with a single-item, thereby beating greedy. We show in this paper that the algorithm of Der-
+akhshan et al. in fact does not beat greedy for the general multi-item problem. This raises the
+question of whether or not the general problem admits a better-than-1/2 approximation.
+In this paper, we answer this question in the affirmative and provide a polynomial-time
+algorithm with a significantly better approximation-factor of 0.63. Our solution is based on a
+novel linear programming formulation, for which we propose two different rounding schemes. We
+prove that the best of these two and the no-reserve case (all-zero vector) is a 0.63-approximation.
+∗Majority of the research was conducted while the author was an Intern at Microsoft Research NYC.
+†Majority of the research was conducted while the author was a Principal Researcher at Microsoft Research NYC.
+1
+ar
+X
+iv
+:2
+00
+7.
+12
+65
+3v
+1 
+ [
+cs
+.G
+T
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+1 Introduction
+The Vickrey-Clarke-Groves (VCG) mechanism, while “lovely” in theory [AM+06], is often criticized
+for not having a good performance guarantee when it comes to revenue maximization. Hartline
+and Roughgarden [HR09] approach this shortcoming by optimizing reserve prices, the minimum
+prices that the seller is willing to sell each item to each buyer. According to a number of theoretical
+and empirical studies [HR09, OS11, BGL+18, EOS07], personalized reserve prices (i.e., one custom
+reserve price for each buyer) can significantly improve revenue. In particular, personalized reserves
+can lead to approximately optimal revenue in quite general settings [HR09]. This has led to several
+studies computing an optimal vector of reserve prices [BGL+18, RW16, PLPV16, DGL19]. The
+study of VCG-like mechanisms for revenue optimization is closely aligned with a broader agenda of
+simple vs. optimal mechanisms [GLMN17, CLMN14, PLPV16, AB18, BFM12, BGL+18, DRY15],
+and in fact has been one of the starting points for this agenda [HR09].
+1.1 Our Scope and Main Result
+We focus on the eager version of VCG auctions. 1 Consider a multi-unit auction with unit-demand
+buyers: that is, k identical units are available, and each buyer is interested in obtaining only one
+unit. The auctioneer announces a reserve price rb for each buyer b and then buyers place their
+bids. We run a VCG auction among the buyers that clear their reserve price (i.e., their bid equals
+or exceeds their reserve price), and the winners pay the maximum of their own reserve price and
+their VCG payment. That is, let S be the set of buyers who clear their reserve prices. The first k
+buyers in S with the highest bids win. Each winning buyer pays the maximum of his/her reserve
+price and the (k + 1)-th highest bid.
+We adopt a standard data-driven model for computing reserve prices [RW16, PLPV16]: given a
+history of buyers’ bids over multiple runs of the auction, we compute a reserve price for each buyer
+to maximize the total revenue attained over the same dataset. An important property of this model
+is that it does not impose essentially any restrictions on the bid distributions. In particular, buyers’
+private values can be correlated, in contrast with other models [BGL+18, CLMN14, DRY15, HR09]
+that assume independence. Moreover, any approximation for the data-driven model can also be used
+in a black-box reduction of Morgenstern and Roughgarden [MR15] to approximate the Bayesian
+Optimization and Batch Learning versions of the problem with (almost) the same approximation-
+factor.2
+In the data driven model, this problem was first studied by Roughgarden and Wang [RW16], who
+showed that it is APX-hard3 and gave a 1/2 approximate greedy solution. Later, for the (important)
+special case of k = 1 items, Derakhshan et al. [DGL19] showed that the approximation factor can
+be improved to 0.68 thereby beating the greedy solution. In Section 6, we provide an example
+proving that the algorithm of Derakhshan et al. [DGL19] in fact does not beat 1/2-approximation
+for the general multi-item problem. This naturally raises the question:
+Is there a polynomial time algorithm beating 1/2-approximation in the general case?
+In this work, we answer this question in the affirmative and in fact achieve a significantly better
+approximation ratio of 0.63 for any k (not necessarily constant).
+1An alternative, called lazy VCG [DRY15], first forms a set of potential winners using a VCG auction, then
+removes buyers whose bids don’t clear their reserve. The eager version is often superior both in theory and in
+practice [PLPV16].
+2In Bayesian Optimization, the buyers’ private value distributions are independent and known to the algorithm.
+In Batch Learning, these distributions are unknown, and we only have access to samples drawn from them.
+3NP-hard to approximate better a fixed constant factor.
+2
+Main Result (Formalized in Theorem 1). Consider the data-driven model for eager VCG
+auctions. There exists a polynomial-time algorithm for computing personalized reserve prices
+which achieves a 0.63-approximation in expected revenue. That is, given a dataset of bids in a
+set of auctions A, the algorithm outputs a vector of reserve prices ro such that the total revenue
+obtained from running the eager VCG mechanism on A using reserve prices ro is at least a 0.63
+fraction of that of any other vector of reserve prices.
+1.2 Our Techniques
+Our algorithm consists of two main parts. First, we design a polynomial-size Integer Linear Pro-
+gram (ILP) to describe the optimal solution. By removing the integrality constraints, we obtain
+a polynomial-size LP, which gives us a fractional solution. The second part is LP-rounding. Us-
+ing the optimal solution of the LP, we construct two different integral solutions. We then show
+that the best of three vectors: these two solutions and the all-zero vector of reserve prices, is a
+0.63-approximation.
+To write the LP, we first need a polynomial-size representation of the solution space in which
+the revenue can be computed using a linear function. The natural representations (e.g., a vector of
+reserve prices, or a reserve price per buyer) fail as they result in either an exponential-size solution
+space or a nonlinear revenue function. We come up with an alternative concise representation,
+based on the following observation: to compute the revenue of an auction, we do not need to know
+the reserve prices of all the buyers. Rather, it suffices to only know the reserve prices of the winners
+and the VCG payment, which is the (k + 1)-th highest cleared bid. The buyer who has this bid is
+called the supporting buyer. We represent a solution based on its outcomes in different auctions,
+where the “outcome” specifies who are the winners and who is the supporting buyer, and what
+are their respective reserve prices. The revenue from each auction can be computed using a linear
+function based on its outcome; therefore, the overall revenue can also be written as a linear function
+which is sum of the revenue across all of these auctions.
+Derakhshan et al. [DGL19] use a similar approach for the single item case, which falls short in
+the general case. They capture all pertinent information about an auction in a single “profile” which
+is then used to compute the revenue of the auction, and use these profiles to write an ILP. However,
+we need exponentially many profiles to extend this approach to the general case, essentially because
+we need information about all the winners in order to compute the auction’s revenue.
+We proceed as follows. Instead of capturing all information about the winners in a single profile,
+we partition this information into several sub-profiles, each containing only a single winner and the
+supporting buyer. One complication is that these sub-profiles should not contradict each other
+(e.g., having different supporting buyers). This issue gets even more complicated when we relax
+the integrality constraint of the ILP. We resolve this by introducing new variables and constraints
+to our LP.
+Next, we use the optimal solution to the LP to construct two vectors of reserve prices which
+we refer to as inflated reserves and discounted reserves. For each buyer b, we use the LP solution
+to choose a threshold tb to determine if a reserve price is too high or too low. We construct two
+probability distributions: one over reserve prices above tb, and another over reserve prices below
+tb. We use these distributions to draw, resp., the inflated and discounted reserve prices.
+Let us provide some intuition for why we choose these two different vectors of reserve prices.
+Recall that each buyer pays the maximum of its reserve price and the VCG payment. Let us
+partition the winners’ payments into two types: one is from winners who pay their reserve prices,
+3
+and another is from those paying the VCG payment. Note that setting smaller reserve prices results
+in clearing more bids, and thus a larger VCG payment. Roughly speaking, second-type revenue
+from the discounted reserves should be larger than that of the inflated reserves, while the opposite
+might hold for the first-type revenue. Intuitively, if most of the optimal revenue is from type-one
+payments and high reserve prices (at least tb for each buyer b), then we expect the inflated reserves
+to give us a high revenue. Otherwise, if the optimal revenue is a combination of type-one and type-
+two payments from small reserve prices, we expect a high revenue from the discounted reserves.
+But what if the type-two payments form a substantial portion of the revenue? This is where the
+vector of all-zero reserve prices comes into play. The all-zero reserve prices obtain the maximum
+possible revenue one can get from the type-two payments as all the bids are cleared in this case.
+We analyze these three solutions simultaneously to lower bound the revenue of each solution as a
+function of the other two. By exploiting structural properties of our problem and the LP, we reduce
+the problem of finding the approximation factor to a complex non-linear optimization problem. This
+reduction, and solving this optimization problem, are the most technically challenging parts of the
+paper (see Section 5).
+To further highlight the significance of rounding our fractional solutions in two different ways,
+we investigate the performance of the rounding procedure by Derakhshan et al. which only outputs
+a single integral solution. Roughly speaking, they directly use the fractional solution of the LP as
+a probability distribution over the reserve prices, and for each buyer independently draw a reserve
+price from that. We show that for a large number of items, this approach fails to beat the greedy
+algorithm. More precisely, for any given constant 0 < �, we construct an example for which the
+solution obtained using this rounding procedure gets at most 0.5 + � fractional of the optimal
+revenue. We describe this example in Section 6.
+1.3 Further Related Work
+Revenue maximization in multi-unit auctions is a fundamental problem in algorithmic game theory
+and has received a lot of attention over the years. In a seminal work, Myerson describes the
+game-theoretically optimal mechanism, equivalent to VCG with optimal reserve, for one item when
+buyers’ valuations are drawn from known independent distributions. Myerson’s mechanism is hard
+to directly put into practice [RS16, CLMN14, GLMN17] as these assumptions often fail to hold
+in real-life applications. Further, even if they do hold, the optimal auction is still quite complex.
+Therefore, the need to design simple yet efficient mechanisms has resulted in a significant body of
+work [GLMN17, CLMN14, PLPV16, AB18, BFM12, BGL+18, DGL19].
+One approach taken in design of simple and efficient mechanisms is adding reserve prices to
+already known simple auctions such as VCG or the second price auction (which is the special case
+of VCG in single-item environments.) [PLPV16, RW16, CHMS10]. Moreover, reserve prices are
+widely used in practice and have been shown to be very important for obtaining a high revenue
+[OS11, BGL+18, EOS07].
+The posted-price mechanism is another well-studied auction in multi-unit environments [CHMS10,
+ACK18], related to a line of work on prophet inequalities [CSZ19, CFPV17]. For the case of in-
+dependent buyer valuations, this mechanism has a particularly strong performance guarantee for
+large numbers of items [Yan11, BGL+18]. To the best of our knowledge, the multi-unit posted-price
+mechanism has not been studied for correlated buyers.
+4
+2 Preliminaries and Problem Statement
+There are k identical items and n unit-demand buyers participating in a set of eager VCG auctions.
+Let A and B respectively be the set of auctions and buyers. We are given a dataset of bids β where
+for any auction a ∈ A and buyer b ∈ B, βa,b represents bid of buyer b in auction a. Let rb be the
+personalized reserve price of buyer b. Then, given the bid vector βa for auction a and reserve price
+vector r, the eager VCG auction (EVCG) works as follows.
+1. Any buyer b with βa,b < rb is eliminated. Let Sa = {b : βa,b ≥ rb} be the set of buyers who
+clear their reserve prices in auction a.
+2. An item is allocated to a buyer b if there are at most k− 1 buyers in Sa whose bid is greater
+than βa,b.
+3. Pick the supporting buyer bs to be a buyer in set Sa such that there are exactly k buyers in
+Sa whose bid in auction a is greater than βa,bs .
+4 (βa,bs is the VCG payment of any winner.)
+4. Any buyer b who receives an item is charged max (rb, βa,bs), otherwise they are not charged.
+Given the dataset of bids β, our goal is to find a vector of personalized reserve prices that
+maximize revenue of the auctioneer. Note that the reserve prices are the same across all the
+auctions a ∈ A. However, each buyer b is assigned a personalized reserve price rb. We assume,
+w.l.o.g. that the optimal reserve price for any buyer is equal to one of their submitted bids. Let
+R = {βa,b : a ∈ A, b ∈ B}. Formally, we would like to solve the following optimization problem:
+EVCG? = max
+r∈Rn
+Rev(r), where Rev(r) :=
+∑
+a∈A Reva(r)
+and Reva(r) is the total payment in action a given the vector of reserve prices r. Note that to solve
+this problem we face a search space of size |R|n which is exponential in the input size.
+3 The Algorithm
+In this section we provide an LP-based algorithm for finding a vector of personalized reserve prices
+given a dataset of bids. We observe that to be able to describe the optimal solution of the problem
+using polynomially many linear constraints, we need a concise representation of the solution space.
+In Section 3.1, we explain this representation. In Section 3.2, we use this representation to design
+an LP and prove that its objective function in its optimal solution is an upper bound for the revenue
+of the optimal solution of the problem. Finally, in Section 3.3, we provide our rounding procedure
+that uses the optimal solution of the LP and outputs a vector of reserve prices.
+3.1 An Alternative Solution Space
+In this section, our goal is to give a concise representation of the solution space which will help us
+to write our linear program. We need this representation to have a polynomial size and it should be
+possible to compute its revenue using a linear function. As mentioned before, we base our design
+on the observation that to compute the revenue of an auction we do not need to have the reserve
+price of all the buyers. Rather, it only suffices to know the reserve prices of the winners and bid
+of the supporting buyer. The main idea here is to have variables that capture the outcome of
+4As usual, we assume that no two buyers have the same bids, or we can break ties based on their IDs.
+5
+auctions (i.e., who the winners and the supporting buyer are and their reserve prices.) instead of
+just having variables for reserve price of buyers. We will define valid profiles and valid sub-profiles
+of an auction to capture its outcome. Roughly speaking, the revenue obtained from each auction
+can be computed in a linear way based on its outcome; thus the overall revenue can also be written
+as a linear function which is sum of the revenue across all these auction.
+Definition 3.1 (Valid Profiles). We define the set of valid profiles of an auction a as the set Pa
+consisting of all tuples (b1, . . . , bk+1, r1, . . . , rk+1) ∈ Bk+1×Rk+1 that satisfy the following conditions:
+1. For any i, j ∈ [k + 1] where i < j, bid of buyer bi is greater than or equal to that of buyer bj
+in auction a; that is, βa,bi ≥ βa,bj .
+2. For any i ∈ [k + 1] buyer bi clears his reserve, ri, in auction a; that is, βa,bi ≥ ri.
+Valid profiles are defined to capture the outcome of an auction given a set of reserve prices.
+However, note that each profile consists of at least k+ 1 buyers; thus, to be able to capture all the
+possible scenarios (for example when fewer than k + 1 buyers clear their reserves in an auction),
+we add k + 1 auxiliary buyers b̂1 . . . b̂k+1 to B who bid zero in all the auctions. Also, w.l.o.g., we
+assume that their reserves are always set to zero as well.
+As mentioned previously, Derakhshan et al. [DGL19], use a concept similar to valid profiles to
+write their linear program for k = 1. In their LP, there is a variable for any pair of auction and valid
+profile. However, it does not work for us since it results in having exponentially many variables.
+To overcome this, we define valid sub-profiles of an auction that only contains information about a
+single winner and the supporting buyer as defined below.
+Definition 3.2 (Sub-profiles). We define the set of valid Sub-profiles of an auction a as the set Sa
+consisting of all tuples (b1, b2, r1, r2) ∈ B2 × R2 that satisfy the following conditions:
+1. Bid of buyer b1 is greater than or equal to that of buyer b2 in auction a; that is, βa,b1 ≥ βa,b2.
+2. Buyers b1 and b2 clear their reserves in auction a if reserve prices r1 and r2 are set for them
+respectively; that is, βa,b1 ≥ r1 and βa,b2 ≥ r2.
+For any given p = (b1, b2, r1, r2) ∈ Sa, we have Reva(p) := max(βa,b2 , r1).
+Given a vector of reserve prices r′, we say a sub-profile (b1, b2, r1, r2) ∈ Sa happens in auction
+a after applying r′, iff r′b1 = r1, r
+′
+b2
+= r2, buyer b1 is a winner in auction a and buyer b2 is the
+supporting buyer in this auction. Moreover, we say two sub-profiles (b1, b2, r1, r2) and (b
+′
+1, b
+′
+2, r
+′
+1, r
+′
+2)
+are compatible iff b′2 = b2 and r
+′
+2 = r2 which means that they have the same information about
+the supporting buyer. Moreover, we say a set P of valid sub-profiles are compatible iff they are
+pairwise compatible and |P | = k. Since we have added k + 1 auxiliary buyers whose bid is always
+cleared in all the auction, we can assume that we always have exactly k winners and a supporting
+buyer.
+To explain how a solution is represented using these sub-profiles, we consider a vector of reserve
+prices r and construct its representation in this new solution space. For any auction a and any
+sub-profile p ∈ Sa, we have a variable sa,p which is equal to one iff sub-profile p happens in auction
+a after applying vector of reserve prices r. Otherwise we have sa,p = 0. We say vector s constructed
+in this way is the representation of r in the profile space. As mentioned above, this representation
+allows us to compute the revenue of each auction using a linear function. Recall that for any
+sub-profile p = (b1, b2, r1, r2) we have Reva(p) := max(βa,b2 , r1), thus we can write
+Reva(r) =
+∑
+p∈Sa sa,p · Reva(p).
+This function is linear since we have polynomially many valid sub-profiles; thus, for any valid
+sup-profile p we can simply compute Reva(p) in advance and treat it as a constant in the LP.
+6
+3.2 The Linear Program
+In this section we first design an integer linear program (ILP) then remove its integrality constraints
+to get an LP. We start by introducing the variables of our ILP. We have four vectors of random
+variables s, x, y and y′ as defined below.
+1. For any auction a ∈ A and any sub-profile p ∈ Sa, we have a variable sa,p ∈ {0, 1} which
+is equal to one iff sub-profile p happens in auction a. This set of variables should satisfy
+constraint
+∑
+p∈Sa sa,p ≤ k as at most k sub-profiles can happen in an auction.
+2. For any buyer b ∈ B and any reserve price r ∈ R we have a variable xb,r ∈ {0, 1}. Reserve
+price r is assigned to buyer b iff xb,r = 1. For this type of variables we enforce the necessary
+constraint
+∑
+r∈R xb,r = 1 in our LP since each buyer has exactly one reserve price.
+3. For any buyer b ∈ B, any auction a and any reserve price r ∈ R, we have a variable yb,r,a ∈
+{0, 1} that is equal to one iff buyer b is assigned a reserve price of r as a winner in auction a.
+4. For any buyer b ∈ B, any auction a and any reserve price r ∈ R, we have a variable y′b,r,a ∈
+{0, 1} that is equal to one iff buyer b is assigned a reserve price of r as the supporting buyer
+in auction a.
+Roughly speaking, the vector of variables x is used in the LP to ensure that in different auctions,
+solution s does not assign different reserve prices to the same buyer. Moreover variables y and y′
+are to ensure that the sub-profiles in an auction are compatible with each other.
+To be able to write the constraints of our LP, we first need the following definitions. Let
+Qb,a := {(b, b2, r1, r2) ∈ Sa |b2 ∈ B, r1 ∈ R, r2 ∈ R} denote the set of valid sup-profiles of auction
+a in which buyer b is the winner and Q′b,a = {(b1, b, r1, r2) ∈ Sa |b1 ∈ B, r1 ∈ R, r2 ∈ R} is the set
+of valid sub-profiles of auction a in which buyer b is the supporting buyer. Moreover, let us define
+Qb,r,a := {(b, b2, r, r2) ∈ Qb,a|b2 ∈ B, r2 ∈ R} and Q′b,r,a := {(b1, b, r1, r) ∈ Q′b,a|b1 ∈ B, r1 ∈ R}.
+We are now ready to write our LP (ILP without the integrality constraints) which we present in
+Figure 1.
+In the rest of the paper we use s? to refer to s from an optimal solution of the LP. To be able
+to use the optimal solution of the LP as a benchmark in analyzing the approximation-factor of our
+algorithm, we need to show that it is indeed an upper bound for the optimal integral solution.
+Lemma 3.3. The optimal revenue is upper bounded by
+∑
+a∈A
+∑
+p∈Sa s
+?
+a,p · Reva(p).
+We have Section 8 designated to the formal proof of this lemma, and also give an informal
+overview of that here. Roughly speaking, to prove this lemma, it suffices to show that the constraints
+of the LP are all necessary for the consistency of the variables that we have defined. Below we give
+some intuition about each constraint and why it is necessary.
+Constraint (1) is due to the fact that for any auction a, buyer b, and reserve price r, variable
+yb,r,a indicates whether or not buyer b has a reserve r and is a winner in auction a. This constraint
+ensures that value of yb,r,a is consistent with whether or not there is a profile happening in auction
+a in which buyer b is a winner as is assigned a reserve price of r. Constraint (2) is similar to the
+previous one but for the supporting buyers. Constraint (3) is because the reserve prices assigned
+to a buyer in different auctions should be consistent. Moreover, imposing constraint (4), on the
+sub-profiles is to make sure that the sub-profiles that happen in an auction can form valid profiles.
+Consider an auction a and buyers b1 and b2. The right-hand-side of this constraint is the probability
+with which buyer b1 is the supporting buyer in auction a, and the left-hand-side is the probability
+with which buyer b2 is a winner while buyer b1 is the supporting buyer which should obviously be
+7
+max
+x,s
+∑
+a∈A
+∑
+p∈Sa
+sa,p · Reva(p)
+s.t. yb,r,a =
+∑
+p∈Qb,r,a
+sa,p ∀a, b, r : b ∈ B, a ∈ A, r ∈ R (1)
+y′b,r,a =
+∑
+p∈Q′b,r,a
+sa,p
+k
+∀a, b, r : b ∈ B, a ∈ A, r ∈ R (2)
+yb,r,a + y
+′
+b,r,a ≤ xb,r ∀a, b, r : b ∈ B, a ∈ A, r ∈ R, (3)∑
+p∈Qb2,a
+∩Q′b1,a
+sa,p ≤
+∑
+r∈R
+y′b1,r,a ∀a, b1, b2 : b, b2 ∈ B, a ∈ A (4)
+∑
+p∈Sa
+sa,p ≤ k ∀a : a ∈ A (5)
+∑
+r∈R
+xb,r = 1 ∀b : b ∈ B (6)
+sa,p ≥ 0 ∀a, p : a ∈ A, p ∈ Sa (7)
+Figure 1: The Linear Program
+smaller than the probability that buyer b2 is a supporting buyer. Finally, constraints (5), (6), and
+(7) are by definition of variables. This LP upper bounds the optimal solution (the proof is deferred
+to the appendix).
+3.3 The LP-Rounding Procedure
+In this section, given an optimal solution of the LP we generate an integral solution for the problem.
+Input of the algorithm is the vector x from an optimal solution of the LP and a parameter β ∈ [0, 1],
+which we fix later.
+1. For any buyer b let tb be the maximum number in R that satisfies
+∑
+r<tb
+xb,r ≤ β.
+2. Define vectors f and f ′ as follows: For any r ∈ R where r < tb set fb,r := xb,r/β and f ′b,r := 0.
+For any r > tb, set fb,r := 0 and f
+′
+b,r := xb,r/(1−β). Finally for r = tb, set fb,r := 1−
+∑
+r′<tb
+fb,r′
+and f ′b,r := 1−
+∑
+r′>tb
+f ′b,r′ .
+3. Construct r the vector of discounted reserve prices as follows: For any buyer b independently
+choose a random reserve price rb ∈ R such that for any ρ ∈ R, we have Pr[rb = ρ] = fb,ρ.
+4. Construct r′ the vector of inflated reserve prices as follows: For any buyer b independently
+choose a random reserve price r′b ∈ R such that for any ρ ∈ R we have Pr[r
+′
+b = ρ] = f
+′
+b,ρ.
+5. Let z be the vector of all zero reserve prices.
+6. Between z, r and r′ return the one with higher revenue which is as follows:
+arg max
+ν∈{z,r,r′}
+Rev(ν).
+8
+In the rest of the paper we use r and r′ to respectively refer to the vector of discounted and inflated
+reserve prices constructed in this algorithm.
+Remark 3.4. For the sake of simplicity in the analysis, we assume w.l.o.g., that for any auction
+a, tb satisfies
+∑
+r<tb
+xb,r = β. This implies that for any r ∈ R, if r < tb we have Pr[rb = r] = xb,r/β
+and Pr[r′b = r] = 0. Otherwise, if r ≥ tb, we have Pr[rb = r] = 0 and Pr[r
+′
+b = r] = xb,r/(1− β).
+In the next section we show how we can use specific features of the three solutions z, r and r′
+to get our desired approximation-factor.
+4 Approximation Factor
+In this section, we prove our main theorem by giving a lower bound for the revenue obtained from
+the vector of reserve prices outputted by the rounding algorithm.
+Let us start by giving some definitions that will be used throughout this section. Define β
+(k+1)
+a
+to be the (k + 1)-th highest bid in any auction a. Note that this is different from the bid of the
+supporting buyer in auction a as the supporting buyer has the (k+1)-th highest bid after removing
+the buyers whose bid is not cleared. Moreover, given a threshold τ , let us denote by Wa(r, τ) the
+number of winners in auction a whose payment is greater than or equal to τ using the vector of
+reserve prices r. Similarly, Wa(r
+′, τ) is the number of winners who pay at least τ using vector of
+reserve prices r′ in auction a. Note that Wa(r, τ) and Wa(r
+′, τ) are both random variables.
+The following lemma establishes sufficient conditions for the algorithm to output an approximate
+solution. For any given auction a ∈ A and a real number τ ≥ 0, we define
+Φa(τ) :=
+∑
+p:p∈Sa,
+Reva(p)≥τ
+s?a,p − (1− β)E[Wa(r
+′, τ)]− β E[Wa(r, τ)].
+Lemma 4.1. Suppose there exist absolute constants β ∈ (0, 1) and c ∈ (0, 1) such that,
+Φa(τ) ≤ 0 if τ > β(k+1)a , and (1)
+Φa(τ) ≤ kc if τ ≤ β(k+1)a (2)
+for any auction a ∈ A. Then, the algorithm with parameter β outputs a 1
+1+c
+-approximate solution.
+Proof. Consider an arbitrary auction a. By integrating over τ in Φa(τ), we obtain:∫
+(β
+(k+1)
+a ,∞)
+Φa(τ) dτ +
+∫
+(0,β
+(k+1)
+a ]
+Φa(τ) dτ ≤ kcβ(k+1)a .
+By simplifying this we get∑
+p∈Sa
+sa,p · Reva(p)− (1− β)E[Reva(r′)]− β E[Reva(r)] ≤ kcβ(k+1)a . (3)
+Recall that the output of our algorithm is the best of r, r′, and z where z is the vector of all-zero
+reserve prices and its revenue is kβ
+(k+1)
+a since by applying that, the players in the k first positions
+win the k items and pay bid of the buyer in the (k+1)-th position. Therefore, the expected revenue
+achieved from the output of our algorithm is at least
+µ := max
+(
+E[Rev(r)],E[Rev(r′)], k ·
+∑
+a∈A
+β(k+1)a
+)
+.
+9
+Based on Equation 3 we have
+Rev(s?)− (1− β)µ− βµ− cµ ≤ 0.
+where Rev(s?) :=
+∑
+a∈A
+∑
+p∈Sa s
+?
+a,p · Reva(p). This implies Rev(s?)− (1 + c)µ ≤ 0, and as a result
+Rev(s?)
+1 + c
+≤ max
+(
+E[Rev(r)],E[Rev(r′)], kβ(k+1)a
+)
+.
+Further by Lemma 3.3, we know that Rev(s?) is an upper bound for the revenue of the optimal
+solution; thus by setting β = β′ in the rounding algorithm its output is at least a 1
+1+c
+-approximate
+solution.
+Having, Lemma 4.1, it suffices to prove that Equation 1 always holds and find values for pa-
+rameters β and c that satisfy Equation 2. We address the former in the following lemma, and the
+latter in Lemma 4.3.
+Lemma 4.2. For auction a and any τ > β
+(k+1)
+a we have∑
+p:p∈Sa
+Reva(p)≥τ
+s?a,p − (1− β)E[Wa(r
+′, τ)]− β E[Wa(r, τ)] ≤ 0.
+Proof. By definition of Wa(r
+′, τ) and Wa(r, τ) for any τ > β
+(k+1)
+a , we have
+(1−β)E
+[
+Wa(r
+′, τ)
+]
++β E [Wa(r, τ)] = (1− β)E
+[
+min
+(∑
+b∈B
+1r′
+b
+>τ , k
+)]
++β E
+[
+min
+(∑
+b∈B
+1rb>τ , k
+)]
+.
+Recall that β
+(k+1)
+a is defined in a way that there are exactly k buyers with bids greater than β
+(k+1)
+a
+in auction a. As a result, there are at most k buyers for whom Pr[r′b > τ ] or Pr[rb > τ ] is nonzero.
+This means that we can rewrite the inequality as
+(1− β)E
+[
+Wa(r
+′, τ)
+]
++ β E [Wa(r, τ)] = (1− β)E
+[∑
+b∈B
+1r′
+b
+>τ
+]
++ β E
+[∑
+b∈B
+1rb>τ
+]
+= E
+[∑
+b∈B
+1rb>τ
+]
+.
+Observe that, by construction of r and r′ we have
+E[1rb>τ ] = Pr[rb > τ ] =
+1
+β
+∑
+r∈(τ,tb)
+xb,r and E[1r′
+b
+>τ ] = Pr[r
+′
+b > τ ] =
+1
+1− β
+∑
+r:r≥tb,r>τ
+xb,r. (4)
+Moreover, by putting the first and third constraints of the LP together, for any buyer b and any
+reserve price r > τ , we get
+∑
+p∈Qb,r,a s
+?
+a,p ≤ xb,r. Note that for any p = (b1, b2, r1, r2) ∈ Sa, by
+definition, we have β
+(k+1)
+a ≥ βa,b2 , which means that if we have Reva(p) > τ , then Reva(p) = r1 and
+p ∈ Qb1,r1,a. This results in the following equations.∑
+b∈B
+∑
+r∈(τ,tb)
+xb,r ≥
+∑
+p:p∈Sa,
+Reva(p)<tb,
+Reva(p)>τ
+s?a,p, and
+∑
+b∈B
+∑
+r:r≥tb,
+r>τ
+xb,r ≥
+∑
+p:p∈Sa,
+Reva(p)≥tb,
+Reva(p)>τ
+s?a,p.
+Combining these with the equations in (4) gives us the following equation and concludes the proof.
+(1− β)E
+[
+Wa(r
+′, τ)
+]
++ β E [Wa(r, τ)] ≥
+∑
+p:p∈Sa
+Reva(p)>τ
+s?a,p.
+10
+The following lemma is the most technically challenging part of the paper. Therefore, we have
+Section 5 (almost the rest of the paper) assigned to its proof.
+Lemma 4.3. Setting β = 0.55 and c = 0.58, the following inequality holds for any auction a ∈ A
+and any 0 < τ ≤ β(k+1)a .∑
+p:p∈Sa,
+Reva(p)≥τ
+s?a,p − (1− β)E[Wa(r
+′, τ)]− β E[Wa(r, τ)] ≤ kc. (5)
+We are now ready to prove the main result of the paper. Below we restate the main theorem
+and prove it using the lemmas in this section.
+Theorem 1. There exists an algorithm with running time polynomial in the input size that outputs
+a vector of reserve prices ro such that Rev(ro) is at least a 0.63 fraction of the revenue achieved
+from the optimal vector of reserve prices.
+Proof. First, note that the LP designed in Section 3.2 has polynomially many variables and con-
+straints. To design our algorithm, we first solve the LP, then given an optimal solution of that use
+the LP-rounding procedure to output a vector of reserve prices. Since the LP rounding procedure
+has a polynomial running time, the total running time of the algorithm is polynomial as well.
+To analyze the approximation factor of the algorithm we use Lemma 4.1, Lemma 4.3 and
+Lemma 4.2. The first lemma states that if there exists a constant c ≥ 0 and a valuation for
+parameter β that satisfies Equation 1 for any τ > β
+(k+1)
+a , and satisfies Equation 2 for any τ ≤ β
+(k+1)
+a ,
+then our rounding algorithm is a 1
+1+c
+-approximation. In Lemma 4.3, we prove that Equation 1
+holds for any β ∈ (0, 1) and any τ > β(k+1)a . Moreover, based on Lemma 4.2 we have that by
+setting β = 0.55, Equation 2 holds for any τ ≤ β(k+1)a and c = 0.58. This implies that by setting
+β = 0.55 in the rounding algorithm, its output is a 0.63-approximation of the optimal solution since
+1
+1+0.58
+> 0.63.
+5 Proof of Lemma 4.3
+In this section, we will consider an arbitrary auction a ∈ A and any constant 0 < τ ≤ β(k+1)a , and
+focus on finding a constant c and a valuation for β that satisfy∑
+p:p∈Sa,
+Reva(p)≥τ
+s?a,p − (1− β)E[Wa(r
+′, τ)]− kc ≤ β E[Wa(r, τ)].
+Denote by Ba,τ the set of buyers whose bid in auction a is greater than or equal to τ . Formally,
+we have Ba,τ := {b ∈ B : βa,b ≥ τ}. Throughout this section, since we assume that a can be any
+arbitrary auction from A, we will abbreviate all notations by dropping a for simplicity when clear
+from the context. Let us define function F (s?, τ) as follows.
+F (s?, τ) =
+∑
+p:p∈Sa,
+Reva(p)≥τ
+s?a,p − (1− β)E[Wa(r
+′, τ)] (6)
+We will consider different values of F (s?, τ) as a function of β and give a lower bound for E[Wa(r, τ)]
+based on that. Consider a buyer b ∈ Ba,τ . Let us define Bernoulli random variables pb,τ and qb
+to be respectively equal to one iff rb ∈ [τ, βa,b] and equal to one iff rb ∈ [0, βa,b]. Moreover, let
+Pτ =
+∑
+b∈Bτ pb,τ and Qτ =
+∑
+b∈Bτ qb.
+11
+Claim 5.1. The expected revenue obtained from the vector of reserve prices r is as follows.
+E[Wa(r, τ)] ≥ max
+(
+k.Pr[Qτ > k],E[min(Pτ , k)]
+)
+Proof. Note that Qτ is a random variable representing the number of buyers whose bid is cleared
+and is greater than or equal to τ ; therefore, Qτ > k is the event in which at least k+ 1 buyers have
+cleared their bid of at least τ which results in k items being sold with a price of at least τ . Moreover,
+Pτ denotes the number of buyers whose bid is cleared with a reserve of at least τ ; thus, we sell at least
+min(Pτ , k) of our items with a price of at least τ . This means that the expected number of items
+that are sold with a price of at least τ is lower bounded by max(k.Pr[Qτ > k],E[min(Pτ , k)]).
+Let Ta,τ be the set of sub-profiles in Sa whose revenue is at least τ . In the other words,
+Ta,τ := {p ∈ Sa|Reva(p) ≥ τ}.
+We partition Ta,τ to three disjoint subsets denoted by J +τ ,J −τ , and Lτ as follows. Set J +τ is the
+set of sub-profiles in Tτ that capture the scenarios in which the supporting buyer has a bid smaller
+than τ and the winner’s reserve price is greater than or equal to its threshold tb (defined in the
+algorithm).
+J +τ := {p = (b
+′, b, r′, r) ∈ Tτ | b /∈ Bτ and r′ ≥ tb′}.
+We similarly define J −b,τ to be the set of sub-profiles in Tτ in which the supporting buyer has a bid
+smaller than τ and the reserve price of the winner is below its threshold tb.
+J −τ := {p = (b
+′, b, r′, r) ∈ Tτ | b /∈ Bτ and r′ < tb′}.
+Moreover, Lτ defined below denotes the set of sub-profiles in Sa that capture the scenarios in which
+the supporting buyer has a bid greater than or equal to τ .
+Lτ := {p = (b′, b, r′, r) ∈ Tτ | b ∈ Bτ}.
+Further, based on this set, we define
+δτ :=
+∑
+b∈Bτ
+∑
+p∈Lτ∩Q′b
+s?a,p/k. (7)
+Observe that the defined subsets of Tτ satisfy Tτ = J +τ ∪ J −τ ∪ Lτ .
+Given Claim 5.1, we now need to find a lower bound for max
+(
+k.Pr[Qτ > k],E[min(Pτ , k)]
+)
+as
+a function of F (s?, τ) and δτ . To get this, we start by giving lower bounds for E[Qτ ] and E[Pτ ]
+in the following section, then use the expected value of these random variables to bound the value
+of the functions k.Pr[Qτ > k] and E[min(Pτ , k)] in Section 5.2. Note that all these bound will be
+functions of F (s?, τ) and δτ .
+5.1 lower bounds for E[Pτ ] and E[Qτ ]
+In this section, we start by investigating useful facts about set Tτ , random variables p and q and
+the relation between them which finally leads to lower bounds for E[Pτ ] and E[Qτ ]. Let us mention
+that to prevent interruptions to the flow of the paper, proofs of some of the lemmas in this section
+are deferred to Section 7.
+We start by obtaining a lower bound for E[Pτ ], for which we make the three claims below.
+Claim 5.2. The following holds:
+∑
+p∈Lτ s
+?
+a,p = kδτ .
+12
+Proof. Recalling definition (7), it suffices to show
+⋃
+b∈Bτ (Lτ ∩Q
+′
+b) = Lτ , as it results in
+δτ =
+∑
+b∈Lτ
+s?a,p/k.
+A valid sub-profile p = (b1, b2, r1, r2) is in
+⋃
+b∈Bτ Q
+′
+b iff b2 ∈ Bτ which also means Reva(p) =
+max(r1, βa,b) ≥ τ and p ∈ Tτ . To complete the proof observe that this is indeed the definition of
+set Lτ which is Lτ := {(b′, b, r′, r) ∈ Tτ | b ∈ Bτ} .
+Claim 5.3. For any buyer b ∈ B we have
+E[pb,τ ] ≥
+1
+β
+(
+∑
+p∈J−τ ∩Qb
+s?a,p).
+Proof. By construction, for vector of reserve prices r and any buyer b we have
+E[pb,τ ] = Pr [rb ∈ [τ, βa,b]] =
+∑
+r∈[τ,βa,b]
+fb,r,
+where fb,r = xb,r/β for any r < tb as defined in the algorithm. This yields that
+E[pb,τ ] ≥
+∑
+r:r<tb,
+r∈[τ,βa,b]
+xb,r
+β
+≥
+∑
+r:r<tb,
+r∈[τ,βa,b]
+∑
+p∈Qb,r,a
+sa,p
+β
+,
+where the second inequality is by the first and third constraints of the LP. To complete the proof
+it suffices to show that
+(J −τ ∩Qb) ⊂
+⋃
+r:r<tb,
+r∈[τ,βa,b]
+Qb,r,a.
+Observe that we have
+(J −τ ∩Qb) = {(b, b2, r, r2) ∈ Tτ | r ∈ R, r2 ∈ R, b2 ∈ Bτ and r < tb} .
+Moroever, note that for any sub-profile p = (b, b2, r, r2) ∈ Tτ we have Reva(p) = max(r, βa,b2) ≥ τ ,
+thus if βa,b2 < τ then r ≥ τ . As a result we have
+(J −τ ∩Qb) ⊂ {(b, b2, r, r2) ∈ Sa| r ∈ R, r2 ∈ R, b2 ∈ Bτ and r < tb} .
+Further, since Qb,r,a := {(b, b2, r, r2) ∈ Sa|b2 ∈ B, r2 ∈ R}, then⋃
+r:r<tb,
+r∈[τ,βa,b]
+Qb,r,a = {(b, b2, r, r2) ∈ Sa| r ∈ R, r2 ∈ R, b2 ∈ B, r ≥ τ, r ≥ βa,b, r < tb} .
+Note that any (b, b2, r, r2) ∈ Sa satisfies r ≥ βa,b, therefore we get
+(J −τ ∩Qb) ⊂
+⋃
+r:r<tb,
+r∈[τ,βa,b]
+Qb,r,a.
+The following lemma is the last piece that we need to get the desired lower bound for E[Pτ ] in
+Lemma 5.5. The proof of this lemma due to being lengthy is deferred to Section 7.
+13
+Lemma 5.4. The following inequality holds.
+F (s?, τ) ≤
+∑
+p∈J−τ
+s?a,p +
+∑
+p∈Lτ
+s?a,p.
+Lemma 5.5. We have the following lower bound for E[Pτ ] :
+E[Pτ ] ≥
+F (s?, τ)− kδτ
+β
+.
+Proof. Based on Lemma 5.4 we have
+F (s?, τ)−
+∑
+p∈Lτ
+s?a,p ≤
+∑
+p∈J−τ
+s?a,p.
+Combining this by
+∑
+p∈Lτ s
+?
+a,p = kδτ from Claim 5.2 and diving both sides by β gives us:
+F (s?, τ)− kδτ
+β
+≤
+1
+β
+∑
+p∈J−τ
+s?a,p
+We conclude the proof by noting that as a result of Claim 5.3, we have E[Pτ ] ≥ 1β
+∑
+p∈J−τ
+s?a,p.
+Getting the desired lower bound for E[Qτ ] is however more complicated than that of E[Pτ ].
+In Lemma 5.6 and Lemma 5.7 we give two different lower bounds for E[Qτ ] which we then merge
+in Lemma 5.8 to obtain an stronger one. The proof of both these lemmas are based on careful
+analysis of the relations between q and subsets of Tτ , and are deferred to Section 7 due to being
+very complicated.
+Lemma 5.6. For B1 = {b ∈ B : E[qb] = 1}, we have
+E[Qτ − |B1|] ≥ (k − |B1|+ 1)δ/β.
+Lemma 5.7. For B1 = {b ∈ B : E[qb] = 1} and m = |B1| we have
+E[Qτ −m] ≥
+F (s?, τ)−mδ
+β
++ δ/β.
+Lemma 5.8. For B1 = {b ∈ B : qb,τ = 1}| and m = |B1|, we have
+E[Qτ −m] ≥
+k.max(F (s?, τ)/k, δτ )− (m− 1)δτ
+β
+.
+Proof. This is a direct result of the lower bounds given in Lemma 5.6 and Lemma 5.7, which are
+respectively as follows.
+E[Qτ −m] ≥ (k −m+ 1)δτ/β.
+E[Qτ −m] ≥
+F (s?, τ)−mδτ
+β
++ δτ/β.
+By combining these lower bounds we get
+β · E[Qτ −m] ≥ max(F (s?, τ), kδτ )− (m− 1)δτ ≥ k ·max(F (s?, τ)/k, δτ )− (m− 1)δτ .
+14
+5.2 Revenue of the discounted vector
+In this section, we continue our effort to give a lower bound for E[Wa(r, τ)] as a function of δτ and
+F (s?, τ). Recall that by Claim 5.1 we have
+E[Wa(r, τ)] ≥ max(k.Pr[Qτ > k],E[min(Pτ , k)]).
+In Lemma 5.8 and Lemma 5.5 in the previous section, we have obtained lower bounds for both
+E[Qτ ] and E[Pτ ] as functions of δτ and F (s?, τ). Thus, we proceed to find numeric lower bounds
+for k · Pr[Qτ > k] and E[min(Pτ , k)] by all possible values of these parameters. To be able to
+do so, we use the fact that both Qτ and Pτ are sums of Bernoulli random variables. Based on a
+sequence of observations about Bernoulli random variables that are mostly presented in Section 9
+we approximate Pr[Qτ > k] by a function on a set of Bernoulli random variables whose expectation
+is related to E[Qτ ]. Later, we use the relation between Binomial and Poisson distributions to get
+a lower bound that can be computed numerically given fixed values of δτ and F (s
+?, τ). We take a
+similar but simpler approach to find a lower bound for E[min(Pτ , k)].
+Let us define function G(x, λ) for a real number τ > 0 and any integer x ≥ 0, as follows:
+G(x, λ) = 1−
+x∑
+i=0
+λie−λ
+i!
+. (8)
+Note that G(x, λ) is the probability with which a random variable drawn from Pois(λ) is greater
+than x. This function later arises in the lower bound for Pr[Qτ > k] due to the special relation
+between Poisson and Binomial distribution when the number of trials goes to infinity.
+We start by the following lemma about Bernoulli random variables (proved in Section 9).
+Lemma 5.9. Given m ∈ N and a random variable X that is sum of a set of independent Bernoulli
+random variables with E[X] = µ, if m+ 1 < µ, then we have
+Pr [X > m] ≥ min
+0≤i≤m
+G(m− i, µ− i).
+For any 0 ≤ i ≤ k, let us define λi as follows. We have
+λ0 = min
+(
+2F (s?, τ)
+kβ
++ δτ/β − 2,
+F (s?, τ)
+kβ
+)
+,
+λ1 = min
+(
+2F (s?, τ)
+kβ
++ δτ/β − 1,
+2F (s?, τ)
+kβ
+)
+,
+and for any any i ≥ 2,
+λi =
+iF (s?, τ)
+kβ
++ δτ/β.
+We are not ready to state our lemma about a lower bound for
+F (s?,τ)
+kβ
+.
+Lemma 5.10. If we have
+F (s?,τ)
+kβ
+> 1 and λi ≥ i+ 1 for any i ≥ 0, then
+Pr[Qτ > k] ≥ min
+0≤m≤k
+G(m,λm).
+15
+Proof. Let us define B1 = {b ∈ B : qb = 1}, m = |B1|, and Qτ,2 =
+∑
+b∈B\B1 qb. We have E[Qτ ] =
+E[Qτ,2] +m which implies Pr[Qτ > k] = Pr[Qτ,2 > k−m]. Using Lemma 5.8, we have the following
+lower bound for the expected value of random variable Qτ,2:
+E[Qτ,2] ≥
+k.max(F (s?, τ)/k, δτ )− (m− 1)δτ
+β
+. (9)
+Further, since Qτ,2 is sum of a set of independent Bernoulli random variables, if E[Qτ,2] ≥ k−m+1
+holds, as an application of Lemma 5.9, we get
+Pr[Qτ,2 > (k −m)] ≥ min
+0≤i≤k1
+G(k1 − i,E[Qτ,2]− i),
+where k1 = k −m. We will later prove that E[Qτ,2] ≥ k −m + 1 holds. Given this equation, to
+complete the proof it suffices to show that for any 0 ≤ i ≤ k1, we have G(k1 − i, E[Qτ,2] − i) ≥
+G(k1 − i, λk1−i) since 0 ≤ k1 − i ≤ k. We do this by proving that the following equation holds for
+any 0 ≤ i ≤ k1:
+E[Qτ,2]− i ≥ λk1−i.
+Note that proving this also gives us E[Qτ,2] ≥ k −m + 1 since we get E[Qτ,2] ≥ λk−m and by the
+statement of the lemma, we have λk−m ≥ k − m + 1. Recall that by definition, for any i with
+k1 − i ≥ 1 we have
+λk1−i =
+(k1 − i)F (s?, τ)
+kβ
++ δτ/β.
+Moreover, using the lower bound provided for E[Qτ,2] in Equation 9, we get
+E[Qτ,2] ≥
+k.max(F (s?, τ)/k, δτ )− (m− 1)δτ
+β
+≥
+(k −m).F (s?, τ)/k + δτ
+β
+≥
+k1F (s
+?, τ)
+kβ
++ δτ/β.
+We complete the proof for the case of k1 − i > 1 by invoking
+F (s?,τ)
+kβ
+> 1 from the statement of
+lemma. Therefore, to complete the proof it suffices to show that E[Qτ,2] − i ≥ λk1−i holds for
+k1 − i ≤ 1. Using Equation 9 and by the fact that k ≥ 2, we have
+E[Qτ,2] ≥
+k.max(F (s?, τ)/k, δτ )−mδτ + δτ
+β
+≥
+2F (s?, τ)/k + (k − 2−m) max(F (s?, τ)/k, δτ ) + δτ
+β
+.
+If m = 0, then we have k1 − 2 = k − 2−m ≥ 0. Moreover, since we have F (s?, τ)/(kβ) > 1, in the
+case of m = 0, we get
+E[Qτ,2]− i ≥
+2F (s?, τ)/k + δτ + (k1 − 2) max(F (s?, τ)/k, δτ )
+β
+− i ≥
+2F (s?, τ)/k + δτ
+β
++ k1 − 2− i.
+This implies E[Qτ,2]− i ≥ λk1−i for m = 0 and k1 − i ≤ 1. Now, it remains to show this for m > 0
+and k1 − i ≤ 1 as well. If m > 0 we can write the followings:
+E[Qτ,2] ≥
+k.max(F (s?, τ)/k, δτ )− (m− 1)δτ
+β
+≥
+(k −m+ 1)F (s?, τ)/k
+β
+=
+(k1 + 1)F (s
+?, τ)/k
+β
+,
+E[Qτ,2]− i ≥
+(k1 − i+ 1)F (s?, τ)/k + i · F (s?, τ)/k
+β
+− i ≥
+(k1 − i+ 1)F (s?, τ)/k
+β
+.
+As a result of this for the cases of (k1 − i) = 0 and (k1 − i) = 1 we respectively get E[Qτ,2] −
+i ≥ F (s?, τ)/(kβ) and E[Qτ,2] − i ≥ 2F (s?, τ)/(kβ). Knowing that by definition, we have λ0 ≤
+F (s?, τ)/(kβ) and λ1 ≤ 2F (s?, τ)/(kβ) hold completes the proof.
+16
+Based on a simple application of Chernoff bound, we show that for any m ≥ 2000, we have
+G(m, 1.05m) ≥ 0.9. (We will prove this as Lemma 9.5 in Section 9.) Since λm is an increasing
+function of F (s?, τ)/(kβ), and that λm ≥ mF (s?, τ) holds for any m ≥ 2, this implies that for
+F (s?, τ)/(kβ) ≥ 1.05, and m ≥ 2000 we have G(m,λm) ≥ 0.9. This gives us
+Pr[Qτ > k] ≥ min(0.9, min
+0≤m<2000
+G(m,λm)). (10)
+For smaller values of m; however, giving a desired lower bound for G(m,λm) is unnecessarily
+complicated. To avoid the complication of that proof, we instead numerically compute G(m,λτ )
+for different values of F (s?, τ)/(kβ) and δτ/β in Table 1. Then, using Lemma 5.10 find a lower
+bound for Pr[Qτ > k] given fixed values for these variables. Each element of Table 1, contains value
+of min0≤m<2000G(m,λm) for fixed values of F (s
+?, τ)/(kβ) and δτ/β. Note that, we ignore an entry
+of the table by inserting an −, if the values associated to F (s?, τ) and δτ/β in that entry do not
+satisfy the necessary conditions of Lemma 5.10. We later use this table to complete the proof of
+Lemma 4.3.
+PPPPPPPPPP
+F (s?,τ)
+kβ
+δτ/β
+0.6 0.8 0.9 1
+1.05 - - 0.57 0.59
+1.1 - 0.57 0.59 0.62
+1.2 0.57 0.62 0.64 0.66
+1.5 0.697 0.73 0.746 0.76
+1.7 0.76 0.789 0.8 0.814
+1.8 0.789 0.8 0.826 0.834
+Table 1: lower bounds for Pr[Qτ > k] given fixed values of F (s
+?, τ) and δ/β based on Equation 10.
+To be able to use the information in this table towards giving a numeric lower bound for
+max(Pr[Qτ > k],E[min(Qτ , k)]/k), we also need a similar table for E[min(Pτ , k)]/k. To provide the
+desired lower bound for E[min(Pτ , k)]/k in Lemma 5.13, we first need some facts about Bernoulli
+random variables which are stated in Lemma 5.11 and Claim 5.12 below. To prevent interruptions
+to the flow of this section, both proofs are deferred to Section 9.
+Lemma 5.11. For any integer number m > 2 and any real number θ ∈ [0, 2], we have
+min
+µ∈M2,θ
+H(2,µ) ≤ min
+µ∈Mm,θ
+H(m,µ),
+where Mm,θ = {µ = (µ1, . . . , µn) ∈ [0, 1]n|
+∑n
+i=1 µi = mθ}, and
+H (k, (µ1, . . . , µn)) =
+E[min(
+∑
+i∈[n] xi,m)]
+m
+,
+with xi, . . . , xn being independent Bernoulli random variables with means µi, . . . , µn.
+Claim 5.12. Given a fixed real number θ ∈ (0, 2), and a set of independent Bernoulli random
+variables x1, . . . , xn with E[
+∑
+i∈[n] xi] = 2θ we have
+1
+2
+E[min(
+∑
+i∈[n]
+xi, 2)] ≥ 1− (1 + θ)e−2θ.
+17
+Lemma 5.13. For any k > 1, we have
+E[min(Pτ , k)]/k > 1− (1 + α)e−2α, where α = F (s?, τ)/(kβ)− δ/β. (11)
+Proof. For any real number θ ∈ [0, 2] we define set
+Mk,θ = {µ = (µ1, . . . , µn) ∈ [0, 1]n|
+n∑
+i=1
+µi ≥ kθ},
+and function
+H(k, (µ1, . . . , µn)) =
+E[min(
+∑
+i∈[n] xi, k)]
+k
+,
+where xi, . . . , xn are independent Bernoulli random variables with means µi, . . . , µn. By Lemma 5.11,
+we know that
+min
+µ∈M2,θ
+H(2,µ) ≤ min
+µ∈Mk,θ
+H(k,µ).
+Note that we have (E[p1], . . .E[pn]) ∈Mk,α since based on Lemma 5.5
+E[Pτ ] ≥
+F (s?, τ)− kδ
+β
+= αk.
+Moreover, observe that H(k, (E[p1], . . .E[pn])) = E[min(Pτ , k)]/k, which implies
+E[min(Pτ , k)]/k > min
+µ∈M2,α
+G(2,µ).
+We complete the proof using Lemma 5.12 that states minµ∈M2,α H(2,µ) ≥ 1− (1 + α)e
+−2α.
+We now proceed to construct a similar table for E[min(Pτ , k)]/k based on the lower bound
+provided in Lemma 5.13. Each element of Table 2 contains a lower bound for E[min(Pτ , k)]/k,
+given fixed values of m(s?, τ)/(kβ) and δτ/β.
+F (s?, τ)/(kβ)− δτ/β 0.15 0.2 0.6 0.7 0.8 0.9 1 1.1 1.2
+E[min(Pτ , k)]/k 0.14 0.19 0.51 0.58 0.63 0.68 0.72 0.76 0.8
+Table 2: lower bounds for E[min(Pτ , k)]/k based on different values of α := F (s?, τ)/(βk) − δ/β.
+We use the lower bound E[min(Pτ , k)]/k > 1− (1 + α)e−2α obtained in Lemma 5.13.
+The following lemma is the final piece that we need to complete the proof of Lemma 4.3. In this
+lemma, we use the constructed tables to show that by setting β = 0.55 in the rounding algorithm
+we get
+F (s?, τ)− β E[Wa(r, τ)] ≤ 1.05kβ ≤ 0.58.
+Lemma 5.14. For β = 0.55 we have F (s?, τ)− β E[Wa(r, τ)] ≤ 1.05kβ.
+Proof. We start by considering different values of F (s?, τ) and finding a lower bound for E[Wa(r, τ)]
+based on that. Recall that by Claim 5.1, we have
+E[Wa(r, τ)]/k ≥ max
+(
+Pr[Qτ > k],E[min(Pτ , k)]/k
+)
+18
+Further, based on Lemma 5.10 and Lemma 5.13, we have
+max
+(
+Pr[Qτ > k],E[min(Pτ , k)]/k
+)
+≥ max
+(
+min
+0≤m≤k
+G(m,λm), 1− (1 + α)−2α
+)
+,
+where α := F (s?, τ)/(βk)−δτ/β. It is easy to see that min0≤m≤kG(m,λm) is an increasing function
+of δτ/β, while 1− (1 +α)−2α is a decreasing function of δτ/β; therefore, for any x ∈ (0, 1) we have5
+max(Pr[Qτ > k],E[min(Qτ , k)]/k) ≥ min
+(
+min
+0≤m≤k
+G(m,λm)| δτ
+β
+=x
+, (1− (1 + α)−2α)| δτ
+β
+=x
+)
+. (12)
+We use this fact to construct Table 3 based on Table 1 and Table 2. To do so, for any fixed value
+of F (s?, τ)/(kβ) = y, we consider four possible values x ∈ {0.6, 0.8, 0.9, 1} for δτ/β and rewrite
+Equation 12 as
+max(Pr[Qτ > k],E[min(Qτ , k)]/k)|F (s?,τ)/(kβ)=y
+≥ max
+x∈{0.6,0.8,0.9,1}
+min
+(
+min
+0≤m≤k
+G(m,λm)|F (s?,τ)/(kβ)=y, δτ
+β
+=x
+, (1− (1 + α)−2α)|F (s?,τ)/(kβ)=y, δτ
+β
+=x
+)
+.
+For any y ∈ {1.05, 1.1, 1.2, 1.5, 1.7, 1.8} and x ∈ {0.6, 0.8, 0.9, 1}, we refer to Table 1 and Table 2 for
+values of min0≤m≤kG(m,λm)|F (s?,τ)/(kβ)=y,δτ/β=x and (1−(1+α)
+−2α)|F (s?,τ)/(kβ)=y,δτ/β=x. (For the
+sake of constructing this table, if for a pair of x and y, values of these function are not precomputed
+in Table 1 and Table 2, we assume that they are equal to zero.)
+F (s?, τ)/(kβ) 1.05 1.1 1.2 1.5 1.7 1.8
+max(Pr[Qτ > k],E[min(Qτ , k)]/k) 0.14 0.19 0.51 0.68 0.76 0.789
+Table 3: lower bounds for E[Wa(r, τ)]/k using Equation 12, given fixed values of F (s?, τ)/(kβ)
+achieved from combining Table 1 and Table 2.
+As an instance, the first column of the table is obtained as follows. For F (s?, τ)/(kβ) = 1.05
+and δτ/β = 0.9, we have the followings respectively based on Table 1 and Table 2:
+min
+0≤m≤k
+G(m,λm)|F (s?,τ)/(kβ)=1.05,δτ/β=0.9 = 0.57,(
+1− (1 + α)−2α
+)
+|F (s?,τ)/(kβ)=1.05,δτ/β=0.9
+= 0.14.
+As a result, we have
+max(Pr[Qτ > k],E[min(Qτ , k)]/k)|F (s?,τ)/(kβ)=1.05
+≥ max
+x∈{0.8,0.9,1}
+min
+(
+min
+0≤m≤k
+G(m,λm)|F (s?,τ)/(kβ)=1.05, δτ
+β
+=0.9
+, (1− (1 + α)−2α)|F (s?,τ)/(kβ)=1.05, δτ
+β
+=0.9
+)
+≥ min(0.57, 0.14) = 0.14.
+We now proceed to complete the proof using Table 3. Observe that the lower bound in Equa-
+tion 12 is a non-decreasing function of F (s?, τ)/(kβ). This implies that for any 0 ≤ x < y ≤ 1,
+we have E[Wa(r, τ)|
+F (s?,τ)
+kβ
+= x] ≤ E[Wa(r, τ)|
+F (s?,τ)
+kβ
+∈ [x, y]]. Having this, we complete the proof
+using a case by case analysis and proving that
+F (s?, τ)− β E[Wa(r, τ)] ≤ 1.05kβ
+holds for all possible values of F (s?, τ)/(kβ).
+5To clarify the notation, when we use G(a, b)|b=x, for a function G, we refer to the value of G given that b = y.
+19
+• For F (s?, τ)/(kβ) ∈ [0, 1.05], it is obvious that F (s?, τ)− β E[Wa(r, τ)] ≤ 1.05kβ holds.
+• If F (s?, τ)/(kβ) ∈ [1.05, 1.1], then we get F (s?, τ)− β E[Wa(r, τ)] ≤ (1.1− 0.14)kβ = 0.96kβ
+since in this case we have E[Wa(r, τ)]/k ≥ 0.14 based on Table 3.
+• If F (s?, τ)/(kβ) ∈ [1.1, 1.2], then we get F (s?, τ) − β E[Wa(r, τ)] ≤ (1.2 − 0.19)kβ = 1.01kβ
+since in this case we have E[Wa(r, τ)]/k ≥ 0.19.
+• If F (s?, τ)/(kβ) ∈ [1.2, 1.5], then we get F (s?, τ) − β E[Wa(r, τ)] ≤ (1.5 − 0.51)kβ = 0.99kβ
+since in this case we have E[Wa(r, τ)]/k ≥ 0.51.
+• If F (s?, τ)/(kβ) ∈ [1.5, 1.7], then we get F (s?, τ) − β E[Wa(r, τ)] ≤ (1.7 − 0.68)kβ = 1.02kβ
+since in this case we have E[Wa(r, τ)]/k ≥ 0.68.
+• If F (s?, τ)/(kβ) ∈ [1.7, 1.8], then we get F (s?, τ) − β E[Wa(r, τ)] ≤ (1.8 − 0.76)kβ = 1.04kβ
+since in this case we have E[Wa(r, τ)]/k ≥ 0.76.
+• If F (s?, τ)/(kβ) ∈ [1.8, 1/β], then we get F (s?, τ)− β E[Wa(r, τ)] ≤ (1.8− 0.76)kβ = 1.04kβ
+since in this case we have E[Wa(r, τ)]/k ≥ 0.76.
+The proof is concluded since we know F (s?, τ)/(kβ) ≤ 1/β. This is due to the definition of
+F (s?, τ) which is
+F (s?, τ) =
+∑
+p:p∈Sa,
+Reva(p)≥τ
+s?a,p − (1− β)E[Wa(r
+′, τ)],
+and the fact that by constraints of the LP, we have
+∑
+p:p∈Sa s
+?
+a,p ≤ k.
+6 Upper Bound for the “Simple Rounding” Approach
+In the algorithm designed for the single unit case of the problem, Derakhshan et al. [DGL19] provide
+a simple rounding technique which directly uses the fraction solution of the LP as a probability
+distribution over reserve prices, and for each buyer independently draws a reserve price from that.
+This is equivalent to setting β = 0 in our rounding algorithm. In the rest of the section, we use
+simple rounding to refer to this rounding technique. We show using an example that for a large
+enough k (number of items) the approximation factor of this algorithm is at most 0.5 + � for any
+small constant �.
+Lemma 6.1. Given any constant � > 0, there exists a dataset of bids for which the simple rounding
+approach achieves at most 0.5 + � fraction of the optimal revenue.
+Proof. We use Table 4 to represent our dataset of auctions. Let k denote the number of items. In
+our example, we have 2k+ 2 auctions and k+ 2 buyers represented by b1, . . . , bk+2. Each column in
+the table represents an auction and its weight is the number of times that this auction is repeated in
+the dataset. To put it differently, we can simply assume that there are only four weighted auctions
+represented by the four columns and each one has a revenue equal to the total payment of buyers
+in the auction multiplied by its weight. Further, note that buyers b3, . . . , bk+2 have similar bids in
+all auctions.
+20
+XXXXXXXXXXXBuyer
+Weight
+1 1 k k
+b1 k
+3 0 0 0
+b2 0 0 k 1
+b3, . . . , bk+2 0 k
+2 k 1
+Table 4: A Bad Example
+We observe that there are two different optimal vectors of reserve prices for this dataset which
+are (k3, k, k2, . . . , k2) and (k3, 1, 1, . . . , 1). By applying the first reserves, the amounts of revenue
+that we get from our four auctions (the four columns) are respectively k3, k3, k2, and 0, while
+the second vector gives us k3, 0, k3, and k2 amounts of revenue respectively. Thus, the optimal
+revenue adds up to 2k3 + k2. Further, let us mention that the all-zero vector of reserve prices
+simply gives us a revenue of k3 + k2, and as a result the approximation factor of this solution is
+at most 0.5 + � for a large enough k and any constant � > 0. Given a small constant � > 0, we
+construct a fractional solution of the LP which if rounded using the simple rounding procedure,
+results in a less than 0.5 + � approximate solution for large values of k. Let δ = �/4, and consider a
+solution of the LP that assigns δ probability to the first optimal solution and 1− δ probability to
+the second one. A formal representation of this solution is given below. Note that for simplicity,
+instead of sub-profiles, we use profiles to represent our solution. (See Definition 3.2.) Also, recall
+that b̂1, . . . , ˆbk+1 are the auxiliary buyers who bid 0 in all the auctions.
+• sa1,p1 = 1 for p1 = (b1, b̂1, . . . , b̂k, k
+3, 0, . . . , 0).
+• sa2,p2 = δ for p2 = (b3, . . . , bk+2, b̂1, , k
+2, . . . , k2, 0).
+• sa2,p′2 = 1− δ for p
+′
+2 = (b3, . . . , bk+2, b̂1, 1, . . . , 1, 0).
+• sa3,p3 = δ for p3 = (b2, b̂1, . . . , b̂k, k, 0, . . . , 0).
+• sa3,p′3 = 1− δ for p
+′
+3 = (b2, b3, . . . , bk+2, 1, . . . , 1).
+• sa4,p4 = 1− δ for p4 = (b2, b3, . . . , bk+2, 1, . . . , 1).
+• sa4,p′4 = δ for p
+′
+4 = (b̂1, b3, . . . , b̂k+1, 0, . . . , 0).
+• xb1,k3 = 1.
+• xb2,k = δ, and xb2,1 = 1− δ.
+• xb,k2 = δ, and xb,1 = 1− δ for any b ∈ {b3, bk+2}.
+It is easy to verify that this fractional solution satisfies the constraints of the LP and is an
+optimal fractional solution; therefore, it suffices to show that the vector of reserve prices obtained
+from the simple rounding algorithm gives us at most (0.5+�)(2k3+k2) revenue for a large enough k.
+As mentioned before, the simple rounding algorithm directly uses the fractional solution of the LP
+as a probability distribution to randomly pick the reserve price of any buyer. More precisely, for any
+buyer b any reserve price r is chosen with probability xb,r independently from other buyers. Let s
+denote the vector of reserve prices obtained from rounding our fractional solution using this simple
+rounding technique. Below we investigate the revenue obtained from each auction by applying s.
+21
+1. From the first auction we simply get revenue of k3 as reserve price k3 is chosen for buyer b1
+with probability one.
+2. In the second auction there are k buyers with nonzero bids, thus all the buyers get an item
+and pay their reserve prices. This implies that the expected revenue of this auction is k(δk2 +
+(1 − δ)) since the simple rounding algorithm chooses reserve prices of k2 and 1 for buyers
+b3, . . . , bk+2 with probabilities δ and (1− δ) respectively.
+3. In the third auction, however, there are k + 1 buyers b2, . . . bk+2 with bid k; therefore, we
+get a revenue of k3 if all the bids are cleared. Otherwise, revenue of this auction is the sum
+of reserve prices of the buyers whose bid is cleared multiplied by the weight of the auction
+(which is k). For any buyer b ∈ {b3, . . . bk+2} the simple rounding technique chooses reserve
+price k2 with probability δ and reserve price 1 with probability 1 − δ. Moreover, buyer b2
+gets reserve prices k and 1 respectively with probabilities δ and 1− δ. This implies that the
+revenue obtained from this auction is k3 with probability (1− δ)k and it is less than 2k2 with
+probability 1− (1− δ)k. Note that for any constant value of δ, we have limk→∞ (1− δ)k = 0;
+thus, for a large enough k, the expected revenue obtained from this auction is at most 2k2+δ.
+4. Since the maximum bid in the fourth auction is one and its weight is k, the total revenue
+obtained from this auction is at most k2.
+By summing up the revenue obtained from the four auctions, we conclude that for a large enough
+k, the expected total revenue is upper bounded by (1 + δ)k3 + 3k2 + k. Since δ = �/4, for a large
+enough k we have (1+ δ)k3 +3k2 +k < (1+ �/2)k3. Recall that the optimal vector of reserve prices
+in this example gives us a revenue of 2k3 + k2. This implies that the approximation factor of the
+simple rounding algorithm is upper bounded by 0.5 + � for a large enough k.
+7 Omitted Proofs of Section 5.1
+In this section, our goal is to prove Lemma 5.4, Lemma 5.6, and Lemma 5.7 which are stated in
+Section 5.1. Before going into their proofs, however, we start by a series of claims that are needed
+for completing the proofs.
+Claim 7.1. If the following inequality holds, then E[Wa(r, τ)] = k.
+E[Wa(r′, τ)] <
+∑
+b∈B
+Pr[βa,b ≥ r′b ≥ τ ] (13)
+Proof. We have
+E[Wa(r′, τ)] = min
+(∑
+b∈B
+Pr[βa,b ≥ r′b ≥ τ ], k
+)
+.
+Define B′ = {b ∈ B : Pr[βa,b ≥ r′b ≥ τ ] 6= 0}. Observe that if |B
+′| ≤ k then∑
+b∈B
+Pr[βa,b ≥ r′b ≥ τ ] ≤ k,
+which implies
+E[Wa(r′, τ)] =
+∑
+b∈B
+Pr[βa,b ≥ r′b ≥ τ ].
+22
+Thus, if Equation 13 holds then |B′| > k. By Claim 7.5, provided in the appendix, for any b ∈ B′
+we have E[qb] = 1. This gives us Pr[
+∑
+b∈B′ qb > k] = 1 and as a result Pr[Qτ > k] = 1. Finally,
+Claim 5.1 gives us E[Wa(r, τ)] ≥ kPr[Qτ > k], and concludes the proof.
+Assumption 7.2. The following equation holds for any auction a ∈ A.
+E[Wa(r′, τ)] =
+∑
+b∈B
+Pr[βa,b ≥ r′b ≥ τ ].
+Proof. As a corollary of Claim 7.1, if
+E[Wa(r′, τ)] ≤
+∑
+b∈B
+Pr[βa,b ≥ r′b ≥ τ ],
+then Equation 5 is simply satisfied for β = 0.55 and c = 0.58 since in this case β E[Wa(r, τ)] = βk.
+Moreover, based on LP we have ∑
+p:p∈Pa
+Reva(p)≥τ
+s?a,p ≤ k,
+which results in∑
+p:p∈Pa
+Reva(p)≥τ
+s?a,p − (1− β)E[Wa(r
+′, τ)]− β E[Wa(r, τ)] ≤ (1− β)k = 0.45k < 0.58k.
+Therefore, to complete the proof of Lemma 4.3, we make the following assumption and only focus
+on proving Equation 5 for auctions that do not satisfy the mentioned condition.
+Claim 7.3. For any buyer b ∈ Bτ the following holds.⋃
+b1∈Bτ\{b}
+(Qb,a ∩Q′b1,a) = Qb,a ∩ Lτ .
+Proof. Consider a valid profile a valid sub-profile p = (b′, b′′, r′, r′′) ∈ Sa. By definition, for any
+buyer b1 ∈ Bτ we have p ∈ (Qb,a ∩ Q′b1,a) iff b
+′ = b and b′′ = b1. Moreover, due to p being a valid
+sub-profile, it satisfies b′ 6= b′′. As a result we have p ∈
+⋃
+b1∈Bτ\{b}(Qb,a ∩ Q
+′
+b1,a) iff b
+′ = b and
+b′′ ∈ Bτ . This completes our proof since this is equal to definition of Qb,a ∩ Lτ .
+Claim 7.4. For any buyer b ∈ Bτ we have∑
+p∈Lτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k ≤ δτ .
+Proof. As a constraint of the LP we have the following for b and any other buyer b1 ∈ B.∑
+p∈Qb,a∩Q′b1,a
+sa,p ≤
+∑
+r∈R
+y′b1,r,a.
+By summing both sides over all buyers in Bτ\{b} we get∑
+b1∈Bτ\{b}
+∑
+p∈Qb,a
+∩Q′b1,a
+sa,p ≤
+∑
+b1∈Bτ\{b}
+∑
+r∈R
+y′b1,r,a.
+23
+Observe that by Claim 7.3 we have⋃
+b1∈Bτ\{b}
+(Qb,a ∩Q′b1,a) = Qb,a ∩ Lτ ,
+which results in ∑
+p∈Lτ∩Qb,a
+sa,p ≤
+∑
+b1∈Bτ\{b}
+∑
+r∈R
+y′b1,r,a. (14)
+Moreover, as the second constraint of the LP we have
+y′b,r,a =
+∑
+p∈Q′b,r,a
+sa,p/k.
+By summing up both sides of this equation over all reserve prices in R, we have∑
+r∈R
+y′b,r,a =
+∑
+r∈R
+∑
+p∈Q′b,r,a
+sa,p/k −
+∑
+p∈Q′b,a
+sa,p/k. (15)
+Combining Equation 14 and Equation 15 yields∑
+p∈Lτ∩Qb,a
+sa,p ≤
+∑
+b1∈Bτ
+∑
+p∈Q′b1,a
+sa,p/k −
+∑
+p∈Q′b,a
+sa,p/k. (16)
+We further use the fact that for any buyer b2 ∈ Bτ and any sup-profile p = (b′, b2, r′, r) ∈ Q′b2,a we
+have p ∈ Lτ . Recall that Lτ is defined as
+Lτ :=
+{
+(b′, b, r′, r) ∈ Tτ | b ∈ Bτ
+}
+.
+We complete the proof using the definition of δτ which is δτ :=
+∑
+b∈Bτ
+∑
+p∈Lτ∩Q′b s
+?
+a,p/k. This gives
+us the followings. ∑
+p∈Lτ∩Qb,a
+sa,p +
+∑
+p∈Lτ∩Q′b,a
+sa,p/k ≤
+∑
+b1∈Bτ
+∑
+p∈Lτ∩Q′b1,a
+sa,p/k ≤ δτ . (17)
+Claim 7.5. For any buyer b ∈ Bτ with Pr[r′b ≤ βa,b] 6= 0 we have E[qb] = 1.
+Proof. By construction of r′ we have
+Pr
+[
+βa,b ≥ r′b
+]
+=
+∑
+r:r≤βa,b,
+r≥tb
+xb,r/(1− β).
+As a result, if Pr[βa,b ≥ r′b] 6= 0 then tb ≤ βa,b. Recall that by definition of tb, we have∑
+r<tb
+xb,r = β.
+Further by construction of r we have
+E[qb] = Pr [rb ≤ βa,b] =
+∑
+r:r≤βa,b,
+r<tb
+xb,r/β.
+24
+Given that tb ≤ βa,b we get
+E[qb] = Pr [rb ≤ βa,b] =
+∑
+r<tb
+xb,r/β = 1.
+This concludes our proof.
+Claim 7.6.
+(1− β)
+∑
+b∈B
+Pr
+[
+βa,b ≥ r′b ≥ τ
+]
+≥
+∑
+p∈J+τ
+s?a,p.
+Proof. By definition of r′
+(1− β)
+∑
+b∈B
+Pr
+[
+βa,b ≥ r′b ≥ τ
+]
+= (1− β)
+∑
+b∈B
+∑
+r:βa,b≤r,
+r≤τ
+fb,r = (1− β)
+∑
+b∈B
+∑
+r:r≥tb,
+r∈[τ,βa,b]
+xb,r
+1− β
+=
+∑
+b∈B
+∑
+r:r≥tb,
+r∈[τ,βa,b]
+xb,r.
+(18)
+Recall definition J +τ := {p = (b, b′, r, r′) ∈ Tτ | b′ /∈ Bτ , r ≥ tb′}, for which we have
+J +τ ⊂
+{
+p = (b, b′, r, r′) ∈ Sa| r ≥ τ , r ≥ tb
+}
+.
+This is because combination of p ∈ Tτ and b′ /∈ Bτ implies that revenue of the sub-profile is greater
+than or equal to τ while bid of the supporting buyer is smaller than τ which yields r ≥ τ . Moreover,
+due to validity of any sub-profile in J +τ we have βa,b ≥ r. Using the first constraint of the LP, we
+get ∑
+p∈J+τ
+s?a,p =
+∑
+b∈B
+∑
+p∈(J+τ
+∩Qb,r)
+s?a,p ≤
+∑
+b∈B
+∑
+r:r≥tb,
+r∈[τ,βa,b]
+yb,r,a.
+Moreover, by the third constraint, we have∑
+r:r≥tb,
+r∈[τ,βa,b]
+yb,r,a ≤
+∑
+r:r≥tb,
+r∈[τ,βa,b]
+xb,r.
+Evoking Equation 18, we obtain∑
+p∈J+τ
+s?a,p ≤
+∑
+b∈B
+∑
+r:r≥tb,
+r∈[τ,βa,b]
+xb,r = (1− β)
+∑
+b∈B
+Pr
+[
+βa,b ≥ r′b ≥ τ
+]
+;
+thus, the proof is completed.
+Claim 7.7. The following equation holds for any buyer b.∑
+p∈Tτ∩Qb,a
+s?a,p +
+∑
+p∈Lτ∩Q′b,a
+s?a,p/k − (1− β) Pr
+[
+βa,b ≥ r′b ≥ τ
+]
+≤ max(β, δτ ). (19)
+Proof. We consider two cases of tb ≥ τ and tb < τ and prove the lemma for them seperately. We
+show that if tb ≥ τ then the left hand side of Equation 19 is uppe bounded by β, and for the second
+case we show that it is upper bounded by δτ . We have∑
+p∈Tτ∩Qb,a
+s?a,p +
+∑
+p∈Lτ∩Q′b,a
+s?a,p/k ≤
+∑
+p∈Qb,a
+s?a,p +
+∑
+p∈Q′b,a
+s?a,p/k =
+∑
+r≤βa,b
+∑
+p∈Qb,r,a
+s?a,p +
+∑
+r≤βa,b
+∑
+p∈Q′b,r,a
+s?a,p/k.
+25
+The right hand side is due to the fact that any sub-profile in Qb,a or Q′b,a is a valid profile of
+auction a which implies Qb,a =
+⋃
+r≤βa,b Q
+′
+b,r,a and Qb,a =
+⋃
+r≤βa,b Q
+′
+b,r,a. Moreover, based on the
+first three constraints of the LP for any r ≤ βa,b we have
+yb,r,a =
+∑
+p∈Qb,r,a
+s?a,p, y
+′
+b,r,a =
+∑
+p∈Q′b,r,a
+s?a,p,a/k, and y
+′
+b,r,a + yb,r,a ≤ xb,r.
+which implies ∑
+r≤βa,b
+∑
+p∈Qb,r,a
+s?a,p +
+∑
+r≤βa,b
+∑
+p∈Q′b,r,a
+s?a,p/k ≤
+∑
+r≤βa,b
+yb,r,a +
+∑
+r≤βa,b
+y′b,r,a ≤
+∑
+r≤βa,b
+xb,r. (20)
+Moreover, based on the construction of r′ we have
+(1− β) Pr
+[
+βa,b ≥ r′b ≥ τ
+]
+= (1− β)
+∑
+r∈[τ,βa,b]
+f ′b,r = (1− β)
+∑
+r:r∈[τ,βa,b],
+r≥tb
+xb,r/(1− β). (21)
+If tb ≥ τ , combining Equation 20 and Equation 21, gives us∑
+p∈Tτ∩Qb,a
+s?a,p +
+∑
+p∈Lτ∩Q′b,a
+s?a,p/k − (1− β) Pr
+[
+βa,b ≥ r′b ≥ τ
+]
+≤
+∑
+r≤βa,b
+xb,r −
+∑
+r∈[tb,βa,b]
+xb,r =
+∑
+r<tb
+xb,r.
+By definition of tb, we have
+∑
+r<tb
+xb,r = β, therefore our proof for the case of tb ≥ τ is completed
+and in the rest of the proof we assume tb < τ . Recall definition
+J −τ := {p = (b, b
+′, r, r′) ∈ Tτ |βa,b′ < τ and r < tb}.
+It is easy to verify that if tb < τ then J −τ ∩Qb,a = ∅. Since Tτ is partitioned to disjoint sets of J +τ ,
+J −τ , and Lτ we obtain. ∑
+p∈Tτ∩Qb
+s?a,p =
+∑
+p∈J+τ ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Qb
+s?a,p.
+In addition, by Claim 7.6, we have
+(1− β) Pr
+[
+βa,b ≥ r′b ≥ τ
+]
+≥
+∑
+p∈J+τ ∩Qb
+s?a,p,
+which gives us ∑
+p∈Tτ∩Qb
+s?a,p − (1− β) Pr
+[
+βa,b ≥ r′b ≥ τ
+]
+≤
+∑
+p∈Lτ∩Qb
+s?a,p.
+The proof is then completed using Claim 7.4 that shows∑
+p∈Lτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k ≤ δτ
+for any buyer b.
+Claim 7.8. For any buyer b with βa,b ≥ τ we have
+E[qb] ≥ min
+
+ 1
+β
+
+ ∑
+p∈Tτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k − (1− β) Pr
+[
+βa,b ≥ r′b ≥ τ
+] , 1
+
+
+26
+Proof. We provide two different proofs for cases of tb ≤ βa,b and tb > βa,b. We claim that in the
+first case, we have E[qb] = 1 and in the second case,
+E[qb] ≥
+1
+β
+
+ ∑
+p∈Tτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k − Pr
+[
+βa,b ≥ r′b ≥ τ
+] .
+By construction, for vector of reserve prices r and any buyer b we have
+E[qb] = Pr
+[
+rb ≤ βa,b
+]
+=
+∑
+r≤βa,b
+fb,r,
+where fb,r = xb,r/β for any r < tb and fb,r = 0 for any r ≥ tb as defined in the algorithm. Note
+that tb is chosen in a way that
+∑
+r<tb
+xb,r = β. Thus, if tb ≤ βa,b we get
+E[qb] =
+∑
+r≤βa,b
+fb,r =
+∑
+r:r≤βa,b,
+r<tb
+xb,r/β =
+∑
+r<tb
+xb,r/β = 1.
+This completes the proof for the first case. Therefore, in the rest of the proof we focus on the case
+of tb > βa,b. This gives us
+E[qb] =
+∑
+r≤βa,b
+fb,r =
+∑
+r:r≤βa,b,
+r<tb
+xb,r/β =
+∑
+r<βa,b
+xb,r/β ≥
+∑
+r<βa,b
+(
+yb,r + y
+′
+b,r
+)
+/β,
+where the right hand side is by constraint yb,r + y
+′
+b,r ≤ xb,r in the LP. Further by the first two
+constraints of the LP we obtain
+∑
+r<βa,b
+(
+yb,r + y
+′
+b,r
+)
+=
+∑
+r<βa,b
+
+ ∑
+p∈Qb,r,a
+sa,p +
+∑
+p∈Q′b,r,a
+sa,p/k
+
+ .
+Note that we can drop the constraint r < βa,b from the right hand side of the equation since by
+definition of valid sub-profiles it holds for any p in Qb,a or Q′b,a. This gives us
+∑
+r<βa,b
+
+ ∑
+p∈Qb,r,a
+sa,p +
+∑
+p∈Q′b,r,a
+sa,p/k
+
+ = ∑
+p∈Qb,a
+sa,p +
+∑
+p∈Q′b,a
+sa,p/k ≥
+∑
+p∈Tτ∩Qb,a
+s?a,p +
+∑
+p∈Lτ∩Q′b,a
+s?a,p/k,
+which completes our proof.
+Lemma 5.4. (restated) The following inequality holds.
+F (s?, τ) ≤
+∑
+p∈J−τ
+s?a,p +
+∑
+p∈Lτ
+s?a,p.
+Proof. Recall that by definition
+F (s?, τ) =
+∑
+p∈Ta,τ
+s?a,p − (1− β)E[Wa(r
+′, τ)].
+Moreover, by Assumption 7.2,
+E
+[
+Wa(r
+′, τ)
+]
+=
+∑
+b∈B
+Pr
+[
+βa,b ≥ r′b ≥ τ
+]
+.
+27
+In addition based on Claim 7.6, we know
+(1− β)
+∑
+b∈B
+Pr
+[
+βa,b ≥ r′b ≥ τ
+]
+≥
+∑
+p∈J+τ
+s?a,p.
+Considering that Tτ is partitioned to three disjoint sets of J +τ ,J −τ , and Lτ , by putting the mentioned
+equations together, we get
+F (s?, τ) =
+∑
+p∈Ta,τ
+s?a,p − (1− β)E[Wa(r
+′, τ)] ≤
+∑
+p∈Ta,τ
+s?a,p −
+∑
+p∈J+τ
+s?a,p ≤
+∑
+p∈J−τ
+s?a,p +
+∑
+p∈Lτ
+s?a,p.
+Lemma 5.6. (restated) For B1 = {b ∈ B : E[qb] = 1}, we have
+E[Qτ − |B1|] ≥ (k − |B1|+ 1)δ/β.
+Proof. By construction of vector of reserve prices r and r′, for any buyer b we have∑
+r≤βa,b
+xr,b = β Pr[r ≤ βa,b] + (1− β) Pr[r ≤ βa,b].
+Moreover, by the third constraint of the LP for any buyer b and reserve price r ∈ R, we have
+yb,r,a + y
+′
+b,r,a ≤ xb,r, which implies∑
+r≤βa,b
+(
+yb,r,a + y
+′
+b,r,a
+)
+= β Pr[r ≤ βa,b] + (1− β) Pr[r ≤ βa,b].
+Combining this with the first two constraints of the LP, yb,r,a =
+∑
+p∈Qb,r,a sa,p and y
+′
+b,r,a =∑
+p∈Q′b,r,a sa,p we get
+∑
+r≤βa,b
+
+ ∑
+p∈Qb,r,a
+s?a,p +
+∑
+p∈Q′b,r,a
+s?a,p/k
+
+ = β Pr[r ≤ βa,b] + (1− β) Pr[r ≤ βa,b].
+By definition of Qb,r and Q′b,a we can write∑
+p∈Qb,a
+s?a,p +
+∑
+p∈Q′b,a
+s?a,p/k = β Pr[r ≤ βa,b] + (1− β) Pr[r ≤ βa,b]
+and ∑
+p∈Qb,a∩Lτ
+s?a,p +
+∑
+p∈Q′b,a∩Lτ
+s?a,p/k ≤ β Pr[r ≤ βa,b] + (1− β) Pr[r ≤ βa,b].
+Further, by Claim 7.4, for any buyer b we have∑
+p∈Lτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k ≤ δτ .
+which means
+∑
+b∈B
+
+ ∑
+p∈Qb,a∩Lτ
+sa,p +
+∑
+p∈Q′b,a∩Lτ
+s′a,p/k
+
+− δτ |B1| ≤ ∑
+b∈B\B1
+β Pr[r ≤ βa,b] + (1− β) Pr[r ≤ βa,b].
+28
+Further, by 7.5, we know Pr[r ≤ βa,b] = 0 holds for any b /∈ B1. This implies
+∑
+b∈B
+
+ ∑
+p∈Qb,a∩Lτ
+sa,p +
+∑
+p∈Q′b,a∩Lτ
+s′a,p/k
+
+− δτ |B1| ≤ ∑
+b∈B\B1
+β Pr[r ≤ βa,b] =
+∑
+b∈B\B1
+β E[qb].
+To complete the proof, recall that we have defined δτ =
+∑
+b∈Bτ
+∑
+p∈Q′b,a∩Lτ s
+?
+a,p/k, and by Claim 5.2
+we have ∑
+b∈Bτ
+∑
+p∈Qb,a∩Lτ
+s?a,p =
+∑
+p∈Lτ
+s?a,p = kδτ .
+This implies ∑
+p∈Qb,a∩Lτ
+s?a,p +
+∑
+p∈Q′b,a∩Lτ
+s?a,p/k = (k + 1)δτ ,
+(k + 1− |B1|)δτ ≤
+∑
+b∈B\B1
+β E[qb] = β(E[Qτ ]− |B1|),
+(k + 1− |B1|)δτ/β ≤ (E[Qτ ]− |B1|) ,
+and concludes the proof.
+Lemma 5.7. (restated) For B1 = {b ∈ B : E[qb] = 1} and m = |B1| we have
+E[Qτ −m] ≥
+F (s?, τ)−mδ
+β
++ δ/β.
+Proof. Recall that by definition
+F (s?, τ) =
+∑
+p∈Ta,τ
+s?a,p − (1− β)E[Wa(r
+′, τ)].
+Combining this with Asspmtion 7.2 gives us
+F (s?, τ) =
+∑
+b∈B
+
+ ∑
+p∈Tτ∩Qb
+s?a,p − (1− β) Pr[βa,b ≥ r
+′
+b ≥ τ ]
+
+ ,
+which results in
+F (s?, τ) + δ
+β
+=
+1
+β
+∑
+b∈B
+
+ ∑
+p∈Tτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k − (1− β) Pr[βa,b ≥ r
+′
+b ≥ τ ]
+
+ . (22)
+Moreover, by Claim 7.8, for any buyer b, we have
+E[qb] ≥ min
+
+ 1
+β
+
+ ∑
+p∈Tτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k − (1− β) Pr[βa,b ≥ r
+′
+b ≥ τ ]
+
+ , 1
+
+ ,
+and by Claim 7.7 for any buyer b, we have∑
+p∈Tτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k − (1− β) Pr[βa,b ≥ r
+′
+b ≥ τ ] ≤ max(β, δτ ).
+29
+This implies that if δτ ≤ β, then for any buyer b we have
+E[qb] ≥
+1
+β
+
+ ∑
+p∈Tτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k − (1− β) Pr[βa,b ≥ r
+′
+b ≥ τ ]
+
+ ,
+and
+E[Qτ ] ≥
+F (s?, τ) + δ
+β
+.
+This completes the proof for the case of δτ ≤ β; therefore, in the rest of the proof we assume δτ > β
+which means for any buyer b,∑
+p∈Tτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k − (1− β) Pr[βa,b ≥ r
+′
+b ≥ τ ] ≤ δτ . (23)
+Note that for any b ∈ B/B1 we have qb < 1 which means
+E[qb] =
+1
+β
+
+ ∑
+p∈Tτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k − (1− β) Pr[βa,b ≥ r
+′
+b ≥ τ ]
+
+ .
+Combining this with Equation 22, we obtain
+E[Qτ−m] =
+∑
+b∈B/B1
+E[qt] =
+F (s?, τ) + δ
+β
+−
+1
+β
+∑
+b∈B1
+
+ ∑
+p∈Tτ∩Qb
+s?a,p +
+∑
+p∈Lτ∩Q′b
+s?a,p/k − (1− β) Pr[βa,b ≥ r
+′
+b ≥ τ ]
+
+ .
+Using Equation 23, we get the following which completes the proof
+E[Qτ −m] =
+∑
+b∈B/B1
+E[qt] ≥
+F (s?, τ) + δτ
+β
+−
+mδτ
+β
+=
+F (s?, τ)−mδτ
+β
++ δτ/β.
+8 Proof of Lemma 3.3
+Lemma 3.3. (restated) The optimal revenue is upper bounded by
+∑
+a∈A
+∑
+p∈Sa s
+?
+a,p · Reva(p).
+Proof. Consider OPT, an optimal solution of the problem. To prove this claim, it suffices to
+construct vectors so, xo, and yo in a way that setting s = so, y = yo and x = xo in the LP satisfies
+all the LP constraints and that the objective function of the LP equals to the revenue of OPT, or
+in the other words
+Rev(OPT) = max
+x,s
+∑
+a∈A
+∑
+p∈Pa
+soa,p · Reva(p). (24)
+Roughly speaking, we construct so to be the representation of OPT in the profile space. For any
+sub-profile p = (b1, b2, r1, r2) we have s
+o
+a,p = 1 iff using OPT, in auction a buyer b1 is one of the
+winners, buyer b2 is the supporting buyer, and their reserve prices are respectively r1 and r2.
+We first show that Equation 24 holds for so. Let r denote the vector of reserve prices in OPT.
+For any auction a ∈ A, let bs,a be the supporting buyer, and let Ba denote the set of winners
+in auction a using vector of reserve prices r. Payment of any winner b ∈ Ba in auction a is
+30
+max(rb, βa,bs,a), which means revenue obtained from auction a using the vector of reserve prices r
+is
+∑
+b∈Ba max(rb, βa,bs,a). To prove Equation 24, it suffices to show that for any auction a we have∑
+b∈Ba
+max(rb, βa,bs,a) =
+∑
+p∈Pa
+Reva(p).
+Note that for any profile p = (b, r′1, b2, r
+′
+2) ∈ Pa we have sa,p = 1 iff b ∈ Ba, b2 = bs,a, rb = r
+′
+1 and
+rb2 = r
+′
+2. Moreover, by defintion, we have Reva(p) = max(r
+′
+1, βa,b2) = max(rb, βa,bs,a). This implies
+that ∑
+p∈Pa
+Reva(p) = max(rb, βa,bs,a),
+which results in Equation 24.
+To complete the proof we construct xo, yo, and y′o in a way that setting x = xo, y′ = y′o,
+y = y′o and s = so, satisfied all the constraints of the LP.
+• For any buyer b ∈ B and r ∈ R we set xob,r = 1 iff reserve price r is assigned to buyer b in
+OPT and set xob,r = 0 otherwise.
+• For any buyer b ∈ B, auction a ∈ A, and reserve price r ∈ R we set yob,r,a = 1 iff using solution
+OPT, buyer b is a winner in auction a and he is assigned a reserve price r. Otherwise we set
+yob,r,a = 0.
+• For any buyer b ∈ B, auction a ∈ A, and reserve price r ∈ R we set y′ob,r,a = 1 if using solution
+OPT, buyer b is the supporting buyer in auction a and he is assigned a reserve price r.
+Otherwise we set y′ob,r,a = 0.
+We now start investigating the constraints of the LP one by one and verify that all seven constraints
+hold for x = xo, y′ = y′o, y = y′o and s = so.
+1. For the first constraint we need to show yob,r,a =
+∑
+p∈Qb,r,a s
+o
+a,p for any b ∈ B, r ∈ R, and a ∈ A.
+It is easy to see that if b is not a winner in auction a then both sides of this equation are equal
+to zero. To complete the proof we assume that b is a winner. Let b2 denote the supporting
+buyer in auction a. Moreover, let r1 and r2 respectively denote the reserve prices assigned to
+buyers b and b2 in OPT. We have y
+o
+b,r,a = 1 iff r = r1 and b is a winner in auction a. We also
+show that
+∑
+p∈Qb,r,a s
+o
+a,p = 1 iff r = r1. Note that p = (b, r1, b2, r2) is the only sub-profiles in
+Sa with soa,p = 1. Further, by definition Qb,r,a is a subset of Sa and contains the sub-profiles
+in which buyer b is a winner in auction a, thus it contains p iff r = r1. This means that both
+sides of the equation are equal to one if r = r1 and both are equal to zero otherwise.
+2. For the second constraint, we need to show that y′ob,r,a =
+∑
+p∈Q′b,r,a s
+o
+a,p/k holds for any
+b ∈ B, r ∈ R, and a ∈ A. Let b1 be the supporting buyer in auction a and let r1 be the reserve
+price assigned to this buyer. By definition we have y′ob,r,a = 1 iff b = b1 and r = r1, and we
+have y′ob,r,a = 1 otherwise. Therefore, for this constraint to be satisfied we need to show that∑
+p∈Q′b,r,a s
+o
+a,p = k holds iff b = b1 and r = r1, and we have
+∑
+p∈Q′b,r,a s
+o
+a,p = 0 otherwise.
+Let b2 denote one of the winners in auction a and let r2 be the reserve price assigned to this
+buyer. By definition, for any profile p = (b2, r2, b1, r1) ∈ Sa we have soa,p = 1 iff b2 is a winner
+in auction a and r1 is the reserve price assigned to him. Since we have assumed that each
+auction has exactly k winners then we have
+∑
+p∈Q′b,r,a s
+o
+a,p = k iff b = b1 and r = r2, and we
+have
+∑
+p∈Q′b,r,a s
+o
+a,p = 0 otherwise.
+31
+3. To prove that our constructed solution satisfies the third constraint of the LP, we need to
+show yob,r,a + y
+′o
+b,r,a ≤ x
+o
+b,r for any b ∈ B, any reserve price r ∈ R and any auction a. Consider
+a buyer b and let r1 be the reserve price assigned to this buyer in solution OPT. For any
+r 6= r1 both sides of the equation are obviously zero. However, for r = r1 we have xob,r = 1.
+Observe that in any auction a, we also have yob,r,a + y
+′o
+b,r,a ≤ 1 since b cannot be both a winner
+and the supporting buyer in an auction.
+4. For the fourth constraint, we need to show
+∑
+p∈Qb2,a∩Q
+′
+b1,a
+soa,p ≤
+∑
+r∈R y
+′o
+b1,r,a
+. For any sub-
+profile p = (b3, r1, b4, r2) in Qb2,a ∩ Q
+′
+b1,a we have b4 = b2 and b3 = b1. Moreover, we have
+sa,p = 1 iff r1 and r2 are respectively the reserve prices assigned to buyers b1 and b2, buyer b1
+is a winner in auction a and buyer b2 is the supporting buyer in this auction. This implies that
+the left hand side is equal to one iff b1 and b2 are respectively a winner and the supporting
+buyer in auction a. Further, the right hand side is equal to one iff b1 is the supporting buyer
+in auction a. This concludes that the fourth constraint is satisfied for so and y′o.
+5. The condition
+∑
+p∈Pa s
+o
+a,p ≤ k is satisfied due to the assumption that we have k winners in all
+auctions. Let b′ be the supporting buyer in auction a. For a sub-profile (b1, r1, b2, r2) ∈ Pa
+we have sob,r = 1 iff b2 = b
+′, b1 is a winner in auction a, and r1 and r2 are respectively the
+reserve prices assigned to buyers b1 and b2. Given that we have exactly k winner and that
+each buyer has a unique reserve price then,
+∑
+p∈Pa s
+o
+a,p ≤ k.
+6. For this constraint, we need to show
+∑
+r∈R x
+o
+b,r = 1. This is true since for a reserve r we have
+xob,r = 1 if reserve r is assigned to buyer b, and in OPT there is exactly one reserve price
+assigned to each buyer.
+7. The last constraint is simply satisfied since soa,p is either zero or one.
+9 Useful Facts about Bernoulli Random Variables
+Lemma 9.1. If Y ∼ Binomial(n, p), then for any m ≤ n we have Pr(Y ≥ m) = G(p), where
+G(p) =
+n!
+(m− 1)!(n−m)!
+∫ 1
+1−p
+tn−m(1− t)m−1dt.
+Proof. Let us define H(p) := Pr(Y ≥ m). We have
+H(p) =
+n∑
+j=m
+(
+n
+j
+)
+pj(1− p)n−j .
+By taking derivative of this function we get:
+H ′(p) =
+n∑
+j=m
+(
+n
+j
+)
+jpj−1(1− p)n−j −
+n∑
+j=m
+(
+n
+j
+)
+(n− j)pj(1− p)n−j−1
+= n
+n∑
+j=m
+(
+n− 1
+j − 1
+)
+pj−1(1− p)n−j − n
+n−1∑
+j=m
+(
+n− 1
+j
+)
+pj(1− p)n−j−1
+= n
+n−1∑
+i=m−1
+(
+n− 1
+i
+)
+pi(1− p)n−1−i − n
+n−1∑
+i=m
+(
+n− 1
+i
+)
+pi(1− q)n−1−i
+32
+= n
+(
+n− 1
+m− 1
+)
+pm−1(1− p)n−m = G′(p).
+The proof is completed as we also have G(0) = H(0) = 0.
+Lemma 9.2. For any α > 1 and m > 0, Pr[X ≥ m] is minimized subject to X ∼ Binomial(n,mα/n)
+when n→∞.
+Proof. Let us define Xn ∼ Binomial(n,mα/n) and Xn+1 ∼ Binomial(n,mα/(n + 1)) We need to
+show that Pr[Xn ≥ m] ≤ Pr[Xn+1 ≥ m]. decreasing function of n. Using Lemma 9.1, we have
+Pr[Xn ≥ m] = n!(m−1)!(n−m)!G(n) where
+G(n, α) =
+n!
+(m− 1)!(n−m)!
+∫ 1
+1−mα/n
+tn−m(1− t)m−1dt.
+We have
+Pr[Xn+1 ≥ m]
+Pr[Xn ≥ m]
+=
+(n−m+ 1)G(n+ 1)
+(n+ 1)G(n, α)
+.
+Define Dn,α = (n−m+1)G(n+1)−(n+1)G(n). To complete the proof it suffices to show Dn,α ≤ 1.
+∂Dn,α
+∂α
+α(mα)−m(n+ 1)m−1
+(
+1−
+mα
+n
+)m−n
+= Dn,α;1 :=
+(
+1−
+mα
+n
+)m−n(
+1−
+mα
+n+ 1
+)n−m+1
+−
+n−m+ 1
+n
+(
+n+ 1
+n
+)m−1
+.
+Moreover, for any α ∈ (1, n/m),
+∂Dn,α;1
+∂α
+=
+(α− 1)m2nn−m(n+ 1−mα)n−m
+(n+ 1)n−m+1(n−mα)n−m+1
+> 0.
+As a result, sign of Dn,α;1 can only change from − to + as α increases from 1 to n/m. So,
+∂Dn,α
+∂α
+has the same sign pattern. To get Dn,α ≤ 1, it suffices to show that Dn,0 ≤ 0 and Dn,n/m ≤ 0.
+Since for α = 0, we have G(n, 0) = 0 for all n, we obviously have Dn,0 = 0 ≤ 0. We conclude
+the proof by noting the following.
+Dn,n/m = (n+ 1)G(n+ 1, n/m)− (n−m+ 1)G(n, n/m)
+≤ (n+ 1)G(n+ 1, (n+ 1)/m)− (n−m+ 1)G(n, n/m)
+= 1
+/( n
+m− 1
+)
+− 1
+/( n
+m− 1
+)
+= 0.
+Lemma 9.3. Let p = (p0, . . . , pn) ∈ [0, 1]n be an extreme point of function Fm(p) defined below
+subject to
+∑
+i∈[n] pi = t for a fixed t.
+Fm(p) = Pr
+[∑
+i∈[n]
+xi > m
+]
+,
+where x1, . . . , xn are independent Bernoulli random variables with E[xi] = pi for any i ∈ [n]. The
+following holds for any i, j ∈ [n]. If pi /∈ {0, 1} and pj /∈ {0, 1}, then pi = pj.
+33
+Proof. We use proof by contradiction. If there does not exist such an extreme point, then let p be
+an arbitrary extreme point with maximum up defined as below.
+up = min
+i∈U
+(pi)
+where U = {i : pi 6= 0}. W.l.o.g, let pi = up and pick a j ∈ [n] where pi < pj . To obtain a
+contradiction, we show that if p is an extreme point, then it is possible to modify pi and pj without
+changing other elements of p in a way that the values of pi + pj and Fm(p) are unchanged but pi
+is increased. This gives us a contradiction since by repeating this process one can increase up.
+Let X =
+∑
+l∈n xl and X
+′ = X − xi − xj . We have
+Fm(p) = Pr[X
+′ > m] + Pr[X ′ = m] Pr[xi + xj > 0] + Pr[X
+′ = m− 1] Pr[xi + xj = 2].
+Define d = (pj − pi)/2 and s = (pi + pj)/2. We have Pr[xi + xj = 2] = (s+ d)(s− d) = s2− d2 and
+Pr[xi + xj > 0] = d
+2 + 2s− s2. Let
+G(s, d) = Pr[X ′ = m](d2 + 2s− s2) + Pr[X ′ = m− 1](s2 − d2).
+Therefore,
+Fm(p) = Pr[X
+′ > m] +G(s, d).
+Note that ∂G
+∂d
+= 2d(Pr[X ′ = m] + Pr[X ′ = m− 1]). By the assumption that p is an extreme point,
+pi /∈ {0, 1} and pj /∈ {0, 1} we obtain that Pr[X ′ = m] + Pr[X ′ = m − 1] = 0. This gives us the
+freedom to change values of pi and pj and set pi = pj = s as it does not change the value of Fm(p).
+Thus, we obtain a contradiction and the proof is completed.
+Fact 9.4. Given n iid Bernoulli random variables x1, . . . , xn with E[xi] = p, if n → ∞, then for
+any 0 ≤ j ≤ n we have
+Pr
+[
+n∑
+i=1
+xi = j
+]
+=
+e−np(np)j
+j!
+.
+Proof. This is based on the relation between Poisson and Binomial distribution when n→∞.
+Lemma 5.9. (restated) Given m ∈ N and a random variable X that is sum of a set of independent
+Bernoulli random variables with E[X] = µ, if m+ 1 < µ, then we have
+Pr [X > m] ≥ min
+0≤i≤m
+G(m− i, µ− i).
+Proof. Let x1 . . . xn denote a set of independent Bernoulli random that minimize Pr[
+∑n
+i=1 xi > m]
+subject to
+∑n
+i=1 xi = E[X]. By Lemma 9.3, we know that any two variables xi and xj that are not
+deterministically zero or one are identical. Let I = {i ∈ [n] : E[xi] = 1}. Moreover, w.l.o.g., assume
+none of the variables are deterministically zero. We have Pr [
+∑n
+i=1 xi > m] = Pr[
+∑
+i/∈M xi > m−|I|].
+Further by Lemma 9.2, Pr[
+∑n
+i=1 xi > m] is minimized when n→∞, which using Fact 9.4, leads to
+Pr
+[∑
+i/∈M
+xi ≤ m− |I|
+]
+≤
+m−|I|∑
+j=0
+(µ− |I|)je−(µ−|I|)
+j!
+.
+Recall that we have
+G(x, λ) = 1−
+x∑
+i=0
+λie−λ
+i!
+.
+34
+Note that if |I| > m, then Pr[
+∑n
+i=1 xi > m] = 1, thus by considering all possible values of 0 ≤ |I| ≤
+m we get
+Pr
+[
+n∑
+i=0
+xi ≥ m
+]
+≥ min
+0≤i≤m
+(
+1−
+m−i∑
+i=0
+(µ− i)je−(µ−i)
+j!
+)
+= min
+0≤i≤m
+G(m− i, µ− i).
+Lemma 5.11. (restated) For any integer number m > 2 and any real number θ ∈ [0, 2], we have
+min
+µ∈M2,θ
+H(2,µ) ≤ min
+µ∈Mm,θ
+H(m,µ),
+where Mm,θ = {µ = (µ1, . . . , µn) ∈ [0, 1]n|
+∑n
+i=1 µi = mθ}, and
+H (k, (µ1, . . . , µn)) =
+E[min(
+∑
+i∈[n] xi,m)]
+m
+,
+with xi, . . . , xn being independent Bernoulli random variables with means µi, . . . , µn.
+Proof. Given a θ ∈ [0, 1] and an arbitrary m ≥ 2, let x = (x1, . . . xn) be a vector of independent
+Bernoulli random variables with means µ1, . . . , µn summing to mθ and let y = (y1, . . . yn) be a
+vector of independent Bernoulli random variables with expectations m−1
+m
+µ1, . . . ,
+m−1
+m
+µn summing
+up to (m− 1)θ. We will prove that for any such x and y we have
+E
+[
+min(
+∑n
+i=1 xi,m)
+m
+]
+≥ E
+[
+min(
+∑n
+i=1 yi,m− 1)
+m− 1
+]
+. (25)
+This shows that for a given m and θ,
+min
+p∈Mm,θ
+H(m,p)
+is an increasing function of m and as a result for any m we have
+min
+p∈M2,θ
+H(2,p) ≤ min
+p∈Mm,θ
+H(m,p).
+To achieve this, for any i, we couple xi with yi so that E[yi|xi = 0] = 0 and E[yi|xi = 1] = m−1m ,
+and show that
+E
+[
+K(
+m− 1
+m
+xi, . . . ,
+m− 1
+m
+xn)
+]
+≥ E [K(y1, . . . , yn)] , (26)
+where K(z1, . . . , zn) = min(
+∑n
+i=1
+zi
+m−1 , 1). Note that the left hand side of Equation 26, is equal to
+that of Equation 25 and similarly the right hand sides are equal too, thus proving the correctness of
+Equation 26 would complete the proof. Let x̄ = be an arbitrary realization of the vector of random
+variables x. We show that for any value of x̄ we have
+E
+[
+K(
+m− 1
+m
+xi, . . . ,
+m− 1
+m
+xn)|x = x̄
+]
+≥ E [K(y1, . . . , yn)|x = x̄] . (27)
+We know that if at least m elements of x̄ are equal to one, then the left hand side is equal to one
+as well. Also, function K(.) is upper bounded by one thus, if
+∑n
+i=1 x̄i > m − 1, the Equation 27
+holds. Otherwise, if at most m− 1 elements of x̄ are equal to one then we have
+E
+[
+K(
+m− 1
+m
+xi, . . . ,
+m− 1
+m
+xn)|x = x̄,
+n∑
+i=1
+x̄i ≤ m− 1
+]
+= min
+(
+n∑
+i=1
+x̄i
+m
+, 1
+)
+=
+∑n
+i=1 x̄i
+m
+.
+35
+Recall that for any yi we have Pr[yi|xi = 0] = 0, which results in
+Pr
+[
+n∑
+i=1
+yi ≤ m− 1|x = x̄,
+n∑
+i=1
+x̄i ≤ m− 1
+]
+= 1.
+This implies that
+E
+[
+K(yi, . . . , yn)|x = x̄,
+n∑
+i=1
+x̄i ≤ m− 1
+]
+= E
+[
+min
+(
+n∑
+i=1
+yi
+m− 1
+, 1
+)]
+= E
+[
+n∑
+i=1
+yi
+m− 1
+]
+=
+∑n
+i=1 x̄i
+m
+,
+which completes the proof as we showed that Equation 27 holds for all possible realizations of x.
+Claim 5.12. (restated) Given a fixed real number θ ∈ (0, 2), and a set of independent Bernoulli
+random variables x1, . . . , xn with E[
+∑
+i∈[n] xi] = 2θ we have
+1
+2
+E[min(
+∑
+i∈[n]
+xi, 2)] ≥ 1− (1 + θ)e−2θ.
+Proof. Let X =
+∑
+i∈[n] xi. We have
+E[min(X, 2)] = Pr[X = 1] + 2 Pr[X ≥ 2] = 2− Pr[X = 1]− 2 Pr[X = 0]
+It is easy to verify that this function is minimized when variables x1, . . . , xn are iid and n→∞ in
+which case, X is a Poisson random variable with λ = 2θ. For X ∼ Poisson(2θ) we have
+Pr[X = 1] + 2 Pr[X = 0] = 2e−2θ + 2θ−2θ = (2 + 2θ)e−2θ,
+which results in
+E[min(X, 2)]
+2
+= 1− (1 + θ)e−2θ.
+Lemma 9.5. Given a real number α > 1.05, an integer m ≥ 2000, and a set of independent
+Bernoulli random variables xi, . . . , xn with E[X] ≥ αm we have
+Pr[X ≥ m+ 1] ≥ 0.9,
+where X =
+∑n
+i=1 xi.
+Proof. Note that for any m ≥ 2000, we have 1.05m < 1.049(m+ 1); therefore, given that α ≥ 1.05
+and m ≥ 2000 we obtain E[X] ≥ 1.049(m+ 1). By Chernoff bound, for any δ > 0, we have
+Pr (X < (1− δ)E[X]) <
+(
+e−δ
+(1− δ)1−δ
+)E[X]
+.
+In our case, we are interested in giving an upper bound for Pr[X < m+ 1], which is
+Pr [X < m+ 1] ≤ Pr
+[
+X <
+1
+1.049
+E[X]
+]
+<
+(
+e−0.047
+(1− 0.047)1−0.047
+)2000∗1.05
+< 0.1.
+This gives us Pr[X ≥ m+ 1] > 0.9 and completes the proof.
+36
+References
+[AB18] Amine Allouah and Omar Besbes. Prior-independent optimal auctions. In Proceedings
+of the 2018 ACM Conference on Economics and Computation, Ithaca, NY, USA, June
+18-22, 2018, page 503, 2018.
+[ACK18] Yossi Azar, Ashish Chiplunkar, and Haim Kaplan. Prophet secretary: Surpassing
+the 1-1/e barrier. In Proceedings of the 2018 ACM Conference on Economics and
+Computation, Ithaca, NY, USA, June 18-22, 2018, pages 303–318, 2018.
+[AM+06] Lawrence M Ausubel, Paul Milgrom, et al. The lovely but lonely vickrey auction.
+Combinatorial auctions, 17:22–26, 2006.
+[BFM12] Anand Bhalgat, Jon Feldman, and Vahab Mirrokni. Online allocation of display ads
+with smooth delivery. In Proceedings of the 18th ACM SIGKDD international confer-
+ence on Knowledge discovery and data mining, pages 1213–1221. ACM, 2012.
+[BGL+18] Hedyeh Beyhaghi, Negin Golrezaei, Renato Paes Leme, Martin Pal, and Balasubrama-
+nian Siva. Improved approximations for free-order prophets and second-price auctions.
+arXiv preprint arXiv:1807.03435, 2018.
+[CFPV17] José Correa, Patricio Foncea, Dana Pizarro, and Victor Verdugo. From pricing to
+prophets, and back. In Dynamic Pricing Workshop, Santiago de Chile, Chile, Dec
+11-15, 2017, 2017.
+[CHMS10] Shuchi Chawla, Jason D Hartline, David L Malec, and Balasubramanian Sivan. Multi-
+parameter mechanism design and sequential posted pricing. In Proceedings of the forty-
+second ACM symposium on Theory of computing, pages 311–320. ACM, 2010.
+[CLMN14] L Elisa Celis, Gregory Lewis, Markus Mobius, and Hamid Nazerzadeh. Buy-it-now or
+take-a-chance: Price discrimination through randomized auctions. Management Sci-
+ence, 60(12):2927–2948, 2014.
+[CSZ19] Jose Correa, Raimundo Saona, and Bruno Ziliotto. Prophet secretary through blind
+strategies. In Proceedings of the Thirtieth Annual ACM-SIAM Symposium on Discrete
+Algorithms, pages 1946–1961. SIAM, 2019.
+[DGL19] Mahsa Derakhshan, Negin Golrezaei, and Renato Paes Leme. Lp-based approximation
+for personalized reserve prices. arXiv preprint arXiv:1905.01526, 2019.
+[DRY15] Peerapong Dhangwatnotai, Tim Roughgarden, and Qiqi Yan. Revenue maximization
+with a single sample. Games and Economic Behavior, 91:318–333, 2015.
+[EOS07] Benjamin Edelman, Michael Ostrovsky, and Michael Schwarz. Internet advertising
+and the generalized second-price auction: Selling billions of dollars worth of keywords.
+American economic review, 97(1):242–259, 2007.
+[GLMN17] Negin Golrezaei, Max Lin, Vahab Mirrokni, and Hamid Nazerzadeh. Boosted second
+price auctions: Revenue optimization for heterogeneous bidders. 2017.
+[HR09] Jason D. Hartline and Tim Roughgarden. Simple versus optimal mechanisms. In
+Proceedings 10th ACM Conference on Electronic Commerce (EC-2009), Stanford, Cal-
+ifornia, USA, July 6–10, 2009, pages 225–234, 2009.
+37
+[MR15] Jamie H Morgenstern and Tim Roughgarden. On the pseudo-dimension of nearly op-
+timal auctions. In Advances in Neural Information Processing Systems, pages 136–144,
+2015.
+[OS11] Michael Ostrovsky and Michael Schwarz. Reserve prices in internet advertising auctions:
+A field experiment. In Proceedings of the 12th ACM conference on Electronic commerce,
+pages 59–60. ACM, 2011.
+[PLPV16] Renato Paes Leme, Martin Pál, and Sergei Vassilvitskii. A field guide to personalized
+reserve prices. In Proceedings of the 25th International Conference on World Wide
+Web, pages 1093–1102. International World Wide Web Conferences Steering Commit-
+tee, 2016.
+[RS16] Tim Roughgarden and Okke Schrijvers. Ironing in the dark. In Proceedings of the 2016
+ACM Conference on Economics and Computation, pages 1–18, 2016.
+[RW16] Tim Roughgarden and Joshua R Wang. Minimizing regret with multiple reserves. In
+Proceedings of the 2016 ACM Conference on Economics and Computation, pages 601–
+616. ACM, 2016.
+[Yan11] Qiqi Yan. Mechanism design via correlation gap. In Proceedings of the twenty-second
+annual ACM-SIAM symposium on Discrete Algorithms, pages 710–719, 2011.
+38
+	1 Introduction
+	1.1 Our Scope and Main Result
+	1.2 Our Techniques
+	1.3 Further Related Work
+	2 Preliminaries and Problem Statement
+	3 The Algorithm
+	3.1 An Alternative Solution Space
+	3.2 The Linear Program
+	3.3 The LP-Rounding Procedure
+	4 Approximation Factor
+	5 Proof of Lemma 4.3
+	5.1 lower bounds for `39`42`"613A``45`47`"603AE[P] and `39`42`"613A``45`47`"603AE[Q]
+	5.2 Revenue of the discounted vector
+	6 Upper Bound for the ``Simple Rounding'' Approach
+	7 Omitted Proofs of Section 5.1
+	8 Proof of Lemma 3.3
+	9 Useful Facts about Bernoulli Random Variables

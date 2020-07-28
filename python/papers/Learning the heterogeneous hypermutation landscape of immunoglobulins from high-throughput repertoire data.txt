@@ -1,0 +1,1890 @@
+Learning the heterogeneous hypermutation landscape of immunoglobulins from
+high-throughput repertoire data
+Natanael Spisak, Aleksandra M. Walczak,∗ and Thierry Mora∗
+Laboratoire de physique de l’École normale supérieure, CNRS, PSL University,
+Sorbonne Université, and Université de Paris, 75005 Paris, France
+Somatic hypermutations of immunoglobulin (Ig) genes occurring during affinity maturation drive
+B-cell receptors’ ability to evolve strong binding to their antigenic targets. The landscape of these
+mutations is highly heterogeneous, with certain regions of the Ig gene being preferentially targeted.
+However, a rigorous quantification of this bias has been difficult because of phylogenetic correlations
+between sequences and the interference of selective forces. Here, we present an approach that corrects
+for these issues, and use it to learn a model of hypermutation preferences from a recently published
+large IgH repertoire dataset. The obtained model predicts mutation profiles accurately and in a
+reproducible way, including in the previously uncharacterized Complementarity Determining Region
+3, revealing that both the sequence context of the mutation and its absolute position along the gene
+are important. In addition, we show that hypermutations occurring concomittantly along B-cell
+lineages tend to co-localize, suggesting a possible mechanism for accelerating affinity maturation.
+I. INTRODUCTION
+B cells are a crucial player in the adaptive immune
+system. Swift eradication of pathogens is enabled by the
+production of immunoglobulins (Ig) that bind tightly to
+antigens, helping in their detection, neutralization, and
+removal. Achieving high accuracy and breadth relies on
+the extraordinary diversity of the B cells repertoire. The
+process of V(D)J recombination results in a highly di-
+verse population of naive cells [1–7]. In addition, B cells
+undergo affinity maturation, a Darwinian process [8] in
+which mutations are introduced to the immunoglobulin-
+coding gene and highest affinity mutants are selected [9].
+This process is driven by a very high rate of somatic
+hypermutations (SHM), ∼ 10−3 per basepair per cell di-
+vision [10], targeting the Ig genes. Some receptor genes
+can ultimately accumulate up to 30% amino acid substi-
+tutions, considerably altering the initial genotype. The
+broad diversity created by SHM ultimately ensures the
+emergence and selection of strong antigen binders. Un-
+derstanding SHM and their statistics is key to designing
+better vaccination strategies [11, 12].
+Like the VDJ recombination process, SHM are charac-
+terized by heterogeneous preferences. Mutational path-
+ways affect the Ig genes unevenly, with ‘cold’ and ‘hot’
+spots along the receptor gene, even before somatic se-
+lection introduces further biases [12]. SHM is initi-
+ated by Activation-Induced cytidine Deaminase (AID)
+through the deamination of deoxycytidines triggering an
+array of error-prone repair pathways [13]. AID and re-
+pair enzymes preferentially target certain regions of the
+gene. However, a quantitative picture of how these pro-
+cesses and their context dependencies result in the ob-
+served heterogeneous mutational landscape is lacking.
+High-throughput repertoire sequencing of the Ig gene
+∗Corresponding authors. These authors contributed equally.
+[2, 3, 14, 15] has facilitated the development of effective
+models from a detailed analysis of mutational profiles of
+Ig sequences before [5, 16, 17] or after selection [18–22].
+However, the spatial organization of mutations, their con-
+text preferences, and their interplay with selection during
+affinity maturation are still poorly understood, in part
+due to a number of confounding factors.
+A fundamental issue is the bias of selection, which
+favors beneficial mutations over deleterious ones in the
+observed repertoire. This bias can be partially circum-
+vented by analyzing synonymous substitutions [16], with
+the limitation that extrapolation is required to generalize
+to non-synonymous ones. Another way around selection
+is to study passenger nonproductive sequences, which are
+unsuccessful products of VDJ recombination and thus
+unaffected by selection [5, 17, 22]. These sequences make
+up a minority of DNA sequences, and are rarely found
+in mRNA sequences because of allelic exclusion, which
+limits their use to very large datasets.
+Another confounding factor arises from phylogenetic
+biases due to the complex multi-lineage structure of the
+repertoire. While methods have been developed to infer
+substitution rates from lineages in a lineage-specific [21]
+or repertoire-wide way [23], they do not aim to correct
+for selection and do not address the question of hyper-
+mutation targeting.
+Here we propose a new framework for quantifying
+and predicting immunoglobulin mutability. The model
+is trained on the reconstructed phylogenies of nonpro-
+ductive lineages from very large published B cell reper-
+toires totalling around half a million nonproductive se-
+quences [7], allowing us to overcome previous limitations
+of dataset sizes. The approach accounts for both phyloge-
+netic and selection biases, and allows us to study in detail
+the spatial and context preferences of hypermutation tar-
+geting, and to reveal the co-localization of contemporary
+mutations.
+ar
+X
+iv
+:2
+00
+7.
+11
+84
+1v
+1 
+ [
+q-
+bi
+o.
+G
+N
+] 
+ 2
+3 
+Ju
+l 
+20
+20
+2
+II. RESULTS
+Repertoire-wide framework to model intrinsic
+mutabilities from out-of-frame lineages
+Out-of-frame Ig sequences are byproducts of the VDJ
+recombination process that are made non functional by
+a frameshift in the CDR3 region. Since each cell has two
+copies of the Ig genes, out-of-frame rearrangements may
+survive in the cell if recombination on the second chro-
+mosome is successful. The mechanism of allelic exclusion
+ensures that only the functional variant is expressed. Yet,
+out-of-frame IgH sequences comprise ∼ 2% of rearrange-
+ments in Ig mRNA sequencing experiments, and ∼ 9% in
+genomic DNA [6]. When a B-cell clone harboring both
+an out-of-frame and a functional rearrangement under-
+goes affinity maturation, the out-of-frame sequence acts
+as a passenger and mutates alongside the functional se-
+quence, with the selection pressure acting only on the
+latter. While the two sequences share the same phy-
+logeny, mutations found in out-of-frame lineages are not
+expected to be subject to selection.
+To model the process of SHM, we reconstruct the evo-
+lutionary history giving rise to the observed mutation
+patterns in nonproductive rearrangements. We analysed
+data consisting of the IgG repertoires of 9 individuals
+from Ref. [7], obtained by the targeted mRNA sequencing
+of the Ig heavy (IgH) chain locus. We pre-processed and
+aligned raw IgH sequences to keep only out-of-frame se-
+quences. We then grouped sequences into clonal families
+that originate from the same ancestor using single linkage
+clustering (Fig. 1A). The size of clonal families typically
+follows a power-law distribution (Fig. 1C). As a result,
+many lineages are represented by one or a few sequences.
+We focused on sufficiently large lineages (comprised of at
+least 6 distinct sequences) and reconstructed their lineage
+structure, using maximum likelihood [24, 25] to infer the
+topology of the underlying tree, and marginal reconstruc-
+tion for the identity of ancestral states. This provides us
+with a list > 200, 000 mutation events occurring between
+the most recent common ancestor of lineages and their
+leaves.
+Using lineage information is essential for multiple rea-
+sons. First, it allows for a better estimate of the sequence
+context in which a mutation appears. In this paper we
+define the context as the 5-mer sequence comprising the
+mutated basepair flanked by 2 basepairs on each side.
+In the absence of lineage information, the best guess for
+the 5-mer context would be given by the genomic se-
+quence of the V, D, or J segment where the mutation
+arose. But that context may itself be affected by other
+prior mutations. The tree structure allows us to identify
+the order of mutations and reconstruct the probable 5-
+mer context in which each mutation occurred. Second,
+for the same reason, the tree structure can help identify
+mutations in the hyper-variable CDR3 region, including
+in the junctions made of nontemplated insertions. This
+makes it possible to estimate the hypermutation rate in
+these regions. Together, these improvements mean that
+mutations can be identified within a broader range of 5-
+mer contexts, and their corresponding mutabilities better
+estimated. Third, lineage structure helps reduce contam-
+ination from sequences that have been under some selec-
+tion. In some rare events, during affinity maturation a
+somatic insertion or deletion may be introduced in the
+CDR3 of a productive sequence, which would lead us to
+classify it as out-of-frame, even though it has been sub-
+ject to selection prior to the frame-shift event. Focusing
+on mutations happening downstream of the most recent
+common ancestor, which is already out of frame, help us
+discards those contaminating events.
+Given a model P (s → s′|t, θ) of sequence evolution
+from s to s′, where t is fraction of mutated positions
+between s and s′, (called branch length, equal to the
+number of mutations divided by alignment length), and
+θ denotes model parameters, we can write the joint like-
+lihood of mutation events in each lineage as
+P (S|T, θ) =
+∏
+(i,j)∈T
+P (si → sj |tj , θ), (1)
+where S is the set of sequences (observed and recon-
+structed) at each node of the tree, and T encodes the re-
+constructed phylogenetic tree through its branches (i, j).
+We assume every position x of the sequence s evolves
+independently inside each branch. Mutations occur ac-
+cording to a set of Poisson clocks with sequence- and
+position-dependent rates, µs,x, expressed per unit time
+of branch length. During t some positions will mutate
+and others will remain unchanged, so that
+P (s→ s′|t) =
+∏
+x | s(x)6=s′(x)
+(1− e−µs,xt)
+∏
+x | s(x)=s′(x)
+e−µs,xt.
+(2)
+We assume that mutability depends independently on the
+local 5-mer sequence context centered around the muta-
+tion, w(s, x) = (s(x− 2), . . . , s(x+ 2)), and on the abso-
+lute position x along the gene (measured as the distance
+from the 5′ end of the gene), so that µs,x = γw(s,x)βx. In
+absence of context and position dependence, we would
+have µ = 1 by construction. Thus values of γw or βx
+above 1 imply higher mutabilities than average, and vice
+versa for values below 1. To lift the degeneracy in overall
+scale between βx and γw, we impose 〈βx〉 = 1.
+Overall, the model has 45 = 1024 parameters for γw
+corresponding to each 5-mer, and L = 400 parameters
+for βx corresponding to each possible position. We infer
+these parameters from repertoire-wide sequencing data
+by maximizing the total log-likelihood of mutations in all
+branches in all lineages, L(β, γ) =
+∑
+(S,T ) lnP (S|T, β, γ),
+with respect to (β, γ), using an iterative procedure.
+Validation on synthetic data
+We first tested the ability of the inference framework
+to recover true mutability parameters using synthetic
+3
+100 102
+Clonal family size
+10�5
+10�4
+10�3
+10�2
+10�1
+100
+D
+is
+tr
+ib
+u
+ti
+o
+n
+1 10 20 30
+Branch length
+0.00
+0.05
+0.10
+0.15
+0.20
+0.25
+0.30
+D
+is
+tr
+ib
+u
+ti
+o
+n
+Donors
+316188
+326650
+326651
+326713
+326737
+326780
+326797
+326907
+327059
+A B C D
+E
+Pre-MRCA
+Post-MRCA
+Mutations
+ACGTGACCGTAGTCTTTACTGTGAC
+ACGTGAACGTAGTCTTTACTGTGAC
+w(s, x)
+<latexit sha1_base64="PIUOvaKGQzIAwyW7NF3ECEiICjI=">AAAB7XicbVDLSgNBEOyNrxhf8XHzMhiECBJ2o6DHgBePEcwDkiXMTmaTMbMzy8ysGpb8gxcPinj1f7z5N042HjSxoKGo6qa7K4g508Z1v5zc0vLK6lp+vbCxubW9U9zda2qZKEIbRHKp2gHWlDNBG4YZTtuxojgKOG0Fo6up37qnSjMpbs04pn6EB4KFjGBjpeZDWZ8+nvSKJbfiZkCLxPshpdpBmKHeK352+5IkERWGcKx1x3Nj46dYGUY4nRS6iaYxJiM8oB1LBY6o9tPs2gk6tkofhVLZEgZl6u+JFEdaj6PAdkbYDPW8NxX/8zqJCS/9lIk4MVSQ2aIw4chINH0d9ZmixPCxJZgoZm9FZIgVJsYGVLAhePMvL5JmteKdVao3No1zmCEPh3AEZfDgAmpwDXVoAIE7eIIXeHWk8+y8Oe+z1pzzM7MPf+B8fANnhJE/</latexit> µs,x = �w(s,x)�x
+<latexit sha1_base64="GHkcsGNrV0cGCzBKGKJ41pSqzZs=">AAACC3icbVDLSgNBEJyNrxhfUY96GBKECBJ2E0EvQsCLRwVjAtmw9E4myZCZ3WVmVg1L7l78A09+gBcFRbz6A570b5w8DhotaCiquunu8iPOlLbtLys1Mzs3v5BezCwtr6yuZdc3LlQYS0KrJOShrPugKGcBrWqmOa1HkoLwOa35veOhX7ukUrEwONf9iDYFdALWZgS0kbxszhWxl6i96wE+wm4HhAAvuSoYYXfg+lSDd+1l83bRHgH/Jc6E5CvbnwdP9+W7Uy/74bZCEgsaaMJBqYZjR7qZgNSMcDrIuLGiEZAedGjD0AAEVc1k9MsA7xilhduhNBVoPFJ/TiQglOoL33QK0F017Q3F/7xGrNuHzYQFUaxpQMaL2jHHOsTDYHCLSUo07xsCRDJzKyZdkEC0iS9jQnCmX/5LLkpFp1wsnZk09tEYabSFcqiAHHSAKugEnaIqIugGPaBn9GLdWo/Wq/U2bk1Zk5lN9AvW+zcKS54O</latexit>
+x
+<latexit sha1_base64="ti0R7f4kOHML+3T9z9xIWDcW4zo=">AAAB6HicbZDLSgNBEEVr4ivGV9Slm8YguAozUdCdATcuEzAPSIbQ06lJ2vQ86O4Rw5AvcONCkbj0L/wNd/6NPUkWGr3QcLi3iq4qLxZcadv+snIrq2vrG/nNwtb2zu5ecf+gqaJEMmywSESy7VGFgofY0FwLbMcSaeAJbHmj6yxv3aNUPApv9ThGN6CDkPucUW2s+kOvWLLL9kzkLzgLKF19TDO91XrFz24/YkmAoWaCKtVx7Fi7KZWaM4GTQjdRGFM2ogPsGAxpgMpNZ4NOyIlx+sSPpHmhJjP3Z0dKA6XGgWcqA6qHajnLzP+yTqL9SzflYZxoDNn8Iz8RREck25r0uUSmxdgAZZKbWQkbUkmZNrcpmCM4yyv/hWal7JyVK3W7VD2HufJwBMdwCg5cQBVuoAYNYIDwCM/wYt1ZT9arNZ2X5qxFzyH8kvX+DQP7kX0=</latexit>
+s
+<latexit sha1_base64="vmUeWR2O+MopVpZ40PtoVFsMyeU=">AAAB6HicbZDLSsNAFIZP6q3WW9Wlm2ARXJWkCrqz4MZlC/YCbSiT6Uk7djIJMxOhhD6BGxeK1KVv4Wu4822ctF1o6w8DH/9/DnPO8WPOlHacbyu3tr6xuZXfLuzs7u0fFA+PmipKJMUGjXgk2z5RyJnAhmaaYzuWSEKfY8sf3WZ56xGlYpG41+MYvZAMBAsYJdpYddUrlpyyM5O9Cu4CSjef00zvtV7xq9uPaBKi0JQTpTquE2svJVIzynFS6CYKY0JHZIAdg4KEqLx0NujEPjNO3w4iaZ7Q9sz93ZGSUKlx6JvKkOihWs4y87+sk+jg2kuZiBONgs4/ChJu68jOtrb7TCLVfGyAUMnMrDYdEkmoNrcpmCO4yyuvQrNSdi/KlbpTql7CXHk4gVM4BxeuoAp3UIMGUEB4ghd4tR6sZ+vNms5Lc9ai5xj+yPr4AfxYkXg=</latexit>
+s0
+<latexit sha1_base64="LW7QZvVEgJEFhBKYBHVfQATUAoA=">AAAB6XicbZDLSgMxFIbP1Futt6pLN8EiuiozVdCdBTcuq9gLtEPJpJk2NJMMSUYoQ9/AjQtFu/UpfA13vo2Ztgtt/SHw8f/nkHNOEHOmjet+O7mV1bX1jfxmYWt7Z3evuH/Q0DJRhNaJ5FK1AqwpZ4LWDTOctmJFcRRw2gyGN1nefKRKMykezCimfoT7goWMYGOte33aLZbcsjsVWgZvDqXrz/dMk1q3+NXpSZJEVBjCsdZtz42Nn2JlGOF0XOgkmsaYDHGfti0KHFHtp9NJx+jEOj0USmWfMGjq/u5IcaT1KApsZYTNQC9mmflf1k5MeOWnTMSJoYLMPgoTjoxE2dqoxxQlho8sYKKYnRWRAVaYGHucgj2Ct7jyMjQqZe+8XLlzS9ULmCkPR3AMZ+DBJVThFmpQBwIhPMELvDpD59l5cyaz0pwz7zmEP3I+fgBc2pGp</latexit>
+t
+<latexit sha1_base64="gnZGGg2j495/YrTh/dN1YnFEtXI=">AAAB6HicbZDLSsNAFIZP6q3WW9Wlm2ARXJWkCrqz4MZlC/YCbSiT6aQdO5mEmROhhD6BGxeK1KVv4Wu4822ctF1o6w8DH/9/DnPO8WPBNTrOt5VbW9/Y3MpvF3Z29/YPiodHTR0lirIGjUSk2j7RTHDJGshRsHasGAl9wVr+6DbLW49MaR7JexzHzAvJQPKAU4LGqmOvWHLKzkz2KrgLKN18TjO913rFr24/oknIJFJBtO64ToxeShRyKtik0E00iwkdkQHrGJQkZNpLZ4NO7DPj9O0gUuZJtGfu746UhFqPQ99UhgSHejnLzP+yToLBtZdyGSfIJJ1/FCTCxsjOtrb7XDGKYmyAUMXNrDYdEkUomtsUzBHc5ZVXoVkpuxflSt0pVS9hrjycwCmcgwtXUIU7qEEDKDB4ghd4tR6sZ+vNms5Lc9ai5xj+yPr4Af3ckXk=</latexit>
+i
+<latexit sha1_base64="GRyYK656HXVzU8k3bMsps4o8OqM=">AAAB6HicbZDLSsNAFIZP6q3WW9Wlm2ARXJWkCrqz4MZlC/YCbSiT6Uk7djIJMxOhhD6BGxeK1KVv4Wu4822ctF1o6w8DH/9/DnPO8WPOlHacbyu3tr6xuZXfLuzs7u0fFA+PmipKJMUGjXgk2z5RyJnAhmaaYzuWSEKfY8sf3WZ56xGlYpG41+MYvZAMBAsYJdpYddYrlpyyM5O9Cu4CSjef00zvtV7xq9uPaBKi0JQTpTquE2svJVIzynFS6CYKY0JHZIAdg4KEqLx0NujEPjNO3w4iaZ7Q9sz93ZGSUKlx6JvKkOihWs4y87+sk+jg2kuZiBONgs4/ChJu68jOtrb7TCLVfGyAUMnMrDYdEkmoNrcpmCO4yyuvQrNSdi/KlbpTql7CXHk4gVM4BxeuoAp3UIMGUEB4ghd4tR6sZ+vNms5Lc9ai5xj+yPr4Ae0wkW4=</latexit>
+j
+<latexit sha1_base64="Amqc6xnkP04y546aRj8+YKYUFeQ=">AAAB6HicbVDJSgNBEK1xjeOSqEcvjUHQS5iJgt4MiOAxAbNAMoSeTk3SSc9Cd48QQr7AiwdFvPob/oU3P8G/sLMcNPFBweO9Kqrq+YngSjvOl7Wyura+sZnZsrd3dveyuf2DmopTybDKYhHLhk8VCh5hVXMtsJFIpKEvsO4PbiZ+/QGl4nF0r4cJeiHtRjzgjGojVfrtXN4pOFOQZeLOSb6U/b4+sz9uy+3cZ6sTszTESDNBlWq6TqK9EZWaM4Fju5UqTCgb0C42DY1oiMobTQ8dkxOjdEgQS1ORJlP198SIhkoNQ990hlT31KI3Ef/zmqkOrrwRj5JUY8Rmi4JUEB2TydekwyUyLYaGUCa5uZWwHpWUaZONbUJwF19eJrViwT0vFCsmjQuYIQNHcAyn4MIllOAOylAFBgiP8AwvVt96sl6tt1nrijWfOYQ/sN5/AGJ0j4o=</latexit>
+tj
+<latexit sha1_base64="2IlHl3jSLCHqJhp9jy4s4TpXEfc=">AAAB6nicbVDLSgNBEOyNrxhfUQ8evCwGwVPYjYIeA170FtE8IFni7GQ2GTM7u8z0CmHJJ3jxoIhX/8H/8OYPePQbnDwOmljQUFR1093lx4JrdJxPK7OwuLS8kl3Nra1vbG7lt3dqOkoUZVUaiUg1fKKZ4JJVkaNgjVgxEvqC1f3++civ3zOleSRvcBAzLyRdyQNOCRrpGtt37XzBKTpj2PPEnZJCee/y6/s9c1tp5z9anYgmIZNIBdG66ToxeilRyKlgw1wr0SwmtE+6rGmoJCHTXjo+dWgfGqVjB5EyJdEeq78nUhJqPQh90xkS7OlZbyT+5zUTDM68lMs4QSbpZFGQCBsje/S33eGKURQDQwhV3Nxq0x5RhKJJJ2dCcGdfnie1UtE9LpauTBonMEEW9uEAjsCFUyjDBVSgChS68ABP8GwJ69F6sV4nrRlrOrMLf2C9/QAeeZFU</latexit>
+FIG. 1: Repertoire-wide framework to model somatic hypermutations (SHM) in out-of-frame lineages. A. Examples of out-
+of-frame clonal families. B. An example of a phylogeny with marked pre- and post-Most Recent Common Ancestor (MRCA)
+mutations. Only post-MRCA mutations are used for learning the somatic hypermutation model. C. Clonal family size distri-
+bution. Phylogenies were inferred for families with more than 5 unique sequences. D. Branch length distribution. Mutations
+encoded in branches shorter than 10 mutations were used for model inference. E. Context and position dependence of the
+mutation rate across a sequence. In this example the underlined C mutates to A, in the GACCG context denoted as w(s, x).
+The mutation rate µs,x depends both on the sequence s and the position x, through the context dependent rate γw(s,x) and
+the position dependent rate βx.
+datasets. Synthetic data was designed to mimic as closely
+as possible the features of the real repertoire data to be
+analyzed. We used tree topologies inferred on out-of-
+frame lineages from 9 individuals of Ref. [7]. The se-
+quence at the root of each tree was replaced by a ran-
+dom sequence drawn using IGoR, a model of stochastic
+VDJ recombination [22]. Random mutations were then
+introduced along the tree structure, following the same
+number of mutations on each branch as in the original lin-
+eage, and according to the SHM model (Eq. 2). Context-
+dependent parameters γw were set to the previously pub-
+lished S5F model [16] , and three variants of the position
+dependent βx were tested: flat, and two sinusoidal pro-
+files (see Methods). Finally we collected sequences at the
+leaves of the trees into a synthetic dataset.
+Starting from this dataset, we performed alignment,
+clonal family inference, tree reconstruction and finally
+model inference using the exact same procedure as for
+real data. We compared parameters inferred this way
+to the true values of γw and βx (Fig. 2). We were able
+to recover these rates with excellent accuracy (Pearson’s
+r2 = 97% for both γ and β).
+The fact that the procedure recovers the correct
+position-dependent profile βx, including a flat one
+(Fig. 2B), shows that the framework successfully cor-
+rects for the two following confounding factors. First,
+sequence conservation across the different V, D, and J
+segments means that context and position are often in-
+tertwined, making the extraction of each dependence dif-
+ficult. Second, high variability in the CDR3 may cause
+errors in the assignment of sequences into clonal families,
+and makes it harder to reliably call mutations than in the
+germline regions. This remains true in the presence of
+large variations of the mutability along the position, in-
+cluding in the CDR3, as demonstrated on the sinusoidal
+profiles (Fig. 2C). On the other hand, the possibility to
+use the CDR3 sequence for model inference gives access
+to a more diverse range of possible contexts, leading to
+better estimates for contexts that are underrepresented
+in the germline genes.
+To assess the impact of errors in the reconstruction of
+clonal families and lineages on the inferred parameters,
+we repeated the procedure using the true tree topologies
+instead of the reconstructed ones. This only modestly
+improved accuracy (r2 = 98%, see Fig. S1), suggesting
+that the procedure is robust to lineage misassignments.
+4
+10�1 100 101
+True context mutabilities
+10�1
+100
+101
+In
+fe
+rr
+ed
+m
+u
+ta
+b
+il
+it
+ie
+s
+�
+S5F with � = 1
+S5F with � = �1x
+10�1 101
+10�1
+100
+101
+100 200 300 400
+Position x
+10�1
+100
+101
+In
+fe
+rr
+ed
+m
+u
+ta
+b
+il
+it
+ie
+s
+�
+Recovered � = 1
+True profile
+100 200 300 400
+Position x
+10�1
+100
+101
+Recovered � = �1x
+Recovered � = �2x
+True profiles
+A B C
+CDR3 CDR3
+FIG. 2: Validation of the SHM model inference framework on synthetic data generated with the S5F model [16]. A. Inference of
+context mutabilities γw. B,C: Inference of position mutabilities βx for flat (B) and sinusoidal (C) profiles. Error bars correspond
+to 95% confidence intervals. The frequency at which a given position belongs to the CDR3 region is indicated with the grey
+shaded area.
+Mutabilities depend on both sequence context and
+position
+Confident that our procedure is able to infer rates re-
+liably, we next applied it to real data, consisting of the
+out-of-frame lineages from Ref. [7]. The inferred depen-
+dencies of mutability with context and position are pre-
+sented in Fig. 3. We represent context dependence using
+a flat variant of the “hedgehog” plots used in Ref. [16],
+for A-, T- , C-, and G-centered motifs (Fig. 3A-D). Full
+parameter tables are available at https://github.com/
+statbiophys/shmoof.
+Context dependent rates for A-centered motifs corre-
+spond well to the standard WA classification [26]: 76%
+of A-centered 5-mers with γw > 1 are of the WA type,
+and only 7 of 128 WA 5-mers have γw . 1. T-centered
+motifs are dominated by coldspots and their mutabili-
+ties do not align well with their corresponding reverse
+complement counterparts. This is in agreement with the
+known property of Polymerase η to be prone to errors at
+A nucleotides on the top strand [27].
+The C- and G-centered motifs have largely reverse-
+complement-symmetric rates (see Fig. S2). As previ-
+ously noted [16], this is in agreement with the strand-
+symmetric targeting of C/G-centered motifs by the AID
+enzyme.
+The previously reported WRCY/RGYW motif [13,
+28] predicts high mutability reasonably well, while the
+SYC/GRW class of motifs [29] explains well a good frac-
+tion of coldspot motifs. Importantly, a large number of
+high or low mutability 5-mers do not belong to any of the
+previously reported motifs (see Supplementary Tables 1
+and 2).
+The rugged profile of position dependence (Fig. 3E)
+shows clear enrichment in mutations in the CDR1 and
+CDR2 regions, reflected in the up to 2-fold increase of
+the position-dependent rates. Framework regions are less
+mutated and we also observe a slight drop in the muta-
+bilities of the positions beyond the Cysteine anchor of
+the CDR3 region. We also learned models where the po-
+sition was defined from the 3’ end of the sequence in the
+J segment (Fig. S3), yielding similar results but no clear
+improvement over 5’-based position. High mutability of
+CDR1 and CDR2 was already noted [30] and justified
+as an enrichment in highly mutable motifs (as quantified
+with the S5F model). Our findings suggest that there is
+a secondary mechanism of this enrichment, having to do
+either with accessibility of mutation-inducing enzymes or
+a superposition of context-dependent effects that evade
+the assumption of independent evolution at different sites
+and the limitation of 5-mer motifs.
+Note that introducing the explicit position dependence
+does affect the learning of the context-dependent param-
+eters: learning γw with no position dependence (fixing
+βx = 1) yields similar but markedly different parameters
+than when learning a free βx (r
+2 = 81%, Fig. S4).
+Model is consistent across individuals and explains
+data better than previous approaches
+To check the model’s generality, we estimated its vari-
+ability across individuals by computing Pearson’s cor-
+relation coefficient between the context (γw, Fig. 4A)
+and position (βx, Fig. 4B) mutability profiles of different
+donors. The precision with which we can estimate model
+parameters depends on the number of sequences used for
+inference, particularly for rare 5-mer contexts. Because
+two individuals had many more reads than the others 7,
+we pooled together these seven individuals to make com-
+https://github.com/statbiophys/shmoof
+https://github.com/statbiophys/shmoof
+5
+0
+1
+5
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+A
+A C G T
+A C G T A C G T A C G T A C G T
+0
+1
+5
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+T
+T G C A
+T G C A T G C A T G C A T G C A
+0
+1
+5
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+C
+C G T A
+C G T A C G T A C G T A C G T A
+0
+1
+5
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+G
+G C A T
+G C A T G C A T G C A T G C A T
+100 200 300 400
+Position x
+0.0
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+Context dependence:
+�w > 1
+�w < 1
+WA hotspot
+WRCY/RGYW hotspot
+SYC/GRS coldspot
+Position dependence:
+�x
+A
+B
+C
+D
+E
+CDR1 CDR2 CDR3
+FIG. 3: Context and position dependent model parameters. Context-dependent mutabilities γw for A- (A),T- (B),C- (C) and
+G-centered (D) 5-mers. The colors indicate known hopspot and coldspot motifs. E. Position-dependent mutabilities βx. Gray
+shadings show the probability to be in the CDR1, CDR2, or CDR3 regions. Error bars correspond to 95% confidence intervals.
+See Fig. S5 for an full analysis of parameter uncertainty.
+parisons with similar dataset sizes (Fig. 4C). We then
+compared the 2 individuals and 1 meta-individual with
+each other and with a model learned on data from all
+individuals. For the 2 individuals with the largest reper-
+toire datasets, the results are highly reproducible with
+Pearson’s r2 = 78% for context and r2 = 70% for po-
+sition parameters (Fig. 4A), suggesting that the model
+captures universal biochemical properties of the hyper-
+mutation process.
+To further validate the model’s accuracy, we compared
+its prediction to data on the V-specific mutation profiles,
+which consist of the position-dependent mutation rate
+6
+A
+ll
+32
+66
+51
+32
+67
+13
+O
+th
+er
+7
+All
+326651
+326713
+Other 7
+Context mutabilities �
+A
+ll
+32
+66
+51
+32
+67
+13
+O
+th
+er
+7
+All
+326651
+326713
+Other 7
+Position mutabilities �
+A
+ll
+32
+66
+51
+32
+67
+13
+O
+th
+er
+7
+0
+100000
+200000
+N
+u
+m
+b
+er
+o
+f
+m
+u
+ta
+ti
+o
+n
+s
+0.0 0.2 0.4 0.6 0.8 1.0
+Pearson r2
+100 150 200 250 300
+Position in the V gene, xIMGT
+0.000
+0.005
+0.010
+0.015
+0.020
+0.025
+F
+ra
+ct
+io
+n
+o
+f
+m
+u
+ta
+ti
+o
+n
+s
+IGHV3-23
+Observed
+Expected
+3-
+23 3-
+7
+4-
+59
+3-
+30
+3-
+21
+4-
+34
+3-
+48
+4-
+39
+3-
+74 4-
+4
+1-
+2
+5-
+51 1-
+8
+1-
+18
+3-
+13 6-
+1
+1-
+46
+1-
+69
+3-
+53
+3-
+11
+IGHV genes (20 most frequent)
+0.0
+0.2
+0.4
+0.6
+0.8
+P
+ea
+rs
+o
+n
+r
+2
+0 5 10 15 20 25 30
+Position in FWR4 (all J genes)
+0.00
+0.01
+0.02
+0.03
+0.04
+0.05
+0.06
+0.07
+0.08
+0.09
+F
+ra
+ct
+io
+n
+o
+f
+m
+u
+ta
+ti
+o
+n
+s
+Observed
+Expected
+Cys104 Try118
+Position in CDR3
+0.00
+0.01
+0.02
+0.03
+0.04
+0.05
+F
+ra
+ct
+io
+n
+o
+f
+m
+u
+ta
+ti
+o
+n
+s
+CDR3 length of 50 nt
+Observed
+Expected
+20 40 60 80 100
+CDR3 length
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7
+P
+ea
+rs
+o
+n
+r
+2
+10�1 100 101
+Mutabilities �w
+10�1
+100
+101
+S
+5
+F
+m
+u
+ta
+b
+il
+it
+ie
+s
+CDR1 FWR2 CDR2 FWR3 CDR3 FWR4
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+P
+ea
+rs
+o
+n
+r
+2
+Models
+�w�x
+�w
+�x
+S5F
+A B C
+ED
+F G H
+JI
+CDR1 CDR2
+FIG. 4: The model explains the data. Observed profiles were measured across the entire dataset used for model inference.
+See Fig. S6 for an equivalent figure when data was divided into training and testing sets. Reproducibility of parameters for
+individual-specific models: context (A) and position (B) mutabilities. C. Number of mutations used for inference D. An example
+mutation profile in the most common V gene. E. Model performance across V genes. F. Mutation profile in the FWR4 region.
+G. An example mutation profile in the CDR3 region for CDR3 length of 50 nts. H. Model performance across CDR3 lengths.
+I. Comparison with the S5F model. J. Summary of models performance across sequence regions. We compare the full context-
+and position-dependent model (γwβx) with purely context- (γw) and position- (βx) dependent models as well as with the S5F
+default model.
+7
+for each V segment. These rates result from the com-
+bined effect of position and context, but they are not
+fitted directly by the model. A typically good exam-
+ple of such a profile is shown in Fig. 4D. The prediction
+is generally excellent (Pearson’s r2 ∼ 50 − 80%), and is
+poorest for V segments for which little data was available
+(Fig. 4E). Similarly, the model predicts well the mutabil-
+ity on Framework Region 4 (FWR4), which encompasses
+the J segment (Fig. 4F), as well as in the CDR3 (Fig. 4G
+and H), which is usually ignored in other approaches.
+Performance is best for the most frequent CDR3 length
+(Fig. 4H).
+We compared the results of our inference to the S5F
+model [16], which was trained on independent data. The
+S5F model is defined by a mutability table γw with no
+attempt to disentangle position dependence, so a direct
+comparison is subject to caution. Besides, S5F mutabil-
+ities are learned from synonymous mutations of produc-
+tive sequences, requiring extrapolation methods to cover
+all 1024 contexts, all of which do not occur with syn-
+onymous mutations. Yet, the two sets of mutabilities
+γw correlate fairly well (r
+2 = 36%, Fig. 4I). Correlation
+rises to r2 = 44% for contexts appearing in synonymous
+mutations, versus r2 = 18% for the other contexts for
+which S5F recourses to extrapolation, emphasizing the
+limitations of that extrapolation.
+A summary of the performances of the different model-
+ing approaches on the mutabilities in the different regions
+of the IgH gene is shown in Fig. 4J. We also checked
+for overfitting by dividing the dataset into a training
+and a testing, finding similar results (Fig. S6). The full
+position and context dependent model (µs,x = γwβx)
+performs better than models with context or position
+alone (µs,x = γw and µs,x = βx). While the context
+explains the bulk of the mutation profile, adding po-
+sitional effects substantially boosts performance. Our
+model clearly outperforms the S5F model, although it
+should be reminded that S5F was trained on a distinct
+dataset. Re-training S5F on the productive sequences
+from the present datasets using the procedure described
+in the original article [16] actually yielded worse perfor-
+mance (data not shown), for reasons that are unclear to
+us. Overall, accounting for phylogeny and disentangling
+the combined effects of context and position allows our
+model to accurately predict mutabilities including in the
+hyper-variable CDR3 region.
+Co-localization of mutations cannot be explained by
+context and position bias
+It was previously observed that hypermutations tend
+to cluster along genomic position in nonproductive se-
+quences [22]. However, the origin of this phenomenon
+and its dependence on confounding factors such as phy-
+logeny and heterogeneous hot spot concentration were
+not fully characterized.
+Clustering of mutations can be directly observed by
+plotting the fraction n(r) of pairs of mutations at dis-
+tance r from each other as a function r (normalized by
+the total number of pairs at that distance, see Meth-
+ods), which is also called a spatial correlation function in
+physics. Focusing on lineages with at least 6 leaves, and
+iterating through all branches with fewer than 10 muta-
+tions, we evaluated this correlation function for pairs of
+mutations occurring in the same branch of the phylogeny
+versus distant branches, as schematized in Fig. 5A). We
+then compared this correlation function to our model pre-
+dictions (Fig. S7). The enrichment of closeby mutations
+can be quantified by the normalized correlation function
+f(r) = n(r)/nm(r), where n(r) stands for the fraction of
+pairs of mutations distant by r in the same tree branch
+and nm(r) the model prediction (Fig. 5B).
+Pairs of mutations in distinct branches are well ex-
+plained by the model, suggesting that they are indepen-
+dent of each other, in agreement with the biological pic-
+ture that they occur at different rounds of affinity mat-
+uration. The enrichment of closeby mutations in distant
+branches can be entirely explained by the clustering of
+hotspot regions. Interestingly, both context and position
+dependencies of the mutability are needed to explain the
+data (Fig. S8). In contrast, pairs of mutations inside
+branches tend to occur closer to each other than pre-
+dicted by the model. The enrichment of closeby muta-
+tions is up to five-fold, pointing to an additional mecha-
+nism causing hypermutation clustering. We observe that
+this enrichment persists in the presence of selection, as
+verified by computing the correlation function f(r) in
+productive lineages (Fig. 5C).
+Minimal model of co-localization
+To explain the observed excess of co-localized muta-
+tions, we propose a simple phenomenological model. Tar-
+geted mutations, following the context and position de-
+pendent profiles described so far, cause additional nearby
+‘follow-up’ mutations due to error-prone DNA repair.
+Given a substitution at x0 drawn from the same distri-
+bution as before, each position x 6= x0 can subsequently
+mutate with probability
+p(x|x0) = � e−|x−x0|/ξ, (3)
+where ξ is the correlation length and � is small. The total
+number of follow-up mutations is approximately Poisson
+distributed with mean
+∑
+x p(x|x0) ' 2�/(1− e−1/ξ). To
+simulate this process, we followed the same procedure
+as described earlier for synthetic data, but allowing for
+follow-up, as well as targeted mutations, while keeping
+the total number of mutations in each branch constant.
+We then computed the correlation function f(r), and
+compared it to true profiles (Fig. 5B). We obtain a good
+agreement for ξ = 10 and � = 5% corresponding to an
+average of ∼ 1 follow-up mutation per targeting event.
+This result suggests that as many as 50% of observed
+mutations are follow-up mutations.
+8
+1 50 100
+Distance r
+0
+1
+2
+3
+4
+5
+C
+o
+rr
+el
+a
+ti
+o
+n
+fu
+n
+ct
+io
+n
+f
+(r
+)
+Inside branches
+Between branches
+Model
+of co-localization
+1 25
+Distance r
+0
+1
+2
+3
+4
+5
+6
+7
+C
+o
+rr
+el
+a
+ti
+o
+n
+fu
+n
+ct
+io
+n
+f
+(r
+)
+Inside branches
+Out-of-frame
+Productive 326651
+Productive 326713
+A B C
+ACGTAGTCTTTACTGTGAC
+ACGTAGTGTTTCCTGTAAC
+Pre-MRCA
+Within selected branch
+Mutations
+Outside
+First target
+Follow-up
+x0 ⇠ µ(x0) = �w(x0)�x0
+<latexit sha1_base64="nRJaG9UYfOCS+5Ho+xTMkFzjzus=">AAACG3icbZA9SwMxGMdz9a3Wt6o4ORgsQruUuzooFKHg4ljBvkCvHLk0bUOT3JHk1HL0e7i4+BXcXRwUcRIc/CpOptcO2vqHwC//53lInr8fMqq0bX9ZqYXFpeWV9GpmbX1jcyu7vVNXQSQxqeGABbLpI0UYFaSmqWakGUqCuM9Iwx+cj+uNayIVDcSVHoakzVFP0C7FSBvLy5ZuPRu6ZVdR7pahy6O8MQrwDLo9xDny4pvEGLk+0eZmeORlc3bRTgTnwZlCrrL3UDh4/BZVL/vhdgIccSI0ZkiplmOHuh0jqSlmZJRxI0VChAeoR1oGBeJEteNktxE8Mk4HdgNpjtAwcX9PxIgrNeS+6eRI99VsbWz+V2tFunvajqkII00EnjzUjRjUARwHBTtUEqzZ0ADCkpq/QtxHEmFt4syYEJzZleehXio6x8XSpUmjCCZKg31wCPLAASegAi5AFdQABnfgCbyAV+veerberPdJa8qazuyCP7I+fwCgAqLt</latexit>
+{x} ⇠ p(x|x0) = ✏ e�|x�x0|/⇠
+<latexit sha1_base64="DsSXK4FRJD5anWm+83YY+hqJW0c=">AAACHHicbVBNSwMxEM36WevXqkcvwSIoaN3Vg4IIBS8eK9hWaGrJplMNZrNLkpUt2/6QevCvePGgiBcPgv/GtPWg1gcDj/dmmJkXxIJr43mfzsTk1PTMbG4uP7+wuLTsrqxWdZQoBhUWiUhdBlSD4BIqhhsBl7ECGgYCasHt6cCv3YHSPJIXphNDI6TXkrc5o8ZKTfeAZCnpkWOieUiO4620mza9bXyCCcSai0iSHQxX2W433bVGd4+kvNd0C17RGwKPE/+bFEpL/QHuy033nbQiloQgDRNU67rvxaaRUWU4E9DLk0RDTNktvYa6pZKGoBvZ8Lke3rRKC7cjZUsaPFR/TmQ01LoTBrYzpOZG//UG4n9ePTHto0bGZZwYkGy0qJ0IbCI8SAq3uAJmRMcSyhS3t2J2QxVlxuaZtyH4f18eJ9X9on9Q3D+3aRTRCDm0jjbQFvLRISqhM1RGFcRQHz2iZ/TiPDhPzqvzNmqdcL5n1tAvOB9fcuekpA==</latexit>
+FIG. 5: Co-localization of subsequent hypermutations. A. Co-localization model explained on an example phylogeny. An
+initial mutation is drawn from the context- and position-dependent model. Then, follow-up mutations are drawn in its vicinity
+within the same branch. B. Correlation function f(r) for pairs of mutations: inside (red) and between (green) branches and
+for simulated mutations according to the co-localization model (3) with � = 5% and ξ = 10. C. Co-localization of subsequent
+hypermutations in productive lineages from the 2 largest individuals’ datasets (ID=326651 and ID=326713). Correlation
+function f(r) for pairs of mutations inside branches compared to the out-of-frame result. The first multiplicities of the codon
+frame length, r = 3, 6, 9, 12 are marked with dotted lines to guide the eye. Shaded areas represent 95% confidence intervals.
+III. DISCUSSION
+The mutational landscape of antibody repertoires re-
+sults from many entangled effects, which are often
+lumped together into effective models of hypermutations
+[12, 16, 31]. First, hypermutations have intrinsic prefer-
+ences for certain positions along the IgH gene, regardless
+of their impact on protein function. In addition, selection
+for antibody function, which includes protein stability
+and antigen affinity, favors beneficial mutations and sup-
+presses deleterious ones [13]. While intrinsic SHM pref-
+erences are believed to be universal, selective forces vary
+across lineages which are involved in distinct immune re-
+sponses [21], and may also depend on the individual’s
+immune status [32]. Repertoire sequencing gives a snap-
+shot of a rapidly adapting population subjected to these
+forces, making it hard to disentangle intrinsic SHM pref-
+erences from the combined effects of selection and genetic
+drift. By focusing on non-productive lineages and using a
+phylogeny-based approach, we overcome the biases aris-
+ing from the dynamics of affinity maturation to obtain a
+comprehensive picture of SHM intrinsic preferences.
+Each hypermutation occurs through a series of events
+of DNA damage and repair. The action of each enzyme,
+including AID to error-prone DNA repair enzymes, may
+each have their own sequence preferences, and the in-
+terplay of these different biases results in the observed
+profile. In our approach, these complex mutational path-
+ways are subsumed into an effective model with a limited
+number of interpretable parameters in terms of effective
+context and position dependence. As a result, the context
+dependent weights γw do not simply reflect the binding
+preference of AID, but also account for the biases of other
+biochemical steps. Our framework enables direct mea-
+surement of the mutability γw of a wide range of 5-mer
+contexts, recovering the known classifications of hot and
+cold spots [16, 28]. We show that our model outperforms
+existing methods as well as purely context or position
+dependent models in terms of explaining the data.
+The introduction of an explicit and universal position
+dependence, βx, allows us to unveil an excess of muta-
+tions in the CDR1 and CDR2 regions. This enrichment
+of mutations cannot be simply explained by their harbor-
+ing more hotspot contexts. We cannot exclude that this
+residual position dependence is due to more complex con-
+text effects missed by our model (based e.g. on 7-mers,
+which would be impractical to infer from the present
+dataset). Alternatively, SHM may preferentially target
+these regions independently of their sequence context,
+possibly through epigenetic mechanisms. Such prefer-
+ence is known to exist at the genome-wide level to mu-
+tate the Ig loci without affecting other genes [13], so it
+is plausible that the same mechanism targets some spe-
+cific positions within Ig. The enrichment of mutations
+in the CDR1 and CDR2 regions is even more marked
+in productive sequences, meaning that these mutations
+are more likely to be selected during affinity maturation.
+This suggests that the intrinsically enhanced mutability
+9
+of these regions may carry an evolutionary advantage, by
+focusing hypermutations on regions where they are the
+most beneficial [30]. The stability of the immunoglobulin
+relies on the FWR regions and most of the substitutions
+are expected to be deleterious. The purifying nature of
+selection in FWR regions has been quantified in Ref. [33]
+and contrasted with positive selection in CDR regions.
+By studying mutations along lineages, we were able to
+study mutations in the probable context in which they
+occurred, rather than relative to the germline sequence,
+allowing us to take into account the order of mutations
+and to sample a broader diversity of 5-mer contexts. This
+approach also allowed us to study and characterize hy-
+permutations in the CDR3, which has been neglected
+in previous work [11] owing to the difficulty to separate
+these mutations from junctional diversity.
+The phylogenetic methods employed in this study were
+not specifically designed to study B cell repertoires. In
+particular the assumptions allowing for fast likelihood
+computations do not account for the context dependence
+of the mutation rate beyond the codon frame [23]. The
+position-dependent model introduced here could offer a
+compromise. While it does not account for the the full
+complexity of SHM biases, it captures the variation of the
+mutation rate observed in out-of-frame data well (Fig. 4),
+and can operate under the assumption of independent
+site evolution. Our framework could also be easily ex-
+tended to include position-dependent selection in the nu-
+cleotide or amino acid representation.
+Our analysis confirmed a phenomenon of co-
+localization of mutations along the sequence. While this
+effect had been previously reported [22], here we showed
+that it could not be explained by phylogenetic bias or the
+existence of regions of higher and lower mutabilities. We
+proposed a minimal quantitative model of hypermuta-
+tion targeting, followed by error-prone DNA repair that
+causes follow-up mutations, which explains the data well.
+While ideally we would like to infer the position and con-
+text mutability profiles taking these follow-up mutations
+into account, the task is impractical because it would
+require to identify the origin of each mutation. We ex-
+pect that doing so would only renormalize the values of
+the context preferences. While the adaptive advantage
+of co-localized mutations is unclear, we find the corre-
+lation function in productive lineages follows the unpro-
+ductive baseline with additional enrichment enhanced at
+multiples of the codon length, 3, suggesting signatures
+of selection (Fig. 5C). We speculate that nearby muta-
+tions occurring simultaneously could help cross barriers
+of positive sign epistasis, whereby two or more mutations
+are deleterious by themselves, but beneficial together.
+This phenomenon could accelerate affinity maturation by
+favoring compensatory or epistatic mutations at amino
+acids that interact strongly within the antibody protein
+[34, 35].
+The obtained mutability models make predictions
+about the likelihood and plausibility of particular tra-
+jectories of affinity maturation. They could be useful in
+designing vaccination strategy, by helping choose targets
+with a greater potential for accumulating beneficial mu-
+tations towards antibodies with desired properties such
+as neutralization power, or broadness in the case of fast
+evolving pathogens such as influenza or HIV [11, 36].
+IV. METHODS
+Data and preprocessing
+We perform the analysis on recently published high-
+throughput RNA sequencing of Ig heavy genes at great
+depth [7].
+The sequences were barcoded with unique molecular
+identifiers (UMI) to correct for the PCR amplification
+bias. However, UMI cannot be used to correct sequenc-
+ing errors, as most UMI were represented by a single
+sequence: the number of UMIs used is of the same or-
+der as the total number of cells in use. We aligned raw
+sequences using presto of the Immcantation pipeline [37]
+with setup allowing to correct for errors in UMIs and deal
+with insufficient UMI diversity. The V region primers
+were masked and the C region primers were used to dis-
+tinguish the two isotypes of sampled B cells: the IgM
+and IgG classes. The study of mutation profiles in the
+two groups revealed a much lower mutational load in the
+IgM cohort and hence a higher relative level of sequencing
+errors, as well as shallower tree topologies. For further
+analysis we chose to focus exclusively on the IgG class.
+Reads were filtered for quality and paired using default
+presto parameters. Pre-processed data was then aligned
+to V, D and J templates from IMGT [38] database using
+IgBlast [39]. In total there were 3.6 × 106 IgG sequences
+per person (average 3.6×106, median 1.8×106), of which
+up to 2% were unproductive (average 5.7 × 104, median
+2.9× 104).
+Inference of evolutionary trajectories
+Sequences with a frameshift in the CDR3 region were
+then selected and used to reconstruct clonal families as
+follows. In the first step, reads were aligned to the V
+and J templates and grouped into classes of sequences
+with the same V and J gene assigned, as well as equal
+CDR3 length. In the out-of-frame classes we inferred
+clonal lineages by single linkage clustering with a thresh-
+old of 90% on CDR3 region identity [40]. We reconstruct
+maximum likelihood topologies, as well as the identity of
+ancestral states, under a simple K80 model of character
+evolution [41] for all lineages comprising at least 6 unique
+sequences. The model does not capture the complexity of
+the observed mutation profile, but avoids fitting multiple
+parameters independently in small lineages of relatively
+short alignment. The existing repertoire-wide method
+[23] is incompatible with out-of-frame lineages since it
+operates on 61 productive codons. Ancestral states are
+10
+found through marginal reconstruction. Germline V and
+J sequences were used as an outgroup to inform the phy-
+logenetic inference and root the lineage.
+Model inference
+With the exception of the initial branch, which joins
+the germline sequence and the most recent common an-
+cestor of the lineage, all branches shorter than 10 substi-
+tutions were used for model inference.
+Our task is to find a set of parameters {γw}, {βx} that
+maximise the log-likelihood
+L =
+∑
+S,T ;(i,j)∈T
+
+ ∑
+x′ | si(x′)6=sj(x′)
+ln
+(
+e
+γw(si,x′)
+βx′ t − 1
+)
+−
+∑
+x
+γw(si,x)βxt
+]
+,
+(4)
+where S is the set of sequences (observed and recon-
+structed) at each node of the tree, and T encodes the re-
+constructed phylogenetic tree through its branches (i, j),
+with reconstructed ancestral states si and sj . The rates
+µs,x = βxγw(s,x) are defined so that the length of each
+branch t is expressed in terms of the expected number
+of substitutions per basepair (total number of substitu-
+tions divided by the total alignment length). Imposing
+∂L/∂γw = 0 yields an implicit expression for γw as a
+function of {βx}, but independent of {γw′}w′ 6=w, which
+can be solved by one-dimensional root finding. Likewise,
+setting ∂L/∂βx = 0 gives an implicit expression for βx
+as a function of {γw}. We can perform the following
+iteration:
+γn = arg max
+γ
+L(γ, βn) (5)
+βn+1 = arg max
+β
+L(γn, β), (6)
+which converges to the maximum of L with respect to
+the joint {γw, βx}.
+To estimate the uncertainty of inferred parameters we
+sample with replacement from the set of all branches to
+create 400 bootstrap copies. We report 95% confidence
+intervals.
+Substitution models
+Not only the targeting rate, but also the identity of
+the substitution is known to depend on the identity of
+neighboring bases [16]. In our formulation of the model,
+inference of the targeting rates does not require knowing
+the substitution type, however we can easily extend the
+framework to include this dependence. The probability
+of mutating from w to w′ over a period t can be expressed
+as
+P (w → w′|t) = 1− e−γwωw→w′βxt, (7)
+where
+∑
+w′ ωw→w′ = 1 and ωw→w′ 6= 0 if w′ is a result of
+a substitution at the central position of w. This way we
+add 2×45 = 2048 parameters to the model. We can infer
+the maximum likelihood estimates of ωw→w′ using the
+same iterative scheme introduced in the previous section.
+Synthetic datasets
+We created synthetic datasets using the S5F model of
+mutability (downloaded from clip.med.yale.edu/shm)
+for γw. We used a flat profile, βx = 1 as well as sinusoidal
+profiles lnβ1x = 2 sin(x/δ)− 1 and lnβ2x = 2 cos(x/δ)− 1
+with δ = 50. For each branch (i, j), we compute the
+mutability µsi,x as a function of x, and then introduce
+mutations at n random positions picked without replace-
+ment according to µx/
+∑
+x′ µx′ , where n is the number of
+mutations on the branch (fixed by the lineage structure
+taken from the real data).
+Data availability
+Code for producing the figures of this paper, as well
+as the inferred model parameters, are freely available at
+https://github.com/statbiophys/shmoof.
+[1] Hozumi N, Tonegawa S (1976) Evidence for somatic re-
+arrangement of immunoglobulin genes coding for vari-
+able and constant regions. Proceedings of the National
+Academy of Sciences 73:3628–3632.
+[2] Boyd SD, et al. (2009) Measurement and clinical moni-
+toring of human lymphocyte clonality by massively par-
+allel {VDJ} pyrosequencing. Sci Transl Med 1:12ra23.
+[3] Glanville J, et al. (2009) Precise determination of the
+diversity of a combinatorial antibody library gives insight
+into the human immunoglobulin repertoire. Proceedings
+of the National Academy of Sciences 106:20216–20221.
+[4] Larimore K, McCormick MW, Robins HS, Greenberg PD
+(2012) Shaping of Human Germline {IgH} Repertoires
+Revealed by Deep Sequencing. The Journal of Immunol-
+ogy 189:3221–3230.
+[5] Elhanati Y, et al. (2015) Inferring processes underlying
+B-cell repertoire diversity. Philos Trans R Soc Lond, B,
+Biol Sci 370:20140243.
+[6] DeWitt WS, et al. (2016) A Public Database of Mem-
+ory and Naive B-Cell Receptor Sequences. Plos One
+11:e0160853.
+[7] Briney B, Inderbitzin A, Joyce C, Burton DR (2019)
+clip.med.yale.edu/shm
+https://github.com/statbiophys/shmoof
+11
+Commonality despite exceptional diversity in the baseline
+human antibody repertoire. Nature 566:393–397.
+[8] Cobey S, Wilson P, Iv FAM, Cobey S (2015) The evolu-
+tion within us.
+[9] Mesin L, Ersching J, Victora GD (2016) Germinal Center
+B Cell Dynamics. Immunity 45:471–482.
+[10] Kleinstein SH, Louzoun Y, Shlomchik MJ (2003) Esti-
+mating hypermutation rates from clonal tree data. The
+Journal of Immunology 171:4639–4649.
+[11] Bonsignori M, et al. (2016) Maturation pathway from
+germline to broad hiv-1 neutralizer of a cd4-mimic anti-
+body. Cell 165:449 – 463.
+[12] Schramm CA, Douek DC (2018) Beyond hot spots: Bi-
+ases in antibody somatic hypermutation and implications
+for vaccine design. Frontiers in Immunology 9:1–11.
+[13] Feng Y, Seija N, Di Noia JM, Martin A (2020) AID in
+Antibody Diversification: There and Back Again. Trends
+in Immunology pp 1–15.
+[14] Weinstein JA, Jiang N, White RA, Fisher DS, Quake
+SR (2009) High-throughput sequencing of the zebrafish
+antibody repertoire. Science 324:807–810.
+[15] Reddy ST, et al. (2010) Monoclonal antibodies isolated
+without screening by analyzing the variable-gene reper-
+toire of plasma cells. Nat Biotechnol 28:965–969.
+[16] Yaari G, et al. (2013) Models of somatic hypermutation
+targeting and substitution based on synonymous muta-
+tions from high-throughput Immunoglobulin sequencing
+data. Frontiers in Immunology 4.
+[17] Cui A, et al. (2016) A Model of Somatic Hypermuta-
+tion Targeting in Mice Based on High-Throughput Ig Se-
+quencing Data. The Journal of Immunology 197:3566–
+3574.
+[18] Mccoy CO, et al. (2015) Quantifying evolutionary con-
+straints on B-cell affinity maturation. Philos Trans R Soc
+Lond, B, Biol Sci 370:20140244.
+[19] Sheng Z, et al. (2017) Gene-specific substitution profiles
+describe the types and frequencies of amino acid changes
+during antibody somatic hypermutation. Frontiers in Im-
+munology 8:1–14.
+[20] Hoehn KB, Lunter G, Pybus OG (2017) A Phylogenetic
+Codon Substitution Model for Antibody Lineages. Ge-
+netics 206:417–427.
+[21] Dhar A, Davidsen K, Matsen FA, Minin VN (2018) Pre-
+dicting B Cell Receptor Substitution Profiles Using Pub-
+lic Repertoire Data.
+[22] Marcou Q, Mora T, Walczak AM (2018) High-
+throughput immune repertoire analysis with IGoR. Na-
+ture Communications 9:561.
+[23] Hoehn KB, et al. (2019) Repertoire-wide phylogenetic
+models of B cell molecular evolution reveal evolution-
+ary signatures of aging and vaccination. Proceedings of
+the National Academy of Sciences of the United States of
+America 116:22664–22672.
+[24] Felsenstein J (1981) Evolutionary trees from DNA se-
+quences: A maximum likelihood approach. Journal of
+Molecular Evolution 17:368–376 Publisher: Springer-
+Verlag.
+[25] Stamatakis A (2014) RAxML version 8: A tool for phy-
+logenetic analysis and post-analysis of large phylogenies.
+Bioinformatics 30:1312–1313 arXiv: 10.1093/bioinfor-
+matics/btu033 ISBN: 1367-4811.
+[26] Zhao Y, et al. (2013) Mechanism of somatic hypermuta-
+tion at the wa motif by human dna polymerase eta. Pro-
+ceedings of the National Academy of Sciences 110:8146–
+8151.
+[27] Pilzecker B, Jacobs H (2019) Mutating for good: Dna
+damage responses during somatic hypermutation. Fron-
+tiers in Immunology 10:438.
+[28] Unniraman S, Schatz DG (2007) Strand-biased spread-
+ing of mutations during somatic hypermutation. Science
+317:1227–1230.
+[29] Pham P, Bransteitter R, Petruska J, Goodman MF
+(2003) Processive aid-catalysed cytosine deamination on
+single-stranded dna simulates somatic hypermutation.
+Nature 424:103–107.
+[30] Saini J, Hershberg U (2015) B cell variable genes have
+evolved their codon usage to focus the targeted patterns
+of somatic mutation on the complementarity determining
+regions. Molecular Immunology 65:157 – 167.
+[31] Dhar A, Ralph DK, Minin VN, IV FAM (2019) A
+bayesian phylogenetic hidden markov model for b cell
+receptor sequence analysis.
+[32] Zuckerman NS, et al. (2010) Somatic hypermutation and
+antigen-driven selection of b cells are altered in autoim-
+mune diseases. Journal of Autoimmunity 35:325 – 335.
+[33] Nourmohammad A, Otwinowski J,  Luksza M, Mora T,
+Walczak AM (2019) Fierce Selection and Interference in
+B-Cell Repertoire Response to Chronic HIV-1. Molecular
+Biology and Evolution 36:2184–2194.
+[34] Koenig P, et al. (2015) Deep sequencing-guided design
+of a high affinity dual specificity antibody to target two
+angiogenic factors in neovascular age-related macular de-
+generation. Journal of Biological Chemistry 290:21773–
+21786.
+[35] Adams RM, Kinney JB, Walczak AM, Mora T (2019)
+Epistasis in a Fitness Landscape Defined by Antibody-
+Antigen Binding Free Energy. Cell Systems pp 1–8.
+[36] Liao HX, et al. (2013) Co-evolution of a broadly neutral-
+izing HIV-1 antibody and founder virus. Nature 496:469–
+476.
+[37] Vander Heiden JA, et al. (2014) pRESTO: a toolkit for
+processing high-throughput sequencing raw reads of lym-
+phocyte receptor repertoires. Bioinformatics 30:1930–
+1932.
+[38] Giudicelli V, et al. (2006) IMGT/LIGM-DB, the IMGT
+comprehensive database of immunoglobulin and T cell
+receptor nucleotide sequences. Nucleic Acids Research
+34:D781–D784.
+[39] Ye J, Ma N, Madden TL, Ostell JM (2013) IgBLAST: an
+immunoglobulin variable domain sequence analysis tool.
+Nucleic Acids Research 41:W34–W40.
+[40] Gupta NT, et al. (2015) Change-O: A toolkit for analyz-
+ing large-scale B cell immunoglobulin repertoire sequenc-
+ing data. Bioinformatics 31:3356–3358.
+[41] Kimura M (1980) A simple method for estimating evo-
+lutionary rates of base substitutions through compara-
+tive studies of nucleotide sequences. Journal of Molecular
+Evolution 16:111–120.
+12
+Supplementary information
+10�1 100 101
+True context mutabilities
+10�1
+100
+101
+In
+fe
+rr
+ed
+m
+u
+ta
+b
+il
+it
+ie
+s
+�
+S5F with � = 1
+S5F with � = �1x
+10�1 101
+10�1
+100
+101
+100 200 300 400
+Position x
+10�1
+100
+101
+In
+fe
+rr
+ed
+m
+u
+ta
+b
+il
+it
+ie
+s
+�
+Recovered � = 1
+True profile
+100 200 300 400
+Position x
+10�1
+100
+101
+Recovered � = �1x
+Recovered � = �2x
+True profiles
+A B C
+CDR3CDR3
+FIG. S1: Model inference on synthetic data using true phylogenies. A. Inference of context mutabilities γ. B,C. Inference of
+position mutabilities β for flat and sinusoidal profiles. Error bars correspond to 95% confidence intervals. Frequency at which
+a given position belongs to the CDR3 region is indicated with the grey shaded areas.
+10�1 100 101
+Mutabilities �w
+10�1
+100
+101
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+w̄
+A/T-centered 5-mers
+10�1 100 101
+Mutabilities �w
+10�1
+100
+101
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+w̄
+C/G-centered 5-mers
+A B
+FIG. S2: Strand asymmetry of the context-dependent rates. For each motif w we juxtapose its mutability γw with the mutability
+of its reverse complement γw̄. A. 5-mer motifs with strong central nucleotide (C/G), r
+2 = 54%. B. 5-mer motifs with weak
+central nucleotide (A/T), r2 = 7%
+13
+100 200 300 400
+Distance x from V5’ end
+0.0
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+300 200 100 0
+Distance xr from J3’ end
+0.0
+0.5
+1.0
+1.5
+2.0
+2.5
+3.0
+3.5
+A B
+CDR1 CDR2 CDR3 CDR1 CDR2 CDR3
+FIG. S3: Alternative position definition. We compare the models based on different position definitions: x, the distance from
+the 5′ end of the V gene (A, red) and xr, distance from the 3
+′ end of the J gene (B, green). Error bars correspond to 95%
+confidence intervals. Frequency at which a given position belongs to a CDR region is indicated with the grey shaded areas.
+10�1 100 101
+Mutabilities � (� = 1)
+10�1
+100
+101
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+(�
+=
+�
+x
+)
+� = 1 versus � = �x
+FIG. S4: Introducing explicit position dependence β 6= 1 influences the context-dependent rates. We compare the γ mutabilities
+from the full model with the parameters of the purely context-dependent model.
+14
+0 200 400 600 800 1000
+5-mers w sorted by �
+0
+1
+2
+3
+4
+5
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+0 100 200 300
+Position x sorted by �
+0
+1
+2
+3
+4
+5
+6
+M
+u
+ta
+b
+il
+it
+ie
+s
+�
+A B
+FIG. S5: Analysis of the uncertainty of estimate parameters γ (A) and β (B). The shaded area indicates the 95% confidence
+interval envelope. Motifs and positions are sorted by their respective mutabilities
+15
+100 150 200 250 300
+Position in the V gene, xIMGT
+0.000
+0.005
+0.010
+0.015
+0.020
+0.025
+F
+ra
+ct
+io
+n
+o
+f
+m
+u
+ta
+ti
+o
+n
+s
+IGHV3-23
+Observed
+Expected
+3-
+23 3-
+7
+4-
+59
+3-
+30
+3-
+21
+4-
+34
+3-
+48
+4-
+39
+3-
+74 1-
+2
+4-
+4
+1-
+8
+5-
+51
+3-
+13
+1-
+18
+1-
+69 6-
+1
+1-
+46
+3-
+53 3-
+9
+IGHV genes (20 most frequent)
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+0.7
+0.8
+P
+ea
+rs
+o
+n
+r
+2
+0 5 10 15 20 25 30
+Position in FWR4 (all J genes)
+0.00
+0.01
+0.02
+0.03
+0.04
+0.05
+0.06
+0.07
+0.08
+0.09
+F
+ra
+ct
+io
+n
+o
+f
+m
+u
+ta
+ti
+o
+n
+s
+Observed
+Expected
+Cys104 Try118
+Position in CDR3
+0.00
+0.01
+0.02
+0.03
+0.04
+0.05
+F
+ra
+ct
+io
+n
+o
+f
+m
+u
+ta
+ti
+o
+n
+s
+CDR3 length of 50 nt
+Observed
+Expected
+20 40 60 80 100
+CDR3 length
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+0.6
+P
+ea
+rs
+o
+n
+r
+2
+10�1 100 101
+Mutabilities �w
+10�1
+100
+101
+S
+5
+F
+m
+u
+ta
+b
+il
+it
+ie
+s
+CDR1 FWR2 CDR2 FWR3 CDR3 FWR4
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+P
+ea
+rs
+o
+n
+r
+2
+Models
+�w�x
+�w
+�x
+S5F
+A B
+C D E
+GF
+CDR1 CDR2
+FIG. S6: Model performance when model was trained on 2/3 of data, and tested on the remaining 1/3. A. Example mutation
+profile in the most common V gene. B. Model performance across V genes. C. Mutation profile in the FWR4 region. D.
+Example mutation profile in the CDR3 region for CDR3 length of 50 nts. E. Model performance across CDR3 lengths. F.
+Comparison with the S5F model. G. Summary of models performance across sequence regions.
+16
+1 50 100
+Distance r
+0
+1
+2
+3
+4
+5
+6
+7
+F
+ra
+ct
+io
+n
+o
+f
+p
+a
+ir
+s
+Inside branches
+Between branches
+Model �w�x
+FIG. S7: Normalized fraction of pairs n(r) of mutations encoded in the same tree branches (red) and pairs of mutations between
+different branches (green). Shaded area corresponds to 95% confidence interval.
+1 50 100
+Distance r
+0
+1
+2
+F
+ra
+ct
+io
+n
+o
+f
+p
+a
+ir
+s
+Between branches
+Model �w�x
+Model �x
+Model �w
+FIG. S8: Normalized fraction n(r) of pairs of mutations between different branches (green). Context- and position-dependent
+models prediction nm(r) for this quantity are presented for the full (µs,x = γwβx), purely context-dependent (µs,x = γw) and
+purely position-dependent (µs,x = βx) models. Shaded area corresponds to 95% confidence interval.
+	I Introduction
+	II Results
+	 Repertoire-wide framework to model intrinsic mutabilities from out-of-frame lineages
+	 Validation on synthetic data
+	 Mutabilities depend on both sequence context and position
+	 Model is consistent across individuals and explains data better than previous approaches
+	 Co-localization of mutations cannot be explained by context and position bias
+	 Minimal model of co-localization
+	III Discussion
+	IV Methods
+	 Data and preprocessing
+	 Inference of evolutionary trajectories
+	 Model inference
+	 Substitution models
+	 Synthetic datasets
+	 Data availability
+	 References
+	 Supplementary information

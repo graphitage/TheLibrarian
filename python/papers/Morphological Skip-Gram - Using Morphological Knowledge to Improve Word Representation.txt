@@ -1,0 +1,576 @@
+MORPHOLOGICAL SKIP-GRAM: USING MORPHOLOGICAL
+KNOWLEDGE TO IMPROVE WORD REPRESENTATION
+A PREPRINT
+Flávio A. Oliveira Santos
+Center of Informatics
+Federal University of Pernambuco
+Recife, Brazil
+faos@cin.ufpe.br
+Hendrik Teixeira Macedo
+Department of Computer Science
+Federal University of Sergipe
+São Cristóvão, Brazil
+hendrik@dcomp.ufs.br
+Thiago Dias Bispo
+Center of Informatics
+Federal University of Pernambuco
+Recife, Brazil
+tdb@cin.ufpe.br
+Cleber Zanchettin
+Center of Informatics
+Federal University of Pernambuco
+Recife, Brazil
+cz@cin.ufpe.br
+July 22, 2020
+ABSTRACT
+Natural language processing models have attracted much interest in the deep learning community.
+This branch of study is composed of some applications such as machine translation, sentiment analysis,
+named entity recognition, question and answer, and others. Word embeddings are continuous word
+representations, they are an essential module for those applications and are generally used as input
+word representation to the deep learning models. Word2Vec and GloVe are two popular methods to
+learn word embeddings. They achieve good word representations, however, they learn representations
+with limited information because they ignore the morphological information of the words and consider
+only one representation vector for each word. This approach implies that Word2Vec and GloVe are
+unaware of the word inner structure. To mitigate this problem, the FastText model represents each
+word as a bag of characters n-grams. Hence, each n-gram has a continuous vector representation, and
+the final word representation is the sum of its characters n-grams vectors. Nevertheless, the use of all
+n-grams character of a word is a poor approach since some n-grams have no semantic relation with
+their words and increase the amount of potentially useless information. This approach also increases
+the training phase time. In this work, we propose a new method for training word embeddings, and
+its goal is to replace the FastText bag of character n-grams for a bag of word morphemes through the
+morphological analysis of the word. Thus, words with similar context and morphemes are represented
+by vectors close to each other. To evaluate our new approach, we performed intrinsic evaluations
+considering 15 different tasks, and the results show a competitive performance compared to FastText.
+Keywords Word Embeddings ·Morphological Knowledge · Character n-grams
+1 Introduction
+Natural language processing (NLP) is a branch of study that helps computers understand, interpret, and manipulate
+human language allowing applications to read, hear, interpret it, measure sentiment and deal with unstructured data.
+Most of the knowledge generated today is unstructured, from medical records to social media and extract and understand
+these pieces of information demand intelligent models able to process all of this information.
+Deep Learning (DL) models have achieved the state-of-the-art results in many NLP tasks as machine translation [1],
+question and answering (Q&A) [2], image captioning [2], keywords extraction [3], text summarization [4], named
+ar
+X
+iv
+:2
+00
+7.
+10
+05
+5v
+2 
+ [
+cs
+.C
+L
+] 
+ 2
+1 
+Ju
+l 
+20
+20
+A PREPRINT - JULY 22, 2020
+entity recognition [5] and sentiment analysis [6]. Most of these solutions use Word Embeddings (WE) to represent the
+input as continuous word vectors. Each word has one-word embedding. WE are fundamental to achieve good results in
+NLP tasks.
+Word embedding’s methods primary goal is to learn good words representations to be given as input for the machine
+learning model. Thus, they need to represent the maximum word information as possible. Every word has semantic and
+syntactic information, such as synonyms, antonyms, radical, lemma, stemming, morphological knowledge, part-of-
+speech, and others. Although the word embeddings need to represent most word information as possible, its training
+can not be computationally costly because it will be used in an expert system. Thus, there is a trade-off between being
+informative and not be computationally expensive.
+There are three main approaches to learn WE: (i) Context-window based models, (ii) Semantic relationship-based
+models, and (iii) Graph Distance-based models. Each method has drawbacks, though; models from (ii) and (iii) use
+knowledge bases such as WordNet [7] and Freebase [8] to learn the WE, but consider only a tiny part of the dataset.
+Models from (iii) use mainly the Leacock-Chodorow [9] distance to capture the semantic relationship between two
+words, ignoring alternative graph distances. Finally, knowledge bases involved are often limited to specific fields. Some
+models from (i), such as Neural Language Model [10] and Word2Vec [11], despite the good results, are trained using
+only local context information of every word instead of global context information. The Word2Vec method also does
+not use the internal word structure information (Morphology information). Although GloVe [12] uses global word
+context information, words with different lexical but equal meaning (paraphrases) have different representations because
+they are in a diverse global context. The FastText [13] model, based on Word2Vec, proposes the use of the internal word
+structure based on a bag of all n-gram characters of each word. Besides being a brute-force solution, some character
+n-grams have no semantic relationship with the formed word; the word ’American’ and their character n-gram ’erica’,
+for instance, have no semantic connection at all.
+We propose the Morphological Skip-Gram (MSG) model, whose main goal is to replace the bag of characters n-grams
+used in FastText with a bag of morphemes obtained from word morphological analysis. A morpheme is the smallest
+grammatical unit in a language. Thereby, words with common morphemes will have a similar representation. Our
+approach is important because it allows the uses of the word inner structure that has a syntactic relation with the
+complete word. Considering grammatically well-behaved texts, our approach sounds like a more consistent scientific
+hypothesis than uses all characters n-gram (FastText).
+The rest of this paper is organized as follows. In section 2, we present the state-of-the-art for word embeddings learning.
+Section 3 presents our approach to word representation using the bag of morphemes. Experiments for intrinsic and
+extrinsic evaluation are presented and discussed in section 4. We conclude the work in section 5.
+2 Word Embeddings
+This section discusses some methods to learn word embeddings.
+Mikolov et al.[11] proposed two architectures to learn word embeddings considering the word context window of every
+word within the corpus, Skip-Gram and CBOW. The CBOW aims to predict the central word c based on its context,
+while the Skip-Gram aims to predict the context of a given central word c.
+Formally, the Skip-Gram goal is to maximize the function Esk:
+Esk =
+1
+T
+T∑
+t=1
+∑
+−c≤j≥c,j 6=0
+logp(wt+j |wt) (1)
+where c is the context window size. Due the computation burden of p(wt+j |wt), the authors propose the use of Negative
+Sample [11] and approximate logp(wt+j |wt) according to equation 2.
+logσ(wTt+jwt) +
+k∑
+i=1
+Ewt∼Pn(w)[logσ(−w
+T
+i wt)] (2)
+Equation 2, thus, aims to distinguish the target word wt+j taken from a noise distribution Pn(w), where k is the number
+of negative samples for each target.
+Pennington et al. [14] proposed the GloVe model. In contrast to Skip-Gram and CBOW, GloVe uses the corpus global
+statistics to learn the word embeddings. Let X be a co-occurrence matrix among the words in the corpus, where Xij
+2
+A PREPRINT - JULY 22, 2020
+indicates how many times the word j appear in word i context. The GloVe objective is thus to minimize the following
+cost function:
+J =
+V∑
+i,j=1
+f(Xij)(w
+T
+i w̃j + bi + b̃j − log(Xij))
+2 (3)
+where V is the vocabulary size, wi is the word embedding of the central word i, and w̃j is the word embedding of the
+context word j. As shown in equation 3, the GloVe aim is to approximate the inner product between vectors wi and wj
+to log the co-occurrence between them. Santos et al. [15] presents a complementary method to GloVe, whose objective
+is to use the Paraphrase Dataset [16] to complete the X co-occurrence matrix.
+Bojanowski et al. [13] proposed a new approach based on Skip-Gram, where each word works as a set of characters
+n-grams. Every character n-gram is associated with a continuous vector representation. Thereby, each word is a sum of
+all character n-gram representations.
+Aavraham et al. [17] present a study on how different types of linguistic information (surface form, lemma, morphologi-
+cal tag) affect the semantic and syntactic relation of word embeddings. The authors consider three sets of information:
+W , L, and M . W is a set of the word surface forms, L is the set of lemma and M a set of morphological tags. Each
+word i in the vocabulary V is a vector vi added the W, L, and M representations. After obtaining this new representation,
+the authors use Skip-Gram to learn the word embeddings.
+Cotterell et al. [18] proposed an extension of the Log-Bilinear model to learn word embeddings. The proposed variation,
+called Morpho-LBL, consists of adding a multi-objective to the LBL model to optimize the model so that it predicts the
+next word and its respective morpheme.
+ELMo [19] is a reference model for characters n-gram. Their representations are computed by two independent LSTM
+[20]: one analyzes the context on the right (step forward) and the other analyzes the context on the left (step backward).
+The final word representation consists of the weighted sum between all the intermediate representations.
+BERT [21] is currently the most prominent word embedding model. It uses attention mechanism [22] to learn the word
+contextual representation, a characteristic that allows the identification of which of the contextual information is the
+most relevant for final word vector representation. Unlike traditional word embeddings and ELMo technique, BERT
+considers the order of neighboring words on the left and right simultaneously. Similarly to ELMo, words can have
+different vector representations depending on the context in which they are inserted.
+A bunch of works considers the addition of morphological knowledge into the model. Luong et al. [23], for instance,
+incorporate explicitly morphological knowledge in word embeddings. Each word i has a vector vi and its morpheme
+vectors. After obtained the new representations of each word, the method uses the Natural Language Model [10] to
+learn the word embeddings. Such kind of incorporation is also the case of Qiu et al. [24]. In the first step, they perform
+morphological analysis of each word i in vocabulary V . Thus, each word i is a sum of its vector vw and its morpheme
+vectors. The authors use CBOW to learn the word and morpheme representations. It is essential to highlight that the
+authors gave a weight of 0.8 to vector vi and 0.2 to the morpheme vectors. Xu et al. [25] also consider morphological
+knowledge addition in the word embeddings but unlike the works cited so far, this is done implicitly. Each word i is
+a vector vi and the set Mi, which corresponds to the morpheme meanings. To build Mi, first, the authors extract the
+suffix, prefix, and root of the word i and adds to the set Mi. After obtaining the whole new words representations of
+a vocabulary V , they use the CBOW method to learn the word embeddings. Qiu et al. [24] proposed an approach to
+incorporate morphological knowledge into the CBOW architecture where each word is represented by a token uniquely
+identifying it and the tokens of its morphemes. Similarly, [26] incorporates the words morphological category during
+word embeddings training; they use CBOW as the base model. Dalvi et al. [27] add morphological knowledge into the
+neural machine translation connection. The authors investigate which part of the decoder is best to add morphological
+knowledge.
+Our proposal is very much related to these latter approaches.
+3 Morphological Skip-Gram
+The proposed approach aims to incorporate morphological knowledge in the Skip-Gram method. We first present
+the morphological analysis and the baseline model FastText. Next, we detail our proposed method Morphological
+Skip-Gram (MSG). Lastly, we point out the differences between FastText and MSG.
+3
+A PREPRINT - JULY 22, 2020
+3.1 Morphological Analysis
+Morphological analysis is the task of finding the morphemes of a word. The morpheme is the smallest unit that carries
+the meaning of a word. The morphemes obtained by the morphological analysis are classified in (i) Radical/base: part
+common to a certain set of words, from which other words will be formed; (ii) Gender and number ending: has the
+function of indicating whether the word is in masculine or feminine, plural or singular; (iii) Thematic vowel: links the
+radical to the endings (terminal elements indicative of the inflections of words) that form the words, constituting the
+theme; (iv) Affixes (prefixes and suffixes): prefixes are the particles that are located before the radical and suffixes
+appear afterward;
+3.2 FastText
+The Skip-Gram method uses a different vector to each word and ignores information about the inner word structure.
+The FastText model proposes a score function considering the inner word structure information. In FastText, each
+word w is represented as a bag of n-grams characters. The full word w is also added in the bag allowing the model to
+learn the continuous vectorial representations of the words and their characters n-grams. Using the Portuguese word
+federativas as an example, the 4-gram and 5-gram characters generate the following bag of tokens:
+<fede, eder, dera, erat, rati, ativ, tiva, ivas, feder, edera, derat, erati, rativ, ativa, tivas>, <federativas>
+In practice, the FastText model uses the characters n-grams of size 3, 4, 5, and 6.
+Supposing that we have a dictionaryG of characters n-grams, where |G| = K. Given the wordw, we denoteGw ⊂ G as
+the set of characters n-gram present inw, and each n-gram g inG is associated with a continuous vectorial representation
+named as zg. Thus, the word w is represented by the sum of all vectorial representation of its characters n-gram (zg).
+Finally, we obtain the following score function used to predict when the word c appear in the context of w:
+s(w, c) =
+∑
+zg∈Gw
+zTg vc (4)
+Rewriting the objective function of Skip-Gram using the FastText score function, we obtain:
+Efasttext =
+1
+T
+T∑
+t=1
+∑
+−c≤j≤c,j 6=0
+log(p(wt+j |wt)) (5)
+Where logp(wt+j |wt) is calculated through:
+log(p(wt+j |wt)) = log(σ(s(wt+j , wt)))
++
+k∑
+i=1
+Ekt∼Pn(w)[log(σ(−s(wi, wt)))]
+(6)
+As shown above, word representation considers the character’s n-gram representation. As a consequence, the new
+FastText score function also incorporates the context word information in the vectorial representation of the characters
+n-gram and consequently in the considered words.
+3.3 Morphological Skip-Gram
+Our proposal uses the morphology of the words as part of the full word representation. The aim of the Morphological
+Segmentation Task is to segment words in its morphemes, the smallest meaning-carrying unit of a word. For each word
+v in the vocabulary V , we define a set mv , where:
+mv = {x | x is a morpheme of v} (7)
+We used Morfessor toolkit [28] to build the set mv. The Morfessor is a popular toolkit for statistical morphological
+segmentation. It is composed of a family of unsupervised learning methods.
+In the original Skip-Gram, each word v is represented by only one vector wv . In our proposal, each word is represented
+as:
+4
+A PREPRINT - JULY 22, 2020
+Figure 1: FastText and MSG general model
+kv = wv +
+mv∑
+x
+zx (8)
+Where zx is the vectorial representation of each morpheme x of word v. Thus, as in Skip-Gram, the MSG also has two
+continuous representations for each word. The first one considers the word as the center of the sentence. The second
+representation of the word is the context.
+The MSG aim is to maximize the function Emsg:
+Emsg =
+1
+T
+T∑
+t=1
+∑
+−c≤j≥c,j 6=0
+logp(kt+j |kt) (9)
+We also use Negative Samples through training optimizing logp(kt+j |kt) according to equation 10.
+logσ(kTt+jkt) +
+k∑
+i=1
+Ekt∼Pn(w)[logσ(−k
+T
+i kt)] (10)
+As we discussed before, some methods such as GloVe [12], Skip-Gram [11], CBOW [11] present interesting results,
+but they do not use the inner structure word information. Our proposed method, MSG, overcomes this limitation
+adding morphological word knowledge into the Skip-Gram architecture. Besides, every word morpheme token (zx in
+equation 8) has equal weight to the word token (mv in equation 8), differently from approach present in [25] that add
+morphological knowledge into CBOW architecture and give different weights to morpheme vectors and word vectors.
+3.4 Differences between the FastText and the Morphological Skip-Gram
+The FastText method is our baseline; thus, this section will focus on discussing the difference between our proposed
+method and it. Figure 1 present a visual representation of the Morphological Skip-Gram and FastText architectures in a
+general way. In order to simplify the figure, we use only a context of size 2 (the output, thus, has only four words):
+w(t− 2), w(t− 1), w(t+ 1) and w(t+ 2), two previous and two posterior words related to the central word w(t).
+The main difference between the two models is the source of information added in the Skip-Gram architecture,
+represented in figure 1 as a feature block. The feature block output in MSG is all word morphemes, while in FastText are
+all characters n-grams. An important point to highlight is the complexity of the two models, which is dependent on the
+number of tokens produced in the feature block. In the training step of both, it is necessary to compute the derivatives
+concerning each one of vectorial representations (morphemes in the Morphological Skip-Gram and characters n-grams
+in the FastText). Thus, in the example of the Portuguese word federativas, using the sets of 4-gram and 5-gram
+5
+A PREPRINT - JULY 22, 2020
+Table 1: Training details
+PARAMETERS VALUES
+dimensions 50, 100, 200, 300
+iterations 20
+threads 12
+negative sample 5
+context window 5
+learning rate 0.1
+of characters, we need to learn 16 representations in the FastText model. However, using the set {federa, tiva, s}
+obtained from the morphological analysis, we need to learn four representations in the MSG model. That example
+shows up the huge difference between uses morphological knowledge as inner structure information and all character
+n-grams as inner structure information.
+Yet from the perspective of the architecture, we can make an analogy with an artificial neural network composed of three
+layers: input, projection, and output. The projection layer represents the word embeddings, morphemes, or n-grams;
+the more substantial dimension in this layer results in more learned parameters and hence a larger space to represent
+information.
+4 Evaluation and discussion
+We performed intrinsic evaluation to compare our proposed model with the baseline FastText. All the intrinsic evaluation
+methods used are universal assessment methods well known by the scientific community.
+Intrinsic evaluation measure the word embeddings quality compared to human judgment. We used 15 well know
+datasets to perform the intrinsic evaluation. The datasets fall into three categories: (i) Similarity, (ii) Analogy, and (iii)
+Categorization.
+• Similarity: datasets composed of pairs of words, where each pair has an average rank defined by humans.
+This category consists of 6 datasets: SimLex999 [29], MEN [30], WordSimilarity353 [31], Rare Words [31],
+RG65 [32] e Turk [33].
+• Analogy: datasets composed of two pairs of words relative to a specific relation. For example, (man, woman),
+(king, queen). This category is composed of 3 datasets: Google [34], MSR [35], SemEval 2012.2 [36].
+• Categorization: problems involving a sentence or word with a binary target. This category is composed by 3
+datasets: AP [37], BATTING [38], BLESS [39].
+We use the toolkit developed by [40] to evaluate the word embeddings in these 15 datasets.
+4.0.1 Corpora and training details
+The corpus 1 billion words language model benchmark [41] was used to train all the word embeddings. This corpus
+consists of approximately 1 billion words. We do not perform the pre-processing step because the corpus is ready to use.
+Table 1 shows the parameter values used along with the training of all word embeddings. It is important to note that the
+values of threads, negative samples, context window, and learning rate were chosen according to the default values of
+the FastText project.
+4.0.2 Results and discussion
+In these experiments, we only compare MSG with FastText because, in FastText paper, the authors already made a
+comparison between FastText and other word embeddings models and achieved better or competitive results. There
+are recent deep learning-based models that learn good word representations, such as BERT and ElMo, but BERT and
+ELMo are context-sensitive models; the same word has different representations depending on its context. However,
+FastText, GloVe, Word2Vec, Morphological Skim-Gram are context insensitive because, after training, the word has the
+same representation no matter its context. Thus, these word embeddings models are in different categories, and we do
+not consider a fair comparison.
+6
+A PREPRINT - JULY 22, 2020
+Table 2: Summary of datasets and metrics
+Dataset Category Metrics
+SimLe999 Similarity ρ− Spearman
+MEN Similarity ρ− Spearman
+Word Similarity 353 Similarity ρ− Spearman
+Rare Words Similarity ρ− Spearman
+RG 5 Similarity ρ− Spearman
+Turk Similarity ρ− Spearman
+Google Analogy Accuracy
+MSR Analogy Accuracy
+SemEval 2012.2 Analogy Accuracy
+AP Categorization Purity
+BLESS Categorization Purity
+BATTING Categorization Purity
+Table 3: Analogy results
+Name Google MSR SE-2012
+ft-d50 0.000 0.001 0.12747
+msg-d50 0.005 0.001 0.128
+ft-d100 0.008 0.004 0.143
+msg-d100 0.064 0.0126 0.144
+ft-d200 0.087 0.051 0.155
+msg-d200 0.242 0.104 0.164
+ft-d300 0.128 0.082 0.168
+msg-d300 0.332 0.211 0.180
+In experiments, we used a Dell desktop with the 8th generation Intel core i5 processor, 8GB of RAM, 1TB of storage,
+running the Ubuntu 16.04 operating system. We ensure that both models are executed in the same environment situation
+to obtain the values of Table 6.
+Table 2 presents a summary of all used datasets in the intrinsic evaluation, highlighting the dataset, category, and used
+metric. High values represent better results.
+Tables 3, 4, and 5 present the results of the experiments performed using tasks of analogy, similarity and categorization,
+respectively. Table 6 shows a comparison of training time between the models. The name ft-d50 means that these word
+embeddings were trained using FastText (FT) and have dimension 50. While msg-d50 means it was trained using the
+Morphological Skip-Gram (MSG) and has dimension 50.
+Considering the Analogy results, the MSG model presented superior results to the FastText in all datasets and all
+embeddings dimensions. The except case was the dataset MSR using embeddings ft-d50 and msg-d50, in which both
+had the same performance (Table 3). However, embeddings of dimension 50 did not have a good performance on all
+three datasets. We observed a variation of the results with the change of the size of the embedding. For instance, in the
+results using the Google dataset, the msg-d50 model obtained 0.005 while the msg-d300 obtained 0.332, in other words,
+the size of the embeddings has much influence on the model performance at Google Analogy benchmark.
+From table 4, we can see the MSG model presented competitive results compared to FT. The methods showed a
+difference of a maximum 0.05 (RG65 dataset using the ft-d300 and msg-d300 models). It is essential to point out that
+the FT was the best in all the Rare Words (RW) dataset cases, generalizing better in the unknown words scenario. It is
+important to highlight that FastText is designed to deal with word out of vocabulary, rare words, and word with spelling
+errors. This FastText characteristic is due to characters n-grams because even if a word is out of vocabulary, some (or
+all) of its characters n-grams can be in n-grams vocabulary. Thus, since the RW scenario is composed of words with
+low frequency, some of its characters n-grams can be present in word with high frequency.
+Considering the Table 5 results, both models presented similar performance, differentiating by a maximum of 0.01.
+Considering Tables 3-5 results, the MSG model is better than the FT in the analogy tasks, whereas, in the Similarity and
+Categorization evaluations, the models had comparable performance. A possible explanation of why the MSG model
+presents better results than FT in analogy task is that some tokens of the FT brute force (all characters n-gram) solution
+7
+A PREPRINT - JULY 22, 2020
+Table 4: Similarity Results
+Name SL9 MEN WS353 RW RG65 Turk
+ft-d50 0.25 0.64 0.61 0.25 0.58 0.63
+msg-d50 0.25 0.64 0.61 0.23 0.56 0.63
+ft-d100 0.29 0.69 0.64 0.28 0.65 0.66
+msg-d100 0.30 0.68 0.64 0.25 0.64 0.63
+ft-d200 0.33 0.71 0.65 0.30 0.71 0.67
+msg-d200 0.33 0.71 0.65 0.29 0.67 0.64
+ft-d300 0.34 0.73 0.66 0.31 0.73 0.67
+msg-d300 0.35 0.71 0.66 0.29 0.68 0.66
+Table 5: Categorization Results
+Name AP BLESS BATTING
+ft-d50 0.61 0.75 0.43
+msg-d50 0.62 0.74 0.42
+ft-d100 0.60 0.77 0.43
+msg-d100 0.59 0.77 0.45
+ft-d200 0.61 0.80 0.43
+msg-d200 0.60 0.81 0.43
+ft-d300 0.59 0.81 0.43
+msg-d300 0.60 0.82 0.42
+may be adding noise in the word representation. Thus, since the morphological analysis only adds expert linguistic
+knowledge, it produces only the necessary tokens (morphemes) to represent the inner word structure.
+Table 6 shows that the training time of the MSG model is approximately 40% faster than the FT model. That
+improvement in training time is expected because the MSG model uses expert knowledge information to represent the
+inner structure of the word, unlike FastText, which uses a force brute solution.
+From the results obtained in intrinsic evaluation, we can see that Morphological Skip-Gram achieved competitive results
+compared with FastText and is approximately 40% faster than it. Both methods have the Skip-Gram as base architecture,
+being different on the inner structure information: MSG uses morphemes of the word, and FastText uses all characters
+n-grams. Thus, there is strong evidence that the morphological information is sufficient to represent the inner structure
+word information, and the FastText brute force solution has some characters n-gram, which are not useful.
+4.1 Morphological Skip-Gram Limitations
+The intrinsic evaluation shows that our proposed method, MSG, presents competitive results and is about 40% faster than
+our baseline FastText. However, even presenting excellent results in intrinsic evaluations, the MSG has limitations. For
+instance, we only consider the Skip-Gram architecture to add morphological knowledge; there are other architectures,
+such as GloVe and Neural Language Model, that we can introduce morphological knowledge. Besides, there is other
+syntactic expert knowledge to be added in word embeddings, such as stemming, radical, and lemma.
+Table 6: Training Time
+Name AP
+ft-d50 307m27
+msg-d50 196m11
+ft-d100 409m42
+msg-d100 268m50
+ft-d200 647m32
+msg-d200 414m30
+ft-d300 853m58
+msg-d300 541m35
+8
+A PREPRINT - JULY 22, 2020
+5 Conclusion
+This work presented the Morphological Skip-Gram (MSG) method to learn word embeddings using expert knowledge,
+especially the morphological knowledge of words. The MSG uses the morphological structure of words to replace the
+n-grams bag of characters used in the FastText model. The use of such a bag of n-grams is a brute force solution as it
+tries all possible combinations of characters n-grams of a word. As the purpose of using this bag of n-grams is also to
+learn the information about the internal structure of the words, we consider the morphological information more robust
+and informative. We compared MSG with FastText in 12 benchmarks. Results show that MSG is competitive compared
+to FastText and takes 40% less processor time than FastText to train the word embeddings. Keeping the quality of
+word embeddings and decreasing training time is very important because usually, a corpus to training embeddings is
+composed of 1B tokens. For example, the Common Crawl corpora contain 820B tokens.
+As future works, we intend to conduct experiments using different tools for morphological analysis to evaluate their
+impact on the MSG. Furthermore, we intend to investigate other sources of semantic and syntactic knowledge to
+incorporate in word embeddings; some of those can be part-of-speech tagging, stemming, and lemmatization.
+Acknowledgments
+The authors thank CAPES and FAPITEC-SE for the financial support [Edital CAPES/FAPITEC/SE No 11/2016 -
+PROEF, Processo 88887.160994/2017-00] and LCAD-UFS for providing a cluster for the execution of the experiments.
+The authors also thank FAPITEC-SE for granting a graduate scholarship to Flávio Santos, and CNPq for giving a
+productivity scholarship to Hendrik Macedo [DT-II, Processo 310446/2014-7].
+References
+[1] Yonghui Wu, Mike Schuster, Zhifeng Chen, Quoc V Le, Mohammad Norouzi, Wolfgang Macherey, Maxim
+Krikun, Yuan Cao, Qin Gao, Klaus Macherey, et al. Google’s neural machine translation system: Bridging the gap
+between human and machine translation. arXiv preprint arXiv:1609.08144, 2016.
+[2] Jiasen Lu, Caiming Xiong, Devi Parikh, and Richard Socher. Knowing when to look: Adaptive attention via a
+visual sentinel for image captioning. arXiv preprint arXiv:1612.01887, 2016.
+[3] Yu Zhang, Mingxiang Tuo, Qingyu Yin, Le Qi, Xuxiang Wang, and Ting Liu. Keywords extraction with deep
+neural network model. Neurocomputing, 383:113–121, 2020.
+[4] Romain Paulus, Caiming Xiong, and Richard Socher. A deep reinforced model for abstractive summarization.
+arXiv preprint arXiv:1705.04304, 2017.
+[5] Carlos AEM Júnior, Luciano A Barbosa, Hendrik T Macedo, and SE São Cristóvão. Uma arquitetura híbrida
+lstm-cnn para reconhecimento de entidades nomeadas em textos naturais em língua portuguesa. XIII Encontro
+Nacional de Intelig^encia Artificial e Computaciona, 2016.
+[6] Himabindu Lakkaraju, Richard Socher, and Chris Manning. Aspect specific sentiment analysis using hierarchical
+deep learning. In NIPS Workshop on Deep Learning and Representation Learning, 2014.
+[7] George A Miller. Wordnet: a lexical database for english. Communications of the ACM, 38(11):39–41, 1995.
+[8] Kurt Bollacker, Colin Evans, Praveen Paritosh, Tim Sturge, and Jamie Taylor. Freebase: a collaboratively created
+graph database for structuring human knowledge. In Proceedings of the 2008 ACM SIGMOD international
+conference on Management of data, pages 1247–1250. AcM, 2008.
+[9] Alexander Budanitsky and Graeme Hirst. Semantic distance in wordnet: An experimental, application-oriented
+evaluation of five measures. In Workshop on WordNet and other lexical resources, volume 2, pages 2–2, 2001.
+[10] Ronan Collobert, Jason Weston, Léon Bottou, Michael Karlen, Koray Kavukcuoglu, and Pavel Kuksa. Natural
+language processing (almost) from scratch. Journal of Machine Learning Research, 12(Aug):2493–2537, 2011.
+[11] Tomas Mikolov, Ilya Sutskever, Kai Chen, Greg S Corrado, and Jeff Dean. Distributed representations of words
+and phrases and their compositionality. In Advances in neural information processing systems, pages 3111–3119,
+2013.
+[12] Jeffrey Pennington, Richard Socher, and Christopher D Manning. Glove: Global vectors for word representation.
+In EMNLP, volume 14, pages 1532–1543, 2014.
+[13] Piotr Bojanowski, Edouard Grave, Armand Joulin, and Tomas Mikolov. Enriching word vectors with subword
+information. arXiv preprint arXiv:1607.04606, 2016.
+9
+http://arxiv.org/abs/1609.08144
+http://arxiv.org/abs/1612.01887
+http://arxiv.org/abs/1705.04304
+http://arxiv.org/abs/1607.04606
+A PREPRINT - JULY 22, 2020
+[14] Jeffrey Pennington, Richard Socher, and Christopher Manning. Glove: Global vectors for word representation.
+In Proceedings of the 2014 conference on empirical methods in natural language processing (EMNLP), pages
+1532–1543, 2014.
+[15] Flávio Arthur O. Santos and Hendrik T. Macedo. Improving word representations using paraphrase dataset.
+In Shahram Latifi, editor, Information Technology - New Generations, pages 405–409, Cham, 2018. Springer
+International Publishing.
+[16] Juri Ganitkevitch, Benjamin Van Durme, and Chris Callison-Burch. PPDB: The paraphrase database. In
+Proceedings of NAACL-HLT, pages 758–764, Atlanta, Georgia, June 2013. Association for Computational
+Linguistics.
+[17] Oded Avraham and Yoav Goldberg. The interplay of semantics and morphology in word embeddings. arXiv
+preprint arXiv:1704.01938, 2017.
+[18] Ryan Cotterell and Hinrich Schütze. Morphological word embeddings. arXiv preprint arXiv:1907.02423, 2019.
+[19] Matthew E Peters, Mark Neumann, Mohit Iyyer, Matt Gardner, Christopher Clark, Kenton Lee, and Luke
+Zettlemoyer. Deep contextualized word representations. arXiv preprint arXiv:1802.05365, 2018.
+[20] Sepp Hochreiter and Jürgen Schmidhuber. Long short-term memory. Neural computation, 9(8):1735–1780, 1997.
+[21] Jacob Devlin, Ming-Wei Chang, Kenton Lee, and Kristina Toutanova. Bert: Pre-training of deep bidirectional
+transformers for language understanding. arXiv preprint arXiv:1810.04805, 2018.
+[22] Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N Gomez, Łukasz Kaiser,
+and Illia Polosukhin. Attention is all you need. In Advances in neural information processing systems, pages
+5998–6008, 2017.
+[23] Thang Luong, Richard Socher, and Christopher Manning. Better word representations with recursive neural
+networks for morphology. In Proceedings of the Seventeenth Conference on Computational Natural Language
+Learning, pages 104–113, 2013.
+[24] Siyu Qiu, Qing Cui, Jiang Bian, Bin Gao, and Tie-Yan Liu. Co-learning of word representations and morpheme
+representations. In Proceedings of COLING 2014, the 25th International Conference on Computational Linguistics:
+Technical Papers, pages 141–150, 2014.
+[25] Yang Xu and Jiawei Liu. Implicitly incorporating morphological information into word embedding. arXiv preprint
+arXiv:1701.02481, 2017.
+[26] Rana Aref Salama, Abdou Youssef, and Aly Fahmy. Morphological word embedding for arabic. Procedia
+computer science, 142:83–93, 2018.
+[27] Fahim Dalvi, Nadir Durrani, Hassan Sajjad, Yonatan Belinkov, and Stephan Vogel. Understanding and improving
+morphological learning in the neural machine translation decoder. In Proceedings of the Eighth International
+Joint Conference on Natural Language Processing (Volume 1: Long Papers), pages 142–151, 2017.
+[28] Peter Smit, Sami Virpioja, Stig-Arne Grönroos, Mikko Kurimo, et al. Morfessor 2.0: Toolkit for statistical mor-
+phological segmentation. In The 14th Conference of the European Chapter of the Association for Computational
+Linguistics (EACL), Gothenburg, Sweden, April 26-30, 2014. Aalto University, 2014.
+[29] Felix Hill, Roi Reichart, and Anna Korhonen. Simlex-999: Evaluating semantic models with (genuine) similarity
+estimation. Computational Linguistics, 41(4):665–695, 2015.
+[30] Elia Bruni, Nam-Khanh Tran, and Marco Baroni. Multimodal distributional semantics. Journal of Artificial
+Intelligence Research, 49:1–47, 2014.
+[31] Lev Finkelstein, Evgeniy Gabrilovich, Yossi Matias, Ehud Rivlin, Zach Solan, Gadi Wolfman, and Eytan Ruppin.
+Placing search in context: The concept revisited. In Proceedings of the 10th international conference on World
+Wide Web, pages 406–414. ACM, 2001.
+[32] Herbert Rubenstein and John B. Goodenough. Contextual correlates of synonymy. Commun. ACM, 8(10):627–633,
+October 1965.
+[33] Kira Radinsky, Eugene Agichtein, Evgeniy Gabrilovich, and Shaul Markovitch. A word at a time: Computing
+word relatedness using temporal semantic analysis. In Proceedings of the 20th International Conference on World
+Wide Web, WWW ’11, pages 337–346, New York, NY, USA, 2011. ACM.
+[34] Tomas Mikolov, Kai Chen, Greg Corrado, and Jeffrey Dean. Efficient estimation of word representations in vector
+space. arXiv preprint arXiv:1301.3781, 2013.
+10
+http://arxiv.org/abs/1704.01938
+http://arxiv.org/abs/1907.02423
+http://arxiv.org/abs/1802.05365
+http://arxiv.org/abs/1810.04805
+http://arxiv.org/abs/1701.02481
+http://arxiv.org/abs/1301.3781
+A PREPRINT - JULY 22, 2020
+[35] Tomas Mikolov, Wen-tau Yih, and Geoffrey Zweig. Linguistic regularities in continuous space word representa-
+tions. In Proceedings of the 2013 Conference of the North American Chapter of the Association for Computational
+Linguistics: Human Language Technologies, pages 746–751, 2013.
+[36] David A Jurgens, Peter D Turney, Saif M Mohammad, and Keith J Holyoak. Semeval-2012 task 2: Measuring
+degrees of relational similarity. In Proceedings of the First Joint Conference on Lexical and Computational
+Semantics-Volume 1: Proceedings of the main conference and the shared task, and Volume 2: Proceedings of the
+Sixth International Workshop on Semantic Evaluation, pages 356–364. Association for Computational Linguistics,
+2012.
+[37] Abdulrahman Almuhareb and Massimo Poesio. Concept learning and categorization from the web. In proceedings
+of the annual meeting of the Cognitive Science society, volume 27, 2005.
+[38] William F Battig and William E Montague. Category norms of verbal items in 56 categories a replication and
+extension of the connecticut category norms. Journal of experimental Psychology, 80(3p2):1, 1969.
+[39] Marco Baroni and Alessandro Lenci. How we blessed distributional semantic evaluation. In Proceedings of the
+GEMS 2011 Workshop on GEometrical Models of Natural Language Semantics, pages 1–10. Association for
+Computational Linguistics, 2011.
+[40] Stanisław Jastrzebski, Damian Leśniak, and Wojciech Marian Czarnecki. How to evaluate word embeddings? on
+importance of data efficiency and simple supervised tasks. arXiv preprint arXiv:1702.02170, 2017.
+[41] Ciprian Chelba, Tomas Mikolov, Mike Schuster, Qi Ge, Thorsten Brants, Phillipp Koehn, and Tony Robinson. One
+billion word benchmark for measuring progress in statistical language modeling. arXiv preprint arXiv:1312.3005,
+2013.
+11
+http://arxiv.org/abs/1702.02170
+http://arxiv.org/abs/1312.3005
+	1 Introduction
+	2 Word Embeddings
+	3 Morphological Skip-Gram
+	3.1 Morphological Analysis
+	3.2 FastText
+	3.3 Morphological Skip-Gram
+	3.4 Differences between the FastText and the Morphological Skip-Gram
+	4 Evaluation and discussion
+	4.0.1 Corpora and training details
+	4.0.2 Results and discussion
+	4.1 Morphological Skip-Gram Limitations
+	5 Conclusion

@@ -1,0 +1,366 @@
+ar
+X
+iv
+:2
+00
+7.
+12
+67
+4v
+1 
+ [
+st
+at
+.M
+E
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+Controlling Privacy Loss in Survey Sampling
+(Working Paper)
+Mark Bun1 Jörg Drechsler2, 3 Marco Gaboardi1 Audra McMillan∗1,4
+1Department of Computer Science, Boston University
+2Institute for Employment Research
+3The Joint Program in Survey Methodology, University of Maryland
+4Khoury College of Computer Sciences, Northeastern University
+Abstract
+Social science and economics research is often based on data collected in surveys. Due to time and budgetary
+constraints, this data is often collected using complex sampling schemes designed to increase accuracy while
+reducing the costs of data collection. A commonly held belief is that the sampling process affords the data subjects
+some additional privacy. This intuition has been formalized in the differential privacy literature for simple random
+sampling: a differentially private mechanism run on a simple random subsample of a population provides higher
+privacy guarantees than when run on the entire population. In this work we initiate the study of the privacy
+implications of more complicated sampling schemes including cluster sampling and stratified sampling. We find
+that not only do these schemes often not amplify privacy, but that they can result in privacy degradation.
+1 Introduction
+In social science and economics research, surveying an entire population is typically infeasible due to time and
+budgetary constraints. As a result, much of the data collected by statistical agencies is based on surveys performed
+on a random sample of the target population. While the main motivation for sampling is often financial, a commonly
+held belief is that sampling provides additional privacy. Intuitively, data subjects are afforded some plausible denia-
+bility by the fact that they may, or may not, have been sampled. This intuition of increased privacy from sampling
+has been formalized for some types of sampling schemes (such as simple random sampling with and without re-
+placement or Poisson sampling) in a series of papers in the differential privacy literature [10, 14, 4, 13]. These types
+of privacy amplification by sampling results are useful for a variety of reasons including producing more accurate
+results at a target privacy level, and for providing additional incentive for participation in a survey study.
+However, simple random sampling schemes like sampling with or without replacement and Poisson sampling
+are rarely used in practice. Statistical agencies typically use more complex sampling designs to increase the accuracy
+of the results and/or to reduce the costs of data collection. Unfortunately, these more complicated sampling schemes
+can result in privacy degradation. That is, sampling can actually make privacy guarantees worse. It is often the case
+that the design of a survey is based on sensitive historic or auxiliary data. Thus, the survey design itself can leak
+additional information about the population. We find that this degradation of the privacy guarantee occurs even for
+reasonably simple sampling designs when the sampling design is data dependent (see Lemma 2.1).
+We focus on two common sampling schemes: cluster sampling and stratified sampling. We will discuss the
+implication of these sample designs on the effective privacy loss, in terms of the ǫ parameter from differential
+privacy. For stratified sampling, we will discuss how the data dependent nature of this sampling design results in
+privacy degradation. We’ll then discuss a potential method for controlling the privacy loss for proportional sampling,
+∗
+Currently at Apple.
+1
+http://arxiv.org/abs/2007.12674v1
+a common sampling design for stratified sampling. For cluster sampling, we’ll discuss how the lack of independence
+between the inclusion of different data subjects affects the privacy guarantee. We’ll show that even for relaxed
+notions of privacy and “ideal” data, while the privacy does not degrade, privacy amplification is negligible.
+1.1 Privacy Amplification by Sampling
+Several works, e.g. [10, 14, 4, 13], have shown that by applying a differentially private data analysis to a random
+sample of the population, rather than to the population itself, one can achieve an amplified privacy guarantee. That
+is, the algorithm obtained by composing a differentially private algorithm with a random sampling process provides
+a quantitatively better privacy protection than the original algorithm. These works have considered different notions
+of privacy, e.g. bounded and unbounded differential privacy, and different sampling methods, e.g. Poisson sampling,
+simple random sampling with replacement and without replacement. Balle et al. [2] gave a unified framework for
+analyzing these privacy amplification effects via statistical divergences and probabilistic coupling between samples.
+However, all of these works assume that the sampling mechanism is data independent, which is not often the case in
+practical statistical surveys.
+Let us now introduce some notation we will use in the remainder of the paper. Let U be a data universe. For
+any n ∈ N, let Un be the set of all datasets of size n and U∗ = ∪n∈NUn. Let P ∈ U∗ be the population that is
+sampled from. We will refer to x ∈ U as the data of a particular data subject. We’ll use |P | to denote the size of a
+dataset. We will not distinguish between “historic” or “auxiliary” data and “current” data. That is, P will be both
+the dataset used in designing the sampling scheme, and the dataset that is sampled from to get the final sample. This
+is for ease of notation, as well as to highlight the fact that we will treat historic and auxiliary data as sensitive. In
+future work, we would like to explore different models for the relationship between these datasets, for example by
+modeling temporal correlation between historic and current data.
+We will focus on unbounded differential privacy, also known as add/remove differential privacy, in this paper.
+That is, the presence or removal of a data subject in the dataset is protected. This implies that the size of the dataset is
+not fixed, and is considered a sensitive attribute. The specific technical results may be slightly different for bounded
+differential privacy, where the size of the dataset is fixed and public, although we expect the general intuition to hold
+for both notions. Given the privacy degradation results shown in this paper, it would be interesting to consider other,
+possibly weaker, notions of privacy.
+2 Privacy Degradation for Data Dependent Survey Design
+It is often the case that the design of a survey is based on historic or auxiliary data. A common example is
+stratified sampling, where characteristics of the target units are used to assign each data subject in the population
+to a single stratum. Often knowledge about the within-stratum variability of the target variable is then used to
+further improve the accuracy of the collected data. Nonresponse adjustment is another example, where response
+rates from previous rounds of the survey are used to adjust the initial sampling rates for different subgroups of the
+data to ensure that the final number of successful interviews matches the desired sample size. In addition to this
+data dependence, many survey designs introduce dependencies between the inclusion of the different data subjects.
+An extreme example is snow-ball sampling where data subjects are asked to recruit other data subjects to the study.
+This phenomenon also occurs in simpler survey designs like cluster sampling. In survey sampling designs with these
+properties, it is possible for the privacy guarantee to actually degrade.
+Many common survey sampling designs result in privacy degradation. A simple, but important, example is
+sampling without replacement when the number of samples is data-dependent. For a function f : U∗ → Z, let
+GSf = max
+P∈U∗,x∈U
+|f(P )− f(P ∪ {x})|
+be the global sensitivity of f .
+2
+Lemma 2.1. Let f : U∗ → Z be a deterministic function and let F : U∗ → U∗×Z be defined by F (P ) = (P, f(P )).
+Let CWOR : U∗×Z → U∗ be the randomised sampling function that maps (P,m) to a dataset drawn from the uniform
+distribution on {Z | Z ⊂ P, |Z| = m}. If M is ǫ-DP then M◦ CWOR ◦ F is (ǫ · GSf )-DP. Moreover, there exists
+an ǫ-DP algorithm M such that M◦ CWOR ◦ F is not ǫ′-DP for any ǫ′ < GSf ·ǫ.
+The following is a simple example of a ǫ-DP mechanism M that suffers from the worst case privacy degradation.
+Let f and CWOR be as in Lemma 2.1. Suppose that M(Z) = |Z|+ Lap(1/ǫ), which provides an ǫ-DP estimate of
+the size of the dataset. The resulting output of M◦ CWOR ◦ F (P ) is f(P ) + Lap(1/ǫ). Then, a simple calculation
+shows that M◦ CWOR ◦ f does not satisfy ǫ′-DP for any ǫ′ < GSf ·ǫ.
+In the following section, we will focus on stratified sampling, where we’ll see natural examples of functions
+f with sensitivity higher than 1. We will see that this exact type of data dependence is present in one of the most
+common stratified sampling schemes, proportional sampling. We will also suggest a slight alteration on these
+common sampling schemes that will result in privacy amplification rather than privacy degradation.
+3 Stratified Sampling
+In stratified sampling, the population is partitioned into disjoint subsets, called strata. Random sampling is then
+performed within each stratum. Stratified sampling is a method of variance reduction if the data collecting agency
+expects the existence of mutually heterogenous but internally homogeneous subpopulations. It also ensures that each
+stratum is represented in the final sample. An informative example is the IAB Job Vacancy Survey [3], a business
+survey by the Institute for Emplyoment Research (IAB) in Germany that stratifies the population by industry, region,
+and size of establishment. Other examples include stratification by race or gender. A crucial feature of this sampling
+design is that the sampling rate may differ from stratum to stratum, and may be data dependent. We will consider
+strata membership to be a sensitive attribute that is determined before sampling begins.
+While the sampling within strata can be performed in a variety of ways, simple random sampling without re-
+placement is often used for business surveys. Unfortunately, sampling without replacement falls exactly into the
+type of data dependent sampling that was discussed in Lemma 2.1. Let f : U∗ → Zk be the function that computes
+the number of cases that will be sampled per stratum. The global sensitivity of f is
+GSf := max
+P∈U∗,x∈U
+‖f(P )− f(P ∪ {x})‖1,
+the sum of the changes in each stratum. The following is an extension of Lemma 2.1.
+Lemma 3.1. Let f : U∗ → Zk be a deterministic function. Let F : U∗ → U∗ × Zk be defined by F(P ) = (P, f(P ))
+and C be the function that randomly samples a dataset of size f(P )i from stratum i for all i ∈ [k]. For any ǫ-DP
+algorithm M, M ◦ C ◦ F is GSf ·ǫ-DP. Moreover, there exists a differentially private mechanism M such that
+M◦ C ◦F is not ǫ′-DP for any ǫ′ < GSf ·ǫ.
+As a concrete example, let us consider proportional sampling. Let S1, · · · , Sk be the strata so P = S1∪· · ·∪Sk.
+In proportional sampling a total number of samples, n, is decided in advance. Then n· |Si|
+|P |
+data subjects are randomly
+sampled from stratum Si. Since n · |Si||P | can be fractional, one must determine a method of apportioning the samples.
+If this process is not done carefully then privacy degradation can be significant, for example if deterministic rounding
+is used, then f can be unstable and GSf can be as large as k.
+An important feature of stratified sampling is that the parameters of the sampling design can vary between the
+strata. This means that data subjects in strata with low sampling rates should expect a higher level of privacy than
+data subjects in strata with high sampling rates. This leads us to a form of differential privacy that allows the privacy
+guarantee to vary between the strata. Suppose there exist k strata, and that each data point is a pair (s, x) where
+s ∈ [k] denotes which stratum the data subject belongs to, and x denotes their data.
+Definition 3.2. Suppose there are k strata. A mechanism A satisfies (ǫ1, · · · , ǫk)-stratified differential privacy if for
+all datasets P , data points (s, x), and sets of outcomes E,
+e−ǫsP(A(P ) ∈ E) ≤ P(A(P∪{(s, x)}) ∈ E) ≤ eǫsP(A(P ) ∈ E)
+3
+This definition is an adaptation of personalized differential privacy [9, 7, 1]. Notice that this definition protects
+whether or not the data subject is included in the dataset. It also implies that the value of the data subject’s data is
+also protected, although one has to pay for the privacy loss of the true stratum, and the privacy loss of the “fake”
+stratum: for any dataset P , and data points (s, x) and (s′, x′), and any set of outcomes E,
+P(A(P ∪ {(s, x)}) ∈ E) ≤ eǫs+ǫs′P(A(P ∪ {(s′, x′)}) ∈ E).
+If the sampling method within each stratum is Poisson sampling, then not only does the privacy guarantee not
+degrade; it actually improves! The following is an immediate consequence of the results for traditional differential
+privacy [10, 14, 4, 13].
+Lemma 3.3 (Privacy Amplification for Stratified Sampling with Poisson Sampling). Suppose there exist constants
+r1, · · · , rk ∈ [0, 1] and let r : U∗ → U∗× [0, 1]k be the function r(P ) = (P, r1, · · · , rk). Let CP : U∗× [0, 1]k → U∗
+be the sampling mechanism that maps (P, (r1, · · · , rk)) to subset where each data subject in stratum i is sampled
+with probability ri. If M is ǫ-DP then M◦ CP ◦ r is (log(1 + r1(eǫ − 1)), · · · , log(1 + rk(eǫ − 1)))-stratified DP.
+Note that when ǫ is small then
+log(1 + ri(e
+ǫ − 1)) ≈ riǫ,
+so the privacy parameter is scaled by the probability of sampling any individual data subject. When ǫ is large,
+log(1 + ri(e
+ǫ − 1)) ≈ ǫ + log ri, which is slightly smaller than ǫ, so we don’t gain a significant advantage in this
+regime.
+3.1 Controlling privacy loss in stratified sampling
+We discussed two results in the previous section: the sampling without replacement can results in privacy degra-
+dation and Poisson sampling can result in privacy amplification. However, sampling without replacement is the
+popular sampling method in practice for in-strata sampling. This method allows the data collecting agency to con-
+trol the total sample size, an important property in practice due to budgetary constraints. In contrast, in Poisson
+sampling, the number of samples follows a binomial distribution, and so it can be difficult to budget appropriately
+for the number of samples. Thus, it is important to consider lightweight adaptations of these sampling schemes that
+control privacy, while also allowing the analyst to upper bound the number of samples.
+One option to control privacy loss in sampling without replacement is to use more stable apportionment meth-
+ods. Apportionment methods like Huntington-Hill (the algorithm for senate seat apportionment used by the US
+congress) produce more stable apportionment functions than deterministic rounding. Under some mild assumptions
+the Huntington-Hill algorithm has global sensitivity at most 2. These methods do have computational overhead, in
+particular because the number of samples in stratum i is a function of the sizes of all the strata, so the sample size
+can not be computed on a stratum-by-stratum basis. We conjecture that a simpler algorithm, randomized rounding,
+provides not only lower computational overhead, but actually results in privacy amplification for sampling without
+replacement.
+Conjecture 3.4 (Privacy Amplification for Stratified Sampling without Replacement). Let r : U∗ → [0, 1]k be the
+constant function r(P ) = (r1, · · · , rk) for some constants r1, · · · , rk ∈ [0, 1]. Let CP : U∗ × [0, 1]k → U∗ be the
+sampling mechanism that maps (P = S1 ∪ · · · ∪ Sk, (r1, · · · , rk)) to a sample T1 ∪ · · · ∪ Tk as follows. For each
+i = 1, . . . , k, let pi = ri|Si| − ⌊ri|Si|⌋. Choose ni = ⌊ri|Si|⌋ with probability 1 − pi, and ni = ⌈ri|Si|⌉ with
+probability pi. Let Ti be a random sample from Si of size ni.
+If M is ǫ-DP for ǫ < 1, then M◦ CP ◦ r is (log(1 +O(ǫ)r1), · · · , log(1 +O(ǫ)rk))-stratified DP.
+4 Clustered Sampling
+In this section, we switch our attention to another feature of many survey sampling designs: dependencies
+between the inclusion of different data subjects. That is, sampling schemes where the inclusion of data subject i is
+4
+correlated with the inclusion of data subject j. We will focus on cluster sampling, a common survey sampling design.
+In cluster sampling, the population is partitioned into disjoint subsets, called clusters. A fraction of the clusters are
+chosen, and then random sampling is performed within the chosen clusters. This type of sampling scheme produces
+accurate results when the clusters are mutually homogeneous yet internally heterogeneous. That is, when the
+distributions within each cluster are similar to the distribution over the entire population. Cluster sampling is often
+performed due to time or budgetary restrictions that make sampling many units from a few clusters cheaper and/or
+faster than sampling a few units from each cluster. A typical example is when clusters are chosen to be geographic
+regions where traveling between clusters is both time consuming and expensive. Note that this will typically result
+in clusters that are internally homogeneous reducing the statistical efficiency compared to simple random sample.
+This loss in efficiency is accepted to save costs.
+We will assume that cluster membership is a sensitive attribute that is determined before sampling begins. There
+are many sampling designs that analysts use to choose which clusters to sample from. We focus on a simple cluster
+sampling design that might naively look like a good candidate for privacy amplification. We show that even under a
+weaker notion of privacy (random differential privacy), this sampling design achieves less amplification than might
+be expected. Note that more complicated cluster sampling designs may result in privacy degradation.
+For a data subject i, let χi be a random variable that is 1 if i is sampled from P , and 0 if i is not sampled from
+P . A crucial feature of a cluster sampling scheme, is that for two data subjects i and j, the random variables χi
+and χj are correlated. For example, if two data subjects i and j belong in the same cluster, then the probability of
+i being sampled conditioned on j being sampled is higher than the probability of i being sampled conditioned on
+j not being sampled. While some level of dependence can be handled by the traditional amplification by sampling
+results discussed in Section 1.1, e.g. sampling without replacement, these dependences are a lot milder than those
+present in cluster sampling.
+The traditional privacy amplification by subsampling results are often called “secrecy of the sample” since the
+additional privacy is derived from the fact that whether or not any data subject is included in the sample is hidden.
+This intuition fails us for cluster sampling, a few simple examples show that there is no general amplification result
+for cluster sampling. To see this consider the following simple cluster sampling scheme: there are two clusters C1
+and C2 so P = C1∪C2. A single cluster Ci is chosen uniformly at random and a ǫ-differentially private mechanism
+M is performed on Ci. Let C be the sampling algorithm. Let C ′1 differ from C1 on a single data point. Then
+P(M ◦ C(P ) = a)
+P(M ◦ C(P ′) = a)
+=
+1
+2
+P(M(C1) = a) +
+1
+2
+P(M(C2) = a)
+1
+2
+P(M(C ′
+1
+) = a) + 1
+2
+P(M(C2) = a)
+(1)
+Now we can see that if the distribution on outputs of M(C1) and M(C2) is very different then we don’t expect
+amplification (for intuition suppose P(M(C2) = a) = 0 and P(M(C1) = a) 6= 0). For a concrete example, suppose
+M(Z) = |Z|+ Lap(1/ǫ) for some mechanism M with sensitivity 1. Suppose |C1| = 0 and |C2| = b and |C ′1| = 1
+then the privacy guarantee of M◦ C is
+P(M◦ C(P ) = 0)
+P(M◦ C(P ′) = 0)
+=
+1 + e−ǫb
+e−ǫ + e−ǫb
+, (2)
+which quickly approaches eǫ as b increases. Intuitively, the problem is that from the output, it is easy to guess which
+cluster was chosen, so there is no secrecy of the sample.
+Conversely, if the output distributions of M(C1) and M(C2) really are similar then equation 1 shows that
+we do obtain amplification. For example if the distributions are identical then the privacy guarantee of M ◦ C is
+log((1 + eǫ)/2) < ǫ. Unfortunately, in practice as pointed out above, we rarely have homogeneity between clusters.
+Random differential privacy [8] gives a way to formalize the notion that we expect the datasets C1 and C2
+to look similar. Given a distribution D over U , random differential privacy requires that the differential privacy
+guarantee holds with high probability over neighbouring datasets P and P ′ drawn from D∗. Unfortunately, even
+under this significantly weaker notion of the privacy guarantee and the strong assumption that both clusters are
+drawn i.i.d. from the same distribution, we obtain negligible amplification. Suppose that the clusters are mutually
+homogeneous such that each data point (in both clusters) xi is draw from the uniform distribution on {0, 1}. Let
+5
+M(Z) = g(Z) + Lap(1/ǫ) where g(Z) =
+∑|Z|
+i=1 zi, and |C1| = |C2| = n. Both g(C1) and g(C2) are drawn from
+the Binomial distribution Bin(n, 1/2) which has variance 1
+4
+n. Therefore, we expect |g(C1) − g(C2)| ≈ 14
+√
+n with
+constant probability. This results in a privacy guarantee of e
+ǫ+e
+− 1
+4
+ǫ
+√
+n
+1+e
+− 1
+4
+ǫ
+√
+n
+, which quickly approaches eǫ as n increases.
+The problem again is that there is no secrecy of the sample since the noise due to privacy is smaller than the sampling
+error.
+5 Conclusions and Future Work
+Data-dependent sampling rates and correlations between individuals’ sampling events necessitate caution in
+using the intuition that subsampling improves privacy in real sampling designs. Indeed, our negative results provide
+scenarios where sampling degrades privacy.
+We are working to extend our positive result for stratified sampling with Poisson sampling within each stratum
+to sampling designs with non-constant sampling rates. In proportional sampling, the number of samples drawn from
+each stratum i is proportional to the size of stratum i to ensure constant sampling rates in each stratum. A more
+complex sampling design is the Neyman (or “optimal”) allocation which accounts for both the size of each stratum
+and the variability of a statistic within each stratum to allocate a fixed number of samples in a fashion that minimizes
+the total variance of the statistic.
+Our predominant goal has been to analyse the privacy implications of sampling schemes as they are currently
+deployed. However, we are also working to identify lightweight changes current sampling schemes that would result
+in improved privacy guarantees. We are working to circumvent our lower bounds for sampling without replacement
+when working with datasets for which f has lower local sensitivity than the worst case. Techniques such as the
+propose-test-release framework [6] would let us privately verify that f has low local sensitivity and, in such cases,
+give a guaranteed amplified privacy parameter. The downside to such an approach is that testing for non-worst-case
+sensitivity requires changing the algorithm and consuming additional privacy budget.
+As our ultimate objective is to understand what kinds of amplified privacy guarantees are afforded by real sam-
+pling designs themselves, a more appealing option is to take a definitional perspective: Could there be a variant of
+differential privacy (with similar semantics) that does enjoy amplification under data-dependent sampling without
+replacement?
+Finally, an additional challenge is to model sampling designs that involve complex-decision making. In particu-
+lar, sampling designs where rates depend on human judgment or opaque analyses of past data releases are difficult
+to encode when conducting an end-to-end privacy analysis.
+Acknowledgements
+We’d like to thank Borja Balle and Om Thakkar for helpful discussions on this work.
+References
+[1] M. Alaggan, S. Gambs, and A.-M. Kermarrec. Heterogeneous differential privacy. Journal of Privacy and
+Confidentiality, 7, 04 2015.
+[2] B. Balle, G. Barthe, and M. Gaboardi. Privacy amplification by subsampling: Tight analyses via couplings
+and divergences. In Advances in Neural Information Processing Systems 31: Annual Conference on Neural
+Information Processing Systems 2018, NeurIPS 2018, 3-8 December 2018, Montréal, Canada, pages 6280–
+6290, 2018.
+[3] M. Bossler, H. Gartner, A. Kubis, B. Küfner, and T. Rothe. The IAB job vacancy survey: Establishment
+survey on labour demand and recruitment processes, waves 2000 to 2016 and subsequent quarters 2006 to
+2017. FDZ-Datenreport 3, Institute for Employment Research (IAB), 2019.
+6
+[4] M. Bun, K. Nissim, U. Stemmer, and S. Vadhan. Differentially private release and learning of threshold
+functions. In Proceedings of the 56th Annual IEEE Symposium on Foundations of Computer Science, FOCS
+’15, pages 634–649, Washington, DC, USA, 2015. IEEE Computer Society.
+[5] D. Durfee and R. M. Rogers. Practical differentially private top-k selection with pay-what-you-get composition.
+In Advances in Neural Information Processing Systems 32, NeurIPS ’19, pages 3527–3537, Vancouver, BC,
+Canada, 2019.
+[6] C. Dwork and J. Lei. Differential privacy and robust statistics. In Proceedings of the 41st Annual ACM
+Symposium on the Theory of Computing, STOC ’09, pages 371–380, New York, NY, USA, 2009. ACM.
+[7] H. Ebadi, D. Sands, and G. Schneider. Differential privacy: Now its getting personal. SIGPLAN Not.,
+50(1):6981, Jan. 2015.
+[8] R. Hall, A. Rinaldo, and L. Wasserman. Random differential privacy. Journal of Privacy and Confidentiality,
+4, 12 2011.
+[9] Z. Jorgensen, T. Yu, and G. Cormode. Conservative or liberal? personalized differential privacy. In 2015 IEEE
+31st International Conference on Data Engineering, pages 1023–1034, 2015.
+[10] S. P. Kasiviswanathan, H. K. Lee, K. Nissim, S. Raskhodnikova, and A. Smith. What can we learn privately?
+SIAM Journal on Computing, 40(3):793–826, 2011.
+[11] K. Ligett, S. Neel, A. Roth, B. Waggoner, and S. Z. Wu. Accuracy first: Selecting a differential privacy level
+for accuracy constrained ERM. In Advances in Neural Information Processing Systems 30, NIPS ’17, pages
+2566–2576, Long Beach, CA, USA, 2017.
+[12] R. M. Rogers, A. Roth, J. Ullman, and S. P. Vadhan. Privacy odometers and filters: Pay-as-you-go composition.
+In Advances in Neural Information Processing Systems 29, NIPS ’16, pages 1921–1929, Barcelona, Spain,
+2016.
+[13] Y. Wang, B. Balle, and S. P. Kasiviswanathan. Subsampled renyi differential privacy and analytical moments
+accountant. In The 22nd International Conference on Artificial Intelligence and Statistics, AISTATS 2019,
+16-18 April 2019, Naha, Okinawa, Japan, volume 89 of Proceedings of Machine Learning Research, pages
+1226–1235. PMLR, 2019.
+[14] Y.-X. Wang, J. Lei, and S. E. Fienberg. Learning with differential privacy: Stability, learnability and the
+sufficiency and necessity of ERM principle. J. Mach. Learn. Res., 17:183:1–183:40, 2016.
+7
+	1 Introduction
+	1.1 Privacy Amplification by Sampling
+	2 Privacy Degradation for Data Dependent Survey Design
+	3 Stratified Sampling
+	3.1 Controlling privacy loss in stratified sampling
+	4 Clustered Sampling
+	5 Conclusions and Future Work

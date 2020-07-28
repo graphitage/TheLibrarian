@@ -1,0 +1,1892 @@
+Axion quality from the
+(anti)symmetric of SU(N )
+Marco Ardu
+a
+, Luca Di Luzio
+b
+, Giacomo Landini
+a,c
+,
+Alessandro Strumia
+a
+, Daniele Teresi
+a,c
+, Jin-Wei Wang
+a,d,e
+a
+Dipartimento di Fisica, Università di Pisa, Italy
+b
+DESY, Notkestraße 85, D-22607 Hamburg, Germany
+c
+INFN, Sezione di Pisa, Italy
+d
+Key Laboratory of Particle Astrophysics, Institute of High Energy Physics, Chinese
+Academy of Sciences, Beijing, China
+e
+School of Physical Sciences, University of Chinese Academy of Sciences, Beijing, China
+We propose two models where a U(1) Peccei-Quinn global symmetry
+arises accidentally and is respected up to high-dimensional operators,
+so that the axion solution to the strong CP problem is successful even
+in the presence of Planck-suppressed operators. One model is SU(N )
+gauge interactions with fermions in the fundamental and a scalar in
+the symmetric. The axion arises from spontaneous symmetry break-
+ing to SO(N ), that confines at a lower energy scale. Axion quality
+in the model needs N >∼ 10. SO bound states and possibly monopoles
+provide extra Dark Matter candidates beyond the axion. In the second
+model the scalar is in the anti-symmetric: SU(N ) broken to Sp(N )
+needs even N >∼ 20. The cosmological DM abundance, consisting of
+axions and/or super-heavy relics, can be reproduced if the PQ sym-
+metry is broken before inflation (Boltzmann-suppressed production of
+super-heavy relics) or after (super-heavy relics in thermal equilibrium
+get partially diluted by dark glue-ball decays).
+1
+ar
+X
+iv
+:2
+00
+7.
+12
+66
+3v
+1 
+ [
+he
+p-
+ph
+] 
+ 2
+4 
+Ju
+l 
+20
+20
+Contents
+1 Introduction 2
+2 Outline of the models 4
+3 Antisymmetric scalar that breaks SU(N )→ Sp(N ) 5
+3.1 Symmetry breaking and perturbative spectrum . . . . . . . . . . . . . . . . . . 6
+3.2 Confinement and bound states . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+3.3 Axion effective Lagrangian . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 7
+3.4 Higher dimensional operators . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+3.5 Cosmology and Dark Matter . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 11
+4 Symmetric scalar that breaks SU(N )→ SO(N ) 16
+4.1 Symmetry breaking and perturbative spectrum . . . . . . . . . . . . . . . . . . 17
+4.2 Confinement and bound states . . . . . . . . . . . . . . . . . . . . . . . . . . . . 17
+4.3 Higher dimensional operators . . . . . . . . . . . . . . . . . . . . . . . . . . . . 18
+4.4 SU(N )/ SO(N ) monopoles? . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
+4.5 Cosmology and Dark Matter . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 20
+5 Conclusions 21
+1 Introduction
+The Peccei-Quinn (PQ) solution to the strong CP problem [1, 2] has a problematic aspect:
+it relies on a global U(1)PQ symmetry which, although broken at low energy by the QCD
+anomaly, must be an extremely good symmetry of high-energy physics. This issue is known as
+the PQ quality problem [3–8]. Global symmetries are believed not to be fundamental, and arise
+as accidental symmetries e.g. in gauge theories. Well known examples are baryon and lepton
+numbers in the Standard Model (SM). Conceptually, there are two steps in the formulation of
+the problem:
+i) the U(1)PQ should arise accidentally in a renormalizable Lagrangian;
+ii) approximating higher-energy physics as non-renormalizable operators suppressed by some
+scale ΛUV, the U(1)PQ should be preserved by operators with dimension up to d ∼ 9
+assuming ΛUV ∼MPl and an axion decay constant fa & 109 GeV.
+The bound becomes stronger for higher fa and lower ΛUV. Indeed, it comes from requiring that
+the energy density due to UV sources of U(1)PQ breaking is about 10
+−10
+times smaller than
+2
+the energy density of the QCD axion potential(
+fa
+ΛUV
+)d−4
+f
+4
+a . 10
+−10
+Λ
+4
+QCD, (1)
+so that the induced axion vacuum expectation value (VEV) is 〈a〉/fa . 10−10, within the
+neutron electric dipole moment bound.
+In string models one expects towers of new states below or around the Planck scale, that
+make manifest the PQ-quality problem. The PQ-quality problem is not present in different
+theories with no states heavier than fa that mediate PQ-breaking operators, so that the effective
+operators assumed in eq. (1) are absent.
+Furthermore, it is believed that gravity violates global symmetries, based on semi-classical
+arguments related to black holes and Hawking radiation. In scenarios in which Einstein gravity
+is minimally coupled to the axion field, non-conservation of the PQ global charge arises from
+non-perturbative effects described by Euclidean wormholes. These effects are calculable to some
+extent and correct the axion potential as [9–13]
+∼M4Ple−Swh cos (a+ δ) , (2)
+where Swh ∼ MPl/fa is the wormhole action and δ is a generic displacement due to the fact
+that the gravity contribution does not need to be aligned to the low-energy QCD contribution.
+Although exponentially suppressed, the contribution in eq. (2) poses a problem for the PQ
+solution for fa & 6 10
+16
+GeV.
+Eq. (2) holds if gravity is well described by the Einstein term at Planckian energies. An
+alternative possibility is that gravity gets modified at lower energies where it is still weakly
+coupled so that it remains weakly coupled, making non-perturbative effects irrelevant. This
+for example arises in 4-derivative gravity, a renormalizable theory that allows for accidental
+global symmetries not broken by higher dimensional operators and negligibly broken by non-
+perturbative gravitational effects [14]. Such theory, however, contains potentially problematic
+negative kinetic energy at the classical level (see e.g. [15]).
+We here assume that the PQ-quality problem is a real problem and address it by devising a
+simple gauge dynamics along the lines of [16,17] that gives an accidental global PQ symmetry
+respected by operators up to large enough dimension. Section 3 describes a model based on
+a gauge group SU(N ) spontaneously broken to Sp(N ) by a scalar S in the anti-symmetric
+representation in the presence of fermions in the fundamental, as listed in table 1. The PQ
+symmetry is broken by the N /2-dimensional local operator
+√
+detS. Section 4 considers a
+similar model where a scalar S in the symmetric breaks SU(N )→ SO(N ), and the first PQ-
+breaking operator is the N -dimensional operator detS. Both models can provide extra Dark
+Matter (DM) candidates beyond the axion. Section 2 outlines some common features of the
+two models. Section 3 describes the model with a scalar in the anti-symmetric, and section 4
+the model with a scalar in the symmetric. Conclusions are given in section 5.
+3
+Field Lorentz Gauge symmetries Global accidental symmetries
+name spin U(1)Y SU(2)L SU(3)c SU(N ) U(1)PQ U(1)Q U(1)L
+S 0 0 1 1 NN +1 0 0
+QL 1/2 +YQ 1 3 N +1/2 +1 0
+QR 1/2 −YQ 1 3̄ N +1/2 −1 0
+L1,2,3L 1/2 +YL 1 1 N̄ −1/2 0 +1
+L1,2,3R 1/2 −YL 1 1 N̄ −1/2 0 −1
+Table 1: Field content of the model. The scalar S can be in the anti-symmetric (section 3) or
+in the symmetric (section 4) two-index representation. The heavy quarks QL,QR and leptons
+LL,LR are Weyl doublets. If L have vanishing hypercharge, their bound states could become
+acceptable DM candidates and there is no difference between LL and LR.
+2 Outline of the models
+We consider a gauge group GSM ⊗ SU(N ), with a new scalar S in the two-index symmetric
+or anti-symmetric representation of SU(N ), and new left-handed chiral Weyl fermions charged
+under SU(N ) as listed in table 1: one Q dubbed ‘quark’ because in the fundamental of color,
+and three L dubbed ‘leptons’ because uncolored. Three L are needed in order to avoid gauge
+anomalies and to obtain the desired PQ anomalies. The three L could be 1 ⊕ 2 or 1 ⊕ 1 ⊕ 1
+under SU(2)L; as the choice does not make a big difference we assume the latter possibility and
+that all 3 leptons have the same hypercharge YL, for the moment left unspecified and possibly
+vanishing. Irrespectively of their hypercharges, the fermions Q and L are chiral: their mass
+terms are forbidden by gauge invariance for all values of the hypercharges YQ and YL.
+As discussed in the next sections, the renormalizable theory contains three accidental global
+U(1) symmetries: the one acting as a phase rotation of the scalar S will be the PQ symmetry.
+It gets spontaneously broken by the vacuum expectation value of the scalar S, that also breaks
+SU(N ) to either Sp(N ) (scalar in the anti-symmetric, studied in section 3) or to SO(N )
+(scalar in the symmetric, studied in section 4). As a result the fermions Q and L acquire mass
+from Yukawa couplings to S and the phase of S becomes the axion. In both models all gauge
+anomalies vanish, and U(1)PQ has the desired anomalies:
+• There is a non-vanishing U(1)PQ SU(3)2c anomaly: to achieve this we introduced the
+fermions L and Q in two different representations of color. We chose the simplest ones
+(singlet and triplet), although different models using more complicated representations of
+color are possible.
+• The U(1)PQ U(1)2Y anomaly is proportional to Y 2Q − Y 2L and contributes to the axion-
+photon coupling.
+4
+• We introduced the appropriate number of leptons L such that the U(1)PQ SU(N )2 anomaly
+vanishes: then the axion relaxes the SU(3)c θ term, rather than the one of the extra gauge
+group SU(N ).
+A similar model based on SU(N )L× SU(N )R gauge dynamics broken by a scalar transforming
+in the bi-fundamental down to SU(N )L+R was considered in [16], which shares similarities with
+the two models presented here. Differently from [16], we assign non-zero SM hypercharges to
+the exotic fermions and show that it is possible to get rid of dangerous colored relics. This
+enlarges the parameter space of the model also to the case where the PQ is broken after inflation
+and opens the possibility of having extra DM candidates in the form of Sp/SO bound states.
+3 Antisymmetric scalar that breaks SU(N )→ Sp(N )
+We assume even N , as for odd N symmetry breaking is slightly different and the axion is eaten
+by a vector [17]. If N > 8 the most generic renormalizable Lagrangian is
+L = LSM + Lkin + LYuk − V (S). (3)
+Using Weyl two-component spinors
+Lkin = −
+1
+4
+GAµνGAµν + Tr(DµS)(DµS)† +
+∑
+f=QL,R,LL,R
+f̄ iDµσ
+µ
+f (4a)
+−LYuk =
+{
+yQQLS∗QR + yijL L
+i
+LSLjR + h.c. if YL 6= 0
+yQQLS∗QR + yii
+′
+L LiSLi
+′
+/2 + h.c. if YL = 0
+(4b)
+V (S) = M2S Tr(SS†) + λS Tr(SS†)2 + λ′S Tr(SS†SS†)− λHS(H†H) Tr(SS†), (4c)
+where H is the SM Higgs doublet. If YL 6= 0 without loss of generality we can rotate to a
+basis where the Yukawa matrix yL is diagonal, diag(yL1 , yL2 , yL3), with real positive entries. If
+YL = 0 the matrix yL is anti-symmetric and can be rotated to diag(yL1 , yL2 , yL3)⊗ � where � is
+the 2× 2 antisymmetric Levi-Civita tensor.
+Accidental symmetries
+The gauge-covariant kinetic terms are invariant under phase rotations of each field. In the
+presence of the Yukawa and potential couplings the theory remains accidentally invariant under
+U(1)Q ⊗ U(1)L1,2,3 ⊗ U(1)PQ (5)
+where U(1)Q and U(1)Li are the baryon and lepton numbers of Q and Li according to which
+QL and QR have the opposite charge (similarly for leptons), while S is uncharged. The U(1)PQ
+5
+symmetry acting on S can be identified (a posteriori) as a PQ symmetry and it acts as shown
+in table 1, where we chose a convenient basis. The accidental flavour symmetry rotates with
+opposite phases the two L fields involved in each mass term: for YL 6= 0 mass terms involve
+LLLR pairs, while for YL = 0 a similar pair structure arises at renormalizable level thanks to
+the anti-symmetry of the mass matrix.
+Landau poles
+We constrain the field content and parameters of the model by requiring that its couplings do
+not hit Landau poles below the Planck scale. The SU(N ) gauge coupling g is asymptotically
+free. Above the masses mQ,mL of the new fermions, the one-loop beta functions of the strong
+and hypercharge gauge coupling g
+2
+1 = 5g
+2
+Y /3 are
+dg
+2
+3
+d lnµ
+2
+=
+g
+4
+3
+(4π)
+2
+(
+−7 + 2
+3
+N
+)
+,
+dg
+2
+1
+d lnµ
+2
+=
+g
+4
+1
+(4π)
+2
+(
+41
+10
++
+12N
+5
+(Y
+2
+L + Y
+2
+Q)
+)
+. (6)
+Assuming mQ ∼ mL ∼ 1011GeV, sub-Planckian Landau poles in g3 and gY are avoided if
+N . 30 and N (Y 2Q + Y 2L ) . 4.
+3.1 Symmetry breaking and perturbative spectrum
+In a range of potential parameters, the scalar S acquires vacuum expectation value 〈S〉 = wγN
+where γN = 1N/2 ⊗ � is the invariant tensor under symplectic transformations. This breaks
+SU(N )⊗U(1)PQ to Sp(N ) leaving one axion and giving mass to all new fermions. Following [17]
+for even N the scalar field is conveniently parametrised as
+S =
+[(
+w +
+s√
+N /2
+)
+γN + 2(s̃
+b
++ iã
+b
+)T̃
+b
+γN
+]
+e
+ia√
+N/2w , (7)
+where T̃
+b
+are the SU(N ) generators such that γN T̃ b is anti-symmetric (which satisfy the con-
+dition T̃
+∗
+= −γN T̃ γN and corresponds to the broken generators). The mass spectrum at
+perturbative level is:
+• N (N + 1)/2 massless vectors Aa in the adjoint of Sp(N );
+• N (N − 1)/2 − 1 vectors Wb in the traceless anti-symmetric of Sp(N ), that acquire a
+squared mass M
+2
+W = g
+2
+w
+2
+eating the Goldstone bosons ã
+b
+;
+• The massless scalar a, singlet under Sp(N ). In view of the U(1)PQ SU(3)2c anomaly it
+can be called axion and, as shown below, its decay constant will be fa = w/
+√
+2N . The
+axion will get a mass because of the QCD anomaly;
+6
+• The scalar s singlet under Sp(N ). If symmetry breaking arises through the Coleman-
+Weinberg mechanism it is light with squared mass M
+2
+s = 24(NλS + λ′S)w2;
+• N (N − 1)/2 − 1 scalars s̃b with squared mass M2s̃ = 8(NλS + 3λ′S)w2, in the traceless
+anti-symmetric of Sp(N );
+• One colored Dirac quark ΨQ = (γNQL, Q̄R)T with massMQ = yQw in the anti-fundamental
+of Sp(N ) charged under the accidental global U(1)Q;
+• Three Dirac leptons with masses MLi = y
+i
+Lw in the fundamental of Sp(N ) and charged
+under the accidental global U(1)Li . Dirac fermions are constructed pairing the Weyl
+fermions involved in each mass term e.g. Ψ
+i
+L = (γNLiL, L̄iR) if YL 6= 0.
+The fermions are perturbatively stable thanks to the unbroken global U(1)Q,Li symmetries
+discussed in eq. (5).
+3.2 Confinement and bound states
+The Sp(N ) gauge dynamics confines at the energy scale
+Λ Sp = fa exp
+[
+− 12π
+11(N + 2)αDC(fa)
+]
+, (8)
+where αDC = g
+2
+/4π and we took into account only the running due to the gauge bosons A. We
+normalise the Dynkin index of SU(N ) as S2 = 1/2 for the fundamental. In the confined phase,
+the baryons containing fermions (�NW(N−2)/2QQ, �NW(N−2)/2LL and �NW(N−2)/2QL, with �N
+denoting the N -dimensional Levi-Civita tensor) decay into lighter mesons QγNQ, LγNL and
+QL. Depending on the constituent masses mQ and mL, 2 or 3 of such mesons are stable because
+of the accidental fermion-number symmetries U(1)Q and U(1)L present at the renormalizable
+level,
+1
+we will later discuss how the situation changes at the non-renormalizable level.
+3.3 Axion effective Lagrangian
+Under a U(1)PQ rotation with angle α the fields transform as
+a→ a+ α
+√
+N /2w, Q → e+iα/2Q, Li → e−iα/2Li.
+1
+The new sector also respects a C symmetry [17] defined as S → S∗, Dµ → D∗µ, F → iγ2F†, with F denoting
+the various fermions. On the Sp(N ) bosonic multiplets, C acts as follows
+s→ s, a→ −a, s̃→ −γN s̃γN , A → −γNAγN , W → γNWγN . (9)
+The colored fermions Q relate this symmetry to the SM via QCD, so that C (combined with parity) extends
+the usual charge-parity conjugation CP, under which the axion is odd, as it should.
+7
+The QCD and QED anomalies are
+AQCD = N
+g
+2
+3
+32π
+2
+G
+aµν
+G̃
+a
+µν , AQED = 3N
+e
+2
+16π
+2
+(Y
+2
+Q − Y 2L )F µνF̃µν . (10)
+In view of the above anomalies the effective axion Lagrangian is
+Leffanom =
+a√
+N /2w
+N g
+2
+3
+32π
+2
+G
+aµν
+G̃
+a
+µν +
+a√
+N /2w
+3N (Y 2Q − Y 2L )
+e
+2
+16π
+2
+F
+µν
+F̃µν
+≡ a
+fa
+g
+2
+3
+32π
+2
+G
+aµν
+G̃
+a
+µν +
+g
+0
+aγ
+4
+aF
+µν
+F̃µν , (11)
+where in the last step we identified the axion decay constant fa = w/
+√
+2N and coupling to
+photons g
+0
+aγ = 3e
+2
+(Y
+2
+Q−Y 2L )/4π2fa. After rotating away the aGG̃ term via an axion-dependent
+light quark field redefinition, the axion-photon coupling gets dressed via the axion-pion mixing
+as gaγ = αemCaγ/(2πfa) in terms of the dimension-less coupling [18–20]
+Caγ = 6(Y
+2
+Q − Y 2L )− 1.92(4). (12)
+Axion Domain Walls
+The QCD anomaly breaks U(1)PQ → ZN , since the 2πfa-periodic axion potential has N
+degenerate minima when the axion field is varied in its angular domain a ∈ [0, 2π)
+√
+N /2w =
+[0, 2π)N fa. However, the ZN action can be embedded in the SU(N ) center, thus making the
+axion minima gauge equivalent. This avoids the formation of axion domain walls at the QCD
+phase transition, and solves the axion domain wall problem along the lines of [21, 16].
+3.4 Higher dimensional operators
+So far we considered the renormalizable theory. As anticipated, the relevance of the present
+model consists in the fact that the PQ symmetry arises accidentally at the renormalizable
+level and can remain good enough even in the presence of possible non-renormalizable opera-
+tors. In this section we study how effective operators can break accidental symmetries, hence
+contributing to the axion potential and to the decay of heavy relics.
+PQ-breaking operators
+We defined the PQ symmetry such that the PQ charge of any field is proportional to its N -
+ality (number of lower indices minus number of higher indices). This means that operators
+containing one �N tensor of SU(N ) break the PQ symmetry, while it is preserved by all other
+operators, such as the renormalizable Yukawa couplings of eq. (4b), or the dimension-7 operator
+(qRQL)S∗(q′RQL).
+8
+We then search for the lowest-dimensional operator containing one �N tensor. This is
+built contracting with scalars S, as replacing one SIJ with two fermions QI or L̄I increases
+the dimension of the operator. The lowest dimensional operator that explicitly breaks the
+accidental PQ symmetry is the Pfaffian, with dimension N /2
+Pf S =
+√
+detS = �I1I2...IN−1INN SI1I2 . . .SIN−1IN . (13)
+Assuming that new physics generates such operator with coefficient suppressed by some scale
+ΛUV, its contribution to the axion potential originates from
+e
+iϕ
+Λ
+N/2−4
+UV
+Pf S + h.c., (14)
+where ϕ is a generic CP-violating phase. Inserting Pf S = wN/2eia/2fa + · · · the axion potential
+obtained from QCD plus eq. (14) is
+Va = −m2πf 2π cos
+(
+a
+fa
++ θ̄
+)
++
+2w
+N/2
+Λ
+N/2−4
+UV
+cos
+(
+a
+2fa
++ ϕ
+)
+, (15)
+where θ̄ is the QCD topological term in a basis in which the SM quark masses are real. The
+experimental bound 〈a/fa〉+ θ̄ < 10−10 is satisfied for
+fa .
+ΛUV√
+N /2
+(
+mπfπ
+Λ
+2
+UV
+)4/N
+× 10−20/N . (16)
+Note that this bound holds even if the new physics respects CP, ϕ = 0, as the operator would
+not relax the axion to the field value that cancels CP violation at low energy and hence it
+would not cancel the θ̄ term. If ΛUV ∼ MPl, the phenomenological bound fa & 1011 GeV for
+PQ symmetry broken after inflation requires N & 24. If, instead, the PQ symmetry is broken
+before inflation fa can be as low as 10
+9
+GeV and then N & 20 suffices. In our numerical plots
+we will assume for definiteness a Planckian cut-off. If instead ΛUV ≈ 2×1016 GeV (as motivated
+e.g. by supersymmetric unification) one needs N & 24 for fa & 109 GeV.
+Q-decay operators
+Furthermore, gauge invariance allows dimension 6 operators such as
+(qRQIL)(eRLI), (qRQIR)(q′RLI), (17)
+(where qR = (uR, dR) and eR are left-handed Weyl spinors, SU(2)L-singlet SM quarks and
+leptons) that conserve the PQ symmetry and break the other accidental global U(1)’s as
+U(1)Q ⊗ U(1)L → U(1)Q−L (18)
+9
+such that only the lightest state containing Q and/or L is stable. Assuming that Q is heavier
+than L, heavier Sp bound states containing Q decay with rate [22]
+ΓQ ≈
+m
+5
+Q
+4(4π)
+3
+Λ
+4
+UV
+[
+1− x2
+2
++ x lnx
+]
+≈ 1
+13 sec
+(
+mQ
+2× 1011 GeV
+)5(
+MPl
+ΛUV
+)4
+, (19)
+for x ≡ mL/mQ ' 0.5. We can reasonably approximate the Big Bang Nucleosynthesis (BBN)
+bound on Q decays [23] by simply demanding that τQ = 1/ΓQ < 0.1 sec such that Q decays
+before BBN. This gives the bound
+fa &
+1
+yQ
+√
+10
+N
+(
+ΛUV
+MPl
+)4/5
+×
+{
+1.2× 1011 GeV for x = 1/2
+0.7× 1011 GeV for x� 1
+. (20)
+Furthermore we neglect the possibility that Q decays while dominating the energy density of
+the universe and thereby providing extra reheating and dilution.
+LL-decay operators
+The Sp mesons LγNL with mass
+MLL ∼ max(Λ Sp, 2yLw), (21)
+are possibly stable but are charged if YL 6= 0. We avoid heavy charged relics assuming
+YL = 0 and YQ = {−
+1
+3
+,
+2
+3
+,−4
+3
+}. (22)
+For YL = 0 the Sp mesons are kept stable only by the accidental flavour symmetry that arises
+at renormalizable level and that gets broken if dimension-6 operators such as LiSS†SLj have
+a different flavour structure. One then expects that LγNL mesons decay fast, leaving no relics
+despite that L is stable. We will however also mention the alternative possibility that LγNL is
+an acceptable DM candidate with τLL>∼ 10
+26
+sec, given that flavour couplings might be small
+and not approximated by a single scale ΛUV.
+The bounds related to Landau poles and higher-dimensional operators (from BBN and PQ
+quality) are plotted in fig. 1, which shows that they can all be simultaneously satisfied for
+N >∼ 24 and physically acceptable values of the axion decay constant fa.
+Axion-photon coupling predictions
+Requiring that the colored exotic states Q decay fast enough to avoid problems with cosmology
+allows to fix their hypercharges and in turn to predict the axion-photon coupling, following a
+similar strategy as in the case of KSVZ axions [24, 25]. In particular, in fig. 2 we show the
+predictions for the dimension-less axion-photon coupling in eq. (12) according to the values of
+10
+108 1010 1012 1014 1016
+20
+22
+24
+26
+28
+30
+PQ scale fa in GeV
+N
+u
+m
+b
+er
+o
+f
+d
+ar
+k
+co
+lo
+rs
+
+SU() → Sp()
+Bad-quality PQ
+Λ
+U
+V
+=
+M
+P
+l
+Λ
+U
+V
+=
+M
+G
+U
+T
+Λ
+U
+V
+=
+M
+G
+U
+T
+Λ
+U
+V
+=
+M
+P
+l
+Colored relics decay
+after BBN
+L
+an
+da
+u
+po
+le
+be
+lo
+w
+M
+P
+l
+L
+an
+da
+u
+po
+le
+be
+lo
+w
+M
+G
+U
+T
+ax
+io
+n
+m
+ak
+es
+all
+D
+M
+fo
+r
+θ
+in
+≈
+1
+✶
+108 1010 1012 1014 1016
+10
+12
+14
+16
+18
+20
+22
+24
+PQ scale fa in GeV
+N
+u
+m
+b
+er
+o
+f
+d
+ar
+k
+co
+lo
+rs
+
+SU() → SO()
+Bad-quality PQ
+Λ
+U
+V
+=
+M
+Pl
+Λ
+U
+V
+=
+M
+G
+U
+T
+Λ
+U
+V
+=
+M
+G
+U
+T
+Λ
+U
+V
+=
+M
+P
+l
+Colored relics decay
+after BBN
+La
+nd
+au
+po
+le
+be
+lo
+w
+M
+Pl
+ax
+io
+n
+m
+ak
+es
+all
+D
+M
+fo
+r
+θ
+in
+≈
+1
+✶
+Figure 1: Values of (fa,N ) such that: i) the model gives rise to a high PQ-quality axion (the
+region shaded in red is excluded); ii) does not have sub-Planckian Landau poles for g3 (gray is
+excluded); iii) colored relics decay before BBN (blue is excluded if PQ is broken after inflation).
+We assumed yQ = 1 = 2yL and non-renormalizable operators suppressed by ΛUV ≈MPl (darker
+regions) or MGUT ≈ 2 1016 GeV (lighter regions). Left: model with a scalar in the anti-
+symmetric. Right: model with a scalar in the anti-symmetric. The stars indicate the models
+considered in fig. 3, 5, that satisfy all the bounds. They lie around the vertical dashed line,
+where axions with initial θi ∼ 1 make all DM.
+the hypercharges in eq. (22). Current limits (full lines) and projected ones (dashed lines) from
+axion experiments are displayed as well. It should be noted that most of those experiments
+(apart for CAST, IAXO and ALPS-II) assume that the axion comprises the 100% of DM.
+Consequently their sensitivity is diluted as Ωa/ΩDM, if the axion is only a fraction of the whole
+DM. Hence, we next study the cosmology and the composition of the DM abundance.
+3.5 Cosmology and Dark Matter
+The model contains two DM candidates: the axion condensate and possibly the LγNL meson
+if YL = 0. The reheating temperature after inflation is TRH ∼
+√
+MPlHinfl if reheating happens
+instantaneously, or TRH ∼
+√
+MPlΓinfl otherwise. Qualitatively different cosmological histories
+arise depending on whether TRH is high enough so that the PQ symmetry is restored after
+inflation.
+11
+10−9 10−8 10−7 10−6 10−5 10−4 10−3 10−2 10−1 100
+Axion mass ma in eV
+10−2
+10−1
+100
+101
+102
+103
+104
+105
+|C
+aγ
+|
+YQ = −1/3
+YQ = 2/3
+YQ = −4/3
+ADMX
+RBF
+UF
+HA
+YS
+TA
+C
+CA
+PP
+ABRACADABRA
+QU
+AX
+MADMAX
+Plasma
+haloscope
+O
+R
+G
+A
+N
+K
+L
+A
+S
+H BRAS
+S
+TOORAD LAMPOST
+Neutron
+stars
+ALP
+S-II
+CAST
+IAXO
+Figure 2: Predictions for the axion-photon coupling in eq. (12) and sensitivity of present and
+future axion experiments. Axion limits from [26].
+3.5.1 PQ broken before inflation, TRH <∼ fa
+If the PQ symmetry is broken during or before inflation and is not restored afterwards, the
+Hubble rate during inflation must be smaller than
+Hinfl . 10
+8
+GeV
+θi
+π
+ΩDM
+Ωa
+fa
+10
+12
+GeV
+(23)
+in order to avoid excessive axion iso-curvature fluctuations during inflation (see e.g. section 3.5
+of [27]). This implies an upper bound on TRH, that anyhow must be smaller than fa under the
+present assumptions.
+All the heavy stable relics including topological defects (strings from PQ breaking) get
+diluted during the inflationary expansion. The abundance of the DM candidates is estimated
+as follows:
+• The axion DM abundance produced through the misalignment mechanism can be ana-
+lytically approximated as [27]
+Ωah
+2
+0.12
+≈ θ2in
+(
+fa
+2.0× 1011 GeV
+)7/6
+, (24)
+where the initial axion phase θin is expected to be of order one, but can accidentally be
+smaller.
+• The LγNL mesonML with mass MLL given in eq. (21) might be stable and light enough
+that it is produced thermally.
+12
+– If TRH >∼ΛSp and possibly larger than mL, its constituents can be produced from
+AA → LL̄ with rate γ ∼ g4T 4e−2mL/T . The resulting number abundance is
+YLL ≈ max
+T
+γ
+Hs
+∼ g
+4
+MPl
+min(mL, TRH)
+e
+−2mL/TRH (25)
+and gets later diluted by glue-ball decays.
+– If TRH <∼ΛSp it can be produced from aX → MLM̄L with space-time density rate
+γ ∼ Λ4SpT 4e−2MLL/T/f 4a . The resulting number abundance is
+YLL ≈
+γ
+Hs
+∣∣∣
+T=TRH
+∼ e−2MLL/TRH
+MPlΛ
+4
+Sp
+TRHf
+4
+a
+. (26)
+In fig. 3a we show the parameter space of the model for some representative benchmark values.
+We select a high N = 26 such that DM can be composed solely by axions: in view of eq. (24)
+this happens along the vertical line in fig. 3. More likely LL are unstable and the value of yL
+is irrelevant. We assumed a small yL = 10
+−3
+such that, if LL is stable, a second DM branch
+appears in fig. 3a in which DM is composed by mesons via thermal production. The transition
+between eq. (25) and eq. (26) gives rise to the discontinuity at TRH ∼ ΛSp in fig. 3a.
+3.5.2 PQ broken after inflation, TRH >∼ fa
+We here consider the alternative situation where the reheating temperature is high enough that
+the PQ symmetry is restored after inflation and all the new states predicted by the model
+thermalise.
+Demanding that axions do not exceed the cosmological DM density gives the bound fa <
+2.0 × 1011 GeV for the average initial misalignment angle θin = 2.2. The latter numerical
+result (more precise than eq. (24)) is obtained by tracking the temperature dependence of
+the topological susceptibility via lattice QCD simulations [28]. If the PQ symmetry is broken
+after inflation, topological defects (strings and domain walls) add up to the total axion relic
+density. The contribution of would-be disastrous axion domain walls to the energy density is
+avoided thanks to the mechanism outlined at the end of section 3.3, while that of axion strings
+is relevant, but difficult to be estimated (see e.g. [29]). We neglect it here for simplicity, also
+because a complete consensus on their importance has not been achieved yet in the literature.
+However, recent developments indicate that they would strengthen the upper bound on fa by
+more than one order of magnitude [30].
+On the other hand, the possibly stable DM candidate LγNL risks being over-abundant. Its
+thermal relic abundance, YLL ∼ 1/TdecMPlσann with σann ∼ 1/Λ2Sp and Tdec ∼ Λ Sp (section
+2.3 of [31] contains an extended discussion), is over-abundant if its mass MLL is above than
+100 TeV, the critical value above which even strongly-coupled freeze-out leaves too much DM.
+A LγNL lighter than 100 TeV needs a very small yL and ΛSp.
+13
+109 1010 1011 1012
+105
+106
+107
+108
+109
+1010
+PQ scale fa in GeV
+D
+ar
+k
+co
+n
+d
+en
+sa
+ti
+o
+n
+sc
+al
+e
+Λ
+S
+p
+in
+G
+eV
+PQ broken before inflation (yL = 10
+-3)
+ΩDMh
+2 < 0.11
+B
+ad
+-
+q
+u
+al
+it
+y
+P
+Q
+Ω
+D
+M
+h
+2
+>
+0
+.1
+1
+θ
+in
+=
+1
+Dark glueballs decay
+after BBN
+TRH = ΛSp
+meson DM
+ax
+io
+n
+D
+M
+Landau Pole
+below MPl
+1011 1012
+105
+106
+107
+108
+109
+1010
+PQ scale fa in GeV
+D
+ar
+k
+co
+n
+d
+en
+sa
+ti
+o
+n
+sc
+al
+e
+Λ
+S
+p
+in
+G
+eV
+PQ broken after inflation (yL = 10
+-3)
+Ω
+D
+M
+h
+2
+>
+0
+.1
+1
+C
+o
+lo
+re
+d
+re
+li
+cs
+d
+ec
+ay
+af
+te
+r
+B
+B
+N
+Dark glueballs decay after BBN
+B
+ad
+-
+q
+u
+al
+it
+y
+P
+Q
+meso
+n DM ax
+io
+n
+D
+M
+ΩD
+M
+h
+2 < 0
+.11
+Figure 3: Parameter space of the SU(26) model assuming YL = 0, YQ = −1/3, and yQ =
+1. We chose a large N such that the cosmological DM abundance is reproduced along the
+red/green boundary (the dashed curve shows how this boundary would change if, in addition
+to the axion, a cosmologically stable LL meson with yL = 10−3 contributes to DM; otherwise
+the same plots apply for any yL � yQ). The right red region is disfavoured by the PQ quality
+arguments in eq. (16). Left: assuming that the PQ symmetry is broken before inflation with
+TRH = 10
+7
+GeV� fa. The left gray region is excluded by sub-Planckian Landau poles. Right:
+assuming that TRH >∼ fa, i.e. PQ-breaking after inflation. The left white region is excluded
+because colored relics decay after BBN (τQ > 0.1 sec).
+Furthermore, the colored relics and the glue-balls of Sp(N ) must decay before BBN, but
+their decay can be slow enough so that they substantially reheat the universe. Dark glue-balls
+decays dilute all relics containing Q and L heavy fermions (while the axion density is still a
+cosmological constant and hence is not diluted), allowing to get a multi-component LγNL plus
+axion abundance that matches the DM relic density. We anyhow demand that colored relics
+decay before BBN, which implies the bound found in eq. (20).
+Glue-balls with mass ∼ ΛSp that decay at T = Tdecay ∼ (Γ2DGM2Pl/ΛSp)1/3 reheat the universe
+up to TRH′ ∼ Tdecay(ΛSp/Tdecay)
+1/3
+. The dilution factor is estimated as [32]
+D =
+
+1 + gDG
+gSM
+(
+Λ
+2
+Sp
+ΓDGMPl
+) 2
+3
+
+−1 , (27)
+where gSM ≈ 100 is the number of SM degrees of freedom, and gDG = N (N + 1) is the number
+of Sp dark gluons [33]. A large D can need a baryogenesis mechanism below TRH′ ; we do not
+14
+G
+Q
+g
+QG g
+Q
+Q G
+Q
+a
+QG
+a
+Q
+Q
+a
+a
+G
+Q
+Q
+Q
+G
+s
+Figure 4: Some Feynman diagrams for dark glue-ball decay into gluons and axions. Analogous
+diagrams with heavy leptons L or vectors W in the loops are not plotted.
+address such model-dependent issue.
+Dark glue-balls with mass MDG ≈ 7Λ Sp can decay into axions and SM particles through
+the Feynman diagrams in fig. 4. The rates are estimated as follows:
+• Glue-balls decay into gluons g through a loop of Q (left-handed diagram in fig. 4) that
+gives the dimension 8 effective operator A2µνg2αβ (see eq. (41) of [33])
+ΓDG→gg ∼
+α
+2
+DCα
+2
+3M
+9
+DG
+m
+8
+Q
+. (28)
+• Glue-balls decay into axions through a loop of Q or L (middle diagram in fig. 4) that
+gives the dimension 8 operator A2µν(∂αa)2
+ΓDG→aa ∼
+α
+2
+DCM
+9
+DG
+m
+8
+Q,L
+(
+mQ,L
+4πfa
+)2
+. (29)
+A similar diagram gives decays into ag.
+• Glue-balls decay into axions as described by the right-handed diagram in fig. 4: through
+the dimension 5 operator (18−7N )αDCA2µνs/16πw times the dimension 5 s(∂αa)2 operator
+ΓDG→aa ≈
+(18− 7N )2α2DCM9DG
+512π
+3
+M
+4
+s f
+4
+a
+. (30)
+• Glue-balls decay into HH† = {hh, hZ, ZZ,W+W−} proceed through the coupling λHS
+that connects the dark and the SM sectors (that however can be small, in order to avoid
+an unnaturally large contribution to the Higgs mass). Taking into account that h mixes
+with s we obtain, for MDG �Mh,W,Z
+Γ
+DG→HH† ≈
+(18− 7N )2α2DCλ2HSM5DG
+2048π
+3
+M
+4
+s
+. (31)
+15
+The most important channels are (29) and (30) for yL � 1, while (30) dominates if yL ∼ 1.
+The parameter space is plotted in fig. 3b: we see that regions exist where all constraints are
+satisfied, the axion quality is good, and the DM cosmological abundance is reproduced either
+through axions or through dark mesons (if stable), or both.
+4 Symmetric scalar that breaks SU(N )→ SO(N )
+We next consider a different but similar model: the scalar is now in the symmetric representation
+and spontaneously breaks the SU(N ) gauge group to SO(N ). We avoid repeating the many
+aspects of the model which remain similar to those in section 3 and highlight the key differences.
+If N > 4 the most generic renormalizable Lagrangian has the same form as in eq.s (3) and
+(4). The Yukawa matrix yL is now symmetric and can be rotated to a basis where it is diagonal
+with real positive entries. We again require that couplings do not hit Landau poles below the
+Planck scale; SM couplings run as in the previous model, giving the same constraints.
+Accidental symmetries
+The situation is similar to the model of section 3, but with two differences.
+First, in both models the SU(N ) theory is accidentally invariant under a reflection, which
+we dub U-parity [17], of any of the N equivalent directions in group space. U-parity is obtained
+by flipping the sign of any color, for example the 1st one. This flips the signs of those generators
+with an 1I entry, preserving the SU(N ) Lie algebra, such that U parity acts on components of
+vectors in the adjoint and of other multiplets as
+GJI
+PU→ (−1)δ1I+δ1JGJI , QI
+PU→ (−1)δ1IQI , LI
+PU→ (−1)δ1ILI , SIJ
+PU→ (−1)δ1I+δ1JSIJ
+(32)
+having written the SU(N ) vectors as GIJ = GA(TA)IJ . We ignored U-parity when discussing
+the SU(N ) → Sp(N ) breaking in the previous section, because U-parity was broken by 〈S〉.
+In the present model, instead, U-parity is preserved when SU(N ) is spontaneously broken by
+〈S〉 = w1N to SO(N ). As a result, SO(N ) confinement produces dark baryons odd under
+U-parity: those built contracting constituents with one �N . The lightest of such baryons is a
+stable DM candidate.
+The U(1)PQ symmetry again acts as shown in table 1. If YL 6= 0 all accidental global
+symmetries are the same as in the previous model, eq. (5). The second difference arises if YL = 0:
+leptons now acquire a Majorana mass, so U(1)L lepton number gets replaced by a Z2 that acts
+as lepton parity Li → −Li. The accidental global symmetries become U(1)Q ⊗ Z2 ⊗ U(1)PQ.
+16
+4.1 Symmetry breaking and perturbative spectrum
+In a range of potential parameters, the scalar S acquires vacuum expectation value 〈S〉 = w1N .
+This breaks SU(N ) ⊗ U(1)PQ to SO(N ) leaving one axion and giving mass to all fermions.
+Following [17] the scalar field is conveniently parametrised as
+S =
+[(
+w +
+s√
+2N
+)
+diag(1, . . . , 1) + (s̃
+b
++ iã
+b
+)T
+b
+real
+]
+e
+ia√
+2Nw (33)
+where T
+b
+real are the real (symmetric) generators of SU(N ) in the fundamental representation,
+while s, s̃, ã, a are canonically normalized fields. The mass spectrum at the perturbative level
+is:
+• N (N − 1)/2 massless vectors Aa in the adjoint of SO(N ).
+• N (N + 1)/2− 1 vectorsWb in the traceless symmetric of SO(N ), that acquire a squared
+mass M
+2
+W = 4g
+2
+w
+2
+eating the Goldstone bosons ã
+b
+.
+• The massless scalar a, singlet under SO(N ). In view of its QCD anomalies it can be
+called axion and its decay constant will be fa = w/
+√
+N /2.
+• the scalar s, singlet under SO(N ). If symmetry breaking arises through the Coleman-
+Weinberg mechanism it is light with squared mass M
+2
+s = 6(NλS + λ′S)w2.
+• N (N + 1)/2− 1 scalars s̃b with squared mass M2s̃ = 2(NλS + 3λ′S)w2.
+• One colored Dirac quark ΨQ = (QL, Q̄R)T with mass MQ = yQw in the fundamental
+representation of SO(N ) charged under the accidental global U(1)Q.
+• Three Dirac leptons ΨiL = (LiL, L̄iR)T with masses MLi = y
+i
+Lw in the fundamental of
+SO(N ) charged under the accidental global U(1)Li if YL 6= 0. If YL = 0 one instead
+gets six Majorana leptons Ψ
+i
+L = (Li, L̄i)T with masses MLi = y
+i
+Lw in the fundamental of
+SO(N ) which transform as ΨiL → −ΨiL under the accidental Z2 symmetry.
+The quarks Q are perturbatively stable thanks to the accidental global U(1)Q while the leptons
+Li are stable thanks to the global U(1)Li (if YL 6= 0) or the discrete Z2 symmetries (if YL = 0).
+4.2 Confinement and bound states
+The SO(N ) gauge dynamics confines at the energy scale
+ΛSO ≈ fa exp
+[
+− 6π
+11(N − 2)αDC(fa)
+]
+. (34)
+17
+The theory contains a CP parity that extends the QCD CP parity analogously to what discussed
+in footnote 1. SO(N ) confinement leads to bound states, and we are interested in the possibly
+stable states. These are the SO baryons formed contracting constituents with an anti-symmetric
+�N tensor of SO(N ), taking into account that group theory allows SO gluons to be constituents.
+• IfN is even the lightest baryon is the 0-ball �NAN/2 made of SO gluons only, stable thanks
+to U-parity (see e.g. [17]). On the other hand, the lighter baryons containing fermions
+�NA(N−2)/2QQ, �NA(N−2)/2LL, �NA(N−2)/2QL (35)
+can decay respecting U-parity into the 0-ball plus the corresponding lighter mesons QQ,
+LL, QL. Such mesons are stable in the limit of exact U(1)Q,L symmetries.
+• If N is odd the lightest baryons contain one fermion (and thereby dubbed 1-ball)
+�NA(N−1)/2Q, �NA(N−1)/2L (36)
+are stable if the fermion Q and/or L is stable.
+4.3 Higher dimensional operators
+Unlike in the model with an anti-symmetric discussed as in section 3.4, in the present model
+with a symmetric the lowest dimensional operator that breaks the PQ symmetry is detS at
+dimension N . PQ quality now demands a weaker bound on fa,
+fa .
+ΛUV√
+N
+(
+mπfπ
+Λ
+2
+UV
+)2/N
+× 10−10/N . (37)
+having identified fa = w/
+√
+N /2, since the construction of the axion effective Lagrangian follows
+exactly section 3.3. Consequently, PQ quality is now assured if N & 12 for both ΛUV 'MGUT
+and fa & 10
+9
+GeV or ΛUV ' MPl and fa & 1011 GeV, the latter for PQ symmetry broken after
+inflation, otherwise N & 10 is enough.
+The dimension 6 operators in eq. (17) that break fermion numbers are allowed for YQ±YL =
+{−1
+3
+, 2
+3
+,−4
+3
+}. Assuming MQ > ML, the colored states Q decay with rate given in eq. (19).
+Demanding again τQ < 0.1 sec in order to avoid problems with BBN we derive a bound on fa
+a factor of 2 stronger than in eq. (20). Assuming that Q decays, the stable relics are:
+if YL 6= 0 if YL = 0
+if N is odd �NA(N−1)/2L and LL �NA(N−1)/2L
+if N is even �NAN/2 and LL �NAN/2
+. (38)
+YL = 0 is needed to have no charged relics.
+The interplay between Landau pole, BBN and PQ-quality constraints is displayed in fig. 1b,
+while for the given values of YQ = {−13 ,
+2
+3
+,−4
+3
+} and YL = 0 the predictions for the axion-photon
+coupling are the same as in fig. 2.
+18
+4.4 SU(N )/ SO(N ) monopoles?
+A qualitatively new feature of the SU(N )→ SO(N ) model is the presence of an unusual type of
+magnetic monopoles. Indeed, while the model of section 3 had a trivial second homotopy group
+π2( SU(N )/ Sp(N )) = 0, in the present model π2( SU(N )/ SO(N )) = Z2 is non-trivial and
+allows for topologically stable Z2 monopoles [34] with mass Mmon ≈ MW/αDC. Z2 monopoles
+differ from the well known monopoles carrying a U(1) magnetic charge by the fact that their
+charge is discrete, modulo 2, so that two Z2 monopole annihilate. Their semi-classical limit
+was constructed in [34–36]. It was later realised that such monopoles fill multiplets under an
+emerging magnetic gauge group: in the present theory monopoles likely fill a spinorial of a dual
+Spin(N ) [37,38]. Monopoles and their vectors are massless in theories where super-symmetries
+allow to reliably compute gauge dynamics beyond the semi-classical approximation [39,38], but
+not in the present theory.
+Furthermore, in our theory SO(N ) is unbroken and (most likely) confines at a lower scale
+ΛSO. Thereby SO(N ) magnetic fields cannot reach infinity, casting doubts on the topological
+argument for monopole stability. Indeed, it is believed that SO(N ) confinement corresponds,
+in the dual theory, to full Higgsing of Spin(N ) [38], so that monopoles can mix with electric
+states and decay. We will then study cosmology assuming no stable monopoles.
+However, as non-perturbative gauge dynamics is not firmly known, we also consider the
+opposite, less likely, possibility of stable monopoles. Then monopoles contribute to the DM
+density, with the abundance estimated in the rest of this section. Monopoles form at the
+SU(N )→ SO(N ) cosmological phase transition. As long as MW , fa � ΛSO the short-distance
+dynamics of monopole formation is not affected by SO(N ) confinement and the estimates for
+cosmological monopole production via the Kibble mechanism [40] apply. If the SU(N ) →
+SO(N ) phase transition is of second order, the Kibble-Zurek estimate [41,42] is
+Ωmonh
+2
+= 1.5× 109
+(
+Mmon
+1TeV
+)(
+30Tc
+MPl
+) 3ν
+1+ν
+, (39)
+where Tc ≈MW is the critical temperature of the phase transition and ν is the related critical
+exponent (ν = 1/2 at classical level).
+If instead the transition is of first order, the Kibble estimate is enhanced by a logarithmic
+factor due to the process of bubble nucleation [43]:
+Ωmonh
+2
+= 1.7× 1011
+(
+Mmon
+1TeV
+) Tc√
+45/(4π
+3
+gSM)MPl
+ln
+((
+45
+4π
+3
+gSM
+)2
+M
+4
+Pl
+T
+4
+c
+)3 , (40)
+where gSM ≈ 100 is the number of SM degrees of freedom. Finally, the monopole abundance gets
+diluted by monopole annihilations and possibly by inflation (if PQ is broken before inflation)
+or by dark glue-ball decays (if PQ is broken after inflation).
+19
+4.5 Cosmology and Dark Matter
+DM is composed by axions, by the 0-ball �AN/2 (for even N ) or the 1-ball �A(N−1)/2L (for odd
+N and YL = 0), and possibly by monopoles (if stable). As in the Sp model, we consider the
+two possible cases.
+4.5.1 PQ broken before inflation, TRH <∼ fa
+Inflation dilutes all relics, so cosmology is similar to what discussed in section 3.5.1 for the
+Sp model. Sp mesons containing 2L get replaced by SO bound states containing 0L or 1L.
+Their relic abundance is again estimated assuming that such states have a non-perturbative
+annihilation cross section of order 1/Λ
+2
+SO. Fig. 5a considers the case of even N = 14, showing
+that there are regions where all constraints are satisfied and the cosmological abundance re-
+produced, as combinations of axions and heavy relics.
+2
+For odd N the relics containing 1L can
+be heavier than ΛSO, and thereby have a smaller abundance produced by thermal scatterings
+after inflation. Nevertheless, one can again find regions where all constraints are satisfied.
+4.5.2 PQ broken after inflation, TRH >∼ fa
+Relics are now not diluted by inflation. Still, abundances at desired level are obtained taking
+into account that they annihilate with cross section σann ∼ 100/Λ2SO and that glue-balls can
+decay slowly, reheating the lighter particles and diluting the heavier relics. We anyhow demand
+that Q relics decay before BBN, finding the extra bound fa & 1011 GeV in fig. 5b. Axions and
+glue-balls behave as in section 3.5.2, except that now gDG = N (N − 1) and the scalon-glue-
+ball effective Lagrangian becomes −(7N + 10)αDC(Aµν)2s/8πw. Fig. 5b shows that regions
+exist where all constraints are satisfied, the axion quality is good and the cosmological DM
+abundance reproduced. We here considered even N = 14; similar results are found for odd N .
+So far we assumed that monopoles decay. As this is not firmly established, we also consider
+the possibility that stable monopoles contribute to the DM abundance. Assuming the Kibble-
+Zurek estimate (dashed curve) we find that monopoles tend to be too much abundant in the
+allowed regions. This can be partially avoided by estimated monopole annihilations (dot-dashed
+curve).
+2
+If ΛSO is smaller than TRH a thermal-equilibrium population of dark gluons is present, that later dilutes
+the 0-ball number density, when it dominates the energy density of the Universe in the form of long-lived dark
+glueballs. Hence, 0-balls are under-abundant for ΛSO . TRH.
+20
+109 1010 1011 1012
+105
+106
+107
+108
+109
+1010
+PQ scale fa in GeV
+D
+ar
+k
+co
+n
+d
+en
+sa
+ti
+o
+n
+sc
+al
+e
+Λ
+S
+O
+in
+G
+eV
+PQ broken before inflation (yL = 0.1)
+ΩDMh
+2 > 0.11
+Dark glueballs decay after BBN
+B
+ad
+-
+q
+u
+al
+it
+y
+P
+Q
+0-ball DM
+ax
+io
+n
+D
+M
+θ
+in
+=
+1
+ΩDMh
+2 < 0.11
+TRH = ΛSO
+1011 1012
+105
+106
+107
+108
+109
+1010
+PQ scale fa in GeV
+D
+ar
+k
+co
+n
+d
+en
+sa
+ti
+o
+n
+sc
+al
+e
+Λ
+S
+O
+in
+G
+eV
+PQ broken after inflation (yL = 0.1)
+ΩDMh
+2 > 0.11
+Dark glueballs decay after BBNC
+o
+lo
+re
+d
+re
+li
+cs
+d
+ec
+ay
+af
+te
+r
+B
+B
+N
+B
+ad
+-
+q
+u
+al
+it
+y
+P
+Q
+0-ball DM
+monopoles
+ax
+io
+n
+D
+M
+Ω
+D
+M
+h
+2
+<
+0
+.1
+1
+Figure 5: Allowed regions in the (fa,ΛSO) plane for the SU(14) model with a scalar in the
+symmetric, assuming yQ = 1, yL = 0.1, YL = 0, YQ = −1/3. DM is composed by axions and 0-
+balls. The relic DM abundance is reproduced along the boundaries between the red/green regions.
+White (gray) regions are excluded because Q (dark glue-balls) decay after BBN. The region at
+large fa is disfavoured by poor PQ quality, eq. (37). Left: we assume PQ-breaking before
+inflation with TRH = 10
+7
+GeV� fa. The axion DM abundance is computed for θin = 1. Right:
+PQ-breaking after inflation. We assumed that monopoles decay; otherwise they contribute as
+well to the DM density and the curve along which the DM abundance is reproduced becomes the
+dashed curve (Kibble-Zurek estimate) or the dot-dashed curve (Kibble-Zurek plus an estimate
+of monopole annihilations).
+5 Conclusions
+We proposed two simple models that provide a high-quality accidental PQ symmetry. The
+models are based on SU(N ) gauge dynamics spontaneously broken to either Sp(N ) or SO(N )
+by a scalar S in the anti-symmetric or symmetric and heavy quarks and leptons in the fun-
+damental, as summarized in table 1. The PQ symmetry acts as a phase rotation of S and
+is only broken by operators involving the SU(N ) anti-symmetric invariant tensor with N in-
+dices. If S is symmetric the lowest-dimensional operator that breaks the PQ symmetry is detS
+with dimension N . If S is anti-symmetric the lowest-dimensional operator that breaks the PQ
+symmetry is Pf S =
+√
+detS with dimension N /2. A high-quality PQ symmetry is thereby ob-
+tained for large enough N . Putting together constraints of theoretical type (PQ quality and no
+sub-Planckian Landau poles, see fig. 1) and of phenomenological type (colored relics decaying
+before BBN, cosmological DM density), the models are viable if N >∼ 12 (for the symmetric) or
+21
+N >∼ 24 (for the anti-symmetric).
+The models contain extra accidental symmetries that can lead to heavy relics. Generic
+non-renormalizable operators break some accidental symmetries. With an appropriate choice
+of heavy fermion hypercharges and masses, heavy quarks decay before BBN into heavy leptons,
+that form bound states together with dark vectors when the unbroken color group (SO or Sp)
+confines at some scale Λ. Depending on the model, such bound states either decay or leave
+cosmologically stable relics that provide extra DM candidates beyond the axion.
+If the PQ symmetry is broken before inflation, extra relics get diluted away and are only
+marginally produced at reheating, so that DM candidates can have the desired abundance.
+If the PQ symmetry is broken after inflation, thermal relics of super-heavy particles are
+typically over-abundant. This is not necessarily a problem, as the models under consideration
+contain dark glue-balls that decay mildly slowly and can thereby partially dilute the heavier
+relics (while the axion density, still in the form of vacuum energy, does not get diluted). As
+a result, we find regions in the (fa,Λ) plane where all constraints are satisfied, as shown in
+fig. 3, 5, Furthermore, in the SU(N )→ SO(N ) model, Z2 monopoles arise at the cosmological
+phase transition. We argued that SO(N ) confinement ruins their topological stability, but we
+also considered the opposite possibility of stable monopoles, showing that they could provide
+extra DM through the Kibble-Zurek mechanism.
+All in all, such models predict strongly coupled dynamics at Λ� fa and are thereby more
+testable than other proposed solutions to the PQ quality problem (based e.g. on discrete or
+abelian gauge symmetries), where the new dynamics remains confined to very high energies.
+While Λ might be larger than scales explorable at colliders, the new physics has implications
+for cosmology, with possible non-trivial cosmological interplays among different sources of DM.
+Acknowledgements
+We thank Claudio Bonati, Ken Konishi and Alfredo Urbano for useful discussions. This work was supported by
+the ERC grant NEO-NAT. The work of LDL is supported by the Marie Sk ldowska-Curie Individual Fellowship
+grant AXIONRUSH (GA 840791). The work of JWW is supported by the China Scholarship Council with
+Grant No. 201904910660. This research is supported in part by the MIUR under contract 2017FMJFMW
+(PRIN2017).
+References
+[1] R.D. Peccei, H.R. Quinn, “CP Conservation in
+the Presence of Instantons”, Phys. Rev. Lett.
+38 (1977) 1440 [InSpire:Peccei:1977hh].
+[2] R.D. Peccei, H.R. Quinn, “Constraints Im-
+posed by CP Conservation in the Presence
+of Instantons”, Phys. Rev. D16 (1977) 1791 [In-
+Spire:Peccei:1977ur].
+[3] H.M. Georgi, L.J. Hall, M.B. Wise, “Grand
+Unified Models With an Automatic Peccei-
+Quinn Symmetry”, Nucl. Phys. B192 (1981)
+409 [InSpire:Georgi:1981pu].
+22
+http://inspirehep.net/search?ln=en&ln=en&p=Peccei:1977hh&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Peccei:1977ur&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Peccei:1977ur&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Georgi:1981pu&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+[4] M. Dine, N. Seiberg, “String Theory and the
+Strong CP Problem”, Nucl. Phys. B273 (1986)
+109 [InSpire:Dine:1986bg].
+[5] S.M. Barr, D. Seckel, “Planck scale corrections
+to axion models”, Phys. Rev. D46 (1992) 539
+[InSpire:Barr:1992qq].
+[6] M. Kamionkowski, J. March-Russell, “Planck
+scale physics and the Peccei-Quinn mecha-
+nism”, Phys. Lett. B282 (1992) 137 [arXiv:hep-
+th/9202003].
+[7] R. Holman, S.D.H. Hsu, T.W. Kephart, E.W.
+Kolb, R. Watkins, L.M. Widrow, “Solutions
+to the strong CP problem in a world with
+gravity”, Phys. Lett. B282 (1992) 132 [In-
+Spire:Holman:1992us].
+[8] S. Ghigna, M. Lusignoli, M. Roncadelli, “Insta-
+bility of the invisible axion”, Phys. Lett. B283
+(1992) 278 [InSpire:Ghigna:1992iv].
+[9] L.F. Abbott, M.B. Wise, “Wormholes and
+Global Symmetries”, Nucl. Phys. B325 (1989)
+687 [InSpire:Abbott:1989jw].
+[10] S.R. Coleman, K-M. Lee, “Wormholes made
+without massless matter fields”, Nucl. Phys.
+B329 (1990) 387 [InSpire:Coleman:1989zu].
+[11] R. Kallosh, A.D. Linde, D.A. Linde, L. Susskind,
+“Gravity and global symmetries”, Phys. Rev.
+D52 (1995) 912 [InSpire:Kallosh:1995hi].
+[12] R. Alonso, A. Urbano, “Wormholes and
+masses for Goldstone bosons”, JHEP 1902
+(2019) 136 [arXiv:1706.07415].
+[13] A. Hebecker, T. Mikhail, P. Soler, “Eu-
+clidean wormholes, baby universes, and their
+impact on particle physics and cosmol-
+ogy”, Front. Astron. Space Sci. 5 (2018) 35
+[arXiv:1807.00824].
+[14] A. Salvio, A. Strumia, “Agravity”, JHEP 1406
+(2014) 080 [arXiv:1403.4226].
+[15] C. Gross, A. Strumia, D. Teresi, M. Zirilli, “Is
+negative kinetic energy meta-stable?” [In-
+Spire:Gross:2020tph].
+[16] L. Di Luzio, E. Nardi, L. Ubaldi, “Acciden-
+tal Peccei-Quinn symmetry protected to ar-
+bitrary order”, Phys. Rev. Lett. 119 (2017)
+011801 [arXiv:1704.01122].
+[17] D. Buttazzo, L. Di Luzio, P. Ghorbani, C.
+Gross, G. Landini, A. Strumia, D. Teresi,
+J-W. Wang, “Scalar gauge dynamics and
+Dark Matter”, JHEP 2001 (2020) 130 [In-
+Spire:Buttazzo:2019mvl].
+[18] D. B. Kaplan, “Opening the axion window”,
+Nucl. Phys. B260 (1985) 215.
+[19] M. Srednicki, “Axion couplings to matter:
+(I). CP-conserving parts”, Nucl. Phys. B260
+(1985) 689.
+[20] G.G. Di Cortona, E. Hardy, J. P. Vega, G. Vil-
+ladoro, “The QCD axion, precisely”, JHEP
+2001 (2016) 034 [arXiv:1511.02867].
+[21] G. Lazarides, Q. Shafi, “Axion Models with
+No Domain Wall Problem”, Phys. Lett. 115B
+(1982) 21 [InSpire:Lazarides:1982tw].
+[22] H.M. Asatrian, A. Hovhannisyan, A. Yeghi-
+azaryan, “The phase space analysis for
+three and four massive particles in fi-
+nal states”, Phys. Rev. D86 (2012) 114023
+[arXiv:1210.7939].
+[23] M. Kawasaki, K. Kohri, T. Moroi, “Big-
+Bang nucleosynthesis and hadronic decay of
+long-lived massive particles”, Phys. Rev. D71
+(2004) 083502 [arXiv:astro-ph/0408426].
+[24] L. Di Luzio, F. Mescia, E. Nardi, “Redefin-
+ing the Axion Window”, Phys. Rev. Lett. 118
+(2017) 031801 [arXiv:1610.07593].
+[25] L. Di Luzio, F. Mescia, E. Nardi, “Window
+for preferred axion models”, Phys. Rev. D96
+(2017) 075003 [arXiv:1705.05370].
+[26] C. O’Hare, “cajohare/AxionLimits”, Zenodo
+v1.0 (2020) 3932430.
+[27] L. Di Luzio, M. Giannotti, E. Nardi, L. Visinelli,
+“The landscape of QCD axion models”,
+Physics Reports (2020) [arXiv:2003.01100].
+23
+http://inspirehep.net/search?ln=en&ln=en&p=Dine:1986bg&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Barr:1992qq&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://arxiv.org/abs/hep-th/9202003
+http://arxiv.org/abs/hep-th/9202003
+http://inspirehep.net/search?ln=en&ln=en&p=Holman:1992us&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Holman:1992us&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Ghigna:1992iv&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Abbott:1989jw&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Coleman:1989zu&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Kallosh:1995hi&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://arxiv.org/abs/1706.07415
+http://arxiv.org/abs/1807.00824
+http://arxiv.org/abs/1403.4226
+http://inspirehep.net/search?ln=en&ln=en&p=Gross:2020tph&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Gross:2020tph&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://arxiv.org/abs/1704.01122
+http://inspirehep.net/search?ln=en&ln=en&p=Buttazzo:2019mvl&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Buttazzo:2019mvl&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://arxiv.org/abs/1511.02867
+http://inspirehep.net/search?ln=en&ln=en&p=Lazarides:1982tw&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://arxiv.org/abs/1210.7939
+http://arxiv.org/abs/astro-ph/0408426
+http://arxiv.org/abs/1610.07593
+http://arxiv.org/abs/1705.05370
+https://doi.org/10.5281/zenodo.3932430
+http://arxiv.org/abs/2003.01100
+[28] S. Borsanyi et al., “Calculation of the axion
+mass based on high-temperature lattice quan-
+tum chromodynamics”, Nature 539 (2016) 69
+[arXiv:1606.07494].
+[29] M. Gorghetto, E. Hardy, G. Villadoro, “Axions
+from Strings: the Attractive Solution”, JHEP
+1807 (2018) 151 [arXiv:1806.04677].
+[30] M. Gorghetto, E. Hardy, G. Villadoro,
+“More Axions from Strings” [In-
+Spire:Gorghetto:2020qws].
+[31] D. Buttazzo, L. Di Luzio, G. Landini, A. Stru-
+mia, D. Teresi, “Dark Matter from self-dual
+gauge/Higgs dynamics”, JHEP 1910 (2019)
+067 [arXiv:1907.11228].
+[32] G. Landini and J.-W. Wang, “Dark Matter in
+scalar Sp(N) gauge dynamics”, JHEP 2006
+(2020) 167 [arXiv:2004.03299].
+[33] A. Mitridate, M. Redi, J. Smirnov, A.
+Strumia, “Dark Matter as a weakly cou-
+pled Dark Baryon”, JHEP 1710 (2017) 210
+[arXiv:1707.05380].
+[34] E.J. Weinberg, D. London, J.L. Rosner, “Mag-
+netic Monopoles with Zn Charges”, Nucl.
+Phys. B236 (1984) 90 [InSpire:Weinberg:1983bf].
+[35] D. London, “Is the Doubly Charged Monopole
+Stable?”, Phys. Rev. D33 (1986) 3075 [In-
+Spire:London:1985ve].
+[36] F.A. Bais, R. Laterveer, “Exact ZN Monopole
+Solutions in Gauge Theories With Non-
+adjoint Higgs Representations”, Nucl. Phys.
+B307 (1988) 487 [InSpire:Bais:1988fn].
+[37] R. Auzzi, S. Bolognesi, J. Evslin, K. Konishi, H.
+Murayama, “NonAbelian monopoles”, Nucl.
+Phys. B701 (2004) 207 [arXiv:hep-th/0405070].
+[38] K. Konishi, “The Magnetic Monopoles
+Seventy-Five Years Later”, Lect. Notes Phys.
+737 (2007) 471 [arXiv:hep-th/0702102].
+[39] N. Seiberg, E. Witten, “Monopoles, duality
+and chiral symmetry breaking in N=2 super-
+symmetric QCD”, Nucl. Phys. B431 (1994) 484
+[arXiv:hep-th/9408099].
+[40] T.W.B. Kibble, “Topology of Cosmic Do-
+mains and Strings”, J. Phys. A9 (1976) 1387
+[InSpire:Kibble:1976sj].
+[41] W.H. Zurek, “Cosmological Experiments in
+Superfluid Helium?”, Nature 317 (1985) 505
+[InSpire:Zurek:1985qw]
+[42] H. Murayama, J. Shu, “Topological Dark
+Matter”, Phys. Lett. B686 (2009) 162
+[arXiv:0905.1720].
+[43] A.H. Guth, E.J. Weinberg, “Could the Uni-
+verse Have Recovered from a Slow First Or-
+der Phase Transition?”, Nucl. Phys. B212
+(1983) 321 [InSpire:Guth:1982pn].
+24
+http://arxiv.org/abs/1606.07494
+http://arxiv.org/abs/1806.04677
+http://inspirehep.net/search?ln=en&ln=en&p=Gorghetto:2020qws&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Gorghetto:2020qws&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://arxiv.org/abs/1907.11228
+http://arxiv.org/abs/2004.03299
+http://arxiv.org/abs/1707.05380
+http://inspirehep.net/search?ln=en&ln=en&p=Weinberg:1983bf&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=London:1985ve&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=London:1985ve&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Bais:1988fn&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://arxiv.org/abs/hep-th/0405070
+http://arxiv.org/abs/hep-th/0702102
+http://arxiv.org/abs/hep-th/9408099
+http://inspirehep.net/search?ln=en&ln=en&p=Kibble:1976sj&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://inspirehep.net/search?ln=en&ln=en&p=Zurek:1985qw&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+http://arxiv.org/abs/0905.1720
+http://inspirehep.net/search?ln=en&ln=en&p=Guth:1982pn&of=hb&action_search=Search&sf=&so=d&rm=&rg=25&sc=0
+	1 Introduction
+	2 Outline of the models
+	3 Antisymmetric scalar that breaks SU(N)to Sp(N)
+	3.1 Symmetry breaking and perturbative spectrum
+	3.2 Confinement and bound states
+	3.3 Axion effective Lagrangian
+	3.4 Higher dimensional operators
+	3.5 Cosmology and Dark Matter
+	4 Symmetric scalar that breaks SU(N)to SO(N)
+	4.1 Symmetry breaking and perturbative spectrum
+	4.2 Confinement and bound states
+	4.3 Higher dimensional operators
+	4.4 SU(N)/SO(N) monopoles?
+	4.5 Cosmology and Dark Matter
+	5 Conclusions
