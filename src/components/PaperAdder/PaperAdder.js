@@ -6,7 +6,7 @@ import Button from 'react-bootstrap/Button';
 import * as actionTypes from '../../store/actions/actionTypes';
 import PaperAdderBar from './PaperAdderBar/PaperAdderBar';
 
-const baseUrl = 'http://localhost:6123';
+const baseUrl = 'http://localhost:8000';
 
 const PaperAdder = (props) => {
     const [pdfFileUrl, setPdfFileUrl] = useState(null);

@@ -6,6 +6,7 @@ import random
 from tika import parser
 import json
 from top2vec import Top2Vec
+from paper_cluster import get_positions_from_similarities
 
 
 paper_directory = 'papers'
@@ -61,6 +62,8 @@ for title in model.document_ids:
 
 app = Flask(__name__)
 CORS(app)
+
+paper_positions = get_positions_from_similarities(paper_similarity)
 
 
 def getPapersAndSimilarities():
@@ -142,7 +145,20 @@ def submit_paper():
     return jsonify(message='Your paper contribution (' + filename + ') is saved. Thanks!')
 
 
+@app.route('/graph_nodes', methods=['GET'])
+def graph_nodes():
+    global paper_positions
+    result = []
+    for paper in paper_positions:
+        x = paper_positions[paper][0]
+        y = paper_positions[paper][1]
+        result.append(
+            {'data': {'id': paper}, 'position': {'x': x, 'y': y} }
+        )
+    return jsonify(result)
+
+
 if __name__ == '__main__':
     # get_paper_jsons()
     getPapersAndSimilarities()
-    app.run(host='127.0.0.1', port=6123, debug=True)
+    app.run(host='127.0.0.1', port=8000, debug=True)

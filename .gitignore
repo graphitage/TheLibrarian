@@ -13,6 +13,7 @@
 
 # misc
 /python/papers
+/python/__pycache__/
 
 .DS_Store
 .env.local

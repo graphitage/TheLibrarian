@@ -10,13 +10,32 @@ import * as actionCreators from '../../store/actions/index';
 import ContextMenu from '../../components/ContextMenu/ContextMenu';
 
 
+const baseUrl = 'http://localhost:8000';
+
 
 const Graph = (props) => {
     const outerRef = useRef(null);
+    const cytoRef = useRef(null);
+
+    let elements = [];
+
+    fetch(
+        baseUrl + '/graph_nodes',
+        {
+            method: 'GET',
+            data: ''
+        }
+    ).then(response => response.json())
+    .then(data => {
+        elements = data;
+        console.log(elements);
+        Graph.cy.elements().remove();
+        Graph.cy.add(elements);
+    })
 
     const elements2 = [
         // { data: { id: '1', label: 'Beyond Accuracy -  Behavioral Testing of NLP Models with Checklist' }, position: { x: 100, y: 100 } },
-        { data: { id: '17', label: 'Separability in Axiomatic Graph Theory' }, position: { x: 100, y: 100 } },
+        { data: { id: 'güneş', label: 'Separability in Axiomatic Graph Theory' }, position: { x: 100, y: 100 } },
         { data: { id: '2', label: 'Deep Bayesian Active Learning with Image Data' }, position: { x: 100, y: 240 } },
         { data: { id: '3', label: 'Generating Person Images with Appearance-aware Pose Stylizer' }, position: { x: 220, y: 210 } },
         { data: { id: '4', label: 'Solvability in Singular Operator Theory' }, position: { x: 110, y: 170 } },
@@ -37,6 +56,8 @@ const Graph = (props) => {
         // { data: { id: '1', label: 'Beyond Accuracy -  Behavioral Testing of NLP Models with Checklist' }, position: { x: 1000, y: 300 } }
     ];
 
+    console.log(elements2);
+
     if (props.beyondAccuracyPaperAdded)
         elements2.push(
             { data: { id: '1', label: 'Beyond Accuracy -  Behavioral Testing of NLP Models with Checklist' }, position: { x: 1000, y: 300 } }
@@ -45,18 +66,18 @@ const Graph = (props) => {
     const { onOpenContextMenu, detailsMenuHandler, onFetchDetails } = props;
     useEffect(() => {
         // var stringStylesheet = 'node[id= "1"], node[id= "2"], node[id= "3"], node[id= "4"], node[id= "5"] { background-color: #161B9C ; label: hey; }';
-        var stringStylesheet = 'node[id= "17"], node[id= "2"], node[id= "3"], node[id= "4"], node[id= "5"] { background-color: #161B9C ; label: data(label); }';
-        var stringStylesheet2 = 'node[id= "6"], node[id= "7"], node[id= "8"] { background-color: #E52424 ; label: data(label); }';
-        var stringStylesheet3 = 'node[id= "9"], node[id= "10"], node[id= "11"] { background-color: #510B7B ; label: data(label); }';
-        var stringStylesheet4 = 'node[id= "12"] { background-color: #8117C0 ; label: data(label); }';
-        // var stringStylesheet5 = 'node[id= "13"], node[id= "14"], node[id= "15"] { background-color: #40C01D ; label: data(label); text-wrap: wrap; text-max-width: 150; }';
-        var stringStylesheet5 = 'node[id= "13"], node[id= "14"], node[id= "15"] { background-color: #40C01D ; label: data(label); }';
-        var stringStylesheet6 = 'node[id= "16"] { background-color: #96AD37 ; label: data(label); }';
-        var stringStylesheet7 = 'node[id= "1"] { background-color: #F3F322 ; label: data(label); }';
-        var stringStylesheet8 = 'node[id= "18"] { background-color: #E57624 ; label: data(label); }';
+        var labelStylesheet = 'node {label: data(id); }'
+        // var stringStylesheet = 'node[id= "17"], node[id= "2"], node[id= "3"], node[id= "4"], node[id= "5"] { background-color: #161B9C ; }';
+        // var stringStylesheet2 = 'node[id= "6"], node[id= "7"], node[id= "8"] { background-color: #E52424 ; }';
+        // var stringStylesheet3 = 'node[id= "9"], node[id= "10"], node[id= "11"] { background-color: #510B7B ; }';
+        // var stringStylesheet4 = 'node[id= "12"] { background-color: #8117C0 ; }';
+        // // var stringStylesheet5 = 'node[id= "13"], node[id= "14"], node[id= "15"] { background-color: #40C01D ; text-wrap: wrap; text-max-width: 150; }';
+        // var stringStylesheet5 = 'node[id= "13"], node[id= "14"], node[id= "15"] { background-color: #40C01D ; }';
+        // var stringStylesheet6 = 'node[id= "16"] { background-color: #96AD37 ; }';
+        // var stringStylesheet7 = 'node[id= "1"] { background-color: #F3F322 ; }';
+        var stringStylesheet8 = 'node[id= "title1"] { background-color: #E57624 ; }';
         var stringStylesheet9 = 'node {text-wrap: ellipsis; text-max-width: 150;}';
-        let str = stringStylesheet + stringStylesheet2 + stringStylesheet3 + stringStylesheet4 +
-        stringStylesheet5 + stringStylesheet6 + stringStylesheet7 + stringStylesheet8 + stringStylesheet9;
+        let str = labelStylesheet + stringStylesheet8;
         Graph.cy.style(str);
 
         Graph.cy.style()
@@ -104,7 +125,7 @@ const Graph = (props) => {
 
     return (
         <div ref={outerRef} style={{ height: '100%' }}>
-            <CytoscapeComponent cy={(cy) => { Graph.cy = cy }} elements={elements2} style={{ width: '100%', height: '100%'  }} />
+            <CytoscapeComponent ref={cytoRef} cy={(cy) => { Graph.cy = cy }} elements={elements} style={{ width: '100%', height: '100%'  }} />
             <ContextMenu outerRef={outerRef} />
         </div>
     );

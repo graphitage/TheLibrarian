@@ -4,7 +4,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
-const baseUrl = 'http://localhost:6123';
+const baseUrl = 'http://localhost:8000';
 
 const PaperAdderBar = (props) => {
     const formRef = useRef(null);
