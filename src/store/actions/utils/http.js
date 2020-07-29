@@ -1,5 +1,5 @@
 const httpReq = async (url, method, body) => {
-    console.log(url, method)
+    // console.log(url, method)
     try {
         let response = await fetch(
             url, {
@@ -11,7 +11,7 @@ const httpReq = async (url, method, body) => {
             }
         });
 
-        console.log(response);
+        // console.log(response);
 
         let data = await response.json();
 
@@ -20,7 +20,7 @@ const httpReq = async (url, method, body) => {
         else
             return { data: data, error: false };
     } catch (error) {
-        console.log(error)
+        // console.log(error)
         return { data: null, error: true }
     }
 

@@ -5,7 +5,8 @@ export {
 export {
     clearNodes,
     simpleExpand,
-    addElements
+    addElements,
+    sendPaperSimilarityRequest
 } from './graph';
 
 

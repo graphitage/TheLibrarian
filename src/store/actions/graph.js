@@ -16,7 +16,7 @@ export const clearNodes = (isActive) => {
 const setElements = (elements) => {
     return {
         type: actionTypes.SET_ELEMENTS,
-        elements : elements
+        elements: elements
     }
 }
 
@@ -33,14 +33,14 @@ export const simpleExpand = (nodeId = null) => {
     return (dispatch, getState) => {
         if (nodeId == null) {
             httpReq(baseUrl + 'papers', 'GET')
-            .then((result) => {
-                if (result.error === true) {
-                    dispatch(setError(true))
-                } else {
-                    const graphElements = allPapersElementCreator(result.data);
-                    dispatch(setElements(graphElements))
-                }
-            })
+                .then((result) => {
+                    if (result.error === true) {
+                        dispatch(setError(true))
+                    } else {
+                        const graphElements = allPapersElementCreator(result.data);
+                        dispatch(setElements(graphElements))
+                    }
+                })
 
         }
     }
@@ -82,5 +82,28 @@ const expandByDatasets = (nodeId) => {
     return {
         type: actionTypes.SET_ELEMENTS,
         nodes: []
+    }
+}
+
+const setSimilarity = (similarity) => {
+    return {
+        type: actionTypes.SET_SIMILARITY,
+        similarity_score: similarity
+    }
+}
+
+export const sendPaperSimilarityRequest = (title1, title2) => {
+    let baseUrl = 'http://localhost:8000';
+    return (dispatch, getState) => {
+        if (title1 !== title2) {
+            httpReq(
+                baseUrl + '/paper_similarity',
+                'GET'
+            ).then(result => result.json())
+            .then(data => {
+                let similarity = data['similarity']
+                dispatch(setSimilarity(similarity));
+            })
+        }
     }
 }

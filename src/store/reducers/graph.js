@@ -3,7 +3,9 @@ import * as actionTypes from '../actions/actionTypes'
 const initialState = {
     clearNodes: false,
     elements: [],
-    error: false
+    error: false,
+    firstId: undefined,
+    secondId: undefined
 }
 
 const reducer = (state = initialState, action) => {

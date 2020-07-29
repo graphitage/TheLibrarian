@@ -7,7 +7,7 @@ def get_positions_from_similarities(paper_similarity):
     max_distance = number_of_papers * 50 # pixels
     movement_decrease_ratio = 0.9
     movement_ratio = 1 # at first. will decrease later.
-    min_movement = 10 # pixels
+    min_movement = (max_distance / 500) ** 0.5 # pixels
 
     # initialization
     paper_position = {}
@@ -46,6 +46,10 @@ def get_positions_from_similarities(paper_similarity):
                         difference * (exp_dist / distance)
 
                     movement = (expected_location - pos2) * movement_ratio
+
+                    if exp_dist < distance:
+                        movement *= similarity
+                    
                     if np.linalg.norm(movement) > min_movement:
                         moveFlag = True
                         paper_position[paper2] = pos2 + movement
@@ -60,3 +64,7 @@ def get_positions_from_similarities(paper_similarity):
         paper_position[paper] -= center_of_gravity
 
     return paper_position
+
+
+def update_positions_with_paper(paper_similarity, positions):
+    pass

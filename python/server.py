@@ -63,13 +63,22 @@ for title in model.document_ids:
 app = Flask(__name__)
 CORS(app)
 
-paper_positions = get_positions_from_similarities(paper_similarity)
+paper_positions = None
 
 
 def getPapersAndSimilarities():
     global papers, paper_content, paper_similarity
     papers = list(model.document_ids)
-    paper_content = list(model.documents)
+    
+    paper_files = os.listdir(paper_directory)
+    for paper_file in paper_files:
+        title = '.'.join(paper_file.split('.')[:-1])
+        
+        file_path = os.path.join(paper_directory, paper_file)
+        with open(file_path, 'rb') as file:
+            content = file.read().decode()
+        
+        paper_content[title] = content
 
     model_paper_count = len(model.documents)
     for paper_title in papers:
@@ -158,7 +167,26 @@ def graph_nodes():
     return jsonify(result)
 
 
+@app.route('/paper_similarity/<string:title1>/<string:title2>', methods=['GET'])
+def send_paper_similarity(title1, title2):
+    try:
+        return jsonify(
+            {'similarity': paper_similarity[title1][title2]}
+        )
+    except:
+        return jsonify('empty')
+
+
+@app.route('/paper_node/<string:title1>', methods=['GET'])
+def paper_node(title1):
+    return jsonify(
+        {'content': paper_content[title1]}
+    )
+
+
+paper_positions = get_positions_from_similarities(paper_similarity)
+
+
 if __name__ == '__main__':
-    # get_paper_jsons()
     getPapersAndSimilarities()
     app.run(host='127.0.0.1', port=8000, debug=True)

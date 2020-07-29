@@ -15,7 +15,6 @@ export const fetchDetails = (id = 1) => {
     return (dispatch, getState) => {
         httpReq(baseUrl + 'paper_node/' + id, 'GET')
         .then((result) => {
-                console.log(result.data);
                 dispatch(saveDetails(result.data));
             });
     }

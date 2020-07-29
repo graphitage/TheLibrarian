@@ -25,6 +25,8 @@ const Layout = (props) => {
     const [comparisonNodeSelectionMode, setcomparisonNodeSelectionMode] = useState(false);
     const [nodeId, setNodeId] = useState('');
 
+    let modalNodeId = undefined;
+
     const comparisonNodeRef = useRef();
 
     comparisonNodeRef.current = comparisonNodeSelectionMode;
@@ -60,7 +62,10 @@ const Layout = (props) => {
         if (comparisonNodeRef.current === false) {
             setdetailsMenu(true);
             setNodeId(id);
+            modalNodeId = undefined;
         } else {
+            modalNodeId = id;
+            console.log(nodeId, modalNodeId);
             setComparisonModal(true);
         }
         setOptions(false);
@@ -115,6 +120,8 @@ const Layout = (props) => {
             <ComparisonModal
                 show={comparisonModal}
                 onClose={comparisonModalClosedHandler}
+                firstId={nodeId}
+                secondId={modalNodeId}
             ></ComparisonModal>
             {comparisonNodeSelectionMode &&
                 <Alert variant="info" style={{ textAlign: "center" }}>
