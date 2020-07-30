@@ -7,7 +7,6 @@ import { Provider } from "react-redux"
 import { createStore, applyMiddleware, compose, combineReducers } from "redux"
 import thunk from 'redux-thunk';
 
-import graphReducer from './store/reducers/graph';
 import detailsReducer from './store/reducers/details';
 import uiReducer from './store/reducers/ui';
 
@@ -16,7 +15,6 @@ import "bootstrap/dist/css/bootstrap.min.css"
 
 const rootReducer = combineReducers({
     details: detailsReducer,
-    graph: graphReducer,
     ui: uiReducer,
 })
 

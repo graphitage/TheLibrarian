@@ -16,7 +16,7 @@ const PaperAdder = (props) => {
 
     const handlePaperSubmitted = event => {
         event.preventDefault();
-        
+
         const data = new FormData(event.target);
 
         fetch(
@@ -26,11 +26,10 @@ const PaperAdder = (props) => {
                 body: data
             }
         ).then(response => response.json())
-        .then(data => {
-            console.log(data);
-            setModalContent(data.message);
-            setModalIsOpen(true);
-        });
+            .then(data => {
+                setModalContent(data.message);
+                setModalIsOpen(true);
+            });
     };
 
     const handleModalClosed = (event) => {
@@ -46,11 +45,16 @@ const PaperAdder = (props) => {
                 setPdfFileUrl={setPdfFileUrl}
                 handlePaperSubmitted={handlePaperSubmitted}
             />
-            <div style={{ clear: 'both' }} />
             <div style={{ width: '80%', margin: 'auto', height: '100%' }}>
                 <iframe
                     title='TheBestPDFViewer'
-                    style={{ width: '49%', float: 'left', height: '100%', maxHeight: '800px' }}
+                    style={{
+                        width: '49%',
+                        float: 'left',
+                        height: '100%',
+                        maxHeight: '800px',
+                        border: '0px'
+                    }}
                     src={pdfFileUrl}
                 />
                 {

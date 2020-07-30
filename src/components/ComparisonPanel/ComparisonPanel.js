@@ -8,11 +8,9 @@ const comparisonPanel = (props) => {
     const firstId = props.firstId;
     const secondId = props.secondId;
 
-    console.log(firstId, secondId);
-
     let similarity = 0;
 
-    if (firstId != undefined && secondId != undefined) {
+    if (firstId !== undefined && secondId !== undefined) {
         fetch(
             baseUrl + '/paper_similarity'
             + '/' + firstId
@@ -24,7 +22,6 @@ const comparisonPanel = (props) => {
         ).then(result => result.json())
             .then(data => {
                 similarity = data['similarity'];
-                console.log(similarity);
             });
     }
 

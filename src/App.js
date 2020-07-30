@@ -11,7 +11,6 @@ function App() {
     <div className="App">
       <Layout >  
         <Content />
-        {/* <Graph></Graph> */}
       </Layout>
     </div>
   );

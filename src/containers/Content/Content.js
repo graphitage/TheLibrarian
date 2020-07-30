@@ -1,7 +1,6 @@
 import React from 'react';
 import Graph from '../Graph/Graph';
 import { connect } from 'react-redux';
-import { propTypes } from 'pdf-viewer-reactjs';
 import PaperAdder from '../../components/PaperAdder/PaperAdder';
 
 const Content = (props) => {

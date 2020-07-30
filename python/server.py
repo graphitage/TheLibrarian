@@ -137,7 +137,8 @@ def submit_paper():
     extracted_text_without_common_words = '\n'.join(
         extract_text_from_buffer(buf, exclude_commons=True))
 
-    filename = request.form['title']
+    title = request.form['title']
+    filename = ''.join([char for char in title if char not in '\\/:*?"<>|'])
     with open(os.path.join(paper_directory, (filename + '.txt')), 'wb') as file:
         file.write(extracted_text.encode())
     if filename not in model.document_ids:
@@ -147,6 +148,7 @@ def submit_paper():
             doc_ids=[filename],
             num_docs=len(model.documents)-1,
             return_documents=False)
+        paper_similarity[filename] = {}
         for score, doc_id in zip(doc_scores, doc_ids):
             paper_similarity[filename][doc_id] = score
             paper_similarity[doc_id][filename] = score

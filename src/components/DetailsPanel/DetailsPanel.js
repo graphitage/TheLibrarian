@@ -2,14 +2,10 @@ import React from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
-import { slide as Menu } from 'react-burger-menu';
 import DetailsForm from './DetailsForm/DetailsForm';
 
 
 const detailsPanel = (props) => {
-    // <Menu right  styles={searchMenuStyles}>
-
-    // </Menu>
     return (
         <Modal style={{top: '9%', height: '90%'}} onHide={() => props.detailsClosed()} show={props.details}>
             <Modal.Header closeButton>

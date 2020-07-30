@@ -8,21 +8,14 @@ import * as actionTypes from '../../../store/actions/actionTypes';
 
 const toolbar = (props) => (
   <header className="Toolbar">
-    <Navbar className="d-flex justify-content-between" bg="dark" variant="dark">
+    <Navbar className="d-flex justify-content-center" bg="dark" variant="dark">
       <Navbar.Brand href="#home" onClick={() => props.logoClicked()} style={{ marginRight: '60px' }}>
         <img alt='logo' src='logo2.png' width='70px' style={{ marginRight: '10px' }} />
         The Librarian
       </Navbar.Brand>
       <Nav variant='pills' className='justify-content-center'>
-        {/* <Nav.Link onClick={() => props.searchClick()}>Search</Nav.Link> */}
         <Nav.Item>
-          <Nav.Link onClick={() => props.addPaperClicked()}>Add</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link onClick={() => props.clearGraph()}>Clear</Nav.Link>
-        </Nav.Item>
-        <Nav.Item>
-          <Nav.Link onClick={() => props.optionsClick()}>Options</Nav.Link>
+          <Nav.Link onClick={() => props.addPaperClicked()} style={{ color: '#fff' }}>Add Paper</Nav.Link>
         </Nav.Item>
       </Nav>
     </Navbar>
