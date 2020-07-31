@@ -1,13 +1,31 @@
 import random
 import numpy as np
 
+
 def get_positions_from_similarities(paper_similarity):
     number_of_papers = len(paper_similarity)
-    min_distance = 50 # pixels
-    max_distance = number_of_papers * 50 # pixels
-    movement_decrease_ratio = 0.9
+
+    node_size = 200 # pixels
+    min_movement = node_size / 20 # pixels
+    movement_decrease_ratio = 0.95
     movement_ratio = 1 # at first. will decrease later.
-    min_movement = (max_distance / 500) ** 0.5 # pixels
+
+    # distance is a cubic equation:
+    # a * x^3 + b * x^2 + c * x + d (in pixels)
+    # where x is the similarity score
+    distance_function_at = {
+        0: number_of_papers / 2 * (node_size / 5), # max distance
+        1: node_size                     # min distance
+    }
+    distance_function_derivative_at = {
+        0: - (25 / 9) * (distance_function_at[0] - distance_function_at[1]),
+        1: 0
+    }
+
+    d = distance_function_at[0]
+    c = distance_function_derivative_at[0]
+    a = distance_function_derivative_at[1] - 2*distance_function_at[1] + c + 2*d
+    b = distance_function_at[1] - a - c - d
 
     # initialization
     paper_position = {}
@@ -22,7 +40,7 @@ def get_positions_from_similarities(paper_similarity):
             if paper != paper2:
                 similarity = paper_similarity[paper][paper2] 
                 expected_distance[paper][paper2] =\
-                    max_distance - (max_distance - min_distance) * similarity
+                    a * similarity**3 + b * similarity**2 + c * similarity + d
 
     turn = 0
     # update
