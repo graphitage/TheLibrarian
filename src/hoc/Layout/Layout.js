@@ -1,38 +1,52 @@
 import React, { useState, useCallback, useRef } from 'react';
+import { connect } from 'react-redux';
 
 import Alert from 'react-bootstrap/Alert';
 
 import Toolbar from '../../components/Navigation/Toolbar/Toolbar';
 import DetailsPanel from '../../components/DetailsPanel/DetailsPanel';
-// import PaperAdder from '../../components/PaperAdder/PaperAdder'
 import ComparisonModal from '../../components/ComparisonPanel/ComparisonPanel';
-
-import classes from './Layout.module.css'
+import { flaskBaseUrl } from '../../store/actions/utils/http';
+import Content from '../../containers/Content/Content';
+import * as actionCreators from '../../store/actions/index';
 
 
 const Layout = (props) => {
     const [detailsMenu, setdetailsMenu] = useState(false);
     const [comparisonModal, setComparisonModal] = useState(false);
     const [comparisonNodeSelectionMode, setcomparisonNodeSelectionMode] = useState(false);
-    const [nodeId, setNodeId] = useState('');
+    const [similarityScore, setSimilarityScore] = useState(0);
 
-    let modalNodeId = undefined;
+    let nodeId = undefined;
 
     const comparisonNodeRef = useRef();
 
     comparisonNodeRef.current = comparisonNodeSelectionMode;
 
-    const detailsPanelOpenedHandler = useCallback((id) => {
+    const { onFetchDetails } = props;
+    const detailsPanelOpenedHandler = (id) => {
         if (comparisonNodeRef.current === false) {
             setdetailsMenu(true);
-            setNodeId(id);
-            modalNodeId = undefined;
+            nodeId = id;
+            onFetchDetails(id);
         } else {
-            modalNodeId = id;
-            setComparisonModal(true);
+            if (id !== undefined && nodeId !== undefined) {
+                fetch(
+                    flaskBaseUrl + '/paper_similarity'
+                    + '/' + id
+                    + '/' + nodeId,
+                    {
+                        method: 'GET',
+                        data: ''
+                    }
+                ).then(result => result.json())
+                    .then(data => {
+                        setSimilarityScore(data['similarity']);
+                    })
+                setComparisonModal(true);
+            }
         }
-        setNodeId(id);
-    }, []);
+    };
 
     const detailsPanelClosedHandler = useCallback(() => {
         setdetailsMenu(false);
@@ -42,6 +56,7 @@ const Layout = (props) => {
     const comparisonModalClosedHandler = useCallback(() => {
         setComparisonModal(false);
         setcomparisonNodeSelectionMode(false);
+        setSimilarityScore(0);
     }, []);
 
 
@@ -61,20 +76,25 @@ const Layout = (props) => {
             />
             <ComparisonModal
                 show={comparisonModal}
+                similarityScore={similarityScore}
                 onClose={comparisonModalClosedHandler}
-                firstId={nodeId}
-                secondId={modalNodeId}
             ></ComparisonModal>
             {comparisonNodeSelectionMode &&
                 <Alert variant="info" style={{ textAlign: "center" }}>
                     <strong>Click the paper that you'd like to compare with...</strong>
                 </Alert>
             }
-            <main className={classes.Content}>
-                {React.cloneElement(props.children, { detailsMenuHandler: detailsPanelOpenedHandler })}
-            </main>
+            <Content
+                detailsMenuHandler={detailsPanelOpenedHandler}
+            />
         </React.Fragment>
     );
 }
 
-export default Layout; 
+const mapDispatchToProps = dispatch => {
+    return {
+        onFetchDetails: (id) => dispatch(actionCreators.fetchDetails(id))
+    }
+}
+
+export default connect(null, mapDispatchToProps)(Layout); 

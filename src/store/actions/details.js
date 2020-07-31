@@ -1,7 +1,5 @@
 import * as actionTypes from './actionTypes';
-import httpReq from './utils/http';
-
-const baseUrl = 'http://localhost:8000/';
+import httpReq, { flaskBaseUrl } from './utils/http';
 
 
 const saveDetails = (res) => {
@@ -13,8 +11,8 @@ const saveDetails = (res) => {
 
 export const fetchDetails = (id = 1) => {
     return (dispatch, getState) => {
-        httpReq(baseUrl + 'paper_node/' + id, 'GET')
-        .then((result) => {
+        httpReq(flaskBaseUrl + '/paper_node/' + id, 'GET')
+            .then((result) => {
                 dispatch(saveDetails(result.data));
             });
     }

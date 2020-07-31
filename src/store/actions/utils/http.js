@@ -26,4 +26,6 @@ const httpReq = async (url, method, body) => {
 
 }
 
+export const flaskBaseUrl = 'http://localhost:8000';
+
 export default httpReq;

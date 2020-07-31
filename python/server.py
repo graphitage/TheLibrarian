@@ -171,12 +171,14 @@ def graph_nodes():
 
 @app.route('/paper_similarity/<string:title1>/<string:title2>', methods=['GET'])
 def send_paper_similarity(title1, title2):
-    try:
-        return jsonify(
-            {'similarity': paper_similarity[title1][title2]}
-        )
-    except:
-        return jsonify('empty')
+    if title1 == title2:
+        similarity = 1.0
+    else:
+        similarity = paper_similarity[title1][title2]
+    print('similarity', similarity)
+    return jsonify(
+        {'similarity': similarity}
+    )
 
 
 @app.route('/paper_node/<string:title1>', methods=['GET'])

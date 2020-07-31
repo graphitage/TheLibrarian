@@ -4,7 +4,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 
-const baseUrl = 'http://localhost:8000';
+import { flaskBaseUrl } from '../../../store/actions/utils/http';
 
 const PaperAdderBar = (props) => {
     const formRef = useRef(null);
@@ -13,7 +13,7 @@ const PaperAdderBar = (props) => {
         let formNode = formRef.current;
         const data = new FormData(formNode);
 
-        fetch(baseUrl + '/extract_text', {
+        fetch(flaskBaseUrl + '/extract_text', {
             method: 'POST',
             body: data
         }).then(response => response.json())
@@ -38,8 +38,8 @@ const PaperAdderBar = (props) => {
                     <Nav.Item>
                         <Form.Control name='paper' type='file' style={{ color: '#fff' }} onChange={onPdfFileChange} />
                     </Nav.Item>
-                    <Nav.Item style={{marginRight:'150px'}}>
-                        <Form.Control name='title' type='text' placeholder='Paper Title' required/>
+                    <Nav.Item style={{ marginRight: '150px' }}>
+                        <Form.Control name='title' type='text' placeholder='Paper Title' required />
                     </Nav.Item>
                     <Nav.Item style={{ margin: '0px 10px' }}>
                         <Button variant='primary' type='submit'>

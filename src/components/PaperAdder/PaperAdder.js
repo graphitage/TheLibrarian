@@ -5,8 +5,7 @@ import Button from 'react-bootstrap/Button';
 
 import * as actionTypes from '../../store/actions/actionTypes';
 import PaperAdderBar from './PaperAdderBar/PaperAdderBar';
-
-const baseUrl = 'http://localhost:8000';
+import { flaskBaseUrl } from '../../store/actions/utils/http';
 
 const PaperAdder = (props) => {
     const [pdfFileUrl, setPdfFileUrl] = useState(null);
@@ -20,7 +19,7 @@ const PaperAdder = (props) => {
         const data = new FormData(event.target);
 
         fetch(
-            baseUrl + '/submit_paper',
+            flaskBaseUrl + '/submit_paper',
             {
                 method: 'POST',
                 body: data
