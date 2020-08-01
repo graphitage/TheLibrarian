@@ -7,7 +7,7 @@ def get_positions_from_similarities(paper_similarity):
 
     node_size = 200 # pixels
     min_movement = node_size / 20 # pixels
-    movement_decrease_ratio = 0.95
+    movement_decrease_ratio = 0.9
     movement_ratio = 1 # at first. will decrease later.
 
     # distance is a cubic equation:
@@ -26,6 +26,8 @@ def get_positions_from_similarities(paper_similarity):
     c = distance_function_derivative_at[0]
     a = distance_function_derivative_at[1] - 2*distance_function_at[1] + c + 2*d
     b = distance_function_at[1] - a - c - d
+
+    print(a,b,c,d)
 
     # initialization
     paper_position = {}
