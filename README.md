@@ -13,15 +13,15 @@ The Librarian uses **OCR** to extract the textual content out of document files.
 
 ### How to run
 * For the application to work, the python back-end needs to be already running. Thus, first type the following on a terminal.
-```
-cd python
-python server.py
-```
+  ```
+  cd python
+  python server.py
+  ```
 
 * To run the application itself, type the following (node.js needs to be installed first).
-```
-npm run
-```
+  ```
+  npm run
+  ```
 
 * You may need to first
   ```
