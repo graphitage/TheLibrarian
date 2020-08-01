@@ -24,7 +24,7 @@ npm run
 ```
 
 * You may need to first
-```
-npm install
-```
-to get the dependencies.
+  ```
+  npm install
+  ```
+  to get the dependencies.
