@@ -18,7 +18,7 @@ cd python
 python server.py
 ```
 
-* To run the application itself, in the same folder with this file, type the following (node.js needs to be installed first).
+* To run the application itself, type the following (node.js needs to be installed first).
 ```
 npm run
 ```
