@@ -10,3 +10,15 @@ The Librarian uses **OCR** to extract the textual content out of document files.
 * and [`Tesseract`](https://pypi.org/project/pytesseract/) for image files.
 
 **Topic modeling** is used to get the similarity score between multiple papers according to what topic their contents are about. For this, the [`Top2Vec`](https://github.com/ddangelov/Top2Vec) algorithm is used.
+
+### How to run
+* For the application to work, the python back-end needs to be already running. Thus, first type the following on a terminal.
+```
+cd python
+python server.py
+```
+
+* To run the application itself, in the same folder with this file, type the following (node.js needs to be installed first).
+```
+npm run
+```

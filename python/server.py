@@ -2,11 +2,11 @@ import os
 import io
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import random
 from tika import parser
 import json
 from top2vec import Top2Vec
 from paper_cluster import get_positions_from_similarities
+from threading import Lock
 
 
 paper_directory = 'papers'
@@ -50,6 +50,7 @@ paper_similarity = {}
 # model.document_ids --> title
 
 model = Top2Vec.load('model.thelibrarian')
+model_lock = Lock()
 
 for title in model.document_ids:
     paper_similarity[title] = {}
@@ -64,6 +65,7 @@ app = Flask(__name__)
 CORS(app)
 
 paper_positions = None
+position_lock = Lock()
 
 
 def getPapersAndSimilarities():
@@ -132,40 +134,52 @@ def send_extracted_text():
 
 @app.route('/submit_paper', methods=['POST'])
 def submit_paper():
-    buf = io.BytesIO(request.files['paper'].read())
-    extracted_text = '\n'.join(extract_text_from_buffer(buf))
-    extracted_text_without_common_words = '\n'.join(
-        extract_text_from_buffer(buf, exclude_commons=True))
-
     title = request.form['title']
     filename = ''.join([char for char in title if char not in '\\/:*?"<>|'])
-    with open(os.path.join(paper_directory, (filename + '.txt')), 'wb') as file:
-        file.write(extracted_text.encode())
+
     if filename not in model.document_ids:
-        model.add_documents(
-            documents=[extracted_text_without_common_words], document_ids=[filename])
-        doc_scores, doc_ids = model.search_documents_by_documents(
-            doc_ids=[filename],
-            num_docs=len(model.documents)-1,
-            return_documents=False)
+        buf = io.BytesIO(request.files['paper'].read())
+        extracted_text = '\n'.join(extract_text_from_buffer(buf))
+        extracted_text_without_common_words = '\n'.join(
+            extract_text_from_buffer(buf, exclude_commons=True))
+
+        with open(os.path.join(paper_directory, (filename + '.txt')), 'wb') as file:
+            file.write(extracted_text.encode())
+        
+        papers.append(filename)
+        paper_content[filename] = extracted_text
+            
+        with model_lock:
+            model.add_documents(
+                documents=[extracted_text_without_common_words], document_ids=[filename])
+                
+            doc_scores, doc_ids = model.search_documents_by_documents(
+                doc_ids=[filename],
+                num_docs=len(model.documents)-1,
+                return_documents=False)
+                
         paper_similarity[filename] = {}
         for score, doc_id in zip(doc_scores, doc_ids):
             paper_similarity[filename][doc_id] = score
             paper_similarity[doc_id][filename] = score
 
-    return jsonify(message='Your paper contribution (' + filename + ') is saved. Thanks!')
+        return jsonify(message='Your paper contribution (' + filename + ') is saved. Thanks!')
+
+    else:
+        return jsonify(message='The paper (' + file + ') already exists. Thanks!')
 
 
 @app.route('/graph_nodes', methods=['GET'])
 def graph_nodes():
     global paper_positions
     result = []
-    for paper in paper_positions:
-        x = paper_positions[paper][0]
-        y = paper_positions[paper][1]
-        result.append(
-            {'data': {'id': paper}, 'position': {'x': x, 'y': y} }
-        )
+    with position_lock:
+        for paper in paper_positions:
+            x = paper_positions[paper][0]
+            y = paper_positions[paper][1]
+            result.append(
+                {'data': {'id': paper}, 'position': {'x': x, 'y': y} }
+            )
     return jsonify(result)
 
 
