@@ -69,6 +69,8 @@ def get_positions_from_similarities(paper_similarity):
 
                     if exp_dist < distance:
                         movement *= similarity
+                    else:
+                        movement *= (1 - similarity)
                     
                     if np.linalg.norm(movement) > min_movement:
                         moveFlag = True
