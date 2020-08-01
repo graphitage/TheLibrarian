@@ -22,3 +22,9 @@ python server.py
 ```
 npm run
 ```
+
+* You may need to first
+```
+npm install
+```
+to get the dependencies.
