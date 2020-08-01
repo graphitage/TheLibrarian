@@ -9,12 +9,12 @@ const detailsPanel = (props) => {
     return (
         <Modal style={{top: '9%', height: '90%'}} onHide={() => props.detailsClosed()} show={props.details}>
             <Modal.Header closeButton>
-                <Modal.Title>Modal title</Modal.Title>
+                <Modal.Title>Extracted Paper Content</Modal.Title>
             </Modal.Header>
 
             <Modal.Body>
                 <div style={{height:'400px', overflowY:'scroll'}}>
-                <DetailsForm nodeId={props.nodeId} />
+                <DetailsForm/>
                 </div>
             </Modal.Body>
 
