@@ -1,7 +1,9 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import CytoscapeComponent from 'react-cytoscapejs';
 
 import { flaskBaseUrl } from '../../store/actions/utils/http';
+import * as actionTypes from '../../store/actions/actionTypes';
 
 
 class Graph extends React.Component {
@@ -21,30 +23,37 @@ class Graph extends React.Component {
                 data: ''
             }
         ).then(response => response.json())
-        .then(data => {
-            this.setState({
-                ...this.state,
-                elements: data
+            .then(data => {
+                this.setState({
+                    ...this.state,
+                    elements: data
+                });
+                Graph.cy.elements().remove();
+                Graph.cy.add(this.state.elements);
             });
-            Graph.cy.elements().remove();
-            Graph.cy.add(this.state.elements);
-        });
 
-        var labelStylesheet = 'node {label: data(id); }';
-        let str = labelStylesheet;
+        const labelStylesheet = 'node {label: data(id); }';
+        let highlightStyle = ''
+
+        if (this.props.highlighted_paper !== undefined) {
+            this.props.setHighlightedPaper(undefined);
+            highlightStyle = "node[id='" + this.props.highlighted_paper + "'] { background-color: #ff0; }";
+        }
+
+        const str = labelStylesheet + highlightStyle;
         Graph.cy.style(str);
 
         Graph.cy.style()
-        .selector('node')
+            .selector('node')
             .style({
-            'background-image': 'https://cdn1.iconfinder.com/data/icons/mobile-device/512/doc-document-copy-file-blue-round-512.png',
-            'background-fit': 'cover',
-            'width':'200',
-            'height':'200',
-            'background-image-opacity': 0.5,
-        })
-        .update() // indicate the end of your new stylesheet so that it can be updated on elements
-        ;
+                'background-image': 'https://cdn1.iconfinder.com/data/icons/mobile-device/512/doc-document-copy-file-blue-round-512.png',
+                'background-fit': 'cover',
+                'width': '200',
+                'height': '200',
+                'background-image-opacity': 0.5,
+            })
+            .update() // indicate the end of your new stylesheet so that it can be updated on elements
+            ;
 
         Graph.cy.on('click', 'node', (event) => {
             this.state.detailsMenuHandler(event.target._private.data.id);
@@ -54,65 +63,24 @@ class Graph extends React.Component {
     render() {
         return (
             <div style={{ height: '100%' }}>
-                <CytoscapeComponent cy={(cy) => { Graph.cy = cy }} style={{ width: '100%', height: '100%'  }} />
+                <CytoscapeComponent zoom={0.1} pan={{ x: 1920 / 2, y: 1080 / 2 }} cy={(cy) => { Graph.cy = cy }} style={{ width: '100%', height: '100%' }} />
             </div>
         );
     }
 }
 
 
-// const Graph = (props) => {
-//     const outerRef = useRef(null);
+const mapStateToProps = state => {
+    return {
+        highlighted_paper: state.ui.graph.highlightedPaper
+    };
+};
 
-//     let elements = [];
+const mapDispatchToProps = dispatch => {
+    return {
+        setHighlightedPaper: (paper_title) => dispatch({ type: actionTypes.HIGHLIGHT_PAPER_NODE, paper_title: paper_title })
+    };
+};
 
-//     fetch(
-//         flaskBaseUrl + '/graph_nodes',
-//         {
-//             method: 'GET',
-//             data: ''
-//         }
-//     ).then(response => response.json())
-//     .then(data => {
-//         elements = data;
-//         Graph.cy.elements().remove();
-//         Graph.cy.add(elements);
-//     })
 
-//     const { detailsMenuHandler } = props;
-//     useEffect(() => {
-//         var labelStylesheet = 'node {label: data(id); }';
-//         let str = labelStylesheet;
-//         Graph.cy.style(str);
-
-//         Graph.cy.style()
-//         .selector('node')
-//             .style({
-//             'background-image': 'https://cdn1.iconfinder.com/data/icons/mobile-device/512/doc-document-copy-file-blue-round-512.png',
-//             'background-fit': 'cover',
-//             'width':'200',
-//             'height':'200',
-//             'background-image-opacity': 0.5,
-//         })
-//         .update() // indicate the end of your new stylesheet so that it can be updated on elements
-//         ;
-
-//         Graph.cy.on('click', 'node', (event) => {
-//             detailsMenuHandler(event.target._private.data.id);
-//         });
-
-//         return () => {
-//             Graph.cy.removeEventListener('click');
-//         };
-        
-//     }, [detailsMenuHandler])
-
-//     return (
-//         <div ref={outerRef} style={{ height: '100%' }}>
-//             <CytoscapeComponent cy={(cy) => { Graph.cy = cy }} elements={elements} style={{ width: '100%', height: '100%'  }} />
-//         </div>
-//     );
-
-// }
-
-export default Graph; 
+export default connect(mapStateToProps, mapDispatchToProps)(Graph); 

@@ -17,7 +17,7 @@ const PaperAdder = (props) => {
         event.preventDefault();
 
         const data = new FormData(event.target);
-
+        const filename = data.get('title');
         fetch(
             flaskBaseUrl + '/submit_paper',
             {
@@ -28,12 +28,12 @@ const PaperAdder = (props) => {
             .then(data => {
                 setModalContent(data.message);
                 setModalIsOpen(true);
+                props.setHighlightedPaper(filename);
             });
     };
 
     const handleModalClosed = (event) => {
         setModalIsOpen(false);
-        props.beyondAccuracyPaperAdded();
         props.paperAdderClosed();
     };
 
@@ -93,7 +93,7 @@ const PaperAdder = (props) => {
 const mapDispatchToProps = dispatch => {
     return {
         paperAdderClosed: () => dispatch({ type: actionTypes.CLOSE_PAPER_ADDER }),
-        beyondAccuracyPaperAdded: () => dispatch({ type: actionTypes.BEYOND_ACCURACY_PAPER_ADDED })
+        setHighlightedPaper: (paper_title) => dispatch({ type: actionTypes.HIGHLIGHT_PAPER_NODE, paper_title: paper_title })
     };
 };
 

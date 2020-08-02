@@ -5,7 +5,7 @@ from flask_cors import CORS
 from tika import parser
 import json
 from top2vec import Top2Vec
-from paper_cluster import get_positions_from_similarities
+from paper_cluster import get_positions_from_similarities, update_positions_with_paper
 from threading import Lock
 
 
@@ -163,10 +163,13 @@ def submit_paper():
             paper_similarity[filename][doc_id] = score
             paper_similarity[doc_id][filename] = score
 
+        with position_lock:
+            update_positions_with_paper(paper_similarity, paper_positions, filename)
+
         return jsonify(message='Your paper contribution (' + filename + ') is saved. Thanks!')
 
     else:
-        return jsonify(message='The paper (' + file + ') already exists. Thanks!')
+        return jsonify(message='The paper (' + filename + ') already exists. Thanks!')
 
 
 @app.route('/graph_nodes', methods=['GET'])
