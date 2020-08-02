@@ -17,7 +17,7 @@ const PaperAdder = (props) => {
         event.preventDefault();
 
         const data = new FormData(event.target);
-        const filename = data.get('title');
+        
         fetch(
             flaskBaseUrl + '/submit_paper',
             {
@@ -28,7 +28,7 @@ const PaperAdder = (props) => {
             .then(data => {
                 setModalContent(data.message);
                 setModalIsOpen(true);
-                props.setHighlightedPaper(filename);
+                props.setHighlightedPaper(data.filename);
             });
     };
 

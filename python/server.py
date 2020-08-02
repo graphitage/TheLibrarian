@@ -166,10 +166,16 @@ def submit_paper():
         with position_lock:
             update_positions_with_paper(paper_similarity, paper_positions, filename)
 
-        return jsonify(message='Your paper contribution (' + filename + ') is saved. Thanks!')
+        return jsonify(
+            message='Your paper contribution (' + filename + ') is saved. Thanks!',
+            filename=filename
+            )
 
     else:
-        return jsonify(message='The paper (' + filename + ') already exists. Thanks!')
+        return jsonify(
+            message='The paper (' + filename + ') already exists. Thanks!',
+            filename=filename
+        )
 
 
 @app.route('/graph_nodes', methods=['GET'])

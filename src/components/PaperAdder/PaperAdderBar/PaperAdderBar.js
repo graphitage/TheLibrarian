@@ -36,7 +36,7 @@ const PaperAdderBar = (props) => {
             <Nav className="justify-content-center" variant="pills" defaultActiveKey="/home" style={{ padding: '10px', margin: 'auto' }}>
                 <Form inline onSubmit={props.handlePaperSubmitted} ref={formRef}>
                     <Nav.Item>
-                        <Form.Control name='paper' type='file' style={{ color: '#fff' }} onChange={onPdfFileChange} />
+                        <Form.Control name='paper' type='file' style={{ color: '#fff' }} onChange={onPdfFileChange} required />
                     </Nav.Item>
                     <Nav.Item style={{ marginRight: '150px' }}>
                         <Form.Control name='title' type='text' placeholder='Paper Title' required />

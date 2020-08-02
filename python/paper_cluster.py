@@ -140,6 +140,8 @@ def update_positions_with_paper(paper_similarity, positions, paper_title):
                 best_similarity = paper_similarity[paper][paper_title]
                 most_similar_paper = paper
 
+    print('most similar paper:', most_similar_paper)
+
     positions[paper_title] = positions[most_similar_paper] + np.array([
         random.random() - 0.5,
         random.random() - 0.5
@@ -154,7 +156,7 @@ def update_positions_with_paper(paper_similarity, positions, paper_title):
         paper_position=positions,
         expected_distance=expected_distance,
         movement_ratio=1,
-        movement_decrease_ratio=0.8,
+        movement_decrease_ratio=0.95,
         min_movement=min_movement,
         moving_papers=[paper_title]
     )
@@ -164,6 +166,6 @@ def update_positions_with_paper(paper_similarity, positions, paper_title):
         paper_position=positions,
         expected_distance=expected_distance,
         movement_ratio=0.6,
-        movement_decrease_ratio=0.4,
+        movement_decrease_ratio=0.8,
         min_movement=min_movement
     )
