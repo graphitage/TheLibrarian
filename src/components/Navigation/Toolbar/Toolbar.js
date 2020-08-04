@@ -2,25 +2,39 @@ import React from 'react';
 import { connect } from 'react-redux';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
+import Form from 'react-bootstrap/Form';
 
 import * as actionTypes from '../../../store/actions/actionTypes';
 
 
-const toolbar = (props) => (
-  <header className="Toolbar">
-    <Navbar className="d-flex justify-content-center" bg="dark" variant="dark">
-      <Navbar.Brand href="#home" onClick={() => props.logoClicked()} style={{ marginRight: '60px' }}>
-        <img alt='logo' src='logo2.png' width='70px' style={{ marginRight: '10px' }} />
+const toolbar = (props) => {
+  const handleTitleUpdated = (event) => {
+    props.setSearchedTitle(event.target.value);
+  };
+
+  return (
+    <header className="Toolbar">
+      <Navbar className="d-flex justify-content-center" bg="dark" variant="dark">
+        <Navbar.Brand href="#home" onClick={() => props.logoClicked()} style={{ marginRight: '60px' }}>
+          <img alt='logo' src='logo2.png' width='70px' style={{ marginRight: '10px' }} />
         The Librarian
       </Navbar.Brand>
-      <Nav variant='pills' className='justify-content-center'>
-        <Nav.Item>
-          <Nav.Link onClick={() => props.addPaperClicked()} style={{ color: '#fff' }}>Add Paper</Nav.Link>
-        </Nav.Item>
-      </Nav>
-    </Navbar>
-  </header>
-)
+        <Nav variant='pills' className='justify-content-center'>
+          <Nav.Item>
+            <Nav.Link onClick={() => props.addPaperClicked()} style={{ color: '#fff' }}>Add Paper</Nav.Link>
+          </Nav.Item>
+
+          <Form inline>
+            <Nav.Item style={{ marginLeft: '50px' }}>
+              <Form.Control name='title' type='text' placeholder='Search Title' onChange={handleTitleUpdated} required />
+            </Nav.Item>
+          </Form>
+
+        </Nav>
+      </Navbar>
+    </header>
+  )
+}
 
 const mapDispatchToProps = dispatch => {
   return {

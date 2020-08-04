@@ -15,6 +15,55 @@ class Graph extends React.Component {
         };
     }
 
+    getTitlesWithString(searchedTitle) {
+        if (searchedTitle !== undefined)
+        {
+            const searchedTitle_lower = searchedTitle.toLowerCase();
+            const resulting_titles = [];
+            let element;
+            for (element of this.state.elements) 
+            {
+                const title = element.data.id;
+                const title_lower = title.toLowerCase();
+                if (title_lower.includes(searchedTitle_lower)) 
+                {
+                    resulting_titles.push(title);
+                }
+            }
+            return resulting_titles;
+        }
+        else
+        {
+            return [];
+        }
+    }
+
+    highlightElements(titles, color) {
+        if (titles.length > 0) {
+            const defaultStylesheet = 'node {label: data(id); background-color: #8af; }';
+            let highlightStyle = '';
+            let title;
+            for (title of titles) {
+                highlightStyle += "node[id='" + title + "'] { background-color: " + color + "; }";
+            }
+
+            const str = defaultStylesheet + highlightStyle;
+            Graph.cy.style(str);
+
+            Graph.cy.style()
+                .selector('node')
+                .style({
+                    'background-image': 'paper_icon.png',
+                    'background-fit': 'cover',
+                    'width': '200',
+                    'height': '200',
+                    'background-image-opacity': 1,
+                })
+                .update()
+                ;
+        }
+    }
+
     componentDidMount() {
         fetch(
             flaskBaseUrl + '/graph_nodes',
@@ -37,11 +86,10 @@ class Graph extends React.Component {
 
         if (this.props.highlighted_paper !== undefined) {
             this.props.setHighlightedPaper(undefined);
-            highlightStyle = "node[id='" + this.props.highlighted_paper + "'] { background-color: #f00; }";
+            highlightStyle = "node[id='" + this.props.highlighted_paper + "'] { background-color: #ff0; }";
         }
 
         const str = defaultStylesheet + highlightStyle;
-        console.log(clientInformation);
         Graph.cy.style(str);
 
         Graph.cy.style()
@@ -59,6 +107,11 @@ class Graph extends React.Component {
         Graph.cy.on('click', 'node', (event) => {
             this.state.detailsMenuHandler(event.target._private.data.id);
         });
+    }
+
+    componentDidUpdate() {
+        const titles = this.getTitlesWithString(this.props.searchedTitle);
+        this.highlightElements(titles, '#f00');
     }
 
     render() {

@@ -16,6 +16,7 @@ const Layout = (props) => {
     const [comparisonModal, setComparisonModal] = useState(false);
     const [comparisonNodeSelectionMode, setcomparisonNodeSelectionMode] = useState(false);
     const [similarityScore, setSimilarityScore] = useState(0);
+    const [searchedTitle, setSearchedTitle] = useState(undefined);
 
     let nodeId = undefined;
 
@@ -68,7 +69,7 @@ const Layout = (props) => {
 
     return (
         <React.Fragment>
-            <Toolbar />
+            <Toolbar setSearchedTitle={setSearchedTitle} />
             <DetailsPanel
                 detailsClosed={detailsPanelClosedHandler}
                 details={detailsMenu} nodeId={nodeId}
@@ -86,6 +87,7 @@ const Layout = (props) => {
             }
             <Content
                 detailsMenuHandler={detailsPanelOpenedHandler}
+                searchedTitle={searchedTitle}
             />
         </React.Fragment>
     );
