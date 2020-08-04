@@ -9,7 +9,9 @@ import * as actionTypes from '../../../store/actions/actionTypes';
 
 const toolbar = (props) => {
   const handleTitleUpdated = (event) => {
-    props.setSearchedTitle(event.target.value);
+    props.setSearchedTitle(event.target.value === '' ?
+      undefined :
+      event.target.value);
   };
 
   return (
@@ -21,12 +23,19 @@ const toolbar = (props) => {
       </Navbar.Brand>
         <Nav variant='pills' className='justify-content-center'>
           <Nav.Item>
-            <Nav.Link onClick={() => props.addPaperClicked()} style={{ color: '#fff' }}>Add Paper</Nav.Link>
+            <Nav.Link onClick={() => { props.setSearchedTitle(undefined); props.addPaperClicked() }} style={{ color: '#fff' }}>Add Paper</Nav.Link>
           </Nav.Item>
 
-          <Form inline>
+          <Form inline onSubmit={(event) => {event.preventDefault()}}>
             <Nav.Item style={{ marginLeft: '50px' }}>
-              <Form.Control name='title' type='text' placeholder='Search Title' onChange={handleTitleUpdated} required />
+              <Form.Control
+                name='title'
+                type='text'
+                placeholder='Search Title'
+                value={props.searchedTitle === undefined ? "" : props.searchedTitle}
+                onChange={handleTitleUpdated}
+                required
+              />
             </Nav.Item>
           </Form>
 

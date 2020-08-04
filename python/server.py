@@ -71,15 +71,15 @@ position_lock = Lock()
 def getPapersAndSimilarities():
     global papers, paper_content, paper_similarity
     papers = list(model.document_ids)
-    
+
     paper_files = os.listdir(paper_directory)
     for paper_file in paper_files:
         title = '.'.join(paper_file.split('.')[:-1])
-        
+
         file_path = os.path.join(paper_directory, paper_file)
         with open(file_path, 'rb') as file:
             content = file.read().decode()
-        
+
         paper_content[title] = content
 
     model_paper_count = len(model.documents)
@@ -145,31 +145,33 @@ def submit_paper():
 
         with open(os.path.join(paper_directory, (filename + '.txt')), 'wb') as file:
             file.write(extracted_text.encode())
-        
+
         papers.append(filename)
         paper_content[filename] = extracted_text
-            
+
         with model_lock:
             model.add_documents(
                 documents=[extracted_text_without_common_words], document_ids=[filename])
-                
+
             doc_scores, doc_ids = model.search_documents_by_documents(
                 doc_ids=[filename],
                 num_docs=len(model.documents)-1,
                 return_documents=False)
-                
+
         paper_similarity[filename] = {}
         for score, doc_id in zip(doc_scores, doc_ids):
             paper_similarity[filename][doc_id] = score
             paper_similarity[doc_id][filename] = score
 
         with position_lock:
-            update_positions_with_paper(paper_similarity, paper_positions, filename)
+            update_positions_with_paper(
+                paper_similarity, paper_positions, filename)
 
         return jsonify(
-            message='Your paper contribution (' + filename + ') is saved. Thanks!',
+            message='Your paper contribution (' +
+            filename + ') is saved. Thanks!',
             filename=filename
-            )
+        )
 
     else:
         return jsonify(
@@ -187,7 +189,7 @@ def graph_nodes():
             x = paper_positions[paper][0]
             y = paper_positions[paper][1]
             result.append(
-                {'data': {'id': paper}, 'position': {'x': x, 'y': y} }
+                {'data': {'id': paper}, 'position': {'x': x, 'y': y}}
             )
     return jsonify(result)
 
@@ -209,6 +211,15 @@ def paper_node(title1):
     return jsonify(
         {'content': paper_content[title1]}
     )
+
+
+@app.route('/find_similar_papers/<string:title>/<int:paper_num>', methods=['GET'])
+def find_similar_papers(title, paper_num):
+    doc_scores, doc_ids = model.search_documents_by_documents(
+        doc_ids=[title],
+        num_docs=min(len(model.documents)-1, paper_num),
+        return_documents=False)
+    return jsonify(doc_ids)
 
 
 paper_positions = get_positions_from_similarities(paper_similarity)

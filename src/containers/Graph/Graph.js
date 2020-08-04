@@ -16,40 +16,42 @@ class Graph extends React.Component {
     }
 
     getTitlesWithString(searchedTitle) {
-        if (searchedTitle !== undefined)
-        {
+        if (searchedTitle !== undefined) {
             const searchedTitle_lower = searchedTitle.toLowerCase();
             const resulting_titles = [];
             let element;
-            for (element of this.state.elements) 
-            {
+            for (element of this.state.elements) {
                 const title = element.data.id;
                 const title_lower = title.toLowerCase();
-                if (title_lower.includes(searchedTitle_lower)) 
-                {
+                if (title_lower.includes(searchedTitle_lower)) {
                     resulting_titles.push(title);
                 }
             }
             return resulting_titles;
         }
-        else
-        {
-            return [];
+        // else if (searchedTitle !== '') {
+        //     return []
+        // }
+        else {
+            return undefined;
         }
     }
 
     highlightElements(titles, color) {
-        if (titles.length > 0) {
+        if (titles !== undefined)
+        {
+            console.log(titles);
             const defaultStylesheet = 'node {label: data(id); background-color: #8af; }';
             let highlightStyle = '';
             let title;
             for (title of titles) {
+                console.log(title);
                 highlightStyle += "node[id='" + title + "'] { background-color: " + color + "; }";
             }
-
+    
             const str = defaultStylesheet + highlightStyle;
             Graph.cy.style(str);
-
+    
             Graph.cy.style()
                 .selector('node')
                 .style({
@@ -58,6 +60,7 @@ class Graph extends React.Component {
                     'width': '200',
                     'height': '200',
                     'background-image-opacity': 1,
+                    'font-size': '2em'
                 })
                 .update()
                 ;
@@ -79,39 +82,26 @@ class Graph extends React.Component {
                 });
                 Graph.cy.elements().remove();
                 Graph.cy.add(this.state.elements);
+                console.log(this.state.elements);
             });
-
-        const defaultStylesheet = 'node {label: data(id); background-color: #8af; }';
-        let highlightStyle = ''
-
-        if (this.props.highlighted_paper !== undefined) {
-            this.props.setHighlightedPaper(undefined);
-            highlightStyle = "node[id='" + this.props.highlighted_paper + "'] { background-color: #ff0; }";
-        }
-
-        const str = defaultStylesheet + highlightStyle;
-        Graph.cy.style(str);
-
-        Graph.cy.style()
-            .selector('node')
-            .style({
-                'background-image': 'paper_icon.png',
-                'background-fit': 'cover',
-                'width': '200',
-                'height': '200',
-                'background-image-opacity': 1,
-            })
-            .update() // indicate the end of your new stylesheet so that it can be updated on elements
-            ;
 
         Graph.cy.on('click', 'node', (event) => {
             this.state.detailsMenuHandler(event.target._private.data.id);
         });
+
+        let titlesToHighlight = [];
+
+        if (this.props.highlighted_paper !== undefined) {
+            titlesToHighlight = [this.props.highlighted_paper];
+            this.props.setHighlightedPaper(undefined);
+        }
+        console.log(titlesToHighlight);
+        this.highlightElements(titlesToHighlight, '#007');
     }
 
     componentDidUpdate() {
         const titles = this.getTitlesWithString(this.props.searchedTitle);
-        this.highlightElements(titles, '#f00');
+        this.highlightElements(titles, '#a00');
     }
 
     render() {

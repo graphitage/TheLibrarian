@@ -1,6 +1,8 @@
 import random
 import numpy as np
 
+random.seed(2171)
+
 PAPER_NODE_SIZE = 200  # pixels
 
 

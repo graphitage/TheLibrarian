@@ -69,7 +69,10 @@ const Layout = (props) => {
 
     return (
         <React.Fragment>
-            <Toolbar setSearchedTitle={setSearchedTitle} />
+            <Toolbar
+                searchedTitle={searchedTitle}
+                setSearchedTitle={setSearchedTitle}
+            />
             <DetailsPanel
                 detailsClosed={detailsPanelClosedHandler}
                 details={detailsMenu} nodeId={nodeId}
