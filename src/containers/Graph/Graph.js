@@ -32,7 +32,7 @@ class Graph extends React.Component {
                 Graph.cy.add(this.state.elements);
             });
 
-        const labelStylesheet = 'node {label: data(id); background-color: #8af; }';
+        const defaultStylesheet = 'node {label: data(id); background-color: #8af; }';
         let highlightStyle = ''
 
         if (this.props.highlighted_paper !== undefined) {
@@ -40,7 +40,7 @@ class Graph extends React.Component {
             highlightStyle = "node[id='" + this.props.highlighted_paper + "'] { background-color: #f00; }";
         }
 
-        const str = labelStylesheet + highlightStyle;
+        const str = defaultStylesheet + highlightStyle;
         console.log(clientInformation);
         Graph.cy.style(str);
 
@@ -51,7 +51,7 @@ class Graph extends React.Component {
                 'background-fit': 'cover',
                 'width': '200',
                 'height': '200',
-                'background-image-opacity': 0.5,
+                'background-image-opacity': 1,
             })
             .update() // indicate the end of your new stylesheet so that it can be updated on elements
             ;
