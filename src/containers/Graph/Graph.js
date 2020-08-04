@@ -32,21 +32,22 @@ class Graph extends React.Component {
                 Graph.cy.add(this.state.elements);
             });
 
-        const labelStylesheet = 'node {label: data(id); }';
+        const labelStylesheet = 'node {label: data(id); background-color: #8af; }';
         let highlightStyle = ''
 
         if (this.props.highlighted_paper !== undefined) {
             this.props.setHighlightedPaper(undefined);
-            highlightStyle = "node[id='" + this.props.highlighted_paper + "'] { background-color: #ff0; }";
+            highlightStyle = "node[id='" + this.props.highlighted_paper + "'] { background-color: #f00; }";
         }
 
         const str = labelStylesheet + highlightStyle;
+        console.log(clientInformation);
         Graph.cy.style(str);
 
         Graph.cy.style()
             .selector('node')
             .style({
-                'background-image': 'https://cdn1.iconfinder.com/data/icons/mobile-device/512/doc-document-copy-file-blue-round-512.png',
+                'background-image': 'paper_icon.png',
                 'background-fit': 'cover',
                 'width': '200',
                 'height': '200',
