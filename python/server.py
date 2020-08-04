@@ -189,7 +189,7 @@ def graph_nodes():
             x = paper_positions[paper][0]
             y = paper_positions[paper][1]
             result.append(
-                {'data': {'id': paper}, 'position': {'x': x, 'y': y}}
+                {'data': {'id': paper, 'color': '#f00'}, 'position': {'x': x, 'y': y}}
             )
     return jsonify(result)
 
@@ -219,7 +219,7 @@ def find_similar_papers(title, paper_num):
         doc_ids=[title],
         num_docs=min(len(model.documents)-1, paper_num),
         return_documents=False)
-    return jsonify(doc_ids)
+    return jsonify(list(doc_ids))
 
 
 paper_positions = get_positions_from_similarities(paper_similarity)

@@ -6,7 +6,9 @@ const initialState = {
         isOpen: false
     },
     graph: {
-        highlightedPaper: undefined
+        addedPaper: undefined,
+        chosenPaper: undefined,
+        searchedPapers : []
     }
 }
 
@@ -26,13 +28,30 @@ const reducer = (state = initialState, action) => {
                     isOpen: false
                 }
             };
-        case actionTypes.HIGHLIGHT_PAPER_NODE:
+        case actionTypes.SET_ADDED_PAPER:
             return {
                 ...state,
                 graph: {
-                    highlightedPaper: action.paper_title
+                    ...state.graph,
+                    addedPaper: action.paper_title
                 }
             };
+        case actionTypes.SET_CHOSEN_PAPER:
+            return {
+                ...state,
+                graph: {
+                    ...state.graph,
+                    chosenPaper: action.paper_title
+                }
+            }
+        case actionTypes.SET_SEARCHED_PAPERS:
+            return {
+                ...state,
+                graph: {
+                    ...state.graph,
+                    searchedPapers: action.paper_titles
+                }
+            }
         default :
             return state
     }

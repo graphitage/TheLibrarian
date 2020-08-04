@@ -28,7 +28,7 @@ const PaperAdder = (props) => {
             .then(data => {
                 setModalContent(data.message);
                 setModalIsOpen(true);
-                props.setHighlightedPaper(data.filename);
+                props.setAddedPaper(data.filename);
             });
     };
 
@@ -93,7 +93,7 @@ const PaperAdder = (props) => {
 const mapDispatchToProps = dispatch => {
     return {
         paperAdderClosed: () => dispatch({ type: actionTypes.CLOSE_PAPER_ADDER }),
-        setHighlightedPaper: (paper_title) => dispatch({ type: actionTypes.HIGHLIGHT_PAPER_NODE, paper_title: paper_title })
+        setAddedPaper: (paper_title) => dispatch({ type: actionTypes.SET_ADDED_PAPER, paper_title: paper_title })
     };
 };
 

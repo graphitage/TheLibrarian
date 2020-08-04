@@ -37,34 +37,76 @@ class Graph extends React.Component {
         }
     }
 
-    highlightElements(titles, color) {
-        if (titles !== undefined)
-        {
-            console.log(titles);
-            const defaultStylesheet = 'node {label: data(id); background-color: #8af; }';
-            let highlightStyle = '';
-            let title;
-            for (title of titles) {
-                console.log(title);
-                highlightStyle += "node[id='" + title + "'] { background-color: " + color + "; }";
-            }
-    
-            const str = defaultStylesheet + highlightStyle;
-            Graph.cy.style(str);
-    
-            Graph.cy.style()
-                .selector('node')
-                .style({
-                    'background-image': 'paper_icon.png',
-                    'background-fit': 'cover',
-                    'width': '200',
-                    'height': '200',
-                    'background-image-opacity': 1,
-                    'font-size': '2em'
-                })
-                .update()
-                ;
+    // highlightElements(titles, color) {
+    //     if (titles !== undefined) {
+    //         const defaultStylesheet = 'node {label: data(id); background-color: #8af; }';
+    //         let highlightStyle = '';
+    //         let title;
+    //         for (title of titles) {
+    //             highlightStyle += "node[id='" + title + "'] { background-color: " + color + "; }";
+    //         }
+
+    //         const str = defaultStylesheet + highlightStyle;
+    //         Graph.cy.style(str);
+
+    //         Graph.cy.style()
+    //             .selector('node')
+    //             .style({
+    //                 'background-image': 'paper_icon.png',
+    //                 'background-fit': 'cover',
+    //                 'width': '200',
+    //                 'height': '200',
+    //                 'background-image-opacity': 1,
+    //                 'font-size': '2em',
+    //                 'text-wrap': 'wrap',
+    //                 'text-max-width': '400px'
+    //             })
+    //             .update()
+    //             ;
+    //     }
+    // }
+
+    highlightElements() {
+        const addedPaperColor = '#0a0';
+        const chosenPaperColor = '#ff0';
+
+        const defaultStylesheet = 'node {label: data(id); background-color: #8af; }';
+
+        let chosenPaperStylesheet = '';
+        const chosen_paper = this.props.chosen_paper;
+        if (chosen_paper !== undefined) {
+            chosenPaperStylesheet = 'node[id="' + chosen_paper + '"] { background-color: ' + chosenPaperColor + '; border-color: #000; border-width: 10px; }';
         }
+
+        let searchedPapersStylesheet = '';
+        const searched_papers = this.props.searched_papers;
+        let paper;
+        for (paper of searched_papers) {
+            searchedPapersStylesheet += 'node[id="' + paper + '"] { background-color: data(color); }';
+        }
+
+        let addedPaperStylesheet = '';
+        const added_paper = this.props.added_paper;
+        if (added_paper !== undefined) {
+            addedPaperStylesheet = 'node[id="' + added_paper + '"] { background-color: ' + addedPaperColor + '; }';
+        }
+
+        const str = defaultStylesheet + chosenPaperStylesheet + searchedPapersStylesheet + addedPaperStylesheet;
+        Graph.cy.style(str);
+
+        Graph.cy.style()
+            .selector('node')
+            .style({
+                'background-image': 'paper_icon.png',
+                'background-fit': 'cover',
+                'width': '200',
+                'height': '200',
+                'background-image-opacity': 1,
+                'font-size': '2em',
+                'text-wrap': 'wrap',
+                'text-max-width': '400px'
+            })
+            .update();
     }
 
     componentDidMount() {
@@ -81,27 +123,57 @@ class Graph extends React.Component {
                     elements: data
                 });
                 Graph.cy.elements().remove();
-                Graph.cy.add(this.state.elements);
-                console.log(this.state.elements);
+                Graph.cy.add(data);
+
+                const titles = [];
+                let element;
+                for (element of data) {
+                    titles.push(element.data.id);
+                }
+                this.props.setSearchedPapers(titles);
             });
 
         Graph.cy.on('click', 'node', (event) => {
-            this.state.detailsMenuHandler(event.target._private.data.id);
+            const title = event.target._private.data.id;
+            this.state.detailsMenuHandler(title);
+            this.props.setChosenPaper(title);
         });
 
-        let titlesToHighlight = [];
+        // let titlesToHighlight = [];
 
-        if (this.props.highlighted_paper !== undefined) {
-            titlesToHighlight = [this.props.highlighted_paper];
-            this.props.setHighlightedPaper(undefined);
-        }
-        console.log(titlesToHighlight);
-        this.highlightElements(titlesToHighlight, '#007');
+        // if (this.props.added_paper !== undefined) {
+        //     titlesToHighlight = [this.props.added_paper];
+        //     // this.props.setAddedPaper(undefined);
+        // }
+
+        // this.highlightElements(titlesToHighlight, '#007');
+
+        this.highlightElements();
     }
 
     componentDidUpdate() {
-        const titles = this.getTitlesWithString(this.props.searchedTitle);
-        this.highlightElements(titles, '#a00');
+        const searchedTitles = this.getTitlesWithString(this.props.searchedTitle);
+        const searched_papers = this.props.searched_papers;
+        if (searchedTitles !== undefined) {
+            let searchedPapersDidNotChange = true;
+            if (searchedTitles.length === searched_papers.length) {
+                for (let index = 0; index < searchedTitles.length; index++) {
+                    if (searchedTitles[index] !== searched_papers[index]) {
+                        searchedPapersDidNotChange = false;
+                        break;
+                    }
+                }
+            }
+            else {
+                searchedPapersDidNotChange = false;
+            }
+            
+            if (!searchedPapersDidNotChange) {
+                this.props.setSearchedPapers(searchedTitles);
+            }
+        }
+        // this.highlightElements(titles, '#a00');
+        this.highlightElements();
     }
 
     render() {
@@ -116,13 +188,17 @@ class Graph extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        highlighted_paper: state.ui.graph.highlightedPaper
+        added_paper: state.ui.graph.addedPaper,
+        chosen_paper: state.ui.graph.chosenPaper,
+        searched_papers: state.ui.graph.searchedPapers
     };
 };
 
 const mapDispatchToProps = dispatch => {
     return {
-        setHighlightedPaper: (paper_title) => dispatch({ type: actionTypes.HIGHLIGHT_PAPER_NODE, paper_title: paper_title })
+        // setAddedPaper: (paper_title) => dispatch({ type: actionTypes.SET_ADDED_PAPER, paper_title: paper_title }),
+        setChosenPaper: (paper_title) => dispatch({ type: actionTypes.SET_CHOSEN_PAPER, paper_title: paper_title }),
+        setSearchedPapers: (paper_titles) => dispatch({ type: actionTypes.SET_SEARCHED_PAPERS, paper_titles: paper_titles })
     };
 };
 

@@ -77,6 +77,7 @@ const Layout = (props) => {
                 detailsClosed={detailsPanelClosedHandler}
                 details={detailsMenu} nodeId={nodeId}
                 compareWithButtonClicked={compareWithClickedHandler}
+                setSearchedTitle={setSearchedTitle}
             />
             <ComparisonModal
                 show={comparisonModal}
