@@ -39,11 +39,11 @@ const PaperAdderBar = (props) => {
                         <Form.Control name='paper' type='file' style={{ color: '#fff' }} onChange={onPdfFileChange} required />
                     </Nav.Item>
                     <Nav.Item style={{ marginRight: '150px' }}>
-                        <Form.Control name='title' type='text' placeholder='Paper Title' required />
+                        <Form.Control name='title' type='text' placeholder='Document Title' style={{ width: '300px' }} required />
                     </Nav.Item>
                     <Nav.Item style={{ margin: '0px 10px' }}>
                         <Button variant='primary' type='submit'>
-                            Submit Paper
+                            Submit Document
                         </Button>
                     </Nav.Item>
                 </Form>

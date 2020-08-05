@@ -168,6 +168,6 @@ def update_positions_with_paper(paper_similarity, positions, paper_title):
         paper_position=positions,
         expected_distance=expected_distance,
         movement_ratio=0.6,
-        movement_decrease_ratio=0.8,
+        movement_decrease_ratio=0.7,
         min_movement=min_movement
     )

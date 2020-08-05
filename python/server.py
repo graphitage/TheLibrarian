@@ -168,14 +168,14 @@ def submit_paper():
                 paper_similarity, paper_positions, filename)
 
         return jsonify(
-            message='Your paper contribution (' +
+            message='Your contribution (' +
             filename + ') is saved. Thanks!',
             filename=filename
         )
 
     else:
         return jsonify(
-            message='The paper (' + filename + ') already exists. Thanks!',
+            message='The document (' + filename + ') already exists. Thanks!',
             filename=filename
         )
 

@@ -36,7 +36,7 @@ const detailsPanel = (props) => {
     return (
         <Modal style={{ top: '9%', height: '90%' }} onHide={() => props.detailsClosed()} show={props.details}>
             <Modal.Header closeButton>
-                <Modal.Title>Extracted Paper Content</Modal.Title>
+                <Modal.Title>Extracted Content</Modal.Title>
             </Modal.Header>
 
             <Modal.Body>

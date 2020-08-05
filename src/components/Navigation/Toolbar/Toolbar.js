@@ -23,7 +23,7 @@ const toolbar = (props) => {
       </Navbar.Brand>
         <Nav variant='pills' className='justify-content-center'>
           <Nav.Item>
-            <Nav.Link onClick={() => { props.setSearchedTitle(undefined); props.addPaperClicked() }} style={{ color: '#fff' }}>Add Paper</Nav.Link>
+            <Nav.Link onClick={() => { props.setSearchedTitle(undefined); props.addPaperClicked() }} style={{ color: '#fff' }}>Add Document</Nav.Link>
           </Nav.Item>
 
           <Form inline onSubmit={(event) => {event.preventDefault()}}>
@@ -32,6 +32,7 @@ const toolbar = (props) => {
                 name='title'
                 type='text'
                 placeholder='Search Title'
+                style={{ width: '300px' }}
                 value={props.searchedTitle === undefined ? "" : props.searchedTitle}
                 onChange={handleTitleUpdated}
                 required
