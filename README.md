@@ -1,6 +1,6 @@
 # The Librarian
 
-[Watch the demo video here.](https://www.youtube.com/watch?v=dB-KBpiRqVA&feature=youtu.be)
+[Watch the demo video here.](https://youtu.be/rgw5jyq0Xz0)
 
 The Librarian is meant to be used for getting a value out of big chunks of document data. It is a platform to make conceptually creating relations among documents, comparing and creating semantic groups out of them possible. Its aim is to solve the common problem of grouping document data. The users can contribute to the amount of data by adding new documents, which will then get positioned in the data space according to their similarities with the already existing ones.
 
