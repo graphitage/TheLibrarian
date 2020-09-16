@@ -1,0 +1,13 @@
+version: "3"
+services:
+  backend:
+    build: python/
+    ports:
+      - "8000:8000"
+  ui:
+    build: ./
+    ports:
+      - "3000:3000"
+    tty: true 
+    depends_on:
+      - backend

@@ -227,4 +227,6 @@ paper_positions = get_positions_from_similarities(paper_similarity)
 
 if __name__ == '__main__':
     getPapersAndSimilarities()
-    app.run(host='127.0.0.1', port=8000, debug=True)
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8000)
+    # app.run(host='127.0.0.1', port=8000, debug=True)
