@@ -52,15 +52,6 @@ paper_similarity = {}
 model = Top2Vec.load('model.thelibrarian')
 model_lock = Lock()
 
-for title in model.document_ids:
-    paper_similarity[title] = {}
-    doc_scores, doc_ids = model.search_documents_by_documents(
-        doc_ids=[title],
-        num_docs=len(model.documents)-1,
-        return_documents=False)
-    for score, doc_id in zip(doc_scores, doc_ids):
-        paper_similarity[title][doc_id] = score
-
 app = Flask(__name__)
 CORS(app)
 
@@ -105,10 +96,11 @@ def extract_text_from_buffer(buffer, exclude_commons=False):
     raw = parser.from_buffer(buffer)
     content = raw['content'].split('\n')
     content = [row for row in content if row != ""]
+    
+    return content
 
-    if not exclude_commons:
-        return content
 
+def remove_common_words_from(content):
     result = []
     for line in content:
         words = line.split(' ')
@@ -141,7 +133,8 @@ def submit_paper():
         buf = io.BytesIO(request.files['paper'].read())
         extracted_text = '\n'.join(extract_text_from_buffer(buf))
         extracted_text_without_common_words = '\n'.join(
-            extract_text_from_buffer(buf, exclude_commons=True))
+            remove_common_words_from(extracted_text.split('\n'))
+        )
 
         with open(os.path.join(paper_directory, (filename + '.txt')), 'wb') as file:
             file.write(extracted_text.encode())
@@ -222,11 +215,11 @@ def find_similar_papers(title, paper_num):
     return jsonify(list(doc_ids))
 
 
+getPapersAndSimilarities()
 paper_positions = get_positions_from_similarities(paper_similarity)
 
 
 if __name__ == '__main__':
-    getPapersAndSimilarities()
     from waitress import serve
     serve(app, host="0.0.0.0", port=8000)
     # app.run(host='127.0.0.1', port=8000, debug=True)

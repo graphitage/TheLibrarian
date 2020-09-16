@@ -38,8 +38,6 @@ def get_expected_distances(paper_similarity, node_size):
         2*distance_function_at[1] + c + 2*d
     b = distance_function_at[1] - a - c - d
 
-    print(a, b, c, d)
-
     expected_distance = {}
     for paper in paper_similarity:
         expected_distance[paper] = {}
@@ -141,8 +139,6 @@ def update_positions_with_paper(paper_similarity, positions, paper_title):
             if paper_similarity[paper][paper_title] > best_similarity:
                 best_similarity = paper_similarity[paper][paper_title]
                 most_similar_paper = paper
-
-    print('most similar paper:', most_similar_paper)
 
     positions[paper_title] = positions[most_similar_paper] + np.array([
         random.random() - 0.5,
